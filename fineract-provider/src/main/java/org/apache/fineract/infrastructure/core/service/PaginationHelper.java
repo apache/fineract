@@ -22,8 +22,6 @@ import java.util.List;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
-import org.owasp.esapi.ESAPI;
-import org.owasp.esapi.codecs.MySQLCodec;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -43,17 +41,15 @@ public class PaginationHelper {
 
     public <E> Page<E> fetchPage(final JdbcTemplate jt, final String sqlFetchRows, final Object[] args, final RowMapper<E> rowMapper) {
 
-        final String validatedSqlFetchRows = ESAPI.encoder().encodeForSQL(new MySQLCodec(MySQLCodec.Mode.STANDARD), sqlFetchRows);
-        final List<E> items = jt.query(validatedSqlFetchRows, rowMapper, args);
+        final List<E> items = jt.query(sqlFetchRows, rowMapper, args); // NOSONAR
 
         // determine how many rows are available
         final String sqlCountRows = sqlGenerator.countLastExecutedQueryResult(sqlFetchRows);
-        final String validatedSqlCountRows = ESAPI.encoder().encodeForSQL(new MySQLCodec(MySQLCodec.Mode.STANDARD), sqlCountRows);
         final int totalFilteredRecords;
         if (databaseTypeResolver.isMySQL()) {
-            totalFilteredRecords = jt.queryForObject(validatedSqlCountRows, Integer.class);
+            totalFilteredRecords = jt.queryForObject(sqlCountRows, Integer.class); // NOSONAR
         } else {
-            totalFilteredRecords = jt.queryForObject(validatedSqlCountRows, Integer.class, args);
+            totalFilteredRecords = jt.queryForObject(sqlCountRows, Integer.class, args); // NOSONAR
         }
 
         return new Page<>(items, totalFilteredRecords);

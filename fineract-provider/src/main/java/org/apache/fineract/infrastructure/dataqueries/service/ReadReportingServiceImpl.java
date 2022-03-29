@@ -48,7 +48,10 @@ import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
 import org.apache.fineract.infrastructure.dataqueries.exception.ReportNotFoundException;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.service.SqlInjectionPreventerService;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.owasp.esapi.ESAPI;
+import org.owasp.esapi.codecs.UnixCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,13 +68,15 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final GenericDataService genericDataService;
+    private final SqlInjectionPreventerService sqlInjectionPreventerService;
 
     @Autowired
     public ReadReportingServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            final GenericDataService genericDataService) {
+            final GenericDataService genericDataService, SqlInjectionPreventerService sqlInjectionPreventerService) {
         this.context = context;
         this.jdbcTemplate = jdbcTemplate;
         this.genericDataService = genericDataService;
+        this.sqlInjectionPreventerService = sqlInjectionPreventerService;
     }
 
     @Override
@@ -194,17 +199,21 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     private String getSql(final String name, final String type) {
-        final String inputSql = "select " + type + "_sql as the_sql from stretchy_" + type + " where " + type + "_name = ?";
+        final String encodedName = sqlInjectionPreventerService.encodeSql(name);
+        final String encodedType = sqlInjectionPreventerService.encodeSql(type);
+
+        final String inputSql = "select " + encodedType + "_sql as the_sql from stretchy_" + encodedType + " where " + encodedType
+                + "_name = ?";
 
         final String inputSqlWrapped = this.genericDataService.wrapSQL(inputSql);
 
         // the return statement contains the exact sql required
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(inputSqlWrapped, name);
+        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(inputSqlWrapped, encodedName);
 
         if (rs.next() && rs.getString("the_sql") != null) {
             return rs.getString("the_sql");
         }
-        throw new ReportNotFoundException(name);
+        throw new ReportNotFoundException(encodedName);
     }
 
     @Override
@@ -248,7 +257,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
             final Document document = new Document(PageSize.B0.rotate());
 
-            PdfWriter.getInstance(document, new FileOutputStream(fileLocation + reportName + ".pdf")); // NOSONAR
+            String validatedFileName = ESAPI.encoder().encodeForOS(new UnixCodec(), reportName);
+            PdfWriter.getInstance(document, new FileOutputStream(fileLocation + validatedFileName + ".pdf"));
             document.open();
 
             final PdfPTable table = new PdfPTable(chSize);

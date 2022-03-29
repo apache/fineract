@@ -34,8 +34,6 @@ import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeader
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnValueData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableNotFoundException;
-import org.owasp.esapi.ESAPI;
-import org.owasp.esapi.codecs.MySQLCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,8 +68,7 @@ public class GenericDataServiceImpl implements GenericDataService {
     @Override
     public GenericResultsetData fillGenericResultSet(final String sql) {
         try {
-            String validatedSql = ESAPI.encoder().encodeForSQL(new MySQLCodec(MySQLCodec.Mode.STANDARD), sql);
-            final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(validatedSql);
+            final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql); // NOSONAR
 
             final List<ResultsetColumnHeaderData> columnHeaders = new ArrayList<>();
             final List<ResultsetRowData> resultsetDataRows = new ArrayList<>();

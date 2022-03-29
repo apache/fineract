@@ -18,10 +18,6 @@
  */
 package org.apache.fineract.infrastructure.survey.service;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -108,26 +104,18 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
                 + " order by application_table_name, registered_table_name";
 
         SurveyDataTableData datatableData = null;
-        try (Connection connection = dataSource.getConnection()) {
-            final PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setLong(1, this.context.authenticatedUser().getId());
-            preparedStatement.setString(2, surveyName);
-            final ResultSet rs = preparedStatement.executeQuery();
 
-            if (rs.next()) {
-                final String appTableName = rs.getString("application_table_name");
-                final String registeredDatatableName = rs.getString("registered_table_name");
-                final String entitySubType = rs.getString("entity_subtype");
-                final boolean enabled = rs.getBoolean("enabled");
-                final List<ResultsetColumnHeaderData> columnHeaderData = this.genericDataService
-                        .fillResultsetColumnHeaders(registeredDatatableName);
+        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql, new Object[] { this.context.authenticatedUser().getId(), surveyName }); // NOSONAR
+        if (rs.next()) {
+            final String appTableName = rs.getString("application_table_name");
+            final String registeredDatatableName = rs.getString("registered_table_name");
+            final String entitySubType = rs.getString("entity_subtype");
+            final boolean enabled = rs.getBoolean("enabled");
+            final List<ResultsetColumnHeaderData> columnHeaderData = this.genericDataService
+                    .fillResultsetColumnHeaders(registeredDatatableName);
+            datatableData = SurveyDataTableData
+                    .create(DatatableData.create(appTableName, registeredDatatableName, entitySubType, columnHeaderData), enabled);
 
-                datatableData = SurveyDataTableData
-                        .create(DatatableData.create(appTableName, registeredDatatableName, entitySubType, columnHeaderData), enabled);
-
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
 
         return datatableData;

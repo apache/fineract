@@ -71,17 +71,17 @@ public final class TrustModifier {
 
         @Override
         public boolean verify(final String hostname, final SSLSession session) {
-            return true;//NOSONAR
+            return true;// NOSONAR
         }
     }
 
     private static class AlwaysTrustManager implements X509TrustManager {
 
         @Override
-        public void checkClientTrusted(final X509Certificate[] arg0, final String arg1) throws CertificateException {}//NOSONAR
+        public void checkClientTrusted(final X509Certificate[] arg0, final String arg1) throws CertificateException {}// NOSONAR
 
         @Override
-        public void checkServerTrusted(final X509Certificate[] arg0, final String arg1) throws CertificateException {}//NOSONAR
+        public void checkServerTrusted(final X509Certificate[] arg0, final String arg1) throws CertificateException {}// NOSONAR
 
         @Override
         public X509Certificate[] getAcceptedIssuers() {

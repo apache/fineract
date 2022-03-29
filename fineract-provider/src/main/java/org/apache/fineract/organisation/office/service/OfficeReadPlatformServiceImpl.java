@@ -19,7 +19,6 @@
 package org.apache.fineract.organisation.office.service;
 
 import java.math.BigDecimal;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -175,12 +174,8 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
                 sqlBuilder.append("order by o.hierarchy");
             }
         }
-        return this.jdbcTemplate.query(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(sqlBuilder.toString(), ResultSet.TYPE_SCROLL_SENSITIVE,
-                    ResultSet.CONCUR_UPDATABLE);
-            preparedStatement.setString(1, hierarchySearchString);
-            return preparedStatement;
-        }, rm);
+
+        return this.jdbcTemplate.query(sqlBuilder.toString(), rm, new Object[] { hierarchySearchString }); // NOSONAR
     }
 
     @Override
