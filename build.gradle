@@ -58,7 +58,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id "org.barfuin.gradle.taskinfo" version "1.3.1"
     id 'com.adarshr.test-logger' version '3.2.0'
-    id 'com.diffplug.spotless' version '6.3.0' apply false
+    id 'com.diffplug.spotless' version '6.4.0' apply false
     id 'org.nosphere.apache.rat' version '0.7.0' apply false
     id 'com.github.hierynomus.license' version '0.16.1' apply false
     id 'com.github.jk1.dependency-license-report' version '2.1' apply false
@@ -86,7 +86,7 @@ description = '''\
 Run as:
 gradle clean bootRun'''
 
-ext['groovy.version'] = '3.0.6'
+ext['groovy.version'] = '3.0.10'
 ext['swaggerFile'] = "$rootDir/fineract-provider/build/generated/swagger-ui/fineract.yaml".toString()
 
 allprojects  {
@@ -149,7 +149,7 @@ allprojects  {
             dependency 'com.github.librepdf:openpdf:1.3.27'
             dependency 'org.mnode.ical4j:ical4j:3.2.1'
             dependency 'org.quartz-scheduler:quartz:2.3.2'
-            dependency 'com.amazonaws:aws-java-sdk-s3:1.12.185'
+            dependency 'com.amazonaws:aws-java-sdk-s3:1.12.188'
             dependency 'org.ehcache:ehcache:3.10.0'
             dependency 'com.github.spullara.mustache.java:compiler:0.9.10'
             dependency 'com.jayway.jsonpath:json-path:2.7.0'
@@ -167,7 +167,7 @@ allprojects  {
             dependency 'com.github.spotbugs:spotbugs-annotations:4.6.0'
             dependency 'javax.cache:cache-api:1.1.1'
             dependency 'org.mock-server:mockserver-junit-jupiter:5.13.0'
-            dependency 'org.webjars.npm:swagger-ui-dist:4.9.0'
+            dependency 'org.webjars.npm:swagger-ui-dist:4.10.0'
             dependency 'org.webjars:webjars-locator-core:0.50'
             dependency 'com.icegreen:greenmail-junit5:1.6.7'
             dependency 'com.intuit.karate:karate-junit5:1.2.0.RC5'
@@ -216,7 +216,7 @@ allprojects  {
                 exclude 'jakarta.activation:jakarta.activation-api'
             }
 
-            dependency ('org.liquibase:liquibase-core:4.9.0') {
+            dependency ('org.liquibase:liquibase-core:4.9.1') {
                 exclude 'javax.xml.bind:jaxb-api'
             }
 
@@ -527,7 +527,7 @@ configure(project.fineractJavaProjects) {
     // Configuration for the Checkstyle plugin
     // https://docs.gradle.org/current/userguide/checkstyle_plugin.html
     dependencies {
-        checkstyle 'com.puppycrawl.tools:checkstyle:10.0'
+        checkstyle 'com.puppycrawl.tools:checkstyle:10.1'
         checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.41.0'
     }
 
