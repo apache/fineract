@@ -57,6 +57,8 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountSubStatusEnum;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.exception.TransactionBeforePivotDateNotAllowed;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -69,14 +71,17 @@ public class SavingsAccountTransactionDataValidator {
     private final FromJsonHelper fromApiJsonHelper;
     private static final Set<String> SAVINGS_ACCOUNT_HOLD_AMOUNT_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(transactionDateParamName, SavingsApiConstants.dateFormatParamName, SavingsApiConstants.localeParamName,
-                    transactionAmountParamName, lienParamName));
+                    transactionAmountParamName, lienParamName, SavingsApiConstants.reasonForBlockParamName));
+
     private final ConfigurationDomainService configurationDomainService;
+    private final SavingsAccountAssembler savingAccountAssembler;
 
     @Autowired
     public SavingsAccountTransactionDataValidator(final FromJsonHelper fromApiJsonHelper,
-            final ConfigurationDomainService configurationDomainService) {
+            final ConfigurationDomainService configurationDomainService, final SavingsAccountAssembler savingAccountAssembler) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.configurationDomainService = configurationDomainService;
+        this.savingAccountAssembler = savingAccountAssembler;
     }
 
     public void validateTransactionWithPivotDate(final LocalDate transactionDate, final SavingsAccount savingsAccount) {
@@ -179,6 +184,13 @@ public class SavingsAccountTransactionDataValidator {
                     account.getId());
         }
 
+        if (account.getSubStatus().equals(SavingsAccountSubStatusEnum.BLOCK.getValue())
+                || account.getSubStatus().equals(SavingsAccountSubStatusEnum.BLOCK_CREDIT.getValue())
+                || account.getSubStatus().equals(SavingsAccountSubStatusEnum.BLOCK_DEBIT.getValue())) {
+            baseDataValidator.reset().parameter(SavingsApiConstants.subStatusParamName)
+                    .failWithCodeNoParameterAddedToErrorCode("account.is.in.blocked.state");
+        }
+
         validatePaymentTypeDetails(baseDataValidator, element);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -225,6 +237,10 @@ public class SavingsAccountTransactionDataValidator {
         baseDataValidator.reset().parameter(transactionAmountParamName).value(amount).notNull().positiveAmount();
         final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(transactionDateParamName, element);
 
+        final String reasonForBlock = this.fromApiJsonHelper.extractStringNamed(SavingsApiConstants.reasonForBlockParamName, element);
+        baseDataValidator.reset().parameter(SavingsApiConstants.reasonForBlockParamName).value(reasonForBlock).notBlank()
+                .notExceedingLengthOf(100);
+
         baseDataValidator.reset().parameter(transactionDateParamName).value(transactionDate).notNull();
         boolean isActive = account.isActive();
 
@@ -232,21 +248,18 @@ public class SavingsAccountTransactionDataValidator {
             baseDataValidator.reset().parameter(SavingsApiConstants.statusParamName)
                     .failWithCodeNoParameterAddedToErrorCode(SavingsApiConstants.ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE);
         }
-        account.holdAmount(amount);
+
+        Boolean lien = false;
+        if (this.fromApiJsonHelper.parameterExists(lienParamName, element)) {
+            lien = this.fromApiJsonHelper.extractBooleanNamed(lienParamName, element);
+        }
 
         if (account.getEnforceMinRequiredBalance()) {
             if (account.getWithdrawableBalance().compareTo(BigDecimal.ZERO) < 0) {
-                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("insufficient balance", account.getId());
-            }
-        }
-
-        Boolean lien = false;
-
-        if (this.fromApiJsonHelper.parameterExists(lienParamName, element)) {
-            lien = this.fromApiJsonHelper.extractBooleanNamed(lienParamName, element);
-            if (!lien) {
-                if (account.getWithdrawableBalanceWithoutMinimumBalance().compareTo(BigDecimal.ZERO) < 0) {
-                    baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("insufficient balance", account.getId());
+                if (!lien) {
+                    if (account.getWithdrawableBalanceWithoutMinimumBalance().compareTo(account.getMinRequiredBalance()) < 0) {
+                        baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("insufficient balance", account.getId());
+                    }
                 }
             }
         }
@@ -271,6 +284,7 @@ public class SavingsAccountTransactionDataValidator {
 
         SavingsAccountTransaction transaction = SavingsAccountTransaction.holdAmount(account, account.office(), paymentDetails,
                 transactionDate, Money.of(account.getCurrency(), amount), createdDate, createdUser);
+
         return transaction;
     }
 
@@ -298,6 +312,7 @@ public class SavingsAccountTransactionDataValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
         Date createdDate = new Date();
         LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
+
         SavingsAccountTransaction transaction = SavingsAccountTransaction.releaseAmount(holdTransaction, transactionDate, createdDate,
                 createdUser);
         return transaction;

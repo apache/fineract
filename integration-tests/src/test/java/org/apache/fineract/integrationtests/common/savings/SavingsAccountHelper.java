@@ -338,8 +338,8 @@ public class SavingsAccountHelper {
     public HashMap blockSavings(final Integer savingsID) {
         LOG.info("---------------------------------- BLOCKING SAVINGS ACCOUNT ----------------------------------");
         Boolean isBlock = true;
-        return performSavingApplicationActions(createSavingsOperationURL(BLOCK_SAVINGS_COMMAND, savingsID), getActivatedSavingsAsJSON(),
-                isBlock);
+        return performSavingApplicationActions(createSavingsOperationURL(BLOCK_SAVINGS_COMMAND, savingsID),
+                getActivatedSavingsAsForHoldJSON(), isBlock);
     }
 
     public HashMap unblockSavings(final Integer savingsID) {
@@ -353,7 +353,7 @@ public class SavingsAccountHelper {
         LOG.info("---------------------------------- BLOCKING DEBIT TRANSACTIONS ----------------------------------");
         Boolean isBlock = true;
         return performSavingApplicationActions(createSavingsOperationURL(BLOCK_DEBITS_SAVINGS_COMMAND, savingsID),
-                getActivatedSavingsAsJSON(), isBlock);
+                getActivatedSavingsAsForHoldJSON(), isBlock);
     }
 
     public HashMap unblockDebit(final Integer savingsID) {
@@ -367,7 +367,7 @@ public class SavingsAccountHelper {
         LOG.info("---------------------------------- BLOCKING CREDIT TRANSACTIONS ----------------------------------");
         Boolean isBlock = true;
         return performSavingApplicationActions(createSavingsOperationURL(BLOCK_CREDITS_SAVINGS_COMMAND, savingsID),
-                getActivatedSavingsAsJSON(), isBlock);
+                getActivatedSavingsAsForHoldJSON(), isBlock);
     }
 
     public HashMap unblockCredit(final Integer savingsID) {
@@ -437,6 +437,17 @@ public class SavingsAccountHelper {
         return savingsAccountActivateJson;
     }
 
+    private String getActivatedSavingsAsForHoldJSON() {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
+        map.put("activatedOnDate", TRANSACTION_DATE);
+        map.put("reasonForBlock", "unUsualActivity");
+        String savingsAccountActivateJson = new Gson().toJson(map);
+        LOG.info(savingsAccountActivateJson);
+        return savingsAccountActivateJson;
+    }
+
     private String getSavingsTransactionJSON(final String amount, final String transactionDate) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", CommonConstants.LOCALE);
@@ -455,6 +466,7 @@ public class SavingsAccountHelper {
         map.put("transactionDate", transactionDate);
         map.put("transactionAmount", amount);
         map.put("lien", lien);
+        map.put("reasonForBlock", "unUsualActivity");
         String savingsAccountWithdrawalJson = new Gson().toJson(map);
         LOG.info(savingsAccountWithdrawalJson);
         return savingsAccountWithdrawalJson;

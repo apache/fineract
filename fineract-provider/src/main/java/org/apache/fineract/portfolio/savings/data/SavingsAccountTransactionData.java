@@ -73,6 +73,8 @@ public final class SavingsAccountTransactionData implements Serializable {
     private final boolean isManualTransaction;
     private final Boolean isReversal;
     private final Long originalTransactionId;
+    private final Long releaseTransactionId;
+    private final String reasonForBlock;
     private Set<SavingsAccountChargesPaidByData> chargesPaidByData = new HashSet<>();
 
     // templates
@@ -347,6 +349,8 @@ public final class SavingsAccountTransactionData implements Serializable {
         this.note = null;
         this.isReversal = null;
         this.originalTransactionId = null;
+        this.releaseTransactionId = null;
+        this.reasonForBlock = null;
     }
 
     public boolean isChargeTransaction() {
@@ -544,7 +548,8 @@ public final class SavingsAccountTransactionData implements Serializable {
         this.isManualTransaction = isManualTransaction;
         this.isReversal = null;
         this.originalTransactionId = null;
-
+        this.releaseTransactionId = null;
+        this.reasonForBlock = null;
     }
 
     private SavingsAccountTransactionData(BigDecimal transactionAmount, LocalDate transactionDate, Long paymentTypeId, String accountNumber,
@@ -582,6 +587,8 @@ public final class SavingsAccountTransactionData implements Serializable {
         this.isManualTransaction = false;
         this.isReversal = null;
         this.originalTransactionId = null;
+        this.releaseTransactionId = null;
+        this.reasonForBlock = null;
     }
 
     private SavingsAccountTransactionData(Integer id, BigDecimal transactionAmount, LocalDate transactionDate, Long paymentTypeId,
@@ -621,6 +628,8 @@ public final class SavingsAccountTransactionData implements Serializable {
         this.isManualTransaction = false;
         this.isReversal = null;
         this.originalTransactionId = null;
+        this.releaseTransactionId = null;
+        this.reasonForBlock = null;
     }
 
     public Integer getRowIndex() {
@@ -753,6 +762,8 @@ public final class SavingsAccountTransactionData implements Serializable {
         this.isManualTransaction = false;
         this.isReversal = null;
         this.originalTransactionId = null;
+        this.releaseTransactionId = null;
+        this.reasonForBlock = null;
     }
 
     public static SavingsAccountTransactionData create(final Long id, final SavingsAccountTransactionEnumData transactionType,
@@ -770,11 +781,12 @@ public final class SavingsAccountTransactionData implements Serializable {
             final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate date,
             final CurrencyData currency, final BigDecimal amount, final BigDecimal outstandingChargeAmount, final BigDecimal runningBalance,
             final boolean reversed, final AccountTransferData transfer, final LocalDate submittedOnDate, final boolean interestedPostedAsOn,
-            final String submittedByUsername, final String note, final Boolean isReversal, final Long originalTransactionId) {
+            final String submittedByUsername, final String note, final Boolean isReversal, final Long originalTransactionId,
+            final Long releaseTransactionId, final String reasonForBlock) {
         final Collection<PaymentTypeData> paymentTypeOptions = null;
         return new SavingsAccountTransactionData(id, transactionType, paymentDetailData, savingsId, savingsAccountNo, date, currency,
                 amount, outstandingChargeAmount, runningBalance, reversed, transfer, paymentTypeOptions, submittedOnDate,
-                interestedPostedAsOn, submittedByUsername, note, isReversal, originalTransactionId);
+                interestedPostedAsOn, submittedByUsername, note, isReversal, originalTransactionId, releaseTransactionId, reasonForBlock);
     }
 
     public static SavingsAccountTransactionData create(final Long id) {
@@ -827,7 +839,7 @@ public final class SavingsAccountTransactionData implements Serializable {
             final CurrencyData currency, final BigDecimal amount, final BigDecimal outstandingChargeAmount, final BigDecimal runningBalance,
             final boolean reversed, final AccountTransferData transfer, final Collection<PaymentTypeData> paymentTypeOptions,
             final LocalDate submittedOnDate, final boolean interestedPostedAsOn, final String submittedByUsername, final String note,
-            final Boolean isReversal, final Long originalTransactionId) {
+            final Boolean isReversal, final Long originalTransactionId, final Long releaseTransactionId, final String reasonForBlock) {
         this.id = id;
         this.transactionType = transactionType;
         this.paymentDetailData = paymentDetailData;
@@ -853,6 +865,8 @@ public final class SavingsAccountTransactionData implements Serializable {
         this.isManualTransaction = false;
         this.isReversal = isReversal;
         this.originalTransactionId = originalTransactionId;
+        this.releaseTransactionId = releaseTransactionId;
+        this.reasonForBlock = reasonForBlock;
     }
 
     private SavingsAccountTransactionData(final Long id, final SavingsAccountTransactionEnumData transactionType,
@@ -886,6 +900,43 @@ public final class SavingsAccountTransactionData implements Serializable {
         this.isManualTransaction = false;
         this.isReversal = null;
         this.originalTransactionId = null;
+        this.releaseTransactionId = null;
+        this.reasonForBlock = null;
+    }
+
+    private SavingsAccountTransactionData(final Long id, final SavingsAccountTransactionEnumData transactionType,
+            final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate date,
+            final CurrencyData currency, final BigDecimal amount, final BigDecimal outstandingChargeAmount, final BigDecimal runningBalance,
+            final boolean reversed, final AccountTransferData transfer, final Collection<PaymentTypeData> paymentTypeOptions,
+            final LocalDate submittedOnDate, final boolean interestedPostedAsOn, final String submittedByUsername, final String note,
+            final Boolean isReversal, final Long originalTransactionId) {
+        this.id = id;
+        this.transactionType = transactionType;
+        this.paymentDetailData = paymentDetailData;
+        this.accountId = savingsId;
+        this.accountNo = savingsAccountNo;
+        this.date = date;
+        this.currency = currency;
+        this.amount = amount;
+        this.outstandingChargeAmount = outstandingChargeAmount;
+        this.runningBalance = runningBalance;
+        this.reversed = reversed;
+        this.transfer = transfer;
+        this.paymentTypeOptions = paymentTypeOptions;
+        if (submittedOnDate != null) {
+            this.submittedOnDate = Date.from(submittedOnDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        } else {
+            this.submittedOnDate = null;
+        }
+
+        this.interestedPostedAsOn = interestedPostedAsOn;
+        this.submittedByUsername = submittedByUsername;
+        this.note = note;
+        this.isManualTransaction = false;
+        this.isReversal = isReversal;
+        this.originalTransactionId = originalTransactionId;
+        this.releaseTransactionId = null;
+        this.reasonForBlock = null;
     }
 
     public static SavingsAccountTransactionData withWithDrawalTransactionDetails(

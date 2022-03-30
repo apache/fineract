@@ -23,6 +23,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.amountParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargeIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.transactionAmountParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawBalanceParamName;
 
@@ -53,6 +54,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
@@ -1762,7 +1764,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     }
 
     @Override
-    public CommandProcessingResult blockAccount(final Long savingsId) {
+    public CommandProcessingResult blockAccount(final Long savingsId, final JsonCommand command) {
 
         this.context.authenticatedUser();
 
@@ -1770,6 +1772,11 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         checkClientOrGroupActive(account);
 
         final Map<String, Object> changes = account.block();
+
+        final String reasonForBlock = command.stringValueOfParameterNamed(SavingsApiConstants.reasonForBlockParamName);
+        validateReasonForHold(reasonForBlock);
+        account.updateReason(reasonForBlock);
+
         if (!changes.isEmpty()) {
 
             this.savingAccountRepositoryWrapper.save(account);
@@ -1786,6 +1793,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         checkClientOrGroupActive(account);
 
         final Map<String, Object> changes = account.unblock();
+
+        account.updateReason(null);
+
         if (!changes.isEmpty()) {
 
             this.savingAccountRepositoryWrapper.save(account);
@@ -1804,12 +1814,29 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         checkClientOrGroupActive(account);
 
-        SavingsAccountTransaction transacton = this.savingsAccountTransactionDataValidator.validateHoldAndAssembleForm(command.json(),
+        final BigDecimal amount = command.bigDecimalValueOfParameterNamed(transactionAmountParamName);
+
+        Money runningBalance = Money.of(account.getCurrency(), account.getAccountBalance());
+        if (account.getSavingsHoldAmount() != null) {
+            runningBalance = runningBalance.minus(account.getSavingsHoldAmount()).minus(amount);
+        } else {
+            runningBalance = runningBalance.minus(amount);
+        }
+
+        account.holdAmount(amount);
+
+        SavingsAccountTransaction transaction = this.savingsAccountTransactionDataValidator.validateHoldAndAssembleForm(command.json(),
                 account, submittedBy, backdatedTxnsAllowedTill);
 
-        this.savingsAccountTransactionDataValidator.validateTransactionWithPivotDate(transacton.getTransactionLocalDate(), account);
+        transaction.updateRunningBalance(runningBalance);
 
-        this.savingsAccountTransactionRepository.saveAndFlush(transacton);
+        final String reasonForBlock = command.stringValueOfParameterNamed(SavingsApiConstants.reasonForBlockParamName);
+        transaction.updateReason(reasonForBlock);
+
+        account.getAccountBalance();
+        this.savingsAccountTransactionDataValidator.validateTransactionWithPivotDate(transaction.getTransactionLocalDate(), account);
+
+        this.savingsAccountTransactionRepository.saveAndFlush(transaction);
 
         if (backdatedTxnsAllowedTill) {
             // Check again whether transactions are modified
@@ -1818,7 +1845,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         this.savingAccountRepositoryWrapper.saveAndFlush(account);
 
-        return new CommandProcessingResultBuilder().withEntityId(transacton.getId()).withOfficeId(account.officeId())
+        return new CommandProcessingResultBuilder().withEntityId(transaction.getId()).withOfficeId(account.officeId())
                 .withClientId(account.clientId()).withGroupId(account.groupId()).withSavingsId(savingsId).build();
     }
 
@@ -1830,12 +1857,23 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         SavingsAccountTransaction holdTransaction = this.savingsAccountTransactionRepository
                 .findOneByIdAndSavingsAccountId(savingsTransactionId, savingsId);
 
+        holdTransaction.updateReason(null);
+
         final SavingsAccountTransaction transaction = this.savingsAccountTransactionDataValidator
                 .validateReleaseAmountAndAssembleForm(holdTransaction, submittedBy);
 
         final boolean backdatedTxnsAllowedTill = this.savingAccountAssembler.getPivotConfigStatus();
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, backdatedTxnsAllowedTill);
         checkClientOrGroupActive(account);
+
+        Money runningBalance = Money.of(account.getCurrency(), account.getAccountBalance());
+
+        Money savingsOnHold = Money.of(account.getCurrency(), account.getSavingsHoldAmount());
+
+        runningBalance = runningBalance.minus(savingsOnHold);
+
+        runningBalance = runningBalance.plus(transaction.getAmount());
+        transaction.updateRunningBalance(runningBalance);
 
         this.savingsAccountTransactionDataValidator.validateTransactionWithPivotDate(transaction.getTransactionLocalDate(), account);
         account.releaseOnHoldAmount(transaction.getAmount());
@@ -1855,11 +1893,15 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     @Transactional
     @Override
-    public CommandProcessingResult blockCredits(final Long savingsId) {
+    public CommandProcessingResult blockCredits(final Long savingsId, final JsonCommand command) {
         this.context.authenticatedUser();
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
         checkClientOrGroupActive(account);
+
+        final String reasonForBlock = command.stringValueOfParameterNamed(SavingsApiConstants.reasonForBlockParamName);
+        validateReasonForHold(reasonForBlock);
+        account.updateReason(reasonForBlock);
 
         final Map<String, Object> changes = account.blockCredits(account.getSubStatus());
         if (!changes.isEmpty()) {
@@ -1877,7 +1919,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
         checkClientOrGroupActive(account);
-
+        account.updateReason(null);
         final Map<String, Object> changes = account.unblockCredits();
         if (!changes.isEmpty()) {
 
@@ -1889,11 +1931,15 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     @Transactional
     @Override
-    public CommandProcessingResult blockDebits(final Long savingsId) {
+    public CommandProcessingResult blockDebits(final Long savingsId, final JsonCommand command) {
         this.context.authenticatedUser();
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
         checkClientOrGroupActive(account);
+
+        final String reasonForBlock = command.stringValueOfParameterNamed(SavingsApiConstants.reasonForBlockParamName);
+        validateReasonForHold(reasonForBlock);
+        account.updateReason(reasonForBlock);
 
         final Map<String, Object> changes = account.blockDebits(account.getSubStatus());
         if (!changes.isEmpty()) {
@@ -1911,6 +1957,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
         checkClientOrGroupActive(account);
+
+        account.updateReason(null);
 
         final Map<String, Object> changes = account.unblockDebits();
         if (!changes.isEmpty()) {
@@ -1933,5 +1981,11 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         }
 
+    }
+
+    private void validateReasonForHold(String reasonForBlock) {
+        if (StringUtils.isBlank(reasonForBlock)) {
+            throw new PlatformDataIntegrityException("Reason For Block is Mandatory", "error.msg.reason.for.block.mandatory");
+        }
     }
 }

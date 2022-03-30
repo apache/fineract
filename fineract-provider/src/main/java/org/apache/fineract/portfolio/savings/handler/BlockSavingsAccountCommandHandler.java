@@ -41,7 +41,7 @@ public class BlockSavingsAccountCommandHandler implements NewCommandSourceHandle
     @Transactional
     @Override
     public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.writePlatformService.blockAccount(command.getSavingsId());
+        return this.writePlatformService.blockAccount(command.getSavingsId(), command);
     }
 
 }

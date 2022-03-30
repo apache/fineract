@@ -2193,7 +2193,7 @@ public class ClientSavingsIntegrationTest {
 
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = null;
-        final String enforceMinRequiredBalance = "false";
+        final String enforceMinRequiredBalance = "true";
         final boolean allowOverdraft = false;
         final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);

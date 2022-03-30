@@ -576,7 +576,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     final BigDecimal minRequiredBalance = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "minRequiredBalance");
                     final boolean enforceMinRequiredBalance = rs.getBoolean("enforceMinRequiredBalance");
                     savingsAccountData = SavingsAccountData.instance(id, accountNo, depositType, externalId, null, null, null, null,
-                            productId, null, null, null, status, subStatus, timeline, currency, nominalAnnualInterestRate,
+                            productId, null, null, null, status, subStatus, null, timeline, currency, nominalAnnualInterestRate,
                             interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType,
                             interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
                             withdrawalFeeForTransfers, summary, allowOverdraft, overdraftLimit, minRequiredBalance,
@@ -746,6 +746,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("s.id fieldOfficerId, s.display_name as fieldOfficerName, ");
             sqlBuilder.append("sa.status_enum as statusEnum, ");
             sqlBuilder.append("sa.sub_status_enum as subStatusEnum, ");
+            sqlBuilder.append("sa.reason_for_block as reasonForBlock, ");
             sqlBuilder.append("sa.submittedon_date as submittedOnDate,");
             sqlBuilder.append("sbu.username as submittedByUsername,");
             sqlBuilder.append("sbu.firstname as submittedByFirstname, sbu.lastname as submittedByLastname,");
@@ -874,6 +875,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
             final Integer subStatusEnum = JdbcSupport.getInteger(rs, "subStatusEnum");
             final SavingsAccountSubStatusEnumData subStatus = SavingsEnumerations.subStatus(subStatusEnum);
+            final String reasonForBlock = rs.getString("reasonForBlock");
 
             final LocalDate lastActiveTransactionDate = JdbcSupport.getLocalDate(rs, "lastActiveTransactionDate");
             final boolean isDormancyTrackingActive = rs.getBoolean("isDormancyTrackingActive");
@@ -1022,7 +1024,6 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
             BigDecimal availableBalance = accountBalance;
             if (availableBalance != null && onHoldFunds != null) {
-
                 availableBalance = availableBalance.subtract(onHoldFunds);
             }
 
@@ -1052,12 +1053,13 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             }
 
             return SavingsAccountData.instance(id, accountNo, depositType, externalId, groupId, groupName, clientId, clientName, productId,
-                    productName, fieldOfficerId, fieldOfficerName, status, subStatus, timeline, currency, nominalAnnualInterestRate,
-                    interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
-                    minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary,
-                    allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance, minBalanceForInterestCalculation,
-                    onHoldFunds, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax, taxGroupData,
-                    lastActiveTransactionDate, isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat, onHoldAmount);
+                    productName, fieldOfficerId, fieldOfficerName, status, subStatus, reasonForBlock, timeline, currency,
+                    nominalAnnualInterestRate, interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType,
+                    interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
+                    withdrawalFeeForTransfers, summary, allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance,
+                    minBalanceForInterestCalculation, onHoldFunds, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation,
+                    withHoldTax, taxGroupData, lastActiveTransactionDate, isDormancyTrackingActive, daysToInactive, daysToDormancy,
+                    daysToEscheat, onHoldAmount);
         }
     }
 
@@ -1312,6 +1314,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("tr.id as transactionId, tr.transaction_type_enum as transactionType, ");
             sqlBuilder.append("tr.transaction_date as transactionDate, tr.amount as transactionAmount,");
+            sqlBuilder.append(" tr.release_id_of_hold_amount as releaseTransactionId,");
+            sqlBuilder.append(" tr.reason_for_block as reasonForBlock,");
             sqlBuilder.append("tr.created_date as submittedOnDate,");
             sqlBuilder.append(" au.username as submittedByUsername, ");
             sqlBuilder.append(" nt.note as transactionNote, ");
@@ -1357,6 +1361,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final LocalDate date = JdbcSupport.getLocalDate(rs, "transactionDate");
             final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedOnDate");
             final BigDecimal amount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "transactionAmount");
+            final Long releaseTransactionId = rs.getLong("releaseTransactionId");
+            final String reasonForBlock = rs.getString("reasonForBlock");
             final BigDecimal outstandingChargeAmount = null;
             final BigDecimal runningBalance = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "runningBalance");
             final boolean reversed = rs.getBoolean("reversed");
@@ -1416,7 +1422,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final String note = rs.getString("transactionNote");
             return SavingsAccountTransactionData.create(id, transactionType, paymentDetailData, savingsId, accountNo, date, currency,
                     amount, outstandingChargeAmount, runningBalance, reversed, transfer, submittedOnDate, postInterestAsOn,
-                    submittedByUsername, note, isReversal, originalTransactionId);
+                    submittedByUsername, note, isReversal, originalTransactionId, releaseTransactionId, reasonForBlock);
         }
     }
 
@@ -1619,6 +1625,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final BigDecimal savingsAmountOnHold = null;
 
             final SavingsAccountSubStatusEnumData subStatus = null;
+            final String reasonForBlock = null;
             final LocalDate lastActiveTransactionDate = null;
             final boolean isDormancyTrackingActive = false;
             final Integer daysToInactive = null;
@@ -1628,13 +1635,13 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final SavingsAccountApplicationTimelineData timeline = SavingsAccountApplicationTimelineData.templateDefault();
             final EnumOptionData depositType = null;
             return SavingsAccountData.instance(null, null, depositType, null, groupId, groupName, clientId, clientName, productId,
-                    productName, fieldOfficerId, fieldOfficerName, status, subStatus, timeline, currency, nominalAnnualIterestRate,
-                    interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
-                    minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary,
-                    allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance, minBalanceForInterestCalculation,
-                    onHoldFunds, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax, taxGroupData,
-                    lastActiveTransactionDate, isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat,
-                    savingsAmountOnHold);
+                    productName, fieldOfficerId, fieldOfficerName, status, subStatus, reasonForBlock, timeline, currency,
+                    nominalAnnualIterestRate, interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType,
+                    interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
+                    withdrawalFeeForTransfers, summary, allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance,
+                    minBalanceForInterestCalculation, onHoldFunds, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation,
+                    withHoldTax, taxGroupData, lastActiveTransactionDate, isDormancyTrackingActive, daysToInactive, daysToDormancy,
+                    daysToEscheat, savingsAmountOnHold);
         }
     }
 
