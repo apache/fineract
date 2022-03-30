@@ -262,6 +262,10 @@ public final class SavingsAccountSummary {
         return this.accountBalance;
     }
 
+    public void setAccountBalance(BigDecimal accountBalance) {
+        this.accountBalance = accountBalance;
+    }
+
     public BigDecimal getTotalInterestPosted() {
         return this.totalInterestPosted;
     }

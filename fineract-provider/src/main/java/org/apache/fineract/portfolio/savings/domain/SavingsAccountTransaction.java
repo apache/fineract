@@ -127,6 +127,9 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     @Column(name = "release_id_of_hold_amount", length = 20)
     private Long releaseIdOfHoldAmountTransaction;
 
+    @Column(name = "reason_for_block", nullable = true)
+    private String reasonForBlock;
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "savings_account_transaction_id", referencedColumnName = "id")
     private List<Note> notes = new ArrayList<>();
@@ -841,6 +844,10 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
 
     public void updateReleaseId(Long releaseId) {
         this.releaseIdOfHoldAmountTransaction = releaseId;
+    }
+
+    public void updateReason(String reasonForBlock) {
+        this.reasonForBlock = reasonForBlock;
     }
 
     public Long getReleaseIdOfHoldAmountTransaction() {

@@ -220,6 +220,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
     @JoinColumn(name = "closedon_userid", nullable = true)
     protected AppUser closedBy;
 
+    @Column(name = "reason_for_block", nullable = true)
+    protected String reasonForBlock;
+
     @Embedded
     protected MonetaryCurrency currency;
 
@@ -1442,8 +1445,16 @@ public class SavingsAccount extends AbstractPersistableCustom {
         }
 
         if (this.getSavingsHoldAmount().compareTo(BigDecimal.ZERO) > 0) {
-            if (runningBalance.minus(this.getSavingsHoldAmount()).isLessThanZero()) {
-                throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount);
+            if (this.enforceMinRequiredBalance) {
+                if (runningBalance.minus(minRequiredBalance.plus(this.getSavingsHoldAmount())).isLessThanZero()) {
+                    throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), withdrawalFee,
+                            transactionAmount);
+                }
+            } else {
+                if (runningBalance.minus(this.getSavingsHoldAmount()).isLessThanZero()) {
+                    throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), withdrawalFee,
+                            transactionAmount);
+                }
             }
         }
     }
@@ -3498,6 +3509,10 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     public void updateSavingsAccountSummary(final List<SavingsAccountTransaction> transactions) {
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, transactions);
+    }
+
+    public void updateReason(final String reasonForBlock) {
+        this.reasonForBlock = reasonForBlock;
     }
 
     public Map<String, Object> block() {

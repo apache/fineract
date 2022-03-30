@@ -41,7 +41,7 @@ public class BlockCreditsToSavingsAccountCommandHandler implements NewCommandSou
     @Transactional
     @Override
     public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.writePlatformService.blockCredits(command.getSavingsId());
+        return this.writePlatformService.blockCredits(command.getSavingsId(), command);
     }
 
 }

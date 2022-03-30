@@ -478,10 +478,10 @@ public class SavingsAccountsApiResource {
             final CommandWrapper commandRequest = builder.unblockCreditsToSavingsAccount(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, SavingsApiConstants.COMMAND_BLOCK_ACCOUNT)) {
-            final CommandWrapper commandRequest = builder.withNoJsonBody().blockSavingsAccount(accountId).build();
+            final CommandWrapper commandRequest = builder.blockSavingsAccount(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT)) {
-            final CommandWrapper commandRequest = builder.withNoJsonBody().unblockSavingsAccount(accountId).build();
+            final CommandWrapper commandRequest = builder.unblockSavingsAccount(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 

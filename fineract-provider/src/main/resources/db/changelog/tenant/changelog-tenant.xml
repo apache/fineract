@@ -28,4 +28,5 @@
     <include file="parts/0006_product_loan_disallow_expected_disbursements.xml" relativeToChangelogFile="true"/>
     <include file="parts/0007_product_loan_higher_than_applied_loan_amount_management.xml" relativeToChangelogFile="true"/>
     <include file="parts/0008_loan_charge_add_external_id.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0009_hold_reason_savings_account.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
