@@ -115,7 +115,7 @@ allprojects  {
     dependencyManagement {
         imports {
             mavenBom 'org.springframework:spring-framework-bom:5.3.17'
-            mavenBom 'org.springframework.boot:spring-boot-dependencies:2.6.5'
+            mavenBom 'org.springframework.boot:spring-boot-dependencies:2.6.6'
             mavenBom 'org.jetbrains.kotlin:kotlin-bom:1.6.10'
             mavenBom 'org.junit:junit-bom:5.8.2'
             mavenBom 'com.fasterxml.jackson:jackson-bom:2.13.2'
