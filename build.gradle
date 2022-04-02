@@ -116,7 +116,7 @@ allprojects  {
         imports {
             mavenBom 'org.springframework:spring-framework-bom:5.3.18'
             mavenBom 'org.springframework.boot:spring-boot-dependencies:2.6.6'
-            mavenBom 'org.jetbrains.kotlin:kotlin-bom:1.6.10'
+            mavenBom 'org.jetbrains.kotlin:kotlin-bom:1.6.20'
             mavenBom 'org.junit:junit-bom:5.8.2'
             mavenBom 'com.fasterxml.jackson:jackson-bom:2.13.2'
             mavenBom 'io.cucumber:cucumber-bom:7.2.3'
