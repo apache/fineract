@@ -199,7 +199,7 @@ allprojects  {
             dependency "com.squareup.okhttp3:okhttp-sse:$okhttpVersion"
             dependency "io.gsonfire:gson-fire:1.8.5"
             dependency "io.swagger:swagger-core:1.6.5"
-            dependency "io.swagger:swagger-annotations:1.6.5"
+            dependency "io.swagger:swagger-annotations:1.6.6"
             dependency "jakarta.annotation:jakarta.annotation-api:1.3.5"
             dependency "com.google.code.findbugs:jsr305:3.0.2"
             dependency "commons-codec:commons-codec:1.15"
