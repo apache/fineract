@@ -211,7 +211,7 @@ allprojects  {
                 exclude 'javax.annotation:javax.annotation-api'
             }
 
-            dependency 'io.swagger.core.v3:swagger-annotations:2.1.13'
+            dependency 'io.swagger.core.v3:swagger-annotations:2.2.0'
             dependency ('io.swagger.core.v3:swagger-jaxrs2:2.1.13') {
                 exclude 'jakarta.activation:jakarta.activation-api'
             }
