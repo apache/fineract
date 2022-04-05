@@ -3,15 +3,6 @@
 
 version: 2
 updates:
-  - package-ecosystem: "gradle"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      timezone: "Europe/Zurich"
-    open-pull-requests-limit: 13
-    ignore:
-      - dependency-name: "org.eclipse.persistence:eclipselink"
-      - dependency-name: "org.eclipse.persistence:org.eclipse.persistence.jpa"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
