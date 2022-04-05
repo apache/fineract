@@ -73,6 +73,7 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
@@ -211,15 +212,18 @@ public class LoansApiResource {
             "interestCalculationPeriodType", LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME,
             "expectedFirstRepaymentOnDate", "graceOnPrincipalPayment", "recurringMoratoriumOnPrincipalPeriods", "graceOnInterestPayment",
             "graceOnInterestCharged", "interestChargedFromDate", "timeline", "totalFeeChargesAtDisbursement", "summary",
-            "repaymentSchedule", "transactions", "charges", "collateral", "guarantors", "meeting", "productOptions",
+            DataTableApiConstant.repaymentScheduleAssociateParamName, DataTableApiConstant.transactionsAssociateParamName,
+            DataTableApiConstant.chargesAssociateParamName, DataTableApiConstant.collateralAssociateParamName,
+            DataTableApiConstant.guarantorsAssociateParamName, DataTableApiConstant.meetingAssociateParamName, "productOptions",
             "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", "repaymentFrequencyTypeOptions",
             "repaymentFrequencyNthDayTypeOptions", "repaymentFrequencyDaysOfWeekTypeOptions", "termFrequencyTypeOptions",
             "interestRateFrequencyTypeOptions", "fundOptions", "repaymentStrategyOptions", "chargeOptions", "loanOfficerOptions",
             "loanPurposeOptions", "loanCollateralOptions", "chargeTemplate", "calendarOptions", "syncDisbursementWithMeeting",
-            "loanCounter", "loanProductCounter", "notes", "accountLinkingOptions", "linkedAccount", "interestRateDifferential",
-            "isFloatingInterestRate", "interestRatesPeriods", LoanApiConstants.canUseForTopup, LoanApiConstants.isTopup,
-            LoanApiConstants.loanIdToClose, LoanApiConstants.topupAmount, LoanApiConstants.clientActiveLoanOptions,
-            LoanApiConstants.datatables, LoanProductConstants.RATES_PARAM_NAME));
+            "loanCounter", "loanProductCounter", DataTableApiConstant.notesAssociateParamName, "accountLinkingOptions",
+            DataTableApiConstant.linkedAccountAssociateParamName, "interestRateDifferential", "isFloatingInterestRate",
+            "interestRatesPeriods", LoanApiConstants.canUseForTopup, LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose,
+            LoanApiConstants.topupAmount, LoanApiConstants.clientActiveLoanOptions, LoanApiConstants.datatables,
+            LoanProductConstants.RATES_PARAM_NAME));
 
     private final Set<String> loanApprovalDataParameters = new HashSet<>(Arrays.asList("approvalDate", "approvalAmount"));
     final Set<String> glimAccountsDataParameters = new HashSet<>(Arrays.asList("glimId", "groupId", "clientId", "parentLoanAccountNo",
@@ -549,70 +553,77 @@ public class LoansApiResource {
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         if (!associationParameters.isEmpty()) {
 
-            if (associationParameters.contains("all")) {
-                associationParameters.addAll(Arrays.asList("repaymentSchedule", "futureSchedule", "originalSchedule", "transactions",
-                        "charges", "guarantors", "collateral", "notes", "linkedAccount", "multiDisburseDetails", "collection"));
+            if (associationParameters.contains(DataTableApiConstant.allAssociateParamName)) {
+                associationParameters.addAll(Arrays.asList(DataTableApiConstant.repaymentScheduleAssociateParamName,
+                        DataTableApiConstant.futureScheduleAssociateParamName, DataTableApiConstant.originalScheduleAssociateParamName,
+                        DataTableApiConstant.transactionsAssociateParamName, DataTableApiConstant.chargesAssociateParamName,
+                        DataTableApiConstant.guarantorsAssociateParamName, DataTableApiConstant.collateralAssociateParamName,
+                        DataTableApiConstant.notesAssociateParamName, DataTableApiConstant.linkedAccountAssociateParamName,
+                        DataTableApiConstant.multiDisburseDetailsAssociateParamName, DataTableApiConstant.collectionAssociateParamName));
             }
 
             ApiParameterHelper.excludeAssociationsForResponseIfProvided(uriInfo.getQueryParameters(), associationParameters);
 
-            if (associationParameters.contains("guarantors")) {
-                mandatoryResponseParameters.add("guarantors");
+            if (associationParameters.contains(DataTableApiConstant.guarantorsAssociateParamName)) {
+                mandatoryResponseParameters.add(DataTableApiConstant.guarantorsAssociateParamName);
                 guarantors = this.guarantorReadPlatformService.retrieveGuarantorsForLoan(loanId);
                 if (CollectionUtils.isEmpty(guarantors)) {
                     guarantors = null;
                 }
             }
 
-            if (associationParameters.contains("transactions")) {
-                mandatoryResponseParameters.add("transactions");
+            if (associationParameters.contains(DataTableApiConstant.transactionsAssociateParamName)) {
+                mandatoryResponseParameters.add(DataTableApiConstant.transactionsAssociateParamName);
                 final Collection<LoanTransactionData> currentLoanRepayments = this.loanReadPlatformService.retrieveLoanTransactions(loanId);
                 if (!CollectionUtils.isEmpty(currentLoanRepayments)) {
                     loanRepayments = currentLoanRepayments;
                 }
             }
 
-            if (associationParameters.contains("multiDisburseDetails") || associationParameters.contains("repaymentSchedule")) {
-                mandatoryResponseParameters.add("multiDisburseDetails");
+            if (associationParameters.contains(DataTableApiConstant.multiDisburseDetailsAssociateParamName)
+                    || associationParameters.contains(DataTableApiConstant.repaymentScheduleAssociateParamName)) {
+                mandatoryResponseParameters.add(DataTableApiConstant.multiDisburseDetailsAssociateParamName);
                 disbursementData = this.loanReadPlatformService.retrieveLoanDisbursementDetails(loanId);
             }
 
-            if (associationParameters.contains("emiAmountVariations") || associationParameters.contains("repaymentSchedule")) {
-                mandatoryResponseParameters.add("emiAmountVariations");
+            if (associationParameters.contains(DataTableApiConstant.emiAmountVariationsAssociateParamName)
+                    || associationParameters.contains(DataTableApiConstant.repaymentScheduleAssociateParamName)) {
+                mandatoryResponseParameters.add(DataTableApiConstant.emiAmountVariationsAssociateParamName);
                 emiAmountVariations = this.loanReadPlatformService.retrieveLoanTermVariations(loanId,
                         LoanTermVariationType.EMI_AMOUNT.getValue());
             }
 
-            if (associationParameters.contains("repaymentSchedule")) {
-                mandatoryResponseParameters.add("repaymentSchedule");
+            if (associationParameters.contains(DataTableApiConstant.repaymentScheduleAssociateParamName)) {
+                mandatoryResponseParameters.add(DataTableApiConstant.repaymentScheduleAssociateParamName);
                 final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData = loanBasicDetails.repaymentScheduleRelatedData();
                 repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId, repaymentScheduleRelatedData,
                         disbursementData, loanBasicDetails.isInterestRecalculationEnabled(), loanBasicDetails.getTotalPaidFeeCharges());
 
-                if (associationParameters.contains("futureSchedule") && loanBasicDetails.isInterestRecalculationEnabled()) {
-                    mandatoryResponseParameters.add("futureSchedule");
+                if (associationParameters.contains(DataTableApiConstant.futureScheduleAssociateParamName)
+                        && loanBasicDetails.isInterestRecalculationEnabled()) {
+                    mandatoryResponseParameters.add(DataTableApiConstant.futureScheduleAssociateParamName);
                     this.calculationPlatformService.updateFutureSchedule(repaymentSchedule, loanId);
                 }
 
-                if (associationParameters.contains("originalSchedule") && loanBasicDetails.isInterestRecalculationEnabled()
-                        && loanBasicDetails.isActive()) {
-                    mandatoryResponseParameters.add("originalSchedule");
+                if (associationParameters.contains(DataTableApiConstant.originalScheduleAssociateParamName)
+                        && loanBasicDetails.isInterestRecalculationEnabled() && loanBasicDetails.isActive()) {
+                    mandatoryResponseParameters.add(DataTableApiConstant.originalScheduleAssociateParamName);
                     LoanScheduleData loanScheduleData = this.loanScheduleHistoryReadPlatformService.retrieveRepaymentArchiveSchedule(loanId,
                             repaymentScheduleRelatedData, disbursementData);
                     loanBasicDetails = LoanAccountData.withOriginalSchedule(loanBasicDetails, loanScheduleData);
                 }
             }
 
-            if (associationParameters.contains("charges")) {
-                mandatoryResponseParameters.add("charges");
+            if (associationParameters.contains(DataTableApiConstant.chargesAssociateParamName)) {
+                mandatoryResponseParameters.add(DataTableApiConstant.chargesAssociateParamName);
                 charges = this.loanChargeReadPlatformService.retrieveLoanCharges(loanId);
                 if (CollectionUtils.isEmpty(charges)) {
                     charges = null;
                 }
             }
 
-            if (associationParameters.contains("collateral")) {
-                mandatoryResponseParameters.add("collateral");
+            if (associationParameters.contains(DataTableApiConstant.collateralAssociateParamName)) {
+                mandatoryResponseParameters.add(DataTableApiConstant.collateralAssociateParamName);
                 loanCollateralManagements = this.loanCollateralManagementReadPlatformService.getLoanCollateralResponseDataList(loanId);
                 for (LoanCollateralResponseData loanCollateralManagement : loanCollateralManagements) {
                     loanCollateralManagementData.add(loanCollateralManagement.toCommand());
@@ -622,26 +633,26 @@ public class LoansApiResource {
                 }
             }
 
-            if (associationParameters.contains("meeting")) {
-                mandatoryResponseParameters.add("meeting");
+            if (associationParameters.contains(DataTableApiConstant.meetingAssociateParamName)) {
+                mandatoryResponseParameters.add(DataTableApiConstant.meetingAssociateParamName);
                 meeting = this.calendarReadPlatformService.retrieveLoanCalendar(loanId);
             }
 
-            if (associationParameters.contains("notes")) {
-                mandatoryResponseParameters.add("notes");
+            if (associationParameters.contains(DataTableApiConstant.notesAssociateParamName)) {
+                mandatoryResponseParameters.add(DataTableApiConstant.notesAssociateParamName);
                 notes = this.noteReadPlatformService.retrieveNotesByResource(loanId, NoteType.LOAN.getValue());
                 if (CollectionUtils.isEmpty(notes)) {
                     notes = null;
                 }
             }
 
-            if (associationParameters.contains("linkedAccount")) {
-                mandatoryResponseParameters.add("linkedAccount");
+            if (associationParameters.contains(DataTableApiConstant.linkedAccountAssociateParamName)) {
+                mandatoryResponseParameters.add(DataTableApiConstant.linkedAccountAssociateParamName);
                 linkedAccount = this.accountAssociationsReadPlatformService.retriveLoanLinkedAssociation(loanId);
             }
 
-            if (associationParameters.contains("collection")) {
-                mandatoryResponseParameters.add("collection");
+            if (associationParameters.contains(DataTableApiConstant.collectionAssociateParamName)) {
+                mandatoryResponseParameters.add(DataTableApiConstant.collectionAssociateParamName);
                 if (loanBasicDetails.isActive()) {
                     collectionData = this.loanReadPlatformService.retrieveLoanCollectionData(loanId);
                 }
@@ -715,8 +726,8 @@ public class LoansApiResource {
                     loanBasicDetails.clientId(), currencyCode, accountStatus, DepositAccountType.SAVINGS_DEPOSIT.getValue());
             accountLinkingOptions = this.portfolioAccountReadPlatformService.retrieveAllForLookup(portfolioAccountDTO);
 
-            if (!associationParameters.contains("linkedAccount")) {
-                mandatoryResponseParameters.add("linkedAccount");
+            if (!associationParameters.contains(DataTableApiConstant.linkedAccountAssociateParamName)) {
+                mandatoryResponseParameters.add(DataTableApiConstant.linkedAccountAssociateParamName);
                 linkedAccount = this.accountAssociationsReadPlatformService.retriveLoanLinkedAssociation(loanId);
             }
             if (loanBasicDetails.groupId() != null) {

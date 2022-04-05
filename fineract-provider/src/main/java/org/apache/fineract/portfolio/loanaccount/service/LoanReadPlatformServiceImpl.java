@@ -2375,17 +2375,19 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
             sqlBuilder.append(
                     "l.id as loanId, coalesce((l.approved_principal - l.principal_disbursed_derived), 0) as availableDisbursementAmount, ");
-            sqlBuilder.append("datediff(" + sqlGenerator.currentDate() + ", laa.overdue_since_date_derived) as pastDueDays, ");
+            sqlBuilder.append(sqlGenerator.dateDiff(sqlGenerator.currentDate(), "laa.overdue_since_date_derived") + " as pastDueDays, ");
             sqlBuilder.append(
-                    "(select coalesce(min(lrs.duedate), null) as duedate from m_loan_repayment_schedule lrs where lrs.loan_id=1 and lrs.completed_derived is false and lrs.duedate >= "
+                    "(select coalesce(min(lrs.duedate), null) as duedate from m_loan_repayment_schedule lrs where lrs.loan_id=l.id and lrs.completed_derived is false and lrs.duedate >= "
                             + sqlGenerator.currentDate() + ") as nextPaymentDueDate, ");
-            sqlBuilder.append("datediff(" + sqlGenerator.currentDate() + ", laa.overdue_since_date_derived) as delinquentDays, ");
+            sqlBuilder.append(sqlGenerator.dateDiff(sqlGenerator.currentDate(), "laa.overdue_since_date_derived") + " as delinquentDays, ");
             sqlBuilder.append(
                     sqlGenerator.currentDate() + " as delinquentDate, coalesce(laa.total_overdue_derived, 0) as delinquentAmount, ");
             sqlBuilder.append("lre.transactionDate as lastPaymentDate, coalesce(lre.amount, 0) as lastPaymentAmount ");
             sqlBuilder.append("from m_loan l inner join m_loan_arrears_aging laa on laa.loan_id = l.id ");
             sqlBuilder.append(
-                    "left join (select lt.loan_id, lt.transaction_date as transactionDate, lt.amount as amount from m_loan_transaction lt where lt.is_reversed = 0 and lt.transaction_type_enum=2 order by lt.transaction_date desc limit 1) lre on lre.loan_id = l.id ");
+                    "left join (select lt.loan_id, lt.transaction_date as transactionDate, lt.amount as amount from m_loan_transaction lt ");
+            sqlBuilder.append(
+                    "where lt.is_reversed = false and lt.transaction_type_enum=2 order by lt.transaction_date desc limit 1) lre on lre.loan_id = l.id ");
             sqlBuilder.append("where l.id=? ");
             return sqlBuilder.toString();
         }

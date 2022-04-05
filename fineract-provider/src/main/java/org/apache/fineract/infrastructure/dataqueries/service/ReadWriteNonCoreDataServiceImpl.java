@@ -640,8 +640,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             }
 
             // Add Created At and Updated At
-            columns.add(addColumn("created_at", "DateTime", false, null));
-            columns.add(addColumn("updated_at", "DateTime", false, null));
+            columns.add(addColumn(DataTableApiConstant.createdAtFieldName, DataTableApiConstant.dateTimeFieldType, false, null));
+            columns.add(addColumn(DataTableApiConstant.updatedAtFieldName, DataTableApiConstant.dateTimeFieldType, false, null));
             for (final JsonElement column : columns) {
                 parseDatatableColumnObjectForCreate(column.getAsJsonObject(), sqlBuilder, constrainBuilder, dataTableNameAlias,
                         codeMappings, isConstraintApproach);
@@ -1550,7 +1550,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 insertColumns += ", " + columnName;
                 selectColumns += "," + pValueWrite + " as " + columnName;
             } else {
-                if (key.equalsIgnoreCase("created_at") || key.equalsIgnoreCase("updated_at")) {
+                if (key.equalsIgnoreCase(DataTableApiConstant.createdAtFieldName)
+                        || key.equalsIgnoreCase(DataTableApiConstant.updatedAtFieldName)) {
                     columnName = sqlGenerator.escape(key);
                     insertColumns += ", " + columnName;
                     selectColumns += "," + sqlGenerator.currentDateTime() + " as " + columnName;

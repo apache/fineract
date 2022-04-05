@@ -21,7 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public class CollectionData {
+public final class CollectionData {
 
     private final BigDecimal availableDisbursementAmount;
     private final int pastDueDays;
