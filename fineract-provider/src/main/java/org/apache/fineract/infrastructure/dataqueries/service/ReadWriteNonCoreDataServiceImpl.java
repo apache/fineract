@@ -640,8 +640,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             }
 
             // Add Created At and Updated At
-            columns.add(addColumn(DataTableApiConstant.createdAtFieldName, DataTableApiConstant.dateTimeFieldType, false, null));
-            columns.add(addColumn(DataTableApiConstant.updatedAtFieldName, DataTableApiConstant.dateTimeFieldType, false, null));
+            columns.add(addColumn(DataTableApiConstant.CREATEDAT_FIELD_NAME, DataTableApiConstant.DATETIME_FIELD_TYPE, false, null));
+            columns.add(addColumn(DataTableApiConstant.UPDATEDAT_FIELD_NAME, DataTableApiConstant.DATETIME_FIELD_TYPE, false, null));
             for (final JsonElement column : columns) {
                 parseDatatableColumnObjectForCreate(column.getAsJsonObject(), sqlBuilder, constrainBuilder, dataTableNameAlias,
                         codeMappings, isConstraintApproach);
@@ -1550,8 +1550,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 insertColumns += ", " + columnName;
                 selectColumns += "," + pValueWrite + " as " + columnName;
             } else {
-                if (key.equalsIgnoreCase(DataTableApiConstant.createdAtFieldName)
-                        || key.equalsIgnoreCase(DataTableApiConstant.updatedAtFieldName)) {
+                if (key.equalsIgnoreCase(DataTableApiConstant.CREATEDAT_FIELD_NAME)
+                        || key.equalsIgnoreCase(DataTableApiConstant.UPDATEDAT_FIELD_NAME)) {
                     columnName = sqlGenerator.escape(key);
                     insertColumns += ", " + columnName;
                     selectColumns += "," + sqlGenerator.currentDateTime() + " as " + columnName;
@@ -1659,7 +1659,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 }
                 sql += sqlGenerator.escape(key) + " = " + pValueWrite;
             } else {
-                if (key.equalsIgnoreCase("updated_at")) {
+                if (key.equalsIgnoreCase(DataTableApiConstant.UPDATEDAT_FIELD_NAME)) {
                     sql += ", " + sqlGenerator.escape(key) + " = " + sqlGenerator.currentDateTime();
                 }
             }

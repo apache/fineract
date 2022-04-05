@@ -34,11 +34,11 @@ public final class DataTableApiConstant {
     public static final String localParamName = "locale";
     public static final String DATATABLE_RESOURCE_NAME = "dataTables";
 
-    public static final String createdAtFieldName = "created_at";
-    public static final String updatedAtFieldName = "updated_at";
+    public static final String CREATEDAT_FIELD_NAME = "created_at";
+    public static final String UPDATEDAT_FIELD_NAME = "updated_at";
 
     // Field Types
-    public static final String dateTimeFieldType = "DateTime";
+    public static final String DATETIME_FIELD_TYPE = "DateTime";
 
     // associationParameters
     public static final String allAssociateParamName = "all";
