@@ -549,7 +549,7 @@ configure(project.fineractJavaProjects) {
     // Configuration for the errorprone plugin
     // https://github.com/tbroyer/gradle-errorprone-plugin
     dependencies {
-        errorprone "com.google.errorprone:error_prone_core:2.11.0"
+        errorprone "com.google.errorprone:error_prone_core:2.12.0"
     }
 
     tasks.withType(JavaCompile) {
