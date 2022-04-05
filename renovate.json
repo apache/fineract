@@ -1,6 +1,8 @@
 {
   "extends": [
-    "config:base"
+    "config:base",
+    "group:allNonMajor",
+    "schedule:weekly"
   ],
   "ignorePaths": [
     "docs/**"
@@ -21,8 +23,8 @@
   },
   {
     "depTypeList": ["dependencies"],
-    "updateTypes": ["patch", "minor", "major"],
-    "groupName": "all"
+    "updateTypes": ["patch", "minor"],
+    "groupName": "non-major"
   }],
   "regexManagers": [
     {
