@@ -59,7 +59,7 @@ plugins {
     id "org.barfuin.gradle.taskinfo" version "1.4.0"
     id 'com.adarshr.test-logger' version '3.2.0'
     id 'com.diffplug.spotless' version '6.4.1' apply false
-    id 'org.nosphere.apache.rat' version '0.7.0' apply false
+    id 'org.nosphere.apache.rat' version '0.7.1' apply false
     id 'com.github.hierynomus.license' version '0.16.1' apply false
     id 'com.github.jk1.dependency-license-report' version '2.1' apply false
     id 'org.openapi.generator' version '5.4.0' apply false
