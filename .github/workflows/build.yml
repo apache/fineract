@@ -7,7 +7,7 @@ jobs:
 
     services:
         mariad:
-            image: mariadb:10.6
+            image: mariadb:10.8
             ports:
                 - 3306:3306
             env:
@@ -26,7 +26,7 @@ jobs:
         TZ: Asia/Kolkata
     steps:
       - name: Set up cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ~/.gradle/caches

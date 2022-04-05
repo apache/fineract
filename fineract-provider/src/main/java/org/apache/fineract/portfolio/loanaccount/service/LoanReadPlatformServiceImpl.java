@@ -108,7 +108,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
-import org.apache.fineract.portfolio.loanaccount.exception.LoanRepaymentScheduleNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
@@ -566,9 +565,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 .getLoanRepaymentScheduleInstallments(loanId);
         List<LoanRepaymentScheduleInstallmentData> loanRepaymentScheduleInstallmentData = new ArrayList<>();
 
-        if (loanRepaymentScheduleInstallments == null || loanRepaymentScheduleInstallments.size() == 0) {
-            throw new LoanRepaymentScheduleNotFoundException(loanId, Integer.valueOf(0));
-        }
         for (LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : loanRepaymentScheduleInstallments) {
             loanRepaymentScheduleInstallmentData.add(LoanRepaymentScheduleInstallmentData.instanceOf(
                     loanRepaymentScheduleInstallment.getId(), loanRepaymentScheduleInstallment.getInstallmentNumber(),
@@ -1163,22 +1159,20 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     BigDecimal principal = BigDecimal.ZERO;
                     for (final DisbursementData data : disbursementData) {
                         if (fromDate.equals(this.disbursement.disbursementDate()) && data.disbursementDate().equals(fromDate)) {
-                            if (periods.size() == 0) {
-                                principal = principal.add(data.amount());
-                                LoanSchedulePeriodData periodData = null;
-                                if (data.getChargeAmount() == null) {
-                                    periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.amount(),
-                                            disbursementChargeAmount, data.isDisbursed());
-                                } else {
-                                    periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.amount(),
-                                            disbursementChargeAmount.add(data.getChargeAmount()).subtract(waivedChargeAmount),
-                                            data.isDisbursed());
-                                }
-                                if (periodData != null) {
-                                    periods.add(periodData);
-                                }
-                                this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(data.amount());
+                            principal = principal.add(data.amount());
+                            LoanSchedulePeriodData periodData = null;
+                            if (data.getChargeAmount() == null) {
+                                periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.amount(),
+                                        disbursementChargeAmount, data.isDisbursed());
+                            } else {
+                                periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.amount(),
+                                        disbursementChargeAmount.add(data.getChargeAmount()).subtract(waivedChargeAmount),
+                                        data.isDisbursed());
                             }
+                            if (periodData != null) {
+                                periods.add(periodData);
+                            }
+                            this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(data.amount());
                         } else if (data.isDueForDisbursement(fromDate, dueDate)) {
                             if (!excludePastUndisbursed || (excludePastUndisbursed && (data.isDisbursed()
                                     || !data.disbursementDate().isBefore(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()))))) {

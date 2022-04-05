@@ -61,7 +61,7 @@ public class FloatingRateWritePlatformServiceImpl implements FloatingRateWritePl
             this.fromApiJsonDeserializer.validateForCreate(command.json());
             final AppUser currentUser = this.context.authenticatedUser();
             final FloatingRate newFloatingRate = FloatingRate.createNew(currentUser, command);
-            this.floatingRateRepository.save(newFloatingRate);
+            this.floatingRateRepository.saveAndFlush(newFloatingRate);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withEntityId(newFloatingRate.getId()) //

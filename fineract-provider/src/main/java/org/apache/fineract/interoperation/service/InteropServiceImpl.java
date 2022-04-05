@@ -288,7 +288,7 @@ public class InteropServiceImpl implements InteropService {
             InteropIdentifier identifier = new InteropIdentifier(savingsAccount, request.getIdType(), request.getIdValue(),
                     request.getSubIdOrType(), createdBy.getUsername(), DateUtils.getDateOfTenant());
 
-            identifierRepository.save(identifier);
+            identifierRepository.saveAndFlush(identifier);
 
             return InteropIdentifierAccountResponseData.build(identifier.getId(), savingsAccount.getExternalId());
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {

@@ -31,10 +31,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -98,8 +98,7 @@ public class Calendar extends AbstractAuditableCustom {
     @Temporal(TemporalType.TIME)
     private Date meetingtime;
 
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "calendar_id")
+    @OneToMany(mappedBy = "calendar", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CalendarHistory> calendarHistory = new HashSet<>();
 
     protected Calendar() {

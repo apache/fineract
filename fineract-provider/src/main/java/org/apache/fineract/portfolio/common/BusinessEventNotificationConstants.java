@@ -83,6 +83,7 @@ public class BusinessEventNotificationConstants {
         }
 
         private static final Set<String> values = new HashSet<>();
+
         static {
             for (final BusinessEvents type : BusinessEvents.values()) {
                 values.add(type.value);

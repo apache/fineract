@@ -584,7 +584,7 @@ public class LoanScheduleAssembler {
             if (!meetingFrequency.equals(repaymentFrequency)) {
                 throw new MeetingFrequencyMismatchException("loanapplication.repayment.frequency",
                         "Loan repayment frequency period must match that of meeting frequency period", repaymentFrequency);
-            } else if (meetingFrequency.equals(repaymentFrequency)) {
+            } else {
                 // repayment frequency is same as meeting frequency repayment
                 // interval should be same or multiple of meeting interval
                 if (repaymentInterval % meetingInterval != 0) {

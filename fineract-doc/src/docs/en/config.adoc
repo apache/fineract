@@ -15,7 +15,7 @@
 :source-language: java
 :diagramsdir: diagrams
 :imagesdir: images
-:years: 2017-2020
+:years: 2017-2022
 :lang: en
 :encoding: utf-8
 :linkattrs:

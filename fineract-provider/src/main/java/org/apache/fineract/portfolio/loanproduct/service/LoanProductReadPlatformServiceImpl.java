@@ -203,6 +203,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lp.amortization_method_enum as amortizationMethod, lp.arrearstolerance_amount as tolerance, "
                     + "lp.accounting_type as accountingType, lp.include_in_borrower_cycle as includeInBorrowerCycle,lp.use_borrower_cycle as useBorrowerCycle, lp.start_date as startDate, lp.close_date as closeDate,  "
                     + "lp.allow_multiple_disbursals as multiDisburseLoan, lp.max_disbursals as maxTrancheCount, lp.max_outstanding_loan_balance as outstandingLoanBalance, "
+                    + "lp.disallow_expected_disbursements as disallowExpectedDisbursements, lp.allow_approved_disbursed_amounts_over_applied as allowApprovedDisbursedAmountsOverApplied, lp.over_applied_calculation_type as overAppliedCalculationType, over_applied_number as overAppliedNumber, "
                     + "lp.days_in_month_enum as daysInMonth, lp.days_in_year_enum as daysInYear, lp.interest_recalculation_enabled as isInterestRecalculationEnabled, "
                     + "lp.can_define_fixed_emi_amount as canDefineInstallmentAmount, lp.instalment_amount_in_multiples_of as installmentAmountInMultiplesOf, "
                     + "lpr.pre_close_interest_calculation_strategy as preCloseInterestCalculationStrategy, "
@@ -360,6 +361,10 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final Boolean multiDisburseLoan = rs.getBoolean("multiDisburseLoan");
             final Integer maxTrancheCount = rs.getInt("maxTrancheCount");
             final BigDecimal outstandingLoanBalance = rs.getBigDecimal("outstandingLoanBalance");
+            final Boolean disallowExpectedDisbursements = rs.getBoolean("disallowExpectedDisbursements");
+            final Boolean allowApprovedDisbursedAmountsOverApplied = rs.getBoolean("allowApprovedDisbursedAmountsOverApplied");
+            final String overAppliedCalculationType = rs.getString("overAppliedCalculationType");
+            final Integer overAppliedNumber = rs.getInt("overAppliedNumber");
 
             final int daysInMonth = JdbcSupport.getInteger(rs, "daysInMonth");
             final EnumOptionData daysInMonthType = CommonEnumerations.daysInMonthType(daysInMonth);
@@ -470,6 +475,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     this.charges, accountingRuleType, includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId,
                     principalVariationsForBorrowerCycle, interestRateVariationsForBorrowerCycle,
                     numberOfRepaymentVariationsForBorrowerCycle, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
+                    disallowExpectedDisbursements, allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber,
                     graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
                     interestRecalculationData, minimumDaysBetweenDisbursalAndFirstRepayment, holdGuaranteeFunds, loanProductGuaranteeData,
                     principalThresholdForLastInstallment, accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineInstallmentAmount,

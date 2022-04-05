@@ -35,7 +35,7 @@ public class NotificationMapperWritePlatformServiceImpl implements NotificationM
 
     @Override
     public Long create(NotificationMapper notificationMapper) {
-        this.notificationMapperRepository.save(notificationMapper);
+        this.notificationMapperRepository.saveAndFlush(notificationMapper);
         return notificationMapper.getId();
     }
 }

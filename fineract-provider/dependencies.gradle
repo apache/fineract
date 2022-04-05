@@ -89,9 +89,8 @@ dependencies {
     implementation ('org.springframework.boot:spring-boot-starter-data-jpa') {
         exclude group: 'org.hibernate'
     }
-    implementation ('org.apache.openjpa:openjpa') {
-        exclude group: 'org.eclipse.persistence'
-        exclude group: 'org.apache.geronimo.specs'
+    implementation('org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.10') {
+        exclude group: 'org.eclipse.persistence', module: 'jakarta.persistence'
     }
     implementation ('org.quartz-scheduler:quartz') {
         exclude group: 'com.zaxxer', module: 'HikariCP-java7'
@@ -129,6 +128,13 @@ dependencies {
     testImplementation( 'org.mockito:mockito-core',
             'org.mockito:mockito-junit-jupiter',
             'org.junit.platform:junit-platform-runner', // required to be able to run tests directly under Eclipse, see FINERACT-943 & FINERACT-1021
+            'org.bouncycastle:bcpkix-jdk15to18',
+            'org.bouncycastle:bcprov-jdk15to18',
+            'io.cucumber:cucumber-core',
+            'io.cucumber:cucumber-java',
+            'io.cucumber:cucumber-java8',
+            'io.cucumber:cucumber-junit-platform-engine',
+            'io.cucumber:cucumber-spring',
             'io.github.classgraph:classgraph'
             )
     testImplementation ('org.springframework.boot:spring-boot-starter-test') {
@@ -136,6 +142,7 @@ dependencies {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
         exclude group: 'jakarta.activation'
         exclude group: 'javax.activation'
+        exclude group: 'org.skyscreamer'
     }
 
 }

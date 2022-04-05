@@ -43,6 +43,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -86,6 +87,7 @@ public class RecurringDepositAccount extends SavingsAccount {
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "account")
     private DepositAccountInterestRateChart chart;
 
+    @OrderBy(value = "installmentNumber, id")
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "account", orphanRemoval = true, fetch = FetchType.LAZY)
     private List<RecurringDepositScheduleInstallment> depositScheduleInstallments = new ArrayList<>();
 

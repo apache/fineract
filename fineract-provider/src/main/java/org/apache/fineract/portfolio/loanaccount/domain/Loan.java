@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -1245,8 +1246,17 @@ public class Loan extends AbstractPersistableCustom {
     }
 
     public void updateLoanSchedule(final Collection<LoanRepaymentScheduleInstallment> installments, AppUser currentUser) {
-        this.repaymentScheduleInstallments.clear();
+        List<LoanRepaymentScheduleInstallment> existingInstallments = new ArrayList<>(this.repaymentScheduleInstallments);
+        repaymentScheduleInstallments.clear();
         for (final LoanRepaymentScheduleInstallment installment : installments) {
+            LoanRepaymentScheduleInstallment existingInstallment = findByInstallmentNumber(existingInstallments,
+                    installment.getInstallmentNumber());
+            if (existingInstallment != null) {
+                Set<LoanInstallmentCharge> existingCharges = existingInstallment.getInstallmentCharges();
+                installment.getInstallmentCharges().addAll(existingCharges);
+                existingCharges.forEach(c -> c.setInstallment(installment));
+                existingInstallment.getInstallmentCharges().clear();
+            }
             addLoanRepaymentScheduleInstallment(installment);
         }
         updateLoanScheduleDependentDerivedFields();
@@ -1255,15 +1265,27 @@ public class Loan extends AbstractPersistableCustom {
 
     }
 
+    private LoanRepaymentScheduleInstallment findByInstallmentNumber(Collection<LoanRepaymentScheduleInstallment> installments,
+            Integer installmentNumber) {
+        for (LoanRepaymentScheduleInstallment installment : installments) {
+            if (Objects.equals(installment.getInstallmentNumber(), installmentNumber)) {
+                return installment;
+            }
+        }
+        return null;
+    }
+
     /**
      * method updates accrual derived fields on installments and reverse the unprocessed transactions
      */
     private void applyAccurals(AppUser currentUser) {
         Collection<LoanTransaction> accruals = retreiveListOfAccrualTransactions();
-        if (isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
-            applyPeriodicAccruals(accruals);
-        } else if (isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()) {
-            updateAccrualsForNonPeriodicAccruals(accruals, currentUser);
+        if (accruals.size() > 0) {
+            if (isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
+                applyPeriodicAccruals(accruals);
+            } else if (isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()) {
+                updateAccrualsForNonPeriodicAccruals(accruals, currentUser);
+            }
         }
     }
 
@@ -4984,6 +5006,7 @@ public class Loan extends AbstractPersistableCustom {
                             .getAmount();
                 }
                 final LoanInstallmentCharge loanInstallmentCharge = new LoanInstallmentCharge(amount, loanCharge, installment);
+                installment.getInstallmentCharges().add(loanInstallmentCharge);
                 loanChargePerInstallments.add(loanInstallmentCharge);
             }
         }

@@ -107,7 +107,7 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
 
             final FineractEntityToEntityMapping newMap = FineractEntityToEntityMapping.newMap(mapId, fromId, toId, startDate, endDate);
 
-            this.fineractEntityToEntityMappingRepository.save(newMap);
+            this.fineractEntityToEntityMappingRepository.saveAndFlush(newMap);
 
             return new CommandProcessingResultBuilder().withEntityId(newMap.getId()).withCommandId(command.commandId()).build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {

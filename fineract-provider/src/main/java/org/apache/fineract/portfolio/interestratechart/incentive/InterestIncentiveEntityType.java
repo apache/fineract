@@ -33,6 +33,7 @@ public enum InterestIncentiveEntityType {
     private final String code;
 
     private static final Map<Integer, InterestIncentiveEntityType> intToEnumMap = new HashMap<>();
+
     static {
         for (final InterestIncentiveEntityType type : InterestIncentiveEntityType.values()) {
             intToEnumMap.put(type.value, type);

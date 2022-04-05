@@ -39,6 +39,7 @@ public enum JournalEntryJsonInputParams {
     }
 
     private static final Set<String> values = new HashSet<>();
+
     static {
         for (final JournalEntryJsonInputParams type : JournalEntryJsonInputParams.values()) {
             values.add(type.value);

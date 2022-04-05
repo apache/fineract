@@ -121,8 +121,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     @Column(name = "is_loan_disbursement", length = 1, nullable = true)
     private boolean isLoanDisbursement;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name = "savings_transaction_id", referencedColumnName = "id", nullable = false)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "savingsAccountTransaction")
     private List<SavingsAccountTransactionTaxDetails> taxDetails = new ArrayList<>();
 
     @Column(name = "release_id_of_hold_amount", length = 20)
@@ -276,7 +275,8 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
             final SavingsAccountTransaction accountTransaction) {
         if (taxDetails != null) {
             for (Map.Entry<TaxComponent, BigDecimal> mapEntry : taxDetails.entrySet()) {
-                accountTransaction.getTaxDetails().add(new SavingsAccountTransactionTaxDetails(mapEntry.getKey(), mapEntry.getValue()));
+                accountTransaction.getTaxDetails()
+                        .add(new SavingsAccountTransactionTaxDetails(accountTransaction, mapEntry.getKey(), mapEntry.getValue()));
             }
         }
     }

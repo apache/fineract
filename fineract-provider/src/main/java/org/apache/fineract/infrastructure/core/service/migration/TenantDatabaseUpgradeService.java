@@ -20,7 +20,6 @@ package org.apache.fineract.infrastructure.core.service.migration;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
-import com.zaxxer.hikari.HikariDataSource;
 import java.util.List;
 import java.util.function.Function;
 import javax.sql.DataSource;
@@ -48,7 +47,7 @@ public class TenantDatabaseUpgradeService implements InitializingBean {
     private static final String TENANT_DB_CONTEXT = "tenant_db";
 
     private final TenantDetailsService tenantDetailsService;
-    private final HikariDataSource tenantDataSource;
+    private final DataSource tenantDataSource;
     private final FineractProperties fineractProperties;
     private final TenantDatabaseStateVerifier databaseStateVerifier;
     private final ExtendedSpringLiquibaseFactory liquibaseFactory;
@@ -56,7 +55,7 @@ public class TenantDatabaseUpgradeService implements InitializingBean {
 
     @Autowired
     public TenantDatabaseUpgradeService(final TenantDetailsService detailsService,
-            @Qualifier("hikariTenantDataSource") final HikariDataSource tenantDataSource, final FineractProperties fineractProperties,
+            @Qualifier("hikariTenantDataSource") final DataSource tenantDataSource, final FineractProperties fineractProperties,
             TenantDatabaseStateVerifier databaseStateVerifier, ExtendedSpringLiquibaseFactory liquibaseFactory,
             TenantDataSourceFactory tenantDataSourceFactory) {
         this.tenantDetailsService = detailsService;

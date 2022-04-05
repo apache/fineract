@@ -25,11 +25,11 @@ Requirements
 
 You can run the required version of the database server in a container, instead of having to install it, like this:
 
-    docker run --name mariadb-10.6 -p 3306:3306 -e MARIADB_ROOT_PASSWORD=mysql -d mariadb:10.6
+    docker run --name mariadb-10.8 -p 3306:3306 -e MARIADB_ROOT_PASSWORD=mysql -d mariadb:10.8
 
 and stop and destroy it like this:
 
-    docker rm -f mariadb-10.6
+    docker rm -f mariadb-10.8
 
 Beware that this database container database keeps its state inside the container and not on the host filesystem.  It is lost when you destroy (rm) this container.  This is typically fine for development.  See [Caveats: Where to Store Data on the database container documentation](https://hub.docker.com/_/mariadb) re. how to make it persistent instead of ephemeral.
 
@@ -49,8 +49,10 @@ Instructions to build the JAR file
 ============
 1. Clone the repository or download and extract the archive file to your local directory.
 2. Run `./gradlew clean bootJar` to build a modern cloud native fully self contained JAR file which will be created at `fineract-provider/build/libs` directory.
-3. As we are not allowed to include a JDBC driver in the built JAR, download a JDBC driver of your choice. For example: `wget https://downloads.mariadb.com/Connectors/java/connector-java-2.7.3/mariadb-java-client-2.7.3.jar`
+3. As we are not allowed to include a JDBC driver in the built JAR, download a JDBC driver of your choice. For example: `wget https://downloads.mariadb.com/Connectors/java/connector-java-2.7.5/mariadb-java-client-2.7.5.jar`
 4. Start the jar and pass the directory where you have downloaded the JDBC driver as loader.path, for example: `java -Dloader.path=. -jar fineract-provider/build/libs/fineract-provider.jar` (does not require external Tomcat)
+
+NOTE: we cannot upgrade to version 3.0.x of the MariaDB driver just yet; have to wait until 3.0.4 is out for a bug fix.
 
 The tenants database connection details are configured [via environment variables (as with Docker container)](#instructions-to-run-using-docker-and-docker-compose), e.g. like this:
 

@@ -42,6 +42,7 @@ public enum InterestRecalculationCompoundingMethod {
     private final String code;
 
     private static final Map<Integer, InterestRecalculationCompoundingMethod> intToEnumMap = new HashMap<>();
+
     static {
         for (final InterestRecalculationCompoundingMethod type : InterestRecalculationCompoundingMethod.values()) {
             intToEnumMap.put(type.value, type);

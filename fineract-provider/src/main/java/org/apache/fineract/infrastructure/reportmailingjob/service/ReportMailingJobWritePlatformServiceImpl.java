@@ -124,7 +124,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
             final ReportMailingJob reportMailingJob = ReportMailingJob.newInstance(jsonCommand, stretchyReport, appUser);
 
             // save entity
-            this.reportMailingJobRepository.save(reportMailingJob);
+            this.reportMailingJobRepository.saveAndFlush(reportMailingJob);
 
             return new CommandProcessingResultBuilder().withCommandId(jsonCommand.commandId()).withEntityId(reportMailingJob.getId())
                     .build();

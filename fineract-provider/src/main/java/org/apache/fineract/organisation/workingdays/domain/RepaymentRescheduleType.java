@@ -52,6 +52,7 @@ public enum RepaymentRescheduleType {
     private static final Map<Integer, RepaymentRescheduleType> intToEnumMap = new HashMap<>();
     private static int minValue;
     private static int maxValue;
+
     static {
         int i = 0;
         for (final RepaymentRescheduleType entityType : RepaymentRescheduleType.values()) {

@@ -68,9 +68,9 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
     private static final class LoanChargeMapper implements RowMapper<LoanChargeData> {
 
         public String schema() {
-            return "lc.id as id, c.id as chargeId, c.name as name, " + "lc.amount as amountDue, " + "lc.amount_paid_derived as amountPaid, "
-                    + "lc.amount_waived_derived as amountWaived, " + "lc.amount_writtenoff_derived as amountWrittenOff, "
-                    + "lc.amount_outstanding_derived as amountOutstanding, "
+            return "lc.id as id, lc.external_id as externalId, c.id as chargeId, c.name as name, " + "lc.amount as amountDue, "
+                    + "lc.amount_paid_derived as amountPaid, " + "lc.amount_waived_derived as amountWaived, "
+                    + "lc.amount_writtenoff_derived as amountWrittenOff, " + "lc.amount_outstanding_derived as amountOutstanding, "
                     + "lc.calculation_percentage as percentageOf, lc.calculation_on_amount as amountPercentageAppliedTo, "
                     + "lc.charge_time_enum as chargeTime, " + "lc.is_penalty as penalty, "
                     + "lc.due_for_collection_as_of_date as dueAsOfDate, " + "lc.charge_calculation_enum as chargeCalculation, "
@@ -130,10 +130,11 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             if (disbursementDate != null) {
                 dueAsOfDate = disbursementDate;
             }
+            final String externalId = rs.getString("externalId");
 
             return new LoanChargeData(id, chargeId, name, currency, amount, amountPaid, amountWaived, amountWrittenOff, amountOutstanding,
                     chargeTimeType, dueAsOfDate, chargeCalculationType, percentageOf, amountPercentageAppliedTo, penalty, paymentMode, paid,
-                    waived, null, minCap, maxCap, amountOrPercentage, null);
+                    waived, null, minCap, maxCap, amountOrPercentage, null, externalId);
         }
     }
 

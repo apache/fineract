@@ -46,6 +46,7 @@ public enum GLAccountType {
     private static final Map<Integer, GLAccountType> intToEnumMap = new HashMap<>();
     private static int minValue;
     private static int maxValue;
+
     static {
         int i = 0;
         for (final GLAccountType type : GLAccountType.values()) {

@@ -44,6 +44,7 @@ public final class CollateralApiConstants {
         }
 
         private static final Set<String> values = new HashSet<>();
+
         static {
             for (final CollateralJSONinputParams type : CollateralJSONinputParams.values()) {
                 values.add(type.value);

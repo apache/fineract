@@ -38,12 +38,10 @@ public class FieldConfiguration extends AbstractPersistableCustom {
 
     }
 
-    private FieldConfiguration(final String entity, final String table, final String field, final boolean is_enabled) {
+    public FieldConfiguration(final String entity, final String table, final String field, final boolean is_enabled) {
         this.entity = entity;
         this.table = table;
         this.field = field;
         this.isEnabled = is_enabled;
-
     }
-
 }
