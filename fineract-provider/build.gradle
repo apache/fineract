@@ -27,22 +27,6 @@ apply plugin: 'io.swagger.core.v3.swagger-gradle-plugin'
 apply plugin: 'com.google.cloud.tools.jib'
 
 
-compileJava.doLast {
-    def mainSS = sourceSets.main
-    def source = mainSS.java.classesDirectory.get()
-    copy {
-        from "src/main/resources/"
-        into source
-    }
-    javaexec {
-        description = 'Performs EclipseLink static weaving of entity classes'
-        def target = source
-        main 'org.eclipse.persistence.tools.weaving.jpa.StaticWeave'
-        args '-persistenceinfo', source, '-classpath', configurations.runtimeClasspath, source, target
-        classpath configurations.runtimeClasspath
-    }
-}
-
 // Configuration for Swagger documentation generation task
 // https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-gradle-plugin
 import org.apache.tools.ant.filters.ReplaceTokens
