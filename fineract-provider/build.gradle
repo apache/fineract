@@ -31,8 +31,8 @@ compileJava.doLast {
     def mainSS = sourceSets.main
     def source = mainSS.java.classesDirectory.get()
     copy {
-        from "src/main/resources/"
-        into source
+        from "src/main/resources/jpa/"
+        into "${source}/META-INF/"
     }
     javaexec {
         description = 'Performs EclipseLink static weaving of entity classes'
@@ -40,6 +40,9 @@ compileJava.doLast {
         main 'org.eclipse.persistence.tools.weaving.jpa.StaticWeave'
         args '-persistenceinfo', source, '-classpath', configurations.runtimeClasspath, source, target
         classpath configurations.runtimeClasspath
+    }
+    delete {
+        delete "${source}/META-INF/"
     }
 }
 
