@@ -86,6 +86,8 @@ public class SavingsProductHelper {
     private String overdraftLimit = null;
     private String minRequiredBalance = null;
     private String enforceMinRequiredBalance = "false";
+    private String lienAllowed = "false";
+    private String maxAllowedLienLimit = null;
     private Boolean withHoldTax = false;
     private String taxGroupId = null;
     private boolean isDormancyTrackingActive = false;
@@ -129,6 +131,8 @@ public class SavingsProductHelper {
         map.put("overdraftLimit", this.overdraftLimit);
         map.put("minRequiredBalance", this.minRequiredBalance);
         map.put("enforceMinRequiredBalance", this.enforceMinRequiredBalance);
+        map.put("lienAllowed", this.lienAllowed);
+        map.put("maxAllowedLienLimit", this.maxAllowedLienLimit);
         map.put("withHoldTax", this.withHoldTax.toString());
 
         if (withHoldTax) {
@@ -216,13 +220,19 @@ public class SavingsProductHelper {
         return this;
     }
 
-    public SavingsProductHelper withMinRequiredBalance(String minBalance) {
-        this.minRequiredBalance = minBalance;
+    public SavingsProductHelper withMinRequiredBalance(final String minRequiredBalance) {
+        this.minRequiredBalance = minRequiredBalance;
         return this;
     }
 
-    public SavingsProductHelper withEnforceMinRequiredBalance(String enforceMinRequiredBalance) {
+    public SavingsProductHelper withEnforceMinRequiredBalance(final String enforceMinRequiredBalance) {
         this.enforceMinRequiredBalance = enforceMinRequiredBalance;
+        return this;
+    }
+
+    public SavingsProductHelper withLienAllowed(final String maxAllowedLienLimit) {
+        this.lienAllowed = "true";
+        this.maxAllowedLienLimit = maxAllowedLienLimit;
         return this;
     }
 

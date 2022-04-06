@@ -23,7 +23,9 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.amountParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargeIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lienAllowedParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.transactionAmountParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.transactionDateParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawBalanceParamName;
 
@@ -1811,6 +1813,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final AppUser submittedBy = this.context.authenticatedUser();
         final boolean backdatedTxnsAllowedTill = this.savingAccountAssembler.getPivotConfigStatus();
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, backdatedTxnsAllowedTill);
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed(transactionDateParamName);
+        final boolean lienAllowed = command.booleanObjectValueOfParameterNamed(lienAllowedParamName);
 
         checkClientOrGroupActive(account);
 
@@ -1823,11 +1827,11 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             runningBalance = runningBalance.minus(amount);
         }
 
+        this.savingsAccountTransactionDataValidator.validateHoldAndAssembleForm(command.json(), account, submittedBy,
+                backdatedTxnsAllowedTill);
+        SavingsAccountTransaction transaction = this.savingsAccountDomainService.handleHold(account, getAppUserIfPresent(), amount,
+                transactionDate, lienAllowed);
         account.holdAmount(amount);
-
-        SavingsAccountTransaction transaction = this.savingsAccountTransactionDataValidator.validateHoldAndAssembleForm(command.json(),
-                account, submittedBy, backdatedTxnsAllowedTill);
-
         transaction.updateRunningBalance(runningBalance);
 
         final String reasonForBlock = command.stringValueOfParameterNamed(SavingsApiConstants.reasonForBlockParamName);

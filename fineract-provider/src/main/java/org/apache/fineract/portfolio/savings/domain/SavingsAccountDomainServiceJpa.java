@@ -36,6 +36,7 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
@@ -217,6 +218,18 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.SAVINGS_DEPOSIT,
                 constructEntityMap(BusinessEntity.SAVINGS_TRANSACTION, deposit));
         return deposit;
+    }
+
+    @Transactional
+    @Override
+    public SavingsAccountTransaction handleHold(final SavingsAccount account, final AppUser createdUser, BigDecimal amount,
+            LocalDate transactionDate, Boolean lienAllowed) {
+        final PaymentDetail paymentDetails = null;
+        Date createdDate = new Date();
+
+        SavingsAccountTransaction transaction = SavingsAccountTransaction.holdAmount(account, account.office(), paymentDetails,
+                transactionDate, Money.of(account.getCurrency(), amount), createdDate, createdUser, lienAllowed);
+        return transaction;
     }
 
     @Override
