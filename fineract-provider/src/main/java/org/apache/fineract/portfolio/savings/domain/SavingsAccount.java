@@ -22,9 +22,11 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.enforceMinRequiredBalanceParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lienAllowedParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.localeParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.maxAllowedLienLimitParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minOverdraftForInterestCalculationParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minRequiredBalanceParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateOverdraftParamName;
@@ -293,6 +295,12 @@ public class SavingsAccount extends AbstractPersistableCustom {
     @Column(name = "min_required_balance", scale = 6, precision = 19, nullable = true)
     private BigDecimal minRequiredBalance;
 
+    @Column(name = "is_lien_allowed", nullable = false)
+    private boolean lienAllowed;
+
+    @Column(name = "max_allowed_lien_limit", scale = 6, precision = 19, nullable = true)
+    private BigDecimal maxAllowedLienLimit;
+
     @Column(name = "on_hold_funds_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal onHoldFunds;
 
@@ -337,7 +345,6 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     @Column(name = "total_savings_amount_on_hold", scale = 6, precision = 19, nullable = true)
     private BigDecimal savingsOnHoldAmount;
-
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "account", orphanRemoval = true, fetch = FetchType.LAZY)
     protected List<InteropIdentifier> identifiers = new ArrayList<>();
 
@@ -354,15 +361,17 @@ public class SavingsAccount extends AbstractPersistableCustom {
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final boolean withdrawalFeeApplicableForTransfer, final Set<SavingsAccountCharge> savingsAccountCharges,
             final boolean allowOverdraft, final BigDecimal overdraftLimit, final boolean enforceMinRequiredBalance,
-            final BigDecimal minRequiredBalance, final BigDecimal nominalAnnualInterestRateOverdraft,
-            final BigDecimal minOverdraftForInterestCalculation, final boolean withHoldTax) {
+            final BigDecimal minRequiredBalance, final BigDecimal maxAllowedLienLimit, final boolean lienAllowed,
+            final BigDecimal nominalAnnualInterestRateOverdraft, final BigDecimal minOverdraftForInterestCalculation,
+            final boolean withHoldTax) {
 
         final SavingsAccountStatusType status = SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL;
         return new SavingsAccount(client, group, product, fieldOfficer, accountNo, externalId, status, accountType, submittedOnDate,
                 submittedBy, interestRate, interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType,
                 interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
                 withdrawalFeeApplicableForTransfer, savingsAccountCharges, allowOverdraft, overdraftLimit, enforceMinRequiredBalance,
-                minRequiredBalance, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax);
+                minRequiredBalance, maxAllowedLienLimit, lienAllowed, nominalAnnualInterestRateOverdraft,
+                minOverdraftForInterestCalculation, withHoldTax);
     }
 
     protected SavingsAccount(final Client client, final Group group, final SavingsProduct product, final Staff fieldOfficer,
@@ -377,8 +386,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
         this(client, group, product, fieldOfficer, accountNo, externalId, status, accountType, submittedOnDate, submittedBy,
                 nominalAnnualInterestRate, interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType,
                 interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
-                withdrawalFeeApplicableForTransfer, savingsAccountCharges, allowOverdraft, overdraftLimit, false, null, null, null,
-                withHoldTax);
+                withdrawalFeeApplicableForTransfer, savingsAccountCharges, allowOverdraft, overdraftLimit, false, null, null, false, null,
+                null, withHoldTax);
     }
 
     protected SavingsAccount(final Client client, final Group group, final SavingsProduct product, final Staff savingsOfficer,
@@ -390,8 +399,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final boolean withdrawalFeeApplicableForTransfer, final Set<SavingsAccountCharge> savingsAccountCharges,
             final boolean allowOverdraft, final BigDecimal overdraftLimit, final boolean enforceMinRequiredBalance,
-            final BigDecimal minRequiredBalance, final BigDecimal nominalAnnualInterestRateOverdraft,
-            final BigDecimal minOverdraftForInterestCalculation, boolean withHoldTax) {
+            final BigDecimal minRequiredBalance, final BigDecimal maxAllowedLienLimit, final boolean lienAllowed,
+            final BigDecimal nominalAnnualInterestRateOverdraft, final BigDecimal minOverdraftForInterestCalculation, boolean withHoldTax) {
         this.client = client;
         this.group = group;
         this.product = product;
@@ -434,6 +443,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
         this.enforceMinRequiredBalance = enforceMinRequiredBalance;
         this.minRequiredBalance = minRequiredBalance;
+        this.lienAllowed = lienAllowed;
+        this.maxAllowedLienLimit = maxAllowedLienLimit;
         this.minBalanceForInterestCalculation = product.minBalanceForInterestCalculation();
         // this.savingsOfficerHistory = null;
         this.withHoldTax = withHoldTax;
@@ -1751,6 +1762,18 @@ public class SavingsAccount extends AbstractPersistableCustom {
             actualChanges.put(localeParamName, localeAsInput);
             this.minRequiredBalance = newValue;
         }
+        if (command.isChangeInBooleanParameterNamed(lienAllowedParamName, this.lienAllowed)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(lienAllowedParamName);
+            actualChanges.put(lienAllowedParamName, newValue);
+            this.lienAllowed = newValue;
+        }
+
+        if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(maxAllowedLienLimitParamName, this.maxAllowedLienLimit)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(maxAllowedLienLimitParamName);
+            actualChanges.put(maxAllowedLienLimitParamName, newValue);
+            actualChanges.put(localeParamName, localeAsInput);
+            this.maxAllowedLienLimit = newValue;
+        }
 
         if (command.isChangeInBooleanParameterNamed(withHoldTaxParamName, this.withHoldTax)) {
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(withHoldTaxParamName);
@@ -1948,6 +1971,10 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     public Boolean getEnforceMinRequiredBalance() {
         return this.enforceMinRequiredBalance;
+    }
+
+    public Boolean getLienAllowed() {
+        return this.lienAllowed;
     }
 
     public void unassignSavingsOfficer() {
@@ -3429,6 +3456,11 @@ public class SavingsAccount extends AbstractPersistableCustom {
                 .subtract(this.getSavingsHoldAmount());
     }
 
+    public BigDecimal getWithdrawableBalanceWithLien() {
+        return getAccountBalance().subtract(minRequiredBalanceDerived(getCurrency()).getAmount()).subtract(this.getOnHoldFunds())
+                .subtract(this.getSavingsHoldAmount());
+    }
+
     public BigDecimal getWithdrawableBalanceWithoutMinimumBalance() {
         return getAccountBalance().subtract(this.getOnHoldFunds()).subtract(this.getSavingsHoldAmount());
     }
@@ -3831,6 +3863,14 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     public boolean isEnforceMinRequiredBalance() {
         return this.enforceMinRequiredBalance;
+    }
+
+    public BigDecimal getMaxAllowedLienLimit() {
+        return this.maxAllowedLienLimit;
+    }
+
+    public boolean isLienAllowed() {
+        return this.lienAllowed;
     }
 
     public BigDecimal getMinBalanceForInterestCalculation() {

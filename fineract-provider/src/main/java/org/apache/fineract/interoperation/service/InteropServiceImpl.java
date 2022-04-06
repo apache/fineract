@@ -401,8 +401,8 @@ public class InteropServiceImpl implements InteropService {
             PaymentDetail paymentDetail = instance(findPaymentType(), savingsAccount.getExternalId(), null, getRoutingCode(), transferCode,
                     null);
             SavingsAccountTransaction holdTransaction = SavingsAccountTransaction.holdAmount(savingsAccount, savingsAccount.office(),
-                    paymentDetail, transactionDate.toLocalDate(), Money.of(savingsAccount.getCurrency(), total), new Date(),
-                    getLoginUser());
+                    paymentDetail, transactionDate.toLocalDate(), Money.of(savingsAccount.getCurrency(), total), new Date(), getLoginUser(),
+                    false);
             MonetaryCurrency accountCurrency = savingsAccount.getCurrency().copy();
             holdTransaction.updateRunningBalance(
                     Money.of(accountCurrency, savingsAccount.getWithdrawableBalance().subtract(holdTransaction.getAmount())));
