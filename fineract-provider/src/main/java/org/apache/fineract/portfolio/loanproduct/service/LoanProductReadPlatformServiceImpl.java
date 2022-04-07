@@ -85,7 +85,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final LoanProductMapper rm = new LoanProductMapper(charges, borrowerCycleVariationDatas, rates);
             final String sql = "select " + rm.loanProductSchema() + " where lp.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId });
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId }); // NOSONAR
 
         } catch (final EmptyResultDataAccessException e) {
             throw new LoanProductNotFoundException(loanProductId, e);
@@ -96,7 +96,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     public Collection<LoanProductBorrowerCycleVariationData> retrieveLoanProductBorrowerCycleVariations(final Long loanProductId) {
         final LoanProductBorrowerCycleMapper rm = new LoanProductBorrowerCycleMapper();
         final String sql = "select " + rm.schema() + " where bc.loan_product_id=?  order by bc.borrower_cycle_number,bc.value_condition";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { loanProductId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { loanProductId }); // NOSONAR
     }
 
     @Override
@@ -116,7 +116,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             sql += " where lp.id in ( " + inClause + " ) ";
         }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
     }
 
     @Override
@@ -134,7 +134,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             // SQLInjectionValidator.validateSQLInput(inClause);
         }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
     }
 
     @Override
@@ -167,7 +167,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             }
         }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
     }
 
     @Override
@@ -570,7 +570,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             sql += " and id in (" + inClause + ") ";
         }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { currencyCode });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { currencyCode }); // NOSONAR
     }
 
     @Override
@@ -590,7 +590,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             sql += " and lp.id in ( " + inClause + " ) ";
         }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
     }
 
     @Override
@@ -619,7 +619,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             sql += " and lp.id in ( " + inClause2 + " ) ";
         }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { productId, productId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { productId, productId }); // NOSONAR
     }
 
     @Override
@@ -642,7 +642,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         sql += "lp.id not in (" + "Select pm.restricted_product_id from m_product_mix pm where pm.product_id=? " + "UNION "
                 + "Select pm.product_id from m_product_mix pm where pm.restricted_product_id=?)";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { productId, productId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { productId, productId }); // NOSONAR
     }
 
     @Override
@@ -652,7 +652,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final LoanProductFloatingRateMapper rm = new LoanProductFloatingRateMapper();
             final String sql = "select " + rm.schema() + " where lp.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId });
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId }); // NOSONAR
 
         } catch (final EmptyResultDataAccessException e) {
             throw new LoanProductNotFoundException(loanProductId, e);

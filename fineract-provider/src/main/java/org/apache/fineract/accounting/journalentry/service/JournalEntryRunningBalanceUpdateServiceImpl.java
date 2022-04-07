@@ -106,12 +106,14 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
         Map<Long, BigDecimal> runningBalanceMap = new HashMap<>(5);
         Map<Long, Map<Long, BigDecimal>> officesRunningBalance = new HashMap<>();
 
-        List<Map<String, Object>> list = jdbcTemplate.queryForList(
-                "select je.organization_running_balance as runningBalance,je.account_id as accountId from acc_gl_journal_entry je "
-                        + "inner join (select max(id) as id from acc_gl_journal_entry where entry_date < ? group by account_id,entry_date) je2 ON je2.id = je.id "
-                        + "inner join (select max(entry_date) as date from acc_gl_journal_entry where entry_date < ? group by account_id) je3 ON je.entry_date = je3.date "
-                        + "group by je.id order by je.entry_date DESC " + sqlGenerator.limit(10000, 0),
-                entityDate, entityDate);
+        final String organizationRunningBalanceQuery = "select je.organization_running_balance as runningBalance,je.account_id as accountId from acc_gl_journal_entry je "
+                + "inner join (select max(id) as id from acc_gl_journal_entry where entry_date < ? group by account_id,entry_date) je2 ON je2.id = je.id "
+                + "inner join (select max(entry_date) as date from acc_gl_journal_entry where entry_date < ? group by account_id) je3 ON je.entry_date = je3.date "
+                + "group by je.id order by je.entry_date DESC " + sqlGenerator.limit(10000, 0);
+
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(organizationRunningBalanceQuery,
+                new Object[] { entityDate, entityDate }); // NOSONAR
+
         for (Map<String, Object> entries : list) {
             Long accountId = Long.parseLong(entries.get("accountId").toString()); // Drizzle
                                                                                   // is
@@ -128,12 +130,14 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
             }
         }
 
-        List<Map<String, Object>> officesRunningBalanceList = jdbcTemplate
-                .queryForList("select je.office_running_balance as runningBalance,je.account_id as accountId,je.office_id as officeId "
-                        + "from acc_gl_journal_entry je "
-                        + "inner join (select max(id) as id from acc_gl_journal_entry where entry_date < ? group by office_id,account_id,entry_date) je2 ON je2.id = je.id "
-                        + "inner join (select max(entry_date) as date from acc_gl_journal_entry where entry_date < ? group by office_id,account_id) je3 ON je.entry_date = je3.date "
-                        + "group by je.id order by je.entry_date DESC " + sqlGenerator.limit(10000, 0), entityDate, entityDate);
+        final String offlineRunningBalanceQuery = "select je.office_running_balance as runningBalance,je.account_id as accountId,je.office_id as officeId "
+                + "from acc_gl_journal_entry je "
+                + "inner join (select max(id) as id from acc_gl_journal_entry where entry_date < ? group by office_id,account_id,entry_date) je2 ON je2.id = je.id "
+                + "inner join (select max(entry_date) as date from acc_gl_journal_entry where entry_date < ? group by office_id,account_id) je3 ON je.entry_date = je3.date "
+                + "group by je.id order by je.entry_date DESC " + sqlGenerator.limit(10000, 0);
+
+        List<Map<String, Object>> officesRunningBalanceList = jdbcTemplate.queryForList(offlineRunningBalanceQuery,
+                new Object[] { entityDate, entityDate }); // NOSONAR
         for (Map<String, Object> entries : officesRunningBalanceList) {
             Long accountId = Long.parseLong(entries.get("accountId").toString());
             Long officeId = Long.parseLong(entries.get("officeId").toString());
@@ -188,12 +192,13 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
     private void updateRunningBalance(Long officeId, Date entityDate) {
         Map<Long, BigDecimal> runningBalanceMap = new HashMap<>(5);
 
-        List<Map<String, Object>> list = jdbcTemplate.queryForList(
-                "select je.office_running_balance as runningBalance,je.account_id as accountId from acc_gl_journal_entry je "
-                        + "inner join (select max(id) as id from acc_gl_journal_entry where office_id=?  and entry_date < ? group by account_id,entry_date) je2 ON je2.id = je.id "
-                        + "inner join (select max(entry_date) as date from acc_gl_journal_entry where office_id=? and entry_date < ? group by account_id) je3 ON je.entry_date = je3.date "
-                        + "group by je.id order by je.entry_date DESC " + sqlGenerator.limit(10000, 0),
-                officeId, entityDate, officeId, entityDate);
+        final String offlineRunningBalanceQuery = "select je.office_running_balance as runningBalance,je.account_id as accountId from acc_gl_journal_entry je "
+                + "inner join (select max(id) as id from acc_gl_journal_entry where office_id=?  and entry_date < ? group by account_id,entry_date) je2 ON je2.id = je.id "
+                + "inner join (select max(entry_date) as date from acc_gl_journal_entry where office_id=? and entry_date < ? group by account_id) je3 ON je.entry_date = je3.date "
+                + "group by je.id order by je.entry_date DESC " + sqlGenerator.limit(10000, 0);
+
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(offlineRunningBalanceQuery,
+                new Object[] { officeId, entityDate, officeId, entityDate }); // NOSONAR
         for (Map<String, Object> entries : list) {
             Long accountId = (Long) entries.get("accountId");
             if (!runningBalanceMap.containsKey(accountId)) {

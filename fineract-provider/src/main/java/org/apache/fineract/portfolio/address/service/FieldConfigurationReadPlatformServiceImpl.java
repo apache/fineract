@@ -71,7 +71,7 @@ public class FieldConfigurationReadPlatformServiceImpl implements FieldConfigura
         final FieldMapper rm = new FieldMapper();
         final String sql = "select " + rm.schema() + " where fld.entity=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { entity });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { entity }); // NOSONAR
     }
 
     @Override
@@ -81,7 +81,7 @@ public class FieldConfigurationReadPlatformServiceImpl implements FieldConfigura
         final FieldMapper rm = new FieldMapper();
         final String sql = "select " + rm.schema() + " where fld.entity=?";
 
-        return this.jdbcTemplate.query(sql, rm, entity);
+        return this.jdbcTemplate.query(sql, rm, entity); // NOSONAR
 
     }
 }

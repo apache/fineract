@@ -47,7 +47,7 @@ public class GroupLevelReadPlatformServiceImpl implements GroupLevelReadPlatform
 
         final GroupLevelDataMapper rm = new GroupLevelDataMapper();
         final String sql = "select " + rm.groupLevelSchema();
-        return this.jdbcTemplate.query(sql, rm);
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
 
     }
 

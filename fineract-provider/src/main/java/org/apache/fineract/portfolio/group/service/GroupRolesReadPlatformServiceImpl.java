@@ -49,7 +49,7 @@ public class GroupRolesReadPlatformServiceImpl implements GroupRolesReadPlatform
         this.context.authenticatedUser();
         final GroupRolesDataMapper mapper = new GroupRolesDataMapper();
         final String sql = "Select " + mapper.schema() + " where role.group_id=?";
-        return this.jdbcTemplate.query(sql, mapper, new Object[] { groupId });
+        return this.jdbcTemplate.query(sql, mapper, new Object[] { groupId }); // NOSONAR
     }
 
     @Override
@@ -58,7 +58,7 @@ public class GroupRolesReadPlatformServiceImpl implements GroupRolesReadPlatform
             this.context.authenticatedUser();
             final GroupRolesDataMapper mapper = new GroupRolesDataMapper();
             final String sql = "Select " + mapper.schema() + " where role.group_id=? and role.id=?";
-            return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { groupId, roleId });
+            return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { groupId, roleId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new GroupRoleNotFoundException(roleId, e);
         }

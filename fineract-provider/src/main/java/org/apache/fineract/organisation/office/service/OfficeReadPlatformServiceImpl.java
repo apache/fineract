@@ -189,7 +189,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
         final OfficeDropdownMapper rm = new OfficeDropdownMapper();
         final String sql = "select " + rm.schema() + "where o.hierarchy like ? order by o.hierarchy";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { hierarchySearchString });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { hierarchySearchString }); // NOSONAR
     }
 
     @Override
@@ -202,7 +202,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
             final OfficeMapper rm = new OfficeMapper();
             final String sql = "select " + rm.officeSchema() + " where o.id = ?";
 
-            final OfficeData selectedOffice = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { officeId });
+            final OfficeData selectedOffice = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { officeId }); // NOSONAR
 
             return selectedOffice;
         } catch (final EmptyResultDataAccessException e) {
@@ -253,7 +253,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
         final String sql = "select " + rm.schema()
                 + " where (fromoff.hierarchy like ? or tooff.hierarchy like ?) order by ot.transaction_date, ot.id";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { hierarchySearchString, hierarchySearchString });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { hierarchySearchString, hierarchySearchString }); // NOSONAR
     }
 
     @Override

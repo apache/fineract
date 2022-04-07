@@ -83,7 +83,7 @@ public class DeviceRegistrationReadPlatformServiceImpl implements DeviceRegistra
         this.context.authenticatedUser();
         DeviceRegistrationDataMapper drm = new DeviceRegistrationDataMapper();
         String sql = "select " + drm.schema();
-        return this.jdbcTemplate.query(sql, drm, new Object[] {});
+        return this.jdbcTemplate.query(sql, drm); // NOSONAR
     }
 
     @Override
@@ -92,7 +92,7 @@ public class DeviceRegistrationReadPlatformServiceImpl implements DeviceRegistra
             this.context.authenticatedUser();
             DeviceRegistrationDataMapper drm = new DeviceRegistrationDataMapper();
             String sql = "select " + drm.schema() + " where cdr.id = ? ";
-            return this.jdbcTemplate.queryForObject(sql, drm, new Object[] { id });
+            return this.jdbcTemplate.queryForObject(sql, drm, new Object[] { id }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new DeviceRegistrationNotFoundException(id, e);
         }
@@ -104,7 +104,7 @@ public class DeviceRegistrationReadPlatformServiceImpl implements DeviceRegistra
             this.context.authenticatedUser();
             DeviceRegistrationDataMapper drm = new DeviceRegistrationDataMapper();
             String sql = "select " + drm.schema() + " where c.id = ? ";
-            return this.jdbcTemplate.queryForObject(sql, drm, new Object[] { clientId });
+            return this.jdbcTemplate.queryForObject(sql, drm, new Object[] { clientId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new DeviceRegistrationNotFoundException(clientId, "client", e);
         }

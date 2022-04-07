@@ -50,10 +50,10 @@ public class MySQLQueryService implements DatabaseQueryService {
 
     @Override
     public SqlRowSet getTableColumns(DataSource dataSource, String tableName) {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-        String sql = "SELECT c.COLUMN_NAME, c.IS_NULLABLE, c.DATA_TYPE, c.CHARACTER_MAXIMUM_LENGTH, c.COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS c WHERE TABLE_SCHEMA = schema() AND TABLE_NAME = '"
-                + tableName + "' ORDER BY ORDINAL_POSITION";
-        final SqlRowSet columnDefinitions = jdbcTemplate.queryForRowSet(sql);
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        final String sql = "SELECT c.COLUMN_NAME, c.IS_NULLABLE, c.DATA_TYPE, c.CHARACTER_MAXIMUM_LENGTH, c.COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS c WHERE TABLE_SCHEMA = schema() AND TABLE_NAME = ? ORDER BY ORDINAL_POSITION";
+
+        final SqlRowSet columnDefinitions = jdbcTemplate.queryForRowSet(sql, new Object[] { tableName }); // NOSONAR
         if (columnDefinitions.next()) {
             return columnDefinitions;
         } else {

@@ -49,21 +49,21 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
     public List<FloatingRateData> retrieveAll() {
         FloatingRateRowMapper rateMapper = new FloatingRateRowMapper(false);
         final String sql = "select " + rateMapper.schema();
-        return this.jdbcTemplate.query(sql, rateMapper);
+        return this.jdbcTemplate.query(sql, rateMapper); // NOSONAR
     }
 
     @Override
     public List<FloatingRateData> retrieveAllActive() {
         FloatingRateRowMapper rateMapper = new FloatingRateRowMapper(false);
         final String sql = "select " + rateMapper.schema() + " where rate.is_active = true ";
-        return this.jdbcTemplate.query(sql, rateMapper);
+        return this.jdbcTemplate.query(sql, rateMapper);// NOSONAR
     }
 
     @Override
     public List<FloatingRateData> retrieveLookupActive() {
         FloatingRateLookupMapper rateMapper = new FloatingRateLookupMapper();
         final String sql = "select " + rateMapper.schema() + " where rate.is_active = true ";
-        return this.jdbcTemplate.query(sql, rateMapper);
+        return this.jdbcTemplate.query(sql, rateMapper); // NOSONAR
     }
 
     @Override
@@ -71,7 +71,7 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
         try {
             FloatingRateRowMapper rateMapper = new FloatingRateRowMapper(true);
             final String sql = "select " + rateMapper.schema() + " where rate.id = ?";
-            return this.jdbcTemplate.queryForObject(sql, rateMapper, new Object[] { floatingRateId });
+            return this.jdbcTemplate.queryForObject(sql, rateMapper, new Object[] { floatingRateId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new FloatingRateNotFoundException(floatingRateId, e);
         }
@@ -81,7 +81,7 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
     public List<InterestRatePeriodData> retrieveInterestRatePeriods(final Long productId) {
         try {
             FloatingInterestRatePeriodRowMapper mapper = new FloatingInterestRatePeriodRowMapper();
-            return this.jdbcTemplate.query(mapper.schema(), mapper, new Object[] { productId });
+            return this.jdbcTemplate.query(mapper.schema(), mapper, new Object[] { productId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new FloatingRateNotFoundException("error.msg.floatingrate.not.found.for.product", e);
         }
@@ -92,7 +92,7 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
         try {
             FloatingRateRowMapper rateMapper = new FloatingRateRowMapper(true);
             final String sql = "select " + rateMapper.schema() + " where rate.is_base_lending_rate = true and rate.is_active = true";
-            return this.jdbcTemplate.queryForObject(sql, rateMapper);
+            return this.jdbcTemplate.queryForObject(sql, rateMapper); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new FloatingRateNotFoundException("error.msg.floatingrate.base.lending.rate.not.found", e);
         }
@@ -128,7 +128,7 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
                 FloatingRatePeriodRowMapper ratePeriodMapper = new FloatingRatePeriodRowMapper();
                 final String sql = "select " + ratePeriodMapper.schema()
                         + " where period.is_active = true and period.floating_rates_id = ? " + " order by period.from_date desc ";
-                ratePeriods = jdbcTemplate.query(sql, ratePeriodMapper, new Object[] { id });
+                ratePeriods = jdbcTemplate.query(sql, ratePeriodMapper, new Object[] { id }); // NOSONAR
             }
             return new FloatingRateData(id, name, isBaseLendingRate, isActive, createdBy, createdOn, modifiedBy, modifiedOn, ratePeriods,
                     null);

@@ -118,7 +118,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
 
         final String sql = "select " + this.smsRowMapper.schema();
 
-        return this.jdbcTemplate.query(sql, this.smsRowMapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, this.smsRowMapper); // NOSONAR
     }
 
     @Override
@@ -126,7 +126,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
         try {
             final String sql = "select " + this.smsRowMapper.schema() + " where smo.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, this.smsRowMapper, new Object[] { resourceId });
+            return this.jdbcTemplate.queryForObject(sql, this.smsRowMapper, new Object[] { resourceId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new SmsNotFoundException(resourceId, e);
         }
@@ -142,7 +142,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
 
         sql += sqlPlusLimit;
 
-        return this.jdbcTemplate.query(sql, this.smsRowMapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, this.smsRowMapper); // NOSONAR
     }
 
     @Override
@@ -152,7 +152,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
                 + SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue() + "," + SmsMessageStatusType.SENT.getValue() + ")"
                 + sqlPlusLimit;
 
-        return this.jdbcTemplate.query(sql, this.smsRowMapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, this.smsRowMapper); // NOSONAR
     }
 
     @Override
@@ -161,7 +161,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
         final String sql = "select external_id from " + this.smsRowMapper.tableName() + " where status_enum = "
                 + SmsMessageStatusType.SENT.getValue() + sqlPlusLimit;
 
-        return this.jdbcTemplate.queryForList(sql, Long.class);
+        return this.jdbcTemplate.queryForList(sql, Long.class); // NOSONAR
     }
 
     @Override
@@ -180,7 +180,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
         final String sql = "select external_id from " + this.smsRowMapper.tableName() + " where status_enum = "
                 + SmsMessageStatusType.PENDING.getValue() + sqlPlusLimit;
 
-        return this.jdbcTemplate.queryForList(sql, Long.class);
+        return this.jdbcTemplate.queryForList(sql, Long.class); // NOSONAR
     }
 
     @Override
@@ -189,7 +189,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
         final String sql = "select " + this.smsRowMapper.schema() + " where smo.status_enum = " + SmsMessageStatusType.DELIVERED.getValue()
                 + sqlPlusLimit;
 
-        return this.jdbcTemplate.query(sql, this.smsRowMapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, this.smsRowMapper); // NOSONAR
     }
 
     @Override
@@ -198,7 +198,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
         final String sql = "select " + this.smsRowMapper.schema() + " where smo.status_enum = " + SmsMessageStatusType.FAILED.getValue()
                 + sqlPlusLimit;
 
-        return this.jdbcTemplate.query(sql, this.smsRowMapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, this.smsRowMapper); // NOSONAR
     }
 
     @Override

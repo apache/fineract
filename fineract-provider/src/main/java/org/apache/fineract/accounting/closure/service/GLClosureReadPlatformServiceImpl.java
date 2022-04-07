@@ -87,7 +87,7 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
         sql = sql + " order by glClosure.closing_date desc";
 
         final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
-        return this.jdbcTemplate.query(sql, rm, finalObjectArray);
+        return this.jdbcTemplate.query(sql, rm, finalObjectArray); // NOSONAR
     }
 
     @Override
@@ -97,7 +97,7 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
             final GLClosureMapper rm = new GLClosureMapper();
             final String sql = "select " + rm.schema() + " and glClosure.id = ?";
 
-            final GLClosureData glAccountData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glClosureId });
+            final GLClosureData glAccountData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glClosureId }); // NOSONAR
 
             return glAccountData;
         } catch (final EmptyResultDataAccessException e) {

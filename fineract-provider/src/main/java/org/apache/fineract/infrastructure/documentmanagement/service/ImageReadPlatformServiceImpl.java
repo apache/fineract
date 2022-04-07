@@ -100,7 +100,7 @@ public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
 
             final String sql = "select " + imageMapper.schema(entityType);
 
-            final ImageData imageData = this.jdbcTemplate.queryForObject(sql, imageMapper, entityId);
+            final ImageData imageData = this.jdbcTemplate.queryForObject(sql, imageMapper, entityId); // NOSONAR
             final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(imageData.storageType());
             return contentRepository.fetchImage(imageData);
         } catch (final EmptyResultDataAccessException e) {

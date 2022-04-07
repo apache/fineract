@@ -191,7 +191,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
 
             final String sql = "select " + rm.schema() + " where sc.id=? and sc.savings_account_id=?";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { id, savingsAccountId });
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { id, savingsAccountId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new SavingsAccountChargeNotFoundException(savingsAccountId, e);
         }
@@ -252,7 +252,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
                 + " and sac.charge_due_date <= NOW() and sa.status_enum = ? ";
 
         return this.jdbcTemplate.query(sql, this.chargeDueMapper,
-                new Object[] { ChargeTimeType.ANNUAL_FEE.getValue(), SavingsAccountStatusType.ACTIVE.getValue() });
+                new Object[] { ChargeTimeType.ANNUAL_FEE.getValue(), SavingsAccountStatusType.ACTIVE.getValue() }); // NOSONAR
     }
 
     @Override
@@ -261,8 +261,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
                 + " where sac.charge_due_date is not null and sac.charge_due_date <= NOW() and sac.waived = false and sac.is_paid_derived=false and sac.is_active=true and sa.status_enum = ? "
                 + " order by sac.charge_due_date ";
 
-        return this.jdbcTemplate.query(sql, this.chargeDueMapper, new Object[] { SavingsAccountStatusType.ACTIVE.getValue() });
-
+        return this.jdbcTemplate.query(sql, this.chargeDueMapper, new Object[] { SavingsAccountStatusType.ACTIVE.getValue() }); // NOSONAR
     }
 
 }

@@ -67,7 +67,7 @@ public class ClientAddressReadPlatformServiceImpl implements ClientAddressReadPl
         final ClientAddrMapper rm = new ClientAddrMapper();
         final String sql = "select " + rm.schema() + " where fld.entity=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { entity });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { entity }); // NOSONAR
     }
 
 }

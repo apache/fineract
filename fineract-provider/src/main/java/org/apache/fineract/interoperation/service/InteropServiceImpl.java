@@ -517,17 +517,17 @@ public class InteropServiceImpl implements InteropService {
     public @NotNull InteropKycResponseData getKyc(@NotNull @NotNull String accountId) {
 
         SavingsAccount savingsAccount = validateAndGetSavingAccount(accountId);
-        Long client_id = savingsAccount.getClient().getId();
+        Long clientId = savingsAccount.getClient().getId();
 
         try {
             final InteropServiceImpl.KycMapper rm = new InteropServiceImpl.KycMapper(sqlGenerator);
             final String sql = "select " + rm.schema() + " where c.id = ?";
 
-            final InteropKycData accountKyc = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { client_id });
+            final InteropKycData accountKyc = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { clientId }); // NOSONAR
 
             return InteropKycResponseData.build(accountKyc);
         } catch (final EmptyResultDataAccessException e) {
-            throw new InteropKycDataNotFoundException(client_id, e);
+            throw new InteropKycDataNotFoundException(clientId, e);
         }
     }
 

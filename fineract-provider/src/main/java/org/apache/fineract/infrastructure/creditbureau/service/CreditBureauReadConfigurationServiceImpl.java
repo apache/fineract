@@ -73,7 +73,7 @@ public class CreditBureauReadConfigurationServiceImpl implements CreditBureauRea
         final CbConfigMapper rm = new CbConfigMapper();
         final String sql = "select " + rm.schema() + " where cbconfig.organisation_creditbureau_id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { id });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { id }); // NOSONAR
 
     }
 
@@ -84,7 +84,7 @@ public class CreditBureauReadConfigurationServiceImpl implements CreditBureauRea
         final CbConfigMapper rm = new CbConfigMapper();
         final String sql = "select " + rm.schema() + " where cbconfig.organisation_creditbureau_id= ?";
 
-        List<CreditBureauConfigurationData> config = this.jdbcTemplate.query(sql, rm, new Object[] { id });
+        List<CreditBureauConfigurationData> config = this.jdbcTemplate.query(sql, rm, new Object[] { id }); // NOSONAR
         Map<String, String> configuration = new HashMap<String, String>();
         for (CreditBureauConfigurationData data : config) {
             configuration.put(data.getConfigurationKey(), data.getValue());

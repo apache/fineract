@@ -161,7 +161,7 @@ public class DatatableCommandFromApiJsonDeserializer {
         // parameter
         // has been specified is necessary in order to avoid JSON requests with
         // no parameters
-        if (!json.matches("(?s)\\A\\{.*?(\\\".*?\\\"\\s*?:\\s*?)+.*?\\}\\z")) {
+        if (!json.matches("(?s)\\A\\{.*?(\\\".*?\\\"\\s*?:\\s*?)+.*?\\}\\z")) { // NOSONAR
             throw new PlatformDataIntegrityException("error.msg.invalid.request.body.no.parameters",
                     "Provided JSON request body does not have any parameters.");
         }

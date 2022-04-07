@@ -79,7 +79,7 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
         try {
             this.context.authenticatedUser();
             final String sql = "select " + this.chartRowMapper.schema() + " where irc.id = ?";
-            return this.jdbcTemplate.queryForObject(sql, this.chartRowMapper, new Object[] { chartId });
+            return this.jdbcTemplate.queryForObject(sql, this.chartRowMapper, new Object[] { chartId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new InterestRateChartNotFoundException(chartId, e);
         }
@@ -129,7 +129,7 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
     public InterestRateChartData retrieveOneWithSlabs(Long chartId) {
         this.context.authenticatedUser();
         final String sql = "select " + this.chartExtractor.schema() + " where irc.id = ? order by ircd.id asc";
-        Collection<InterestRateChartData> chartDatas = this.jdbcTemplate.query(sql, this.chartExtractor, new Object[] { chartId });
+        Collection<InterestRateChartData> chartDatas = this.jdbcTemplate.query(sql, this.chartExtractor, new Object[] { chartId }); // NOSONAR
         if (chartDatas == null || chartDatas.isEmpty()) {
             throw new InterestRateChartNotFoundException(chartId);
         }

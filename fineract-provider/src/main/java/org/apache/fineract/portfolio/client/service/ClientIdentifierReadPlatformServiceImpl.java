@@ -59,7 +59,7 @@ public class ClientIdentifierReadPlatformServiceImpl implements ClientIdentifier
 
         sql += " order by ci.id";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { clientId, hierarchySearchString });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { clientId, hierarchySearchString }); // NOSONAR
     }
 
     @Override
@@ -76,7 +76,7 @@ public class ClientIdentifierReadPlatformServiceImpl implements ClientIdentifier
             sql += " and ci.id = ?";
 
             final ClientIdentifierData clientIdentifierData = this.jdbcTemplate.queryForObject(sql, rm,
-                    new Object[] { clientId, hierarchySearchString, clientIdentifierId });
+                    new Object[] { clientId, hierarchySearchString, clientIdentifierId }); // NOSONAR
 
             return clientIdentifierData;
         } catch (final EmptyResultDataAccessException e) {

@@ -120,7 +120,7 @@ public class HolidayReadPlatformServiceImpl implements HolidayReadPlatformServic
 
         final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
 
-        return this.jdbcTemplate.query(sql, rm, finalObjectArray);
+        return this.jdbcTemplate.query(sql, rm, finalObjectArray); // NOSONAR
     }
 
     @Override
@@ -130,7 +130,7 @@ public class HolidayReadPlatformServiceImpl implements HolidayReadPlatformServic
 
             final String sql = " select " + rm.schema() + " where h.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { holidayId });
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { holidayId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new HolidayNotFoundException(holidayId, e);
         }

@@ -56,7 +56,7 @@ public class RateReadServiceImpl implements RateReadService {
         this.context.authenticatedUser();
         final RateMapper rm = new RateMapper();
         final String sql = "select " + rm.rateSchema();
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
     }
 
     @Override
@@ -65,7 +65,7 @@ public class RateReadServiceImpl implements RateReadService {
             this.context.authenticatedUser();
             final RateMapper rm = new RateMapper();
             final String sql = "select " + rm.rateSchema() + " where r.id = ?";
-            final RateData selectedRate = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { rateId });
+            final RateData selectedRate = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { rateId }); // NOSONAR
             return selectedRate;
 
         } catch (final EmptyResultDataAccessException e) {
@@ -79,7 +79,7 @@ public class RateReadServiceImpl implements RateReadService {
             this.context.authenticatedUser();
             final RateMapper rm = new RateMapper();
             final String sql = "select " + rm.rateSchema() + " where r.name = ?";
-            final RateData selectedRate = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { name });
+            final RateData selectedRate = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { name }); // NOSONAR
             return selectedRate;
 
         } catch (final EmptyResultDataAccessException e) {
@@ -92,21 +92,21 @@ public class RateReadServiceImpl implements RateReadService {
         this.context.authenticatedUser();
         final RateMapper rm = new RateMapper();
         final String sql = "select " + rm.rateSchema() + " where r.active = ? and product_apply=?";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { true, RateAppliesTo.LOAN.getValue() });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { true, RateAppliesTo.LOAN.getValue() }); // NOSONAR
     }
 
     @Override
     public List<RateData> retrieveLoanRates(Long loanId) {
         final RateMapper rm = new RateMapper();
         final String sql = "select " + rm.loanRateSchema() + " where lr.loan_id = ?";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { loanId }); // NOSONAR
     }
 
     @Override
     public List<RateData> retrieveProductLoanRates(Long loanId) {
         final RateMapper rm = new RateMapper();
         final String sql = "select " + rm.productLoanRateSchema() + " where lr.product_loan_id = ?";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { loanId }); // NOSONAR
     }
 
     private static final class RateMapper implements RowMapper<RateData> {

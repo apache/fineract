@@ -195,7 +195,7 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
         final ExternalServiceMapper mapper = new ExternalServiceMapper();
         final String sql = "SELECT esp.name, esp.value FROM c_external_service_properties esp inner join c_external_service es on esp.external_service_id = es.id where es.name = '"
                 + serviceNameToUse + "'";
-        return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, mapper); // NOSONAR
 
     }
 

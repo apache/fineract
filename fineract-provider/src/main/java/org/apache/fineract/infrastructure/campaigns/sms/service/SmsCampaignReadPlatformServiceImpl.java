@@ -81,7 +81,7 @@ public class SmsCampaignReadPlatformServiceImpl implements SmsCampaignReadPlatfo
         final boolean isVisible = true;
         try {
             final String sql = "select " + this.smsCampaignMapper.schema + " where sc.id = ? and sc.is_visible = ?";
-            return this.jdbcTemplate.queryForObject(sql, this.smsCampaignMapper, new Object[] { campaignId, isVisible });
+            return this.jdbcTemplate.queryForObject(sql, this.smsCampaignMapper, new Object[] { campaignId, isVisible }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new SmsCampaignNotFound(campaignId, e);
         }
@@ -112,7 +112,7 @@ public class SmsCampaignReadPlatformServiceImpl implements SmsCampaignReadPlatfo
             sql = sql + " where sr.report_type = ?";
         }
         final Collection<SmsBusinessRulesData> businessRulesOptions = this.jdbcTemplate.query(sql, this.businessRuleMapper,
-                new Object[] { reportType });
+                new Object[] { reportType }); // NOSONAR
         final Collection<SmsProviderData> smsProviderOptions = this.smsCampaignDropdownReadPlatformService.retrieveSmsProviders();
         final Collection<EnumOptionData> campaignTypeOptions = this.smsCampaignDropdownReadPlatformService.retrieveCampaignTypes();
         final Collection<EnumOptionData> campaignTriggerTypeOptions = this.smsCampaignDropdownReadPlatformService

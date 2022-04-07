@@ -189,7 +189,7 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
         final GSIMFieldsMapper rm = new GSIMFieldsMapper();
         final String sql = "select " + rm.schema() + " and gsim.id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { gsimId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { gsimId }); // NOSONAR
     }
 
     @Override
@@ -199,7 +199,7 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
         final GSIMMapper rm = new GSIMMapper();
         final String sql = "select " + rm.schema() + " where gsim.id=?";
 
-        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { gsimId });
+        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { gsimId }); // NOSONAR
     }
 
     @Override
@@ -209,7 +209,7 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
         final GSIMMapper rm = new GSIMMapper();
         final String sql = "select " + rm.schema() + " where gsim.group_id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { Long.parseLong(groupId) });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { Long.parseLong(groupId) }); // NOSONAR
     }
 
     @Override
@@ -219,7 +219,7 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
         final GSIMMapper rm = new GSIMMapper();
         final String sql = "select " + rm.schema() + " where gsim.account_number=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { parentAccountIds });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { parentAccountIds }); // NOSONAR
     }
 
     @Override
@@ -230,14 +230,14 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
 
         final String sql = "select " + rm.schema() + " where gsim.group_id=? and gsim.account_number=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { accountNo });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { groupId, accountNo });// NOSONAR
     }
 
     private List<SavingsSummaryCustom> retrieveAccountDetails(final String savingswhereClause, final Object[] inputs) {
         final SavingsAccountSummaryDataMapper savingsAccountSummaryDataMapper = new SavingsAccountSummaryDataMapper();
         final String savingsSql = "select " + savingsAccountSummaryDataMapper.schema() + savingswhereClause;
         this.columnValidator.validateSqlInjection(savingsAccountSummaryDataMapper.schema(), savingswhereClause);
-        return this.jdbcTemplate.query(savingsSql, savingsAccountSummaryDataMapper, inputs);
+        return this.jdbcTemplate.query(savingsSql, savingsAccountSummaryDataMapper, inputs); // NOSONAR
     }
 
     private static final class SavingsAccountSummaryDataMapper implements RowMapper<SavingsSummaryCustom> {

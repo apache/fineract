@@ -170,14 +170,14 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
         }
         parameters[0] = clientId;
         sql = sql + " order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC";
-        return this.jdbcTemplate.query(sql, this.clientTransactionMapper, parameters);
+        return this.jdbcTemplate.query(sql, this.clientTransactionMapper, parameters); // NOSONAR
     }
 
     @Override
     public ClientTransactionData retrieveTransaction(Long clientId, Long transactionId) {
         try {
             final String sql = "select " + this.clientTransactionMapper.schema() + " where c.id = ? and tr.id= ?";
-            return this.jdbcTemplate.queryForObject(sql, this.clientTransactionMapper, new Object[] { clientId, transactionId });
+            return this.jdbcTemplate.queryForObject(sql, this.clientTransactionMapper, new Object[] { clientId, transactionId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new ClientTransactionNotFoundException(clientId, transactionId, e);
         }

@@ -59,7 +59,7 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
         // scope for the particular entities
         final DocumentMapper mapper = new DocumentMapper(true, true);
         final String sql = "select " + mapper.schema() + " order by d.id";
-        return this.jdbcTemplate.query(sql, mapper, entityType, entityId);
+        return this.jdbcTemplate.query(sql, mapper, new Object[] { entityType, entityId }); // NOSONAR
     }
 
     @Override
@@ -87,7 +87,7 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
     private DocumentData fetchDocumentDetails(final String entityType, final Long entityId, final Long documentId,
             final DocumentMapper mapper) {
         final String sql = "select " + mapper.schema() + " and d.id=? ";
-        return this.jdbcTemplate.queryForObject(sql, mapper, entityType, entityId, documentId);
+        return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { entityType, entityId, documentId });// NOSOANR
     }
 
     private static final class DocumentMapper implements RowMapper<DocumentData> {

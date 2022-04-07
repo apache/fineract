@@ -350,7 +350,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
         try {
             final String sql = "select " + this.standingInstructionMapper.schema() + " where atsi.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, this.standingInstructionMapper, new Object[] { instructionId });
+            return this.jdbcTemplate.queryForObject(sql, this.standingInstructionMapper, new Object[] { instructionId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new AccountTransferNotFoundException(instructionId, e);
         }
@@ -361,7 +361,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
         final StandingInstructionLoanDuesMapper rm = new StandingInstructionLoanDuesMapper();
         final String sql = "select " + rm.schema() + " where ml.id= ? and ls.duedate <= " + sqlGenerator.currentDate()
                 + " and ls.completed_derived <> 1";
-        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId });
+        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId }); // NOSONAR
     }
 
     private static final class StandingInstructionMapper implements RowMapper<StandingInstructionData> {

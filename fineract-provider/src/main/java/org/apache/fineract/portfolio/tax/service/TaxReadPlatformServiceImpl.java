@@ -59,13 +59,13 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
     @Override
     public Collection<TaxComponentData> retrieveAllTaxComponents() {
         String sql = "select " + this.taxComponentMapper.getSchema();
-        return this.jdbcTemplate.query(sql, this.taxComponentMapper);
+        return this.jdbcTemplate.query(sql, this.taxComponentMapper); // NOSONAR
     }
 
     @Override
     public TaxComponentData retrieveTaxComponentData(final Long id) {
         String sql = "select " + this.taxComponentMapper.getSchema() + " where tc.id=?";
-        return this.jdbcTemplate.queryForObject(sql, this.taxComponentMapper, new Object[] { id });
+        return this.jdbcTemplate.queryForObject(sql, this.taxComponentMapper, new Object[] { id }); // NOSONAR
     }
 
     @Override
@@ -77,13 +77,13 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
     @Override
     public Collection<TaxGroupData> retrieveAllTaxGroups() {
         String sql = "select " + this.taxGroupMapper.getSchema();
-        return this.jdbcTemplate.query(sql, this.taxGroupMapper);
+        return this.jdbcTemplate.query(sql, this.taxGroupMapper); // NOSONAR
     }
 
     @Override
     public TaxGroupData retrieveTaxGroupData(final Long id) {
         String sql = "select " + this.taxGroupMapper.getSchema() + " where tg.id=?";
-        return this.jdbcTemplate.queryForObject(sql, this.taxGroupMapper, new Object[] { id });
+        return this.jdbcTemplate.queryForObject(sql, this.taxGroupMapper, new Object[] { id }); // NOSONAR
     }
 
     @Override
@@ -100,13 +100,13 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
 
     private Collection<TaxComponentData> retrieveTaxComponentsForLookUp() {
         String sql = "select " + this.taxComponentLookUpMapper.getSchema();
-        return this.jdbcTemplate.query(sql, this.taxComponentLookUpMapper);
+        return this.jdbcTemplate.query(sql, this.taxComponentLookUpMapper); // NOSONAR
     }
 
     @Override
     public Collection<TaxGroupData> retrieveTaxGroupsForLookUp() {
         String sql = "select " + this.taxGroupLookUpMapper.getSchema();
-        return this.jdbcTemplate.query(sql, this.taxGroupLookUpMapper);
+        return this.jdbcTemplate.query(sql, this.taxGroupLookUpMapper); // NOSONAR
     }
 
     private static final class TaxComponentMapper implements RowMapper<TaxComponentData> {

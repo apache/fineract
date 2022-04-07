@@ -66,7 +66,7 @@ public class CreditReportReadPlatformServiceImpl implements CreditReportReadPlat
         final CreditReportDataMapper rm = new CreditReportDataMapper();
         final String sql = " select " + rm.schema() + " where c.creditBureauId = ? ";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { creditBureauId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { creditBureauId }); // NOSONAR
 
     }
 

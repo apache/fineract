@@ -71,7 +71,7 @@ public class TopicSubscriberReadPlatformServiceImpl implements TopicSubscriberRe
     @Override
     public Collection<TopicSubscriberData> getSubscribers(Long entityId, String entityType, String memberType) {
         final TopicSubscriberMapper tsm = new TopicSubscriberMapper();
-        String sql = "SELECT " + tsm.schema();
-        return this.jdbcTemplate.query(sql, tsm, new Object[] { entityId, entityType, memberType });
+        final String sql = "SELECT " + tsm.schema();
+        return this.jdbcTemplate.query(sql, tsm, new Object[] { entityId, entityType, memberType }); // NOSONAR
     }
 }

@@ -234,7 +234,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         sql += groupAndOrderBySQL;
         log.info("sql: {}", sql);
 
-        return this.jdbcTemplate.query(sql, rm, extraCriteria.getArguments());
+        return this.jdbcTemplate.query(sql, rm, extraCriteria.getArguments()); // NOSONAR
     }
 
     @Override
@@ -247,7 +247,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
         final String sql = "select " + rm.schema(true, hierarchy) + " where aud.id = ? ";
 
-        final AuditData auditResult = this.jdbcTemplate.queryForObject(sql, rm, auditId);
+        final AuditData auditResult = this.jdbcTemplate.queryForObject(sql, rm, auditId); // NOSONAR
 
         return replaceIdsOnAuditData(auditResult);
     }
@@ -421,13 +421,13 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         sql += makercheckerCapabilityOnly(useType, currentUser);
         sql += " order by (CASE WHEN action_name in ('CREATE', 'DELETE', 'UPDATE') THEN action_name ELSE 'ZZZ' END), action_name";
         final ActionNamesMapper mapper = new ActionNamesMapper();
-        final List<String> actionNames = this.jdbcTemplate.query(sql, mapper);
+        final List<String> actionNames = this.jdbcTemplate.query(sql, mapper); // NOSONAR
 
         sql = " select distinct(entity_name) as entityName from m_permission p ";
         sql += makercheckerCapabilityOnly(useType, currentUser);
         sql += " order by (CASE WHEN grouping = 'datatable' THEN 'ZZZ' ELSE entity_name END), entity_name";
         final EntityNamesMapper mapper2 = new EntityNamesMapper();
-        final List<String> entityNames = this.jdbcTemplate.query(sql, mapper2);
+        final List<String> entityNames = this.jdbcTemplate.query(sql, mapper2); // NOSONAR
 
         Collection<ProcessingResultLookup> processingResults = null;
         if (useType.equals("audit")) {

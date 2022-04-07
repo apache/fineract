@@ -108,11 +108,11 @@ public class ShareProductReadPlatformServiceImpl implements ProductReadPlatformS
         try {
             final String sql1 = "select " + marketRowMapper.schema() + " where marketData.product_id = ?";
             final Collection<ShareProductMarketPriceData> shareMarketCollection = this.jdbcTemplate.query(sql1, marketRowMapper,
-                    new Object[] { productId });
+                    new Object[] { productId }); // NOSONAR
             final Collection<ChargeData> charges = this.chargeReadPlatformService.retrieveShareProductCharges(productId);
             ShareProductRowMapper mapper = new ShareProductRowMapper(shareMarketCollection, charges);
             final String sql = "select " + mapper.schema() + " where shareproduct.id = ?";
-            ShareProductData data = (ShareProductData) this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { productId });
+            ShareProductData data = (ShareProductData) this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { productId }); // NOSONAR
 
             if (data.hasAccountingEnabled()) {
                 final Map<String, Object> accountingMappings = this.accountMappingReadPlatformService
@@ -161,7 +161,7 @@ public class ShareProductReadPlatformServiceImpl implements ProductReadPlatformS
     public Collection<ProductData> retrieveAllForLookup() {
         AllShareProductRowMapper mapper = new AllShareProductRowMapper();
         String sql = "select " + mapper.schema();
-        return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, mapper); // NOSONAR
     }
 
     @Override

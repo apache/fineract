@@ -46,7 +46,7 @@ public class FinancialActivityAccountReadPlatformServiceImpl implements Financia
     @Override
     public List<FinancialActivityAccountData> retrieveAll() {
         String sql = "select " + financialActivityAccountMapper.schema();
-        return this.jdbcTemplate.query(sql, financialActivityAccountMapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, financialActivityAccountMapper, new Object[] {}); // NOSONAR
     }
 
     @Override

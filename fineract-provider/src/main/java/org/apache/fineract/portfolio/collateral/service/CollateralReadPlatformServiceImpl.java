@@ -97,7 +97,7 @@ public class CollateralReadPlatformServiceImpl implements CollateralReadPlatform
 
         final String sql = "select " + rm.schema() + " where lc.loan_id=? order by id ASC";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { loanId }); // NOSONAR
     }
 
     @Override
@@ -106,7 +106,7 @@ public class CollateralReadPlatformServiceImpl implements CollateralReadPlatform
             final CollateralMapper rm = new CollateralMapper();
             String sql = "select " + rm.schema();
             sql += " where lc.loan_id=? and lc.id = ?";
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId, collateralId });
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId, collateralId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new CollateralNotFoundException(loanId, collateralId, e);
         }

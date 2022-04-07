@@ -80,7 +80,7 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
             final String sql = "select " + fullResultsetExtractor.schema()
                     + " where ls.loan_id = ? and ls.version = ? order by ls.loan_id, ls.installment";
 
-            return this.jdbcTemplate.query(sql, fullResultsetExtractor, new Object[] { loanId, versionNumber });
+            return this.jdbcTemplate.query(sql, fullResultsetExtractor, new Object[] { loanId, versionNumber }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new LoanNotFoundException(loanId, e);
         }

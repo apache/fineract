@@ -157,7 +157,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
 
         ShareAccountMapper mapper = new ShareAccountMapper(charges, purchasedShares);
         String query = "select " + mapper.schema() + "where sa.id=?";
-        ShareAccountData data = (ShareAccountData) this.jdbcTemplate.queryForObject(query, mapper, new Object[] { id });
+        ShareAccountData data = (ShareAccountData) this.jdbcTemplate.queryForObject(query, mapper, new Object[] { id }); // NOSONAR
         String serviceName = "share" + ProductsApiConstants.READPLATFORM_NAME;
         ProductReadPlatformService service = (ProductReadPlatformService) this.applicationContext.getBean(serviceName);
         final ShareProductData productData = (ShareProductData) service.retrieveOne(data.getProductId(), false);
@@ -184,7 +184,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
     private Collection<ShareAccountDividendData> retrieveAssociatedDividends(final Long shareAccountId) {
         ShareAccountDividendRowMapper mapper = new ShareAccountDividendRowMapper();
         String query = "select " + mapper.schema() + "where sadd.account_id=?";
-        return this.jdbcTemplate.query(query, mapper, new Object[] { shareAccountId });
+        return this.jdbcTemplate.query(query, mapper, new Object[] { shareAccountId }); // NOSONAR
     }
 
     @Override

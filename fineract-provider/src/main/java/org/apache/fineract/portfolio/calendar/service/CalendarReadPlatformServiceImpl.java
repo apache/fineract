@@ -126,7 +126,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
 
             final String sql = rm.schema() + " and c.id = ? and ci.entity_id = ? and ci.entity_type_enum = ? ";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { calendarId, entityId, entityTypeId });
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { calendarId, entityId, entityTypeId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new CalendarNotFoundException(calendarId, e);
         }
@@ -160,7 +160,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         final String sql = rm.schema()
                 + " and ci.entity_id = ? and ci.entity_type_enum = ? and calendar_type_enum = ? order by c.start_date ";
         final List<CalendarData> result = this.jdbcTemplate.query(sql, rm,
-                new Object[] { entityId, entityTypeId, CalendarType.COLLECTION.getValue() });
+                new Object[] { entityId, entityTypeId, CalendarType.COLLECTION.getValue() }); // NOSONAR
 
         if (!result.isEmpty() && result.size() > 0) {
             return result.get(0);
@@ -385,7 +385,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         final String sql = rm.schema() + " and ci.entity_id = ? and ci.entity_type_enum = ? order by c.start_date ";
         CalendarData calendarData = null;
         final Collection<CalendarData> calendars = this.jdbcTemplate.query(sql, rm,
-                new Object[] { loanId, CalendarEntityType.LOANS.getValue() });
+                new Object[] { loanId, CalendarEntityType.LOANS.getValue() }); // NOSONAR
 
         if (!CollectionUtils.isEmpty(calendars)) {
             for (final CalendarData calendar : calendars) {
@@ -432,7 +432,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             final String sql = rm.schema() + " where c.calendar_id = ? and date(?) between c.start_date and c.end_date limit 1";
 
             return this.jdbcTemplate.queryForObject(sql, rm,
-                    new Object[] { calendarId, Date.from(compareDate.atStartOfDay(ZoneId.systemDefault()).toInstant()) });
+                    new Object[] { calendarId, Date.from(compareDate.atStartOfDay(ZoneId.systemDefault()).toInstant()) }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             return null;
         }
@@ -444,7 +444,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
 
             final String sql = rm.schema() + " where c.calendar_id = ? ";
 
-            final Collection<CalendarData> calendars = this.jdbcTemplate.query(sql, rm, new Object[] { calendarId });
+            final Collection<CalendarData> calendars = this.jdbcTemplate.query(sql, rm, new Object[] { calendarId }); // NOSONAR
             return calendars;
         } catch (final EmptyResultDataAccessException e) {
             return null;

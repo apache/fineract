@@ -317,7 +317,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         final String sql = "select " + this.transactionsMapper.schema()
                 + " where sa.id = ? and sa.deposit_type_enum = ? order by tr.transaction_date DESC, tr.id DESC";
 
-        return this.jdbcTemplate.query(sql, this.transactionsMapper, new Object[] { accountId, depositAccountType.getValue() });
+        return this.jdbcTemplate.query(sql, this.transactionsMapper, new Object[] { accountId, depositAccountType.getValue() }); // NOSONAR
     }
 
     @Override
@@ -354,7 +354,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final DepositAccountTemplateMapper mapper = getDepositAccountTemplaMapper(depositAccountType, client, group);
 
             final String sql = "select " + mapper.schema() + " where sa.id = ? and sa.deposit_type_enum = ? ";
-            template = this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { productId, depositAccountType.getValue() });
+            template = this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { productId, depositAccountType.getValue() }); // NOSONAR
 
             final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions = this.savingsDropdownReadPlatformService
                     .retrieveCompoundingInterestPeriodTypeOptions();
@@ -495,7 +495,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final String sql = "select " + this.rdTransactionTemplateMapper.schema()
                     + " where sa.id = ? and sa.deposit_type_enum = ? order by mss.installment limit 1";
             return this.jdbcTemplate.queryForObject(sql, this.rdTransactionTemplateMapper,
-                    new Object[] { accountId, accountId, DepositAccountType.RECURRING_DEPOSIT.getValue() });
+                    new Object[] { accountId, accountId, DepositAccountType.RECURRING_DEPOSIT.getValue() }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new DepositAccountNotFoundException(DepositAccountType.RECURRING_DEPOSIT, accountId, e);
         }

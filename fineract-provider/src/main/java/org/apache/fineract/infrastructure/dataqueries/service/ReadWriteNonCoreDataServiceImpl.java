@@ -491,7 +491,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private void assertDataTableExists(final String datatableName) {
         final String sql = "select (CASE WHEN exists (select 1 from information_schema.tables where table_schema = "
                 + sqlGenerator.currentSchema() + " and table_name = ?) THEN 'true' ELSE 'false' END)";
-        final String dataTableExistsString = this.jdbcTemplate.queryForObject(sql, String.class, new Object[] { datatableName });
+        final String dataTableExistsString = this.jdbcTemplate.queryForObject(sql, String.class, new Object[] { datatableName }); // NOSONAR
         final boolean dataTableExists = Boolean.valueOf(dataTableExistsString);
         if (!dataTableExists) {
             throw new PlatformDataIntegrityException("error.msg.invalid.datatable", "Invalid Data Table: " + datatableName, "name",
@@ -938,9 +938,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final boolean isConstraintApproach = this.configurationDomainService.isConstraintApproachEnabledForDatatables();
 
             if (!StringUtils.isBlank(entitySubType)) {
-                String updateLegalFormSQL = "update x_registered_table SET entity_subtype='" + entitySubType
+                final String updateLegalFormSQL = "update x_registered_table SET entity_subtype='" + entitySubType
                         + "' WHERE registered_table_name = '" + datatableName + "'";
-                this.jdbcTemplate.execute(updateLegalFormSQL);
+                this.jdbcTemplate.execute(updateLegalFormSQL); // NOSONAR
             }
 
             if (!StringUtils.isBlank(apptableName)) {
@@ -1154,7 +1154,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     private int getRowCount(final String datatableName) {
         final String sql = "select count(*) from " + sqlGenerator.escape(datatableName);
-        return this.jdbcTemplate.queryForObject(sql, Integer.class);
+        return this.jdbcTemplate.queryForObject(sql, Integer.class); // NOSONAR
     }
 
     @Transactional
@@ -1476,7 +1476,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         SQLInjectionValidator.validateSQLInput(datatable);
         final String sql = "SELECT application_table_name FROM x_registered_table where registered_table_name = ?";
 
-        String applicationTableName = "";
+        String applicationTableName;
 
         final SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, new Object[] { datatable }); // NOSONAR
         if (rowSet.next()) {
@@ -1879,8 +1879,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     public Long countDatatableEntries(final String datatableName, final Long appTableId, String foreignKeyColumn) {
 
         final String sqlString = "SELECT COUNT(" + sqlGenerator.escape(foreignKeyColumn) + ") FROM " + sqlGenerator.escape(datatableName)
-                + " WHERE " + sqlGenerator.escape(foreignKeyColumn) + "=" + appTableId;
-        final Long count = this.jdbcTemplate.queryForObject(sqlString, Long.class);
+                + " WHERE " + sqlGenerator.escape(foreignKeyColumn) + "=?";
+        final Long count = this.jdbcTemplate.queryForObject(sqlString, Long.class, new Object[] { appTableId }); // NOSONAR
         return count;
     }
 

@@ -102,7 +102,7 @@ public class ScorecardReadPlatformServiceImpl implements ScorecardReadPlatformSe
     List<ScorecardValue> getScorecardValueBySurveyAndClient(final Long surveyId, final Long clientId) {
         ScorecardValueMapper scvm = new ScorecardValueMapper();
         String sql = "select " + scvm.schema();
-        return this.jdbcTemplate.query(sql, scvm, new Object[] { surveyId, clientId });
+        return this.jdbcTemplate.query(sql, scvm, new Object[] { surveyId, clientId }); // NOSONAR
     }
 
     Collection<ScorecardData> updateScorecardValues(Collection<ScorecardData> scorecard) {
@@ -117,7 +117,7 @@ public class ScorecardReadPlatformServiceImpl implements ScorecardReadPlatformSe
         this.context.authenticatedUser();
         ScorecardMapper scm = new ScorecardMapper();
         String sql = "select " + scm.schema() + " where sc.survey_id = ? " + " group by sc.survey_id, sc.client_id, sc.id ";
-        Collection<ScorecardData> scorecardDatas = this.jdbcTemplate.query(sql, scm, new Object[] { surveyId });
+        Collection<ScorecardData> scorecardDatas = this.jdbcTemplate.query(sql, scm, new Object[] { surveyId }); // NOSONAR
         updateScorecardValues(scorecardDatas);
         return scorecardDatas;
     }
@@ -127,7 +127,7 @@ public class ScorecardReadPlatformServiceImpl implements ScorecardReadPlatformSe
         this.context.authenticatedUser();
         ScorecardMapper scm = new ScorecardMapper();
         String sql = "select " + scm.schema() + " where sc.client_id = ? " + " group by sc.survey_id, sc.client_id, sc.id ";
-        Collection<ScorecardData> scorecardDatas = this.jdbcTemplate.query(sql, scm, new Object[] { clientId });
+        Collection<ScorecardData> scorecardDatas = this.jdbcTemplate.query(sql, scm, new Object[] { clientId }); // NOSONAR
         updateScorecardValues(scorecardDatas);
         return scorecardDatas;
     }
@@ -138,7 +138,7 @@ public class ScorecardReadPlatformServiceImpl implements ScorecardReadPlatformSe
         ScorecardMapper scm = new ScorecardMapper();
         String sql = "select " + scm.schema() + " where sc.survey_id = ? and sc.client_id = ? "
                 + " group by sc.survey_id, sc.client_id, sc.id ";
-        Collection<ScorecardData> scorecardDatas = this.jdbcTemplate.query(sql, scm, new Object[] { surveyId, clientId });
+        Collection<ScorecardData> scorecardDatas = this.jdbcTemplate.query(sql, scm, new Object[] { surveyId, clientId }); // NOSONAR
         updateScorecardValues(scorecardDatas);
         return scorecardDatas;
     }

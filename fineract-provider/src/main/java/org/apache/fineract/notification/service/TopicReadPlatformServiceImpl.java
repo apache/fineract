@@ -73,14 +73,14 @@ public class TopicReadPlatformServiceImpl implements TopicReadPlatformService {
     public Collection<TopicData> getAllTopics() {
         final TopicMapper tm = new TopicMapper();
         String sql = "select " + tm.schema();
-        return this.jdbcTemplate.query(sql, tm, new Object[] {});
+        return this.jdbcTemplate.query(sql, tm); // NOSONAR
     }
 
     @Override
     public Collection<TopicData> getAllEnabledTopics() {
         final TopicMapper tm = new TopicMapper();
         final String sql = "select " + tm.schema() + " where t.is_active = ?";
-        return this.jdbcTemplate.query(sql, tm, new Object[] { true });
+        return this.jdbcTemplate.query(sql, tm, new Object[] { true }); // NOSONAR
     }
 
     @Override
@@ -88,7 +88,7 @@ public class TopicReadPlatformServiceImpl implements TopicReadPlatformService {
         try {
             final TopicMapper tm = new TopicMapper();
             final String sql = "select " + tm.schema() + " where t.id = ?";
-            return this.jdbcTemplate.queryForObject(sql, tm, new Object[] { topicId });
+            return this.jdbcTemplate.queryForObject(sql, tm, new Object[] { topicId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new TopicNotFoundException(topicId, e);
         }

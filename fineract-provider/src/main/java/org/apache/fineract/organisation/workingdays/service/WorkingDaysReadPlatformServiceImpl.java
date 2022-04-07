@@ -81,7 +81,7 @@ public class WorkingDaysReadPlatformServiceImpl implements WorkingDaysReadPlatfo
         try {
             final WorkingDaysMapper rm = new WorkingDaysMapper();
             final String sql = " select " + rm.schema();
-            WorkingDaysData data = this.jdbcTemplate.queryForObject(sql, rm, new Object[] {});
+            WorkingDaysData data = this.jdbcTemplate.queryForObject(sql, rm); // NOSONAR
             Collection<EnumOptionData> repaymentRescheduleOptions = repaymentRescheduleTypeOptions();
             return new WorkingDaysData(data, repaymentRescheduleOptions);
         } catch (final EmptyResultDataAccessException e) {

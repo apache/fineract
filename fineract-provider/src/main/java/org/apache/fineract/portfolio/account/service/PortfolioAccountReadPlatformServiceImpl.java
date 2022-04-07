@@ -119,25 +119,29 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
             case LOAN:
                 sql = "select " + this.loanAccountMapper.schema() + " where ";
                 if (portfolioAccountDTO.getClientId() != null) {
-                    sql += " la.client_id = ? and la.loan_status_id in (" + defaultAccountStatus.toString() + ") ";
+                    sql += " la.client_id = ? and la.loan_status_id in (?) ";
                     sqlParams.add(portfolioAccountDTO.getClientId());
+                    sqlParams.add(defaultAccountStatus);
                 } else {
-                    sql += " la.loan_status_id in (" + defaultAccountStatus.toString() + ") ";
+                    sql += " la.loan_status_id in (?) ";
+                    sqlParams.add(defaultAccountStatus);
                 }
                 if (portfolioAccountDTO.getCurrencyCode() != null) {
                     sql += " and la.currency_code = ?";
                     sqlParams.add(portfolioAccountDTO.getCurrencyCode());
                 }
 
-                accounts = this.jdbcTemplate.query(sql, this.loanAccountMapper, sqlParams.toArray());
+                accounts = this.jdbcTemplate.query(sql, this.loanAccountMapper, sqlParams.toArray()); // NOSONAR
             break;
             case SAVINGS:
                 sql = "select " + this.savingsAccountMapper.schema() + " where ";
                 if (portfolioAccountDTO.getClientId() != null) {
-                    sql += " sa.client_id = ? and sa.status_enum in (" + defaultAccountStatus.toString() + ") ";
+                    sql += " sa.client_id = ? and sa.status_enum in (?) ";
                     sqlParams.add(portfolioAccountDTO.getClientId());
+                    sqlParams.add(defaultAccountStatus);
                 } else {
-                    sql += " sa.status_enum in (" + defaultAccountStatus.toString() + ") ";
+                    sql += " sa.status_enum in (?) ";
+                    sqlParams.add(defaultAccountStatus);
                 }
                 if (portfolioAccountDTO.getCurrencyCode() != null) {
                     sql += " and sa.currency_code = ?";
@@ -158,7 +162,7 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
                     sqlParams.add(portfolioAccountDTO.getGroupId());
                 }
 
-                accounts = this.jdbcTemplate.query(sql, this.savingsAccountMapper, sqlParams.toArray());
+                accounts = this.jdbcTemplate.query(sql, this.savingsAccountMapper, sqlParams.toArray()); // NOSONAR
             break;
         }
 

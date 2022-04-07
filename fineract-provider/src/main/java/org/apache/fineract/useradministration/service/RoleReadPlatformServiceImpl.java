@@ -47,14 +47,14 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
     public Collection<RoleData> retrieveAll() {
         final String sql = "select " + this.roleRowMapper.schema() + " order by r.id";
 
-        return this.jdbcTemplate.query(sql, this.roleRowMapper);
+        return this.jdbcTemplate.query(sql, this.roleRowMapper); // NOSONAR
     }
 
     @Override
     public Collection<RoleData> retrieveAllActiveRoles() {
         final String sql = "select " + this.roleRowMapper.schema() + " where r.is_disabled = false order by r.id";
 
-        return this.jdbcTemplate.query(sql, this.roleRowMapper);
+        return this.jdbcTemplate.query(sql, this.roleRowMapper); // NOSONAR
     }
 
     @Override
@@ -62,7 +62,7 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
         final String role = SelfServiceApiConstants.SELF_SERVICE_USER_ROLE;
         final String sql = "select " + this.roleRowMapper.schema() + " where r.name = ? order by r.id";
 
-        return this.jdbcTemplate.query(sql, this.roleRowMapper, role);
+        return this.jdbcTemplate.query(sql, this.roleRowMapper, role); // NOSONAR
     }
 
     @Override
@@ -70,7 +70,7 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
         try {
             final String sql = "select " + this.roleRowMapper.schema() + " where r.id=?";
 
-            return this.jdbcTemplate.queryForObject(sql, this.roleRowMapper, id);
+            return this.jdbcTemplate.queryForObject(sql, this.roleRowMapper, id); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new RoleNotFoundException(id, e);
         }
@@ -99,6 +99,6 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
         final String sql = "select " + this.roleRowMapper.schema() + " inner join m_appuser_role"
                 + " ar on ar.role_id = r.id where ar.appuser_id= ?";
 
-        return this.jdbcTemplate.query(sql, this.roleRowMapper, appUserId);
+        return this.jdbcTemplate.query(sql, this.roleRowMapper, appUserId); // NOSONAR
     }
 }

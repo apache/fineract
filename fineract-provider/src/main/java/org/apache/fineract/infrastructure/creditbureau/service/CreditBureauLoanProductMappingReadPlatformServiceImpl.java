@@ -94,7 +94,7 @@ public class CreditBureauLoanProductMappingReadPlatformServiceImpl implements Cr
         final CreditBureauLoanProductMapper rm = new CreditBureauLoanProductMapper();
         final String sql = "select " + rm.schema() + " order by cblp.id";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
     }
 
     @Override
@@ -104,7 +104,7 @@ public class CreditBureauLoanProductMappingReadPlatformServiceImpl implements Cr
         final CreditBureauLoanProductMapper rm = new CreditBureauLoanProductMapper();
         final String sql = "select " + rm.schema() + " and cblp.loan_product_id=?";
 
-        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId });
+        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId }); // NOSONAR
     }
 
     @Override
@@ -114,7 +114,7 @@ public class CreditBureauLoanProductMappingReadPlatformServiceImpl implements Cr
         final LoanProductMapper rm = new LoanProductMapper();
         final String sql = "select " + rm.schema() + " order by lp.id";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
     }
 
 }

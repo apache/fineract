@@ -399,7 +399,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
                 sb.append("')");
                 iterations++;
                 if (iterations > 200) {
-                    jdbcTemplate.update(insertSql + sb.toString());
+                    jdbcTemplate.update(insertSql + sb); // NOSONAR
                     sb = new StringBuilder();
                 }
 
@@ -407,7 +407,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         }
 
         if (sb.length() > 0) {
-            jdbcTemplate.update(insertSql + sb.toString());
+            jdbcTemplate.update(insertSql + sb); // NOSONAR
         }
 
     }

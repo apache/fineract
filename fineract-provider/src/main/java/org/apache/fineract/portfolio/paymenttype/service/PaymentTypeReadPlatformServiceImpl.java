@@ -48,7 +48,7 @@ public class PaymentTypeReadPlatformServiceImpl implements PaymentTypeReadPlatfo
         final PaymentTypeMapper ptm = new PaymentTypeMapper();
         final String sql = "select " + ptm.schema() + "order by position";
 
-        return this.jdbcTemplate.query(sql, ptm, new Object[] {});
+        return this.jdbcTemplate.query(sql, ptm); // NOSONAR
     }
 
     @Override
@@ -59,7 +59,7 @@ public class PaymentTypeReadPlatformServiceImpl implements PaymentTypeReadPlatfo
         final PaymentTypeMapper ptm = new PaymentTypeMapper();
         final String sql = "select " + ptm.schema() + "where pt.id = ?";
 
-        return this.jdbcTemplate.queryForObject(sql, ptm, new Object[] { paymentTypeId });
+        return this.jdbcTemplate.queryForObject(sql, ptm, new Object[] { paymentTypeId }); // NOSONAR
     }
 
     private static final class PaymentTypeMapper implements RowMapper<PaymentTypeData> {
