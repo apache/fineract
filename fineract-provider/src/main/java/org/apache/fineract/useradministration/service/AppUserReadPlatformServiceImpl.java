@@ -85,7 +85,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
         final AppUserMapper mapper = new AppUserMapper(this.roleReadPlatformService, this.staffReadPlatformService);
         final String sql = "select " + mapper.schema();
 
-        return this.jdbcTemplate.query(sql, mapper, new Object[] { hierarchySearchString });
+        return this.jdbcTemplate.query(sql, mapper, new Object[] { hierarchySearchString }); // NOSONAR
     }
 
     @Override
@@ -97,7 +97,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
         final AppUserLookupMapper mapper = new AppUserLookupMapper();
         final String sql = "select " + mapper.schema();
 
-        return this.jdbcTemplate.query(sql, mapper, new Object[] { hierarchySearchString });
+        return this.jdbcTemplate.query(sql, mapper, new Object[] { hierarchySearchString }); // NOSONAR
     }
 
     @Override

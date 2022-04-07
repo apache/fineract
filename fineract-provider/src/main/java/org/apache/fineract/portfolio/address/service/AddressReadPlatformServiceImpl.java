@@ -180,7 +180,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
         final AddFieldsMapper rm = new AddFieldsMapper();
         final String sql = "select " + rm.schema() + " where client.id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { clientid });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { clientid }); // NOSONAR
     }
 
     @Override
@@ -188,7 +188,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
         this.context.authenticatedUser();
         final AddMapper rm = new AddMapper();
         final String sql = "select " + rm.schema() + " and ca.client_id=?";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { clientid });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { clientid }); // NOSONAR
     }
 
     @Override
@@ -198,31 +198,29 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
         final AddMapper rm = new AddMapper();
         final String sql = "select " + rm.schema() + " and ca.client_id=? and ca.address_type_id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { clientid, typeid });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { clientid, typeid }); // NOSONAR
     }
 
     @Override
     public Collection<AddressData> retrieveAddressbyTypeAndStatus(final long clientid, final long typeid, final String status) {
         this.context.authenticatedUser();
-        Boolean temp = false;
-        temp = Boolean.parseBoolean(status);
+        boolean temp = Boolean.parseBoolean(status);
 
         final AddMapper rm = new AddMapper();
         final String sql = "select " + rm.schema() + " and ca.client_id=? and ca.address_type_id=? and ca.is_active=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { clientid, typeid, temp });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { clientid, typeid, temp }); // NOSONAR
     }
 
     @Override
     public Collection<AddressData> retrieveAddressbyStatus(final long clientid, final String status) {
         this.context.authenticatedUser();
-        Boolean temp = false;
-        temp = Boolean.parseBoolean(status);
+        boolean temp = Boolean.parseBoolean(status);
 
         final AddMapper rm = new AddMapper();
         final String sql = "select " + rm.schema() + " and ca.client_id=? and ca.is_active=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { clientid, temp });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { clientid, temp }); // NOSONAR
     }
 
     @Override

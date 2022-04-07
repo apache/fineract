@@ -100,7 +100,7 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
         final String sql = "select " + mapper.reportMailingJobSchema() + " where rmj.is_deleted = false and is_active = true"
                 + " order by rmj.name";
 
-        return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, mapper); // NOSONAR
     }
 
     @Override
@@ -109,7 +109,7 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
             final ReportMailingJobMapper mapper = new ReportMailingJobMapper();
             final String sql = "select " + mapper.reportMailingJobSchema() + " where rmj.id = ? and rmj.is_deleted = false";
 
-            return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { reportMailingJobId });
+            return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { reportMailingJobId }); // NOSONAR
         }
 
         catch (final EmptyResultDataAccessException ex) {

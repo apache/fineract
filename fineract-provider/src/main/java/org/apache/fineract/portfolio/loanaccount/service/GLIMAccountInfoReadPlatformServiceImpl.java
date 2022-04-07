@@ -93,7 +93,7 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
         final GLIMFieldsMapper rm = new GLIMFieldsMapper();
         final String sql = "select " + rm.schema() + " and glim.id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { glimId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { glimId }); // NOSONAR
     }
 
     @Override
@@ -103,7 +103,7 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
         final GLIMFieldsMapper rm = new GLIMFieldsMapper();
         final String sql = "select " + rm.schema() + " and ln.group_id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { Long.parseLong(groupId) });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { Long.parseLong(groupId) }); // NOSONAR
     }
 
     @Override
@@ -114,7 +114,7 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
 
         final String sql = "select " + rm.schema() + " where glim.group_id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { Long.parseLong(groupId) });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { Long.parseLong(groupId) }); // NOSONAR
     }
 
     @Override
@@ -124,7 +124,7 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
         final GLIMFieldsMapper rm = new GLIMFieldsMapper();
         final String sql = "select " + rm.schema() + " and glim.accountNumber=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { parentAccountIds });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { parentAccountIds }); // NOSONAR
     }
 
     @Override
@@ -135,7 +135,7 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
 
         final String sql = "select " + rm.schema() + " where glim.group_id=? and glim.account_number=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { groupId, accountNo });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { groupId, accountNo }); // NOSONAR
     }
 
     @Override
@@ -188,7 +188,7 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
 
         final String sql = "select " + rm.schema() + " where glim.id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { glimId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { glimId }); // NOSONAR
 
     }
 

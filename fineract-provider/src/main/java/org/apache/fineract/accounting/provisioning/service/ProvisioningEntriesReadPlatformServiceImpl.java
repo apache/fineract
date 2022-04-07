@@ -115,8 +115,8 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
     @Override
     public ProvisioningEntryData retrieveProvisioningEntryData(Long entryId) {
         ProvisioningEntryDataMapperWithSumReserved mapper1 = new ProvisioningEntryDataMapperWithSumReserved();
-        final String sql1 = "select" + mapper1.getSchema() + " where entry.id = ? group by entry.id, created.username, modified.username";
-        ProvisioningEntryData data = this.jdbcTemplate.queryForObject(sql1, mapper1, new Object[] { entryId });
+        final String sql = "select" + mapper1.getSchema() + " where entry.id = ? group by entry.id, created.username, modified.username";
+        ProvisioningEntryData data = this.jdbcTemplate.queryForObject(sql, mapper1, new Object[] { entryId }); // NOSONAR
         return data;
     }
 
@@ -248,7 +248,7 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
         final String sql1 = "select " + mapper1.getSchema() + " where entry.created_date like ? ";
         ProvisioningEntryData data = null;
         try {
-            data = this.jdbcTemplate.queryForObject(sql1, mapper1, new Object[] { date });
+            data = this.jdbcTemplate.queryForObject(sql1, mapper1, new Object[] { date }); // NOSONAR
         } catch (EmptyResultDataAccessException e) {
             LOG.error("Problem occurred in retrieveProvisioningEntryData function", e);
         }
@@ -261,12 +261,12 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
         ProvisioningEntryData data = null;
         LoanProductProvisioningEntryRowMapper mapper = new LoanProductProvisioningEntryRowMapper();
         final String sql = "select " + mapper.getSchema() + " where entry.criteria_id = ?";
-        Collection<LoanProductProvisioningEntryData> entries = this.jdbcTemplate.query(sql, mapper, new Object[] { criteriaId });
+        Collection<LoanProductProvisioningEntryData> entries = this.jdbcTemplate.query(sql, mapper, new Object[] { criteriaId }); // NOSONAR
         if (entries != null && entries.size() > 0) {
             Long entryId = ((LoanProductProvisioningEntryData) entries.toArray()[0]).getHistoryId();
             ProvisioningEntryDataMapper mapper1 = new ProvisioningEntryDataMapper();
             final String sql1 = "select " + mapper1.getSchema() + " where entry.id = ?";
-            data = this.jdbcTemplate.queryForObject(sql1, mapper1, new Object[] { entryId });
+            data = this.jdbcTemplate.queryForObject(sql1, mapper1, new Object[] { entryId }); // NOSONAR
             data.setEntries(entries);
         }
         return data;

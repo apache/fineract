@@ -94,7 +94,7 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
     @Override
     public List<AccountNumberFormatData> getAllAccountNumberFormats() {
         String sql = "select " + this.accountNumberFormatMapper.schema();
-        return this.jdbcTemplate.query(sql, this.accountNumberFormatMapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, this.accountNumberFormatMapper); // NOSONAR
     }
 
     @Override
@@ -103,7 +103,7 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
             final String sql = "select " + this.accountNumberFormatMapper.schema() + " where anf.id = ?";
 
             final AccountNumberFormatData accountNumberFormatData = this.jdbcTemplate.queryForObject(sql, this.accountNumberFormatMapper,
-                    new Object[] { id });
+                    new Object[] { id }); // NOSONAR
             return accountNumberFormatData;
         } catch (final EmptyResultDataAccessException e) {
             throw new AccountNumberFormatNotFoundException(id, e);

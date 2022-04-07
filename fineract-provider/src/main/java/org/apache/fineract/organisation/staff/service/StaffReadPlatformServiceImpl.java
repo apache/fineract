@@ -176,7 +176,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
         final String sql = "select " + this.lookupMapper.schema() + " where s.office_id = ? and s.is_active=true and o.hierarchy like ? ";
 
-        return this.jdbcTemplate.query(sql, this.lookupMapper, new Object[] { defaultOfficeId, hierarchy });
+        return this.jdbcTemplate.query(sql, this.lookupMapper, new Object[] { defaultOfficeId, hierarchy }); // NOSONAR
     }
 
     private Long defaultToUsersOfficeIfNull(final Long officeId) {
@@ -199,7 +199,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
             final StaffMapper rm = new StaffMapper();
             final String sql = "select " + rm.schema() + " where s.id = ? and o.hierarchy like ? ";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { staffId, hierarchy });
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { staffId, hierarchy }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new StaffNotFoundException(staffId, e);
         }
@@ -225,7 +225,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
         sql += " " + extraCriteria.getSQLTemplate();
         sql = sql + " order by s.lastname ";
 
-        return this.jdbcTemplate.query(sql, rm, extraCriteria.getArguments());
+        return this.jdbcTemplate.query(sql, rm, extraCriteria.getArguments()); // NOSONAR
     }
 
     private SQLBuilder getStaffCriteria(final Long officeId, final boolean loanOfficersOnly, final String status) {
@@ -259,7 +259,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
         String sql = "select " + this.staffInOfficeHierarchyMapper.schema(loanOfficersOnly);
         sql = sql + " order by s.lastname";
-        return this.jdbcTemplate.query(sql, this.staffInOfficeHierarchyMapper, new Object[] { officeId });
+        return this.jdbcTemplate.query(sql, this.staffInOfficeHierarchyMapper, new Object[] { officeId }); // NOSONAR
     }
 
     @Override

@@ -98,7 +98,7 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
         final ClientFamilyMembersMapper rm = new ClientFamilyMembersMapper();
         final String sql = "select " + rm.schema() + " where fmb.client_id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { clientId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { clientId }); // NOSONAR
     }
 
     @Override
@@ -109,7 +109,7 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
         final ClientFamilyMembersMapper rm = new ClientFamilyMembersMapper();
         final String sql = "select " + rm.schema() + " where fmb.id=? ";
 
-        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { id });
+        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { id }); // NOSONAR
     }
 
     @Override

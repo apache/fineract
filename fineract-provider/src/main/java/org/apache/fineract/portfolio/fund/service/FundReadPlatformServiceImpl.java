@@ -69,7 +69,7 @@ public class FundReadPlatformServiceImpl implements FundReadPlatformService {
         final FundMapper rm = new FundMapper();
         final String sql = "select " + rm.schema() + " order by f.name";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
     }
 
     @Override
@@ -81,7 +81,7 @@ public class FundReadPlatformServiceImpl implements FundReadPlatformService {
             final FundMapper rm = new FundMapper();
             final String sql = "select " + rm.schema() + " where f.id = ?";
 
-            final FundData selectedFund = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { fundId });
+            final FundData selectedFund = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { fundId }); // NOSONAR
 
             return selectedFund;
         } catch (final EmptyResultDataAccessException e) {

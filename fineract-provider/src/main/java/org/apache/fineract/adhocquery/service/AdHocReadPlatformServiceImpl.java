@@ -50,7 +50,7 @@ public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
     public Collection<AdHocData> retrieveAllAdHocQuery() {
         final String sql = "select " + this.adHocRowMapper.schema() + " order by r.id";
 
-        return this.jdbcTemplate.query(sql, this.adHocRowMapper);
+        return this.jdbcTemplate.query(sql, this.adHocRowMapper); // NOSONAR
     }
 
     @Override
@@ -58,7 +58,7 @@ public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
         final String sql = "select " + this.adHocRowMapper.schema() + " where r." + sqlGenerator.escape("is_active")
                 + " = true order by r.id";
 
-        return this.jdbcTemplate.query(sql, this.adHocRowMapper);
+        return this.jdbcTemplate.query(sql, this.adHocRowMapper); // NOSONAR
     }
 
     @Override
@@ -67,7 +67,7 @@ public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
         try {
             final String sql = "select " + this.adHocRowMapper.schema() + " where r.id=?";
 
-            return this.jdbcTemplate.queryForObject(sql, this.adHocRowMapper, new Object[] { id });
+            return this.jdbcTemplate.queryForObject(sql, this.adHocRowMapper, new Object[] { id }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new AdHocNotFoundException(id, e);
         }

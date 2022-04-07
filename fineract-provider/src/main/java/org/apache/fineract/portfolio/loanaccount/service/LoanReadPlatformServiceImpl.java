@@ -232,24 +232,22 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         this.context.authenticatedUser();
         final LoanMapper rm = new LoanMapper(sqlGenerator);
 
-        String sql = "select " + rm.loanSchema() + " where l.account_no=?";
+        final String sql = "select " + rm.loanSchema() + " where l.account_no=?";
 
-        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanAccountNumber });
+        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanAccountNumber }); // NOSONAR
 
     }
 
     @Override
     public List<LoanAccountData> retrieveGLIMChildLoansByGLIMParentAccount(String parentloanAccountNumber) {
-
-        // final AppUser currentUser = this.context.authenticatedUser();
         this.context.authenticatedUser();
         final LoanMapper rm = new LoanMapper(sqlGenerator);
 
-        String sql = "select " + rm.loanSchema()
+        final String sql = "select " + rm.loanSchema()
                 + " left join glim_parent_child_mapping as glim on glim.glim_child_account_id=l.account_no "
                 + "where glim.glim_parent_account_id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { parentloanAccountNumber });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { parentloanAccountNumber }); // NOSONAR
 
     }
 
@@ -265,7 +263,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     repaymentScheduleRelatedLoanData, disbursementData, isInterestRecalculationEnabled, totalPaidFeeCharges);
             final String sql = "select " + fullResultsetExtractor.schema() + " where ls.loan_id = ? order by ls.loan_id, ls.installment";
 
-            return this.jdbcTemplate.query(sql, fullResultsetExtractor, new Object[] { loanId });
+            return this.jdbcTemplate.query(sql, fullResultsetExtractor, new Object[] { loanId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new LoanNotFoundException(loanId, e);
         }
@@ -287,7 +285,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
              ***/
             final String sql = "select " + rm.loanPaymentsSchema()
                     + " where tr.loan_id = ? and tr.transaction_type_enum not in (0, 3) and  (tr.is_reversed=false or tr.manually_adjusted_or_reversed = true) order by tr.transaction_date ASC,id ";
-            return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
+            return this.jdbcTemplate.query(sql, rm, new Object[] { loanId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             return null;
         }
@@ -440,7 +438,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         RepaymentTransactionTemplateMapper mapper = new RepaymentTransactionTemplateMapper(sqlGenerator);
         String sql = "select " + mapper.schema();
         LoanTransactionData loanTransactionData = this.jdbcTemplate.queryForObject(sql, mapper,
-                new Object[] { LoanTransactionType.REPAYMENT.getValue(), loanId, loanId });
+                new Object[] { LoanTransactionType.REPAYMENT.getValue(), loanId, loanId }); // NOSONAR
         final Collection<PaymentTypeData> paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
         return LoanTransactionData.templateOnTop(loanTransactionData, paymentOptions);
     }
@@ -578,7 +576,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         try {
             final LoanTransactionsMapper rm = new LoanTransactionsMapper(sqlGenerator);
             final String sql = "select " + rm.loanPaymentsSchema() + " where l.id = ? and tr.id = ? ";
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId, transactionId });
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId, transactionId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new LoanTransactionNotFoundException(transactionId, e);
         }
@@ -1579,7 +1577,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final LoanDisbursementDetailMapper rm = new LoanDisbursementDetailMapper(sqlGenerator);
         final String sql = "select " + rm.schema()
                 + " where dd.loan_id=? group by dd.id, lc.amount_waived_derived order by dd.expected_disburse_date";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { loanId }); // NOSONAR
     }
 
     private static final class LoanDisbursementDetailMapper implements RowMapper<DisbursementData> {
@@ -1621,14 +1619,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     public DisbursementData retrieveLoanDisbursementDetail(Long loanId, Long disbursementId) {
         final LoanDisbursementDetailMapper rm = new LoanDisbursementDetailMapper(sqlGenerator);
         final String sql = "select " + rm.schema() + " where dd.loan_id=? and dd.id=? group by dd.id, lc.amount_waived_derived";
-        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId, disbursementId });
+        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId, disbursementId }); // NOSONAR
     }
 
     @Override
     public Collection<LoanTermVariationsData> retrieveLoanTermVariations(Long loanId, Integer termType) {
         final LoanTermVariationsMapper rm = new LoanTermVariationsMapper();
         final String sql = "select " + rm.schema() + " where tv.loan_id=? and tv.term_type=?";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { loanId, termType });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { loanId, termType }); // NOSONAR
     }
 
     private static final class LoanTermVariationsMapper implements RowMapper<LoanTermVariationsData> {
@@ -1956,7 +1954,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
             final String sql = "select " + rm.schema()
                     + " where tr.loan_id = ? and tr.transaction_type_enum = ? and tr.is_reversed=false order by tr.transaction_date ASC,id ";
-            return this.jdbcTemplate.query(sql, rm, new Object[] { loanId, LoanTransactionType.WAIVE_INTEREST.getValue() });
+            return this.jdbcTemplate.query(sql, rm, new Object[] { loanId, LoanTransactionType.WAIVE_INTEREST.getValue() }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             return null;
         }
@@ -2015,7 +2013,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
             final String sql = "select " + rm.getSchema()
                     + " where lrs.loan_id = ? and lrs.interest_waived_derived is not null order by lrs.installment ASC ";
-            return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
+            return this.jdbcTemplate.query(sql, rm, new Object[] { loanId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             return null;
         }
@@ -2105,11 +2103,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " + SUM(COALESCE(mr.interest_completed_derived, 0)) " + " + SUM(COALESCE(mr.fee_charges_completed_derived, 0)) "
                     + " + SUM(COALESCE(mr.penalty_charges_completed_derived, 0))) as total_in_advance_derived "
                     + " from m_loan ml INNER JOIN m_loan_repayment_schedule mr on mr.loan_id = ml.id "
-                    + " where ml.id=? and  mr.duedate >= " + sqlGenerator.currentDate() + " group by ml.id having "
-                    + " (SUM(COALESCE(mr.principal_completed_derived, 0))  " + " + SUM(COALESCE(mr.interest_completed_derived, 0)) "
-                    + " + SUM(COALESCE(mr.fee_charges_completed_derived, 0)) "
+                    + " where ml.id=? and  mr.duedate >= ? group by ml.id having " + " (SUM(COALESCE(mr.principal_completed_derived, 0))  "
+                    + " + SUM(COALESCE(mr.interest_completed_derived, 0)) " + " + SUM(COALESCE(mr.fee_charges_completed_derived, 0)) "
                     + "+  SUM(COALESCE(mr.penalty_charges_completed_derived, 0))) > 0";
-            BigDecimal bigDecimal = this.jdbcTemplate.queryForObject(sql, BigDecimal.class, loanId);
+            BigDecimal bigDecimal = this.jdbcTemplate.queryForObject(sql, BigDecimal.class,
+                    new Object[] { loanId, sqlGenerator.currentDate() }); // NOSONAR
             return new PaidInAdvanceData(bigDecimal);
         } catch (DataAccessException e) {
             // TODO Auto-generated catch block

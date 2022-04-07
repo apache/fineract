@@ -58,13 +58,13 @@ public class NamespaceReadPlatformServiceImpl implements NamespaceReadPlatformSe
     public NamespaceData retrieveNamespaceById(final Long id) {
         final String sql = this.namespaceMapper.schema() + " where id= ? ";
 
-        return this.jdbcTemplate.queryForObject(sql, this.namespaceMapper, new Object[] { id });
+        return this.jdbcTemplate.queryForObject(sql, this.namespaceMapper, new Object[] { id }); // NOSONAR
     }
 
     @Override
     public NamespaceData retrieveNamespaceByPrefix(final String prefix) {
         final String sql = this.namespaceMapper.schema() + " where prefix = ? ";
 
-        return this.jdbcTemplate.queryForObject(sql, this.namespaceMapper, new Object[] { prefix });
+        return this.jdbcTemplate.queryForObject(sql, this.namespaceMapper, new Object[] { prefix }); // NOSONAR
     }
 }

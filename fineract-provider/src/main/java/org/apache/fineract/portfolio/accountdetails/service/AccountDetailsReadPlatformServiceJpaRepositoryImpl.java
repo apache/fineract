@@ -176,9 +176,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
         final LoanAccountSummaryDataMapper rm = new LoanAccountSummaryDataMapper();
         final String loanWhereClauseForGroupAndLoanType = " where l.group_id =? and glim.account_number=? and l.loan_type_enum=4";
         final String sql = "select " + rm.loanAccountSummarySchema() + loanWhereClauseForGroupAndLoanType;
-        // this.columnValidator.validateSqlInjection(rm.loanAccountSummarySchema(),
-        // loanWhereClauseForGroupAndLoanType);
-        return this.jdbcTemplate.query(sql, rm, new Object[] { groupId, glimAccount });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { groupId, glimAccount }); // NOSONAR
     }
 
     @Override
@@ -191,7 +189,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
         final LoanAccountSummaryDataMapper rm = new LoanAccountSummaryDataMapper();
         final String sql = "select " + rm.loanAccountSummarySchema() + loanwhereClause;
         this.columnValidator.validateSqlInjection(rm.loanAccountSummarySchema(), loanwhereClause);
-        return this.jdbcTemplate.query(sql, rm, inputs);
+        return this.jdbcTemplate.query(sql, rm, inputs); // NOSONAR
     }
 
     /**
@@ -202,19 +200,19 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
         final SavingsAccountSummaryDataMapper savingsAccountSummaryDataMapper = new SavingsAccountSummaryDataMapper();
         final String savingsSql = "select " + savingsAccountSummaryDataMapper.schema() + savingswhereClause;
         this.columnValidator.validateSqlInjection(savingsAccountSummaryDataMapper.schema(), savingswhereClause);
-        return this.jdbcTemplate.query(savingsSql, savingsAccountSummaryDataMapper, inputs);
+        return this.jdbcTemplate.query(savingsSql, savingsAccountSummaryDataMapper, inputs); // NOSONAR
     }
 
     private List<ShareAccountSummaryData> retrieveShareAccountDetails(final Long clientId) {
         final ShareAccountSummaryDataMapper mapper = new ShareAccountSummaryDataMapper();
         final String query = "select " + mapper.schema() + " where sa.client_id = ?";
-        return this.jdbcTemplate.query(query, mapper, new Object[] { clientId });
+        return this.jdbcTemplate.query(query, mapper, new Object[] { clientId }); // NOSONAR
     }
 
     private List<GuarantorAccountSummaryData> retrieveGuarantorLoanAccountDetails(final String loanwhereClause, final Object[] inputs) {
         final GuarantorLoanAccountSummaryDataMapper rm = new GuarantorLoanAccountSummaryDataMapper();
         final String sql = "select " + rm.guarantorLoanAccountSummarySchema() + loanwhereClause;
-        return this.jdbcTemplate.query(sql, rm, inputs);
+        return this.jdbcTemplate.query(sql, rm, inputs); // NOSONAR
     }
 
     private static final class ShareAccountSummaryDataMapper implements RowMapper<ShareAccountSummaryData> {

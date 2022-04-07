@@ -40,7 +40,6 @@ public class EmailConfigurationReadPlatformServiceImpl implements EmailConfigura
     public EmailConfigurationReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.emailConfigurationRowMapper = new EmailConfigurationRowMapper();
-
     }
 
     private static final class EmailConfigurationRowMapper implements RowMapper<EmailConfigurationData> {
@@ -77,7 +76,7 @@ public class EmailConfigurationReadPlatformServiceImpl implements EmailConfigura
     public Collection<EmailConfigurationData> retrieveAll() {
         final String sql = "select " + this.emailConfigurationRowMapper.schema();
 
-        return this.jdbcTemplate.query(sql, this.emailConfigurationRowMapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, this.emailConfigurationRowMapper); // NOSONAR
     }
 
     @Override
@@ -85,7 +84,7 @@ public class EmailConfigurationReadPlatformServiceImpl implements EmailConfigura
         try {
             final String sql = "select " + this.emailConfigurationRowMapper.schema() + " where cnf.name = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, this.emailConfigurationRowMapper, name);
+            return this.jdbcTemplate.queryForObject(sql, this.emailConfigurationRowMapper, new Object[] { name }); // NOSONAR
         }
 
         catch (final EmptyResultDataAccessException e) {

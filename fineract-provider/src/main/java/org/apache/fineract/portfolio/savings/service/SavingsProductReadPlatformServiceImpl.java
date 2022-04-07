@@ -71,7 +71,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             sql += " and sp.id in ( " + inClause + " ) ";
         }
 
-        return this.jdbcTemplate.query(sql, this.savingsProductRowMapper, new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() });
+        return this.jdbcTemplate.query(sql, this.savingsProductRowMapper, new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() }); // NOSONAR
     }
 
     @Override
@@ -88,7 +88,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         }
 
         return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper,
-                new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() });
+                new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() }); // NOSONAR
     }
 
     @Override
@@ -97,7 +97,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             this.context.authenticatedUser();
             final String sql = "select " + this.savingsProductRowMapper.schema() + " where sp.id = ? and sp.deposit_type_enum = ?";
             return this.jdbcTemplate.queryForObject(sql, this.savingsProductRowMapper,
-                    new Object[] { savingProductId, DepositAccountType.SAVINGS_DEPOSIT.getValue() });
+                    new Object[] { savingProductId, DepositAccountType.SAVINGS_DEPOSIT.getValue() }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new SavingsProductNotFoundException(savingProductId, e);
         }
@@ -269,7 +269,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
                 sql += " where sp.allow_overdraft=? and sp.deposit_type_enum = ?";
             }
             return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper,
-                    new Object[] { isOverdraftType, DepositAccountType.SAVINGS_DEPOSIT.getValue() });
+                    new Object[] { isOverdraftType, DepositAccountType.SAVINGS_DEPOSIT.getValue() }); // NOSONAR
         }
 
         if (inClauseAdded) {
@@ -278,8 +278,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             sql += " where sp.deposit_type_enum = ?";
         }
         return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper,
-                new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() });
-
+                new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() }); // NOSONAR
     }
 
     @Override
@@ -297,6 +296,6 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             sql += " and id in ( " + inClause + " ) ";
         }
 
-        return this.jdbcTemplate.query(sql, this.savingsProductRowMapper, new Object[] { currencyCode });
+        return this.jdbcTemplate.query(sql, this.savingsProductRowMapper, new Object[] { currencyCode }); // NOSONAR
     }
 }

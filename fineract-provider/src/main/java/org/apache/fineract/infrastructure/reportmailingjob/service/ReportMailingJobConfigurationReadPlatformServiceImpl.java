@@ -48,7 +48,7 @@ public class ReportMailingJobConfigurationReadPlatformServiceImpl implements Rep
         final ReportMailingJobConfigurationMapper mapper = new ReportMailingJobConfigurationMapper();
         final String sql = "select " + mapper.reportMailingJobConfigurationSchema();
 
-        return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, mapper); // NOSONAR
     }
 
     @Override
@@ -57,7 +57,7 @@ public class ReportMailingJobConfigurationReadPlatformServiceImpl implements Rep
             final ReportMailingJobConfigurationMapper mapper = new ReportMailingJobConfigurationMapper();
             final String sql = "select " + mapper.reportMailingJobConfigurationSchema() + " where rmjc.name = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { name });
+            return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { name }); // NOSONAR
         }
 
         catch (final EmptyResultDataAccessException ex) {

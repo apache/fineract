@@ -52,7 +52,7 @@ public final class ApiParameterHelper {
         if (queryParams.getFirst("fields") != null) {
             commaSerperatedParameters = queryParams.getFirst("fields");
             if (StringUtils.isNotBlank(commaSerperatedParameters)) {
-                fields = new HashSet<>(Arrays.asList(commaSerperatedParameters.split("\\s*,\\s*")));
+                fields = new HashSet<>(Arrays.asList(commaSerperatedParameters.split("\\s*,\\s*"))); // NOSONAR
             }
         }
         return fields;
@@ -64,7 +64,7 @@ public final class ApiParameterHelper {
         if (queryParams.getFirst("associations") != null) {
             commaSerperatedParameters = queryParams.getFirst("associations");
             if (StringUtils.isNotBlank(commaSerperatedParameters)) {
-                fields = new HashSet<>(Arrays.asList(commaSerperatedParameters.split("\\s*,\\s*")));
+                fields = new HashSet<>(Arrays.asList(commaSerperatedParameters.split("\\s*,\\s*"))); // NOSONAR
             }
         }
         return fields;
@@ -75,7 +75,7 @@ public final class ApiParameterHelper {
         if (queryParams.getFirst("exclude") != null) {
             commaSerperatedParameters = queryParams.getFirst("exclude");
             if (StringUtils.isNotBlank(commaSerperatedParameters)) {
-                fields.removeAll(new HashSet<>(Arrays.asList(commaSerperatedParameters.split("\\s*,\\s*"))));
+                fields.removeAll(new HashSet<>(Arrays.asList(commaSerperatedParameters.split("\\s*,\\s*")))); // NOSONAR
             }
         }
     }

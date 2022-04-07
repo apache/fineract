@@ -73,7 +73,7 @@ public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRat
     public Collection<InterestRateChartSlabData> retrieveAll(Long chartId) {
         this.context.authenticatedUser();
         final String sql = "select " + this.chartSlabExtractor.schema() + " where ircd.interest_rate_chart_id = ? order by ircd.id";
-        return this.jdbcTemplate.query(sql, this.chartSlabExtractor, new Object[] { chartId });
+        return this.jdbcTemplate.query(sql, this.chartSlabExtractor, new Object[] { chartId }); // NOSONAR
     }
 
     @Override
@@ -81,7 +81,7 @@ public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRat
         this.context.authenticatedUser();
         final String sql = "select " + this.chartSlabExtractor.schema() + " where irc.id = ? order by ircd.id asc";
         Collection<InterestRateChartSlabData> chartDatas = this.jdbcTemplate.query(sql, this.chartSlabExtractor,
-                new Object[] { chartSlabId, chartId });
+                new Object[] { chartSlabId, chartId }); // NOSONAR
         if (chartDatas == null || chartDatas.isEmpty()) {
             throw new InterestRateChartSlabNotFoundException(chartSlabId, chartId);
         }

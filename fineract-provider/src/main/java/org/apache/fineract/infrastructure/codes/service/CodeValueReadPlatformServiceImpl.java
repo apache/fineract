@@ -72,7 +72,7 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
         final CodeValueDataMapper rm = new CodeValueDataMapper();
         final String sql = "select " + rm.schema() + "where c.code_name like ? and cv.is_active = true order by position";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { code });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { code }); // NOSONAR
     }
 
     @Override
@@ -84,7 +84,7 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
         final CodeValueDataMapper rm = new CodeValueDataMapper();
         final String sql = "select " + rm.schema() + "where cv.code_id = ? order by position";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { codeId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { codeId }); // NOSONAR
     }
 
     @Override
@@ -96,7 +96,7 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
             final CodeValueDataMapper rm = new CodeValueDataMapper();
             final String sql = "select " + rm.schema() + " where cv.id = ? order by position";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { codeValueId });
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { codeValueId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new CodeValueNotFoundException(codeValueId, e);
         }

@@ -57,7 +57,7 @@ public class MixTaxonomyMappingReadPlatformServiceImpl implements MixTaxonomyMap
         try {
             final TaxonomyMappingMapper rm = new TaxonomyMappingMapper();
             final String sqlString = "select " + rm.schema();
-            return this.jdbcTemplate.queryForObject(sqlString, rm);
+            return this.jdbcTemplate.queryForObject(sqlString, rm); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             return null;
         }

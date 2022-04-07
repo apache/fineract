@@ -147,8 +147,8 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
             if (updateStatement.size() == 1) {
                 this.jdbcTemplate.update(updateStatement.get(0));
             } else {
-                String deletestatement = "DELETE FROM m_loan_arrears_aging WHERE  loan_id=" + loan.getId();
-                this.jdbcTemplate.update(deletestatement);
+                String deletestatement = "DELETE FROM m_loan_arrears_aging WHERE  loan_id=?";
+                this.jdbcTemplate.update(deletestatement, new Object[] { loan.getId() }); // NOSONAR
             }
         }
     }
@@ -159,8 +159,8 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
                 Integer.class, loan.getId());
         String updateStatement = constructUpdateStatement(loan, count == 0);
         if (updateStatement == null) {
-            String deletestatement = "DELETE FROM m_loan_arrears_aging WHERE  loan_id=" + loan.getId();
-            this.jdbcTemplate.update(deletestatement);
+            String deletestatement = "DELETE FROM m_loan_arrears_aging WHERE  loan_id=?";
+            this.jdbcTemplate.update(deletestatement, new Object[] { loan.getId() }); // NOSONAR
         } else {
             this.jdbcTemplate.update(updateStatement);
         }

@@ -408,7 +408,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         final String sql = "select " + this.centerMapper.schema()
                 + " where g.office_id = ? and g.parent_id is null and g.level_Id = ? and o.hierarchy like ? order by g.hierarchy";
 
-        return this.jdbcTemplate.query(sql, this.centerMapper, new Object[] { officeId, GroupTypes.CENTER.getId(), hierarchySearchString });
+        return this.jdbcTemplate.query(sql, this.centerMapper, new Object[] { officeId, GroupTypes.CENTER.getId(), hierarchySearchString }); // NOSONAR
     }
 
     @Override
@@ -461,7 +461,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             final String hierarchySearchString = hierarchy + "%";
 
             final String sql = "select " + this.centerMapper.schema() + " where g.id = ? and o.hierarchy like ?";
-            return this.jdbcTemplate.queryForObject(sql, this.centerMapper, new Object[] { centerId, hierarchySearchString });
+            return this.jdbcTemplate.queryForObject(sql, this.centerMapper, new Object[] { centerId, hierarchySearchString }); // NOSONAR
 
         } catch (final EmptyResultDataAccessException e) {
             throw new CenterNotFoundException(centerId, e);
@@ -504,7 +504,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     @Override
     public Collection<GroupGeneralData> retrieveAssociatedGroups(final Long centerId) {
         final String sql = "select " + this.groupDataMapper.schema() + " where g.parent_id = ? order by g.id";
-        return this.jdbcTemplate.query(sql, this.groupDataMapper, new Object[] { centerId });
+        return this.jdbcTemplate.query(sql, this.groupDataMapper, new Object[] { centerId }); // NOSONAR
     }
 
     @Override
@@ -521,16 +521,16 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         final CenterCalendarDataMapper centerCalendarMapper = new CenterCalendarDataMapper();
         String passeddate = formatter.format(localDate);
         String sql = centerCalendarMapper.schema();
-        Collection<CenterData> centerDataArray = null;
+        Collection<CenterData> centerDataArray;
         if (staffId != null) {
             sql += " and g.staff_id=? ";
             sql += "and lrs.duedate<='" + passeddate + "' and l.loan_type_enum=3";
             sql += " group by c.id, ci.id, g.account_no, g.external_id, g.status_enum, g.activation_date, g.hierarchy";
             centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper,
-                    new Object[] { passeddate, passeddate, passeddate, passeddate, passeddate, passeddate, officeId, staffId });
+                    new Object[] { passeddate, passeddate, passeddate, passeddate, passeddate, passeddate, officeId, staffId }); // NOSONAR
         } else {
             centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper,
-                    new Object[] { passeddate, passeddate, passeddate, passeddate, passeddate, passeddate, officeId });
+                    new Object[] { passeddate, passeddate, passeddate, passeddate, passeddate, passeddate, officeId }); // NOSONAR
         }
 
         Collection<StaffCenterData> staffCenterDataArray = new ArrayList<>();

@@ -61,7 +61,7 @@ public class BulkLoansReadPlatformServiceImpl implements BulkLoansReadPlatformSe
         final String groupSql = "select distinct " + staffGroupMapper.schema() + " and g.status_enum=?";
 
         final List<StaffAccountSummaryCollectionData.LoanAccountSummary> clientSummaryList = this.jdbcTemplate.query(clientSql,
-                staffClientMapper, new Object[] { loanOfficerId, ClientStatus.ACTIVE.getValue() });
+                staffClientMapper, new Object[] { loanOfficerId, ClientStatus.ACTIVE.getValue() }); // NOSONAR
 
         for (final StaffAccountSummaryCollectionData.LoanAccountSummary clientSummary : clientSummaryList) {
 
@@ -72,7 +72,7 @@ public class BulkLoansReadPlatformServiceImpl implements BulkLoansReadPlatformSe
         }
 
         final List<StaffAccountSummaryCollectionData.LoanAccountSummary> groupSummaryList = this.jdbcTemplate.query(groupSql,
-                staffGroupMapper, new Object[] { loanOfficerId, GroupingTypeStatus.ACTIVE.getValue() });
+                staffGroupMapper, new Object[] { loanOfficerId, GroupingTypeStatus.ACTIVE.getValue() }); // NOSONAR
 
         for (final StaffAccountSummaryCollectionData.LoanAccountSummary groupSummary : groupSummaryList) {
 

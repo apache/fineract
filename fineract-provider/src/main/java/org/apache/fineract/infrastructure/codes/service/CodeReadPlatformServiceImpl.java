@@ -68,7 +68,7 @@ public class CodeReadPlatformServiceImpl implements CodeReadPlatformService {
         final CodeMapper rm = new CodeMapper();
         final String sql = "select " + rm.schema() + " order by c.code_name";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
     }
 
     @Override
@@ -79,7 +79,7 @@ public class CodeReadPlatformServiceImpl implements CodeReadPlatformService {
             final CodeMapper rm = new CodeMapper();
             final String sql = "select " + rm.schema() + " where c.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { codeId });
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { codeId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new CodeNotFoundException(codeId, e);
         }
@@ -93,7 +93,7 @@ public class CodeReadPlatformServiceImpl implements CodeReadPlatformService {
             final CodeMapper rm = new CodeMapper();
             final String sql = "select " + rm.schema() + " where c.code_name = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { codeName });
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { codeName }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new CodeNotFoundException(codeName, e);
         }

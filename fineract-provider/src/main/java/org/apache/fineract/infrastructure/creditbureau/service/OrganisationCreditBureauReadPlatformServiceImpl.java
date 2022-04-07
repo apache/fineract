@@ -74,7 +74,7 @@ public class OrganisationCreditBureauReadPlatformServiceImpl implements Organisa
         final OrganisationCreditBureauMapper rm = new OrganisationCreditBureauMapper();
         final String sql = "select " + rm.schema() + " order by ocb.id";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
     }
 
     @Override
@@ -84,7 +84,7 @@ public class OrganisationCreditBureauReadPlatformServiceImpl implements Organisa
         final OrganisationCreditBureauMapper rm = new OrganisationCreditBureauMapper();
         final String sql = "select " + rm.schema() + " and ocb.id=?";
 
-        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { orgCbId });
+        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { orgCbId }); // NOSONAR
     }
 
 }

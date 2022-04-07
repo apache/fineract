@@ -147,7 +147,7 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
         private List<AccountingTagRuleData> getCreditOrDebitTags(final Long creditOrDebitAccount, final Integer transactionType) {
             final AccountingTagRuleDataMapper mapper = new AccountingTagRuleDataMapper();
             final String taggedAccountsSchema = "Select " + mapper.taggedAccountSchema() + " where rule.id = ? and tag.acc_type_enum=?";
-            return this.jdbcTemplate.query(taggedAccountsSchema, mapper, new Object[] { creditOrDebitAccount, transactionType });
+            return this.jdbcTemplate.query(taggedAccountsSchema, mapper, new Object[] { creditOrDebitAccount, transactionType }); // NOSONAR
         }
 
     }
@@ -164,7 +164,7 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
             arguments = new Object[] { hierarchySearchString };
         }
         sql = sql + " order by rule.id asc";
-        final Map<Long, AccountingRuleData> extractedData = this.jdbcTemplate.query(sql, resultSetExtractor, arguments);
+        final Map<Long, AccountingRuleData> extractedData = this.jdbcTemplate.query(sql, resultSetExtractor, arguments); // NOSONAR
         return new ArrayList<>(extractedData.values());
     }
 
@@ -176,7 +176,7 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
             final String sql = "select " + resultSetExtractor.schema() + " and rule.id = ?";
 
             final Map<Long, AccountingRuleData> extractedData = this.jdbcTemplate.query(sql, resultSetExtractor,
-                    new Object[] { accountingRuleId });
+                    new Object[] { accountingRuleId }); // NOSONAR
             final AccountingRuleData accountingRuleData = extractedData.get(accountingRuleId);
             if (accountingRuleData == null) {
                 throw new AccountingRuleNotFoundException(accountingRuleId);

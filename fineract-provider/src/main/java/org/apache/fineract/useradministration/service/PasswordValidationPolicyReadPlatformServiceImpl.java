@@ -49,14 +49,14 @@ public class PasswordValidationPolicyReadPlatformServiceImpl implements Password
     public Collection<PasswordValidationPolicyData> retrieveAll() {
         final String sql = "select " + this.passwordValidationPolicyMapper.schema() + " order by pvp.id";
 
-        return this.jdbcTemplate.query(sql, this.passwordValidationPolicyMapper);
+        return this.jdbcTemplate.query(sql, this.passwordValidationPolicyMapper); // NOSONAR
     }
 
     @Override
     public PasswordValidationPolicyData retrieveActiveValidationPolicy() {
         try {
             final String sql = "select " + this.passwordValidationPolicyMapper.schema() + " where pvp.active = true";
-            return this.jdbcTemplate.queryForObject(sql, this.passwordValidationPolicyMapper);
+            return this.jdbcTemplate.queryForObject(sql, this.passwordValidationPolicyMapper); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new PasswordValidationPolicyNotFoundException(e);
         }

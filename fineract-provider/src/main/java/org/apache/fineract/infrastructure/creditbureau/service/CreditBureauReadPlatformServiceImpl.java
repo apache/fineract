@@ -68,7 +68,7 @@ public class CreditBureauReadPlatformServiceImpl implements CreditBureauReadPlat
         final CBMapper rm = new CBMapper();
         final String sql = "select " + rm.schema() + " order by id";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
     }
 
 }

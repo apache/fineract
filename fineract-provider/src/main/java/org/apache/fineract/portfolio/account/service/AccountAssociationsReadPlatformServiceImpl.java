@@ -55,7 +55,7 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
         final String sql = "select " + mapper.schema() + " where aa.loan_account_id = ? and aa.association_type_enum = ?";
         try {
             final AccountAssociationsData accountAssociationsData = this.jdbcTemplate.queryForObject(sql, mapper, loanId,
-                    AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
+                    AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue()); // NOSONAR
             if (accountAssociationsData != null) {
                 linkedAccount = accountAssociationsData.linkedAccount();
             }
@@ -70,7 +70,7 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
         final AccountAssociationsMapper mapper = new AccountAssociationsMapper();
         final String sql = "select " + mapper.schema() + " where aa.loan_account_id = ? and aa.association_type_enum = ?";
         try {
-            return this.jdbcTemplate.query(sql, mapper, loanId, associationType);
+            return this.jdbcTemplate.query(sql, mapper, new Object[] { loanId, associationType }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             return null;
         }
@@ -83,8 +83,8 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
         final AccountAssociationsMapper mapper = new AccountAssociationsMapper();
         final String sql = "select " + mapper.schema() + " where aa.savings_account_id = ? and aa.association_type_enum = ?";
         try {
-            final AccountAssociationsData accountAssociationsData = this.jdbcTemplate.queryForObject(sql, mapper, savingsId,
-                    AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
+            final AccountAssociationsData accountAssociationsData = this.jdbcTemplate.queryForObject(sql, mapper,
+                    new Object[] { savingsId, AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue() }); // NOSONAR
             if (accountAssociationsData != null) {
                 linkedAccount = accountAssociationsData.linkedAccount();
             }

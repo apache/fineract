@@ -45,7 +45,7 @@ public class ProvisioningCategoryReadPlatformServiceImpl implements Provisioning
         // User is already authenticated by API. So we no need to check again
         // here
         final String sql = "select " + this.provisionCategoryRowMapper.schema() + " from m_provision_category pc order by pc.id";
-        return this.jdbcTemplate.query(sql, this.provisionCategoryRowMapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, this.provisionCategoryRowMapper); // NOSONAR
     }
 
     private static final class ProvisioningCategoryRowMapper implements RowMapper<ProvisioningCategoryData> {

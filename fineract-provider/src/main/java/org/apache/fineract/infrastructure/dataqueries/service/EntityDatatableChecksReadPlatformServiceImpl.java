@@ -171,7 +171,7 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
     private List<DatatableChecksData> getDataTables() {
         final String sql = "select " + this.registerDataTableMapper.schema();
 
-        return this.jdbcTemplate.query(sql, this.registerDataTableMapper);
+        return this.jdbcTemplate.query(sql, this.registerDataTableMapper); // NOSONAR
     }
 
     protected static final class RegisterDataTableMapper implements RowMapper<DatatableChecksData> {

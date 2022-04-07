@@ -55,7 +55,7 @@ public class PostgreSQLQueryService implements DatabaseQueryService {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         String sql = "SELECT attname AS COLUMN_NAME, not attnotnull AS IS_NULLABLE, atttypid::regtype  AS DATATYPE, attlen AS CHARACTER_MAXIMUM_LENGTH, attnum = 1 AS COLUMN_KEY FROM pg_attribute WHERE attrelid = '\""
                 + tableName + "\"'::regclass AND attnum > 0 AND NOT attisdropped ORDER BY attnum";
-        final SqlRowSet columnDefinitions = jdbcTemplate.queryForRowSet(sql);
+        final SqlRowSet columnDefinitions = jdbcTemplate.queryForRowSet(sql); // NOSONAR
         if (columnDefinitions.next()) {
             return columnDefinitions;
         } else {

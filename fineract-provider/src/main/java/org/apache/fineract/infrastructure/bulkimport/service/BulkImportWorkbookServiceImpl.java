@@ -208,7 +208,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
         final ImportMapper rm = new ImportMapper();
         final String sql = "select " + rm.schema() + " order by i.id desc";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { type.getValue() });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { type.getValue() }); // NOSONAR
     }
 
     private static final class ImportMapper implements RowMapper<ImportData> {
@@ -247,7 +247,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
         final ImportTemplateLocationMapper importTemplateLocationMapper = new ImportTemplateLocationMapper();
         final String sql = "select " + importTemplateLocationMapper.schema();
 
-        return this.jdbcTemplate.queryForObject(sql, importTemplateLocationMapper, new Object[] { Integer.parseInt(importDocumentId) });
+        return this.jdbcTemplate.queryForObject(sql, importTemplateLocationMapper, new Object[] { Integer.parseInt(importDocumentId) }); // NOSONAR
     }
 
     @Override
@@ -255,7 +255,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
         this.securityContext.authenticatedUser();
         final ImportTemplateLocationMapper importTemplateLocationMapper = new ImportTemplateLocationMapper();
         final String sql = "select " + importTemplateLocationMapper.schema();
-        DocumentData documentData = this.jdbcTemplate.queryForObject(sql, importTemplateLocationMapper, new Object[] { importDocumentId });
+        DocumentData documentData = this.jdbcTemplate.queryForObject(sql, importTemplateLocationMapper, new Object[] { importDocumentId }); // NOSONAR
         return buildResponse(documentData);
     }
 

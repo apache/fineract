@@ -50,7 +50,7 @@ public class CurrencyReadPlatformServiceImpl implements CurrencyReadPlatformServ
 
         final String sql = "select " + this.currencyRowMapper.schema() + " from m_organisation_currency c order by c.name";
 
-        return this.jdbcTemplate.query(sql, this.currencyRowMapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, this.currencyRowMapper); // NOSONAR
     }
 
     @Override
@@ -58,7 +58,7 @@ public class CurrencyReadPlatformServiceImpl implements CurrencyReadPlatformServ
 
         final String sql = "select " + this.currencyRowMapper.schema() + " from m_currency c order by c.name";
 
-        return this.jdbcTemplate.query(sql, this.currencyRowMapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, this.currencyRowMapper); // NOSONAR
     }
 
     @Override
@@ -66,7 +66,7 @@ public class CurrencyReadPlatformServiceImpl implements CurrencyReadPlatformServ
 
         final String sql = "select " + this.currencyRowMapper.schema() + " from m_currency c  where c.code = ? order by c.name";
 
-        return this.jdbcTemplate.queryForObject(sql, this.currencyRowMapper, new Object[] { code });
+        return this.jdbcTemplate.queryForObject(sql, this.currencyRowMapper, new Object[] { code }); // NOSONAR
     }
 
     private static final class CurrencyMapper implements RowMapper<CurrencyData> {

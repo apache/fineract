@@ -60,7 +60,7 @@ public class ProductMixReadPlatformServiceImpl implements ProductMixReadPlatform
 
             final String sql = "Select " + extractor.schema() + " where pm.product_id=? group by pm.product_id";
 
-            final Map<Long, ProductMixData> productMixData = this.jdbcTemplate.query(sql, extractor, new Object[] { productId });
+            final Map<Long, ProductMixData> productMixData = this.jdbcTemplate.query(sql, extractor, new Object[] { productId }); // NOSONAR
 
             return productMixData.get(productId);
 
@@ -78,7 +78,7 @@ public class ProductMixReadPlatformServiceImpl implements ProductMixReadPlatform
 
         final String sql = "Select " + extractor.schema() + " group by pm.product_id";
 
-        final Map<Long, ProductMixData> productMixData = this.jdbcTemplate.query(sql, extractor, new Object[] {});
+        final Map<Long, ProductMixData> productMixData = this.jdbcTemplate.query(sql, extractor); // NOSONAR
 
         return productMixData.values();
     }

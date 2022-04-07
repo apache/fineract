@@ -64,7 +64,7 @@ public class ClientAttendanceReadPlatformServiceImpl implements ClientAttendance
         final ClientAttendanceDataMapper rm = new ClientAttendanceDataMapper();
         final String sql = rm.schema() + " where m.id = ? ";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { meetingId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { meetingId }); // NOSONAR
     }
 
 }

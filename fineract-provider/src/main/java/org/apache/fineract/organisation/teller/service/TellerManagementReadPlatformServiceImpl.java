@@ -204,7 +204,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
         final String sql = "select " + this.lookupMapper.schema() + " where s.office_id = ? and s.is_active=true ";
 
-        return this.jdbcTemplate.query(sql, this.lookupMapper, new Object[] { defaultOfficeId });
+        return this.jdbcTemplate.query(sql, this.lookupMapper, new Object[] { defaultOfficeId }); // NOSONAR
     }
 
     private Long defaultToUsersOfficeIfNull(final Long officeId) {
@@ -222,7 +222,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             final TellerMapper tm = new TellerMapper();
             final String sql = "select " + tm.schema() + " where t.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, tm, new Object[] { tellerId });
+            return this.jdbcTemplate.queryForObject(sql, tm, new Object[] { tellerId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new StaffNotFoundException(tellerId, e);
         }
@@ -243,9 +243,9 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         }
         sql = sql + " order by t.teller_name";
         if (officeId != null) {
-            return this.jdbcTemplate.query(sql, tm, new Object[] { officeId });
+            return this.jdbcTemplate.query(sql, tm, new Object[] { officeId }); // NOSONAR
         }
-        return this.jdbcTemplate.query(sql, tm, new Object[] {});
+        return this.jdbcTemplate.query(sql, tm); // NOSONAR
     }
 
     private String getTellerCriteria(final String sqlSearch, final Long officeId, final String status) {
@@ -326,7 +326,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             sql += " where " + extraCriteria;
         }
         sql = sql + " order by teller_name";
-        return this.jdbcTemplate.query(sql, cm, new Object[] {});
+        return this.jdbcTemplate.query(sql, cm); // NOSONAR
     }
 
     @Override
@@ -335,7 +335,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             final CashierMapper cm = new CashierMapper();
             final String sql = "select " + cm.schema() + " where c.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, cm, new Object[] { cashierId });
+            return this.jdbcTemplate.queryForObject(sql, cm, new Object[] { cashierId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new StaffNotFoundException(cashierId, e);
         }
@@ -390,7 +390,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         final TellerMapper tm = new TellerMapper();
         final String sql = "select " + tm.schema() + "where o.hierarchy like ? order by o.hierarchy";
 
-        return this.jdbcTemplate.query(sql, tm, new Object[] { hierarchySearchString });
+        return this.jdbcTemplate.query(sql, tm, new Object[] { hierarchySearchString }); // NOSONAR
     }
 
     @Override
@@ -466,7 +466,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         StaffData staffData = staffReadPlatformService.retrieveStaff(staffId);
         OfficeData officeData = officeReadPlatformService.retrieveOffice(staffData.getOfficeId());
         final String hierarchy = officeData.getHierarchy();
-        String hierarchySearchString = null;
+        String hierarchySearchString;
         if (includeAllTellers) {
             hierarchySearchString = "." + "%";
         } else {
@@ -477,7 +477,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
         Collection<CashierTransactionTypeTotalsData> cashierTxnTypeTotals = this.jdbcTemplate.query(sql, ctsm,
                 new Object[] { cashierId, currencyCode, hierarchySearchString, cashierId, currencyCode, hierarchySearchString, cashierId,
-                        currencyCode, hierarchySearchString, cashierId, currencyCode, hierarchySearchString });
+                        currencyCode, hierarchySearchString, cashierId, currencyCode, hierarchySearchString }); // NOSONAR
 
         Iterator<CashierTransactionTypeTotalsData> itr = cashierTxnTypeTotals.iterator();
         BigDecimal allocAmount = new BigDecimal(0);

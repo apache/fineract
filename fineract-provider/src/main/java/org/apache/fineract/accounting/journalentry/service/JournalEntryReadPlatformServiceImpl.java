@@ -383,7 +383,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             final GLJournalEntryMapper rm = new GLJournalEntryMapper(associationParametersData);
             final String sql = "select " + rm.schema() + " where journalEntry.id = ?";
 
-            final JournalEntryData glJournalEntryData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glJournalEntryId });
+            final JournalEntryData glJournalEntryData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glJournalEntryId }); // NOSONAR
 
             return glJournalEntryData;
         } catch (final EmptyResultDataAccessException e) {

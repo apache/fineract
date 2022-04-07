@@ -91,7 +91,7 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
 
             final String sql = rm.schema() + " where n.id = ? " + conditionSql + " order by n.created_date DESC";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, paramList.toArray());
+            return this.jdbcTemplate.queryForObject(sql, rm, paramList.toArray()); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new NoteNotFoundException(noteId, resourceId, noteType.name().toLowerCase(), e);
         }
@@ -106,7 +106,7 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
 
         final String sql = rm.schema() + " where " + conditionSql + " order by n.created_date DESC";
 
-        return this.jdbcTemplate.query(sql, rm, paramList.toArray());
+        return this.jdbcTemplate.query(sql, rm, paramList.toArray()); // NOSONAR
     }
 
     public static String getResourceCondition(final NoteType noteType, List<Object> paramList) {

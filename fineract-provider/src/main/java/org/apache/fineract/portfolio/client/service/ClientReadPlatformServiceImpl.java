@@ -324,7 +324,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String sql = "select " + this.clientMapper.schema()
                     + " where ( o.hierarchy like ? or transferToOffice.hierarchy like ?) and c.id = ?";
             final ClientData clientData = this.jdbcTemplate.queryForObject(sql, this.clientMapper,
-                    new Object[] { hierarchySearchString, hierarchySearchString, clientId });
+                    new Object[] { hierarchySearchString, hierarchySearchString, clientId }); // NOSONAR
 
             // Get client collaterals
             final Collection<ClientCollateralManagement> clientCollateralManagements = this.clientCollateralManagementRepositoryWrapper
@@ -342,7 +342,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String clientGroupsSql = "select " + this.clientGroupsMapper.parentGroupsSchema();
 
             final Collection<GroupGeneralData> parentGroups = this.jdbcTemplate.query(clientGroupsSql, this.clientGroupsMapper,
-                    new Object[] { clientId });
+                    new Object[] { clientId }); // NOSONAR
 
             return ClientData.setParentGroups(clientData, parentGroups, clientCollateralManagementDataSet);
 
@@ -360,7 +360,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             sql += " and (" + extraCriteria + ")";
             this.columnValidator.validateSqlInjection(sql, extraCriteria);
         }
-        return this.jdbcTemplate.query(sql, this.lookupMapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, this.lookupMapper); // NOSONAR
     }
 
     @Override
@@ -368,7 +368,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         final String sql = "select " + this.lookupMapper.schema() + " where c.office_id = ? and c.status_enum != ?";
 
-        return this.jdbcTemplate.query(sql, this.lookupMapper, new Object[] { officeId, ClientStatus.CLOSED.getValue() });
+        return this.jdbcTemplate.query(sql, this.lookupMapper, new Object[] { officeId, ClientStatus.CLOSED.getValue() }); // NOSONAR
     }
 
     @Override
@@ -380,7 +380,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         final String sql = "select " + this.membersOfGroupMapper.schema() + " where o.hierarchy like ? and pgc.group_id = ?";
 
-        return this.jdbcTemplate.query(sql, this.membersOfGroupMapper, new Object[] { hierarchySearchString, groupId });
+        return this.jdbcTemplate.query(sql, this.membersOfGroupMapper, new Object[] { hierarchySearchString, groupId }); // NOSONAR
     }
 
     @Override
@@ -394,7 +394,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
                 + " where o.hierarchy like ? and pgc.group_id = ? and c.status_enum = ? ";
 
         return this.jdbcTemplate.query(sql, this.membersOfGroupMapper,
-                new Object[] { hierarchySearchString, groupId, ClientStatus.ACTIVE.getValue() });
+                new Object[] { hierarchySearchString, groupId, ClientStatus.ACTIVE.getValue() }); // NOSONAR
     }
 
     private static final class ClientMembersOfGroupMapper implements RowMapper<ClientData> {
@@ -583,7 +583,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
                 + " left join m_group g on pgc.group_id=g.id where o.hierarchy like ? and g.parent_id = ? and c.status_enum = ? group by c.id";
 
         return this.jdbcTemplate.query(sql, this.membersOfGroupMapper,
-                new Object[] { hierarchySearchString, centerId, ClientStatus.ACTIVE.getValue() });
+                new Object[] { hierarchySearchString, centerId, ClientStatus.ACTIVE.getValue() }); // NOSONAR
     }
 
     private static final class ClientMapper implements RowMapper<ClientData> {
@@ -815,7 +815,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             final String sql = "select " + mapper.clientLookupByIdentifierSchema();
 
-            return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { identifierTypeId, identifierKey });
+            return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { identifierTypeId, identifierKey }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             return null;
         }
