@@ -41,6 +41,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.data.AuditData;
 import org.apache.fineract.commands.data.AuditSearchData;
@@ -52,7 +53,6 @@ import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamE
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.utils.SQLBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -60,6 +60,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Tag(name = "Maker Checker (or 4-eye) functionality")
+@RequiredArgsConstructor
 public class MakercheckersApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "actionName", "entityName", "resourceId",
@@ -71,19 +72,6 @@ public class MakercheckersApiResource {
     private final DefaultToApiJsonSerializer<AuditSearchData> toApiJsonSerializerSearchTemplate;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService writePlatformService;
-
-    @Autowired
-    public MakercheckersApiResource(final AuditReadPlatformService readPlatformService,
-            final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializerAudit,
-            final DefaultToApiJsonSerializer<AuditSearchData> toApiJsonSerializerSearchTemplate,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService writePlatformService) {
-        this.readPlatformService = readPlatformService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.toApiJsonSerializerAudit = toApiJsonSerializerAudit;
-        this.toApiJsonSerializerSearchTemplate = toApiJsonSerializerSearchTemplate;
-        this.writePlatformService = writePlatformService;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

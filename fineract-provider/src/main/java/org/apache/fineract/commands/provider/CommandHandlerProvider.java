@@ -20,17 +20,16 @@ package org.apache.fineract.commands.provider;
 
 import com.google.common.base.Preconditions;
 import java.util.HashMap;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.exception.UnsupportedCommandException;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
@@ -46,17 +45,12 @@ import org.springframework.stereotype.Component;
  * @see CommandType
  */
 @Component
-@Scope("singleton")
+@NoArgsConstructor
+@Slf4j
 public class CommandHandlerProvider implements ApplicationContextAware {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(CommandHandlerProvider.class);
 
     private ApplicationContext applicationContext;
     private HashMap<String, String> registeredHandlers;
-
-    CommandHandlerProvider() {
-
-    }
 
     /**
      * Returns a handler for the given entity and action.<br>
@@ -87,12 +81,12 @@ public class CommandHandlerProvider implements ApplicationContextAware {
             final String[] commandHandlerBeans = this.applicationContext.getBeanNamesForAnnotation(CommandType.class);
             if (ArrayUtils.isNotEmpty(commandHandlerBeans)) {
                 for (final String commandHandlerName : commandHandlerBeans) {
-                    LOGGER.info("Register command handler '{}' ...", commandHandlerName);
+                    log.info("Register command handler '{}' ...", commandHandlerName);
                     final CommandType commandType = this.applicationContext.findAnnotationOnBean(commandHandlerName, CommandType.class);
                     try {
                         this.registeredHandlers.put(commandType.entity() + "|" + commandType.action(), commandHandlerName);
                     } catch (final Throwable th) {
-                        LOGGER.error("Unable to register command handler '{}'!", commandHandlerName, th);
+                        log.error("Unable to register command handler '{}'!", commandHandlerName, th);
                     }
                 }
             }

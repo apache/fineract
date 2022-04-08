@@ -25,6 +25,8 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.batch.exception.ErrorHandler;
 import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.commands.domain.CommandSource;
@@ -45,41 +47,22 @@ import org.apache.fineract.infrastructure.hooks.event.HookEvent;
 import org.apache.fineract.infrastructure.hooks.event.HookEventSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class SynchronousCommandProcessingService implements CommandProcessingService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SynchronousCommandProcessingService.class);
-    private PlatformSecurityContext context;
+    private final PlatformSecurityContext context;
     private final ApplicationContext applicationContext;
     private final ToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer;
     private final ToApiJsonSerializer<CommandProcessingResult> toApiResultJsonSerializer;
-    private CommandSourceRepository commandSourceRepository;
+    private final CommandSourceRepository commandSourceRepository;
     private final ConfigurationDomainService configurationDomainService;
     private final CommandHandlerProvider commandHandlerProvider;
-
-    @Autowired
-    public SynchronousCommandProcessingService(final PlatformSecurityContext context, final ApplicationContext applicationContext,
-            final ToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer,
-            final ToApiJsonSerializer<CommandProcessingResult> toApiResultJsonSerializer,
-            final CommandSourceRepository commandSourceRepository, final ConfigurationDomainService configurationDomainService,
-            final CommandHandlerProvider commandHandlerProvider) {
-        this.context = context;
-        this.context = context;
-        this.applicationContext = applicationContext;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.toApiResultJsonSerializer = toApiResultJsonSerializer;
-        this.commandSourceRepository = commandSourceRepository;
-        this.commandSourceRepository = commandSourceRepository;
-        this.configurationDomainService = configurationDomainService;
-        this.commandHandlerProvider = commandHandlerProvider;
-    }
 
     @Transactional
     @Override
@@ -286,7 +269,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 applicationContext.publishEvent(applicationEvent);
             }
         } catch (Exception e) {
-            LOG.error("Error", e);
+            log.error("Error", e);
         }
     }
 
