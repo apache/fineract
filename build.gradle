@@ -289,18 +289,6 @@ allprojects  {
         strictCheck true
     }
 
-    task licenseFormatBuildScripts (type:nl.javadude.gradle.plugins.license.License) {
-        source = fileTree(dir: "$rootDir/", includes: [
-            '**/*.bat',
-            '**/*.sh',
-            '**/*.sql'
-        ], excludes: [
-            '**/gradlew*'
-        ])
-    }
-
-    licenseFormat.dependsOn licenseFormatBuildScripts
-
     licenseReport {
         outputDir = "$projectDir/licenses"
     }

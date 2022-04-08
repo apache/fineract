@@ -38,7 +38,7 @@ openApiValidate {
     recommend = true
 }
 
-task buildJavaSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask){
+task buildJavaSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
     generatorName = 'java'
     verbose = false
     validateSpec = false
@@ -63,12 +63,6 @@ task buildJavaSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateT
     dependsOn = [
         ':fineract-provider:resolve'
     ]
-    finalizedBy = [licenseFormat]
-    // uncomment below block to automatically copy the custom files in generated SDK
-    /*copy {
-     from file('src/main/java')
-     into file("$buildDir/generated/java/src/main/java")
-     }*/
 }
 
 task buildTypescriptAngularSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask){
@@ -90,8 +84,11 @@ task buildTypescriptAngularSdk(type: org.openapitools.generator.gradle.plugin.ta
     dependsOn = [
         ':fineract-provider:resolve'
     ]
-    finalizedBy = [licenseFormat]
 }
+
+licenseFormatMain.dependsOn buildJavaSdk
+licenseFormatMain.dependsOn buildTypescriptAngularSdk
+compileJava.dependsOn licenseFormatMain
 
 // TODO: @vidakovic we could provide even more client libs in different languages (Go, Ruby, Swift etc.)
 compileJava.dependsOn buildJavaSdk, spotlessJavaApply, buildTypescriptAngularSdk, spotlessMiscApply
@@ -119,8 +116,5 @@ configurations {
 test {
     useJUnitPlatform()
 }
-
-// Gradle 7.x asks for explicit dependencies between tasks
-licenseFormatBuildScripts.dependsOn spotlessGroovyGradle, spotlessJava, spotlessMisc, compileJava, processResources, compileTestJava, rat, test
 
 sourceSets.main.java.srcDir new File(buildDir, "generated/java/src/main/java")

@@ -79,3 +79,5 @@ test {
     dependsOn cargoStartLocal
     finalizedBy cargoStopLocal
 }
+
+compileTestJava.dependsOn ':fineract-client:processResources'
