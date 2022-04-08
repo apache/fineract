@@ -26,6 +26,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.accounting.journalentry.api.JournalEntryJsonInputParams;
@@ -42,18 +44,15 @@ import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecific
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntryRunningBalanceUpdateService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(JournalEntryRunningBalanceUpdateServiceImpl.class);
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -66,17 +65,6 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
 
     private final GLJournalEntryMapper entryMapper = new GLJournalEntryMapper();
 
-    @Autowired
-    public JournalEntryRunningBalanceUpdateServiceImpl(final JdbcTemplate jdbcTemplate,
-            final OfficeRepositoryWrapper officeRepositoryWrapper, final JournalEntryDataValidator dataValidator,
-            final FromJsonHelper fromApiJsonHelper, DatabaseSpecificSQLGenerator sqlGenerator) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.officeRepositoryWrapper = officeRepositoryWrapper;
-        this.dataValidator = dataValidator;
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.sqlGenerator = sqlGenerator;
-    }
-
     @Override
     @CronTarget(jobName = JobName.ACCOUNTING_RUNNING_BALANCE_UPDATE)
     public void updateRunningBalance() {
@@ -86,7 +74,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
             Date entityDate = this.jdbcTemplate.queryForObject(dateFinder, Date.class);
             updateOrganizationRunningBalance(entityDate);
         } catch (EmptyResultDataAccessException e) {
-            LOG.debug("No results found for updation of running balance ");
+            log.debug("No results found for updation of running balance ");
         }
     }
 
@@ -107,7 +95,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
                 Date entityDate = this.jdbcTemplate.queryForObject(dateFinder, Date.class, officeId);
                 updateRunningBalance(officeId, entityDate);
             } catch (EmptyResultDataAccessException e) {
-                LOG.debug("No results found for updation of office running balance with office id: {}", officeId);
+                log.debug("No results found for updation of office running balance with office id: {}", officeId);
             }
             commandProcessingResultBuilder.withOfficeId(officeId);
         }

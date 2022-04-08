@@ -25,6 +25,7 @@ import com.google.gson.JsonElement;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingConstants.AccrualAccountsForLoan;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForLoan;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForSavings;
@@ -37,11 +38,11 @@ import org.apache.fineract.accounting.producttoaccountmapping.serialization.Prod
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class ProductToGLAccountMappingWritePlatformServiceImpl implements ProductToGLAccountMappingWritePlatformService {
 
     private final FromJsonHelper fromApiJsonHelper;
@@ -49,19 +50,6 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
     private final LoanProductToGLAccountMappingHelper loanProductToGLAccountMappingHelper;
     private final SavingsProductToGLAccountMappingHelper savingsProductToGLAccountMappingHelper;
     private final ShareProductToGLAccountMappingHelper shareProductToGLAccountMappingHelper;
-
-    @Autowired
-    public ProductToGLAccountMappingWritePlatformServiceImpl(final FromJsonHelper fromApiJsonHelper,
-            final ProductToGLAccountMappingFromApiJsonDeserializer deserializer,
-            final LoanProductToGLAccountMappingHelper loanProductToGLAccountMappingHelper,
-            final SavingsProductToGLAccountMappingHelper savingsProductToGLAccountMappingHelper,
-            final ShareProductToGLAccountMappingHelper shareProductToGLAccountMappingHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.deserializer = deserializer;
-        this.loanProductToGLAccountMappingHelper = loanProductToGLAccountMappingHelper;
-        this.savingsProductToGLAccountMappingHelper = savingsProductToGLAccountMappingHelper;
-        this.shareProductToGLAccountMappingHelper = shareProductToGLAccountMappingHelper;
-    }
 
     @Override
     @Transactional

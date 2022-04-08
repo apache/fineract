@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
 import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
 import org.apache.fineract.accounting.financialactivityaccount.data.FinancialActivityAccountData;
@@ -29,26 +30,18 @@ import org.apache.fineract.accounting.financialactivityaccount.data.FinancialAct
 import org.apache.fineract.accounting.financialactivityaccount.exception.FinancialActivityAccountNotFoundException;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class FinancialActivityAccountReadPlatformServiceImpl implements FinancialActivityAccountReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
-    private final FinancialActivityAccountMapper financialActivityAccountMapper;
     private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
-
-    @Autowired
-    public FinancialActivityAccountReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate,
-            final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService) {
-        financialActivityAccountMapper = new FinancialActivityAccountMapper();
-        this.jdbcTemplate = jdbcTemplate;
-        this.accountingDropdownReadPlatformService = accountingDropdownReadPlatformService;
-    }
+    private final FinancialActivityAccountMapper financialActivityAccountMapper = new FinancialActivityAccountMapper();
 
     @Override
     public List<FinancialActivityAccountData> retrieveAll() {
@@ -73,7 +66,7 @@ public class FinancialActivityAccountReadPlatformServiceImpl implements Financia
     @Override
     public FinancialActivityAccountData addTemplateDetails(FinancialActivityAccountData financialActivityAccountData) {
         final Map<String, List<GLAccountData>> accountOptions = this.accountingDropdownReadPlatformService.retrieveAccountMappingOptions();
-        financialActivityAccountData.setAccountingMappingOptions(accountOptions);
+        financialActivityAccountData.setGlAccountOptions(accountOptions);
         financialActivityAccountData.setFinancialActivityOptions(FinancialActivity.getAllFinancialActivities());
         return financialActivityAccountData;
     }
