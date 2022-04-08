@@ -1,5 +1,11 @@
 name: Fineract Sonarqube
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - *
+  pull_request:
+    branches:
+      - *
   workflow_dispatch:
 
 jobs:
