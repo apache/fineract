@@ -76,5 +76,5 @@ script:
   - date
 # Using travis_wait for a proccess that could take longer than 20 minutes, in this case the SonaQube analysis
 # https://docs.travis-ci.com/user/common-build-problems/#build-times-out-because-no-output-was-received
-  - travis_wait 30 ./gradlew -q --no-daemon --console=plain -x rat -x test sonarqube -Pcoverage=true
+  - travis_wait 30 ./gradlew -q --no-daemon --console=plain -Dsonar.projectKey=apache_fineract -x rat -x test sonarqube -Pcoverage=true
   - date
