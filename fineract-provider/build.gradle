@@ -73,6 +73,7 @@ resolve {
     classpath = sourceSets.main.runtimeClasspath
     outputDir = file("${buildDir}/generated/swagger-ui")
     openApiFile = file("config/swagger/fineract-input.yaml")
+    sortOutput = true
 }
 
 resolve.dependsOn prepareInputYaml
