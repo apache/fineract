@@ -1,5 +1,6 @@
 name: Fineract Sonarqube
 on: [push, pull_request]
+  workflow_dispatch:
 
 jobs:
   build:
