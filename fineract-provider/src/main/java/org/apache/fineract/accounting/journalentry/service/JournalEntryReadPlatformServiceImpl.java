@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccount;
@@ -61,7 +62,6 @@ import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -69,6 +69,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 @Service
+@RequiredArgsConstructor
 public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
@@ -79,21 +80,6 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
     private final PaginationHelper paginationHelper;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
-
-    @Autowired
-    public JournalEntryReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate,
-            final GLAccountReadPlatformService glAccountReadPlatformService, final ColumnValidator columnValidator,
-            final OfficeReadPlatformService officeReadPlatformService,
-            final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper,
-            DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.glAccountReadPlatformService = glAccountReadPlatformService;
-        this.officeReadPlatformService = officeReadPlatformService;
-        this.financialActivityAccountRepositoryWrapper = financialActivityAccountRepositoryWrapper;
-        this.columnValidator = columnValidator;
-        this.paginationHelper = paginationHelper;
-        this.sqlGenerator = sqlGenerator;
-    }
 
     private static final class GLJournalEntryMapper implements RowMapper<JournalEntryData> {
 

@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.provisioning.constant.ProvisioningEntriesApiConstants;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -37,20 +38,15 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.provisioning.exception.ProvisioningCriteriaCannotBeCreatedException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class ProvisioningEntriesDefinitionJsonDeserializer implements ProvisioningEntriesApiConstants {
 
-    private final FromJsonHelper fromApiJsonHelper;
     private static final Set<String> supportedParameters = new HashSet<>(
             Arrays.asList(JSON_DATE_PARAM, JSON_DATEFORMAT_PARAM, JSON_LOCALE_PARAM, JSON_CREATEJOURNALENTRIES_PARAM));
-
-    @Autowired
-    public ProvisioningEntriesDefinitionJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
-    }
+    private final FromJsonHelper fromApiJsonHelper;
 
     public void validateForCreate(final String json) {
         if (StringUtils.isBlank(json)) {

@@ -100,8 +100,8 @@ public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
             final Long reportRunEvery = JdbcSupport.getLong(rs, "report_run_every");
             final ZonedDateTime lastRun = JdbcSupport.getDateTime(rs, "last_run");
 
-            return new AdHocData(id, name, query, tableName, tableFields, isActive, createdDate, createdById, updatedById, updatedOn,
-                    createdByUsername, email, AdHocData.template().getReportRunFrequencies(), reportRunFrequency, reportRunEvery, lastRun);
+            return new AdHocData(id, name, query, tableName, tableFields, email, isActive, createdDate, createdById, updatedById, updatedOn,
+                    createdByUsername, AdHocData.template().getReportRunFrequencies(), reportRunFrequency, reportRunEvery, lastRun);
         }
 
         public String schema() {

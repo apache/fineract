@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForLoan;
 import org.apache.fineract.accounting.common.AccountingConstants.LoanProductAccountingParams;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
@@ -44,32 +45,18 @@ import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class ProductToGLAccountMappingHelper {
 
     protected final GLAccountRepository accountRepository;
-    protected final GLAccountRepositoryWrapper accountRepositoryWrapper;
     protected final ProductToGLAccountMappingRepository accountMappingRepository;
     protected final FromJsonHelper fromApiJsonHelper;
     private final ChargeRepositoryWrapper chargeRepositoryWrapper;
+    protected final GLAccountRepositoryWrapper accountRepositoryWrapper;
     private final PaymentTypeRepositoryWrapper paymentTypeRepositoryWrapper;
-
-    @Autowired
-    public ProductToGLAccountMappingHelper(final GLAccountRepository glAccountRepository,
-            final ProductToGLAccountMappingRepository glAccountMappingRepository, final FromJsonHelper fromApiJsonHelper,
-            final ChargeRepositoryWrapper chargeRepositoryWrapper, final GLAccountRepositoryWrapper accountRepositoryWrapper,
-            PaymentTypeRepositoryWrapper paymentTypeRepositoryWrapper) {
-        this.accountRepository = glAccountRepository;
-        this.accountMappingRepository = glAccountMappingRepository;
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.chargeRepositoryWrapper = chargeRepositoryWrapper;
-        this.accountRepositoryWrapper = accountRepositoryWrapper;
-        this.paymentTypeRepositoryWrapper = paymentTypeRepositoryWrapper;
-
-    }
 
     public void saveProductToAccountMapping(final JsonElement element, final String paramName, final Long productId,
             final int placeHolderTypeId, final GLAccountType expectedAccountType, final PortfolioProductType portfolioProductType) {

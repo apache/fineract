@@ -43,6 +43,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.closure.data.GLClosureData;
 import org.apache.fineract.accounting.closure.service.GLClosureReadPlatformService;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -54,7 +55,6 @@ import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSeria
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -65,7 +65,7 @@ import org.springframework.stereotype.Component;
         + "\n" + "Field Descriptions\n" + "closingDate\n" + "The date for which the accounting closure is defined\n" + "officeId\n"
         + "The identifer of the branch for which accounting has been closed\n" + "comments\n"
         + "Description associated with an Accounting closure")
-
+@RequiredArgsConstructor
 public class GLClosuresApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
@@ -74,25 +74,12 @@ public class GLClosuresApiResource {
 
     private final String resourceNameForPermission = "GLCLOSURE";
 
+    private final PlatformSecurityContext context;
     private final GLClosureReadPlatformService glClosureReadPlatformService;
-    private final OfficeReadPlatformService officeReadPlatformService;
     private final DefaultToApiJsonSerializer<GLClosureData> apiJsonSerializerService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PlatformSecurityContext context;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-
-    @Autowired
-    public GLClosuresApiResource(final PlatformSecurityContext context, final GLClosureReadPlatformService glClosureReadPlatformService,
-            final DefaultToApiJsonSerializer<GLClosureData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final OfficeReadPlatformService officeReadPlatformService) {
-        this.context = context;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.apiJsonSerializerService = toApiJsonSerializer;
-        this.glClosureReadPlatformService = glClosureReadPlatformService;
-        this.officeReadPlatformService = officeReadPlatformService;
-    }
+    private final OfficeReadPlatformService officeReadPlatformService;
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })

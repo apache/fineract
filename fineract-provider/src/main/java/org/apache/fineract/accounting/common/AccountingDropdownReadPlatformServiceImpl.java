@@ -21,24 +21,20 @@ package org.apache.fineract.accounting.common;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountUsage;
 import org.apache.fineract.accounting.glaccount.service.GLAccountReadPlatformService;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryType;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class AccountingDropdownReadPlatformServiceImpl implements AccountingDropdownReadPlatformService {
 
     private final GLAccountReadPlatformService accountReadPlatformService;
-
-    @Autowired
-    public AccountingDropdownReadPlatformServiceImpl(final GLAccountReadPlatformService accountReadPlatformService) {
-        this.accountReadPlatformService = accountReadPlatformService;
-    }
 
     @Override
     public List<EnumOptionData> retrieveGLAccountTypeOptions() {

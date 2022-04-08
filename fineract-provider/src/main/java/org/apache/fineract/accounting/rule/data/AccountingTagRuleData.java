@@ -18,25 +18,16 @@
  */
 package org.apache.fineract.accounting.rule.data;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
+@RequiredArgsConstructor
+@Getter
 public class AccountingTagRuleData {
 
-    @SuppressWarnings("unused")
     private final Long id;
     private final CodeValueData tag;
-    @SuppressWarnings("unused")
     private final EnumOptionData transactionType;
-
-    public AccountingTagRuleData(final Long id, final CodeValueData tag, final EnumOptionData transactionType) {
-        this.id = id;
-        this.tag = tag;
-        this.transactionType = transactionType;
-    }
-
-    public CodeValueData getTag() {
-        return this.tag;
-    }
-
 }

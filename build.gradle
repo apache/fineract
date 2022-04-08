@@ -205,6 +205,7 @@ allprojects  {
             dependency "commons-codec:commons-codec:1.15"
             dependency "org.bouncycastle:bcpkix-jdk15to18:1.70"
             dependency "org.bouncycastle:bcprov-jdk15to18:1.70"
+            dependency "org.projectlombok:lombok:1.18.22"
 
 
             dependency ('org.apache.activemq:activemq-broker:5.17.0') {
@@ -561,7 +562,9 @@ configure(project.fineractJavaProjects) {
                     "AlmostJavadoc",
                     "InvalidBlockTag",
                     "JavaUtilDate", // TODO FINERACT-1298
-                    "ReturnValueIgnored"
+                    "ReturnValueIgnored",
+                    "SameNameButDifferent", // Until errorprone recognizes Lombok
+                    "MultiVariableDeclaration" // Until errorprone recognizes Lombok
                     )
             error(
                     "DefaultCharset",
@@ -572,7 +575,6 @@ configure(project.fineractJavaProjects) {
                     "UnnecessaryParentheses",
                     "MultipleTopLevelClasses",
                     "MixedMutabilityReturnType",
-                    "MultiVariableDeclaration",
                     "AssertEqualsArgumentOrderChecker",
                     "EmptySetMultibindingContributions",
                     "BigDecimalEquals",
@@ -586,7 +588,6 @@ configure(project.fineractJavaProjects) {
                     "StreamResourceLeak",
                     "TruthIncompatibleType",
                     "ByteBufferBackingArray",
-                    "SameNameButDifferent",
                     "OrphanedFormatString",
                     "CatchAndPrintStackTrace",
                     "ObjectToString",

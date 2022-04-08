@@ -23,24 +23,20 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.closure.data.GLClosureData;
 import org.apache.fineract.accounting.closure.exception.GLClosureNotFoundException;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    public GLClosureReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     private static final class GLClosureMapper implements RowMapper<GLClosureData> {
 
