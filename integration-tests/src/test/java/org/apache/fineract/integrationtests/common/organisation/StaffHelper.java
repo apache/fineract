@@ -87,6 +87,12 @@ public final class StaffHelper {
         return Utils.performServerGet(requestSpec, responseSpec, url, "");
     }
 
+    public static List<Map<String, Object>> getStaffListWithLoanOfficerStatus(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String loanOfficerStatus) {
+        final String url = CREATE_STAFF_URL + "?" + Utils.TENANT_IDENTIFIER + "&loanOfficersOnly=" + loanOfficerStatus;
+        return Utils.performServerGet(requestSpec, responseSpec, url, "");
+    }
+
     public static Map<String, Object> updateStaff(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer staffId, final Map<String, Object> changes) {
         final String url = CREATE_STAFF_URL + "/" + staffId + "?" + Utils.TENANT_IDENTIFIER;

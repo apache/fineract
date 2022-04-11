@@ -241,4 +241,22 @@ public class StaffTest {
         map.put("xyz", "xyz");
         StaffHelper.updateStaff(requestSpec, responseSpecForValidationError, 1, map);
     }
+
+    @Test
+    public void testStaffLoanOfficer() {
+        final Map<String, Object> map = StaffHelper.getMapWithJoiningDate();
+
+        map.put("officeId", 1);
+        map.put("firstname", Utils.randomNameGenerator("michael_", 5));
+        map.put("lastname", Utils.randomNameGenerator("Doe_", 5));
+        map.put("isLoanOfficer", true);
+
+        StaffHelper.createStaffWithJson(requestSpec, responseSpec, new Gson().toJson(map));
+
+        List<Map<String, Object>> responseActive = StaffHelper.getStaffListWithLoanOfficerStatus(requestSpec, responseSpec, "true");
+        for (final Map<String, Object> staff : responseActive) {
+            Assertions.assertNotNull(staff.get("id"));
+            Assertions.assertEquals(true, staff.get("isLoanOfficer"));
+        }
+    }
 }

@@ -90,6 +90,7 @@ public class JournalEntryData {
     private String routingCode;
     private String receiptNumber;
     private String bankNumber;
+    private transient Long savingTransactionId;
 
     // for opening bal bulk import
     public JournalEntryData(Long officeId, LocalDate transactionDate, String currencyCode, List<CreditDebit> credits,
@@ -131,7 +132,6 @@ public class JournalEntryData {
         this.organizationRunningBalance = null;
         this.runningBalanceComputed = null;
         this.transactionDetails = null;
-
     }
 
     public static JournalEntryData importInstance(Long officeId, LocalDate transactionDate, String currencyCode, Long paymentTypeId,
@@ -240,6 +240,40 @@ public class JournalEntryData {
         this.currency = currency;
     }
 
+    public JournalEntryData(final Long id, final Long officeId, final String glAccountName, final Long glAccountId,
+            final String glAccountCode, final EnumOptionData glAccountClassification, final LocalDate transactionDate,
+            final EnumOptionData entryType, final BigDecimal amount, final String transactionId, final Boolean manualEntry,
+            final EnumOptionData entityType, final Long entityId, final LocalDate createdDate, final String currencyCode,
+            final Long savingTransactionId) {
+        this.id = id;
+        this.officeId = officeId;
+        this.officeName = null;
+        this.glAccountName = glAccountName;
+        this.glAccountId = glAccountId;
+        this.glAccountCode = glAccountCode;
+        this.glAccountType = glAccountClassification;
+        this.transactionDate = transactionDate;
+        this.entryType = entryType;
+        this.amount = amount;
+        this.transactionId = transactionId;
+        this.savingTransactionId = savingTransactionId;
+        this.manualEntry = manualEntry;
+        this.entityType = entityType;
+        this.entityId = entityId;
+        this.createdByUserId = null;
+        this.createdDate = createdDate;
+        this.createdByUserName = null;
+        this.comments = null;
+        this.reversed = false;
+        this.referenceNumber = null;
+        this.officeRunningBalance = null;
+        this.organizationRunningBalance = null;
+        this.runningBalanceComputed = null;
+        this.transactionDetails = null;
+        this.currency = null;
+        this.currencyCode = currencyCode;
+    }
+
     public static JournalEntryData fromGLAccountData(final GLAccountData glAccountData) {
 
         final Long id = null;
@@ -300,4 +334,33 @@ public class JournalEntryData {
     public String getTransactionId() {
         return transactionId;
     }
+
+    public Long getSavingTransactionId() {
+        return this.savingTransactionId;
+    }
+
+    public String getCurrencyCode() {
+        return this.currencyCode;
+    }
+
+    public boolean isManualEntry() {
+        return this.manualEntry;
+    }
+
+    public EnumOptionData getEntityType() {
+        return this.entityType;
+    }
+
+    public Long getEntityId() {
+        return this.entityId;
+    }
+
+    public LocalDate getCreatedDate() {
+        return this.createdDate;
+    }
+
+    public Long getPaymentTypeId() {
+        return this.paymentTypeId;
+    }
+
 }

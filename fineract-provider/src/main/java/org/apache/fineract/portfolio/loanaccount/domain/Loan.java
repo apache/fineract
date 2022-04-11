@@ -316,7 +316,7 @@ public class Loan extends AbstractPersistableCustom {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<LoanCollateral> collateral = null;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<LoanCollateralManagement> loanCollateralManagements = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
@@ -5623,7 +5623,8 @@ public class Loan extends AbstractPersistableCustom {
                 rescheduleStrategyMethod, calendar, getApprovedPrincipal(), annualNominalInterestRate, loanTermVariations,
                 calendarHistoryDataWrapper, scheduleGeneratorDTO.getNumberOfdays(), scheduleGeneratorDTO.isSkipRepaymentOnFirstDayofMonth(),
                 holidayDetailDTO, allowCompoundingOnEod, scheduleGeneratorDTO.isFirstRepaymentDateAllowedOnHoliday(),
-                scheduleGeneratorDTO.isInterestToBeAppropriatedEquallyWhenGreaterThanEMI(), this.fixedPrincipalPercentagePerInstallment);
+                scheduleGeneratorDTO.isInterestToBeRecoveredFirstWhenGreaterThanEMI(), this.fixedPrincipalPercentagePerInstallment,
+                scheduleGeneratorDTO.isPrincipalCompoundingDisabledForOverdueLoans());
         return loanApplicationTerms;
     }
 
@@ -5905,7 +5906,7 @@ public class Loan extends AbstractPersistableCustom {
                 compoundingCalendarInstance, compoundingFrequencyType, this.loanProduct.preCloseInterestCalculationStrategy(),
                 rescheduleStrategyMethod, loanCalendar, getApprovedPrincipal(), annualNominalInterestRate, loanTermVariations,
                 calendarHistoryDataWrapper, numberofdays, isSkipRepaymentonmonthFirst, holidayDetailDTO, allowCompoundingOnEod, false,
-                false, this.fixedPrincipalPercentagePerInstallment);
+                false, this.fixedPrincipalPercentagePerInstallment, false);
     }
 
     /**

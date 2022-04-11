@@ -54,7 +54,7 @@ Instructions to build the JAR file
 
 The tenants database connection details are configured [via environment variables (as with Docker container)](#instructions-to-run-using-docker-and-docker-compose), e.g. like this:
 
-    export fineract_tenants_pwd=verysecret
+    export FINERACT_HIKARI_PASSWORD=verysecret
     ...
     java -jar fineract-provider.jar
 
@@ -177,6 +177,26 @@ variables; please consult the [`docker-compose.yml`](docker-compose.yml) for exa
 _(Note that in previous versions, the `mysqlserver` environment variable used at `docker build` time instead of at
 `docker run` time did something similar; this has changed in [FINERACT-773](https://issues.apache.org/jira/browse/FINERACT-773)),
 and the `mysqlserver` environment variable is now no longer supported.)_
+
+
+Connection pool configuration
+=============================
+
+Please check `application.properties` to see which connection pool settings can be tweaked. The associated environment variables are prefixed with `FINERACT_HIKARI_*`. You can find more information about specific connection pool settings (Hikari) at https://github.com/brettwooldridge/HikariCP#configuration-knobs-baby
+
+NOTE: we'll keep backwards compatibility until one of the next releases to ensure that things are working as expected. Environment variables prefixed `fineract_tenants_*` can still be used to configure the database connection, but we strongly encourage using `FINERACT_HIKARI_*` with more options.
+
+SSL configuration
+=================
+
+By default SSL is enabled, but all SSL related properties are now tunable. SSL can be turned off by setting the environment variable `FINERACT_SERVER_SSL_ENABLED` to false. If you do that then please make sure to also change the server port to `8080` via the variable `FINERACT_SERVER_PORT`, just for the sake of keeping the conventions.
+You can choose now easily a different SSL keystore by setting `FINERACT_SERVER_SSL_KEY_STORE` with a path to a different (not embedded) keystore. The password can be set via `FINERACT_SERVER_SSL_KEY_STORE_PASSWORD`. See the `application.properties` file and the latest Spring Boot documentation (https://docs.spring.io/spring-boot/docs/current/reference/html/application-properties.html) for more details.
+
+
+Tomcat configuration
+====================
+
+Please refer to the `application.properties` and the official Spring Boot documentation (https://docs.spring.io/spring-boot/docs/current/reference/html/application-properties.html) on how to do performance tuning for Tomcat. Note: you can set now the acceptable form POST size (default is 2MB) via environment variable `FINERACT_SERVER_TOMCAT_MAX_HTTP_FORM_POST_SIZE`.
 
 
 Instructions to run on Kubernetes
@@ -302,11 +322,11 @@ License
 This project is licensed under Apache License Version 2.0. See <https://github.com/apache/incubator-fineract/blob/develop/LICENSE.md> for reference.
 
 The Connector/J JDBC Driver client library from MariaDB.org, which is licensed under the LGPL,
-is used in development when running integration tests that use the Flyway library.  That JDBC
+is used in development when running integration tests that use the Liquibase library.  That JDBC
 driver is however not included in and distributed with the Fineract product and is not
 required to use the product.
 If you are developer and object to using the LGPL licensed Connector/J JDBC driver,
-simply do not run the integration tests that use the Flyway library and/or use another JDBC driver.
+simply do not run the integration tests that use the Liquibase library and/or use another JDBC driver.
 As discussed in [LEGAL-462](https://issues.apache.org/jira/browse/LEGAL-462), this project therefore
 complies with the [Apache Software Foundation third-party license policy](https://www.apache.org/legal/resolved.html).
 
@@ -440,7 +460,7 @@ Releasing
 
 Before you use Gradle to create a release you need to make sure that you provide the proper GPG parameters. You have to options:
 
-1. Provide the parameters via ~/gradle/gradle.properties in your home folder:
+1. Provide the parameters via ~/.gradle/gradle.properties in your home folder:
 ```
 signing.gnupg.keyName=7890ABCD
 signing.gnupg.passphrase=secret
@@ -462,23 +482,23 @@ NOTE: Let's assume your GPG key ID would be "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789
 
 Above tasks will create the following files in folder build/distributions:
 
-- binary distribution file: apache-fineract-1.4.0-binary.tar.gz
-- ASCII armored signature for binary distribution: apache-fineract-1.4.0-binary.tar.gz.asc
-- SHA512 checksum for binary distribution: apache-fineract-1.4.0-binary.tar.gz.sha512
-- source distribution file: apache-fineract-1.4.0-src.tar.gz
-- ASCII armored signature for source distribution: apache-fineract-1.4.0-src.tar.gz.asc
-- SHA512 checksum for source distribution: apache-fineract-1.4.0-src.tar.gz.sha512
+- binary distribution file: apache-fineract-1.6.0-binary.tar.gz
+- ASCII armored signature for binary distribution: apache-fineract-1.6.0-binary.tar.gz.asc
+- SHA512 checksum for binary distribution: apache-fineract-1.6.0-binary.tar.gz.sha512
+- source distribution file: apache-fineract-1.6.0-src.tar.gz
+- ASCII armored signature for source distribution: apache-fineract-1.6.0-src.tar.gz.asc
+- SHA512 checksum for source distribution: apache-fineract-1.6.0-src.tar.gz.sha512
 
 The signatures are automatically verified by the build script. It will throw an exception if the verification fails.
 
 Additionally, you can verify the validity of the release distribution files e. g. with:
 ```
-gpg --verify build/distributions/apache-fineract-1.4.0-binary.tar.gz.asc
+gpg --verify build/distributions/apache-fineract-1.6.0-binary.tar.gz.asc
 ```
 
 The output should look somewhat like this:
 ```
-gpg: assuming signed data in 'build/distributions/apache-fineract-1.4.0-binary.tgz'
+gpg: assuming signed data in 'build/distributions/apache-fineract-1.6.0-binary.tgz'
 gpg: Signature made Mi 26 Aug 2020 17:17:45 CEST
 gpg:                using RSA key ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCD
 gpg: Good signature from "Aleksandar Vidakovic (Apache Fineract Release Manager) <aleks@apache.org>" [ultimate]

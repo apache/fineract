@@ -113,7 +113,7 @@ public class CenterIntegrationTest {
 
     @Test
     public void testVoidCenterRetrieval() {
-        ArrayList<CenterDomain> arr = CenterHelper.listCenters(requestSpec, responseSpec);
+        ArrayList<CenterDomain> arr = CenterHelper.listCentersOrdered(requestSpec, responseSpec);
         int id = arr.get(arr.size() - 1).getId() + 1;
         ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(404).build();
         CenterDomain center = CenterHelper.retrieveByID(id, requestSpec, responseSpec);

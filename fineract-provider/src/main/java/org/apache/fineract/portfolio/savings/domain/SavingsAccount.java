@@ -1003,7 +1003,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
                     if (overdraftAmount.isGreaterThanZero()) {
                         accountTransaction.updateOverdraftAmount(overdraftAmount.getAmount());
                     }
-                    accountTransaction.updateRunningBalance(runningBalance);
+                    // accountTransaction.updateRunningBalance(runningBalance);
                     if (backdatedTxnsAllowedTill) {
                         addTransactionToExisting(accountTransaction);
                     } else {
@@ -1108,6 +1108,11 @@ public class SavingsAccount extends AbstractPersistableCustom {
             this.sub_status = SavingsAccountSubStatusEnum.NONE.getValue();
         }
 
+        if (backdatedTxnsAllowedTill) {
+            this.summary.updateSummaryWithPivotConfig(this.currency, this.savingsAccountTransactionSummaryWrapper, transaction,
+                    this.savingsAccountTransactions);
+        }
+
         return transaction;
     }
 
@@ -1119,8 +1124,16 @@ public class SavingsAccount extends AbstractPersistableCustom {
         return activationLocalDate;
     }
 
+    public AppUser getActivatedBy() {
+        return this.activatedBy;
+    }
+
     public LocalDate getWithdrawnOnDate() {
         return withdrawnOnDate == null ? null : LocalDate.ofInstant(withdrawnOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+    }
+
+    public AppUser getWithdrawnBy() {
+        return this.withdrawnBy;
     }
 
     // startInterestCalculationDate is set during migration so that there is no
@@ -1950,6 +1963,10 @@ public class SavingsAccount extends AbstractPersistableCustom {
         return gsim;
     }
 
+    public Long getSavingsProductId() {
+        return this.savingsProduct().getId();
+    }
+
     public void setGsim(GroupSavingsIndividualMonitoring gsim) {
         this.gsim = gsim;
     }
@@ -2063,6 +2080,10 @@ public class SavingsAccount extends AbstractPersistableCustom {
         return rejectedOnDate == null ? null : LocalDate.ofInstant(rejectedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
     }
 
+    public AppUser getRejectedBy() {
+        return this.rejectedBy;
+    }
+
     public void removeSavingsOfficer(final LocalDate unassignDate) {
 
         final SavingsOfficerAssignmentHistory latestHistoryRecord = findLatestIncompleteHistoryRecord();
@@ -2167,6 +2188,18 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     public BigDecimal getNominalAnnualInterestRate() {
         return this.nominalAnnualInterestRate;
+    }
+
+    public Integer getInterestCompoundingPeriodType() {
+        return this.interestCompoundingPeriodType;
+    }
+
+    public Integer getInterestPostingPeriodType() {
+        return this.interestPostingPeriodType;
+    }
+
+    public Integer getInterestCalculationType() {
+        return this.interestCalculationType;
     }
 
     public BigDecimal getNominalAnnualInterestRateOverdraft() {
@@ -2775,6 +2808,10 @@ public class SavingsAccount extends AbstractPersistableCustom {
         return this.closedOnDate == null ? null : LocalDate.ofInstant(this.closedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
     }
 
+    public AppUser getClosedBy() {
+        return this.closedBy;
+    }
+
     public SavingsAccountSummary getSummary() {
         return this.summary;
     }
@@ -3211,6 +3248,14 @@ public class SavingsAccount extends AbstractPersistableCustom {
                     savingsPostingInterestPeriodType.name(), savingsCompoundingInterestPeriodType.name());
 
         }
+    }
+
+    public AppUser getSubmittedBy() {
+        return this.submittedBy;
+    }
+
+    public AppUser getApprovedBy() {
+        return this.approvedBy;
     }
 
     public boolean allowDeposit() {
@@ -3664,5 +3709,69 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     private boolean isOverdraft() {
         return allowOverdraft;
+    }
+
+    public Long getGroupId() {
+        return this.groupId();
+    }
+
+    public Integer getInterestCalculationDaysInYearType() {
+        return this.interestCalculationDaysInYearType;
+    }
+
+    public BigDecimal getMinRequiredOpeningBalance() {
+        return this.minRequiredOpeningBalance;
+    }
+
+    public Integer getLockinPeriodFrequency() {
+        return this.lockinPeriodFrequency;
+    }
+
+    public Integer getLockinPeriodFrequencyType() {
+        return this.lockinPeriodFrequencyType;
+    }
+
+    public boolean isWithdrawalFeeForTransfer() {
+        return this.withdrawalFeeApplicableForTransfer;
+    }
+
+    public boolean isAllowOverdraft() {
+        return this.allowOverdraft;
+    }
+
+    public BigDecimal getOverdraftLimit() {
+        return this.overdraftLimit;
+    }
+
+    public BigDecimal getMinOverdraftForInterestCalculation() {
+        return this.minOverdraftForInterestCalculation;
+    }
+
+    public Date getLockedInUntilDate() {
+        return this.lockedInUntilDate;
+    }
+
+    public Integer getDepositType() {
+        return this.depositType;
+    }
+
+    public BigDecimal getMinRequiredBalance() {
+        return this.minRequiredBalance;
+    }
+
+    public boolean isEnforceMinRequiredBalance() {
+        return this.enforceMinRequiredBalance;
+    }
+
+    public BigDecimal getMinBalanceForInterestCalculation() {
+        return this.minBalanceForInterestCalculation;
+    }
+
+    public int getVersion() {
+        return this.version;
+    }
+
+    public boolean isWithHoldTax() {
+        return this.withHoldTax;
     }
 }

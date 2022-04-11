@@ -1,0 +1,2538 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet author="fineract" id="1">
+        <insert tableName="tenant_server_connections">
+            <column name="id" valueNumeric="1"/>
+            <column name="schema_server" value="${fineract.tenant.host}"/>
+            <column name="schema_name" value="${fineract.tenant.schema-name}"/>
+            <column name="schema_server_port" value="${fineract.tenant.port}"/>
+            <column name="schema_username" value="${fineract.tenant.username}"/>
+            <column name="schema_password" value="${fineract.tenant.password}"/>
+            <column name="schema_connection_parameters" value="${fineract.tenant.parameters}"/>
+        </insert>
+    </changeSet>
+    <changeSet author="fineract" id="2">
+        <insert tableName="tenants">
+            <column name="id" valueNumeric="1"/>
+            <column name="identifier" value="${fineract.tenant.identifier}"/>
+            <column name="name" value="${fineract.tenant.description}"/>
+            <column name="timezone_id" value="${fineract.tenant.timezone}"/>
+            <column name="oltp_id" valueNumeric="1"/>
+            <column name="report_id" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+    <changeSet author="fineract" id="3">
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="1"/>
+            <column name="country_code" value="AD"/>
+            <column name="timezonename" value="Europe/Andorra"/>
+            <column name="comments"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="2"/>
+            <column name="country_code" value="AE"/>
+            <column name="timezonename" value="Asia/Dubai"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="3"/>
+            <column name="country_code" value="AF"/>
+            <column name="timezonename" value="Asia/Kabul"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="4"/>
+            <column name="country_code" value="AG"/>
+            <column name="timezonename" value="America/Antigua"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="5"/>
+            <column name="country_code" value="AI"/>
+            <column name="timezonename" value="America/Anguilla"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="6"/>
+            <column name="country_code" value="AL"/>
+            <column name="timezonename" value="Europe/Tirane"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="7"/>
+            <column name="country_code" value="AM"/>
+            <column name="timezonename" value="Asia/Yerevan"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="8"/>
+            <column name="country_code" value="AO"/>
+            <column name="timezonename" value="Africa/Luanda"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="9"/>
+            <column name="country_code" value="AQ"/>
+            <column name="timezonename" value="Antarctica/McMurdo"/>
+            <column name="comments" value="McMurdo Station, Ross Island"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="10"/>
+            <column name="country_code" value="AQ"/>
+            <column name="timezonename" value="Antarctica/South_Pole"/>
+            <column name="comments" value="Amundsen-Scott Station, South Pole"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="11"/>
+            <column name="country_code" value="AQ"/>
+            <column name="timezonename" value="Antarctica/Rothera"/>
+            <column name="comments" value="Rothera Station, Adelaide Island"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="12"/>
+            <column name="country_code" value="AQ"/>
+            <column name="timezonename" value="Antarctica/Palmer"/>
+            <column name="comments" value="Palmer Station, Anvers Island"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="13"/>
+            <column name="country_code" value="AQ"/>
+            <column name="timezonename" value="Antarctica/Mawson"/>
+            <column name="comments" value="Mawson Station, Holme Bay"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="14"/>
+            <column name="country_code" value="AQ"/>
+            <column name="timezonename" value="Antarctica/Davis"/>
+            <column name="comments" value="Davis Station, Vestfold Hills"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="15"/>
+            <column name="country_code" value="AQ"/>
+            <column name="timezonename" value="Antarctica/Casey"/>
+            <column name="comments" value="Casey Station, Bailey Peninsula"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="16"/>
+            <column name="country_code" value="AQ"/>
+            <column name="timezonename" value="Antarctica/Vostok"/>
+            <column name="comments" value="Vostok Station, Lake Vostok"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="17"/>
+            <column name="country_code" value="AQ"/>
+            <column name="timezonename" value="Antarctica/DumontDUrville"/>
+            <column name="comments" value="Dumont-dUrville Station, Terre Adelie"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="18"/>
+            <column name="country_code" value="AQ"/>
+            <column name="timezonename" value="Antarctica/Syowa"/>
+            <column name="comments" value="Syowa Station, E Ongul I"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="19"/>
+            <column name="country_code" value="AQ"/>
+            <column name="timezonename" value="Antarctica/Macquarie"/>
+            <column name="comments" value="Macquarie Island Station, Macquarie Island"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="20"/>
+            <column name="country_code" value="AR"/>
+            <column name="timezonename" value="America/Argentina/Buenos_Aires"/>
+            <column name="comments" value="Buenos Aires (BA, CF)"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="21"/>
+            <column name="country_code" value="AR"/>
+            <column name="timezonename" value="America/Argentina/Cordoba"/>
+            <column name="comments" value="most locations (CB, CC, CN, ER, FM, MN, SE, SF)"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="22"/>
+            <column name="country_code" value="AR"/>
+            <column name="timezonename" value="America/Argentina/Salta"/>
+            <column name="comments" value="(SA, LP, NQ, RN)"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="23"/>
+            <column name="country_code" value="AR"/>
+            <column name="timezonename" value="America/Argentina/Jujuy"/>
+            <column name="comments" value="Jujuy (JY)"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="24"/>
+            <column name="country_code" value="AR"/>
+            <column name="timezonename" value="America/Argentina/Tucuman"/>
+            <column name="comments" value="Tucuman (TM)"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="25"/>
+            <column name="country_code" value="AR"/>
+            <column name="timezonename" value="America/Argentina/Catamarca"/>
+            <column name="comments" value="Catamarca (CT), Chubut (CH)"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="26"/>
+            <column name="country_code" value="AR"/>
+            <column name="timezonename" value="America/Argentina/La_Rioja"/>
+            <column name="comments" value="La Rioja (LR)"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="27"/>
+            <column name="country_code" value="AR"/>
+            <column name="timezonename" value="America/Argentina/San_Juan"/>
+            <column name="comments" value="San Juan (SJ)"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="28"/>
+            <column name="country_code" value="AR"/>
+            <column name="timezonename" value="America/Argentina/Mendoza"/>
+            <column name="comments" value="Mendoza (MZ)"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="29"/>
+            <column name="country_code" value="AR"/>
+            <column name="timezonename" value="America/Argentina/San_Luis"/>
+            <column name="comments" value="San Luis (SL)"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="30"/>
+            <column name="country_code" value="AR"/>
+            <column name="timezonename" value="America/Argentina/Rio_Gallegos"/>
+            <column name="comments" value="Santa Cruz (SC)"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="31"/>
+            <column name="country_code" value="AR"/>
+            <column name="timezonename" value="America/Argentina/Ushuaia"/>
+            <column name="comments" value="Tierra del Fuego (TF)"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="32"/>
+            <column name="country_code" value="AS"/>
+            <column name="timezonename" value="Pacific/Pago_Pago"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="33"/>
+            <column name="country_code" value="AT"/>
+            <column name="timezonename" value="Europe/Vienna"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="34"/>
+            <column name="country_code" value="AU"/>
+            <column name="timezonename" value="Australia/Lord_Howe"/>
+            <column name="comments" value="Lord Howe Island"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="35"/>
+            <column name="country_code" value="AU"/>
+            <column name="timezonename" value="Australia/Hobart"/>
+            <column name="comments" value="Tasmania - most locations"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="36"/>
+            <column name="country_code" value="AU"/>
+            <column name="timezonename" value="Australia/Currie"/>
+            <column name="comments" value="Tasmania - King Island"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="37"/>
+            <column name="country_code" value="AU"/>
+            <column name="timezonename" value="Australia/Melbourne"/>
+            <column name="comments" value="Victoria"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="38"/>
+            <column name="country_code" value="AU"/>
+            <column name="timezonename" value="Australia/Sydney"/>
+            <column name="comments" value="New South Wales - most locations"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="39"/>
+            <column name="country_code" value="AU"/>
+            <column name="timezonename" value="Australia/Broken_Hill"/>
+            <column name="comments" value="New South Wales - Yancowinna"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="40"/>
+            <column name="country_code" value="AU"/>
+            <column name="timezonename" value="Australia/Brisbane"/>
+            <column name="comments" value="Queensland - most locations"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="41"/>
+            <column name="country_code" value="AU"/>
+            <column name="timezonename" value="Australia/Lindeman"/>
+            <column name="comments" value="Queensland - Holiday Islands"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="42"/>
+            <column name="country_code" value="AU"/>
+            <column name="timezonename" value="Australia/Adelaide"/>
+            <column name="comments" value="South Australia"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="43"/>
+            <column name="country_code" value="AU"/>
+            <column name="timezonename" value="Australia/Darwin"/>
+            <column name="comments" value="Northern Territory"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="44"/>
+            <column name="country_code" value="AU"/>
+            <column name="timezonename" value="Australia/Perth"/>
+            <column name="comments" value="Western Australia - most locations"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="45"/>
+            <column name="country_code" value="AU"/>
+            <column name="timezonename" value="Australia/Eucla"/>
+            <column name="comments" value="Western Australia - Eucla area"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="46"/>
+            <column name="country_code" value="AW"/>
+            <column name="timezonename" value="America/Aruba"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="47"/>
+            <column name="country_code" value="AX"/>
+            <column name="timezonename" value="Europe/Mariehamn"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="48"/>
+            <column name="country_code" value="AZ"/>
+            <column name="timezonename" value="Asia/Baku"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="49"/>
+            <column name="country_code" value="BA"/>
+            <column name="timezonename" value="Europe/Sarajevo"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="50"/>
+            <column name="country_code" value="BB"/>
+            <column name="timezonename" value="America/Barbados"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="51"/>
+            <column name="country_code" value="BD"/>
+            <column name="timezonename" value="Asia/Dhaka"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="52"/>
+            <column name="country_code" value="BE"/>
+            <column name="timezonename" value="Europe/Brussels"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="53"/>
+            <column name="country_code" value="BF"/>
+            <column name="timezonename" value="Africa/Ouagadougou"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="54"/>
+            <column name="country_code" value="BG"/>
+            <column name="timezonename" value="Europe/Sofia"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="55"/>
+            <column name="country_code" value="BH"/>
+            <column name="timezonename" value="Asia/Bahrain"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="56"/>
+            <column name="country_code" value="BI"/>
+            <column name="timezonename" value="Africa/Bujumbura"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="57"/>
+            <column name="country_code" value="BJ"/>
+            <column name="timezonename" value="Africa/Porto-Novo"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="58"/>
+            <column name="country_code" value="BL"/>
+            <column name="timezonename" value="America/St_Barthelemy"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="59"/>
+            <column name="country_code" value="BM"/>
+            <column name="timezonename" value="Atlantic/Bermuda"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="60"/>
+            <column name="country_code" value="BN"/>
+            <column name="timezonename" value="Asia/Brunei"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="61"/>
+            <column name="country_code" value="BO"/>
+            <column name="timezonename" value="America/La_Paz"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="62"/>
+            <column name="country_code" value="BQ"/>
+            <column name="timezonename" value="America/Kralendijk"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="63"/>
+            <column name="country_code" value="BR"/>
+            <column name="timezonename" value="America/Noronha"/>
+            <column name="comments" value="Atlantic islands"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="64"/>
+            <column name="country_code" value="BR"/>
+            <column name="timezonename" value="America/Belem"/>
+            <column name="comments" value="Amapa, E Para"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="65"/>
+            <column name="country_code" value="BR"/>
+            <column name="timezonename" value="America/Fortaleza"/>
+            <column name="comments" value="NE Brazil (MA, PI, CE, RN, PB)"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="66"/>
+            <column name="country_code" value="BR"/>
+            <column name="timezonename" value="America/Recife"/>
+            <column name="comments" value="Pernambuco"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="67"/>
+            <column name="country_code" value="BR"/>
+            <column name="timezonename" value="America/Araguaina"/>
+            <column name="comments" value="Tocantins"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="68"/>
+            <column name="country_code" value="BR"/>
+            <column name="timezonename" value="America/Maceio"/>
+            <column name="comments" value="Alagoas, Sergipe"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="69"/>
+            <column name="country_code" value="BR"/>
+            <column name="timezonename" value="America/Bahia"/>
+            <column name="comments" value="Bahia"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="70"/>
+            <column name="country_code" value="BR"/>
+            <column name="timezonename" value="America/Sao_Paulo"/>
+            <column name="comments" value="S &amp; SE Brazil (GO, DF, MG, ES, RJ, SP, PR, SC, RS)"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="71"/>
+            <column name="country_code" value="BR"/>
+            <column name="timezonename" value="America/Campo_Grande"/>
+            <column name="comments" value="Mato Grosso do Sul"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="72"/>
+            <column name="country_code" value="BR"/>
+            <column name="timezonename" value="America/Cuiaba"/>
+            <column name="comments" value="Mato Grosso"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="73"/>
+            <column name="country_code" value="BR"/>
+            <column name="timezonename" value="America/Santarem"/>
+            <column name="comments" value="W Para"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="74"/>
+            <column name="country_code" value="BR"/>
+            <column name="timezonename" value="America/Porto_Velho"/>
+            <column name="comments" value="Rondonia"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="75"/>
+            <column name="country_code" value="BR"/>
+            <column name="timezonename" value="America/Boa_Vista"/>
+            <column name="comments" value="Roraima"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="76"/>
+            <column name="country_code" value="BR"/>
+            <column name="timezonename" value="America/Manaus"/>
+            <column name="comments" value="E Amazonas"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="77"/>
+            <column name="country_code" value="BR"/>
+            <column name="timezonename" value="America/Eirunepe"/>
+            <column name="comments" value="W Amazonas"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="78"/>
+            <column name="country_code" value="BR"/>
+            <column name="timezonename" value="America/Rio_Branco"/>
+            <column name="comments" value="Acre"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="79"/>
+            <column name="country_code" value="BS"/>
+            <column name="timezonename" value="America/Nassau"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="80"/>
+            <column name="country_code" value="BT"/>
+            <column name="timezonename" value="Asia/Thimphu"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="81"/>
+            <column name="country_code" value="BW"/>
+            <column name="timezonename" value="Africa/Gaborone"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="82"/>
+            <column name="country_code" value="BY"/>
+            <column name="timezonename" value="Europe/Minsk"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="83"/>
+            <column name="country_code" value="BZ"/>
+            <column name="timezonename" value="America/Belize"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="84"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/St_Johns"/>
+            <column name="comments" value="Newfoundland Time, including SE Labrador"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="85"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Halifax"/>
+            <column name="comments" value="Atlantic Time - Nova Scotia (most places), PEI"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="86"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Glace_Bay"/>
+            <column name="comments" value="Atlantic Time - Nova Scotia - places that did not observe DST 1966-1971"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="87"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Moncton"/>
+            <column name="comments" value="Atlantic Time - New Brunswick"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="88"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Goose_Bay"/>
+            <column name="comments" value="Atlantic Time - Labrador - most locations"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="89"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Blanc-Sablon"/>
+            <column name="comments" value="Atlantic Standard Time - Quebec - Lower North Shore"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="90"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Montreal"/>
+            <column name="comments" value="Eastern Time - Quebec - most locations"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="91"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Toronto"/>
+            <column name="comments" value="Eastern Time - Ontario - most locations"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="92"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Nipigon"/>
+            <column name="comments" value="Eastern Time - Ontario &amp; Quebec - places that did not observe DST 1967-1973"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="93"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Thunder_Bay"/>
+            <column name="comments" value="Eastern Time - Thunder Bay, Ontario"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="94"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Iqaluit"/>
+            <column name="comments" value="Eastern Time - east Nunavut - most locations"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="95"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Pangnirtung"/>
+            <column name="comments" value="Eastern Time - Pangnirtung, Nunavut"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="96"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Resolute"/>
+            <column name="comments" value="Central Standard Time - Resolute, Nunavut"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="97"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Atikokan"/>
+            <column name="comments" value="Eastern Standard Time - Atikokan, Ontario and Southampton I, Nunavut"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="98"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Rankin_Inlet"/>
+            <column name="comments" value="Central Time - central Nunavut"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="99"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Winnipeg"/>
+            <column name="comments" value="Central Time - Manitoba &amp; west Ontario"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="100"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Rainy_River"/>
+            <column name="comments" value="Central Time - Rainy River &amp; Fort Frances, Ontario"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="101"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Regina"/>
+            <column name="comments" value="Central Standard Time - Saskatchewan - most locations"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="102"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Swift_Current"/>
+            <column name="comments" value="Central Standard Time - Saskatchewan - midwest"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="103"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Edmonton"/>
+            <column name="comments" value="Mountain Time - Alberta, east British Columbia &amp; west Saskatchewan"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="104"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Cambridge_Bay"/>
+            <column name="comments" value="Mountain Time - west Nunavut"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="105"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Yellowknife"/>
+            <column name="comments" value="Mountain Time - central Northwest Territories"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="106"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Inuvik"/>
+            <column name="comments" value="Mountain Time - west Northwest Territories"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="107"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Creston"/>
+            <column name="comments" value="Mountain Standard Time - Creston, British Columbia"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="108"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Dawson_Creek"/>
+            <column name="comments" value="Mountain Standard Time - Dawson Creek &amp; Fort Saint John, British Columbia"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="109"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Vancouver"/>
+            <column name="comments" value="Pacific Time - west British Columbia"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="110"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Whitehorse"/>
+            <column name="comments" value="Pacific Time - south Yukon"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="111"/>
+            <column name="country_code" value="CA"/>
+            <column name="timezonename" value="America/Dawson"/>
+            <column name="comments" value="Pacific Time - north Yukon"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="112"/>
+            <column name="country_code" value="CC"/>
+            <column name="timezonename" value="Indian/Cocos"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="113"/>
+            <column name="country_code" value="CD"/>
+            <column name="timezonename" value="Africa/Kinshasa"/>
+            <column name="comments" value="west Dem. Rep. of Congo"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="114"/>
+            <column name="country_code" value="CD"/>
+            <column name="timezonename" value="Africa/Lubumbashi"/>
+            <column name="comments" value="east Dem. Rep. of Congo"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="115"/>
+            <column name="country_code" value="CF"/>
+            <column name="timezonename" value="Africa/Bangui"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="116"/>
+            <column name="country_code" value="CG"/>
+            <column name="timezonename" value="Africa/Brazzaville"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="117"/>
+            <column name="country_code" value="CH"/>
+            <column name="timezonename" value="Europe/Zurich"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="118"/>
+            <column name="country_code" value="CI"/>
+            <column name="timezonename" value="Africa/Abidjan"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="119"/>
+            <column name="country_code" value="CK"/>
+            <column name="timezonename" value="Pacific/Rarotonga"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="120"/>
+            <column name="country_code" value="CL"/>
+            <column name="timezonename" value="America/Santiago"/>
+            <column name="comments" value="most locations"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="121"/>
+            <column name="country_code" value="CL"/>
+            <column name="timezonename" value="Pacific/Easter"/>
+            <column name="comments" value="Easter Island &amp; Sala y Gomez"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="122"/>
+            <column name="country_code" value="CM"/>
+            <column name="timezonename" value="Africa/Douala"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="123"/>
+            <column name="country_code" value="CN"/>
+            <column name="timezonename" value="Asia/Shanghai"/>
+            <column name="comments" value="east China - Beijing, Guangdong, Shanghai, etc."/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="124"/>
+            <column name="country_code" value="CN"/>
+            <column name="timezonename" value="Asia/Harbin"/>
+            <column name="comments" value="Heilongjiang (except Mohe), Jilin"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="125"/>
+            <column name="country_code" value="CN"/>
+            <column name="timezonename" value="Asia/Chongqing"/>
+            <column name="comments" value="central China - Sichuan, Yunnan, Guangxi, Shaanxi, Guizhou, etc."/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="126"/>
+            <column name="country_code" value="CN"/>
+            <column name="timezonename" value="Asia/Urumqi"/>
+            <column name="comments" value="most of Tibet &amp; Xinjiang"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="127"/>
+            <column name="country_code" value="CN"/>
+            <column name="timezonename" value="Asia/Kashgar"/>
+            <column name="comments" value="west Tibet &amp; Xinjiang"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="128"/>
+            <column name="country_code" value="CO"/>
+            <column name="timezonename" value="America/Bogota"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="129"/>
+            <column name="country_code" value="CR"/>
+            <column name="timezonename" value="America/Costa_Rica"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="130"/>
+            <column name="country_code" value="CU"/>
+            <column name="timezonename" value="America/Havana"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="131"/>
+            <column name="country_code" value="CV"/>
+            <column name="timezonename" value="Atlantic/Cape_Verde"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="132"/>
+            <column name="country_code" value="CW"/>
+            <column name="timezonename" value="America/Curacao"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="133"/>
+            <column name="country_code" value="CX"/>
+            <column name="timezonename" value="Indian/Christmas"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="134"/>
+            <column name="country_code" value="CY"/>
+            <column name="timezonename" value="Asia/Nicosia"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="135"/>
+            <column name="country_code" value="CZ"/>
+            <column name="timezonename" value="Europe/Prague"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="136"/>
+            <column name="country_code" value="DE"/>
+            <column name="timezonename" value="Europe/Berlin"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="137"/>
+            <column name="country_code" value="DJ"/>
+            <column name="timezonename" value="Africa/Djibouti"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="138"/>
+            <column name="country_code" value="DK"/>
+            <column name="timezonename" value="Europe/Copenhagen"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="139"/>
+            <column name="country_code" value="DM"/>
+            <column name="timezonename" value="America/Dominica"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="140"/>
+            <column name="country_code" value="DO"/>
+            <column name="timezonename" value="America/Santo_Domingo"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="141"/>
+            <column name="country_code" value="DZ"/>
+            <column name="timezonename" value="Africa/Algiers"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="142"/>
+            <column name="country_code" value="EC"/>
+            <column name="timezonename" value="America/Guayaquil"/>
+            <column name="comments" value="mainland"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="143"/>
+            <column name="country_code" value="EC"/>
+            <column name="timezonename" value="Pacific/Galapagos"/>
+            <column name="comments" value="Galapagos Islands"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="144"/>
+            <column name="country_code" value="EE"/>
+            <column name="timezonename" value="Europe/Tallinn"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="145"/>
+            <column name="country_code" value="EG"/>
+            <column name="timezonename" value="Africa/Cairo"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="146"/>
+            <column name="country_code" value="EH"/>
+            <column name="timezonename" value="Africa/El_Aaiun"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="147"/>
+            <column name="country_code" value="ER"/>
+            <column name="timezonename" value="Africa/Asmara"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="148"/>
+            <column name="country_code" value="ES"/>
+            <column name="timezonename" value="Europe/Madrid"/>
+            <column name="comments" value="mainland"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="149"/>
+            <column name="country_code" value="ES"/>
+            <column name="timezonename" value="Africa/Ceuta"/>
+            <column name="comments" value="Ceuta &amp; Melilla"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="150"/>
+            <column name="country_code" value="ES"/>
+            <column name="timezonename" value="Atlantic/Canary"/>
+            <column name="comments" value="Canary Islands"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="151"/>
+            <column name="country_code" value="ET"/>
+            <column name="timezonename" value="Africa/Addis_Ababa"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="152"/>
+            <column name="country_code" value="FI"/>
+            <column name="timezonename" value="Europe/Helsinki"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="153"/>
+            <column name="country_code" value="FJ"/>
+            <column name="timezonename" value="Pacific/Fiji"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="154"/>
+            <column name="country_code" value="FK"/>
+            <column name="timezonename" value="Atlantic/Stanley"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="155"/>
+            <column name="country_code" value="FM"/>
+            <column name="timezonename" value="Pacific/Chuuk"/>
+            <column name="comments" value="Chuuk (Truk) and Yap"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="156"/>
+            <column name="country_code" value="FM"/>
+            <column name="timezonename" value="Pacific/Pohnpei"/>
+            <column name="comments" value="Pohnpei (Ponape)"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="157"/>
+            <column name="country_code" value="FM"/>
+            <column name="timezonename" value="Pacific/Kosrae"/>
+            <column name="comments" value="Kosrae"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="158"/>
+            <column name="country_code" value="FO"/>
+            <column name="timezonename" value="Atlantic/Faroe"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="159"/>
+            <column name="country_code" value="FR"/>
+            <column name="timezonename" value="Europe/Paris"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="160"/>
+            <column name="country_code" value="GA"/>
+            <column name="timezonename" value="Africa/Libreville"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="161"/>
+            <column name="country_code" value="GB"/>
+            <column name="timezonename" value="Europe/London"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="162"/>
+            <column name="country_code" value="GD"/>
+            <column name="timezonename" value="America/Grenada"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="163"/>
+            <column name="country_code" value="GE"/>
+            <column name="timezonename" value="Asia/Tbilisi"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="164"/>
+            <column name="country_code" value="GF"/>
+            <column name="timezonename" value="America/Cayenne"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="165"/>
+            <column name="country_code" value="GG"/>
+            <column name="timezonename" value="Europe/Guernsey"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="166"/>
+            <column name="country_code" value="GH"/>
+            <column name="timezonename" value="Africa/Accra"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="167"/>
+            <column name="country_code" value="GI"/>
+            <column name="timezonename" value="Europe/Gibraltar"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="168"/>
+            <column name="country_code" value="GL"/>
+            <column name="timezonename" value="America/Godthab"/>
+            <column name="comments" value="most locations"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="169"/>
+            <column name="country_code" value="GL"/>
+            <column name="timezonename" value="America/Danmarkshavn"/>
+            <column name="comments" value="east coast, north of Scoresbysund"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="170"/>
+            <column name="country_code" value="GL"/>
+            <column name="timezonename" value="America/Scoresbysund"/>
+            <column name="comments" value="Scoresbysund / Ittoqqortoormiit"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="171"/>
+            <column name="country_code" value="GL"/>
+            <column name="timezonename" value="America/Thule"/>
+            <column name="comments" value="Thule / Pituffik"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="172"/>
+            <column name="country_code" value="GM"/>
+            <column name="timezonename" value="Africa/Banjul"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="173"/>
+            <column name="country_code" value="GN"/>
+            <column name="timezonename" value="Africa/Conakry"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="174"/>
+            <column name="country_code" value="GP"/>
+            <column name="timezonename" value="America/Guadeloupe"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="175"/>
+            <column name="country_code" value="GQ"/>
+            <column name="timezonename" value="Africa/Malabo"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="176"/>
+            <column name="country_code" value="GR"/>
+            <column name="timezonename" value="Europe/Athens"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="177"/>
+            <column name="country_code" value="GS"/>
+            <column name="timezonename" value="Atlantic/South_Georgia"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="178"/>
+            <column name="country_code" value="GT"/>
+            <column name="timezonename" value="America/Guatemala"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="179"/>
+            <column name="country_code" value="GU"/>
+            <column name="timezonename" value="Pacific/Guam"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="180"/>
+            <column name="country_code" value="GW"/>
+            <column name="timezonename" value="Africa/Bissau"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="181"/>
+            <column name="country_code" value="GY"/>
+            <column name="timezonename" value="America/Guyana"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="182"/>
+            <column name="country_code" value="HK"/>
+            <column name="timezonename" value="Asia/Hong_Kong"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="183"/>
+            <column name="country_code" value="HN"/>
+            <column name="timezonename" value="America/Tegucigalpa"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="184"/>
+            <column name="country_code" value="HR"/>
+            <column name="timezonename" value="Europe/Zagreb"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="185"/>
+            <column name="country_code" value="HT"/>
+            <column name="timezonename" value="America/Port-au-Prince"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="186"/>
+            <column name="country_code" value="HU"/>
+            <column name="timezonename" value="Europe/Budapest"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="187"/>
+            <column name="country_code" value="ID"/>
+            <column name="timezonename" value="Asia/Jakarta"/>
+            <column name="comments" value="Java &amp; Sumatra"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="188"/>
+            <column name="country_code" value="ID"/>
+            <column name="timezonename" value="Asia/Pontianak"/>
+            <column name="comments" value="west &amp; central Borneo"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="189"/>
+            <column name="country_code" value="ID"/>
+            <column name="timezonename" value="Asia/Makassar"/>
+            <column name="comments" value="east &amp; south Borneo, Sulawesi (Celebes), Bali, Nusa Tengarra, west Timor"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="190"/>
+            <column name="country_code" value="ID"/>
+            <column name="timezonename" value="Asia/Jayapura"/>
+            <column name="comments" value="west New Guinea (Irian Jaya) &amp; Malukus (Moluccas)"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="191"/>
+            <column name="country_code" value="IE"/>
+            <column name="timezonename" value="Europe/Dublin"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="192"/>
+            <column name="country_code" value="IL"/>
+            <column name="timezonename" value="Asia/Jerusalem"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="193"/>
+            <column name="country_code" value="IM"/>
+            <column name="timezonename" value="Europe/Isle_of_Man"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="194"/>
+            <column name="country_code" value="IN"/>
+            <column name="timezonename" value="Asia/Kolkata"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="195"/>
+            <column name="country_code" value="IO"/>
+            <column name="timezonename" value="Indian/Chagos"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="196"/>
+            <column name="country_code" value="IQ"/>
+            <column name="timezonename" value="Asia/Baghdad"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="197"/>
+            <column name="country_code" value="IR"/>
+            <column name="timezonename" value="Asia/Tehran"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="198"/>
+            <column name="country_code" value="IS"/>
+            <column name="timezonename" value="Atlantic/Reykjavik"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="199"/>
+            <column name="country_code" value="IT"/>
+            <column name="timezonename" value="Europe/Rome"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="200"/>
+            <column name="country_code" value="JE"/>
+            <column name="timezonename" value="Europe/Jersey"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="201"/>
+            <column name="country_code" value="JM"/>
+            <column name="timezonename" value="America/Jamaica"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="202"/>
+            <column name="country_code" value="JO"/>
+            <column name="timezonename" value="Asia/Amman"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="203"/>
+            <column name="country_code" value="JP"/>
+            <column name="timezonename" value="Asia/Tokyo"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="204"/>
+            <column name="country_code" value="KE"/>
+            <column name="timezonename" value="Africa/Nairobi"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="205"/>
+            <column name="country_code" value="KG"/>
+            <column name="timezonename" value="Asia/Bishkek"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="206"/>
+            <column name="country_code" value="KH"/>
+            <column name="timezonename" value="Asia/Phnom_Penh"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="207"/>
+            <column name="country_code" value="KI"/>
+            <column name="timezonename" value="Pacific/Tarawa"/>
+            <column name="comments" value="Gilbert Islands"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="208"/>
+            <column name="country_code" value="KI"/>
+            <column name="timezonename" value="Pacific/Enderbury"/>
+            <column name="comments" value="Phoenix Islands"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="209"/>
+            <column name="country_code" value="KI"/>
+            <column name="timezonename" value="Pacific/Kiritimati"/>
+            <column name="comments" value="Line Islands"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="210"/>
+            <column name="country_code" value="KM"/>
+            <column name="timezonename" value="Indian/Comoro"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="211"/>
+            <column name="country_code" value="KN"/>
+            <column name="timezonename" value="America/St_Kitts"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="212"/>
+            <column name="country_code" value="KP"/>
+            <column name="timezonename" value="Asia/Pyongyang"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="213"/>
+            <column name="country_code" value="KR"/>
+            <column name="timezonename" value="Asia/Seoul"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="214"/>
+            <column name="country_code" value="KW"/>
+            <column name="timezonename" value="Asia/Kuwait"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="215"/>
+            <column name="country_code" value="KY"/>
+            <column name="timezonename" value="America/Cayman"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="216"/>
+            <column name="country_code" value="KZ"/>
+            <column name="timezonename" value="Asia/Almaty"/>
+            <column name="comments" value="most locations"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="217"/>
+            <column name="country_code" value="KZ"/>
+            <column name="timezonename" value="Asia/Qyzylorda"/>
+            <column name="comments" value="Qyzylorda (Kyzylorda, Kzyl-Orda)"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="218"/>
+            <column name="country_code" value="KZ"/>
+            <column name="timezonename" value="Asia/Aqtobe"/>
+            <column name="comments" value="Aqtobe (Aktobe)"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="219"/>
+            <column name="country_code" value="KZ"/>
+            <column name="timezonename" value="Asia/Aqtau"/>
+            <column name="comments" value="Atyrau (Atirau, Guryev), Mangghystau (Mankistau)"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="220"/>
+            <column name="country_code" value="KZ"/>
+            <column name="timezonename" value="Asia/Oral"/>
+            <column name="comments" value="West Kazakhstan"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="221"/>
+            <column name="country_code" value="LA"/>
+            <column name="timezonename" value="Asia/Vientiane"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="222"/>
+            <column name="country_code" value="LB"/>
+            <column name="timezonename" value="Asia/Beirut"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="223"/>
+            <column name="country_code" value="LC"/>
+            <column name="timezonename" value="America/St_Lucia"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="224"/>
+            <column name="country_code" value="LI"/>
+            <column name="timezonename" value="Europe/Vaduz"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="225"/>
+            <column name="country_code" value="LK"/>
+            <column name="timezonename" value="Asia/Colombo"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="226"/>
+            <column name="country_code" value="LR"/>
+            <column name="timezonename" value="Africa/Monrovia"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="227"/>
+            <column name="country_code" value="LS"/>
+            <column name="timezonename" value="Africa/Maseru"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="228"/>
+            <column name="country_code" value="LT"/>
+            <column name="timezonename" value="Europe/Vilnius"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="229"/>
+            <column name="country_code" value="LU"/>
+            <column name="timezonename" value="Europe/Luxembourg"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="230"/>
+            <column name="country_code" value="LV"/>
+            <column name="timezonename" value="Europe/Riga"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="231"/>
+            <column name="country_code" value="LY"/>
+            <column name="timezonename" value="Africa/Tripoli"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="232"/>
+            <column name="country_code" value="MA"/>
+            <column name="timezonename" value="Africa/Casablanca"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="233"/>
+            <column name="country_code" value="MC"/>
+            <column name="timezonename" value="Europe/Monaco"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="234"/>
+            <column name="country_code" value="MD"/>
+            <column name="timezonename" value="Europe/Chisinau"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="235"/>
+            <column name="country_code" value="ME"/>
+            <column name="timezonename" value="Europe/Podgorica"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="236"/>
+            <column name="country_code" value="MF"/>
+            <column name="timezonename" value="America/Marigot"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="237"/>
+            <column name="country_code" value="MG"/>
+            <column name="timezonename" value="Indian/Antananarivo"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="238"/>
+            <column name="country_code" value="MH"/>
+            <column name="timezonename" value="Pacific/Majuro"/>
+            <column name="comments" value="most locations"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="239"/>
+            <column name="country_code" value="MH"/>
+            <column name="timezonename" value="Pacific/Kwajalein"/>
+            <column name="comments" value="Kwajalein"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="240"/>
+            <column name="country_code" value="MK"/>
+            <column name="timezonename" value="Europe/Skopje"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="241"/>
+            <column name="country_code" value="ML"/>
+            <column name="timezonename" value="Africa/Bamako"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="242"/>
+            <column name="country_code" value="MM"/>
+            <column name="timezonename" value="Asia/Rangoon"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="243"/>
+            <column name="country_code" value="MN"/>
+            <column name="timezonename" value="Asia/Ulaanbaatar"/>
+            <column name="comments" value="most locations"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="244"/>
+            <column name="country_code" value="MN"/>
+            <column name="timezonename" value="Asia/Hovd"/>
+            <column name="comments" value="Bayan-Olgiy, Govi-Altai, Hovd, Uvs, Zavkhan"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="245"/>
+            <column name="country_code" value="MN"/>
+            <column name="timezonename" value="Asia/Choibalsan"/>
+            <column name="comments" value="Dornod, Sukhbaatar"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="246"/>
+            <column name="country_code" value="MO"/>
+            <column name="timezonename" value="Asia/Macau"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="247"/>
+            <column name="country_code" value="MP"/>
+            <column name="timezonename" value="Pacific/Saipan"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="248"/>
+            <column name="country_code" value="MQ"/>
+            <column name="timezonename" value="America/Martinique"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="249"/>
+            <column name="country_code" value="MR"/>
+            <column name="timezonename" value="Africa/Nouakchott"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="250"/>
+            <column name="country_code" value="MS"/>
+            <column name="timezonename" value="America/Montserrat"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="251"/>
+            <column name="country_code" value="MT"/>
+            <column name="timezonename" value="Europe/Malta"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="252"/>
+            <column name="country_code" value="MU"/>
+            <column name="timezonename" value="Indian/Mauritius"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="253"/>
+            <column name="country_code" value="MV"/>
+            <column name="timezonename" value="Indian/Maldives"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="254"/>
+            <column name="country_code" value="MW"/>
+            <column name="timezonename" value="Africa/Blantyre"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="255"/>
+            <column name="country_code" value="MX"/>
+            <column name="timezonename" value="America/Mexico_City"/>
+            <column name="comments" value="Central Time - most locations"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="256"/>
+            <column name="country_code" value="MX"/>
+            <column name="timezonename" value="America/Cancun"/>
+            <column name="comments" value="Central Time - Quintana Roo"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="257"/>
+            <column name="country_code" value="MX"/>
+            <column name="timezonename" value="America/Merida"/>
+            <column name="comments" value="Central Time - Campeche, Yucatan"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="258"/>
+            <column name="country_code" value="MX"/>
+            <column name="timezonename" value="America/Monterrey"/>
+            <column name="comments" value="Mexican Central Time - Coahuila, Durango, Nuevo Leon, Tamaulipas away from US border"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="259"/>
+            <column name="country_code" value="MX"/>
+            <column name="timezonename" value="America/Matamoros"/>
+            <column name="comments" value="US Central Time - Coahuila, Durango, Nuevo Leon, Tamaulipas near US border"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="260"/>
+            <column name="country_code" value="MX"/>
+            <column name="timezonename" value="America/Mazatlan"/>
+            <column name="comments" value="Mountain Time - S Baja, Nayarit, Sinaloa"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="261"/>
+            <column name="country_code" value="MX"/>
+            <column name="timezonename" value="America/Chihuahua"/>
+            <column name="comments" value="Mexican Mountain Time - Chihuahua away from US border"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="262"/>
+            <column name="country_code" value="MX"/>
+            <column name="timezonename" value="America/Ojinaga"/>
+            <column name="comments" value="US Mountain Time - Chihuahua near US border"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="263"/>
+            <column name="country_code" value="MX"/>
+            <column name="timezonename" value="America/Hermosillo"/>
+            <column name="comments" value="Mountain Standard Time - Sonora"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="264"/>
+            <column name="country_code" value="MX"/>
+            <column name="timezonename" value="America/Tijuana"/>
+            <column name="comments" value="US Pacific Time - Baja California near US border"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="265"/>
+            <column name="country_code" value="MX"/>
+            <column name="timezonename" value="America/Santa_Isabel"/>
+            <column name="comments" value="Mexican Pacific Time - Baja California away from US border"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="266"/>
+            <column name="country_code" value="MX"/>
+            <column name="timezonename" value="America/Bahia_Banderas"/>
+            <column name="comments" value="Mexican Central Time - Bahia de Banderas"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="267"/>
+            <column name="country_code" value="MY"/>
+            <column name="timezonename" value="Asia/Kuala_Lumpur"/>
+            <column name="comments" value="peninsular Malaysia"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="268"/>
+            <column name="country_code" value="MY"/>
+            <column name="timezonename" value="Asia/Kuching"/>
+            <column name="comments" value="Sabah &amp; Sarawak"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="269"/>
+            <column name="country_code" value="MZ"/>
+            <column name="timezonename" value="Africa/Maputo"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="270"/>
+            <column name="country_code" value="NA"/>
+            <column name="timezonename" value="Africa/Windhoek"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="271"/>
+            <column name="country_code" value="NC"/>
+            <column name="timezonename" value="Pacific/Noumea"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="272"/>
+            <column name="country_code" value="NE"/>
+            <column name="timezonename" value="Africa/Niamey"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="273"/>
+            <column name="country_code" value="NF"/>
+            <column name="timezonename" value="Pacific/Norfolk"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="274"/>
+            <column name="country_code" value="NG"/>
+            <column name="timezonename" value="Africa/Lagos"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="275"/>
+            <column name="country_code" value="NI"/>
+            <column name="timezonename" value="America/Managua"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="276"/>
+            <column name="country_code" value="NL"/>
+            <column name="timezonename" value="Europe/Amsterdam"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="277"/>
+            <column name="country_code" value="NO"/>
+            <column name="timezonename" value="Europe/Oslo"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="278"/>
+            <column name="country_code" value="NP"/>
+            <column name="timezonename" value="Asia/Kathmandu"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="279"/>
+            <column name="country_code" value="NR"/>
+            <column name="timezonename" value="Pacific/Nauru"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="280"/>
+            <column name="country_code" value="NU"/>
+            <column name="timezonename" value="Pacific/Niue"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="281"/>
+            <column name="country_code" value="NZ"/>
+            <column name="timezonename" value="Pacific/Auckland"/>
+            <column name="comments" value="most locations"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="282"/>
+            <column name="country_code" value="NZ"/>
+            <column name="timezonename" value="Pacific/Chatham"/>
+            <column name="comments" value="Chatham Islands"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="283"/>
+            <column name="country_code" value="OM"/>
+            <column name="timezonename" value="Asia/Muscat"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="284"/>
+            <column name="country_code" value="PA"/>
+            <column name="timezonename" value="America/Panama"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="285"/>
+            <column name="country_code" value="PE"/>
+            <column name="timezonename" value="America/Lima"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="286"/>
+            <column name="country_code" value="PF"/>
+            <column name="timezonename" value="Pacific/Tahiti"/>
+            <column name="comments" value="Society Islands"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="287"/>
+            <column name="country_code" value="PF"/>
+            <column name="timezonename" value="Pacific/Marquesas"/>
+            <column name="comments" value="Marquesas Islands"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="288"/>
+            <column name="country_code" value="PF"/>
+            <column name="timezonename" value="Pacific/Gambier"/>
+            <column name="comments" value="Gambier Islands"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="289"/>
+            <column name="country_code" value="PG"/>
+            <column name="timezonename" value="Pacific/Port_Moresby"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="290"/>
+            <column name="country_code" value="PH"/>
+            <column name="timezonename" value="Asia/Manila"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="291"/>
+            <column name="country_code" value="PK"/>
+            <column name="timezonename" value="Asia/Karachi"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="292"/>
+            <column name="country_code" value="PL"/>
+            <column name="timezonename" value="Europe/Warsaw"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="293"/>
+            <column name="country_code" value="PM"/>
+            <column name="timezonename" value="America/Miquelon"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="294"/>
+            <column name="country_code" value="PN"/>
+            <column name="timezonename" value="Pacific/Pitcairn"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="295"/>
+            <column name="country_code" value="PR"/>
+            <column name="timezonename" value="America/Puerto_Rico"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="296"/>
+            <column name="country_code" value="PS"/>
+            <column name="timezonename" value="Asia/Gaza"/>
+            <column name="comments" value="Gaza Strip"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="297"/>
+            <column name="country_code" value="PS"/>
+            <column name="timezonename" value="Asia/Hebron"/>
+            <column name="comments" value="West Bank"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="298"/>
+            <column name="country_code" value="PT"/>
+            <column name="timezonename" value="Europe/Lisbon"/>
+            <column name="comments" value="mainland"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="299"/>
+            <column name="country_code" value="PT"/>
+            <column name="timezonename" value="Atlantic/Madeira"/>
+            <column name="comments" value="Madeira Islands"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="300"/>
+            <column name="country_code" value="PT"/>
+            <column name="timezonename" value="Atlantic/Azores"/>
+            <column name="comments" value="Azores"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="301"/>
+            <column name="country_code" value="PW"/>
+            <column name="timezonename" value="Pacific/Palau"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="302"/>
+            <column name="country_code" value="PY"/>
+            <column name="timezonename" value="America/Asuncion"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="303"/>
+            <column name="country_code" value="QA"/>
+            <column name="timezonename" value="Asia/Qatar"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="304"/>
+            <column name="country_code" value="RE"/>
+            <column name="timezonename" value="Indian/Reunion"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="305"/>
+            <column name="country_code" value="RO"/>
+            <column name="timezonename" value="Europe/Bucharest"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="306"/>
+            <column name="country_code" value="RS"/>
+            <column name="timezonename" value="Europe/Belgrade"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="307"/>
+            <column name="country_code" value="RU"/>
+            <column name="timezonename" value="Europe/Kaliningrad"/>
+            <column name="comments" value="Moscow-01 - Kaliningrad"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="308"/>
+            <column name="country_code" value="RU"/>
+            <column name="timezonename" value="Europe/Moscow"/>
+            <column name="comments" value="Moscow+00 - west Russia"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="309"/>
+            <column name="country_code" value="RU"/>
+            <column name="timezonename" value="Europe/Volgograd"/>
+            <column name="comments" value="Moscow+00 - Caspian Sea"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="310"/>
+            <column name="country_code" value="RU"/>
+            <column name="timezonename" value="Europe/Samara"/>
+            <column name="comments" value="Moscow+00 - Samara, Udmurtia"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="311"/>
+            <column name="country_code" value="RU"/>
+            <column name="timezonename" value="Asia/Yekaterinburg"/>
+            <column name="comments" value="Moscow+02 - Urals"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="312"/>
+            <column name="country_code" value="RU"/>
+            <column name="timezonename" value="Asia/Omsk"/>
+            <column name="comments" value="Moscow+03 - west Siberia"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="313"/>
+            <column name="country_code" value="RU"/>
+            <column name="timezonename" value="Asia/Novosibirsk"/>
+            <column name="comments" value="Moscow+03 - Novosibirsk"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="314"/>
+            <column name="country_code" value="RU"/>
+            <column name="timezonename" value="Asia/Novokuznetsk"/>
+            <column name="comments" value="Moscow+03 - Novokuznetsk"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="315"/>
+            <column name="country_code" value="RU"/>
+            <column name="timezonename" value="Asia/Krasnoyarsk"/>
+            <column name="comments" value="Moscow+04 - Yenisei River"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="316"/>
+            <column name="country_code" value="RU"/>
+            <column name="timezonename" value="Asia/Irkutsk"/>
+            <column name="comments" value="Moscow+05 - Lake Baikal"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="317"/>
+            <column name="country_code" value="RU"/>
+            <column name="timezonename" value="Asia/Yakutsk"/>
+            <column name="comments" value="Moscow+06 - Lena River"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="318"/>
+            <column name="country_code" value="RU"/>
+            <column name="timezonename" value="Asia/Vladivostok"/>
+            <column name="comments" value="Moscow+07 - Amur River"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="319"/>
+            <column name="country_code" value="RU"/>
+            <column name="timezonename" value="Asia/Sakhalin"/>
+            <column name="comments" value="Moscow+07 - Sakhalin Island"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="320"/>
+            <column name="country_code" value="RU"/>
+            <column name="timezonename" value="Asia/Magadan"/>
+            <column name="comments" value="Moscow+08 - Magadan"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="321"/>
+            <column name="country_code" value="RU"/>
+            <column name="timezonename" value="Asia/Kamchatka"/>
+            <column name="comments" value="Moscow+08 - Kamchatka"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="322"/>
+            <column name="country_code" value="RU"/>
+            <column name="timezonename" value="Asia/Anadyr"/>
+            <column name="comments" value="Moscow+08 - Bering Sea"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="323"/>
+            <column name="country_code" value="RW"/>
+            <column name="timezonename" value="Africa/Kigali"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="324"/>
+            <column name="country_code" value="SA"/>
+            <column name="timezonename" value="Asia/Riyadh"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="325"/>
+            <column name="country_code" value="SB"/>
+            <column name="timezonename" value="Pacific/Guadalcanal"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="326"/>
+            <column name="country_code" value="SC"/>
+            <column name="timezonename" value="Indian/Mahe"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="327"/>
+            <column name="country_code" value="SD"/>
+            <column name="timezonename" value="Africa/Khartoum"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="328"/>
+            <column name="country_code" value="SE"/>
+            <column name="timezonename" value="Europe/Stockholm"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="329"/>
+            <column name="country_code" value="SG"/>
+            <column name="timezonename" value="Asia/Singapore"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="330"/>
+            <column name="country_code" value="SH"/>
+            <column name="timezonename" value="Atlantic/St_Helena"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="331"/>
+            <column name="country_code" value="SI"/>
+            <column name="timezonename" value="Europe/Ljubljana"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="332"/>
+            <column name="country_code" value="SJ"/>
+            <column name="timezonename" value="Arctic/Longyearbyen"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="333"/>
+            <column name="country_code" value="SK"/>
+            <column name="timezonename" value="Europe/Bratislava"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="334"/>
+            <column name="country_code" value="SL"/>
+            <column name="timezonename" value="Africa/Freetown"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="335"/>
+            <column name="country_code" value="SM"/>
+            <column name="timezonename" value="Europe/San_Marino"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="336"/>
+            <column name="country_code" value="SN"/>
+            <column name="timezonename" value="Africa/Dakar"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="337"/>
+            <column name="country_code" value="SO"/>
+            <column name="timezonename" value="Africa/Mogadishu"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="338"/>
+            <column name="country_code" value="SR"/>
+            <column name="timezonename" value="America/Paramaribo"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="339"/>
+            <column name="country_code" value="SS"/>
+            <column name="timezonename" value="Africa/Juba"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="340"/>
+            <column name="country_code" value="ST"/>
+            <column name="timezonename" value="Africa/Sao_Tome"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="341"/>
+            <column name="country_code" value="SV"/>
+            <column name="timezonename" value="America/El_Salvador"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="342"/>
+            <column name="country_code" value="SX"/>
+            <column name="timezonename" value="America/Lower_Princes"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="343"/>
+            <column name="country_code" value="SY"/>
+            <column name="timezonename" value="Asia/Damascus"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="344"/>
+            <column name="country_code" value="SZ"/>
+            <column name="timezonename" value="Africa/Mbabane"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="345"/>
+            <column name="country_code" value="TC"/>
+            <column name="timezonename" value="America/Grand_Turk"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="346"/>
+            <column name="country_code" value="TD"/>
+            <column name="timezonename" value="Africa/Ndjamena"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="347"/>
+            <column name="country_code" value="TF"/>
+            <column name="timezonename" value="Indian/Kerguelen"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="348"/>
+            <column name="country_code" value="TG"/>
+            <column name="timezonename" value="Africa/Lome"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="349"/>
+            <column name="country_code" value="TH"/>
+            <column name="timezonename" value="Asia/Bangkok"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="350"/>
+            <column name="country_code" value="TJ"/>
+            <column name="timezonename" value="Asia/Dushanbe"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="351"/>
+            <column name="country_code" value="TK"/>
+            <column name="timezonename" value="Pacific/Fakaofo"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="352"/>
+            <column name="country_code" value="TL"/>
+            <column name="timezonename" value="Asia/Dili"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="353"/>
+            <column name="country_code" value="TM"/>
+            <column name="timezonename" value="Asia/Ashgabat"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="354"/>
+            <column name="country_code" value="TN"/>
+            <column name="timezonename" value="Africa/Tunis"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="355"/>
+            <column name="country_code" value="TO"/>
+            <column name="timezonename" value="Pacific/Tongatapu"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="356"/>
+            <column name="country_code" value="TR"/>
+            <column name="timezonename" value="Europe/Istanbul"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="357"/>
+            <column name="country_code" value="TT"/>
+            <column name="timezonename" value="America/Port_of_Spain"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="358"/>
+            <column name="country_code" value="TV"/>
+            <column name="timezonename" value="Pacific/Funafuti"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="359"/>
+            <column name="country_code" value="TW"/>
+            <column name="timezonename" value="Asia/Taipei"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="360"/>
+            <column name="country_code" value="TZ"/>
+            <column name="timezonename" value="Africa/Dar_es_Salaam"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="361"/>
+            <column name="country_code" value="UA"/>
+            <column name="timezonename" value="Europe/Kiev"/>
+            <column name="comments" value="most locations"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="362"/>
+            <column name="country_code" value="UA"/>
+            <column name="timezonename" value="Europe/Uzhgorod"/>
+            <column name="comments" value="Ruthenia"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="363"/>
+            <column name="country_code" value="UA"/>
+            <column name="timezonename" value="Europe/Zaporozhye"/>
+            <column name="comments" value="Zaporozhye, E Lugansk / Zaporizhia, E Luhansk"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="364"/>
+            <column name="country_code" value="UA"/>
+            <column name="timezonename" value="Europe/Simferopol"/>
+            <column name="comments" value="central Crimea"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="365"/>
+            <column name="country_code" value="UG"/>
+            <column name="timezonename" value="Africa/Kampala"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="366"/>
+            <column name="country_code" value="UM"/>
+            <column name="timezonename" value="Pacific/Johnston"/>
+            <column name="comments" value="Johnston Atoll"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="367"/>
+            <column name="country_code" value="UM"/>
+            <column name="timezonename" value="Pacific/Midway"/>
+            <column name="comments" value="Midway Islands"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="368"/>
+            <column name="country_code" value="UM"/>
+            <column name="timezonename" value="Pacific/Wake"/>
+            <column name="comments" value="Wake Island"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="369"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/New_York"/>
+            <column name="comments" value="Eastern Time"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="370"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/Detroit"/>
+            <column name="comments" value="Eastern Time - Michigan - most locations"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="371"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/Kentucky/Louisville"/>
+            <column name="comments" value="Eastern Time - Kentucky - Louisville area"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="372"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/Kentucky/Monticello"/>
+            <column name="comments" value="Eastern Time - Kentucky - Wayne County"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="373"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/Indiana/Indianapolis"/>
+            <column name="comments" value="Eastern Time - Indiana - most locations"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="374"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/Indiana/Vincennes"/>
+            <column name="comments" value="Eastern Time - Indiana - Daviess, Dubois, Knox &amp; Martin Counties"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="375"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/Indiana/Winamac"/>
+            <column name="comments" value="Eastern Time - Indiana - Pulaski County"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="376"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/Indiana/Marengo"/>
+            <column name="comments" value="Eastern Time - Indiana - Crawford County"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="377"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/Indiana/Petersburg"/>
+            <column name="comments" value="Eastern Time - Indiana - Pike County"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="378"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/Indiana/Vevay"/>
+            <column name="comments" value="Eastern Time - Indiana - Switzerland County"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="379"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/Chicago"/>
+            <column name="comments" value="Central Time"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="380"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/Indiana/Tell_City"/>
+            <column name="comments" value="Central Time - Indiana - Perry County"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="381"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/Indiana/Knox"/>
+            <column name="comments" value="Central Time - Indiana - Starke County"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="382"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/Menominee"/>
+            <column name="comments" value="Central Time - Michigan - Dickinson, Gogebic, Iron &amp; Menominee Counties"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="383"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/North_Dakota/Center"/>
+            <column name="comments" value="Central Time - North Dakota - Oliver County"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="384"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/North_Dakota/New_Salem"/>
+            <column name="comments" value="Central Time - North Dakota - Morton County (except Mandan area)"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="385"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/North_Dakota/Beulah"/>
+            <column name="comments" value="Central Time - North Dakota - Mercer County"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="386"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/Denver"/>
+            <column name="comments" value="Mountain Time"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="387"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/Boise"/>
+            <column name="comments" value="Mountain Time - south Idaho &amp; east Oregon"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="388"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/Shiprock"/>
+            <column name="comments" value="Mountain Time - Navajo"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="389"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/Phoenix"/>
+            <column name="comments" value="Mountain Standard Time - Arizona"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="390"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/Los_Angeles"/>
+            <column name="comments" value="Pacific Time"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="391"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/Anchorage"/>
+            <column name="comments" value="Alaska Time"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="392"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/Juneau"/>
+            <column name="comments" value="Alaska Time - Alaska panhandle"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="393"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/Sitka"/>
+            <column name="comments" value="Alaska Time - southeast Alaska panhandle"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="394"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/Yakutat"/>
+            <column name="comments" value="Alaska Time - Alaska panhandle neck"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="395"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/Nome"/>
+            <column name="comments" value="Alaska Time - west Alaska"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="396"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/Adak"/>
+            <column name="comments" value="Aleutian Islands"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="397"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="America/Metlakatla"/>
+            <column name="comments" value="Metlakatla Time - Annette Island"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="398"/>
+            <column name="country_code" value="US"/>
+            <column name="timezonename" value="Pacific/Honolulu"/>
+            <column name="comments" value="Hawaii"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="399"/>
+            <column name="country_code" value="UY"/>
+            <column name="timezonename" value="America/Montevideo"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="400"/>
+            <column name="country_code" value="UZ"/>
+            <column name="timezonename" value="Asia/Samarkand"/>
+            <column name="comments" value="west Uzbekistan"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="401"/>
+            <column name="country_code" value="UZ"/>
+            <column name="timezonename" value="Asia/Tashkent"/>
+            <column name="comments" value="east Uzbekistan"/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="402"/>
+            <column name="country_code" value="VA"/>
+            <column name="timezonename" value="Europe/Vatican"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="403"/>
+            <column name="country_code" value="VC"/>
+            <column name="timezonename" value="America/St_Vincent"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="404"/>
+            <column name="country_code" value="VE"/>
+            <column name="timezonename" value="America/Caracas"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="405"/>
+            <column name="country_code" value="VG"/>
+            <column name="timezonename" value="America/Tortola"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="406"/>
+            <column name="country_code" value="VI"/>
+            <column name="timezonename" value="America/St_Thomas"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="407"/>
+            <column name="country_code" value="VN"/>
+            <column name="timezonename" value="Asia/Ho_Chi_Minh"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="408"/>
+            <column name="country_code" value="VU"/>
+            <column name="timezonename" value="Pacific/Efate"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="409"/>
+            <column name="country_code" value="WF"/>
+            <column name="timezonename" value="Pacific/Wallis"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="410"/>
+            <column name="country_code" value="WS"/>
+            <column name="timezonename" value="Pacific/Apia"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="411"/>
+            <column name="country_code" value="YE"/>
+            <column name="timezonename" value="Asia/Aden"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="412"/>
+            <column name="country_code" value="YT"/>
+            <column name="timezonename" value="Indian/Mayotte"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="413"/>
+            <column name="country_code" value="ZA"/>
+            <column name="timezonename" value="Africa/Johannesburg"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="414"/>
+            <column name="country_code" value="ZM"/>
+            <column name="timezonename" value="Africa/Lusaka"/>
+            <column name="comments" value=""/>
+        </insert>
+        <insert tableName="timezones">
+            <column name="id" valueNumeric="415"/>
+            <column name="country_code" value="ZW"/>
+            <column name="timezonename" value="Africa/Harare"/>
+            <column name="comments" value=""/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

@@ -113,7 +113,11 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
                         compoundFee = compoundingMap.get(principal.getKey());
                         compoundingMap.put(principal.getKey(), interestToBeCompounded.plus(compoundFee));
                     }
-                    balanceForInterestCalculation = balanceForInterestCalculation.plus(principal.getValue()).plus(compoundFee);
+                    if (!loanApplicationTerms.isPrincipalCompoundingDisabledForOverdueLoans()) {
+                        balanceForInterestCalculation = balanceForInterestCalculation.plus(principal.getValue());
+                    }
+                    balanceForInterestCalculation = balanceForInterestCalculation.plus(compoundFee);
+
                     if (interestRates.containsKey(principal.getKey())) {
                         loanApplicationTerms.updateAnnualNominalInterestRate(interestRates.get(principal.getKey()));
                     }
@@ -128,33 +132,11 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
         interestForThisInstallment = interestForThisInstallment.plus(result.interest());
         cumulatingInterestDueToGrace = result.interestPaymentDueToGrace();
 
-        Money interestTobeApproppriated = loanApplicationTerms.getInterestTobeApproppriated() == null
-                ? Money.zero(interestForThisInstallment.getCurrency())
-                : loanApplicationTerms.getInterestTobeApproppriated();
-
-        if (loanApplicationTerms.getFixedEmiAmount() != null
-                && loanApplicationTerms.isInterestToBeAppropriatedEquallyWhenGreaterThanEMIEnabled() && interestForThisInstallment
-                        .isGreaterThan(Money.of(interestForThisInstallment.getCurrency(), loanApplicationTerms.getFixedEmiAmount()))) {
-            LocalDate actualPeriodEndDate = this.scheduledDateGenerator.generateNextRepaymentDate(interestStartDate, loanApplicationTerms,
-                    false);
-            PrincipalInterest tempInterest = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,
-                    interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc, cumulatingInterestDueToGrace,
-                    balanceForInterestCalculation, interestStartDate, actualPeriodEndDate);
-
-            Money fixedEmi = Money.of(interestForThisInstallment.getCurrency(), loanApplicationTerms.getFixedEmiAmount());
-
-            if (tempInterest.interest().isGreaterThan(fixedEmi)) {
-                loanApplicationTerms
-                        .setInterestTobeApproppriated(interestTobeApproppriated.plus(interestForThisInstallment.minus(fixedEmi)));
-                interestForThisInstallment = fixedEmi;
-            } else {
-                loanApplicationTerms.setInterestTobeApproppriated(
-                        interestTobeApproppriated.plus(interestForThisInstallment.minus(tempInterest.interest())));
-                interestForThisInstallment = tempInterest.interest();
-            }
+        if (loanApplicationTerms.isInterestToBeRecoveredFirstWhenGreaterThanEMIEnabled()
+                && loanApplicationTerms.isInterestTobeApproppriated()) {
+            interestForThisInstallment = interestForThisInstallment.add(loanApplicationTerms.getInterestTobeApproppriated());
+            loanApplicationTerms.setInterestTobeApproppriated(interestForThisInstallment.zero());
         }
-
-        cumulatingInterestDueToGrace = result.interestPaymentDueToGrace();
 
         Money interestForPeriod = interestForThisInstallment;
         if (interestForPeriod.isGreaterThanZero()) {
@@ -162,8 +144,15 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
         } else {
             interestForPeriod = cumulatingInterestDueToGrace.minus(cumulatingInterestPaymentDueToGrace);
         }
+
         Money principalForThisInstallment = loanApplicationTerms.calculateTotalPrincipalForPeriod(calculator, outstandingBalance,
                 periodNumber, mc, interestForPeriod);
+        if (loanApplicationTerms.isInterestToBeRecoveredFirstWhenGreaterThanEMIEnabled() && principalForThisInstallment.isLessThanZero()
+                && !loanApplicationTerms.isLastRepaymentPeriod(periodNumber)) {
+            loanApplicationTerms.setInterestTobeApproppriated(principalForThisInstallment.abs());
+            interestForThisInstallment = interestForThisInstallment.minus(loanApplicationTerms.getInterestTobeApproppriated());
+            principalForThisInstallment = principalForThisInstallment.zero();
+        }
 
         // update cumulative fields for principal & interest
         final Money interestBroughtFowardDueToGrace = cumulatingInterestDueToGrace;
@@ -173,6 +162,9 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
         principalForThisInstallment = loanApplicationTerms.adjustPrincipalIfLastRepaymentPeriod(principalForThisInstallment,
                 totalCumulativePrincipalToDate, periodNumber);
 
-        return new PrincipalInterest(principalForThisInstallment, interestForThisInstallment, interestBroughtFowardDueToGrace);
+        PrincipalInterest principalInterest = new PrincipalInterest(principalForThisInstallment, interestForThisInstallment,
+                interestBroughtFowardDueToGrace);
+        principalInterest.setRescheduleInterestPortion(loanApplicationTerms.getInterestTobeApproppriated());
+        return principalInterest;
     }
 }

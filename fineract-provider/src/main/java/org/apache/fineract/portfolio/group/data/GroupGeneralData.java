@@ -126,6 +126,37 @@ public class GroupGeneralData implements Serializable {
         this.timeline = null;
     }
 
+    public GroupGeneralData(Long id, Long officeId) {
+        this.id = id;
+        this.accountNo = null;
+        this.name = null;
+        this.externalId = null;
+        this.status = null;
+        this.active = null;
+        this.activationDate = null;
+        this.officeId = officeId;
+        this.officeName = null;
+        this.centerId = null;
+        this.centerName = null;
+        this.staffId = null;
+        this.staffName = null;
+        this.hierarchy = null;
+        this.groupLevel = null;
+        this.clientMembers = null;
+        this.activeClientMembers = null;
+        this.groupRoles = null;
+        this.calendarsData = null;
+        this.collectionMeetingCalendar = null;
+        this.centerOptions = null;
+        this.officeOptions = null;
+        this.staffOptions = null;
+        this.clientOptions = null;
+        this.availableRoles = null;
+        this.selectedRole = null;
+        this.closureReasons = null;
+        this.timeline = null;
+    }
+
     public GroupGeneralData(Long id) {
         this.id = id;
         this.accountNo = null;

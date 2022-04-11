@@ -201,6 +201,14 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
                 isReversed, appUser, isManualTransaction);
     }
 
+    public static SavingsAccountTransaction from(final Integer transactionTypeEnum, final LocalDate transactionDate,
+            final BigDecimal amount, final boolean isReversed, final BigDecimal runningBalance, final BigDecimal cumulativeBalance,
+            final LocalDate balanceEndDate, final Integer balanceNumberOfDays, final BigDecimal overdraftAmount,
+            final LocalDate createdDate, final boolean isManualTransaction, final Long releaseIdOfHoldAmountTransaction) {
+        return new SavingsAccountTransaction(transactionTypeEnum, transactionDate, amount, isReversed, runningBalance, cumulativeBalance,
+                balanceEndDate, balanceNumberOfDays, overdraftAmount, createdDate, isManualTransaction, releaseIdOfHoldAmountTransaction);
+    }
+
     public static SavingsAccountTransaction waiver(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
             final Money amount, final AppUser appUser) {
         final boolean isReversed = false;
@@ -299,6 +307,24 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
         this.createdDate = createdDate;
         this.appUser = appUser;
         this.isManualTransaction = isManualTransaction;
+    }
+
+    private SavingsAccountTransaction(final Integer transactionTypeEnum, final LocalDate transactionDate, final BigDecimal amount,
+            final boolean isReversed, final BigDecimal runningBalance, final BigDecimal cumulativeBalance, final LocalDate balanceEndDate,
+            final Integer balanceNumberOfDays, final BigDecimal overdraftAmount, final LocalDate createdDate,
+            final boolean isManualTransaction, final Long releaseIdOfHoldAmountTransaction) {
+        this.typeOf = transactionTypeEnum;
+        this.dateOf = Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.amount = amount;
+        this.reversed = isReversed;
+        this.runningBalance = runningBalance;
+        this.cumulativeBalance = cumulativeBalance;
+        this.balanceEndDate = Date.from(balanceEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.balanceNumberOfDays = balanceNumberOfDays;
+        this.overdraftAmount = overdraftAmount;
+        this.createdDate = Date.from(createdDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.isManualTransaction = isManualTransaction;
+        this.releaseIdOfHoldAmountTransaction = releaseIdOfHoldAmountTransaction;
     }
 
     public static SavingsAccountTransaction holdAmount(final SavingsAccount savingsAccount, final Office office,
@@ -808,5 +834,33 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
 
     public boolean isAmountOnHoldNotReleased() {
         return (isAmountOnHold() && getReleaseIdOfHoldAmountTransaction() == null);
+    }
+
+    public Long getOfficeId() {
+        return this.office.getId();
+    }
+
+    public Date getBalanceEndDate() {
+        return this.balanceEndDate;
+    }
+
+    public BigDecimal getCumulativeBalance() {
+        return this.cumulativeBalance;
+    }
+
+    public Integer getBalanceNumberOfDays() {
+        return this.balanceNumberOfDays;
+    }
+
+    public Long getAppUserId() {
+        return this.appUser.getId();
+    }
+
+    public Date getCreatedDate() {
+        return this.createdDate;
+    }
+
+    public boolean getIsManualTransaction() {
+        return this.isManualTransaction;
     }
 }

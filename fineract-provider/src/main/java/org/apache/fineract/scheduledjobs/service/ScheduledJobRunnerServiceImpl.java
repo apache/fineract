@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.fineract.accounting.glaccount.domain.TrialBalance;
 import org.apache.fineract.accounting.glaccount.domain.TrialBalanceRepositoryWrapper;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -56,7 +57,6 @@ import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountSchedular
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -81,9 +81,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     private final TrialBalanceRepositoryWrapper trialBalanceRepositoryWrapper;
     private final JobRegisterService jobRegisterService;
     private final ScheduledJobDetailRepository scheduledJobDetailsRepository;
-
-    @Value("${node_id:1}")
-    private String nodeId;
+    private final FineractProperties fineractProperties;
 
     @Autowired
     public ScheduledJobRunnerServiceImpl(final RoutingDataSourceServiceFactory dataSourceServiceFactory,
@@ -94,7 +92,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             final ShareAccountDividendReadPlatformService shareAccountDividendReadPlatformService,
             final ShareAccountSchedularService shareAccountSchedularService,
             final TrialBalanceRepositoryWrapper trialBalanceRepositoryWrapper, @Lazy final JobRegisterService jobRegisterService,
-            final ScheduledJobDetailRepository scheduledJobDetailsRepository) {
+            final ScheduledJobDetailRepository scheduledJobDetailsRepository, final FineractProperties fineractProperties) {
         this.dataSourceServiceFactory = dataSourceServiceFactory;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
         this.savingsAccountChargeReadPlatformService = savingsAccountChargeReadPlatformService;
@@ -105,6 +103,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         this.trialBalanceRepositoryWrapper = trialBalanceRepositoryWrapper;
         this.jobRegisterService = jobRegisterService;
         this.scheduledJobDetailsRepository = scheduledJobDetailsRepository;
+        this.fineractProperties = fineractProperties;
     }
 
     @Transactional
@@ -500,7 +499,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         List<ScheduledJobDetail> jobDetails = this.scheduledJobDetailsRepository.findAllMismatchedJobs(true);
 
         for (ScheduledJobDetail scheduledJobDetail : jobDetails) {
-            if (scheduledJobDetail.getNodeId().toString().equals(this.nodeId)) {
+            if (scheduledJobDetail.getNodeId().toString().equals(fineractProperties.getNodeId())) {
                 jobRegisterService.executeJob(scheduledJobDetail.getId());
             }
         }

@@ -314,7 +314,10 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
      */
     private PlatformDataIntegrityException handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause,
             final Exception dve) {
-        if (realCause.getMessage().contains("'username_org'")) {
+        // TODO: this needs to be fixed. The error condition should be independent from the underlying message and
+        // naming
+        // of the constraint
+        if (realCause.getMessage().contains("username_org")) {
             final String username = command.stringValueOfParameterNamed("username");
             final StringBuilder defaultMessageBuilder = new StringBuilder("User with username ").append(username)
                     .append(" already exists.");
@@ -322,7 +325,10 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                     username);
         }
 
-        if (realCause.getMessage().contains("'unique_self_client'")) {
+        // TODO: this needs to be fixed. The error condition should be independent from the underlying message and
+        // naming
+        // of the constraint
+        if (realCause.getMessage().contains("unique_self_client")) {
             return new PlatformDataIntegrityException("error.msg.user.self.service.user.already.exist",
                     "Self Service User Id is already created. Go to Admin->Users to edit or delete the self-service user.");
         }

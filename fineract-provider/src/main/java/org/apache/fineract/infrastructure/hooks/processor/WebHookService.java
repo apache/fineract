@@ -38,22 +38,22 @@ public interface WebHookService {
     String API_KEY_HEADER = "X-Fineract-API-Key";
 
     // Ping
-    @GET("/")
+    @GET(".")
     Call<Void> sendEmptyRequest();
 
     // Template - Web
-    @POST("/")
+    @POST(".")
     Call<Void> sendJsonRequest(@Header(ENTITY_HEADER) String entityHeader, @Header(ACTION_HEADER) String actionHeader,
             @Header(TENANT_HEADER) String tenantHeader, @Header(ENDPOINT_HEADER) String endpointHeader, @Body JsonObject result);
 
     @FormUrlEncoded
-    @POST("/")
+    @POST(".")
     Call<Void> sendFormRequest(@Header(ENTITY_HEADER) String entityHeader, @Header(ACTION_HEADER) String actionHeader,
             @Header(TENANT_HEADER) String tenantHeader, @Header(ENDPOINT_HEADER) String endpointHeader,
             @FieldMap Map<String, String> params);
 
     // Template - SMS Bridge
-    @POST("/")
+    @POST(".")
     Call<Void> sendSmsBridgeRequest(@Header(ENTITY_HEADER) String entityHeader, @Header(ACTION_HEADER) String actionHeader,
             @Header(TENANT_HEADER) String tenantHeader, @Header(API_KEY_HEADER) String apiKeyHeader, @Body JsonObject result);
 

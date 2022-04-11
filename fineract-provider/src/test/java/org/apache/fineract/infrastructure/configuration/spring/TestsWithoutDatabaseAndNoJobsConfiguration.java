@@ -18,11 +18,17 @@
  */
 package org.apache.fineract.infrastructure.configuration.spring;
 
+import static org.mockito.Mockito.mock;
+
 import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.boot.AbstractApplicationConfiguration;
-import org.apache.fineract.infrastructure.core.service.TenantDatabaseUpgradeService;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.service.migration.TenantDataSourceFactory;
+import org.apache.fineract.infrastructure.core.service.migration.TenantDatabaseUpgradeService;
 import org.apache.fineract.infrastructure.jobs.service.JobRegisterService;
 import org.mockito.Mockito;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -33,7 +39,19 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  * are in the DB), thus nor starts any background jobs. For some integration tests, this may be perfectly sufficient
  * (and faster to run such tests).
  */
+@EnableConfigurationProperties({ FineractProperties.class })
 public class TestsWithoutDatabaseAndNoJobsConfiguration extends AbstractApplicationConfiguration {
+
+    @Bean
+    public TenantDataSourceFactory tenantDataSourceFactory() {
+        return new TenantDataSourceFactory(null) {
+
+            @Override
+            public DataSource create(FineractPlatformTenant tenant) {
+                return mock(DataSource.class);
+            }
+        };
+    }
 
     /**
      * Override TenantDatabaseUpgradeService binding, because the real one has a @PostConstruct upgradeAllTenants()
@@ -41,10 +59,10 @@ public class TestsWithoutDatabaseAndNoJobsConfiguration extends AbstractApplicat
      */
     @Bean
     public TenantDatabaseUpgradeService tenantDatabaseUpgradeService() {
-        return new TenantDatabaseUpgradeService(null, null) {
+        return new TenantDatabaseUpgradeService(null, null, null, null, null, null) {
 
             @Override
-            public void upgradeAllTenants() {
+            public void afterPropertiesSet() {
                 // NOOP
             }
         };
@@ -56,7 +74,7 @@ public class TestsWithoutDatabaseAndNoJobsConfiguration extends AbstractApplicat
      */
     @Bean
     public JobRegisterService jobRegisterServiceImpl() {
-        JobRegisterService mockJobRegisterService = Mockito.mock(JobRegisterService.class);
+        JobRegisterService mockJobRegisterService = mock(JobRegisterService.class);
         return mockJobRegisterService;
     }
 
@@ -65,7 +83,7 @@ public class TestsWithoutDatabaseAndNoJobsConfiguration extends AbstractApplicat
      */
     @Bean
     public DataSource hikariTenantDataSource() {
-        DataSource mockDataSource = Mockito.mock(DataSource.class, Mockito.RETURNS_MOCKS);
+        DataSource mockDataSource = mock(DataSource.class, Mockito.RETURNS_MOCKS);
         return mockDataSource;
     }
 

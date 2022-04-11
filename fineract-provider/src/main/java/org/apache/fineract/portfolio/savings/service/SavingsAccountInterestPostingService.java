@@ -16,29 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.service;
+package org.apache.fineract.portfolio.savings.service;
 
-import javax.sql.DataSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
+import java.math.MathContext;
+import java.time.LocalDate;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 
-/**
- * Implementation that returns connection pool datasource for tenants database
- */
-@Service
-public class DataSourceForTenants implements RoutingDataSourceService {
+public interface SavingsAccountInterestPostingService {
 
-    private final DataSource tenantDataSource;
-
-    @Autowired
-    public DataSourceForTenants(final @Qualifier("hikariTenantDataSource") DataSource tenantDataSource) {
-        this.tenantDataSource = tenantDataSource;
-    }
-
-    @Override
-    public DataSource retrieveDataSource() {
-        return this.tenantDataSource;
-    }
+    SavingsAccountData postInterest(MathContext mc, LocalDate interestPostingUpToDate, boolean isInterestTransfer,
+            boolean isSavingsInterestPostingAtCurrentPeriodEnd, Integer financialYearBeginningMonth, LocalDate postInterestOnDate,
+            boolean backdatedTxnsAllowedTill, SavingsAccountData savingsAccountData);
 
 }

@@ -69,6 +69,39 @@ public class GLAccountData implements Serializable {
         return new GLAccountData(name, parentId, glCode, manualEntriesAllowed, type, usage, description, tagId, rowIndex);
     }
 
+    public static GLAccountData createFrom(final Long id) {
+        return new GLAccountData(id);
+    }
+
+    private GLAccountData(final Long id) {
+
+        this.name = null;
+        this.parentId = null;
+        this.glCode = null;
+        this.manualEntriesAllowed = null;
+        this.type = null;
+        this.usage = null;
+        this.description = null;
+        this.tagId = null;
+        this.rowIndex = null;
+        this.id = id;
+        this.disabled = null;
+        this.nameDecorated = null;
+        this.organizationRunningBalance = null;
+        this.accountTypeOptions = null;
+        this.usageOptions = null;
+        this.assetHeaderAccountOptions = null;
+        this.liabilityHeaderAccountOptions = null;
+        this.equityHeaderAccountOptions = null;
+        this.incomeHeaderAccountOptions = null;
+        this.expenseHeaderAccountOptions = null;
+        this.allowedAssetsTagOptions = null;
+        this.allowedLiabilitiesTagOptions = null;
+        this.allowedEquityTagOptions = null;
+        this.allowedIncomeTagOptions = null;
+        this.allowedExpensesTagOptions = null;
+    }
+
     private GLAccountData(String name, Long parentId, String glCode, Boolean manualEntriesAllowed, EnumOptionData type,
             EnumOptionData usage, String description, CodeValueData tagId, Integer rowIndex) {
 

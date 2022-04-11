@@ -81,24 +81,18 @@ spec:
           initialDelaySeconds: 180
           periodSeconds: 1
         env:
-        - name: DRIVERCLASS_NAME
-          value: org.mariadb.jdbc.Driver
-        - name: PROTOCOL
-          value: jdbc
-        - name: SUB_PROTOCOL
-          value: mariadb
-        - name: node_id
+        - name: FINERACT_NODE_ID
           value: '1'
-        - name: fineract_tenants_driver
+        - name: FINERACT_HIKARI_DRIVER_CLASS_NAME
           value: org.mariadb.jdbc.Driver
-        - name: fineract_tenants_url
+        - name: FINERACT_HIKARI_JDBC_URL
           value: jdbc:mariadb://fineractmysql:3306/fineract_tenants
-        - name: fineract_tenants_uid
+        - name: FINERACT_HIKARI_USERNAME
           valueFrom:
             secretKeyRef:
               name: fineract-tenants-db-secret
               key: username
-        - name: fineract_tenants_pwd
+        - name: FINERACT_HIKARI_PASSWORD
           valueFrom:
             secretKeyRef:
               name: fineract-tenants-db-secret

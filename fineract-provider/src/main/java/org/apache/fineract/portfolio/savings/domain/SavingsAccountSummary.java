@@ -286,4 +286,39 @@ public final class SavingsAccountSummary {
         return this.runningBalanceOnInterestPostingTillDate;
     }
 
+    public BigDecimal getTotalWithdrawals() {
+        return this.totalWithdrawals;
+    }
+
+    public BigDecimal getTotalDeposits() {
+        return this.totalDeposits;
+    }
+
+    public BigDecimal getTotalWithdrawalFees() {
+        return this.totalWithdrawalFees;
+    }
+
+    public BigDecimal getTotalFeeCharge() {
+        return this.totalFeeCharge;
+    }
+
+    public BigDecimal getTotalPenaltyCharge() {
+        return this.totalPenaltyCharge;
+    }
+
+    public BigDecimal getTotalAnnualFees() {
+        return this.totalAnnualFees;
+    }
+
+    public BigDecimal getTotalInterestEarned() {
+        return this.totalInterestEarned;
+    }
+
+    public BigDecimal getTotalOverdraftInterestDerived() {
+        return this.totalOverdraftInterestDerived;
+    }
+
+    public BigDecimal getTotalWithholdTax() {
+        return this.totalWithholdTax;
+    }
 }
