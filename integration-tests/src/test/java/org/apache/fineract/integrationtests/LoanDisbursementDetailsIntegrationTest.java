@@ -31,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -436,7 +437,7 @@ public class LoanDisbursementDetailsIntegrationTest {
     private String formatExpectedDisbursementDate(String expectedDisbursementDate) throws ParseException {
 
         SimpleDateFormat source = new SimpleDateFormat("[yyyy, MM, dd]");
-        SimpleDateFormat target = new SimpleDateFormat("dd MMMM yyyy");
+        SimpleDateFormat target = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         String date = target.format(source.parse(expectedDisbursementDate));
 
         return date;

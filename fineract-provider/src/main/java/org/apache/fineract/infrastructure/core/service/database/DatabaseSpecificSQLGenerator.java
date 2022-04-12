@@ -97,6 +97,16 @@ public class DatabaseSpecificSQLGenerator {
         }
     }
 
+    public String currentDateTime() {
+        if (databaseTypeResolver.isMySQL()) {
+            return "CURRENT_TIMESTAMP()";
+        } else if (databaseTypeResolver.isPostgreSQL()) {
+            return "CURRENT_TIMESTAMP";
+        } else {
+            throw new IllegalStateException("Database type is not supported for current date " + databaseTypeResolver.databaseType());
+        }
+    }
+
     public String subDate(String date, String multiplier, String unit) {
         if (databaseTypeResolver.isMySQL()) {
             return format("DATE_SUB(%s, INTERVAL %s %s)", date, multiplier, unit);

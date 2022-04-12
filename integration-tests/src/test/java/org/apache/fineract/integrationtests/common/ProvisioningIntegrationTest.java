@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -258,7 +259,7 @@ public class ProvisioningIntegrationTest {
                 String date = (String) item.get("createdDate");
                 DateFormat formatter = new SimpleDateFormat("MMM dd, yyyy");
                 Date date1 = formatter.parse(date);
-                DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
+                DateFormat simple = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
                 String formattedString = simple
                         .format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
                 Date currentDate = simple.parse(formattedString);

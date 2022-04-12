@@ -33,6 +33,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -134,7 +135,7 @@ public class SavingsImportHandlerTest {
         firstSavingsRow.createCell(SavingsConstants.PRODUCT_COL)
                 .setCellValue(savingsProductSheet.getRow(1).getCell(1).getStringCellValue());
         firstSavingsRow.createCell(SavingsConstants.FIELD_OFFICER_NAME_COL).setCellValue((String) staffMap.get("displayName"));
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         Date date = simpleDateFormat.parse("13 May 2017");
         firstSavingsRow.createCell(SavingsConstants.SUBMITTED_ON_DATE_COL).setCellValue(date);
         firstSavingsRow.createCell(SavingsConstants.APPROVED_DATE_COL).setCellValue(date);
