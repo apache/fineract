@@ -124,6 +124,12 @@ public class LoanTransactionHelper {
         return (ArrayList) Utils.performServerGet(requestSpec, responseSpec, URL, "charges");
     }
 
+    public ArrayList getLoanTransactions(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer loanID) {
+        final String URL = "/fineract-provider/api/v1/loans/" + loanID + "?associations=transactions&" + Utils.TENANT_IDENTIFIER;
+        return (ArrayList) Utils.performServerGet(requestSpec, responseSpec, URL, "transactions");
+    }
+
     public ArrayList getLoanFutureRepaymentSchedule(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer loanID) {
         final String URL = "/fineract-provider/api/v1/loans/" + loanID + "?associations=repaymentSchedule,futureSchedule&"
@@ -731,7 +737,7 @@ public class LoanTransactionHelper {
     public void checkAccrualTransactionForRepayment(final LocalDate transactionDate, final Float interestPortion, final Float feePortion,
             final Float penaltyPortion, final Integer loanID) {
 
-        ArrayList<HashMap> transactions = (ArrayList<HashMap>) getLoanDetail(this.requestSpec, this.responseSpec, loanID, "transactions");
+        ArrayList<HashMap> transactions = (ArrayList<HashMap>) getLoanTransactions(this.requestSpec, this.responseSpec, loanID);
         boolean isTransactionFound = false;
         for (int i = 0; i < transactions.size(); i++) {
             HashMap transactionType = (HashMap) transactions.get(i).get("type");
