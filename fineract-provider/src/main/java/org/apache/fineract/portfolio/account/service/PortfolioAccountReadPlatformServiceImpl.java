@@ -105,12 +105,9 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
         // sqlParams.add(portfolioAccountDTO.getClientId());
         Collection<PortfolioAccountData> accounts = null;
         String sql = null;
-        String defaultAccountStatus = "300";
+        long defaultAccountStatus = 300; // Active Status
         if (portfolioAccountDTO.getAccountStatus() != null) {
-            for (final long status : portfolioAccountDTO.getAccountStatus()) {
-                defaultAccountStatus += ", " + status;
-            }
-            defaultAccountStatus = defaultAccountStatus.substring(defaultAccountStatus.indexOf(",") + 1);
+            defaultAccountStatus = portfolioAccountDTO.getFirstAccountStatus();
         }
         final PortfolioAccountType accountType = PortfolioAccountType.fromInt(portfolioAccountDTO.getAccountTypeId());
         switch (accountType) {
@@ -150,11 +147,11 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
 
                 if (portfolioAccountDTO.getDepositType() != null) {
                     sql += " and sa.deposit_type_enum = ?";
-                    sqlParams.add(portfolioAccountDTO.getDepositType());
+                    sqlParams.add(portfolioAccountDTO.getDepositType().shortValue());
                 }
 
                 if (portfolioAccountDTO.isExcludeOverDraftAccounts()) {
-                    sql += " and sa.allow_overdraft = 0";
+                    sql += " and sa.allow_overdraft = false";
                 }
 
                 if (portfolioAccountDTO.getClientId() == null && portfolioAccountDTO.getGroupId() != null) {
