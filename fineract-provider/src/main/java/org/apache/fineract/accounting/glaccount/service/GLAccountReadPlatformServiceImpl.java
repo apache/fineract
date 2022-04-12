@@ -131,7 +131,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
                         + "group by t2.account_id desc) t1)";
             }
         }
-        final Object[] paramaterArray = new Object[3];
+        final Object[] parameterArray = new Object[3];
         int arrayPos = 0;
         boolean filtersPresent = false;
         if ((accountClassification != null) || StringUtils.isNotBlank(searchParam) || (usage != null) || (manualTransactionsAllowed != null)
@@ -143,8 +143,8 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
         if (filtersPresent) {
             boolean firstWhereConditionAdded = false;
             if (accountClassification != null) {
-                sql += " classification_enum like ?";
-                paramaterArray[arrayPos] = accountClassification;
+                sql += " classification_enum = ?";
+                parameterArray[arrayPos] = accountClassification.shortValue();
                 arrayPos = arrayPos + 1;
                 firstWhereConditionAdded = true;
             }
@@ -153,9 +153,9 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
                     sql += " and ";
                 }
                 sql += " ( name like %?% or gl_code like %?% )";
-                paramaterArray[arrayPos] = searchParam;
+                parameterArray[arrayPos] = searchParam;
                 arrayPos = arrayPos + 1;
-                paramaterArray[arrayPos] = searchParam;
+                parameterArray[arrayPos] = searchParam;
                 arrayPos = arrayPos + 1;
                 firstWhereConditionAdded = true;
             }
@@ -175,11 +175,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
                     sql += " and ";
                 }
 
-                if (manualTransactionsAllowed) {
-                    sql += " manual_journal_entries_allowed = 1";
-                } else {
-                    sql += " manual_journal_entries_allowed = 0";
-                }
+                sql += " manual_journal_entries_allowed = " + manualTransactionsAllowed;
                 firstWhereConditionAdded = true;
             }
             if (disabled != null) {
@@ -187,18 +183,14 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
                     sql += " and ";
                 }
 
-                if (disabled) {
-                    sql += " disabled = 1";
-                } else {
-                    sql += " disabled = 0";
-                }
+                sql += " disabled = " + disabled;
                 firstWhereConditionAdded = true;
             }
         }
 
         sql += " ORDER BY gl_code ASC";
 
-        final Object[] finalObjectArray = Arrays.copyOf(paramaterArray, arrayPos);
+        final Object[] finalObjectArray = Arrays.copyOf(parameterArray, arrayPos);
         return this.jdbcTemplate.query(sql, rm, finalObjectArray); // NOSONAR
     }
 
