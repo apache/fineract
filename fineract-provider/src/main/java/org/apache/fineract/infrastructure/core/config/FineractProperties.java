@@ -19,8 +19,12 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+@Getter
+@Setter
 @ConfigurationProperties(prefix = "fineract")
 public class FineractProperties {
 
@@ -28,22 +32,10 @@ public class FineractProperties {
 
     private FineractTenantProperties tenant;
 
-    public String getNodeId() {
-        return nodeId;
-    }
+    private FineractModeProperties mode;
 
-    public void setNodeId(String nodeId) {
-        this.nodeId = nodeId;
-    }
-
-    public FineractTenantProperties getTenant() {
-        return tenant;
-    }
-
-    public void setTenant(FineractTenantProperties tenant) {
-        this.tenant = tenant;
-    }
-
+    @Getter
+    @Setter
     public static class FineractTenantProperties {
 
         private String host;
@@ -55,77 +47,18 @@ public class FineractProperties {
         private String identifier;
         private String name;
         private String description;
+    }
 
-        public String getHost() {
-            return host;
-        }
+    @Getter
+    @Setter
+    public static class FineractModeProperties {
 
-        public void setHost(String host) {
-            this.host = host;
-        }
+        private boolean readEnabled;
+        private boolean writeEnabled;
+        private boolean batchEnabled;
 
-        public Integer getPort() {
-            return port;
-        }
-
-        public void setPort(Integer port) {
-            this.port = port;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
-
-        public String getParameters() {
-            return parameters;
-        }
-
-        public void setParameters(String parameters) {
-            this.parameters = parameters;
-        }
-
-        public String getTimezone() {
-            return timezone;
-        }
-
-        public void setTimezone(String timezone) {
-            this.timezone = timezone;
-        }
-
-        public String getIdentifier() {
-            return identifier;
-        }
-
-        public void setIdentifier(String identifier) {
-            this.identifier = identifier;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public void setDescription(String description) {
-            this.description = description;
+        public boolean isReadOnlyMode() {
+            return readEnabled && !writeEnabled && !batchEnabled;
         }
     }
 }
