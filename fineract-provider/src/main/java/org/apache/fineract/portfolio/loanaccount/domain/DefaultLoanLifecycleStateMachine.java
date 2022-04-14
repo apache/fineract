@@ -106,6 +106,8 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
             break;
             case WRITE_OFF_OUTSTANDING_UNDO:
             break;
+            case LOAN_CREDIT_BALANCE_REFUND:
+            break;
             default:
             break;
         }

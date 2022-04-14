@@ -878,6 +878,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder creditBalanceRefund(final Long loanId) {
+        this.actionName = "CREDITBALANCEREFUND";
+        this.entityName = "LOAN";
+        this.entityId = null;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions?command=creditBalanceRefund";
+        return this;
+    }
+
     public CommandWrapperBuilder undoWaiveChargeTransaction(final Long loanId, final Long transactionId) {
         this.actionName = "UNDO";
         this.entityName = "WAIVECHARGE";

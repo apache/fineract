@@ -128,6 +128,8 @@ public interface LoanReadPlatformService {
 
     LoanTransactionData retrieveRefundByCashTemplate(Long loanId);
 
+    LoanTransactionData retrieveCreditBalanceRefundTemplate(Long loanId);
+
     Collection<InterestRatePeriodData> retrieveLoanInterestRatePeriodData(LoanAccountData loan);
 
     Collection<Long> retrieveLoanIdsWithPendingIncomePostingTransactions();

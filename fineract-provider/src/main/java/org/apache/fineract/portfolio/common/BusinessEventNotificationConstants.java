@@ -55,6 +55,7 @@ public class BusinessEventNotificationConstants {
         LOAN_INTEREST_RECALCULATION("loan_interest_recalculation"), //
         LOAN_REFUND("loan_refund"), //
         LOAN_FORECLOSURE("loan_foreclosure"), //
+        LOAN_CREDIT_BALANCE_REFUND("loan_credit_balance_refund"), //
         LOAN_CREATE("loan_create"), //
         LOAN_PRODUCT_CREATE("loan_product_create"), //
         SAVINGS_ACTIVATE("savings_activated"), //
