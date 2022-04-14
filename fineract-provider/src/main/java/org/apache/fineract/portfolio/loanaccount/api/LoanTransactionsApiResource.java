@@ -164,6 +164,8 @@ public class LoanTransactionsApiResource {
                         DateUtils.getDateTimeZoneOfTenant());
             }
             transactionData = this.loanReadPlatformService.retrieveLoanForeclosureTemplate(loanId, transactionDate);
+        } else if (is(commandParam, "creditBalanceRefund")) {
+            transactionData = this.loanReadPlatformService.retrieveCreditBalanceRefundTemplate(loanId);
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }
@@ -238,6 +240,9 @@ public class LoanTransactionsApiResource {
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "foreclosure")) {
             final CommandWrapper commandRequest = builder.loanForeclosure(loanId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "creditBalanceRefund")) {
+            final CommandWrapper commandRequest = builder.creditBalanceRefund(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 

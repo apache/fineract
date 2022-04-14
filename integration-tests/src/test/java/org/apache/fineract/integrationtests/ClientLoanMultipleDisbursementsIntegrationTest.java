@@ -46,9 +46,9 @@ import org.slf4j.LoggerFactory;
  * repayments and verifying accounting transactions
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class ClientLoanIntegrationMultipleDisbursementsTest {
+public class ClientLoanMultipleDisbursementsIntegrationTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ClientLoanIntegrationMultipleDisbursementsTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ClientLoanMultipleDisbursementsIntegrationTest.class);
 
     public static final String MINIMUM_OPENING_BALANCE = "1000.0";
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";

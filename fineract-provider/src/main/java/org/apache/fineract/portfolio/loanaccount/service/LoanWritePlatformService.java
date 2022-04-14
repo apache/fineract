@@ -116,4 +116,6 @@ public interface LoanWritePlatformService {
 
     CommandProcessingResult makeGLIMLoanRepayment(Long loanId, JsonCommand command);
 
+    CommandProcessingResult creditBalanceRefund(Long loanId, JsonCommand command);
+
 }

@@ -3615,10 +3615,11 @@ public class Loan extends AbstractPersistableCustom {
         validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_REPAYMENT_OR_WAIVER,
                 transactionForAdjustment.getTransactionDate());
 
-        if (transactionForAdjustment.isNotRepayment() && transactionForAdjustment.isNotWaiver()) {
-            final String errorMessage = "Only transactions of type repayment or waiver can be adjusted.";
-            throw new InvalidLoanTransactionTypeException("transaction", "adjustment.is.only.allowed.to.repayment.or.waiver.transaction",
-                    errorMessage);
+        if (transactionForAdjustment.isNotRepayment() && transactionForAdjustment.isNotWaiver()
+                && transactionForAdjustment.isNotCreditBalanceRefund()) {
+            final String errorMessage = "Only transactions of type repayment, waiver or credit balance refund can be adjusted.";
+            throw new InvalidLoanTransactionTypeException("transaction",
+                    "adjustment.is.only.allowed.to.repayment.or.waiver.or.creditbalancerefund.transactions", errorMessage);
         }
 
         transactionForAdjustment.reverse();
@@ -3698,7 +3699,8 @@ public class Loan extends AbstractPersistableCustom {
         }
 
         for (final LoanTransaction loanTransaction : this.loanTransactions) {
-            if ((loanTransaction.isRefund() || loanTransaction.isRefundForActiveLoan()) && !loanTransaction.isReversed()) {
+            if ((loanTransaction.isRefund() || loanTransaction.isRefundForActiveLoan() || loanTransaction.isCreditBalanceRefund())
+                    && !loanTransaction.isReversed()) {
                 totalPaidInRepayments = totalPaidInRepayments.minus(loanTransaction.getAmount(currency));
             }
         }
@@ -5157,6 +5159,14 @@ public class Loan extends AbstractPersistableCustom {
                     dataValidationErrors.add(error);
                 }
             break;
+            case LOAN_CREDIT_BALANCE_REFUND:
+                if (!status().isOverpaid()) {
+                    final String defaultUserMessage = "Loan Credit Balance Refund is not allowed. Loan Account is not Overpaid.";
+                    final ApiParameterError error = ApiParameterError
+                            .generalError("error.msg.loan.credit.balance.refund.account.is.not.overpaid", defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
+            break;
             default:
             break;
         }
@@ -6062,6 +6072,40 @@ public class Loan extends AbstractPersistableCustom {
         return this.guaranteeAmountDerived == null ? BigDecimal.ZERO : this.guaranteeAmountDerived;
     }
 
+    public void creditBalanceRefund(LoanTransaction newCreditBalanceRefundTransaction,
+            LoanLifecycleStateMachine defaultLoanLifecycleStateMachine, List<Long> existingTransactionIds,
+            List<Long> existingReversedTransactionIds) {
+        validateAccountStatus(LoanEvent.LOAN_CREDIT_BALANCE_REFUND);
+
+        validateRefundDateIsAfterLastRepayment(newCreditBalanceRefundTransaction.getTransactionDate());
+
+        if (!newCreditBalanceRefundTransaction.isGreaterThanZeroAndLessThanOrEqualTo(this.totalOverpaid)) {
+            final String errorMessage = "Transaction Amount ("
+                    + newCreditBalanceRefundTransaction.getAmount(getCurrency()).getAmount().toString()
+                    + ") must be > zero and <= Overpaid amount (" + this.totalOverpaid.toString() + ").";
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+            final ApiParameterError error = ApiParameterError.parameterError(
+                    "error.msg.transactionAmount.invalid.must.be.>zero.and<=overpaidamount", errorMessage, "transactionAmount",
+                    newCreditBalanceRefundTransaction.getAmount(getCurrency()));
+            dataValidationErrors.add(error);
+
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
+
+        existingTransactionIds.addAll(findExistingTransactionIds());
+        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
+
+        this.loanTransactions.add(newCreditBalanceRefundTransaction);
+
+        updateLoanSummaryDerivedFields();
+
+        if (this.totalOverpaid == null || BigDecimal.ZERO.compareTo(this.totalOverpaid) == 0) {
+            this.loanStatus = LoanStatus.CLOSED_OBLIGATIONS_MET.getValue();
+        }
+
+    }
+
     public ChangedTransactionDetail makeRefundForActiveLoan(final LoanTransaction loanTransaction,
             final LoanLifecycleStateMachine loanLifecycleStateMachine, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds, final boolean allowTransactionsOnHoliday, final List<Holiday> holidays,
@@ -6179,7 +6223,8 @@ public class Loan extends AbstractPersistableCustom {
 
         LocalDate lastTransactionDate = null;
         for (final LoanTransaction transaction : this.loanTransactions) {
-            if ((transaction.isRepayment() || transaction.isRefundForActiveLoan()) && transaction.isNonZero()) {
+            if ((transaction.isRepayment() || transaction.isRefundForActiveLoan() || transaction.isCreditBalanceRefund())
+                    && transaction.isNonZero() && transaction.isNotReversed()) {
                 lastTransactionDate = transaction.getTransactionDate();
             }
         }
@@ -6841,4 +6886,5 @@ public class Loan extends AbstractPersistableCustom {
     public void adjustNetDisbursalAmount(BigDecimal adjustedAmount) {
         this.netDisbursalAmount = adjustedAmount.subtract(this.deriveSumTotalOfChargesDueAtDisbursement());
     }
+
 }

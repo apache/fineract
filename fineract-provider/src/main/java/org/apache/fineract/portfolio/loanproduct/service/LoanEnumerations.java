@@ -411,6 +411,10 @@ public final class LoanEnumerations {
                 optionData = new LoanTransactionEnumData(LoanTransactionType.INCOME_POSTING.getValue().longValue(),
                         LoanTransactionType.INCOME_POSTING.getCode(), "Income Posting");
             break;
+            case CREDIT_BALANCE_REFUND:
+                optionData = new LoanTransactionEnumData(LoanTransactionType.CREDIT_BALANCE_REFUND.getValue().longValue(),
+                        LoanTransactionType.CREDIT_BALANCE_REFUND.getCode(), "Credit Balance Refund");
+            break;
         }
         return optionData;
     }

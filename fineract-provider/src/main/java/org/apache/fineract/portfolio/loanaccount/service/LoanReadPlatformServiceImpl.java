@@ -2117,24 +2117,38 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
     @Override
     public LoanTransactionData retrieveRefundByCashTemplate(Long loanId) {
-        // TODO Auto-generated method stub
         this.context.authenticatedUser();
 
-        // TODO - KW - OPTIMIZE - write simple sql query to fetch back date of
-        // possible next transaction date.
+        final Collection<PaymentTypeData> paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
         final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
-        final MonetaryCurrency currency = loan.getCurrency();
+        return retrieveRefundTemplate(loanId, LoanTransactionType.REFUND_FOR_ACTIVE_LOAN, paymentOptions, loan.getCurrency(),
+                retrieveTotalPaidInAdvance(loan.getId()).getPaidInAdvance(), loan.getNetDisbursalAmount());
+    }
+
+    @Override
+    public LoanTransactionData retrieveCreditBalanceRefundTemplate(Long loanId) {
+        this.context.authenticatedUser();
+
+        final Collection<PaymentTypeData> paymentOptions = null;
+        final BigDecimal netDisbursal = null;
+        final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
+        return retrieveRefundTemplate(loanId, LoanTransactionType.CREDIT_BALANCE_REFUND, paymentOptions, loan.getCurrency(),
+                loan.getTotalOverpaid(), netDisbursal);
+
+    }
+
+    private LoanTransactionData retrieveRefundTemplate(Long loanId, LoanTransactionType loanTransactionType,
+            Collection<PaymentTypeData> paymentOptions, MonetaryCurrency currency, BigDecimal transactionAmount, BigDecimal netDisbursal) {
+
         final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
 
         final CurrencyData currencyData = applicationCurrency.toData();
 
-        final LocalDate earliestUnpaidInstallmentDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        final LocalDate currentDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
 
-        final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.REFUND_FOR_ACTIVE_LOAN);
-        final Collection<PaymentTypeData> paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
-        return new LoanTransactionData(null, null, null, transactionType, null, currencyData, earliestUnpaidInstallmentDate,
-                retrieveTotalPaidInAdvance(loan.getId()).getPaidInAdvance(), null, loan.getNetDisbursalAmount(), null, null, null, null,
-                null, paymentOptions, null, null, null, null, false);
+        final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(loanTransactionType);
+        return new LoanTransactionData(null, null, null, transactionType, null, currencyData, currentDate, transactionAmount, null,
+                netDisbursal, null, null, null, null, null, paymentOptions, null, null, null, null, false);
     }
 
     @Override

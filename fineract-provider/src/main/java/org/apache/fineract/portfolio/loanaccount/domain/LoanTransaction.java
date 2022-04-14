@@ -297,6 +297,13 @@ public class LoanTransaction extends AbstractPersistableCustom {
         return applyCharge;
     }
 
+    public static LoanTransaction creditBalanceRefund(final Loan loan, final Office office, final Money amount, final LocalDate paymentDate,
+            final String externalId, final LocalDateTime createdDate, final AppUser appUser) {
+        final PaymentDetail paymentDetail = null;
+        return new LoanTransaction(loan, office, LoanTransactionType.CREDIT_BALANCE_REFUND, paymentDetail, amount.getAmount(), paymentDate,
+                externalId, createdDate, appUser);
+    }
+
     public static LoanTransaction refundForActiveLoan(final Office office, final Money amount, final PaymentDetail paymentDetail,
             final LocalDate paymentDate, final String externalId, final LocalDateTime createdDate, final AppUser appUser) {
         return new LoanTransaction(null, office, LoanTransactionType.REFUND_FOR_ACTIVE_LOAN, paymentDetail, amount.getAmount(), paymentDate,
@@ -573,6 +580,10 @@ public class LoanTransaction extends AbstractPersistableCustom {
         return !isInterestWaiver() && !isChargesWaiver();
     }
 
+    public boolean isNotCreditBalanceRefund() {
+        return !isCreditBalanceRefund();
+    }
+
     public boolean isChargePayment() {
         return getTypeOf().isChargePayment() && isNotReversed();
     }
@@ -614,6 +625,10 @@ public class LoanTransaction extends AbstractPersistableCustom {
 
     public boolean isGreaterThanZero(final MonetaryCurrency currency) {
         return getAmount(currency).isGreaterThanZero();
+    }
+
+    public boolean isGreaterThanZeroAndLessThanOrEqualTo(BigDecimal totalOverpaid) {
+        return isNonZero() && this.amount.compareTo(totalOverpaid) <= 0;
     }
 
     public boolean isNotZero(final MonetaryCurrency currency) {
@@ -698,6 +713,10 @@ public class LoanTransaction extends AbstractPersistableCustom {
 
     public boolean isRefund() {
         return LoanTransactionType.REFUND.equals(getTypeOf()) && isNotReversed();
+    }
+
+    public boolean isCreditBalanceRefund() {
+        return LoanTransactionType.CREDIT_BALANCE_REFUND.equals(getTypeOf()) && isNotReversed();
     }
 
     public void updateExternalId(final String externalId) {

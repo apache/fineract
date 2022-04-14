@@ -3214,9 +3214,39 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     @Override
+    public CommandProcessingResult creditBalanceRefund(Long loanId, JsonCommand command) {
+        this.loanEventApiJsonValidator.validateNewRefundTransaction(command.json());
+
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
+        final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
+        final String noteText = command.stringValueOfParameterNamedAllowingNull("note");
+        final String externalId = command.stringValueOfParameterNamedAllowingNull("externalId");
+
+        final Map<String, Object> changes = new LinkedHashMap<>();
+        changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
+        changes.put("transactionAmount", command.stringValueOfParameterNamed("transactionAmount"));
+        changes.put("locale", command.locale());
+        changes.put("dateFormat", command.dateFormat());
+
+        if (StringUtils.isNotBlank(noteText)) {
+            changes.put("note", noteText);
+        }
+        if (StringUtils.isNotBlank(externalId)) {
+            changes.put("externalId", externalId);
+        }
+
+        final CommandProcessingResultBuilder commandProcessingResultBuilder = this.loanAccountDomainService.creditBalanceRefund(loanId,
+                transactionDate, transactionAmount, noteText, externalId);
+
+        return commandProcessingResultBuilder //
+                .withCommandId(command.commandId()).with(changes) //
+                .build();
+
+    }
+
+    @Override
     @Transactional
     public CommandProcessingResult makeLoanRefund(Long loanId, JsonCommand command) {
-        // TODO Auto-generated method stub
 
         this.loanEventApiJsonValidator.validateNewRefundTransaction(command.json());
 
@@ -3400,4 +3430,5 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
     }
+
 }

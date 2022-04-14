@@ -63,6 +63,7 @@ public class LoanTransactionHelper {
     private static final String WRITE_OFF_LOAN_COMMAND = "writeoff";
     private static final String WAIVE_INTEREST_COMMAND = "waiveinterest";
     private static final String MAKE_REPAYMENT_COMMAND = "repayment";
+    private static final String CREDIT_BALANCE_REFUND_COMMAND = "creditBalanceRefund";
     private static final String WITHDRAW_LOAN_APPLICATION_COMMAND = "withdrawnByApplicant";
     private static final String RECOVER_FROM_GUARANTORS_COMMAND = "recoverGuarantees";
     private static final String MAKE_REFUND_BY_CASH_COMMAND = "refundByCash";
@@ -326,6 +327,12 @@ public class LoanTransactionHelper {
         return resourceId;
     }
 
+    public Object creditBalanceRefund(final String date, final Float amountToBePaid, final String externalId, final Integer loanID,
+            String jsonAttributeToGetback) {
+        return performLoanTransaction(createLoanTransactionURL(CREDIT_BALANCE_REFUND_COMMAND, loanID),
+                getCreditBalanceRefundBodyAsJSON(date, amountToBePaid, externalId), jsonAttributeToGetback);
+    }
+
     public HashMap makeRepayment(final String date, final Float amountToBePaid, final Integer loanID) {
         return (HashMap) performLoanTransaction(createLoanTransactionURL(MAKE_REPAYMENT_COMMAND, loanID),
                 getRepaymentBodyAsJSON(date, amountToBePaid), "");
@@ -419,6 +426,12 @@ public class LoanTransactionHelper {
         return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_CHARGES_URL, "");
     }
 
+    public HashMap getLoanTransactionDetails(final Integer loanId, final Integer txnId) {
+        final String GET_LOAN_CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/" + txnId + "?"
+                + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_CHARGES_URL, "");
+    }
+
     public HashMap getPostDatedCheck(final Integer loanId, final Integer installmentId) {
         final String GET_POST_DATED_TRANS_URL = "/fineract-provider/api/v1/loans/" + loanId + "/postdatedchecks/" + installmentId + "?"
                 + Utils.TENANT_IDENTIFIER;
@@ -491,6 +504,19 @@ public class LoanTransactionHelper {
         map.put("rejectedOnDate", date);
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");
+        return new Gson().toJson(map);
+    }
+
+    private String getCreditBalanceRefundBodyAsJSON(final String transactionDate, final Float transactionAmount, final String externalId) {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("locale", "en");
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("transactionDate", transactionDate);
+        map.put("transactionAmount", transactionAmount.toString());
+        map.put("note", "Credit Balance Refund Made!!!");
+        if (externalId != null) {
+            map.put("externalId", externalId);
+        }
         return new Gson().toJson(map);
     }
 
