@@ -15,6 +15,9 @@ on:
     branches:
       - develop
 
+permissions:
+  contents: read
+
 jobs:
   setup-build-deploy:
     name: Deploy on Fineract.dev

@@ -2,6 +2,9 @@ name: Fineract Docker build
 
 on: [push, pull_request]
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-20.04
