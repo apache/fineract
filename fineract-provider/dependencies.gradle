@@ -129,7 +129,13 @@ dependencies {
 
             // Although fineract (at the time of writing) doesn't have any compile time dep. on httpclient,
             // it's useful to have this for the Spring Boot TestRestTemplate http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#boot-features-rest-templates-test-utility
-            'org.apache.httpcomponents:httpclient'
+            'org.apache.httpcomponents:httpclient',
+
+            //The Cloud SQL Connector for Java is a library that provides IAM-based authorization and encryption
+            //when connecting to a Cloud SQL instance.
+            //It can not provide a network path to a Cloud SQL instance if one is not already present.
+            //Apache License https://github.com/GoogleCloudPlatform/cloud-sql-jdbc-socket-factory
+            'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.4.4'
             )
 
     compileOnly 'org.projectlombok:lombok'

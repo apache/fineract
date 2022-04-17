@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.core.service;
 
 import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection.toJdbcUrl;
+import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection.toJdbcUrlGCP;
 import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection.toProtocol;
 
 import com.zaxxer.hikari.HikariConfig;
@@ -30,6 +31,8 @@ import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 /**
@@ -46,6 +49,9 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
 
     @Autowired
     private HikariConfig hikariConfig;
+
+    @Autowired
+    ApplicationContext context;
 
     @Autowired
     public TomcatJdbcDataSourcePerTenantService(final @Qualifier("hikariTenantDataSource") DataSource tenantDataSource) {
@@ -80,8 +86,14 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
     // creates the tenant data source for the oltp and report database
     private DataSource createNewDataSourceFor(final FineractPlatformTenantConnection tenantConnectionObj) {
         String protocol = toProtocol(this.tenantDataSource);
-        String jdbcUrl = toJdbcUrl(protocol, tenantConnectionObj.getSchemaServer(), tenantConnectionObj.getSchemaServerPort(),
-                tenantConnectionObj.getSchemaName(), tenantConnectionObj.getSchemaConnectionParameters());
+        Environment environment = context.getEnvironment();
+        String jdbcUrl;
+        if (environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_INSTANCE_CONNECTION_NAME") != null) {
+            jdbcUrl = toJdbcUrlGCP(protocol, tenantConnectionObj.getSchemaName(), tenantConnectionObj.getSchemaConnectionParameters());
+        } else {
+            jdbcUrl = toJdbcUrl(protocol, tenantConnectionObj.getSchemaServer(), tenantConnectionObj.getSchemaServerPort(),
+                    tenantConnectionObj.getSchemaName(), tenantConnectionObj.getSchemaConnectionParameters());
+        }
 
         HikariConfig config = new HikariConfig();
         config.setDriverClassName(hikariConfig.getDriverClassName());

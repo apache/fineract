@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.core.service.migration;
 
 import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection.toJdbcUrl;
+import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection.toJdbcUrlGCP;
 import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection.toProtocol;
 
 import com.zaxxer.hikari.HikariDataSource;
@@ -29,6 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -37,6 +40,9 @@ public class TenantDataSourceFactory {
     private static final Logger LOG = LoggerFactory.getLogger(TenantDataSourceFactory.class);
 
     private final HikariDataSource tenantDataSource;
+
+    @Autowired
+    ApplicationContext context;
 
     @Autowired
     public TenantDataSourceFactory(@Qualifier("hikariTenantDataSource") HikariDataSource tenantDataSource) {
@@ -56,8 +62,15 @@ public class TenantDataSourceFactory {
         dataSource.setUsername(tenantConnection.getSchemaUsername());
         dataSource.setPassword(tenantConnection.getSchemaPassword());
         String protocol = toProtocol(tenantDataSource);
-        String tenantJdbcUrl = toJdbcUrl(protocol, tenantConnection.getSchemaServer(), tenantConnection.getSchemaServerPort(),
-                tenantConnection.getSchemaName(), tenantConnection.getSchemaConnectionParameters());
+
+        Environment environment = context.getEnvironment();
+        String tenantJdbcUrl;
+        if (environment.getProperty("FINERACT_HIKARI_DS_PROPERTIES_INSTANCE_CONNECTION_NAME") != null) {
+            tenantJdbcUrl = toJdbcUrlGCP(protocol, tenantConnection.getSchemaName(), tenantConnection.getSchemaConnectionParameters());
+        } else {
+            tenantJdbcUrl = toJdbcUrl(protocol, tenantConnection.getSchemaServer(), tenantConnection.getSchemaServerPort(),
+                    tenantConnection.getSchemaName(), tenantConnection.getSchemaConnectionParameters());
+        }
         LOG.debug("JDBC URL for tenant {} is {}", tenant.getTenantIdentifier(), tenantJdbcUrl);
         dataSource.setJdbcUrl(tenantJdbcUrl);
         return dataSource;
