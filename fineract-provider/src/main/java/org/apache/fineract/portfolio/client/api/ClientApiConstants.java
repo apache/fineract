@@ -69,6 +69,7 @@ public class ClientApiConstants {
     public static final String localeParamName = "locale";
     public static final String dateFormatParamName = "dateFormat";
     public static final String address = "address";
+    public static final String CONTACTS = "contacts";
     public static final String familyMembers = "familyMembers";
     public static final String MARITALSTATUS = "MARITALSTATUS";
     public static final String maritalStatusIdParamName = "maritalStatusId";
@@ -184,6 +185,12 @@ public class ClientApiConstants {
     public static final String obligeeData = "ObligeeDetails";
 
     public static final String clientEntityName = "clients";
+
+    // Client Contact Information
+    public static final String contactTypeIdParamName = "contactTypeId";
+    public static final String contactKeyParamName = "contactKey";
+    public static final String currentContactParamName = "currentContact";
+    public static final String CLIENT_CONTACT_TYPE_CODENAME = "ContactInformationType";
 
     /**
      * These parameters will match the class level parameters of {@link ClientData}. Where possible, we try to get

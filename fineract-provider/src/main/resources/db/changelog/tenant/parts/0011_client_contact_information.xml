@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet author="fineract" id="0011_1">
+        <createTable tableName="m_client_contact_information">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="client_id" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+            <column name="contact_type_id" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="contact_key" type="VARCHAR(120)">
+                <constraints nullable="false" />
+            </column>
+            <column defaultValueNumeric="200" name="status" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column defaultValueComputed="false" name="current" type="boolean">
+                <constraints nullable="false" />
+            </column>
+            <column defaultValueComputed="NULL" name="createdby_id" type="BIGINT" />
+            <column defaultValueComputed="NULL" name="lastmodifiedby_id" type="BIGINT" />
+            <column defaultValueComputed="NULL" name="created_date" type="datetime" />
+            <column defaultValueComputed="NULL" name="lastmodified_date" type="datetime" />
+        </createTable>
+    </changeSet>
+    <changeSet author="fineract" id="0011_2">
+        <insert tableName="m_code">
+            <column name="code_name" value="ContactInformationType"/>
+            <column name="is_system_defined" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+    <changeSet author="fineract" id="0011_3">
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="CREATE_CLIENTCONTACTINFORMATION"/>
+            <column name="entity_name" value="CLIENTCONTACTINFORMATION"/>
+            <column name="action_name" value="CREATE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="UPDATE_CLIENTCONTACTINFORMATION"/>
+            <column name="entity_name" value="CLIENTCONTACTINFORMATION"/>
+            <column name="action_name" value="UPDATE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio"/>
+            <column name="code" value="DELETE_CLIENTCONTACTINFORMATION"/>
+            <column name="entity_name" value="CLIENTCONTACTINFORMATION"/>
+            <column name="action_name" value="DELETE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

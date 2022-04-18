@@ -123,6 +123,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
+    private final ClientContactInformationWritePlatformService clientContactInformationWritePlatformService;
 
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -139,7 +140,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final AddressWritePlatformService addressWritePlatformService,
             final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService,
             final BusinessEventNotifierService businessEventNotifierService,
-            final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService) {
+            final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
+            final ClientContactInformationWritePlatformService clientContactInformationWritePlatformService) {
         this.context = context;
         this.clientRepository = clientRepository;
         this.clientNonPersonRepository = clientNonPersonRepository;
@@ -163,6 +165,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.clientFamilyMembersWritePlatformService = clientFamilyMembersWritePlatformService;
         this.businessEventNotifierService = businessEventNotifierService;
         this.entityDatatableChecksWritePlatformService = entityDatatableChecksWritePlatformService;
+        this.clientContactInformationWritePlatformService = clientContactInformationWritePlatformService;
     }
 
     @Transactional
@@ -225,7 +228,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     @Transactional
     @Override
     public CommandProcessingResult createClient(final JsonCommand command) {
-
         try {
             final AppUser currentUser = this.context.authenticatedUser();
 
@@ -235,8 +237,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .retrieveGlobalConfiguration("Enable-Address");
 
             final Boolean isAddressEnabled = configuration.isEnabled();
-
-            final Boolean isStaff = command.booleanObjectValueOfParameterNamed(ClientApiConstants.isStaffParamName);
 
             final Long officeId = command.longValueOfParameterNamed(ClientApiConstants.officeIdParamName);
 
@@ -338,6 +338,11 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 this.entityDatatableChecksWritePlatformService.saveDatatables(StatusEnum.CREATE.getCode().longValue(),
                         EntityTables.CLIENT.getName(), newClient.getId(), null,
                         command.arrayOfParameterNamed(ClientApiConstants.datatables));
+            }
+
+            // Client Contact Information
+            if (command.parameterExists(ClientApiConstants.CONTACTS)) {
+                this.clientContactInformationWritePlatformService.addClientContactInformation(currentUser, newClient, command);
             }
 
             this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.CLIENTS_CREATE,

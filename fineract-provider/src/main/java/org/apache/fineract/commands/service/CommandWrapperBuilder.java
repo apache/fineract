@@ -549,6 +549,33 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder createClientContactInformation(final Long clientId) {
+        this.actionName = "CREATE";
+        this.entityName = "CLIENTCONTACTINFORMATION";
+        this.entityId = null;
+        this.clientId = clientId;
+        this.href = "/clients/" + clientId + "/contactinformation/template";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateClientContactInformation(final Long clientId, final Long clientInformationId) {
+        this.actionName = "UPDATE";
+        this.entityName = "CLIENTCONTACTINFORMATION";
+        this.entityId = clientInformationId;
+        this.clientId = clientId;
+        this.href = "/clients/" + clientId + "/contactinformation/" + clientInformationId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteClientContactInformation(final Long clientId, final Long clientInformationId) {
+        this.actionName = "DELETE";
+        this.entityName = "CLIENTCONTACTINFORMATION";
+        this.entityId = clientInformationId;
+        this.clientId = clientId;
+        this.href = "/clients/" + clientId + "/contactinformation/" + clientInformationId;
+        return this;
+    }
+
     public CommandWrapperBuilder createClient() {
         this.actionName = "CREATE";
         this.entityName = "CLIENT";

@@ -112,8 +112,8 @@ public class ClientIdentifier extends AbstractAuditableCustom {
 
         final String statusParamName = "status";
         if (command.isChangeInStringParameterNamed(statusParamName, ClientIdentifierStatus.fromInt(this.status).getCode())) {
-            final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
-            actualChanges.put(descriptionParamName, ClientIdentifierStatus.valueOf(newValue));
+            final String newValue = command.stringValueOfParameterNamed(statusParamName);
+            actualChanges.put(statusParamName, ClientIdentifierStatus.valueOf(newValue));
             this.status = ClientIdentifierStatus.valueOf(newValue).getValue();
         }
 

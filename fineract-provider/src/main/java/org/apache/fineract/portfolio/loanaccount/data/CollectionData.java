@@ -20,7 +20,11 @@ package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public final class CollectionData {
 
     private final BigDecimal availableDisbursementAmount;
@@ -54,37 +58,5 @@ public final class CollectionData {
     public static CollectionData template() {
         final BigDecimal zero = BigDecimal.ZERO;
         return new CollectionData(zero, 0, null, 0, null, zero, null, zero);
-    }
-
-    public BigDecimal getAvailableDisbursementAmount() {
-        return availableDisbursementAmount;
-    }
-
-    public int getPastDueDays() {
-        return pastDueDays;
-    }
-
-    public LocalDate getNextPaymentDueDate() {
-        return nextPaymentDueDate;
-    }
-
-    public int getDelinquentDays() {
-        return delinquentDays;
-    }
-
-    public LocalDate getDelinquentDate() {
-        return delinquentDate;
-    }
-
-    public BigDecimal getDelinquentAmount() {
-        return delinquentAmount;
-    }
-
-    public LocalDate getLastPaymentDate() {
-        return lastPaymentDate;
-    }
-
-    public BigDecimal getLastPaymentAmount() {
-        return lastPaymentAmount;
     }
 }

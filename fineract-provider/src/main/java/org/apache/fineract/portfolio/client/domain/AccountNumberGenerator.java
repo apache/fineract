@@ -25,7 +25,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatEnumerations.AccountNumberPrefixType;
-import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatRepository;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
@@ -55,7 +54,6 @@ public class AccountNumberGenerator {
     private static final String SAVINGS_PRODUCT_SHORT_NAME = "savingsProductShortName";
     private static final String SHARE_PRODUCT_SHORT_NAME = "sharesProductShortName";
     private static final String PREFIX_SHORT_NAME = "prefixShortName";
-    private final AccountNumberFormatRepository accountNumberFormatRepository;
     private final ConfigurationReadPlatformService configurationReadPlatformService;
     private final ClientRepository clientRepository;
     private final LoanRepository loanRepository;
@@ -63,10 +61,9 @@ public class AccountNumberGenerator {
 
     @Autowired
     public AccountNumberGenerator(final ConfigurationReadPlatformService configurationReadPlatformService,
-            final AccountNumberFormatRepository accountNumberFormatRepository, final ClientRepository clientRepository,
-            final LoanRepository loanRepository, final SavingsAccountRepository savingsAccountRepository) {
+            final ClientRepository clientRepository, final LoanRepository loanRepository,
+            final SavingsAccountRepository savingsAccountRepository) {
         this.configurationReadPlatformService = configurationReadPlatformService;
-        this.accountNumberFormatRepository = accountNumberFormatRepository;
         this.clientRepository = clientRepository;
         this.loanRepository = loanRepository;
         this.savingsAccountRepository = savingsAccountRepository;
