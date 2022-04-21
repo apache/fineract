@@ -1,4 +1,4 @@
-name: Fineract Gradle build - basicauth
+name: Fineract Gradle build - MariaDB
 on: [push, pull_request]
 
 permissions:

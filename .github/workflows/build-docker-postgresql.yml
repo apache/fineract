@@ -1,4 +1,4 @@
-name: Fineract Docker build for PostgreSQL
+name: Fineract Docker build - PostgreSQL
 
 on: [push, pull_request]
 
