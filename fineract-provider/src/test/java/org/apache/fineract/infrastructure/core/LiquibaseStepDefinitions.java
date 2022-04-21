@@ -40,12 +40,14 @@ import org.apache.fineract.infrastructure.core.service.migration.TenantDataSourc
 import org.apache.fineract.infrastructure.core.service.migration.TenantDatabaseStateVerifier;
 import org.apache.fineract.infrastructure.core.service.migration.TenantDatabaseUpgradeService;
 import org.apache.fineract.infrastructure.security.service.TenantDetailsService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class LiquibaseStepDefinitions implements En {
 
     private TenantDataSourceFactory tenantDataSourceFactory;
     private TenantDetailsService tenantDetailsService;
     private TenantDatabaseStateVerifier databaseStateVerifier;
+    @Autowired
     private FineractProperties fineractProperties;
     private ExtendedSpringLiquibaseFactory liquibaseFactory;
     private ExtendedSpringLiquibase initialTenantStoreLiquibase;
@@ -100,8 +102,13 @@ public class LiquibaseStepDefinitions implements En {
         Then("The database migration did not do anything", () -> {
             verify(databaseStateVerifier).isLiquibaseDisabled();
             verifyNoMoreInteractions(databaseStateVerifier);
-            verifyNoInteractions(tenantDetailsService, tenantStoreDataSource, fineractProperties, liquibaseFactory,
-                    tenantDataSourceFactory);
+            verifyNoInteractions(tenantDetailsService, tenantStoreDataSource, liquibaseFactory, tenantDataSourceFactory);
+        });
+
+        Then("The database migration did not do anything, because it is not a write instance", () -> {
+            verify(databaseStateVerifier).isLiquibaseDisabled();
+            verifyNoMoreInteractions(databaseStateVerifier);
+            verifyNoInteractions(tenantDetailsService, tenantStoreDataSource, liquibaseFactory, tenantDataSourceFactory);
         });
 
         Then("The tenant store upgrade fails with a schema upgrade needed", () -> {
@@ -140,7 +147,6 @@ public class LiquibaseStepDefinitions implements En {
         tenantDataSourceFactory = mock(TenantDataSourceFactory.class);
         tenantDetailsService = mock(TenantDetailsService.class);
         databaseStateVerifier = mock(TenantDatabaseStateVerifier.class);
-        fineractProperties = mock(FineractProperties.class);
 
         liquibaseFactory = mock(ExtendedSpringLiquibaseFactory.class);
 
@@ -158,7 +164,6 @@ public class LiquibaseStepDefinitions implements En {
         defaultTenantDataSource = mock(DataSource.class);
 
         given(databaseStateVerifier.isLiquibaseDisabled()).willReturn(!liquibaseEnabled);
-        given(fineractProperties.getTenant()).willReturn(new FineractProperties.FineractTenantProperties());
         given(liquibaseFactory.create(tenantStoreDataSource, "tenant_store_db", "initial_switch")).willReturn(initialTenantStoreLiquibase);
         given(liquibaseFactory.create(tenantStoreDataSource, "tenant_store_db")).willReturn(tenantStoreLiquibase);
 
