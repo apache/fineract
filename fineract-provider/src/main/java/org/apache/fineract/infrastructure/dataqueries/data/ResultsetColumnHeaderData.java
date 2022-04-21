@@ -157,7 +157,8 @@ public final class ResultsetColumnHeaderData implements Serializable {
     }
 
     private boolean isDecimal() {
-        return "decimal".equalsIgnoreCase(this.columnType) || "NEWDECIMAL".equalsIgnoreCase(this.columnType);
+        return "decimal".equalsIgnoreCase(this.columnType) || "NEWDECIMAL".equalsIgnoreCase(this.columnType)
+                || "numeric".equalsIgnoreCase(this.columnType);
         // Refer org.drizzle.jdbc.internal.mysql.MySQLType.java
     }
 
