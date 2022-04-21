@@ -149,18 +149,22 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     @Override
     public List<DatatableData> retrieveDatatableNames(final String appTable) {
-
+        Object[] params = new Object[] { this.context.authenticatedUser().getId() };
         // PERMITTED datatables
-        final String sql = "select application_table_name, registered_table_name, entity_subtype " + " from x_registered_table "
-                + " where exists" + " (select 'f'" + " from m_appuser_role ur " + " join m_role r on r.id = ur.role_id"
+        String sql = "select application_table_name, registered_table_name, entity_subtype " + " from x_registered_table " + " where exists"
+                + " (select 'f'" + " from m_appuser_role ur " + " join m_role r on r.id = ur.role_id"
                 + " left join m_role_permission rp on rp.role_id = r.id" + " left join m_permission p on p.id = rp.permission_id"
                 + " where ur.appuser_id = ? and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat"
-                + "('READ_', registered_table_name))) "
-                + " and application_table_name like ? order by application_table_name, registered_table_name";
+                + "('READ_', registered_table_name))) ";
+        if (appTable != null) {
+            sql = sql + " and application_table_name like ? ";
+            params = new Object[] { this.context.authenticatedUser().getId(), appTable };
+        }
+        sql = sql + " order by application_table_name, registered_table_name";
 
         final List<DatatableData> datatables = new ArrayList<>();
 
-        final SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, new Object[] { this.context.authenticatedUser().getId(), appTable }); // NOSONAR
+        final SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, params); // NOSONAR
         while (rowSet.next()) {
             final String appTableName = rowSet.getString("application_table_name");
             final String registeredDatatableName = rowSet.getString("registered_table_name");
