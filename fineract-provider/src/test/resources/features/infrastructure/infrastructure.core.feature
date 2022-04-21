@@ -7,7 +7,25 @@ Feature: Core Infrastructure
     Then The database migration did not do anything
 
   @infrastructure
+  Scenario: Verify that schema migration is not executed when the Fineract instance is a read instance
+    Given Set every Fineract instance type to false
+    Given Fineract instance is a read instance
+    Given Liquibase is enabled with a default tenant
+    When The database migration process is executed
+    Then The database migration did not do anything, because it is not a write instance
+
+  @infrastructure
+  Scenario: Verify that schema migration is not executed when the Fineract instance is a batch instance
+    Given Set every Fineract instance type to false
+    Given Fineract instance is a batch instance
+    Given Liquibase is enabled with a default tenant
+    When The database migration process is executed
+    Then The database migration did not do anything, because it is not a write instance
+
+  @infrastructure
   Scenario: Verify that schema migration works from scratch
+    Given Set every Fineract instance type to false
+    Given Fineract instance is a write instance
     Given Liquibase is enabled with a default tenant
     Given Liquibase runs the very first time for the tenant store
     Given Liquibase runs the very first time for the default tenant

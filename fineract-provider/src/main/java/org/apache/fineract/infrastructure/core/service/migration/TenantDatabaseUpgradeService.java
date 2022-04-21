@@ -68,8 +68,11 @@ public class TenantDatabaseUpgradeService implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        if (databaseStateVerifier.isLiquibaseDisabled()) {
+        if (databaseStateVerifier.isLiquibaseDisabled() || !fineractProperties.getMode().isWriteEnabled()) {
             LOG.warn("Liquibase is disabled. Not upgrading any database.");
+            if (!fineractProperties.getMode().isWriteEnabled()) {
+                LOG.warn("Liquibase is disabled because the current instance is configured as a non-write Fineract instance");
+            }
             return;
         }
         try {

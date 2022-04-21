@@ -103,7 +103,7 @@ public class TestConfiguration {
     @Bean
     public TenantDatabaseStateVerifier tenantDatabaseStateVerifier(DatabaseIndependentQueryService databaseIndependentQueryService,
             LiquibaseProperties liquibaseProperties, FineractProperties fineractProperties) {
-        return new TenantDatabaseStateVerifier(liquibaseProperties, databaseIndependentQueryService);
+        return new TenantDatabaseStateVerifier(liquibaseProperties, databaseIndependentQueryService, fineractProperties);
     }
 
     /**
