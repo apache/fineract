@@ -1,4 +1,4 @@
-name: Fineract Gradle build - basicauth - PostgreSQL
+name: Fineract Gradle build - PostgreSQL
 on: [push, pull_request]
 
 permissions:

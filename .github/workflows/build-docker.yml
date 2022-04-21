@@ -1,4 +1,4 @@
-name: Fineract Docker build
+name: Fineract Docker build - MariaDB
 
 on: [push, pull_request]
 
