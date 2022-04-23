@@ -130,22 +130,6 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
     private static final class TellerInOfficeHierarchyMapper implements RowMapper<TellerData> {
 
-        public String schema() {
-
-            final StringBuilder sqlBuilder = new StringBuilder(200);
-
-            sqlBuilder.append("t.id as id,t.office_id as office_id, t.name as teller_name, t.description as description, ");
-            sqlBuilder.append("t.valid_from as start_date, t.valid_to as end_date, t.state as status, o.name as office_name ");
-            sqlBuilder.append("t.debit_account_id as debit_account_id, t.credit_account_id as credit_account_id ");
-            sqlBuilder.append("from m_office o ");
-            sqlBuilder.append("join m_office ohierarchy on o.hierarchy like concat(ohierarchy.hierarchy, '%') ");
-            sqlBuilder.append("join m_tellers t on t.office_id = ohierarchy.id and s.is_active=true ");
-
-            sqlBuilder.append("where o.id = ? ");
-
-            return sqlBuilder.toString();
-        }
-
         @Override
         public TellerData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 

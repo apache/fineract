@@ -27,7 +27,6 @@ import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.rate.data.RateData;
-import org.apache.fineract.portfolio.rate.domain.Rate;
 import org.apache.fineract.portfolio.rate.domain.RateAppliesTo;
 import org.apache.fineract.portfolio.rate.exception.RateNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -137,13 +136,5 @@ public class RateReadServiceImpl implements RateReadService {
             return RateData.instance(id, name, percentage, productAppliesTo, active);
         }
 
-        public RateData mapRow(Rate rateResponse, int i) {
-            final Long id = rateResponse.getId();
-            final String name = rateResponse.getName();
-            final BigDecimal percentage = rateResponse.getPercentage();
-            final EnumOptionData productApply = RateEnumerations.rateAppliesTo(rateResponse.getProductApply());
-            final boolean active = rateResponse.isActive();
-            return RateData.instance(id, name, percentage, productApply, active);
-        }
     }
 }
