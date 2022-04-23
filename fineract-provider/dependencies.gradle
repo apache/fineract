@@ -65,7 +65,7 @@ dependencies {
             'io.swagger.core.v3:swagger-annotations',
             'org.webjars:webjars-locator-core',
 
-            'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.4.4',
+            'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.5.0',
             'com.squareup.retrofit2:converter-gson',
             'org.apache.commons:commons-email'
             )
@@ -106,7 +106,7 @@ dependencies {
         exclude group: 'com.sun.activation'
     }
 
-    implementation('org.owasp.esapi:esapi:2.2.3.1') {
+    implementation('org.owasp.esapi:esapi:2.3.0.0') {
         exclude group: 'org.slf4j'
         exclude group: 'log4j'
         exclude group: 'commons-logging'
