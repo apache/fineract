@@ -24,7 +24,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.Locale;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -182,14 +181,12 @@ public class Address extends AbstractPersistableCustom {
         BigDecimal latitude = BigDecimal.ZERO;
         BigDecimal longitude = BigDecimal.ZERO;
         String createdBy = "";
-        Locale locale = Locale.ENGLISH;
         String updatedBy = "";
         LocalDate updatedOnDate = null;
         LocalDate createdOnDate = null;
 
         if (jsonObject.has("street")) {
             street = jsonObject.get("street").getAsString();
-
         }
 
         if (jsonObject.has("addressLine1")) {

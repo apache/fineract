@@ -38,4 +38,7 @@ dependencies {
         exclude group: 'org.apache.sling'
         exclude group: 'com.sun.xml.bind'
     }
+
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
 }

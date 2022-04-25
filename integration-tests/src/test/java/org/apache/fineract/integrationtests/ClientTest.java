@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.integrationtests.client.IntegrationTest.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -29,122 +30,133 @@ import io.restassured.specification.ResponseSpecification;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.List;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.fineract.client.models.GetClientClientIdAddressesResponse;
+import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
+import org.apache.fineract.client.models.PostClientClientIdAddressesRequest;
+import org.apache.fineract.client.models.PostClientClientIdAddressesResponse;
+import org.apache.fineract.client.models.PostClientsAddressRequest;
+import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.system.CodeHelper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class ClientTest {
 
+    private static final SecureRandom rand = new SecureRandom();
+
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private ClientHelper clientHelper;
-    private static final SecureRandom rand = new SecureRandom();
 
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        clientHelper = new ClientHelper(requestSpec, responseSpec);
+    }
+
+    @AfterEach
+    public void tearDown() {
+        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(requestSpec, responseSpec);
+        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(requestSpec, responseSpec);
     }
 
     @Test
     public void testClientStatus() {
-
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
-        // Assertions.assertNotNull(clientId);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
 
         HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
         ClientStatusChecker.verifyClientIsActive(status);
 
-        HashMap<String, Object> clientStatusHashMap = this.clientHelper.closeClient(clientId);
+        HashMap<String, Object> clientStatusHashMap = clientHelper.closeClient(clientId);
         ClientStatusChecker.verifyClientClosed(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.reactivateClient(clientId);
+        clientStatusHashMap = clientHelper.reactivateClient(clientId);
         ClientStatusChecker.verifyClientPending(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.rejectClient(clientId);
+        clientStatusHashMap = clientHelper.rejectClient(clientId);
         ClientStatusChecker.verifyClientRejected(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.activateClient(clientId);
+        clientStatusHashMap = clientHelper.activateClient(clientId);
         ClientStatusChecker.verifyClientActiavted(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.closeClient(clientId);
+        clientStatusHashMap = clientHelper.closeClient(clientId);
         ClientStatusChecker.verifyClientClosed(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.reactivateClient(clientId);
+        clientStatusHashMap = clientHelper.reactivateClient(clientId);
         ClientStatusChecker.verifyClientPending(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.withdrawClient(clientId);
+        clientStatusHashMap = clientHelper.withdrawClient(clientId);
         ClientStatusChecker.verifyClientWithdrawn(clientStatusHashMap);
 
     }
 
     @Test
     public void testClientAsPersonStatus() {
-
-        final Integer clientId = ClientHelper.createClientAsPerson(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
-        // Assertions.assertNotNull(clientId);
+        final Integer clientId = ClientHelper.createClientAsPerson(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
 
         HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
         ClientStatusChecker.verifyClientIsActive(status);
 
-        HashMap<String, Object> clientStatusHashMap = this.clientHelper.closeClient(clientId);
+        HashMap<String, Object> clientStatusHashMap = clientHelper.closeClient(clientId);
         ClientStatusChecker.verifyClientClosed(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.reactivateClient(clientId);
+        clientStatusHashMap = clientHelper.reactivateClient(clientId);
         ClientStatusChecker.verifyClientPending(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.rejectClient(clientId);
+        clientStatusHashMap = clientHelper.rejectClient(clientId);
         ClientStatusChecker.verifyClientRejected(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.activateClient(clientId);
+        clientStatusHashMap = clientHelper.activateClient(clientId);
         ClientStatusChecker.verifyClientActiavted(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.closeClient(clientId);
+        clientStatusHashMap = clientHelper.closeClient(clientId);
         ClientStatusChecker.verifyClientClosed(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.reactivateClient(clientId);
+        clientStatusHashMap = clientHelper.reactivateClient(clientId);
         ClientStatusChecker.verifyClientPending(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.withdrawClient(clientId);
+        clientStatusHashMap = clientHelper.withdrawClient(clientId);
         ClientStatusChecker.verifyClientWithdrawn(clientStatusHashMap);
 
     }
 
     @Test
     public void testClientAsEntityStatus() {
-
-        final Integer clientId = ClientHelper.createClientAsEntity(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
-        // Assertions.assertNotNull(clientId);
+        final Integer clientId = ClientHelper.createClientAsEntity(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
 
         HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
         ClientStatusChecker.verifyClientIsActive(status);
 
-        HashMap<String, Object> clientStatusHashMap = this.clientHelper.closeClient(clientId);
+        HashMap<String, Object> clientStatusHashMap = clientHelper.closeClient(clientId);
         ClientStatusChecker.verifyClientClosed(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.reactivateClient(clientId);
+        clientStatusHashMap = clientHelper.reactivateClient(clientId);
         ClientStatusChecker.verifyClientPending(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.rejectClient(clientId);
+        clientStatusHashMap = clientHelper.rejectClient(clientId);
         ClientStatusChecker.verifyClientRejected(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.activateClient(clientId);
+        clientStatusHashMap = clientHelper.activateClient(clientId);
         ClientStatusChecker.verifyClientActiavted(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.closeClient(clientId);
+        clientStatusHashMap = clientHelper.closeClient(clientId);
         ClientStatusChecker.verifyClientClosed(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.reactivateClient(clientId);
+        clientStatusHashMap = clientHelper.reactivateClient(clientId);
         ClientStatusChecker.verifyClientPending(clientStatusHashMap);
 
-        clientStatusHashMap = this.clientHelper.withdrawClient(clientId);
+        clientStatusHashMap = clientHelper.withdrawClient(clientId);
         ClientStatusChecker.verifyClientWithdrawn(clientStatusHashMap);
 
     }
@@ -157,11 +169,11 @@ public class ClientTest {
 
         // Add a few clients to the server and activate a random amount of them
         for (int i = 0; i < 15; i++) {
-            final Integer clientId = ClientHelper.createClientAsEntity(this.requestSpec, this.responseSpec);
+            final Integer clientId = ClientHelper.createClientAsEntity(requestSpec, responseSpec);
             if (rand.nextInt(10) % 2 == 0) {
                 // Takes Client to pending status
-                this.clientHelper.closeClient(clientId);
-                this.clientHelper.reactivateClient(clientId);
+                clientHelper.closeClient(clientId);
+                clientHelper.reactivateClient(clientId);
             }
             // Other clients stay in Active status
         }
@@ -180,6 +192,75 @@ public class ClientTest {
                     String.valueOf(clientsRecieved.get(i).get("id")));
             ClientStatusChecker.verifyClientIsActive(clientStatus);
         }
+    }
+
+    @Test
+    public void testClientAddressCreationWorks() {
+        // given
+        GlobalConfigurationPropertyData addressEnabledConfig = GlobalConfigurationHelper.getGlobalConfigurationByName(requestSpec,
+                responseSpec, "Enable-Address");
+        Long configId = addressEnabledConfig.getId();
+
+        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, configId, true);
+        GlobalConfigurationPropertyData updatedAddressEnabledConfig = GlobalConfigurationHelper.getGlobalConfigurationByName(requestSpec,
+                responseSpec, "Enable-Address");
+        boolean isAddressEnabled = BooleanUtils.toBoolean(updatedAddressEnabledConfig.getEnabled());
+        assertThat(isAddressEnabled).isTrue();
+
+        Integer addressTypeId = CodeHelper.createAddressTypeCodeValue(requestSpec, responseSpec,
+                Utils.randomNameGenerator("Residential address", 4), 0);
+        Integer countryId = CodeHelper.createCountryCodeValue(requestSpec, responseSpec, Utils.randomNameGenerator("Hungary", 4), 0);
+        Integer stateId = CodeHelper.createStateCodeValue(requestSpec, responseSpec, Utils.randomNameGenerator("Budapest", 4), 0);
+        String city = "Budapest";
+        boolean addressIsActive = true;
+        long postalCode = 1000L;
+
+        // when
+        PostClientsAddressRequest addressRequest = new PostClientsAddressRequest().postalCode(postalCode).city(city).countryId(countryId)
+                .stateProvinceId(stateId).addressTypeId(addressTypeId.longValue()).isActive(addressIsActive);
+        PostClientsRequest request = ClientHelper.defaultClientCreationRequest().address(List.of(addressRequest));
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, request);
+
+        // then
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
+        List<GetClientClientIdAddressesResponse> clientAddresses = ClientHelper.getClientAddresses(requestSpec, responseSpec, clientId);
+        GetClientClientIdAddressesResponse addressResponse = clientAddresses.get(0);
+        assertThat(addressResponse.getCity()).isEqualTo(city);
+        assertThat(addressResponse.getCountryId()).isEqualTo(countryId);
+        assertThat(addressResponse.getStateProvinceId()).isEqualTo(stateId);
+        assertThat(addressResponse.getAddressTypeId()).isEqualTo(addressTypeId);
+        assertThat(addressResponse.getIsActive()).isEqualTo(addressIsActive);
+        assertThat(addressResponse.getPostalCode()).isEqualTo(postalCode);
+    }
+
+    @Test
+    public void testClientAddressCreationWorksAfterClientIsCreated() {
+        // given
+        Integer addressTypeId = CodeHelper.createAddressTypeCodeValue(requestSpec, responseSpec,
+                Utils.randomNameGenerator("Residential address", 4), 0);
+        Integer countryId = CodeHelper.createCountryCodeValue(requestSpec, responseSpec, Utils.randomNameGenerator("Hungary", 4), 0);
+        Integer stateId = CodeHelper.createStateCodeValue(requestSpec, responseSpec, Utils.randomNameGenerator("Budapest", 4), 0);
+        String city = "Budapest";
+        boolean addressIsActive = true;
+        long postalCode = 1000L;
+
+        PostClientsRequest clientRequest = ClientHelper.defaultClientCreationRequest();
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, clientRequest);
+        // when
+        PostClientClientIdAddressesRequest request = new PostClientClientIdAddressesRequest().postalCode(postalCode).city(city)
+                .countryId(countryId).stateProvinceId(stateId).isActive(addressIsActive);
+        PostClientClientIdAddressesResponse response = ClientHelper.createClientAddress(requestSpec, responseSpec, clientId.longValue(),
+                addressTypeId, request);
+        // then
+        assertThat(response.getResourceId()).isNotNull();
+        List<GetClientClientIdAddressesResponse> clientAddresses = ClientHelper.getClientAddresses(requestSpec, responseSpec, clientId);
+        GetClientClientIdAddressesResponse addressResponse = clientAddresses.get(0);
+        assertThat(addressResponse.getCity()).isEqualTo(city);
+        assertThat(addressResponse.getCountryId()).isEqualTo(countryId);
+        assertThat(addressResponse.getStateProvinceId()).isEqualTo(stateId);
+        assertThat(addressResponse.getAddressTypeId()).isEqualTo(addressTypeId);
+        assertThat(addressResponse.getIsActive()).isEqualTo(addressIsActive);
+        assertThat(addressResponse.getPostalCode()).isEqualTo(postalCode);
     }
 
 }

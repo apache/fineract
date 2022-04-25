@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests.common;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
@@ -33,18 +34,22 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.GetClientClientIdAddressesResponse;
+import org.apache.fineract.client.models.GetClientsClientIdResponse;
+import org.apache.fineract.client.models.PostClientClientIdAddressesRequest;
+import org.apache.fineract.client.models.PostClientClientIdAddressesResponse;
+import org.apache.fineract.client.models.PostClientsRequest;
+import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
+@RequiredArgsConstructor
 public class ClientHelper {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ClientHelper.class);
-    private final RequestSpecification requestSpec;
-    private final ResponseSpecification responseSpec;
 
     private static final String CREATE_CLIENT_URL = "/fineract-provider/api/v1/clients?" + Utils.TENANT_IDENTIFIER;
     private static final String CLIENT_URL = "/fineract-provider/api/v1/clients";
@@ -67,9 +72,16 @@ public class ClientHelper {
     public static final String DATE_FORMAT = "dd MMMM yyyy";
     public static final String DATE_TIME_FORMAT = "dd MMMM yyyy HH:mm";
 
-    public ClientHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        this.requestSpec = requestSpec;
-        this.responseSpec = responseSpec;
+    private static final Gson GSON = new JSON().getGson();
+
+    private final RequestSpecification requestSpec;
+    private final ResponseSpecification responseSpec;
+
+    public static Integer createClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            PostClientsRequest request) {
+        log.info("---------------------------------CREATING A CLIENT---------------------------------------------");
+        String requestBody = GSON.toJson(request);
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, requestBody, "clientId");
     }
 
     public static Integer createClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
@@ -83,9 +95,19 @@ public class ClientHelper {
 
     public static Integer createClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String activationDate, final String officeId) {
-        LOG.info("---------------------------------CREATING A CLIENT---------------------------------------------");
+        log.info("---------------------------------CREATING A CLIENT---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestClientAsJSON(activationDate, officeId),
                 "clientId");
+    }
+
+    public static PostClientClientIdAddressesResponse createClientAddress(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, long clientId, long addressTypeId, PostClientClientIdAddressesRequest request) {
+        final String CREATE_CLIENT_ADDRESS_URL = "/fineract-provider/api/v1/client/" + clientId + "/addresses?type=" + addressTypeId + "&"
+                + Utils.TENANT_IDENTIFIER;
+        log.info("---------------------------------CREATING A CLIENT ADDRESS ---------------------------------------------");
+        String requestBody = GSON.toJson(request);
+        String response = Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_ADDRESS_URL, requestBody);
+        return GSON.fromJson(response, PostClientClientIdAddressesResponse.class);
     }
 
     public static Integer createClientPending(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
@@ -99,20 +121,20 @@ public class ClientHelper {
 
     public static Integer createClientPending(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String submittedOnDate, final String officeId) {
-        LOG.info("---------------------------------CREATING A CLIENT IN PENDING---------------------------------------------");
+        log.info("---------------------------------CREATING A CLIENT IN PENDING---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestClientAsJSONPending(submittedOnDate, officeId),
                 "clientId");
     }
 
     public Object createClientPendingWithError(final String jsonAttributeToGetBack) {
-        LOG.info("---------------------------------CREATING A CLIENT IN PENDING WITH ERROR---------------------------------------------");
+        log.info("---------------------------------CREATING A CLIENT IN PENDING WITH ERROR---------------------------------------------");
         return Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_CLIENT_URL,
                 getTestClientAsJSONPending("04 March 2014", "1"), jsonAttributeToGetBack);
     }
 
     public static Integer createClientPendingWithDatatable(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String registeredTableName) {
-        LOG.info("-------------------------- CREATING A CLIENT IN PENDING WITH DATATABLES --------------------------------");
+        log.info("-------------------------- CREATING A CLIENT IN PENDING WITH DATATABLES --------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL,
                 getTestPendingClientWithDatatableAsJson(registeredTableName), "clientId");
     }
@@ -129,7 +151,7 @@ public class ClientHelper {
     public static Integer createClientAsPerson(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String activationDate, final String officeId) {
 
-        LOG.info(
+        log.info(
                 "---------------------------------CREATING A CLIENT NON PERSON(ORGANISATION)---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestPersonClientAsJSON(activationDate, officeId),
                 "clientId");
@@ -151,7 +173,7 @@ public class ClientHelper {
         Integer soleProprietorCodeValueId = (Integer) CodeHelper.retrieveOrCreateCodeValue(constitutionCodeId, requestSpec, responseSpec)
                 .get("id");
 
-        LOG.info(
+        log.info(
                 "---------------------------------CREATING A CLIENT NON PERSON(ORGANISATION)---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL,
                 getTestEntityClientAsJSON(activationDate, officeId, soleProprietorCodeValueId), "clientId");
@@ -161,7 +183,7 @@ public class ClientHelper {
             final Integer clientType, String jsonAttributeToGetBack) {
         final String activationDate = "04 March 2011";
         final String officeId = "1";
-        LOG.info(
+        log.info(
                 "---------------------------------CREATING A CLIENT BASED ON ACCOUNT PREFERENCE---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL,
                 getTestClientWithClientTypeAsJSON(activationDate, officeId, clientType.toString()), jsonAttributeToGetBack);
@@ -172,7 +194,7 @@ public class ClientHelper {
         final String CLIENT_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/clients/" + clientId + "?" + Utils.TENANT_IDENTIFIER
                 + "&command=assignStaff";
 
-        LOG.info("---------------------------------CREATING A CLIENT---------------------------------------------");
+        log.info("---------------------------------CREATING A CLIENT---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CLIENT_ASSIGN_STAFF_URL, assignStaffToClientAsJson(staffId), "changes");
     }
 
@@ -192,8 +214,8 @@ public class ClientHelper {
         map.put("locale", "en");
         map.put("active", "true");
         map.put("activationDate", dateOfJoining);
-        LOG.info("map :  {}", map);
-        return new Gson().toJson(map);
+        log.info("map :  {}", map);
+        return GSON.toJson(map);
     }
 
     public static String getTestClientAsJSONPending(final String submittedOnDate, final String officeId) {
@@ -207,8 +229,8 @@ public class ClientHelper {
         map.put("locale", "en");
         map.put("active", "false");
         map.put("submittedOnDate", submittedOnDate);
-        LOG.info("map :  {}", map);
-        return new Gson().toJson(map);
+        log.info("map :  {}", map);
+        return GSON.toJson(map);
     }
 
     public static String getTestPendingClientWithDatatableAsJson(final String registeredTableName) {
@@ -223,7 +245,7 @@ public class ClientHelper {
         map.put("active", "false");
         map.put("submittedOnDate", "04 March 2014");
         String requestJson = getTestDatatableAsJson(map, registeredTableName);
-        LOG.info("map : {}", requestJson);
+        log.info("map : {}", requestJson);
         return requestJson;
     }
 
@@ -241,7 +263,7 @@ public class ClientHelper {
         datatableMap.put("data", dataMap);
         datatablesListMap.add(datatableMap);
         map.put("datatables", datatablesListMap);
-        return new Gson().toJson(map);
+        return GSON.toJson(map);
     }
 
     public static String getTestPersonClientAsJSON(final String dateOfJoining, final String officeId) {
@@ -255,8 +277,8 @@ public class ClientHelper {
         map.put("activationDate", dateOfJoining);
         map.put("legalFormId", 1);
 
-        LOG.info("map :  {}", map);
-        return new Gson().toJson(map);
+        log.info("map :  {}", map);
+        return GSON.toJson(map);
     }
 
     public static String getTestEntityClientAsJSON(final String dateOfJoining, final String officeId,
@@ -275,8 +297,8 @@ public class ClientHelper {
         clientNonPersonMap.put("constitutionId", soleProprietorCodeValueId);
         map.put("clientNonPersonDetails", clientNonPersonMap);
 
-        LOG.info("map :  {}", map);
-        return new Gson().toJson(map);
+        log.info("map :  {}", map);
+        return GSON.toJson(map);
     }
 
     public static String getTestClientWithClientTypeAsJSON(final String dateOfJoining, final String officeId, final String clientType) {
@@ -291,31 +313,44 @@ public class ClientHelper {
         map.put("active", "true");
         map.put("activationDate", dateOfJoining);
         map.put("clientTypeId", clientType);
-        LOG.info("map :  {}", map);
-        return new Gson().toJson(map);
+        log.info("map :  {}", map);
+        return GSON.toJson(map);
     }
 
     public static String assignStaffToClientAsJson(final String staffId) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("staffId", staffId);
-        LOG.info("map :  {}", map);
-        return new Gson().toJson(map);
+        log.info("map :  {}", map);
+        return GSON.toJson(map);
     }
 
     public static void verifyClientCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final Integer generatedClientID) {
-        LOG.info("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
-        final String CLIENT_URL = "/fineract-provider/api/v1/clients/" + generatedClientID + "?" + Utils.TENANT_IDENTIFIER;
+            final Integer clientId) {
+        log.info("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
+        final String CLIENT_URL = "/fineract-provider/api/v1/clients/" + clientId + "?" + Utils.TENANT_IDENTIFIER;
         final Integer responseClientID = Utils.performServerGet(requestSpec, responseSpec, CLIENT_URL, "id");
-        assertEquals(generatedClientID, responseClientID, "ERROR IN CREATING THE CLIENT");
+        assertEquals(clientId, responseClientID, "ERROR IN CREATING THE CLIENT");
+    }
+
+    public static GetClientsClientIdResponse getClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final int clientId) {
+        String clientResponseStr = (String) getClient(requestSpec, responseSpec, Integer.toString(clientId), null);
+        return GSON.fromJson(clientResponseStr, GetClientsClientIdResponse.class);
+    }
+
+    public static List<GetClientClientIdAddressesResponse> getClientAddresses(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final int clientId) {
+        final String GET_CLIENT_ADDRESSES_URL = "/fineract-provider/api/v1/client/" + clientId + "/addresses?" + Utils.TENANT_IDENTIFIER;
+        log.info("---------------------------------GET A CLIENT'S ADDRESSES ---------------------------------------------");
+        String clientResponseStr = Utils.performServerGet(requestSpec, responseSpec, GET_CLIENT_ADDRESSES_URL);
+        return GSON.fromJson(clientResponseStr, new TypeToken<List<GetClientClientIdAddressesResponse>>() {}.getType());
     }
 
     public static Object getClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String clientId,
             final String jsonReturn) {
         final String GET_CLIENT_URL = "/fineract-provider/api/v1/clients/" + clientId + "?" + Utils.TENANT_IDENTIFIER;
-        LOG.info("---------------------------------GET A CLIENT---------------------------------------------");
+        log.info("---------------------------------GET A CLIENT---------------------------------------------");
         return Utils.performServerGet(requestSpec, responseSpec, GET_CLIENT_URL, jsonReturn);
-
     }
 
     /* Client status is a map.So adding SuppressWarnings */
@@ -346,8 +381,8 @@ public class ClientHelper {
         map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("closureDate", CREATED_DATE_PLUS_ONE);
 
-        String clientJson = new Gson().toJson(map);
-        LOG.info(clientJson);
+        String clientJson = GSON.toJson(map);
+        log.info(clientJson);
         return clientJson;
 
     }
@@ -357,8 +392,8 @@ public class ClientHelper {
         map.put("locale", CommonConstants.LOCALE);
         map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("reactivationDate", CREATED_DATE_PLUS_ONE);
-        String clientJson = new Gson().toJson(map);
-        LOG.info(clientJson);
+        String clientJson = GSON.toJson(map);
+        log.info(clientJson);
         return clientJson;
 
     }
@@ -368,8 +403,8 @@ public class ClientHelper {
         map.put("locale", CommonConstants.LOCALE);
         map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("reopenedDate", date);
-        String clientJson = new Gson().toJson(map);
-        LOG.info(clientJson);
+        String clientJson = GSON.toJson(map);
+        log.info(clientJson);
         return clientJson;
 
     }
@@ -379,8 +414,8 @@ public class ClientHelper {
         map.put("locale", CommonConstants.LOCALE);
         map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("reopenedDate", date);
-        String clientJson = new Gson().toJson(map);
-        LOG.info(clientJson);
+        String clientJson = GSON.toJson(map);
+        log.info(clientJson);
         return clientJson;
 
     }
@@ -401,8 +436,8 @@ public class ClientHelper {
         map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("rejectionDate", CREATED_DATE_PLUS_ONE);
         map.put("rejectionReasonId", rejectionReasonId.toString());
-        String clientJson = new Gson().toJson(map);
-        LOG.info(clientJson);
+        String clientJson = GSON.toJson(map);
+        log.info(clientJson);
         return clientJson;
 
     }
@@ -412,8 +447,8 @@ public class ClientHelper {
         map.put("locale", CommonConstants.LOCALE);
         map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("activationDate", date);
-        String clientJson = new Gson().toJson(map);
-        LOG.info(clientJson);
+        String clientJson = GSON.toJson(map);
+        log.info(clientJson);
         return clientJson;
     }
 
@@ -433,8 +468,8 @@ public class ClientHelper {
         map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("withdrawalDate", CREATED_DATE_PLUS_ONE);
         map.put("withdrawalReasonId", withdrawalReasonId.toString());
-        String clientJson = new Gson().toJson(map);
-        LOG.info(clientJson);
+        String clientJson = GSON.toJson(map);
+        log.info(clientJson);
         return clientJson;
 
     }
@@ -446,7 +481,7 @@ public class ClientHelper {
         map.put("dueDate", dueDate);
         map.put("chargeId", chargeId);
         map.put("amount", "200");
-        String json = new Gson().toJson(map);
+        String json = GSON.toJson(map);
         return json;
     }
 
@@ -456,8 +491,8 @@ public class ClientHelper {
         map.put("dateFormat", DATE_FORMAT);
         map.put("transactionDate", date);
         map.put("amount", amount);
-        String json = new Gson().toJson(map);
-        LOG.info("{}", json);
+        String json = GSON.toJson(map);
+        log.info("{}", json);
         return json;
     }
 
@@ -466,34 +501,34 @@ public class ClientHelper {
         map.put("locale", "en_GB");
         map.put("amount", amount);
         map.put("clientChargeId", clientChargeId);
-        String json = new Gson().toJson(map);
-        LOG.info("{}", json);
+        String json = GSON.toJson(map);
+        log.info("{}", json);
         return json;
     }
 
     public HashMap<String, Object> closeClient(final Integer clientId) {
-        LOG.info("--------------------------------- CLOSE CLIENT -------------------------------");
+        log.info("--------------------------------- CLOSE CLIENT -------------------------------");
         return performClientActions(createClientOperationURL(CLOSE_CLIENT_COMMAND, clientId), getCloseClientAsJSON(), clientId);
     }
 
     public HashMap<String, Object> reactivateClient(final Integer clientId) {
-        LOG.info("--------------------------------- REACTIVATE CLIENT -------------------------------");
+        log.info("--------------------------------- REACTIVATE CLIENT -------------------------------");
         return performClientActions(createClientOperationURL(REACTIVATE_CLIENT_COMMAND, clientId), getReactivateClientAsJSON(), clientId);
     }
 
     public HashMap<String, Object> rejectClient(final Integer clientId) {
-        LOG.info("--------------------------------- REJECT CLIENT -------------------------------");
+        log.info("--------------------------------- REJECT CLIENT -------------------------------");
         return performClientActions(createClientOperationURL(REJECT_CLIENT_COMMAND, clientId), getRejectClientAsJSON(), clientId);
     }
 
     public HashMap<String, Object> activateClient(final Integer clientId) {
-        LOG.info("--------------------------------- ACTIVATE CLIENT -------------------------------");
+        log.info("--------------------------------- ACTIVATE CLIENT -------------------------------");
         return performClientActions(createClientOperationURL(ACTIVATE_CLIENT_COMMAND, clientId),
                 getActivateClientAsJSON(CREATED_DATE_PLUS_ONE), clientId);
     }
 
     public HashMap<String, Object> withdrawClient(final Integer clientId) {
-        LOG.info("--------------------------------- WITHDRAWN CLIENT -------------------------------");
+        log.info("--------------------------------- WITHDRAWN CLIENT -------------------------------");
         return performClientActions(createClientOperationURL(WITHDRAW_CLIENT_COMMAND, clientId), getWithdrawClientAsJSON(), clientId);
     }
 
@@ -502,39 +537,39 @@ public class ClientHelper {
     }
 
     public HashMap<String, Object> undoReject(final Integer clientId) {
-        LOG.info("--------------------------------- UNDO REJECT CLIENT -------------------------------");
+        log.info("--------------------------------- UNDO REJECT CLIENT -------------------------------");
         return performClientActions(createClientOperationURL(UNDOREJECT_CLIENT_COMMAND, clientId),
                 getUndoRejectClientAsJSON(CREATED_DATE_PLUS_TWO), clientId);
     }
 
     public HashMap<String, Object> undoWithdrawn(final Integer clientId) {
-        LOG.info("--------------------------------- UNDO WITHDRAWN CLIENT -------------------------------");
+        log.info("--------------------------------- UNDO WITHDRAWN CLIENT -------------------------------");
         return performClientActions(createClientOperationURL(UNDOWITHDRAWN_CLIENT_COMMAND, clientId),
                 getUndoWithdrawnClientAsJSON(CREATED_DATE_PLUS_TWO), clientId);
     }
 
     public ArrayList<HashMap<String, Object>> undoRejectedclient(final Integer clientId, final String jsonAttributeToGetBack,
             final String rejectedDate) {
-        LOG.info("----------------------------------UNDO REJECT CLIENT ----------------------------------");
+        log.info("----------------------------------UNDO REJECT CLIENT ----------------------------------");
         return performClientActionsWithValidationErrors(createClientOperationURL(UNDOREJECT_CLIENT_COMMAND, clientId),
                 getUndoRejectClientAsJSON(rejectedDate), jsonAttributeToGetBack);
     }
 
     public ArrayList<HashMap<String, Object>> undoWithdrawclient(final Integer clientId, final String jsonAttributeToGetBack,
             final String rejectedDate) {
-        LOG.info("----------------------------------UNDO WITHDRAW CLIENT ----------------------------------");
+        log.info("----------------------------------UNDO WITHDRAW CLIENT ----------------------------------");
         return performClientActionsWithValidationErrors(createClientOperationURL(UNDOWITHDRAWN_CLIENT_COMMAND, clientId),
                 getUndoWithdrawnClientAsJSON(rejectedDate), jsonAttributeToGetBack);
     }
 
     public ArrayList<HashMap<String, Object>> activateClient(final Integer clientId, final String jsonAttributeToGetBack) {
-        LOG.info("--------------------------------- ACTIVATE CLIENT -------------------------------");
+        log.info("--------------------------------- ACTIVATE CLIENT -------------------------------");
         return performClientActionsWithValidationErrors(createClientOperationURL(ACTIVATE_CLIENT_COMMAND, clientId),
                 getActivateClientAsJSON(CREATED_DATE_PLUS_ONE), jsonAttributeToGetBack);
     }
 
     public HashMap<String, Object> activateClientWithDiffDateOption(final Integer clientId, final String activationDate) {
-        LOG.info("--------------------------------- ACTIVATE CLIENT -------------------------------");
+        log.info("--------------------------------- ACTIVATE CLIENT -------------------------------");
         return performClientActions(createClientOperationURL(ACTIVATE_CLIENT_COMMAND, clientId), getActivateClientAsJSON(activationDate),
                 clientId);
     }
@@ -553,7 +588,7 @@ public class ClientHelper {
 
     public static Integer addChargesForClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer clientId, final String request) {
-        LOG.info("--------------------------------- ADD CHARGES FOR Client --------------------------------");
+        log.info("--------------------------------- ADD CHARGES FOR Client --------------------------------");
         final String ADD_CHARGES_URL = "/fineract-provider/api/v1/clients/" + clientId + "/charges?" + Utils.TENANT_IDENTIFIER;
         final HashMap<?, ?> response = Utils.performServerPost(requestSpec, responseSpec, ADD_CHARGES_URL, request, "");
         return (Integer) response.get("resourceId");
@@ -561,7 +596,7 @@ public class ClientHelper {
 
     public static String payChargesForClients(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer clientId, final Integer clientChargeId, final String json) {
-        LOG.info("--------------------------------- PAY CHARGES FOR CLIENT --------------------------------");
+        log.info("--------------------------------- PAY CHARGES FOR CLIENT --------------------------------");
         final String CHARGES_URL = "/fineract-provider/api/v1/clients/" + clientId + "/charges/" + clientChargeId + "?command=paycharge&"
                 + Utils.TENANT_IDENTIFIER;
         final HashMap<?, ?> response = Utils.performServerPost(requestSpec, responseSpec, CHARGES_URL, json, "");
@@ -570,7 +605,7 @@ public class ClientHelper {
 
     public static String waiveChargesForClients(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer clientId, final Integer clientChargeId, final String json) {
-        LOG.info("--------------------------------- WAIVE CHARGES FOR CLIENT --------------------------------");
+        log.info("--------------------------------- WAIVE CHARGES FOR CLIENT --------------------------------");
         final String CHARGES_URL = "/fineract-provider/api/v1/clients/" + clientId + "/charges/" + clientChargeId + "?command=waive&"
                 + Utils.TENANT_IDENTIFIER;
 
@@ -580,7 +615,7 @@ public class ClientHelper {
 
     public static Integer revertClientChargeTransaction(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String clientId, String clientChargeId) {
-        LOG.info("---------------------------------UNDO TRANSACTION---------------------------------------------");
+        log.info("---------------------------------UNDO TRANSACTION---------------------------------------------");
         final String CHARGES_URL = "/fineract-provider/api/v1/clients/" + clientId + "/transactions/" + clientChargeId + "?command=undo&"
                 + Utils.TENANT_IDENTIFIER;
 
@@ -591,7 +626,7 @@ public class ClientHelper {
 
     public static Object getClientCharge(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String clientId, final String clientChargeId) {
-        LOG.info("---------------------------------GET CLIENT CHARGE---------------------------------------------");
+        log.info("---------------------------------GET CLIENT CHARGE---------------------------------------------");
         final String CHARGES_URL = "/fineract-provider/api/v1/clients/" + clientId + "/charges/" + clientChargeId + "?"
                 + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL, "amountOutstanding");
@@ -599,7 +634,7 @@ public class ClientHelper {
 
     public static Boolean getClientTransactions(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String clientId, final String transactionId) {
-        LOG.info("---------------------------------GET CLIENT CHARGE TRANSACTIONS---------------------------------------------");
+        log.info("---------------------------------GET CLIENT CHARGE TRANSACTIONS---------------------------------------------");
         final String CHARGES_URL = "/fineract-provider/api/v1/clients/" + clientId + "/transactions/" + transactionId + "?"
                 + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL, "reversed");
@@ -636,4 +671,9 @@ public class ClientHelper {
         return (List) responseClients.get("pageItems");
     }
 
+    public static PostClientsRequest defaultClientCreationRequest() {
+        return new PostClientsRequest().officeId(1).legalFormId(LEGALFORM_ID_PERSON)
+                .firstname(Utils.randomNameGenerator("Client_FirstName_", 5)).lastname(Utils.randomNameGenerator("Client_LastName_", 5))
+                .externalId(randomIDGenerator("ID_", 7)).dateFormat(DATE_FORMAT).locale("en").active(true).activationDate("04 March 2011");
+    }
 }
