@@ -75,6 +75,9 @@ public final class ResultsetColumnHeaderData implements Serializable {
             if (isString()) {
                 displayType = "STRING";
             } else if (isAnyInteger()) {
+                if (isInteger()) {
+                    this.columnType = this.columnType.toUpperCase();
+                }
                 displayType = "INTEGER";
             } else if (isDate()) {
                 displayType = "DATE";
@@ -92,7 +95,7 @@ public final class ResultsetColumnHeaderData implements Serializable {
             }
 
         } else {
-            if (isInt()) {
+            if (isInt() || isInteger()) {
                 displayType = "CODELOOKUP";
             } else if (isVarchar()) {
                 displayType = "CODEVALUE";
