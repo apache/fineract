@@ -109,8 +109,14 @@ public class LoanTransactionsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Loan Transaction Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n"
-            + "\n" + "Field Defaults\n" + "Allowed Value Lists\n\n" + "Example Request:\n" + "\n"
-            + "loans/1/transactions/template?command=repayment")
+            + "\n" + "Field Defaults\n" + "Allowed Value Lists\n\n" + "Example Requests:\n" + "\n"
+            + "loans/1/transactions/template?command=repayment" + "\n" + "loans/1/transactions/template?command=waiveinterest" + "\n"
+            + "loans/1/transactions/template?command=writeoff" + "\n" + "loans/1/transactions/template?command=close-rescheduled" + "\n"
+            + "loans/1/transactions/template?command=close" + "\n" + "loans/1/transactions/template?command=disburse" + "\n"
+            + "loans/1/transactions/template?command=disburseToSavings" + "\n" + "loans/1/transactions/template?command=recoverypayment"
+            + "\n" + "loans/1/transactions/template?command=prepayLoan" + "\n" + "loans/1/transactions/template?command=refundbycash" + "\n"
+            + "loans/1/transactions/template?command=refundbytransfer" + "\n" + "loans/1/transactions/template?command=foreclosure" + "\n"
+            + "loans/1/transactions/template?command=creditBalanceRefund (returned 'amount' field will have the overpaid value")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.GetLoansLoanIdTransactionsTemplateResponse.class))) })
     public String retrieveTransactionTemplate(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
@@ -202,8 +208,16 @@ public class LoanTransactionsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Make a Repayment | Make a Refund of an Active Loan by Cash | Foreclosure of an Active Loan | Waive Interest | Write-off Loan | Make Recovery Payment | Undo Loan Write-off Transaction", description = "Make Recovery Payment:\n\n"
-            + "This API allows collecting recovery payments for written-off loans")
+    @Operation(summary = "Significant Loan Transactions", description = "This API covers the major loan transaction functionality\n\n"
+            + "Example Requests:\n" + "\n" + "loans/1/transactions/template?command=repayment" + " | Make a Repayment | \n"
+            + "loans/1/transactions/template?command=waiveinterest" + " | Waive Interest | \n"
+            + "loans/1/transactions/template?command=writeoff" + " | Write-off Loan | \n"
+            + "loans/1/transactions/template?command=close-rescheduled" + " | Close Rescheduled Loan | \n"
+            + "loans/1/transactions/template?command=close" + " | Close Loan | \n" + "loans/1/transactions/template?command=undowriteoff"
+            + " | Undo Loan Write-off | \n" + "loans/1/transactions/template?command=recoverypayment" + " | Make Recovery Payment | \n"
+            + "loans/1/transactions/template?command=refundByCash" + " | Make a Refund of an Active Loan by Cash | \n"
+            + "loans/1/transactions/template?command=foreclosure" + " | Foreclosure of an Active Loan | \n"
+            + "loans/1/transactions/template?command=creditBalanceRefund" + " | Credit Balance Refund" + " |  \n")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.PostLoansLoanIdTransactionsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.PostLoansLoanIdTransactionsResponse.class))) })
