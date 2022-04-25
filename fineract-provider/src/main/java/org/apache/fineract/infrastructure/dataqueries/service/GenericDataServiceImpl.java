@@ -27,8 +27,6 @@ import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseIndependentQueryService;
-import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
-import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnValueData;
@@ -48,18 +46,13 @@ public class GenericDataServiceImpl implements GenericDataService {
 
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
-    private final DatabaseSpecificSQLGenerator sqlGenerator;
-    private final DatabaseTypeResolver databaseTypeResolver;
     private final DatabaseIndependentQueryService databaseIndependentQueryService;
     private static final Logger LOG = LoggerFactory.getLogger(GenericDataServiceImpl.class);
 
     @Autowired
     public GenericDataServiceImpl(final RoutingDataSource dataSource, final JdbcTemplate jdbcTemplate,
-            DatabaseSpecificSQLGenerator sqlGenerator, DatabaseTypeResolver databaseTypeResolver,
             DatabaseIndependentQueryService databaseIndependentQueryService) {
         this.dataSource = dataSource;
-        this.sqlGenerator = sqlGenerator;
-        this.databaseTypeResolver = databaseTypeResolver;
         this.databaseIndependentQueryService = databaseIndependentQueryService;
         this.jdbcTemplate = new JdbcTemplate(this.dataSource);
     }
@@ -206,9 +199,6 @@ public class GenericDataServiceImpl implements GenericDataService {
 
     @Override
     public List<ResultsetColumnHeaderData> fillResultsetColumnHeaders(final String datatable) {
-
-        LOG.debug("::3 Was inside the fill ResultSetColumnHeader");
-
         final SqlRowSet columnDefinitions = getDatatableMetaData(datatable);
 
         final List<ResultsetColumnHeaderData> columnHeaders = new ArrayList<>();
@@ -226,38 +216,16 @@ public class GenericDataServiceImpl implements GenericDataService {
 
             List<ResultsetColumnValueData> columnValues = new ArrayList<>();
             String codeName = null;
-            if ("varchar".equalsIgnoreCase(columnType)) {
-
-                final int codePosition = columnName.indexOf("_cv");
-                if (codePosition > 0) {
-                    codeName = columnName.substring(0, codePosition);
-
-                    columnValues = retreiveColumnValues(codeName);
-                }
-
-            } else if ("int".equalsIgnoreCase(columnType)) {
-
-                final int codePosition = columnName.indexOf("_cd");
+            final int codePosition = columnName.indexOf("_cd");
+            if ("varchar".equalsIgnoreCase(columnType) || "int".equalsIgnoreCase(columnType) || "integer".equalsIgnoreCase(columnType)) {
                 if (codePosition > 0) {
                     codeName = columnName.substring(0, codePosition);
                     columnValues = retreiveColumnValues(codeName);
                 }
             }
-            if (codeName == null) {
-                final SqlRowSet rsValues = getDatatableCodeData(datatable, columnName);
-                Integer codeId = null;
-                while (rsValues.next()) {
-                    codeId = rsValues.getInt("id");
-                    codeName = rsValues.getString("code_name");
-                }
-                columnValues = retreiveColumnValues(codeId);
 
-            }
-
-            final ResultsetColumnHeaderData rsch = ResultsetColumnHeaderData.detailed(columnName, columnType, columnLength, columnNullable,
-                    columnIsPrimaryKey, columnValues, codeName);
-
-            columnHeaders.add(rsch);
+            columnHeaders.add(ResultsetColumnHeaderData.detailed(columnName, columnType, columnLength, columnNullable, columnIsPrimaryKey,
+                    columnValues, codeName));
         }
 
         return columnHeaders;
@@ -286,23 +254,6 @@ public class GenericDataServiceImpl implements GenericDataService {
         return columnValues;
     }
 
-    private List<ResultsetColumnValueData> retreiveColumnValues(final Integer codeId) {
-
-        final List<ResultsetColumnValueData> columnValues = new ArrayList<>();
-        if (codeId != null) {
-            final String sql = "select v.id, v.code_value from m_code_value v where v.code_id = ? order by v.order_position, v.id";
-            final SqlRowSet rsValues = this.jdbcTemplate.queryForRowSet(sql, new Object[] { codeId }); // NOSONAR
-            rsValues.beforeFirst();
-            while (rsValues.next()) {
-                final Integer id = rsValues.getInt("id");
-                final String codeValue = rsValues.getString("code_value");
-                columnValues.add(new ResultsetColumnValueData(id, codeValue));
-            }
-        }
-
-        return columnValues;
-    }
-
     @SuppressWarnings("AvoidHidingCauseException")
     private SqlRowSet getDatatableMetaData(final String datatable) {
         try {
@@ -310,13 +261,5 @@ public class GenericDataServiceImpl implements GenericDataService {
         } catch (IllegalArgumentException e) {
             throw new DatatableNotFoundException(datatable);
         }
-    }
-
-    private SqlRowSet getDatatableCodeData(final String datatable, final String columnName) {
-        final String dataTableColumnName = datatable.toLowerCase().replaceAll("\\s", "_") + "_" + columnName + "'";
-        final String sql = "select mc.id,mc.code_name from m_code mc join x_table_column_code_mappings xcc on xcc.code_id = mc.id where xcc.column_alias_name= ?";
-        final SqlRowSet rsValues = this.jdbcTemplate.queryForRowSet(sql, new Object[] { dataTableColumnName }); // NOSONAR
-
-        return rsValues;
     }
 }
