@@ -91,7 +91,7 @@ licenseFormatMain.dependsOn buildTypescriptAngularSdk
 compileJava.dependsOn licenseFormatMain
 
 // TODO: @vidakovic we could provide even more client libs in different languages (Go, Ruby, Swift etc.)
-compileJava.dependsOn buildJavaSdk, spotlessJavaApply, buildTypescriptAngularSdk, spotlessMiscApply
+compileJava.dependsOn buildJavaSdk, buildTypescriptAngularSdk, spotlessMiscApply
 
 java {
     // keep this at Java 8, not 17; see https://issues.apache.org/jira/browse/FINERACT-1214
