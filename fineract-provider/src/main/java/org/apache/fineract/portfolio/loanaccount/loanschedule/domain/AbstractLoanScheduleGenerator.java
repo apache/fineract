@@ -174,8 +174,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
             applyLoanVariationsForPartialScheduleGenerate(loanApplicationTerms, scheduleParams, interestRates,
                     interestRatesForInstallments);
-
-            isFirstRepayment = false;
+            if (!firstRepaymentdate.isAfter(scheduleParams.getActualRepaymentDate())) {
+                isFirstRepayment = false;
+            }
         }
         while (!scheduleParams.getOutstandingBalance().isZero() || !scheduleParams.getDisburseDetailMap().isEmpty()) {
             LocalDate previousRepaymentDate = scheduleParams.getActualRepaymentDate();

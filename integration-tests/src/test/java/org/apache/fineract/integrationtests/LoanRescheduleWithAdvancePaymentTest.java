@@ -255,4 +255,97 @@ public class LoanRescheduleWithAdvancePaymentTest {
 
     }
 
+    /* FINERACT-1449 */
+    @Test
+    public void testMultipleAdvancePaymentWithReschedule() {
+        this.enableConfig();
+        this.enablePrincipalCompoundingConfig();
+        WorkingDaysHelper.updateWorkingDaysWeekDays(this.requestSpec, this.responseSpec);
+        // create all required entities
+        this.createRequiredEntitiesForTestMultipleAdvancePaymentWithReschedule();
+        this.doMultipleAdvancePaymentsAndVerifySchedule();
+        WorkingDaysHelper.updateWorkingDays(this.requestSpec, this.responseSpec);
+        this.disablePrincipalCompoundingConfig();
+        this.disableConfig();
+    }
+
+    private void createRequiredEntitiesForTestMultipleAdvancePaymentWithReschedule() {
+        this.createClientEntity();
+        this.createLoanProductWithInterestRecalculationForTestMultipleAdvancePaymentWithReschedule();
+        this.createLoanEntityForTestMultipleAdvancePaymentWithReschedule();
+    }
+
+    private void createLoanProductWithInterestRecalculationForTestMultipleAdvancePaymentWithReschedule() {
+        LOG.info(
+                "---------------------------------CREATING LOAN PRODUCT WITH RECALULATION ENABLED ------------------------------------------");
+
+        final String interestRecalculationCompoundingMethod = LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE;
+        final String rescheduleStrategyMethod = LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS;
+        final String recalculationRestFrequencyType = LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_DAILY;
+        final String recalculationRestFrequencyInterval = "0";
+        final String preCloseInterestCalculationStrategy = LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE;
+        final String recalculationCompoundingFrequencyType = null;
+        final String recalculationCompoundingFrequencyInterval = null;
+        final Integer recalculationCompoundingFrequencyOnDayType = null;
+        final Integer recalculationCompoundingFrequencyDayOfWeekType = null;
+        final Integer recalculationRestFrequencyOnDayType = null;
+        final Integer recalculationRestFrequencyDayOfWeekType = null;
+
+        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal(loanPrincipalAmount)
+                .withNumberOfRepayments(numberOfRepayments).withinterestRatePerPeriod(interestRatePerPeriod)
+                .withInterestRateFrequencyTypeAsYear().withInterestTypeAsDecliningBalance().withInterestCalculationPeriodTypeAsDays()
+                .withInterestRecalculationDetails(interestRecalculationCompoundingMethod, rescheduleStrategyMethod,
+                        preCloseInterestCalculationStrategy)
+                .withInterestRecalculationRestFrequencyDetails(recalculationRestFrequencyType, recalculationRestFrequencyInterval,
+                        recalculationRestFrequencyOnDayType, recalculationRestFrequencyDayOfWeekType)
+                .withInterestRecalculationCompoundingFrequencyDetails(recalculationCompoundingFrequencyType,
+                        recalculationCompoundingFrequencyInterval, recalculationCompoundingFrequencyOnDayType,
+                        recalculationCompoundingFrequencyDayOfWeekType)
+                .withInstallmentAmountInMultiplesOf("10").build(null);
+
+        this.loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        LOG.info("Successfully created loan product  (ID:{}) ", this.loanProductId);
+    }
+
+    private void createLoanEntityForTestMultipleAdvancePaymentWithReschedule() {
+        String firstRepaymentDate = "03 January 2022";
+        String submittedDate = "29 November 2021";
+
+        LOG.info("---------------------------------NEW LOAN APPLICATION------------------------------------------");
+
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("15000").withLoanTermFrequency("12")
+                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("12").withRepaymentEveryAfter("1")
+                .withRepaymentFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestCalculationPeriodTypeAsDays()
+                .withInterestRatePerPeriod("12").withInterestTypeAsDecliningBalance().withSubmittedOnDate(submittedDate)
+                .withExpectedDisbursementDate(submittedDate).withFirstRepaymentDate(firstRepaymentDate)
+                .withwithRepaymentStrategy(LoanApplicationTestBuilder.INTEREST_PRINCIPAL_PENALTIES_FEES_ORDER_STRATEGY)
+                .withinterestChargedFromDate(submittedDate).build(this.clientId.toString(), this.loanProductId.toString(), null);
+
+        this.loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+
+        LOG.info("Sucessfully created loan (ID: {} )", this.loanId);
+
+        this.approveLoanApplication(submittedDate);
+        this.disburseLoan(submittedDate);
+    }
+
+    private void doMultipleAdvancePaymentsAndVerifySchedule() {
+
+        LOG.info("-------------Make Advance repayment 1-----------");
+        this.loanTransactionHelper.makeRepayment("02 December 2021", Float.parseFloat("1"), this.loanId);
+
+        LOG.info("-------------Make Advance repayment 2-----------");
+        this.loanTransactionHelper.makeRepayment("03 December 2021", Float.parseFloat("1"), this.loanId);
+
+        final Map repaymentSchedule = (Map) this.loanTransactionHelper.getLoanDetailExcludeFutureSchedule(requestSpec, generalResponseSpec,
+                this.loanId, "repaymentSchedule");
+
+        final ArrayList periods = (ArrayList) repaymentSchedule.get("periods");
+        HashMap period = (HashMap) periods.get(3);
+        LOG.info("period  {}", period);
+
+        assertEquals(new ArrayList<>(Arrays.asList(2022, 1, 3)), period.get("dueDate"), "Checking for Due Date for 1st Month");
+        assertEquals(period.get("principalDue"), Float.parseFloat("1177.12"));
+        assertEquals(period.get("interestDue"), Float.parseFloat("152.88"));
+    }
 }

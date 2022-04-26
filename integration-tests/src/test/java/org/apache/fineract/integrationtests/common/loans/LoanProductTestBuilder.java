@@ -125,6 +125,7 @@ public class LoanProductTestBuilder {
     private Integer recalculationRestFrequencyDayOfWeekType = null;
     private boolean syncExpectedWithDisbursementDate = false;
     private String fixedPrincipalPercentagePerInstallment;
+    private String installmentAmountInMultiplesOf;
 
     public String build(final String chargeId) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -214,7 +215,15 @@ public class LoanProductTestBuilder {
             map.put("maximumGap", maximumGap);
         }
         map.put("syncExpectedWithDisbursementDate", this.syncExpectedWithDisbursementDate);
+        if (installmentAmountInMultiplesOf != null) {
+            map.put("installmentAmountInMultiplesOf", this.installmentAmountInMultiplesOf);
+        }
         return new Gson().toJson(map);
+    }
+
+    public LoanProductTestBuilder withInstallmentAmountInMultiplesOf(String installmentAmountInMultiplesOf) {
+        this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
+        return this;
     }
 
     public LoanProductTestBuilder withMinPrincipal(final String minPrincipal) {
