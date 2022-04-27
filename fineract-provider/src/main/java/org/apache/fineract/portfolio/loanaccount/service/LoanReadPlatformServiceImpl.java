@@ -438,8 +438,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         RepaymentTransactionTemplateMapper mapper = new RepaymentTransactionTemplateMapper(sqlGenerator);
         String sql = "select " + mapper.schema();
-        LoanTransactionData loanTransactionData = this.jdbcTemplate.queryForObject(sql, mapper,
-                new Object[] { LoanTransactionType.REPAYMENT.getValue(), loanId, loanId }); // NOSONAR
+        LoanTransactionData loanTransactionData = this.jdbcTemplate.queryForObject(sql, mapper, // NOSONAR
+                new Object[] { LoanTransactionType.REPAYMENT.getValue(), loanId, loanId });
         final Collection<PaymentTypeData> paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
         return LoanTransactionData.templateOnTop(loanTransactionData, paymentOptions);
     }
@@ -2369,7 +2369,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     public CollectionData retrieveLoanCollectionData(Long loanId) {
         final CollectionDataMapper mapper = new CollectionDataMapper(sqlGenerator);
         String sql = "select " + mapper.schema();
-        CollectionData collectionData = this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { loanId });
+        CollectionData collectionData = this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { loanId }); // NOSONAR
         return collectionData;
     }
 

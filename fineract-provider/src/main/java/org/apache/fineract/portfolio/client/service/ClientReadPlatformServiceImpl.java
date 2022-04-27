@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
@@ -71,7 +72,6 @@ import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 import org.apache.fineract.portfolio.savings.service.SavingsProductReadPlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -79,6 +79,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 @Service
+@RequiredArgsConstructor
 public class ClientReadPlatformServiceImpl implements ClientReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
@@ -101,33 +102,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private final EntityDatatableChecksReadService entityDatatableChecksReadService;
     private final ColumnValidator columnValidator;
     private final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper;
-
-    @Autowired
-    public ClientReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            final OfficeReadPlatformService officeReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService,
-            final SavingsProductReadPlatformService savingsProductReadPlatformService,
-            final AddressReadPlatformService addressReadPlatformService,
-            final ClientFamilyMembersReadPlatformService clientFamilyMembersReadPlatformService,
-            final ConfigurationReadPlatformService configurationReadPlatformService,
-            final EntityDatatableChecksReadService entityDatatableChecksReadService, final ColumnValidator columnValidator,
-            final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper,
-            DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
-        this.context = context;
-        this.officeReadPlatformService = officeReadPlatformService;
-        this.jdbcTemplate = jdbcTemplate;
-        this.staffReadPlatformService = staffReadPlatformService;
-        this.codeValueReadPlatformService = codeValueReadPlatformService;
-        this.savingsProductReadPlatformService = savingsProductReadPlatformService;
-        this.addressReadPlatformService = addressReadPlatformService;
-        this.clientFamilyMembersReadPlatformService = clientFamilyMembersReadPlatformService;
-        this.configurationReadPlatformService = configurationReadPlatformService;
-        this.entityDatatableChecksReadService = entityDatatableChecksReadService;
-        this.columnValidator = columnValidator;
-        this.clientCollateralManagementRepositoryWrapper = clientCollateralManagementRepositoryWrapper;
-        this.paginationHelper = paginationHelper;
-        this.sqlGenerator = sqlGenerator;
-    }
 
     @Override
     public ClientData retrieveTemplate(final Long officeId, final boolean staffInSelectedOfficeOnly) {
@@ -323,8 +297,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             final String sql = "select " + this.clientMapper.schema()
                     + " where ( o.hierarchy like ? or transferToOffice.hierarchy like ?) and c.id = ?";
-            final ClientData clientData = this.jdbcTemplate.queryForObject(sql, this.clientMapper,
-                    new Object[] { hierarchySearchString, hierarchySearchString, clientId }); // NOSONAR
+            final ClientData clientData = this.jdbcTemplate.queryForObject(sql, this.clientMapper, // NOSONAR
+                    new Object[] { hierarchySearchString, hierarchySearchString, clientId });
 
             // Get client collaterals
             final Collection<ClientCollateralManagement> clientCollateralManagements = this.clientCollateralManagementRepositoryWrapper
@@ -341,8 +315,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             final String clientGroupsSql = "select " + this.clientGroupsMapper.parentGroupsSchema();
 
-            final Collection<GroupGeneralData> parentGroups = this.jdbcTemplate.query(clientGroupsSql, this.clientGroupsMapper,
-                    new Object[] { clientId }); // NOSONAR
+            final Collection<GroupGeneralData> parentGroups = this.jdbcTemplate.query(clientGroupsSql, this.clientGroupsMapper, // NOSONAR
+                    new Object[] { clientId });
 
             return ClientData.setParentGroups(clientData, parentGroups, clientCollateralManagementDataSet);
 
@@ -393,8 +367,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final String sql = "select " + this.membersOfGroupMapper.schema()
                 + " where o.hierarchy like ? and pgc.group_id = ? and c.status_enum = ? ";
 
-        return this.jdbcTemplate.query(sql, this.membersOfGroupMapper,
-                new Object[] { hierarchySearchString, groupId, ClientStatus.ACTIVE.getValue() }); // NOSONAR
+        return this.jdbcTemplate.query(sql, this.membersOfGroupMapper, // NOSONAR
+                new Object[] { hierarchySearchString, groupId, ClientStatus.ACTIVE.getValue() });
     }
 
     private static final class ClientMembersOfGroupMapper implements RowMapper<ClientData> {
@@ -582,8 +556,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final String sql = "select " + this.membersOfGroupMapper.schema()
                 + " left join m_group g on pgc.group_id=g.id where o.hierarchy like ? and g.parent_id = ? and c.status_enum = ? group by c.id";
 
-        return this.jdbcTemplate.query(sql, this.membersOfGroupMapper,
-                new Object[] { hierarchySearchString, centerId, ClientStatus.ACTIVE.getValue() }); // NOSONAR
+        return this.jdbcTemplate.query(sql, this.membersOfGroupMapper, // NOSONAR
+                new Object[] { hierarchySearchString, centerId, ClientStatus.ACTIVE.getValue() });
     }
 
     private static final class ClientMapper implements RowMapper<ClientData> {

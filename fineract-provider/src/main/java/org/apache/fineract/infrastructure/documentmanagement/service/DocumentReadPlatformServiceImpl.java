@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.documentmanagement.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepository;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepositoryFactory;
@@ -28,26 +29,18 @@ import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
 import org.apache.fineract.infrastructure.documentmanagement.data.FileData;
 import org.apache.fineract.infrastructure.documentmanagement.exception.DocumentNotFoundException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final ContentRepositoryFactory contentRepositoryFactory;
-
-    @Autowired
-    public DocumentReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            final ContentRepositoryFactory documentStoreFactory) {
-        this.context = context;
-        this.jdbcTemplate = jdbcTemplate;
-        this.contentRepositoryFactory = documentStoreFactory;
-    }
 
     @Override
     public Collection<DocumentData> retrieveAllDocuments(final String entityType, final Long entityId) {
@@ -87,7 +80,7 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
     private DocumentData fetchDocumentDetails(final String entityType, final Long entityId, final Long documentId,
             final DocumentMapper mapper) {
         final String sql = "select " + mapper.schema() + " and d.id=? ";
-        return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { entityType, entityId, documentId });// NOSOANR
+        return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { entityType, entityId, documentId }); // NOSONAR
     }
 
     private static final class DocumentMapper implements RowMapper<DocumentData> {

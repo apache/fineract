@@ -111,8 +111,8 @@ public class SmsCampaignReadPlatformServiceImpl implements SmsCampaignReadPlatfo
         if (!StringUtils.isEmpty(reportType)) {
             sql = sql + " where sr.report_type = ?";
         }
-        final Collection<SmsBusinessRulesData> businessRulesOptions = this.jdbcTemplate.query(sql, this.businessRuleMapper,
-                new Object[] { reportType }); // NOSONAR
+        final Collection<SmsBusinessRulesData> businessRulesOptions = this.jdbcTemplate.query(sql, this.businessRuleMapper, // NOSONAR
+                new Object[] { reportType });
         final Collection<SmsProviderData> smsProviderOptions = this.smsCampaignDropdownReadPlatformService.retrieveSmsProviders();
         final Collection<EnumOptionData> campaignTypeOptions = this.smsCampaignDropdownReadPlatformService.retrieveCampaignTypes();
         final Collection<EnumOptionData> campaignTriggerTypeOptions = this.smsCampaignDropdownReadPlatformService
