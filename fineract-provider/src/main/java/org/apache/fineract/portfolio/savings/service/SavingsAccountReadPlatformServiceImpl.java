@@ -141,7 +141,6 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         this.transactionsMapper = new SavingsAccountTransactionsMapper();
         this.savingsAccountTransactionsForBatchMapper = new SavingsAccountTransactionsForBatchMapper();
         this.savingAccountMapper = new SavingAccountMapper();
-        // this.annualFeeMapper = new SavingsAccountAnnualFeeMapper();
         this.chargeReadPlatformService = chargeReadPlatformService;
         this.entityDatatableChecksReadService = entityDatatableChecksReadService;
         this.columnValidator = columnValidator;
@@ -278,8 +277,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         sql = sql + "and apm.product_type=2 and sa.interest_posted_till_date < '" + java.sql.Date.valueOf(currentDate) + "'";
         sql = sql + " order by sa.id, tr.transaction_date, tr.created_date, tr.id";
 
-        List<SavingsAccountData> savingsAccountDataList = this.jdbcTemplate.query(sql, this.savingAccountMapperForInterestPosting,
-                new Object[] { maxSavingsId, status, pageSize }); // NOSONAR
+        List<SavingsAccountData> savingsAccountDataList = this.jdbcTemplate.query(sql, this.savingAccountMapperForInterestPosting, // NOSONAR
+                new Object[] { maxSavingsId, status, pageSize });
         for (SavingsAccountData savingsAccountData : savingsAccountDataList) {
             this.savingAccountAssembler.assembleSavings(savingsAccountData);
         }
@@ -1254,8 +1253,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         try {
             final String sql = "select " + this.transactionTemplateMapper.schema() + " where sa.id = ? and sa.deposit_type_enum = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, this.transactionTemplateMapper,
-                    new Object[] { savingsId, depositAccountType.getValue() }); // NOSONAR
+            return this.jdbcTemplate.queryForObject(sql, this.transactionTemplateMapper, // NOSONAR
+                    new Object[] { savingsId, depositAccountType.getValue() });
         } catch (final EmptyResultDataAccessException e) {
             throw new SavingsAccountNotFoundException(savingsId, e);
         }
@@ -1276,8 +1275,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
         final String sql = "select " + this.transactionsMapper.schema() + " where sa.id = ? and sa.deposit_type_enum = ? and tr.id= ?";
 
-        return this.jdbcTemplate.queryForObject(sql, this.transactionsMapper,
-                new Object[] { savingsId, depositAccountType.getValue(), transactionId }); // NOSONAR
+        return this.jdbcTemplate.queryForObject(sql, this.transactionsMapper, // NOSONAR
+                new Object[] { savingsId, depositAccountType.getValue(), transactionId });
     }
 
     private static final class SavingsAccountTransactionsForBatchMapper implements RowMapper<SavingsAccountTransactionData> {

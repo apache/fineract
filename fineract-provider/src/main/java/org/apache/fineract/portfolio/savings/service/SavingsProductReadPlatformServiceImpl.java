@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -33,13 +34,13 @@ import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class SavingsProductReadPlatformServiceImpl implements SavingsProductReadPlatformService {
 
     private final PlatformSecurityContext context;
@@ -47,14 +48,6 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
     private final SavingProductMapper savingsProductRowMapper = new SavingProductMapper();
     private final SavingProductLookupMapper savingsProductLookupsRowMapper = new SavingProductLookupMapper();
     private final FineractEntityAccessUtil fineractEntityAccessUtil;
-
-    @Autowired
-    public SavingsProductReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            final FineractEntityAccessUtil fineractEntityAccessUtil) {
-        this.context = context;
-        this.jdbcTemplate = jdbcTemplate;
-        this.fineractEntityAccessUtil = fineractEntityAccessUtil;
-    }
 
     @Override
     public Collection<SavingsProductData> retrieveAll() {
@@ -87,8 +80,8 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             sql += " and id in ( " + inClause + " ) ";
         }
 
-        return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper,
-                new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() }); // NOSONAR
+        return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper, // NOSONAR
+                new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() });
     }
 
     @Override
@@ -96,8 +89,8 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         try {
             this.context.authenticatedUser();
             final String sql = "select " + this.savingsProductRowMapper.schema() + " where sp.id = ? and sp.deposit_type_enum = ?";
-            return this.jdbcTemplate.queryForObject(sql, this.savingsProductRowMapper,
-                    new Object[] { savingProductId, DepositAccountType.SAVINGS_DEPOSIT.getValue() }); // NOSONAR
+            return this.jdbcTemplate.queryForObject(sql, this.savingsProductRowMapper, // NOSONAR
+                    new Object[] { savingProductId, DepositAccountType.SAVINGS_DEPOSIT.getValue() });
         } catch (final EmptyResultDataAccessException e) {
             throw new SavingsProductNotFoundException(savingProductId, e);
         }
@@ -268,8 +261,8 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             } else {
                 sql += " where sp.allow_overdraft=? and sp.deposit_type_enum = ?";
             }
-            return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper,
-                    new Object[] { isOverdraftType, DepositAccountType.SAVINGS_DEPOSIT.getValue() }); // NOSONAR
+            return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper, // NOSONAR
+                    new Object[] { isOverdraftType, DepositAccountType.SAVINGS_DEPOSIT.getValue() });
         }
 
         if (inClauseAdded) {
@@ -277,8 +270,8 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         } else {
             sql += " where sp.deposit_type_enum = ?";
         }
-        return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper,
-                new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() }); // NOSONAR
+        return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper, // NOSONAR
+                new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() });
     }
 
     @Override

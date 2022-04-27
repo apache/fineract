@@ -80,8 +80,8 @@ public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRat
     public InterestRateChartSlabData retrieveOne(Long chartId, Long chartSlabId) {
         this.context.authenticatedUser();
         final String sql = "select " + this.chartSlabExtractor.schema() + " where irc.id = ? order by ircd.id asc";
-        Collection<InterestRateChartSlabData> chartDatas = this.jdbcTemplate.query(sql, this.chartSlabExtractor,
-                new Object[] { chartSlabId, chartId }); // NOSONAR
+        Collection<InterestRateChartSlabData> chartDatas = this.jdbcTemplate.query(sql, this.chartSlabExtractor, // NOSONAR
+                new Object[] { chartSlabId, chartId });
         if (chartDatas == null || chartDatas.isEmpty()) {
             throw new InterestRateChartSlabNotFoundException(chartSlabId, chartId);
         }

@@ -240,8 +240,8 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
 
         final String sql = "select " + this.businessRuleMapper.schema() + " where sr.report_type = ? and sr.id = ?";
 
-        List<EmailBusinessRulesData> retrieveOne = this.jdbcTemplate.query(sql, this.businessRuleMapper,
-                new Object[] { searchType, resourceId }); // NOSONAR
+        List<EmailBusinessRulesData> retrieveOne = this.jdbcTemplate.query(sql, this.businessRuleMapper, // NOSONAR
+                new Object[] { searchType, resourceId });
         try {
             EmailBusinessRulesData emailBusinessRulesData = retrieveOne.get(0);
             return emailBusinessRulesData;

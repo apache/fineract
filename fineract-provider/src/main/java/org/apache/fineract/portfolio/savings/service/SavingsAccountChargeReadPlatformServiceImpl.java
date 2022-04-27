@@ -251,8 +251,8 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
                 + " where sac.charge_due_date is not null and sac.charge_time_enum = ? "
                 + " and sac.charge_due_date <= NOW() and sa.status_enum = ? ";
 
-        return this.jdbcTemplate.query(sql, this.chargeDueMapper,
-                new Object[] { ChargeTimeType.ANNUAL_FEE.getValue(), SavingsAccountStatusType.ACTIVE.getValue() }); // NOSONAR
+        return this.jdbcTemplate.query(sql, this.chargeDueMapper, // NOSONAR
+                new Object[] { ChargeTimeType.ANNUAL_FEE.getValue(), SavingsAccountStatusType.ACTIVE.getValue() });
     }
 
     @Override

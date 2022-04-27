@@ -494,8 +494,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         try {
             final String sql = "select " + this.rdTransactionTemplateMapper.schema()
                     + " where sa.id = ? and sa.deposit_type_enum = ? order by mss.installment limit 1";
-            return this.jdbcTemplate.queryForObject(sql, this.rdTransactionTemplateMapper,
-                    new Object[] { accountId, accountId, DepositAccountType.RECURRING_DEPOSIT.getValue() }); // NOSONAR
+            return this.jdbcTemplate.queryForObject(sql, this.rdTransactionTemplateMapper, // NOSONAR
+                    new Object[] { accountId, accountId, DepositAccountType.RECURRING_DEPOSIT.getValue() });
         } catch (final EmptyResultDataAccessException e) {
             throw new DepositAccountNotFoundException(DepositAccountType.RECURRING_DEPOSIT, accountId, e);
         }

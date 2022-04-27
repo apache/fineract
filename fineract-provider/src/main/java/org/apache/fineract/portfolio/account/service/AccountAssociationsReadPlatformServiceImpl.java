@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.portfolio.account.data.AccountAssociationsData;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
@@ -31,22 +32,17 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class AccountAssociationsReadPlatformServiceImpl implements AccountAssociationsReadPlatformService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AccountAssociationsReadPlatformServiceImpl.class);
     private final JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    public AccountAssociationsReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public PortfolioAccountData retriveLoanLinkedAssociation(final Long loanId) {
@@ -54,8 +50,8 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
         final AccountAssociationsMapper mapper = new AccountAssociationsMapper();
         final String sql = "select " + mapper.schema() + " where aa.loan_account_id = ? and aa.association_type_enum = ?";
         try {
-            final AccountAssociationsData accountAssociationsData = this.jdbcTemplate.queryForObject(sql, mapper, loanId,
-                    AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue()); // NOSONAR
+            final AccountAssociationsData accountAssociationsData = this.jdbcTemplate.queryForObject(sql, mapper, loanId, // NOSONAR
+                    AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
             if (accountAssociationsData != null) {
                 linkedAccount = accountAssociationsData.linkedAccount();
             }
@@ -83,8 +79,8 @@ public class AccountAssociationsReadPlatformServiceImpl implements AccountAssoci
         final AccountAssociationsMapper mapper = new AccountAssociationsMapper();
         final String sql = "select " + mapper.schema() + " where aa.savings_account_id = ? and aa.association_type_enum = ?";
         try {
-            final AccountAssociationsData accountAssociationsData = this.jdbcTemplate.queryForObject(sql, mapper,
-                    new Object[] { savingsId, AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue() }); // NOSONAR
+            final AccountAssociationsData accountAssociationsData = this.jdbcTemplate.queryForObject(sql, mapper, // NOSONAR
+                    new Object[] { savingsId, AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue() });
             if (accountAssociationsData != null) {
                 linkedAccount = accountAssociationsData.linkedAccount();
             }

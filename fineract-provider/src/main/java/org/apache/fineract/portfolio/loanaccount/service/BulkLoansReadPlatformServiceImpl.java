@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.staff.data.StaffAccountSummaryCollectionData;
@@ -29,25 +30,17 @@ import org.apache.fineract.portfolio.accountdetails.data.LoanAccountSummaryData;
 import org.apache.fineract.portfolio.accountdetails.service.AccountDetailsReadPlatformService;
 import org.apache.fineract.portfolio.client.domain.ClientStatus;
 import org.apache.fineract.portfolio.group.domain.GroupingTypeStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class BulkLoansReadPlatformServiceImpl implements BulkLoansReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final AccountDetailsReadPlatformService accountDetailsReadPlatformService;
-
-    @Autowired
-    public BulkLoansReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            final AccountDetailsReadPlatformService accountDetailsReadPlatformService) {
-        this.context = context;
-        this.jdbcTemplate = jdbcTemplate;
-        this.accountDetailsReadPlatformService = accountDetailsReadPlatformService;
-    }
 
     @Override
     public StaffAccountSummaryCollectionData retrieveLoanOfficerAccountSummary(final Long loanOfficerId) {
@@ -60,8 +53,8 @@ public class BulkLoansReadPlatformServiceImpl implements BulkLoansReadPlatformSe
         final StaffGroupMapper staffGroupMapper = new StaffGroupMapper();
         final String groupSql = "select distinct " + staffGroupMapper.schema() + " and g.status_enum=?";
 
-        final List<StaffAccountSummaryCollectionData.LoanAccountSummary> clientSummaryList = this.jdbcTemplate.query(clientSql,
-                staffClientMapper, new Object[] { loanOfficerId, ClientStatus.ACTIVE.getValue() }); // NOSONAR
+        final List<StaffAccountSummaryCollectionData.LoanAccountSummary> clientSummaryList = this.jdbcTemplate.query(clientSql, // NOSONAR
+                staffClientMapper, new Object[] { loanOfficerId, ClientStatus.ACTIVE.getValue() });
 
         for (final StaffAccountSummaryCollectionData.LoanAccountSummary clientSummary : clientSummaryList) {
 
@@ -71,8 +64,8 @@ public class BulkLoansReadPlatformServiceImpl implements BulkLoansReadPlatformSe
             clientSummary.setLoans(clientLoanAccounts);
         }
 
-        final List<StaffAccountSummaryCollectionData.LoanAccountSummary> groupSummaryList = this.jdbcTemplate.query(groupSql,
-                staffGroupMapper, new Object[] { loanOfficerId, GroupingTypeStatus.ACTIVE.getValue() }); // NOSONAR
+        final List<StaffAccountSummaryCollectionData.LoanAccountSummary> groupSummaryList = this.jdbcTemplate.query(groupSql, // NOSONAR
+                staffGroupMapper, new Object[] { loanOfficerId, GroupingTypeStatus.ACTIVE.getValue() });
 
         for (final StaffAccountSummaryCollectionData.LoanAccountSummary groupSummary : groupSummaryList) {
 

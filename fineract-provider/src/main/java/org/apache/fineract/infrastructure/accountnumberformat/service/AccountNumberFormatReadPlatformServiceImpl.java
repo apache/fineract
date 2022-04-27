@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.accountnumberformat.data.AccountNumberFormatData;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatEnumerations;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatEnumerations.AccountNumberPrefixType;
@@ -35,13 +36,13 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumberFormatReadPlatformService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AccountNumberFormatReadPlatformServiceImpl.class);
@@ -50,11 +51,6 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
 
     // data mapper
     private final AccountNumberFormatMapper accountNumberFormatMapper = new AccountNumberFormatMapper();
-
-    @Autowired
-    public AccountNumberFormatReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     private static final class AccountNumberFormatMapper implements RowMapper<AccountNumberFormatData> {
 
@@ -102,8 +98,8 @@ public class AccountNumberFormatReadPlatformServiceImpl implements AccountNumber
         try {
             final String sql = "select " + this.accountNumberFormatMapper.schema() + " where anf.id = ?";
 
-            final AccountNumberFormatData accountNumberFormatData = this.jdbcTemplate.queryForObject(sql, this.accountNumberFormatMapper,
-                    new Object[] { id }); // NOSONAR
+            final AccountNumberFormatData accountNumberFormatData = this.jdbcTemplate.queryForObject(sql, this.accountNumberFormatMapper, // NOSONAR
+                    new Object[] { id });
             return accountNumberFormatData;
         } catch (final EmptyResultDataAccessException e) {
             throw new AccountNumberFormatNotFoundException(id, e);

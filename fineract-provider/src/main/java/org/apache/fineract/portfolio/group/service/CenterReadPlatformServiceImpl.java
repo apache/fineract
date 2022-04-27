@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -69,7 +70,6 @@ import org.apache.fineract.portfolio.group.domain.GroupTypes;
 import org.apache.fineract.portfolio.group.domain.GroupingTypeEnumerations;
 import org.apache.fineract.portfolio.group.exception.CenterNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -77,6 +77,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 @Service
+@RequiredArgsConstructor
 public class CenterReadPlatformServiceImpl implements CenterReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
@@ -98,27 +99,6 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final PaginationParametersDataValidator paginationParametersDataValidator;
     private static final Set<String> SUPPORTED_ORDER_BY_VALUES = new HashSet<>(Arrays.asList("id", "name", "officeId", "officeName"));
-
-    @Autowired
-    public CenterReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            final ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
-            final StaffReadPlatformService staffReadPlatformService, final CodeValueReadPlatformService codeValueReadPlatformService,
-            final PaginationParametersDataValidator paginationParametersDataValidator,
-            final ConfigurationDomainService configurationDomainService, final CalendarReadPlatformService calendarReadPlatformService,
-            final ColumnValidator columnValidator, DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
-        this.context = context;
-        this.clientReadPlatformService = clientReadPlatformService;
-        this.jdbcTemplate = jdbcTemplate;
-        this.officeReadPlatformService = officeReadPlatformService;
-        this.staffReadPlatformService = staffReadPlatformService;
-        this.codeValueReadPlatformService = codeValueReadPlatformService;
-        this.paginationParametersDataValidator = paginationParametersDataValidator;
-        this.configurationDomainService = configurationDomainService;
-        this.calendarReadPlatformService = calendarReadPlatformService;
-        this.columnValidator = columnValidator;
-        this.paginationHelper = paginationHelper;
-        this.sqlGenerator = sqlGenerator;
-    }
 
     // 'g.' preffix because of ERROR 1052 (23000): Column 'column_name' in where
     // clause is ambiguous
@@ -395,7 +375,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             }
         }
 
-        return this.jdbcTemplate.query(sqlBuilder.toString(), this.centerMapper, extraCriteria.getArguments());
+        return this.jdbcTemplate.query(sqlBuilder.toString(), this.centerMapper, extraCriteria.getArguments()); // NOSONAR
     }
 
     @Override
@@ -526,11 +506,11 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             sql += " and g.staff_id=? ";
             sql += "and lrs.duedate<='" + passeddate + "' and l.loan_type_enum=3";
             sql += " group by c.id, ci.id, g.account_no, g.external_id, g.status_enum, g.activation_date, g.hierarchy";
-            centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper,
-                    new Object[] { passeddate, passeddate, passeddate, passeddate, passeddate, passeddate, officeId, staffId }); // NOSONAR
+            centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper, // NOSONAR
+                    new Object[] { passeddate, passeddate, passeddate, passeddate, passeddate, passeddate, officeId, staffId });
         } else {
-            centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper,
-                    new Object[] { passeddate, passeddate, passeddate, passeddate, passeddate, passeddate, officeId }); // NOSONAR
+            centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper, // NOSONAR
+                    new Object[] { passeddate, passeddate, passeddate, passeddate, passeddate, passeddate, officeId });
         }
 
         Collection<StaffCenterData> staffCenterDataArray = new ArrayList<>();

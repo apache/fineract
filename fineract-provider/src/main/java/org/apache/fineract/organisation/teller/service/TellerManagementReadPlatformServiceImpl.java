@@ -26,6 +26,7 @@ import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
@@ -52,7 +53,6 @@ import org.apache.fineract.organisation.teller.data.TellerTransactionData;
 import org.apache.fineract.organisation.teller.domain.CashierTxnType;
 import org.apache.fineract.organisation.teller.domain.TellerStatus;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -61,6 +61,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 @Service
+@RequiredArgsConstructor
 public class TellerManagementReadPlatformServiceImpl implements TellerManagementReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
@@ -73,21 +74,6 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final PaginationHelper paginationHelper;
     private final ColumnValidator columnValidator;
-
-    @Autowired
-    public TellerManagementReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            final OfficeReadPlatformService officeReadPlatformService, StaffReadPlatformService staffReadPlatformService,
-            final CurrencyReadPlatformService currencyReadPlatformService, final ColumnValidator columnValidator,
-            DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
-        this.context = context;
-        this.jdbcTemplate = jdbcTemplate;
-        this.officeReadPlatformService = officeReadPlatformService;
-        this.staffReadPlatformService = staffReadPlatformService;
-        this.currencyReadPlatformService = currencyReadPlatformService;
-        this.columnValidator = columnValidator;
-        this.sqlGenerator = sqlGenerator;
-        this.paginationHelper = paginationHelper;
-    }
 
     private static final class TellerMapper implements RowMapper<TellerData> {
 
@@ -459,9 +445,9 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         final CashierTransactionSummaryMapper ctsm = new CashierTransactionSummaryMapper();
         final String sql = "select " + ctsm.cashierTxnSummarySchema() + " limit 1000";
 
-        Collection<CashierTransactionTypeTotalsData> cashierTxnTypeTotals = this.jdbcTemplate.query(sql, ctsm,
+        Collection<CashierTransactionTypeTotalsData> cashierTxnTypeTotals = this.jdbcTemplate.query(sql, ctsm, // NOSONAR
                 new Object[] { cashierId, currencyCode, hierarchySearchString, cashierId, currencyCode, hierarchySearchString, cashierId,
-                        currencyCode, hierarchySearchString, cashierId, currencyCode, hierarchySearchString }); // NOSONAR
+                        currencyCode, hierarchySearchString, cashierId, currencyCode, hierarchySearchString });
 
         Iterator<CashierTransactionTypeTotalsData> itr = cashierTxnTypeTotals.iterator();
         BigDecimal allocAmount = new BigDecimal(0);
