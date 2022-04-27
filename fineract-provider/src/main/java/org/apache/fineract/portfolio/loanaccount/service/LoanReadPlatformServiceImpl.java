@@ -2369,8 +2369,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     public CollectionData retrieveLoanCollectionData(Long loanId) {
         final CollectionDataMapper mapper = new CollectionDataMapper(sqlGenerator);
         String sql = "select " + mapper.schema();
-        CollectionData collectionData = this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { loanId }); // NOSONAR
-        return collectionData;
+        List<CollectionData> collectionDatas = this.jdbcTemplate.query(sql, mapper, new Object[] { loanId });
+        if (collectionDatas.isEmpty()) {
+            return null;
+        }
+        return collectionDatas.get(0);
     }
 
     private static final class CollectionDataMapper implements RowMapper<CollectionData> {
