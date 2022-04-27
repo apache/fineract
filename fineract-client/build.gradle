@@ -72,14 +72,15 @@ task buildTypescriptAngularSdk(type: org.openapitools.generator.gradle.plugin.ta
     skipValidateSpec = true
     inputSpec = "file:///$swaggerFile"
     outputDir = "$buildDir/generated/typescript".toString()
-    apiPackage = 'org.apache.fineract.client.services'
-    invokerPackage = 'org.apache.fineract.client'
-    modelPackage = 'org.apache.fineract.client.models'
+    apiPackage = 'apache-fineract-client/services'
+    invokerPackage = 'apache-fineract-client/invoker'
+    modelPackage = 'apache-fineract-client/models'
     configOptions = [
-        apiModulePrefix: 'fineract',
-        configurationPrefix: 'fineract',
+        apiModulePrefix: 'apacheFineractClient',
+        configurationPrefix: 'apacheFineractClient',
         ngVersion: '12.0.0',
-        npmName: 'apache-fineract-client'
+        npmName: '@apache/fineract-client',
+        npmRepository: "${npmRepository}"
     ]
     dependsOn = [
         ':fineract-provider:resolve'

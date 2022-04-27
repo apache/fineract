@@ -68,10 +68,10 @@ rat.dependsOn prepareInputYaml
 resolve {
     logging.captureStandardOutput LogLevel.INFO
     outputFileName = 'fineract'
-    outputFormat = 'YAML'
+    outputFormat = 'JSONANDYAML'
     prettyPrint = true
     classpath = sourceSets.main.runtimeClasspath
-    outputDir = file("${buildDir}/generated/swagger-ui")
+    outputDir = file("${buildDir}/classes/java/main/static")
     openApiFile = file("config/swagger/fineract-input.yaml")
     sortOutput = true
 }
@@ -215,34 +215,22 @@ bootRun {
         implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.5'
         implementation 'org.postgresql:postgresql:42.3.4'
     }
-
-    classpath += files("build/generated/swagger-ui")
 }
 
 springBoot {
     mainClass = 'org.apache.fineract.ServerApplication'
+    buildInfo()
 }
 
 bootJar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
-        attributes 'Main-Class': 'org.springframework.boot.loader.PropertiesLauncher', 'Implementation-Title':   'Apache Fineract', 'Implementation-Version': archiveVersion
+        attributes('Main-Class': 'org.springframework.boot.loader.PropertiesLauncher', 'Implementation-Title': 'Apache Fineract', 'Implementation-Version': archiveVersion)
     }
     dependsOn resolve
     classifier = ''
-
-    from('build/generated/swagger-ui') {
-        into 'BOOT-INF/classes/static/swagger-ui'
-    }
 }
 
-jar {
-    from('build/generated/swagger-ui') {
-        include '*'
-    }
-}
-
-jar.dependsOn resolve
 jar.dependsOn bootJar
 
 jib {
@@ -294,15 +282,6 @@ jib {
     dependencies {
         implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.5'
         implementation 'org.postgresql:postgresql:42.3.4'
-    }
-
-    extraDirectories {
-        paths {
-            path {
-                from = file('build/generated/swagger-ui')
-                into = "/app/classes"
-            }
-        }
     }
 
     pluginExtensions {
