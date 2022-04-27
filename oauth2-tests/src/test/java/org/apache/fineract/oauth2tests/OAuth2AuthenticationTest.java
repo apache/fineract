@@ -72,7 +72,7 @@ public class OAuth2AuthenticationTest {
 
     @Test
     public void testApiDocsAccess() {
-        performServerGet(requestSpec, responseSpec, "/fineract-provider/api-docs/apiLive.htm", null);
+        performServerGet(requestSpec, responseSpec, "/fineract-provider/legacy-docs/apiLive.htm", null);
     }
 
     @Test

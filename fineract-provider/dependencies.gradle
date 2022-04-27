@@ -63,12 +63,21 @@ dependencies {
 
             'com.github.spotbugs:spotbugs-annotations',
             'io.swagger.core.v3:swagger-annotations',
-            'org.webjars:webjars-locator-core',
 
             'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.5.0',
             'com.squareup.retrofit2:converter-gson',
-            'org.apache.commons:commons-email'
+            'com.sun.activation:jakarta.activation',
+            'com.sun.mail:jakarta.mail',
+
+            'org.springdoc:springdoc-openapi-ui',
+            'org.springdoc:springdoc-openapi-common',
+            'org.springdoc:springdoc-openapi-security',
             )
+
+    implementation ('org.apache.commons:commons-email:1.5') {
+        exclude group: 'com.sun.mail', module: 'javax.mail'
+        exclude group: 'javax.activation', module: 'activation'
+    }
 
     implementation('org.springframework.boot:spring-boot-starter-jersey') {
         exclude group: 'org.glassfish.hk2.external', module: 'aopalliance-repackaged'
@@ -84,11 +93,12 @@ dependencies {
     }
     implementation ('org.apache.activemq:activemq-broker') {
         exclude group: 'org.apache.geronimo.specs'
+        exclude group: 'javax.annotation', module: 'javax.annotation-api'
     }
     implementation ('org.springframework.boot:spring-boot-starter-data-jpa') {
         exclude group: 'org.hibernate'
     }
-    implementation('org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.10') {
+    implementation('org.eclipse.persistence:org.eclipse.persistence.jpa') {
         exclude group: 'org.eclipse.persistence', module: 'jakarta.persistence'
     }
     implementation ('org.quartz-scheduler:quartz') {
@@ -100,13 +110,14 @@ dependencies {
     implementation ('org.mnode.ical4j:ical4j') {
         exclude group: 'commons-logging'
         exclude group: 'javax.activation'
+        exclude group: 'com.sun.mail', module: 'javax.mail'
     }
 
     implementation ('org.ehcache:ehcache') {
         exclude group: 'com.sun.activation'
     }
 
-    implementation('org.owasp.esapi:esapi:2.3.0.0') {
+    implementation('org.owasp.esapi:esapi') {
         exclude group: 'org.slf4j'
         exclude group: 'log4j'
         exclude group: 'commons-logging'
@@ -125,7 +136,6 @@ dependencies {
     runtimeOnly(
             'org.apache.bval:org.apache.bval.bundle',
             'org.springframework.boot:spring-boot-starter-actuator',
-            'org.webjars.npm:swagger-ui-dist',
 
             // Although fineract (at the time of writing) doesn't have any compile time dep. on httpclient,
             // it's useful to have this for the Spring Boot TestRestTemplate http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#boot-features-rest-templates-test-utility
