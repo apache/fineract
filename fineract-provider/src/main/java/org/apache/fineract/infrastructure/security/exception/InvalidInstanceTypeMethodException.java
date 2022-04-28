@@ -16,16 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-rootProject.name='fineract'
-include ':module:dummy:core'
-include ':module:dummy:service'
-include ':module:dummy:starter'
-include ':custom:foo:service'
-include ':fineract-provider'
-include ':fineract-war'
-include ':integration-tests'
-include ':twofactor-tests'
-include ':instancemode-tests'
-include ':oauth2-tests'
-include ':fineract-client'
-include ':fineract-doc'
+package org.apache.fineract.infrastructure.security.exception;
+
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
+
+/**
+ * {@link RuntimeException} thrown when an invalid method in the Fineract instance type called in request to platform.
+ *
+ *
+ */
+public class InvalidInstanceTypeMethodException extends AbstractPlatformDomainRuleException {
+
+    public InvalidInstanceTypeMethodException(final String method) {
+        super("error.msg.invalid.method.for.instance.type", "Method Not Allowed " + method + " for the instance type");
+    }
+}

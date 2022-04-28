@@ -19,6 +19,7 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
+import org.apache.fineract.infrastructure.security.filter.FineractInstanceModeApiFilter;
 import org.apache.fineract.infrastructure.security.filter.TenantAwareBasicAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.filter.TwoFactorAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.service.TenantAwareJpaPlatformUserDetailsService;
@@ -54,6 +55,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private TwoFactorAuthenticationFilter twoFactorAuthenticationFilter;
 
     @Autowired
+    private FineractInstanceModeApiFilter fineractInstanceModeApiFilter;
+
+    @Autowired
+    private FineractProperties fineractProperties;
+
+    @Autowired
     private ServerProperties serverProperties;
 
     @Override
@@ -77,7 +84,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement() //
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS) //
                 .and() //
-                .addFilterAfter(tenantAwareBasicAuthenticationFilter(), SecurityContextPersistenceFilter.class) //
+                .addFilterAfter(fineractInstanceModeApiFilter, SecurityContextPersistenceFilter.class) //
+                .addFilterAfter(tenantAwareBasicAuthenticationFilter(), FineractInstanceModeApiFilter.class) //
                 .addFilterAfter(twoFactorAuthenticationFilter, BasicAuthenticationFilter.class); //
 
         if (serverProperties.getSsl().isEnabled()) {
