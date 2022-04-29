@@ -39,6 +39,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -48,21 +49,19 @@ import org.apache.fineract.infrastructure.security.domain.PlatformUser;
 import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
 import org.apache.fineract.infrastructure.security.service.PlatformPasswordEncoder;
 import org.apache.fineract.infrastructure.security.service.RandomPasswordGenerator;
+import org.apache.fineract.infrastructure.security.utils.LogParameterEscapeUtil;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.useradministration.service.AppUserConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
+@Slf4j
 @Entity
 @Table(name = "m_appuser", uniqueConstraints = @UniqueConstraint(columnNames = { "username" }, name = "username_org"))
 public class AppUser extends AbstractPersistableCustom implements PlatformUser {
-
-    private static final Logger LOG = LoggerFactory.getLogger(AppUser.class);
 
     @Column(name = "email", nullable = false, length = 100)
     private String email;
@@ -622,16 +621,14 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
     public void validateHasPermissionTo(final String function) {
         if (hasNotPermissionTo(function)) {
             final String authorizationMessage = "User has no authority to: " + function;
-            LOG.info("Unauthorized access: userId: {} action: {} allowed: {}", getId(), function, getAuthorities());
+            log.info("Unauthorized access: userId: {} action: {} allowed: {}", getId(), LogParameterEscapeUtil.escapeLogParameter(function),
+                    getAuthorities());
             throw new NoAuthorizationException(authorizationMessage);
         }
     }
 
     public void validateHasReadPermission(final String function, final Long userId) {
-        if ("USER".equalsIgnoreCase(function) && userId.equals(getId())) {
-            // abstain from validation as user allowed fetch their own data no
-            // matter what permissions they have.
-        } else {
+        if (!("USER".equalsIgnoreCase(function) && userId.equals(getId()))) {
             validateHasReadPermission(function);
         }
     }

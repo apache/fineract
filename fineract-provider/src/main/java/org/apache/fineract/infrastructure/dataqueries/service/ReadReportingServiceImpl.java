@@ -37,6 +37,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import javax.ws.rs.core.StreamingOutput;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
@@ -49,35 +51,24 @@ import org.apache.fineract.infrastructure.dataqueries.exception.ReportNotFoundEx
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.SqlInjectionPreventerService;
+import org.apache.fineract.infrastructure.security.utils.LogParameterEscapeUtil;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.owasp.esapi.ESAPI;
 import org.owasp.esapi.codecs.UnixCodec;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class ReadReportingServiceImpl implements ReadReportingService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ReadReportingServiceImpl.class);
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final GenericDataService genericDataService;
     private final SqlInjectionPreventerService sqlInjectionPreventerService;
-
-    @Autowired
-    public ReadReportingServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-            final GenericDataService genericDataService, SqlInjectionPreventerService sqlInjectionPreventerService) {
-        this.context = context;
-        this.jdbcTemplate = jdbcTemplate;
-        this.genericDataService = genericDataService;
-        this.sqlInjectionPreventerService = sqlInjectionPreventerService;
-    }
 
     @Override
     public StreamingOutput retrieveReportCSV(final String name, final String type, final Map<String, String> queryParams,
@@ -110,7 +101,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         final StringBuilder writer = new StringBuilder();
 
         final List<ResultsetColumnHeaderData> columnHeaders = result.getColumnHeaders();
-        LOG.info("NO. of Columns: {}", columnHeaders.size());
+        log.info("NO. of Columns: {}", columnHeaders.size());
         final Integer chSize = columnHeaders.size();
         for (int i = 0; i < chSize; i++) {
             writer.append('"' + columnHeaders.get(i).getColumnName() + '"');
@@ -128,7 +119,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         String currVal;
         final String doubleQuote = "\"";
         final String twoDoubleQuotes = doubleQuote + doubleQuote;
-        LOG.info("NO. of Rows: {}", data.size());
+        log.info("NO. of Rows: {}", data.size());
         for (ResultsetRowData element : data) {
             row = element.getRow();
             rSize = row.size();
@@ -160,14 +151,20 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             final boolean isSelfServiceUserReport) {
 
         final long startTime = System.currentTimeMillis();
-        LOG.info("STARTING REPORT: {}   Type: {}", name, type);
+        if (log.isDebugEnabled()) {
+            log.debug("STARTING REPORT: {}   Type: {}", LogParameterEscapeUtil.escapeLogParameter(name),
+                    LogParameterEscapeUtil.escapeLogParameter(type));
+        }
 
         final String sql = getSQLtoRun(name, type, queryParams, isSelfServiceUserReport);
 
         final GenericResultsetData result = this.genericDataService.fillGenericResultSet(sql);
 
         final long elapsed = System.currentTimeMillis() - startTime;
-        LOG.info("FINISHING Report/Request Name: {} - {}     Elapsed Time: {}", name, type, elapsed);
+        if (log.isDebugEnabled()) {
+            log.debug("FINISHING Report/Request Name: {} - {}     Elapsed Time: {}", LogParameterEscapeUtil.escapeLogParameter(name),
+                    type.replaceAll("[\n\r\t]", "_"), elapsed);
+        }
         return result;
     }
 
@@ -252,7 +249,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             final List<ResultsetRowData> data = result.getData();
             List<String> row;
 
-            LOG.info("NO. of Columns: {}", columnHeaders.size());
+            log.info("NO. of Columns: {}", columnHeaders.size());
             final Integer chSize = columnHeaders.size();
 
             final Document document = new Document(PageSize.B0.rotate());
@@ -274,7 +271,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             Integer rSize;
             String currColType;
             String currVal;
-            LOG.info("NO. of Rows: {}", data.size());
+            log.info("NO. of Rows: {}", data.size());
             for (ResultsetRowData element : data) {
                 row = element.getRow();
                 rSize = row.size();
@@ -297,7 +294,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             document.close();
             return genaratePdf;
         } catch (final Exception e) {
-            LOG.error("error.msg.reporting.error:", e);
+            log.error("error.msg.reporting.error:", e);
             throw new PlatformDataIntegrityException("error.msg.exception.error", e.getMessage(), e);
         }
     }
@@ -482,14 +479,14 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     @Override
     public GenericResultsetData retrieveGenericResultSetForSmsEmailCampaign(String name, String type, Map<String, String> queryParams) {
         final long startTime = System.currentTimeMillis();
-        LOG.info("STARTING REPORT: {}   Type: {}", name, type);
+        log.info("STARTING REPORT: {}   Type: {}", name, type);
 
         final String sql = sqlToRunForSmsEmailCampaign(name, type, queryParams);
 
         final GenericResultsetData result = this.genericDataService.fillGenericResultSet(sql);
 
         final long elapsed = System.currentTimeMillis() - startTime;
-        LOG.info("FINISHING Report/Request Name: {} - {}     Elapsed Time: {}", name, type, elapsed);
+        log.info("FINISHING Report/Request Name: {} - {}     Elapsed Time: {}", name, type, elapsed);
         return result;
     }
 
