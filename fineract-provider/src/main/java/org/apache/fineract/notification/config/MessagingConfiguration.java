@@ -52,7 +52,7 @@ public class MessagingConfiguration {
 
     @Bean
     public ActiveMQConnectionFactory amqConnectionFactory() {
-        ActiveMQConnectionFactory amqConnectionFactory = new ActiveMQConnectionFactory();
+        ActiveMQConnectionFactory amqConnectionFactory = new ActiveMQConnectionFactory(); // NOSONAR
         try {
             amqConnectionFactory.setBrokerURL(DEFAULT_BROKER_URL);
         } catch (Exception e) {
@@ -63,8 +63,7 @@ public class MessagingConfiguration {
 
     @Bean
     public CachingConnectionFactory connectionFactory() {
-        CachingConnectionFactory connectionFactory = new CachingConnectionFactory(amqConnectionFactory());
-        return connectionFactory;
+        return new CachingConnectionFactory(amqConnectionFactory());
     }
 
     @Bean
