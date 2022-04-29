@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.domain.Base64EncodedImage;
 import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCommand;
 import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
@@ -43,12 +44,10 @@ import org.apache.fineract.infrastructure.documentmanagement.data.ImageData;
 import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
 import org.apache.fineract.infrastructure.documentmanagement.exception.ContentManagementException;
 import org.apache.fineract.infrastructure.documentmanagement.exception.DocumentNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.fineract.infrastructure.security.utils.LogParameterEscapeUtil;
 
+@Slf4j
 public class S3ContentRepository implements ContentRepository {
-
-    private static final Logger LOG = LoggerFactory.getLogger(S3ContentRepository.class);
 
     private final String s3BucketName;
     private final AmazonS3 s3Client;
@@ -154,23 +153,21 @@ public class S3ContentRepository implements ContentRepository {
     private void putObject(final String filename, final InputStream inputStream, final String s3UploadLocation)
             throws ContentManagementException {
         try {
-            LOG.info("Uploading a new object to S3 {}", s3UploadLocation);
+            if (log.isDebugEnabled()) {
+                log.debug("Uploading a new object to S3 {}", LogParameterEscapeUtil.escapeLogParameter(s3UploadLocation));
+            }
             this.s3Client.putObject(new PutObjectRequest(this.s3BucketName, s3UploadLocation, inputStream, new ObjectMetadata()));
-        } catch (AmazonServiceException ase) {
+        } catch (AmazonClientException ase) {
             throw new ContentManagementException(filename, ase.getMessage(), ase);
-        } catch (final AmazonClientException ace) {
-            throw new ContentManagementException(filename, ace.getMessage(), ace);
         }
     }
 
     private S3Object getObject(String key) {
         try {
-            LOG.info("Downloading an object from Amazon S3 Bucket: {}, location: {}", this.s3BucketName, key);
+            log.info("Downloading an object from Amazon S3 Bucket: {}, location: {}", this.s3BucketName, key);
             return this.s3Client.getObject(new GetObjectRequest(this.s3BucketName, key));
-        } catch (AmazonServiceException ase) {
+        } catch (AmazonClientException ase) {
             throw new ContentManagementException(key, ase.getMessage(), ase);
-        } catch (final AmazonClientException ace) {
-            throw new ContentManagementException(key, ace.getMessage(), ace);
         }
     }
 }
