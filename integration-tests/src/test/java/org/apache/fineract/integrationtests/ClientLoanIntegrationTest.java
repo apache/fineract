@@ -308,6 +308,43 @@ public class ClientLoanIntegrationTest {
     }
 
     @Test
+    public void testLoanDisbursedTodayIsRetrieved() {
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer loanProductID = createLoanProduct(false, NONE);
+
+        final Integer loanID = applyForLoanApplication(clientID, loanProductID, "5", null);
+        Assertions.assertNotNull(loanID);
+
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
+        final String LOAN_DISBURSEMENT_DATE = dateFormat.format(todaysDate.getTime());
+
+        LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
+        loanStatusHashMap = this.loanTransactionHelper.approveLoan(LOAN_DISBURSEMENT_DATE, loanID);
+        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+
+        // DISBURSE on todays date so that loan can't be in arrears
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(LOAN_DISBURSEMENT_DATE, loanID, "10000",
+                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
+        LOG.info("DISBURSE {}", loanStatusHashMap.toString());
+        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+        loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
+        // Test added because loans created without arrears were failing to be retrieved (associations=all) due to inner
+        // join on m_loan_arrears_aging (now left join)
+        Assertions.assertNotNull(loanDetails, "Empty Loan Details");
+        Assertions.assertNotNull(JsonPath.from(loanDetails).get("id"), "No id Found");
+
+    }
+
+    @Test
     public void testLoanCharges_SPECIFIED_DUE_DATE_FEE() {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
 
