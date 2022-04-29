@@ -2394,7 +2394,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             sqlBuilder.append(
                     sqlGenerator.currentDate() + " as delinquentDate, coalesce(laa.total_overdue_derived, 0) as delinquentAmount, ");
             sqlBuilder.append("lre.transactionDate as lastPaymentDate, coalesce(lre.amount, 0) as lastPaymentAmount ");
-            sqlBuilder.append("from m_loan l inner join m_loan_arrears_aging laa on laa.loan_id = l.id ");
+            sqlBuilder.append("from m_loan l left join m_loan_arrears_aging laa on laa.loan_id = l.id ");
             sqlBuilder.append(
                     "left join (select lt.loan_id, lt.transaction_date as transactionDate, lt.amount as amount from m_loan_transaction lt ");
             sqlBuilder.append(
