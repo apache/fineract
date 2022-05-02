@@ -1,5 +1,8 @@
 name: Fineract Sonarqube
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - develop
 
 permissions:
   contents: read
