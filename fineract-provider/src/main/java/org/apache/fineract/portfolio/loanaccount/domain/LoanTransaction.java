@@ -169,6 +169,13 @@ public class LoanTransaction extends AbstractPersistableCustom {
                 createdDate, appUser);
     }
 
+    public static LoanTransaction repaymentType(final LoanTransactionType repaymentType, final Office office, final Money amount,
+            final PaymentDetail paymentDetail, final LocalDate paymentDate, final String externalId, final LocalDateTime createdDate,
+            final AppUser appUser) {
+        return new LoanTransaction(null, office, repaymentType, paymentDetail, amount.getAmount(), paymentDate, externalId, createdDate,
+                appUser);
+    }
+
     public void setLoanTransactionToRepaymentScheduleMappings(final Integer installmentId, final BigDecimal chargePerInstallment) {
         for (LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping : this.loanTransactionToRepaymentScheduleMappings) {
             final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loanTransactionToRepaymentScheduleMapping
@@ -524,16 +531,28 @@ public class LoanTransaction extends AbstractPersistableCustom {
         this.manuallyAdjustedOrReversed = true;
     }
 
-    public boolean isAnyTypeOfRepayment() {
-        return isRepayment() || isRepaymentAtDisbursement() || isRecoveryRepayment();
+    public boolean isRepaymentType() {
+        return isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit();
     }
 
     public boolean isRepayment() {
         return LoanTransactionType.REPAYMENT.equals(getTypeOf()) && isNotReversed();
     }
 
-    public boolean isNotRepayment() {
-        return !isRepayment();
+    public boolean isMerchantIssuedRefund() {
+        return LoanTransactionType.MERCHANT_ISSUED_REFUND.equals(getTypeOf()) && isNotReversed();
+    }
+
+    public boolean isPayoutRefund() {
+        return LoanTransactionType.PAYOUT_REFUND.equals(getTypeOf()) && isNotReversed();
+    }
+
+    public boolean isGoodwillCredit() {
+        return LoanTransactionType.GOODWILL_CREDIT.equals(getTypeOf()) && isNotReversed();
+    }
+
+    public boolean isNotRepaymentType() {
+        return !isRepaymentType();
     }
 
     public boolean isIncomePosting() {

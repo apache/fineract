@@ -415,6 +415,18 @@ public final class LoanEnumerations {
                 optionData = new LoanTransactionEnumData(LoanTransactionType.CREDIT_BALANCE_REFUND.getValue().longValue(),
                         LoanTransactionType.CREDIT_BALANCE_REFUND.getCode(), "Credit Balance Refund");
             break;
+            case MERCHANT_ISSUED_REFUND:
+                optionData = new LoanTransactionEnumData(LoanTransactionType.MERCHANT_ISSUED_REFUND.getValue().longValue(),
+                        LoanTransactionType.MERCHANT_ISSUED_REFUND.getCode(), "Merchant Issued Refund");
+            break;
+            case PAYOUT_REFUND:
+                optionData = new LoanTransactionEnumData(LoanTransactionType.PAYOUT_REFUND.getValue().longValue(),
+                        LoanTransactionType.PAYOUT_REFUND.getCode(), "Payout Refund");
+            break;
+            case GOODWILL_CREDIT:
+                optionData = new LoanTransactionEnumData(LoanTransactionType.GOODWILL_CREDIT.getValue().longValue(),
+                        LoanTransactionType.GOODWILL_CREDIT.getCode(), "Goodwill Credit");
+            break;
         }
         return optionData;
     }

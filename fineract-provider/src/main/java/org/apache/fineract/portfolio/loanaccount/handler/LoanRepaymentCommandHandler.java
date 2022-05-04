@@ -18,30 +18,28 @@
  */
 package org.apache.fineract.portfolio.loanaccount.handler;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 @CommandType(entity = "LOAN", action = "REPAYMENT")
 public class LoanRepaymentCommandHandler implements NewCommandSourceHandler {
 
     private final LoanWritePlatformService writePlatformService;
 
-    @Autowired
-    public LoanRepaymentCommandHandler(final LoanWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
-
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
         boolean isRecoveryRepayment = false;
-        return this.writePlatformService.makeLoanRepayment(command.getLoanId(), command, isRecoveryRepayment);
+        return this.writePlatformService.makeLoanRepayment(LoanTransactionType.REPAYMENT, command.getLoanId(), command,
+                isRecoveryRepayment);
     }
 }

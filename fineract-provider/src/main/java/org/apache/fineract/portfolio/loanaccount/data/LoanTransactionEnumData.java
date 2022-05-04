@@ -31,6 +31,9 @@ public class LoanTransactionEnumData {
     private final boolean disbursement;
     private final boolean repaymentAtDisbursement;
     private final boolean repayment;
+    private final boolean merchantIssuedRefund;
+    private final boolean payoutRefund;
+    private final boolean goodwillCredit;
     private final boolean contra;
     private final boolean waiveInterest;
     private final boolean waiveCharges;
@@ -53,6 +56,9 @@ public class LoanTransactionEnumData {
         this.disbursement = Long.valueOf(1).equals(this.id);
         this.repaymentAtDisbursement = Long.valueOf(5).equals(this.id);
         this.repayment = Long.valueOf(2).equals(this.id);
+        this.merchantIssuedRefund = Long.valueOf(21).equals(this.id);
+        this.payoutRefund = Long.valueOf(22).equals(this.id);
+        this.goodwillCredit = Long.valueOf(23).equals(this.id);
         this.contra = Long.valueOf(3).equals(this.id);
         this.waiveInterest = Long.valueOf(4).equals(this.id);
         this.waiveCharges = Long.valueOf(9).equals(this.id);
@@ -88,7 +94,14 @@ public class LoanTransactionEnumData {
      * @return
      */
     public boolean isPaymentOrReceipt() {
-        if (isDisbursement() || isRepayment() || isRepaymentAtDisbursement() || isRecoveryRepayment()) {
+        if (isDisbursement() || isRepaymentType() || isRepaymentAtDisbursement() || isRecoveryRepayment()) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isRepaymentType() {
+        if (isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit()) {
             return true;
         }
         return false;
@@ -104,6 +117,18 @@ public class LoanTransactionEnumData {
 
     public boolean isRepayment() {
         return this.repayment;
+    }
+
+    public boolean isMerchantIssuedRefund() {
+        return this.merchantIssuedRefund;
+    }
+
+    public boolean isPayoutRefund() {
+        return this.payoutRefund;
+    }
+
+    public boolean isGoodwillCredit() {
+        return this.goodwillCredit;
     }
 
     public boolean isWaiveInterest() {

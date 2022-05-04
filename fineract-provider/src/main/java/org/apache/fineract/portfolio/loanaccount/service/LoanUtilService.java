@@ -30,6 +30,7 @@ import java.util.Locale;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepository;
@@ -57,6 +58,7 @@ import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -349,6 +351,14 @@ public class LoanUtilService {
             }
         }
         return disbursementDatas;
+    }
+
+    public void validateRepaymentTransactionType(LoanTransactionType repaymentTransactionType) {
+        if (!repaymentTransactionType.isRepaymentType()) {
+            throw new PlatformServiceUnavailableException("error.msg.repaymentTransactionType.provided.not.a.repayment.type",
+                    "Loan :" + repaymentTransactionType.getCode() + " Repayment Transaction Type provided is not a Repayment Type",
+                    repaymentTransactionType.getCode());
+        }
     }
 
 }

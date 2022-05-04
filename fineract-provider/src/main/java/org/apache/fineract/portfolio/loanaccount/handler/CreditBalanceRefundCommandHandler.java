@@ -31,9 +31,9 @@ import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
+@Slf4j
 @CommandType(entity = "LOAN", action = "CREDITBALANCEREFUND")
 public class CreditBalanceRefundCommandHandler implements NewCommandSourceHandler {
 

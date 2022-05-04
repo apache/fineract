@@ -45,9 +45,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class ClientLoanCreditBalanceRefundIntegrationTest {
+public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ClientLoanCreditBalanceRefundIntegrationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest.class);
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -56,11 +56,15 @@ public class ClientLoanCreditBalanceRefundIntegrationTest {
     private JournalEntryHelper journalEntryHelper;
     private AccountHelper accountHelper;
     private Integer disbursedLoanID;
+    private static final String CASH_BASED = "2";
     private static final String ACCRUAL_PERIODIC = "3";
     private Account assetAccount;
     private Account incomeAccount;
     private Account expenseAccount;
     private Account overpaymentAccount;
+    private static final String MERCHANT_ISSUED_REFUND = "merchantIssuedRefund";
+    private static final String PAYOUT_REFUND = "payoutRefund";
+    private static final String GOODWILL_CREDIT = "goodwillCredit";
 
     @BeforeEach
     public void setup() {
@@ -76,12 +80,13 @@ public class ClientLoanCreditBalanceRefundIntegrationTest {
         this.expenseAccount = this.accountHelper.createExpenseAccount();
         this.overpaymentAccount = this.accountHelper.createLiabilityAccount();
         this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
+    }
 
+    private void disburseLoanOfAccountingRule(final String accountingType) {
         final String principal = "12000.00";
         final String submitApproveDisburseDate = "01 January 2022";
         this.disbursedLoanID = fromStartToDisburseLoan(submitApproveDisburseDate, principal, ACCRUAL_PERIODIC, assetAccount, incomeAccount,
                 expenseAccount, overpaymentAccount);
-
     }
 
     private Integer createLoanProduct(final String principal, final boolean multiDisburseLoan, final String accountingRule,
@@ -162,6 +167,7 @@ public class ClientLoanCreditBalanceRefundIntegrationTest {
 
     @Test
     public void creditBalanceRefundCanOnlyBeAppliedWhereLoanStatusIsOverpaidTest() {
+        disburseLoanOfAccountingRule(ACCRUAL_PERIODIC);
         HashMap loanStatusHashMap = makeRepayment("06 January 2022", 2000.00f); // not full payment
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
@@ -174,14 +180,11 @@ public class ClientLoanCreditBalanceRefundIntegrationTest {
         assertEquals("error.msg.loan.credit.balance.refund.account.is.not.overpaid",
                 cbrErrors.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
-        // ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec,
-        // this.responseSpec, loanID);
-        // final int loanScheduleLineCount = loanSchedule.size();
-
     }
 
     @Test
     public void cantRefundMoreThanOverpaidTest() {
+        disburseLoanOfAccountingRule(ACCRUAL_PERIODIC);
         HashMap loanStatusHashMap = makeRepayment("06 January 2022", 20000.00f); // overpayment
         LoanStatusChecker.verifyLoanAccountIsOverPaid(loanStatusHashMap);
 
@@ -204,6 +207,7 @@ public class ClientLoanCreditBalanceRefundIntegrationTest {
 
     @Test
     public void fullRefundChangesStatusToClosedObligationMetTest() {
+        disburseLoanOfAccountingRule(ACCRUAL_PERIODIC);
         HashMap loanStatusHashMap = makeRepayment("06 January 2022", 20000.00f); // overpayment
         LoanStatusChecker.verifyLoanAccountIsOverPaid(loanStatusHashMap);
 
@@ -229,6 +233,7 @@ public class ClientLoanCreditBalanceRefundIntegrationTest {
 
     @Test
     public void partialRefundKeepsOverpaidStatusTest() {
+        disburseLoanOfAccountingRule(ACCRUAL_PERIODIC);
         HashMap loanStatusHashMap = makeRepayment("06 January 2022", 20000.00f); // overpayment
         LoanStatusChecker.verifyLoanAccountIsOverPaid(loanStatusHashMap);
 
@@ -246,6 +251,7 @@ public class ClientLoanCreditBalanceRefundIntegrationTest {
     @Test
     public void newCreditBalanceRefundSavesExternalIdTest() {
 
+        disburseLoanOfAccountingRule(ACCRUAL_PERIODIC);
         HashMap loanStatusHashMap = makeRepayment("06 January 2022", 20000.00f); // overpayment
         LoanStatusChecker.verifyLoanAccountIsOverPaid(loanStatusHashMap);
 
@@ -265,6 +271,7 @@ public class ClientLoanCreditBalanceRefundIntegrationTest {
     @Test
     public void newCreditBalanceRefundFindsDuplicateExternalIdTest() {
 
+        disburseLoanOfAccountingRule(ACCRUAL_PERIODIC);
         HashMap loanStatusHashMap = makeRepayment("06 January 2022", 20000.00f); // overpayment
         LoanStatusChecker.verifyLoanAccountIsOverPaid(loanStatusHashMap);
 
@@ -287,6 +294,7 @@ public class ClientLoanCreditBalanceRefundIntegrationTest {
     @Test
     public void newCreditBalanceRefundCreatesCorrectJournalEntriesForPeriodicAccrualsTest() {
 
+        disburseLoanOfAccountingRule(ACCRUAL_PERIODIC);
         HashMap loanStatusHashMap = makeRepayment("06 January 2022", 20000.00f); // overpayment
         LoanStatusChecker.verifyLoanAccountIsOverPaid(loanStatusHashMap);
 
@@ -302,6 +310,47 @@ public class ClientLoanCreditBalanceRefundIntegrationTest {
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, creditBalanceRefundDate,
                 new JournalEntry(refund, JournalEntry.TransactionType.CREDIT));
 
+    }
+
+    @Test
+    public void newCreditBalanceRefundCreatesCorrectJournalEntriesForCashAccrualsTest() {
+
+        disburseLoanOfAccountingRule(CASH_BASED);
+        HashMap loanStatusHashMap = makeRepayment("08 January 2022", 20000.00f); // overpayment
+        LoanStatusChecker.verifyLoanAccountIsOverPaid(loanStatusHashMap);
+
+        final Float refund = 1000.00f; // partial refund
+        final String creditBalanceRefundDate = "09 January 2022";
+        final String externalId = null;
+        final Integer resourceId = (Integer) loanTransactionHelper.creditBalanceRefund(creditBalanceRefundDate, refund, externalId,
+                disbursedLoanID, "resourceId");
+        Assertions.assertNotNull(resourceId);
+
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, creditBalanceRefundDate,
+                new JournalEntry(refund, JournalEntry.TransactionType.DEBIT));
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, creditBalanceRefundDate,
+                new JournalEntry(refund, JournalEntry.TransactionType.CREDIT));
+
+    }
+
+    @Test
+    public void repaymentTransactionTypeMatchesTest() {
+        disburseLoanOfAccountingRule(ACCRUAL_PERIODIC);
+        verifyRepaymentTransactionTypeMatches(MERCHANT_ISSUED_REFUND);
+        verifyRepaymentTransactionTypeMatches(PAYOUT_REFUND);
+        verifyRepaymentTransactionTypeMatches(GOODWILL_CREDIT);
+
+    }
+
+    private void verifyRepaymentTransactionTypeMatches(final String repaymentTransactionType) {
+        HashMap loanStatusHashMap = this.loanTransactionHelper.makeRepaymentTypePayment(repaymentTransactionType, "06 January 2022",
+                200.00f, this.disbursedLoanID);
+        Integer newTransactionId = (Integer) loanStatusHashMap.get("resourceId");
+        loanStatusHashMap = this.loanTransactionHelper.getLoanTransactionDetails(this.disbursedLoanID, newTransactionId);
+
+        HashMap typeMap = (HashMap) loanStatusHashMap.get("type");
+        Boolean isTypeCorrect = (Boolean) typeMap.get(repaymentTransactionType);
+        Assertions.assertTrue(Boolean.TRUE.equals(isTypeCorrect), "Not " + repaymentTransactionType);
     }
 
 }

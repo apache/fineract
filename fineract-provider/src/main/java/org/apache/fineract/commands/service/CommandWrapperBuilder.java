@@ -797,6 +797,33 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder loanMerchantIssuedRefundTransaction(final Long loanId) {
+        this.actionName = "MERCHANTISSUEDREFUND";
+        this.entityName = "LOAN";
+        this.entityId = null;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions/template?command=merchantissuedrefund";
+        return this;
+    }
+
+    public CommandWrapperBuilder loanPayoutRefundTransaction(final Long loanId) {
+        this.actionName = "PAYOUTREFUND";
+        this.entityName = "LOAN";
+        this.entityId = null;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions/template?command=payoutrefund";
+        return this;
+    }
+
+    public CommandWrapperBuilder loanGoodwillCreditTransaction(final Long loanId) {
+        this.actionName = "GOODWILLCREDIT";
+        this.entityName = "LOAN";
+        this.entityId = null;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions/template?command=goodwillcredit";
+        return this;
+    }
+
     public CommandWrapperBuilder loanRecoveryPaymentTransaction(final Long loanId) {
         this.actionName = "RECOVERYPAYMENT";
         this.entityName = "LOAN";

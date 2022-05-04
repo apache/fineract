@@ -33,6 +33,10 @@ public class BusinessEventNotificationConstants {
         LOAN_UNDO_TRANSACTION("loan_undo_transaction"), //
         LOAN_ADJUST_TRANSACTION("loan_adjust_transaction"), //
         LOAN_MAKE_REPAYMENT("loan_repayment_transaction"), //
+        LOAN_MERCHANT_ISSUED_REFUND("loan_merchant_issued_refund"), //
+        LOAN_PAYOUT_REFUND("loan_payout_refund"), //
+        LOAN_GOODWILL_CREDIT("loan_goodwill_credit"), //
+        LOAN_RECOVERY_PAYMENT("loan_recovery_payment"), //
         LOAN_WRITTEN_OFF("loan_writtenoff"), //
         LOAN_UNDO_WRITTEN_OFF("loan_undo_writtenoff"), //
         LOAN_DISBURSAL("loan_disbursal"), //
