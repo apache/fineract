@@ -61,9 +61,10 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
             }
 
             /***
-             * Handle repayments, repayments at disbursement and reversal of Repayments and Repayments at disbursement
+             * Handle repayments, loan refunds, repayments at disbursement and reversal of Repayments and Repayments at
+             * disbursement
              ***/
-            else if (loanTransactionDTO.getTransactionType().isRepayment()
+            else if (loanTransactionDTO.getTransactionType().isRepaymentType()
                     || loanTransactionDTO.getTransactionType().isRepaymentAtDisbursement()
                     || loanTransactionDTO.getTransactionType().isChargePayment()) {
                 createJournalEntriesForRepaymentsAndWriteOffs(loanDTO, loanTransactionDTO, office, false,
@@ -293,9 +294,16 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
                             FinancialActivity.LIABILITY_TRANSFER.getValue(), loanProductId, paymentTypeId, loanId, transactionId,
                             transactionDate, totalDebitAmount, isReversal);
                 } else {
-                    this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode,
-                            AccrualAccountsForLoan.FUND_SOURCE.getValue(), loanProductId, paymentTypeId, loanId, transactionId,
-                            transactionDate, totalDebitAmount, isReversal);
+                    if (loanTransactionDTO.getTransactionType().isGoodwillCredit()) {
+                        this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode,
+                                AccrualAccountsForLoan.FUND_SOURCE.getValue(), loanProductId, paymentTypeId, loanId, transactionId,
+                                transactionDate, totalDebitAmount, isReversal);
+
+                    } else {
+                        this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode,
+                                AccrualAccountsForLoan.FUND_SOURCE.getValue(), loanProductId, paymentTypeId, loanId, transactionId,
+                                transactionDate, totalDebitAmount, isReversal);
+                    }
                 }
             }
         }

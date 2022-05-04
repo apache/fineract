@@ -18,32 +18,26 @@
  */
 package org.apache.fineract.portfolio.loanaccount.handler;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 @CommandType(entity = "LOANCHARGE", action = "CREATE")
 public class AddLoanChargeCommandHandler implements NewCommandSourceHandler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AddLoanChargeCommandHandler.class);
-
     private final LoanWritePlatformService writePlatformService;
-
-    @Autowired
-    public AddLoanChargeCommandHandler(final LoanWritePlatformService writePlatformService) {
-        this.writePlatformService = writePlatformService;
-    }
 
     @Transactional
     @Override
@@ -71,7 +65,7 @@ public class AddLoanChargeCommandHandler implements NewCommandSourceHandler {
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
-        LOG.error("Error occured.", dve);
+        log.error("Error occured.", dve);
     }
 
 }

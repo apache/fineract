@@ -3179,7 +3179,7 @@ public class Loan extends AbstractPersistableCustom {
             addLoanTransaction(loanTransaction);
         }
 
-        if (loanTransaction.isNotRepayment() && loanTransaction.isNotWaiver() && loanTransaction.isNotRecoveryRepayment()) {
+        if (loanTransaction.isNotRepaymentType() && loanTransaction.isNotWaiver() && loanTransaction.isNotRecoveryRepayment()) {
             final String errorMessage = "A transaction of type repayment or recovery repayment or waiver was expected but not received.";
             throw new InvalidLoanTransactionTypeException("transaction", "is.not.a.repayment.or.waiver.or.recovery.transaction",
                     errorMessage);
@@ -3502,7 +3502,7 @@ public class Loan extends AbstractPersistableCustom {
 
         final LocalDate currentTransactionDate = loanTransaction.getTransactionDate();
         for (final LoanTransaction previousTransaction : loanTransactions) {
-            if (previousTransaction.isRepayment() && previousTransaction.isNotReversed()) {
+            if (previousTransaction.isRepaymentType() && previousTransaction.isNotReversed()) {
                 if (currentTransactionDate.isBefore(previousTransaction.getTransactionDate())) {
                     isAfterLatRepayment = false;
                     break;
@@ -3543,7 +3543,7 @@ public class Loan extends AbstractPersistableCustom {
 
         LocalDate lastTransactionDate = null;
         for (final LoanTransaction transaction : this.loanTransactions) {
-            if (transaction.isRepayment() && transaction.isNonZero()) {
+            if (transaction.isRepaymentType() && transaction.isNonZero()) {
                 lastTransactionDate = transaction.getTransactionDate();
             }
         }
@@ -3615,7 +3615,7 @@ public class Loan extends AbstractPersistableCustom {
         validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_REPAYMENT_OR_WAIVER,
                 transactionForAdjustment.getTransactionDate());
 
-        if (transactionForAdjustment.isNotRepayment() && transactionForAdjustment.isNotWaiver()
+        if (transactionForAdjustment.isNotRepaymentType() && transactionForAdjustment.isNotWaiver()
                 && transactionForAdjustment.isNotCreditBalanceRefund()) {
             final String errorMessage = "Only transactions of type repayment, waiver or credit balance refund can be adjusted.";
             throw new InvalidLoanTransactionTypeException("transaction",
@@ -3635,7 +3635,7 @@ public class Loan extends AbstractPersistableCustom {
             this.loanStatus = LoanStatus.ACTIVE.getValue();
         }
 
-        if (newTransactionDetail.isRepayment() || newTransactionDetail.isInterestWaiver()) {
+        if (newTransactionDetail.isRepaymentType() || newTransactionDetail.isInterestWaiver()) {
             changedTransactionDetail = handleRepaymentOrRecoveryOrWaiverTransaction(newTransactionDetail, loanLifecycleStateMachine,
                     transactionForAdjustment, scheduleGeneratorDTO, currentUser);
         }
@@ -4139,7 +4139,7 @@ public class Loan extends AbstractPersistableCustom {
         Money cumulativePaid = Money.zero(loanCurrency());
 
         for (final LoanTransaction repayment : this.loanTransactions) {
-            if (repayment.isRepayment() && !repayment.isReversed()) {
+            if (repayment.isRepaymentType() && !repayment.isReversed()) {
                 cumulativePaid = cumulativePaid.plus(repayment.getAmount(loanCurrency()));
             }
         }
@@ -4464,7 +4464,7 @@ public class Loan extends AbstractPersistableCustom {
                     && !transaction.getTransactionDate().isAfter(tillDate)) {
                 if (transaction.isAccrual()) {
                     receivableInterest = receivableInterest.plus(transaction.getInterestPortion(getCurrency()));
-                } else if (transaction.isRepayment() || transaction.isInterestWaiver()) {
+                } else if (transaction.isRepaymentType() || transaction.isInterestWaiver()) {
                     receivableInterest = receivableInterest.minus(transaction.getInterestPortion(getCurrency()));
                 }
             }
@@ -4953,7 +4953,7 @@ public class Loan extends AbstractPersistableCustom {
     public LocalDate getLastRepaymentDate() {
         LocalDate currentTransactionDate = getDisbursementDate();
         for (final LoanTransaction previousTransaction : this.loanTransactions) {
-            if (previousTransaction.isRepayment()) {
+            if (previousTransaction.isRepaymentType()) {
                 if (currentTransactionDate.isBefore(previousTransaction.getTransactionDate())) {
                     currentTransactionDate = previousTransaction.getTransactionDate();
                 }
@@ -5063,7 +5063,7 @@ public class Loan extends AbstractPersistableCustom {
             break;
             case LOAN_REPAYMENT_OR_WAIVER:
                 if (!isOpen()) {
-                    final String defaultUserMessage = "Loan Repayment or Waiver is not allowed. Loan Account is not active.";
+                    final String defaultUserMessage = "Loan Repayment (or its types) or Waiver is not allowed. Loan Account is not active.";
                     final ApiParameterError error = ApiParameterError
                             .generalError("error.msg.loan.repayment.or.waiver.account.is.not.active", defaultUserMessage);
                     dataValidationErrors.add(error);
@@ -6223,7 +6223,7 @@ public class Loan extends AbstractPersistableCustom {
 
         LocalDate lastTransactionDate = null;
         for (final LoanTransaction transaction : this.loanTransactions) {
-            if ((transaction.isRepayment() || transaction.isRefundForActiveLoan() || transaction.isCreditBalanceRefund())
+            if ((transaction.isRepaymentType() || transaction.isRefundForActiveLoan() || transaction.isCreditBalanceRefund())
                     && transaction.isNonZero() && transaction.isNotReversed()) {
                 lastTransactionDate = transaction.getTransactionDate();
             }
@@ -6268,7 +6268,7 @@ public class Loan extends AbstractPersistableCustom {
         Collections.reverse(loanTransactions);
         for (final LoanTransaction previousTransaction : loanTransactions) {
             if (lastTransactionDate.isBefore(previousTransaction.getTransactionDate())) {
-                if (previousTransaction.isRepayment() || previousTransaction.isWaiver() || previousTransaction.isChargePayment()) {
+                if (previousTransaction.isRepaymentType() || previousTransaction.isWaiver() || previousTransaction.isChargePayment()) {
                     throw new UndoLastTrancheDisbursementException(previousTransaction.getId());
                 }
             }
@@ -6602,7 +6602,7 @@ public class Loan extends AbstractPersistableCustom {
                     receivableInterest = receivableInterest.plus(transaction.getInterestPortion(currency));
                     receivableFee = receivableFee.plus(transaction.getFeeChargesPortion(currency));
                     receivablePenalty = receivablePenalty.plus(transaction.getPenaltyChargesPortion(currency));
-                } else if (transaction.isRepayment() || transaction.isChargePayment()) {
+                } else if (transaction.isRepaymentType() || transaction.isChargePayment()) {
                     receivableInterest = receivableInterest.minus(transaction.getInterestPortion(currency));
                     receivableFee = receivableFee.minus(transaction.getFeeChargesPortion(currency));
                     receivablePenalty = receivablePenalty.minus(transaction.getPenaltyChargesPortion(currency));
