@@ -56,27 +56,24 @@ task prepareInputYaml {
     doLast {
         copy {
             from file('config/swagger/fineract-input.yaml.template')
-            into file('config/swagger')
+            into file("${buildDir}/tmp/swagger")
             rename { String filename -> return 'fineract-input.yaml' }
             filter(ReplaceTokens, tokens: [VERSION: "${project.version}".toString()])
         }
     }
 }
 
-rat.dependsOn prepareInputYaml
-
 resolve {
-    logging.captureStandardOutput LogLevel.INFO
+    logging.captureStandardOutput LogLevel.QUIET
     outputFileName = 'fineract'
     outputFormat = 'JSONANDYAML'
-    prettyPrint = true
+    prettyPrint = false
     classpath = sourceSets.main.runtimeClasspath
     outputDir = file("${buildDir}/classes/java/main/static")
-    openApiFile = file("config/swagger/fineract-input.yaml")
+    // openApiFile = file("${buildDir}/tmp/swagger/fineract-input.yaml")
     sortOutput = true
+    // dependsOn(prepareInputYaml)
 }
-
-resolve.dependsOn prepareInputYaml
 
 configurations {
     providedRuntime // needed for Spring Boot executable WAR
@@ -109,11 +106,6 @@ modernizer {
         '.*EntityTables',
         '.*domain.*'
     ]
-}
-
-compileJava {
-    dependsOn rat
-    finalizedBy resolve
 }
 
 // If we are running Gradle within Eclipse to enhance classes with OpenJPA,
@@ -158,7 +150,7 @@ configurations {
 }
 dependencies {
     driver 'org.mariadb.jdbc:mariadb-java-client:2.7.5'
-    driver 'org.postgresql:postgresql:42.3.4'
+    driver 'org.postgresql:postgresql:42.3.5'
 }
 
 URLClassLoader loader = GroovyObject.class.classLoader
@@ -213,22 +205,21 @@ bootRun {
 
     dependencies {
         implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.5'
-        implementation 'org.postgresql:postgresql:42.3.4'
+        implementation 'org.postgresql:postgresql:42.3.5'
     }
 }
 
 springBoot {
     mainClass = 'org.apache.fineract.ServerApplication'
-    buildInfo()
 }
 
 bootJar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
-        attributes('Main-Class': 'org.springframework.boot.loader.PropertiesLauncher', 'Implementation-Title': 'Apache Fineract', 'Implementation-Version': archiveVersion)
+        attributes('Main-Class': 'org.springframework.boot.loader.PropertiesLauncher', 'Implementation-Title': 'Apache Fineract', 'Implementation-Version': project.version)
     }
-    dependsOn resolve
     classifier = ''
+    dependsOn resolve
 }
 
 jib {
@@ -279,7 +270,7 @@ jib {
 
     dependencies {
         implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.5'
-        implementation 'org.postgresql:postgresql:42.3.4'
+        implementation 'org.postgresql:postgresql:42.3.5'
     }
 
     pluginExtensions {
@@ -296,7 +287,7 @@ jib {
     }
 }
 
-tasks.jibDockerBuild.dependsOn = ["bootJar"]
+tasks.jibDockerBuild.dependsOn(bootJar)
 
 // Configuration for git properties gradle plugin
 // https://github.com/n0mer/gradle-git-properties
@@ -310,9 +301,11 @@ gitProperties {
 // make sure the generateGitProperties task always executes (even when git.properties is not changed)
 generateGitProperties.outputs.upToDateWhen { false }
 
-// Gradle 7.x asks for explicit dependencies between tasks
+// NOTE: Gradle suggested these dependencies
+jar.dependsOn resolve
+test.dependsOn resolve
 checkstyleMain.dependsOn resolve
 checkstyleTest.dependsOn resolve
-licenseMain.dependsOn processResources, generateGitProperties
 spotbugsTest.dependsOn resolve
-test.dependsOn resolve
+compileTestJava.dependsOn ':fineract-client:processResources'
+bootJarMainClassName.dependsOn resolve

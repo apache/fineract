@@ -58,7 +58,7 @@ buildscript {
 plugins {
     id "org.barfuin.gradle.taskinfo" version "1.4.0"
     id 'com.adarshr.test-logger' version '3.2.0'
-    id 'com.diffplug.spotless' version '6.5.1' apply false
+    id 'com.diffplug.spotless' version '6.5.2' apply false
     id 'org.nosphere.apache.rat' version '0.7.1' apply false
     id 'com.github.hierynomus.license' version '0.16.1' apply false
     id 'com.github.jk1.dependency-license-report' version '2.1' apply false
@@ -79,7 +79,7 @@ plugins {
     id 'org.sonarqube' version '3.3'
     id 'com.github.andygoossens.modernizer' version '1.6.2' apply false
     id 'com.github.spotbugs' version '5.0.6' apply false
-    id 'se.thinkcode.cucumber-runner' version '0.0.10' apply false
+    id 'se.thinkcode.cucumber-runner' version '0.0.11' apply false
 }
 
 apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.release.gradle"
@@ -92,8 +92,6 @@ ext['groovy.version'] = '3.0.10'
 ext['swaggerFile'] = "$rootDir/fineract-provider/build/classes/java/main/static/fineract.yaml".toString()
 
 allprojects  {
-    apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.dependencies.gradle"
-
     group = 'org.apache.fineract'
 
     jgitver {
@@ -248,6 +246,7 @@ allprojects  {
             // Git build info
             "**/git.properties",
             ".mailmap",
+            '**/images/diag-*.svg',
         ]
     }
 }
@@ -264,6 +263,7 @@ configure(project.fineractJavaProjects) {
     apply plugin: 'com.github.spotbugs'
     apply plugin: 'com.github.andygoossens.modernizer'
     apply plugin: 'se.thinkcode.cucumber-runner'
+    apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.dependencies.gradle"
 
 
     /* define the valid syntax level for source files */
@@ -365,10 +365,6 @@ configure(project.fineractJavaProjects) {
 
         lineEndings 'UNIX'
     }
-
-    // compileJava may create more source files into generated, hence we need to run these tasks after it
-    licenseMain.dependsOn compileJava
-    processResources.dependsOn compileJava
 
     // If we are running Gradle within Eclipse to enhance classes,
     // set the classes directory to point to Eclipse's default build directory
@@ -500,6 +496,10 @@ configure(project.fineractJavaProjects) {
                     // "FieldCanBeFinal"
                     )
         }
+    }
+
+    compileJava {
+        dependsOn(rat, licenseMain, licenseTest)
     }
 
     dependencies {

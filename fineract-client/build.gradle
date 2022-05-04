@@ -31,6 +31,7 @@ openApiMeta {
     generatorName = 'Fineract'
     packageName = 'org.apache.fineract.client'
     outputFolder = "$buildDir/meta".toString()
+    // trick to make sure fineract.yaml is generated first
 }
 
 openApiValidate {
@@ -59,10 +60,7 @@ task buildJavaSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateT
     generateModelTests = false
     generateApiTests = false
     ignoreFileOverride = "$projectDir/.openapi-generator-ignore"
-    // trick to make sure fineract.yaml is generated first
-    dependsOn = [
-        ':fineract-provider:resolve'
-    ]
+    dependsOn(':fineract-provider:resolve')
 }
 
 task buildTypescriptAngularSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask){
@@ -82,9 +80,7 @@ task buildTypescriptAngularSdk(type: org.openapitools.generator.gradle.plugin.ta
         npmName: '@apache/fineract-client',
         npmRepository: "${npmRepository}"
     ]
-    dependsOn = [
-        ':fineract-provider:resolve'
-    ]
+    dependsOn(':fineract-provider:resolve')
 }
 
 task buildAsciidoc(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask){
@@ -97,17 +93,11 @@ task buildAsciidoc(type: org.openapitools.generator.gradle.plugin.tasks.Generate
     apiPackage = 'org.apache.fineract.client.services'
     invokerPackage = 'org.apache.fineract.client'
     modelPackage = 'org.apache.fineract.client.models'
-    dependsOn = [
-        ':fineract-provider:resolve'
-    ]
+    dependsOn(':fineract-provider:resolve')
 }
 
 // TODO: @vidakovic we could provide even more client libs in different languages (Go, Ruby, Swift etc.)
-licenseMain.dependsOn(buildJavaSdk, licenseFormatMain, spotlessMiscApply)
-licenseMain.dependsOn(buildTypescriptAngularSdk, licenseFormatMain, spotlessMiscApply)
-licenseMain.dependsOn(buildAsciidoc, licenseFormatMain, spotlessMiscApply)
-
-compileJava.dependsOn(licenseFormatMain, spotlessMiscApply)
+compileJava.dependsOn(buildJavaSdk, buildTypescriptAngularSdk, buildAsciidoc, licenseFormatMain, spotlessMiscApply)
 
 java {
     // keep this at Java 8, not 17; see https://issues.apache.org/jira/browse/FINERACT-1214
@@ -134,3 +124,7 @@ test {
 }
 
 sourceSets.main.java.srcDir new File(buildDir, "generated/java/src/main/java")
+
+// NOTE: Gradle suggested these dependencies
+licenseFormatMain.dependsOn buildJavaSdk
+licenseMain.dependsOn buildJavaSdk

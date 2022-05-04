@@ -20,6 +20,7 @@ description = 'Fineract WAR'
 
 apply plugin: 'war'
 apply plugin: 'distribution'
+apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.dependencies.gradle"
 
 war {
     archiveFileName = 'fineract-provider.war'
@@ -102,7 +103,7 @@ distributions {
     }
 }
 
-tasks.binaryDistZip.enabled false
-tasks.srcDistZip.enabled false
-tasks.binaryDistTar.dependsOn = [war, ':fineract-doc:doc']
-// tasks.srcDistTar.dependsOn prepareInputYaml
+binaryDistZip.enabled false
+srcDistZip.enabled false
+// NOTE: Gradle suggested these dependencies
+binaryDistTar.dependsOn(war, ':fineract-client:jar', ':fineract-provider:build', ':fineract-doc:doc')
