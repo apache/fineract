@@ -158,7 +158,7 @@ configurations {
 }
 dependencies {
     driver 'org.mariadb.jdbc:mariadb-java-client:2.7.5'
-    driver 'org.postgresql:postgresql:42.3.4'
+    driver 'org.postgresql:postgresql:42.3.5'
 }
 
 URLClassLoader loader = GroovyObject.class.classLoader
@@ -213,7 +213,7 @@ bootRun {
 
     dependencies {
         implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.5'
-        implementation 'org.postgresql:postgresql:42.3.4'
+        implementation 'org.postgresql:postgresql:42.3.5'
     }
 }
 
@@ -279,7 +279,7 @@ jib {
 
     dependencies {
         implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.5'
-        implementation 'org.postgresql:postgresql:42.3.4'
+        implementation 'org.postgresql:postgresql:42.3.5'
     }
 
     pluginExtensions {
