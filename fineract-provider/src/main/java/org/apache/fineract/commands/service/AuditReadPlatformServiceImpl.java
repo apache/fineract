@@ -425,7 +425,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
         sql = " select distinct(entity_name) as entityName from m_permission p ";
         sql += makercheckerCapabilityOnly(useType, currentUser);
-        sql += " order by (CASE WHEN grouping = 'datatable' THEN 'ZZZ' ELSE entity_name END), entity_name";
+        sql += " order by (CASE WHEN " + sqlGenerator.escape("grouping") + " = 'datatable' THEN 'ZZZ' ELSE entity_name END), entity_name";
         final EntityNamesMapper mapper2 = new EntityNamesMapper();
         final List<String> entityNames = this.jdbcTemplate.query(sql, mapper2); // NOSONAR
 
