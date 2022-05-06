@@ -243,7 +243,7 @@ public class SavingsProductHelper {
         this.overdraftLimit = overdraftLimit;
         return this;
     }
-    public SavingsProductHelper withOverDraft(final String overdraftLimit,String nominalAnnualInterestRateOverdraft) {
+    public SavingsProductHelper withOverDraftRate(final String overdraftLimit,String nominalAnnualInterestRateOverdraft) {
         this.allowOverdraft = "true";
         this.overdraftLimit = overdraftLimit;
         this.nominalAnnualInterestRateOverdraft=nominalAnnualInterestRateOverdraft;
