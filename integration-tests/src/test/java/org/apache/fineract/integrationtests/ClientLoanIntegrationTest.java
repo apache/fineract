@@ -4714,8 +4714,7 @@ public class ClientLoanIntegrationTest {
     /***
      * Test case to verify default Style payment strategy
      */
-    // @Test // TODO: @galovics failing since
-    // https://github.com/apache/fineract/commit/d5c611564f7b8c877136f3b3aca647bf7de15fe0
+    @Test
     public void testLoanRefundByCashCashBasedAccounting() {
         this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
 
@@ -4898,8 +4897,7 @@ public class ClientLoanIntegrationTest {
     /***
      * Test case to verify Default style payment strategy
      */
-    // @Test // TODO: @galovics failing since
-    // https://github.com/apache/fineract/commit/d5c611564f7b8c877136f3b3aca647bf7de15fe0
+    @Test
     public void testLoanRefundByCashAccrualBasedAccounting() {
         this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
 
@@ -5077,8 +5075,7 @@ public class ClientLoanIntegrationTest {
 
     }
 
-    // @Test // TODO: @galovics failing since
-    // https://github.com/apache/fineract/commit/d5c611564f7b8c877136f3b3aca647bf7de15fe0
+    @Test
     public void testLoanRefundByTransferCashBasedAccounting() {
         this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
