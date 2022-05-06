@@ -2100,20 +2100,18 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
     @Override
     public PaidInAdvanceData retrieveTotalPaidInAdvance(Long loanId) {
-        // TODO Auto-generated method stub
         try {
-            final String sql = "  select (SUM(COALESCE(mr.principal_completed_derived, 0)) +"
+            final String sql = "  select (SUM(COALESCE(mr.principal_completed_derived, 0))"
                     + " + SUM(COALESCE(mr.interest_completed_derived, 0)) " + " + SUM(COALESCE(mr.fee_charges_completed_derived, 0)) "
                     + " + SUM(COALESCE(mr.penalty_charges_completed_derived, 0))) as total_in_advance_derived "
                     + " from m_loan ml INNER JOIN m_loan_repayment_schedule mr on mr.loan_id = ml.id "
-                    + " where ml.id=? and  mr.duedate >= ? group by ml.id having " + " (SUM(COALESCE(mr.principal_completed_derived, 0))  "
-                    + " + SUM(COALESCE(mr.interest_completed_derived, 0)) " + " + SUM(COALESCE(mr.fee_charges_completed_derived, 0)) "
+                    + " where ml.id=? and  mr.duedate >= " + sqlGenerator.currentDate() + " group by ml.id having "
+                    + " (SUM(COALESCE(mr.principal_completed_derived, 0))  " + " + SUM(COALESCE(mr.interest_completed_derived, 0)) "
+                    + " + SUM(COALESCE(mr.fee_charges_completed_derived, 0)) "
                     + "+  SUM(COALESCE(mr.penalty_charges_completed_derived, 0))) > 0";
-            BigDecimal bigDecimal = this.jdbcTemplate.queryForObject(sql, BigDecimal.class,
-                    new Object[] { loanId, sqlGenerator.currentDate() }); // NOSONAR
+            BigDecimal bigDecimal = this.jdbcTemplate.queryForObject(sql, BigDecimal.class, new Object[] { loanId }); // NOSONAR
             return new PaidInAdvanceData(bigDecimal);
         } catch (DataAccessException e) {
-            // TODO Auto-generated catch block
             return new PaidInAdvanceData(new BigDecimal(0));
         }
     }
