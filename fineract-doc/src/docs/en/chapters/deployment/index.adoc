@@ -8,6 +8,8 @@ include::local.adoc[leveloffset=+1]
 
 include::appserver.adoc[leveloffset=+1]
 
+include::instance-type.adoc[leveloffset=+1]
+
 include::kubernetes.adoc[leveloffset=+1]
 
 include::aws.adoc[leveloffset=+1]

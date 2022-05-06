@@ -1,0 +1,177 @@
+= Fineract Instance types
+
+In cases where Fineract has to deal with high load, it can cause a performance problem for a single Fineract instance.
+To overcome this problem, Fineract instances can be started in different instance types for better scalability and performance in a multi-instance environment:
+
+.Fineract instance types
+* Read instance
+* Write instance
+* Batch instance
+
+Each instance type comes with different restrictions. The specifics can be found in the table below.
+
+.Instance types
+|===
+^| ^| Read instance ^| Write instance ^| Batch instance
+
+| Using only read-only DB connection | Yes | No | No
+| Batch jobs are automatically scheduled or startable via API | No | No | Yes
+| Can receive events (business events, hook template events) | No | Yes | No
+| Can send events (business events, hook template events) | No | Yes | Yes
+| Read APIs supported | Yes | Yes | No
+| Write APIs supported | No | Yes | No
+| Batch job APIs supported | No | No | Yes
+| Liquibase migration initiated upon startup | No | Yes |No
+|===
+
+== Configuring instance types in single instance setup
+
+If Fineract is running as a single instance, then all of the 3 instance types should be enabled. In this case, there is no need to worry about the configuration, because this is the default behavior.
+
+[ditaa, target="single-instance-diagram"]
+----
+    +---------+
+    |         |
+    |  Read   |
+    |  Write  |
+    |  Batch  |
+    |         |
+    +----+----+
+         |
+         v
+ +----------------+
+ |{s}             |
+ |  Fineract DB   |
+ |                |
+ +----------------+
+----
+
+== Configuring instance types in multi-instance setup
+
+A common solution to dealing with the high load is to deploy 1 write and 1 batch instances and deploy multiple read instances with read replicas of the Fineract database.
+In this case, the write instance and the database will be freed from part of the load, because read request will use the separated read instance and its read replica database.
+
+[ditaa, target="multiple-read-instances-diagram"]
+----
+    +---------+      +---------+     +---------+         +---------+
+    |         |      |         |     |         |         |         |
+    |         |      |         |     |         |         |         |
+    |  Write  |      |  Batch  |     |  Read   |  [...]  |  Read   |
+    |         |      |         |     |         |         |         |
+    |         |      |         |     |         |         |         |
+    +----+----+      +----+----+     +----+----+         +----+----+
+         |                |               |                   |
+         +-------+--------+               |                   |
+                 |                        |                   |
+                 v                        v                   v
+         +----------------+        +-------------+     +-------------+
+         |{s}             |        |{s}          |     |{s}          |
+         |  Fineract DB   +-=----->+    Read     |[...]|    Read     |
+         |                |        |   Replica   |     |   Replica   |
+         +----------------+        +-------------+     +-------------+
+                 |                                           ^
+                 |                                           |
+                 +-----=-------------------------------------+
+----
+
+Also a common scenario when Close of Business jobs are running and Fineract has to deal with a high amount of processes.
+(In a future release) Fineract (will be) is able to run this CoB jobs in batches.
+In multi-instances environment these CoB jobs can run on multiple batch instances and they don't have any impact on the performance of the read and write processes.
+The best practice is to deploy 1 master batch instance and multiple worker batch instances.
+
+[ditaa, target="multiple-batch-instances-diagram"]
+----
+    +---------+      +---------+     +---------+       +---------+         +---------+
+    |         |      |         |     |         |       |         |         |         |
+    |         |      |         |     |         |       |         |         |         |
+    |  Read   |      |  Write  |     |  Batch  |       |  Batch  |  [...]  |  Batch  |
+    |         |      |         |     | Manager |       |  Worker |         |  Worker |
+    |         |      |         |     |         |       |         |         |         |
+    +----+----+      +----+----+     +----+----+       +----+----+         +----+----+
+         |                |               |                 |                   |
+         +----------------+---------------+-----------------+-------------------+
+                                          |
+                                          v
+                                  +----------------+
+                                  |{s}             |
+                                  |  Fineract DB   |
+                                  |                |
+                                  +----------------+
+----
+These soultions can be mixed with each other, based on the load of the Fineract deployment.
+
+== Configuring instance type via environment variables
+
+The Fineract instance type is configurable via environment variables for the following 3 values:
+
+.Environment variables
+|===
+^| Instance type ^| Environment variable
+
+| Read instance | FINERACT_READ_MODE_ENABLED
+| Write instance | FINERACT_WRITE_MODE_ENABLED
+| Batch instance | FINERACT_BATCH_MODE_ENABLED
+|===
+
+The environment variable values are booleans (true/false). The Fineract instance can be configured in any combination of these instance types, although if all 3 configurations are false, startup will fail. The default value for all 3 values is true.
+
+The configured Fineract instance types are easily accessible via a single Spring bean, named `FineractProperties.FineractModeProperties` that has 4 methods: `isReadMode()`, `isWriteMode()`, `isBatchMode()`, `isReadOnlyMode()`
+
+== Liquibase Database Migration
+
+Liquibase data migration is allowed only for write instances
+
+== APIs
+
+=== Read APIs are allowed only for read and write instances
+
+A Fineract instance is ONLY able to serve read API calls when it’s configured as a read or write instance. In batch instance mode, it won’t serve read API calls.
+If it’s a read or write instance, the read APIs will be served.
+If it’s a batch instance, the read APIs won't be served and a proper HTTP status code will be returned.
+The distinction whether something is a read API can be decided based on the HTTP request method. If it’s a GET, we can assume it’s a read call.
+
+=== Write APIs are allowed only for write instances
+
+A Fineract instance is ONLY able to serve write API calls when it’s configured as a write instance. In read or batch instance mode, it won't serve write API calls.
+If the write APIs won't be served and a proper HTTP status code will be returned.
+If it’s a write instance, the write APIs will be served except the ones related to batch jobs.
+The distinction whether something is a write API can be decided based on the HTTP request method. If it’s non-GET, we can assume it’s a write call. Also, the write APIs related to batch jobs (starting/stopping jobs) will not be served either.
+
+=== Batch job APIs are allowed only for batch instances
+
+A Fineract instance is ONLY able to serve batch API calls when it’s configured as a batch instance. In read or write instance mode, it won’t serve batch API calls.
+If the batch APIs won't be served and and a proper HTTP status code will be returned.
+If it’s a batch instance, the batch APIs will be served.
+
+== Batch jobs
+
+=== Batch job scheduling is allowed only for batch instances
+
+Batch jobs are scheduled only if the Fineract instance running as a batch instance
+
+
+== Read-only instance type restrictions
+
+If the read mode is enabled, but the write mode and batch mode are disabled, Fineract instance runs in read-only mode.
+
+=== Events are disabled for read-only instances
+
+When a Fineract instance is running in read-only mode, all event receiving/sending will be disabled.
+
+=== Read-only tenant connection support
+
+With read separation, there’s a possibility to use read-only database connections for read-only instances.
+If the instance is read-only , the DataSource connection used for the tenant will be read-only.
+If the instance is read-only and the configuration for the read-only datasource is not set, the application startup will fail.
+
+== Batch-only instance type restrictions
+
+If the batch mode is enabled, but the read mode and write mode are disabled, Fineract instance runs in batch-only mode.
+
+=== Receiving events is disabled for batch-only instances
+
+When a Fineract instance is running as batch, event receiving will be disabled while sending events will be still possible since the batch jobs are potentially generating business events.
+
+
+
+
