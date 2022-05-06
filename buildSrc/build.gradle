@@ -33,6 +33,7 @@ repositories {
 }
 
 dependencies {
+    implementation 'com.sun.activation:jakarta.activation'
     implementation 'com.sun.mail:jakarta.mail'
     implementation 'org.freemarker:freemarker'
     implementation 'org.tmatesoft.svnkit:svnkit'
