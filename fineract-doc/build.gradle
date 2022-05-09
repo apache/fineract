@@ -57,7 +57,7 @@ asciidoctor {
     }
     outputDir 'build/docs/html'
 
-    dependsOn ':fineract-client:buildAsciidoc'
+    dependsOn(':fineract-client:clean', ':fineract-client:buildAsciidoc')
 }
 
 // asciidoctorEpub {
@@ -92,11 +92,11 @@ asciidoctorPdf {
     //     }
     // }
     // fontsDir "$projectDir/src/resources/fonts"
-    dependsOn ':fineract-client:buildAsciidoc'
+    dependsOn(':fineract-client:clean', ':fineract-client:buildAsciidoc')
 }
 
 task doc(type: Zip) {
-    dependsOn asciidoctor, asciidoctorPdf
+    dependsOn(asciidoctor, asciidoctorPdf)
 
     into("fineract-${project.version}/html") {
         from("$buildDir/docs/html") {

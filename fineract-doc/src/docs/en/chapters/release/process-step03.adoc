@@ -24,14 +24,14 @@ You do not need to ask committers to hold off any commits until you have branche
 
 1. Create a new release branch with name "$Version"
 +
-[source,bash,subs="attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 % git checkout -b {revnumber}
 ----
 
 1. Push new branch to Apache Fineract repository
 +
-[source,bash,subs="attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 % git push origin {revnumber}
 ----
@@ -42,15 +42,15 @@ You do not need to ask committers to hold off any commits until you have branche
 +
 [source,text]
 ----
-include::{rootdir}/buildSrc/src/main/resources/email/release.step03.branch.subject.ftl[]
+include::{rootdir}/buildSrc/src/main/resources/email/release.step03.branch.subject.ftl[lines=21..]
 
-include::{rootdir}/buildSrc/src/main/resources/email/release.step03.branch.message.ftl[]
+include::{rootdir}/buildSrc/src/main/resources/email/release.step03.branch.message.ftl[lines=21..]
 ----
 
 == Gradle Task
 
 .Command
-[source,bash,subs="attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 % ./gradlew fineractReleaseStep3 -Pfineract.release.date="Monday, May 10, 2022" -Pfineract.release.version={revnumber}
 ----

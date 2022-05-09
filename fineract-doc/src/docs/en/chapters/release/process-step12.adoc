@@ -4,7 +4,7 @@
 
 In order to release you have to checkout release repository located on https://dist.apache.org/repos/dist/release/fineract and add release artifacts there.
 
-[source,bash,subs="attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 % svn co https://dist.apache.org/repos/dist/release/fineract fineract-release
 % mkdir fineract-release/{revnumber}/
@@ -18,7 +18,7 @@ You will now get an automated email from the Apache Reporter Service (no-reply@r
 == Gradle Task
 
 .Command
-[source,bash,subs="attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 % ./gradlew fineractReleaseStep12 -Pfineract.release.version={revnumber}
 ----

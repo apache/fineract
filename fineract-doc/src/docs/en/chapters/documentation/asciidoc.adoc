@@ -1,9 +1,3 @@
-= Asciidoc
-
-See: https://asciidoctor.org/
-
-TBD
-
-include::asciidoc-tutorial.adoc[leveloffset=+1]
+= AsciiDoc
 
 include::asciidoc-cheatsheet.adoc[leveloffset=+1]

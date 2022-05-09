@@ -8,8 +8,8 @@
 :pdf-version: 1.7
 :page-layout: base
 :toc-title: Table of Contents
-:toc: macro
-:toclevels: 4
+:toc: left
+:toclevels: 2
 :icons: font
 :source-highlighter: coderay
 :experimental:
