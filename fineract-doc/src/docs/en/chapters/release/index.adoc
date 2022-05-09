@@ -3,7 +3,7 @@
 https://cwiki.apache.org/confluence/x/DRwIB[How to Release Apache Fineract] documents the process how we make the source code that is available here in this Git repository into a binary release tar.gz available on http://fineract.apache.org.
 
 .Release Schedule
-[plantuml, format=svg]
+[plantuml, format=svg, width=100%]
 ----
 include::{diagramsdir}/release-schedule.puml[]
 ----

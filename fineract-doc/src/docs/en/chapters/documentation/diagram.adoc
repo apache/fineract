@@ -1,0 +1,13 @@
+= Diagrams
+
+TBD
+
+NOTE: https://docs.asciidoctor.org/diagram-extension/latest
+
+include::diagram-plantuml-cheatsheet.adoc[leveloffset=+1]
+
+include::diagram-c4-cheatsheet.adoc[leveloffset=+1]
+
+include::diagram-archimate-cheatsheet.adoc[leveloffset=+1]
+
+include::diagram-vega-cheatsheet.adoc[leveloffset=+1]

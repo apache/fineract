@@ -34,5 +34,5 @@ Creating Apache Fineract releases was a very manual and tedious procedure before
 
 [source,groovy]
 ----
-include::{rootdir}/buildSrc/src/main/groovy/org.apache.fineract.release.gradle[lines=32..105]
+include::{rootdir}/buildSrc/src/main/groovy/org.apache.fineract.release.gradle[lines=23..89]
 ----

@@ -4,7 +4,7 @@
 
 As discussed in https://issues.apache.org/jira/browse/FINERACT-1154[FINERACT-1154], now that everything is final, please do the following to remove the release branch (and just keep the tag), and make sure that everything on the release tag is merged to develop and that e.g. git describe works:
 
-[source,bash,subs="attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 % git checkout develop
 % git branch -D {revnumber}
@@ -21,7 +21,7 @@ As discussed in https://issues.apache.org/jira/browse/FINERACT-1154[FINERACT-115
 == Gradle Task
 
 .Command
-[source,bash,subs="attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 % ./gradlew fineractReleaseStep13 -Pfineract.release.version={revnumber}
 ----

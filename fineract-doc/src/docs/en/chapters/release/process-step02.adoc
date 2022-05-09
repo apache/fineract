@@ -10,13 +10,13 @@ project = FINERACT and resolution = fixed and fixVersion is empty
 ----
 
 Move all unresolved JIRA issues which have this release as Fix Version to the next release
-[source,text,subs="attributes"]
+[source,text,subs="attributes+,+macros"]
 ----
 project = FINERACT and fixVersion = {revnumber} and status not in ( Resolved, Done, Accepted, Closed )
 ----
 
 You can also run the following query to make sure that the issues fixed for the to-be-released version look accurate:
-[source,text,subs="attributes"]
+[source,text,subs="attributes+,+macros"]
 ----
 project = FINERACT and fixVersion = {revnumber}
 ----
@@ -26,7 +26,7 @@ Finally, check out the output of the JIRA release note tool to see which tickets
 == Gradle Task
 
 .Command
-[source,bash,subs="attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 % ./gradlew fineractReleaseStep2 -Pfineract.release.version={revnumber}
 ----

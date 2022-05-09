@@ -18,7 +18,7 @@ Make sure release artifacts are hosted at https://dist.apache.org/repos/dist/dev
 == Gradle Task
 
 .Command
-[source,bash,subs="attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 % ./gradlew fineractReleaseStep9 -Pfineract.release.version={revnumber}
 ----
