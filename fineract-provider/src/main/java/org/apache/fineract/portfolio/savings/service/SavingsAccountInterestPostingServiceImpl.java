@@ -108,7 +108,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                         newPostingTransaction = SavingsAccountTransactionData.interestPosting(savingsAccountData,
                                 interestPostingTransactionDate, interestEarnedToBePostedForPeriod, interestPostingPeriod.isUserPosting());
                     } else {
-                        newPostingTransaction = SavingsAccountTransactionData.interestPosting(savingsAccountData,
+                        newPostingTransaction = SavingsAccountTransactionData.overdraftInterest(savingsAccountData,
                                 interestPostingTransactionDate, interestEarnedToBePostedForPeriod.negated(),
                                 interestPostingPeriod.isUserPosting());
                     }
@@ -250,7 +250,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
         final List<PostingPeriod> allPostingPeriods = new ArrayList<>();
 
         Money periodStartingBalance;
-        if (savingsAccountData.getStartInterestCalculationDate() != null) {
+        if (savingsAccountData.getStartInterestCalculationDate() != null  && !savingsAccountData.getStartInterestCalculationDate().equals(savingsAccountData.getActivationLocalDate())) {
             final SavingsAccountTransactionData transaction = retrieveLastTransactions(savingsAccountData);
 
             if (transaction == null) {
@@ -361,7 +361,8 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
     }
 
     private BigDecimal getEffectiveOverdraftInterestRateAsFraction(MathContext mc, final SavingsAccountData savingsAccountData) {
-        return savingsAccountData.getNominalAnnualInterestRateOverdraft().divide(BigDecimal.valueOf(100L), mc);
+        return savingsAccountData.getNominalAnnualInterestRateOverdraft() != null ? savingsAccountData.getNominalAnnualInterestRateOverdraft().divide(BigDecimal.valueOf(100L), mc)
+                : BigDecimal.ZERO;
     }
 
     @SuppressWarnings("unused")

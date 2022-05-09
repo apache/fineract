@@ -90,6 +90,7 @@ public class SavingsProductHelper {
     private String maxAllowedLienLimit = null;
     private Boolean withHoldTax = false;
     private String taxGroupId = null;
+    private String nominalAnnualInterestRateOverdraft=null;
     private boolean isDormancyTrackingActive = false;
     private String daysToInactive = null;
     private String daysToDormancy = null;
@@ -134,6 +135,7 @@ public class SavingsProductHelper {
         map.put("lienAllowed", this.lienAllowed);
         map.put("maxAllowedLienLimit", this.maxAllowedLienLimit);
         map.put("withHoldTax", this.withHoldTax.toString());
+        map.put("nominalAnnualInterestRateOverdraft" ,this.nominalAnnualInterestRateOverdraft);
 
         if (withHoldTax) {
             map.put("taxGroupId", taxGroupId);
@@ -239,6 +241,12 @@ public class SavingsProductHelper {
     public SavingsProductHelper withOverDraft(final String overdraftLimit) {
         this.allowOverdraft = "true";
         this.overdraftLimit = overdraftLimit;
+        return this;
+    }
+    public SavingsProductHelper withOverDraftRate(final String overdraftLimit,String nominalAnnualInterestRateOverdraft) {
+        this.allowOverdraft = "true";
+        this.overdraftLimit = overdraftLimit;
+        this.nominalAnnualInterestRateOverdraft=nominalAnnualInterestRateOverdraft;
         return this;
     }
 
