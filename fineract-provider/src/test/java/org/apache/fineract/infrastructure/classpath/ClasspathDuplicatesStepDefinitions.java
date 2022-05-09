@@ -35,10 +35,13 @@ public class ClasspathDuplicatesStepDefinitions implements En {
     private ClassGraph classGraph;
 
     public ClasspathDuplicatesStepDefinitions() {
+        // tag::given[]
         Given("A class graph", () -> {
             this.classGraph = new ClassGraph();
         });
+        // end::given[]
 
+        // tag::when[]
         When("The user scans the class graph", () -> {
             // nothing to do here
             try (ScanResult scanResult = this.classGraph.scan()) {
@@ -61,12 +64,15 @@ public class ClasspathDuplicatesStepDefinitions implements En {
                 }
             }
         });
+        // end::when[]
 
+        // tag::then[]
         Then("There should be no duplicates", () -> {
             if (!duplicates.isEmpty()) {
                 throw new AssertionFailedError(duplicates.size() + " Classpath duplicates detected:\n" + duplicates);
             }
         });
+        // end::then[]
     }
 
     private boolean skipJAR(String jarPath) {

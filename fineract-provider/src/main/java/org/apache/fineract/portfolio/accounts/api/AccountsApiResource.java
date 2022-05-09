@@ -200,7 +200,7 @@ public class AccountsApiResource {
             + "requestedDate is requsted date of shares redeem\n" + "\n" + "requestedShares is number of shares to be redeemed\n\n"
             + "Mandatory Fields: dateFormat,locale,requestedDate,requestedShares\n\n"
             + "Showing request/response for 'Reject additional shares request on a share account'\n\n"
-            + "For more info visit this link - https://demo.fineract.dev/fineract-provider/legacy-docs/apiLive.htm#shareaccounts")
+            + "For more info visit this link - https://fineract.apache.org/legacy-docs/apiLive.htm#shareaccounts")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = AccountsApiResourceSwagger.PostAccountsTypeAccountIdRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountsApiResourceSwagger.PostAccountsTypeAccountIdResponse.class))) })

@@ -4,7 +4,7 @@
 
 Next, you create a git tag from the HEAD of the release's git branch.
 
-[source,bash,subs="attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 % git checkout {revnumber}
 % ./gradlew clean integrationTests <1>
@@ -18,7 +18,7 @@ CAUTION: It is important to create so called annotated tags (vs. lightweight) fo
 == Gradle Task
 
 .Command
-[source,bash,subs="attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 % ./gradlew fineractReleaseStep5 -Pfineract.release.version={revnumber}
 ----

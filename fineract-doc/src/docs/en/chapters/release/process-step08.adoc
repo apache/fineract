@@ -15,7 +15,7 @@ Finally create a directory with release name ({revnumber} in this example) in ht
 
 Upload binary and source archives to ASF's distribution dev (staging) area:
 
-[source,bash,subs="attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 % svn co https://dist.apache.org/repos/dist/dev/fineract/ fineract-dist-dev
 % mkdir fineract-dist-dev/{revnumber}
@@ -28,7 +28,7 @@ NOTE: You will need your ASF Committer credentials to be able to access the Subv
 == Gradle Task
 
 .Command
-[source,bash,subs="attributes"]
+[source,bash,subs="attributes+,+macros"]
 ----
 % ./gradlew fineractReleaseStep8 -Pfineract.release.version={revnumber}
 ----

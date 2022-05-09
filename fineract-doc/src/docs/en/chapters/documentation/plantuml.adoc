@@ -1,9 +1,0 @@
-= PlantUML
-
-See: https://plantuml.com/
-
-TBD
-
-include::plantuml-tutorial.adoc[leveloffset=+1]
-
-include::plantuml-cheatsheet.adoc[leveloffset=+1]

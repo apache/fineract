@@ -63,4 +63,4 @@ curl --location --request GET \
 
 ----
 
-NOTE: See also https://demo.fineract.dev/fineract-provider/legacy-docs/apiLive.htm#authentication_oauth
+NOTE: See also https://fineract.apache.org/legacy-docs/apiLive.htm#authentication_oauth
