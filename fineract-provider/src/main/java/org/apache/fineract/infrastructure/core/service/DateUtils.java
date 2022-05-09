@@ -37,6 +37,9 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 
 public final class DateUtils {
 
+    public static final String DEFAULT_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    public static final DateTimeFormatter DEFAULT_DATETIME_FORMATER = DateTimeFormatter.ofPattern(DEFAULT_DATETIME_FORMAT);
+
     private DateUtils() {
 
     }

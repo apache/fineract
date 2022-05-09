@@ -23,6 +23,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -37,8 +40,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -59,6 +66,7 @@ public final class Utils {
 
     private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
     private static final SecureRandom random = new SecureRandom();
+    private static final Gson gson = new Gson();
 
     public static final String TENANT_PARAM_NAME = "tenantIdentifier";
     public static final String DEFAULT_TENANT = "default";
@@ -157,6 +165,20 @@ public final class Utils {
         return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
     }
 
+    public static List<String> performServerGetList(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String getURL, final String jsonAttributeToGetBack) {
+        final JsonPath jsonPath = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).jsonPath();
+        List<String> items = jsonPath.getList(jsonAttributeToGetBack);
+        return items;
+    }
+
+    public static JsonElement performServerGetArray(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String getURL, final int position, final String jsonAttributeToGetBack) {
+        final JsonPath jsonPath = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).jsonPath();
+        List<Map<String, Object>> items = jsonPath.getList("$");
+        return gson.fromJson(((ArrayList) items.get(position).get(jsonAttributeToGetBack)).toString(), JsonArray.class);
+    }
+
     public static String performGetTextResponse(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String getURL) {
         return given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
@@ -251,6 +273,12 @@ public final class Utils {
         return dateFormat.format(dateToBeConvert.getTime());
     }
 
+    public static String convertDateToURLFormat(final Calendar dateToBeConvert, final String dateGormat) {
+        DateFormat dateFormat = new SimpleDateFormat(dateGormat);
+        dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
+        return dateFormat.format(dateToBeConvert.getTime());
+    }
+
     public static LocalDate getLocalDateOfTenant() {
         LocalDate today = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
         final ZoneId zone = ZoneId.of(TENANT_TIME_ZONE);
@@ -262,6 +290,24 @@ public final class Utils {
 
     public static TimeZone getTimeZoneOfTenant() {
         return TimeZone.getTimeZone(TENANT_TIME_ZONE);
+    }
+
+    public static Date convertJsonElementAsDate(JsonElement jsonElement) {
+        if (jsonElement.isJsonArray()) {
+            JsonArray jsonArray = jsonElement.getAsJsonArray();
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.YEAR, jsonArray.get(0).getAsInt());
+            calendar.set(Calendar.MONTH, jsonArray.get(1).getAsInt() - 1);
+            calendar.set(Calendar.DATE, jsonArray.get(2).getAsInt());
+            // If the Array includes Time
+            if (jsonArray.size() > 3) {
+                calendar.set(Calendar.HOUR, jsonArray.get(3).getAsInt());
+                calendar.set(Calendar.MINUTE, jsonArray.get(4).getAsInt());
+                calendar.set(Calendar.SECOND, jsonArray.get(5).getAsInt());
+            }
+            return calendar.getTime();
+        }
+        return null;
     }
 
     public static String performServerTemplatePost(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
