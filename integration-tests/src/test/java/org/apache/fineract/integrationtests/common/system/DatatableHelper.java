@@ -21,9 +21,12 @@ package org.apache.fineract.integrationtests.common.system;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -46,6 +49,33 @@ public class DatatableHelper {
     public String createDatatable(final String apptableName, final boolean multiRow) {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, DATATABLE_URL + "?" + Utils.TENANT_IDENTIFIER,
                 getTestDatatableAsJSON(apptableName, multiRow), "resourceIdentifier");
+    }
+
+    public Integer createDatatableEntry(final String apptableName, final String datatableName, final Integer apptableId,
+            final boolean genericResultSet, final String dateFormat) {
+        return Utils.performServerPost(
+                this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + apptableId + "?genericResultSet="
+                        + Boolean.toString(genericResultSet) + "&" + Utils.TENANT_IDENTIFIER,
+                getTestDatatableEntryAsJSON(dateFormat), "resourceId");
+    }
+
+    public String readDatatableEntry(final String datatableName, final Integer resourceId, final boolean genericResultset) {
+        return Utils.performServerGet(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + resourceId
+                + "?genericResultSet=" + String.valueOf(genericResultset) + "&" + Utils.TENANT_IDENTIFIER);
+    }
+
+    public List<String> readDatatableEntry(final String datatableName, final Integer resourceId, final boolean genericResultset,
+            final String jsonAttributeToGetBack) {
+        return Utils.performServerGetList(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + resourceId
+                + "?genericResultSet=" + String.valueOf(genericResultset) + "&" + Utils.TENANT_IDENTIFIER, jsonAttributeToGetBack);
+    }
+
+    public Date readDatatableEntry(final String datatableName, final Integer resourceId, final boolean genericResultset, final int position,
+            final String jsonAttributeToGetBack) {
+        final JsonElement jsonElement = Utils.performServerGetArray(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName
+                + "/" + resourceId + "?genericResultSet=" + String.valueOf(genericResultset) + "&" + Utils.TENANT_IDENTIFIER, position,
+                jsonAttributeToGetBack);
+        return Utils.convertJsonElementAsDate(jsonElement);
     }
 
     public String deleteDatatable(final String datatableName) {
@@ -79,6 +109,19 @@ public class DatatableHelper {
         addDatatableColumns(datatableColumnsList, "Time of Visit", "DateTime", false, null);
         addDatatableColumns(datatableColumnsList, "Date of Approval", "Date", false, null);
         map.put("columns", datatableColumnsList);
+        String requestJsonString = new Gson().toJson(map);
+        LOG.info("map : {}", requestJsonString);
+        return requestJsonString;
+    }
+
+    public static String getTestDatatableEntryAsJSON(final String dateFormat) {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("Spouse Name", Utils.randomNameGenerator("Spouse_Name_", 5));
+        map.put("Number of Dependents", Utils.randomNumberGenerator(1));
+        map.put("Date of Approval", Utils.convertDateToURLFormat(Calendar.getInstance(), dateFormat));
+        map.put("locale", "en");
+        map.put("dateFormat", dateFormat);
+
         String requestJsonString = new Gson().toJson(map);
         LOG.info("map : {}", requestJsonString);
         return requestJsonString;

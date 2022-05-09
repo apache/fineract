@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseIndependentQueryService;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
@@ -32,8 +33,6 @@ import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeader
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnValueData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -47,7 +46,6 @@ public class GenericDataServiceImpl implements GenericDataService {
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
     private final DatabaseIndependentQueryService databaseIndependentQueryService;
-    private static final Logger LOG = LoggerFactory.getLogger(GenericDataServiceImpl.class);
 
     @Autowired
     public GenericDataServiceImpl(final RoutingDataSource dataSource, final JdbcTemplate jdbcTemplate,
@@ -169,9 +167,10 @@ public class GenericDataServiceImpl implements GenericDataService {
                             writer.append(
                                     "[" + localDate.getYear() + ", " + localDate.getMonthValue() + ", " + localDate.getDayOfMonth() + "]");
                         } else if (currColType.equals("DATETIME")) {
-                            final LocalDateTime localDateTime = LocalDateTime.parse(currVal);
+                            final LocalDateTime localDateTime = LocalDateTime.parse(formatDateTimeValue(currVal),
+                                    DateUtils.DEFAULT_DATETIME_FORMATER);
                             writer.append("[" + localDateTime.getYear() + ", " + localDateTime.getMonthValue() + ", "
-                                    + localDateTime.getDayOfMonth() + " " + localDateTime.getHour() + ", " + localDateTime.getMinute()
+                                    + localDateTime.getDayOfMonth() + ", " + localDateTime.getHour() + ", " + localDateTime.getMinute()
                                     + ", " + localDateTime.getSecond() + ", " + localDateTime.get(ChronoField.MILLI_OF_SECOND) + "]");
                         } else {
                             writer.append(doubleQuote + replace(currVal, doubleQuote, slashDoubleQuote) + doubleQuote);
@@ -261,5 +260,15 @@ public class GenericDataServiceImpl implements GenericDataService {
         } catch (IllegalArgumentException e) {
             throw new DatatableNotFoundException(datatable);
         }
+    }
+
+    private String formatDateTimeValue(String dateTimeValue) {
+        if (dateTimeValue.length() > 19) {
+            dateTimeValue = dateTimeValue.substring(0, 19);
+        }
+        if (dateTimeValue.contains("T")) {
+            dateTimeValue = dateTimeValue.replace("T", " ");
+        }
+        return dateTimeValue;
     }
 }
