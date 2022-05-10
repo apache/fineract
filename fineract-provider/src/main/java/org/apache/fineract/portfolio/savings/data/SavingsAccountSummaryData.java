@@ -78,7 +78,7 @@ public class SavingsAccountSummaryData implements Serializable {
         this.interestNotPosted = interestNotPosted;
         this.lastInterestCalculationDate = lastInterestCalculationDate;
         this.availableBalance = availableBalance;
-        this.interestPostedTillDate = interestPostedTillDate;
+        this.interestPostedTillDate = interestPostedTillDate == null ? lastInterestCalculationDate : interestPostedTillDate;
     }
 
     public void setPrevInterestPostedTillDate(LocalDate interestPostedTillDate) {
