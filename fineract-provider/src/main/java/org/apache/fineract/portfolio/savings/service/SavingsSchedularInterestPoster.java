@@ -359,7 +359,7 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
         query.append("transaction_type_enum, transaction_date, amount, balance_end_date_derived,");
         query.append("balance_number_of_days_derived, running_balance_derived, cumulative_balance_derived,");
         query.append("created_date, appuser_id, is_manual, is_loan_disbursement, ref_no) VALUES ");
-        query.append("(?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)");
+        query.append("(?, ?, false, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, false, ?)");
         return query.toString();
 
     }
