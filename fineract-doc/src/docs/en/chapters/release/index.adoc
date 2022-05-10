@@ -11,3 +11,5 @@ include::{diagramsdir}/release-schedule.puml[]
 include::configuration.adoc[leveloffset=+1]
 
 include::process.adoc[leveloffset=+1]
+
+include::publish.adoc[leveloffset=+1]

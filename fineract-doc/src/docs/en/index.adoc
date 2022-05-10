@@ -39,15 +39,15 @@ include::chapters/development/index.adoc[leveloffset=+1]
 
 include::chapters/security/index.adoc[leveloffset=+1]
 
-include::{rootdir}/fineract-client/build/generated/asciidoc/index.adoc[leveloffset=+1]
-
-include::chapters/sdk/index.adoc[leveloffset=+1]
-
 include::chapters/testing/index.adoc[leveloffset=+1]
 
 include::chapters/documentation/index.adoc[leveloffset=+1]
 
 include::chapters/release/index.adoc[leveloffset=+1]
+
+include::chapters/sdk/index.adoc[leveloffset=+1]
+
+include::{rootdir}/fineract-client/build/generated/asciidoc/index.adoc[leveloffset=+1]
 
 include::faq.adoc[leveloffset=+1]
 

@@ -51,11 +51,11 @@ compileJava.doLast {
 import org.apache.tools.ant.filters.ReplaceTokens
 
 task prepareInputYaml {
-    outputs.file('config/swagger/fineract-input.yaml')
+    outputs.file("${buildDir}/tmp/swagger/fineract-input.yaml")
 
     doLast {
         copy {
-            from file('config/swagger/fineract-input.yaml.template')
+            from file("${projectDir}/config/swagger/fineract-input.yaml.template")
             into file("${buildDir}/tmp/swagger")
             rename { String filename -> return 'fineract-input.yaml' }
             filter(ReplaceTokens, tokens: [VERSION: "${project.version}".toString()])
@@ -323,6 +323,7 @@ jar.dependsOn resolve
 test.dependsOn resolve
 checkstyleMain.dependsOn resolve
 checkstyleTest.dependsOn resolve
+rat.dependsOn prepareInputYaml
 spotbugsTest.dependsOn resolve
 compileTestJava.dependsOn ':fineract-client:processResources'
 bootJarMainClassName.dependsOn resolve
