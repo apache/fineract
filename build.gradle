@@ -96,8 +96,7 @@ allprojects  {
 
     jgitver {
         strategy 'PATTERN'
-        versionPattern '${M}.${m}.${p}-${meta.GIT_SHA1_8}'
-        // versionPattern '${v}'
+        versionPattern ( project.hasProperty('fineract.release.version') ? '${v}' : '${M}.${m}.${p}-${meta.GIT_SHA1_8}' )
     }
 
     repositories {
@@ -265,6 +264,7 @@ configure(project.fineractJavaProjects) {
     apply plugin: 'se.thinkcode.cucumber-runner'
     apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.dependencies.gradle"
 
+    group = 'org.apache.fineract'
 
     /* define the valid syntax level for source files */
     sourceCompatibility = JavaVersion.VERSION_17
@@ -590,10 +590,15 @@ configure(project.fineractJavaProjects) {
 
 configure(project.fineractPublishProjects) {
     apply plugin: 'maven-publish'
+    apply plugin: 'signing'
 
     publishing {
         publications {
             mavenJava(MavenPublication) {
+                groupId 'org.apache.fineract'
+                artifactId project.name
+                version "${project.version}-SNAPSHOT"
+
                 from components.java
 
                 versionMapping {
@@ -606,7 +611,7 @@ configure(project.fineractPublishProjects) {
                 }
 
                 pom {
-                    name = 'Fineract'
+                    name = "Fineract: ${project.name}"
                     description = 'A secure, multi-tenanted microfinance platform'
                     url = 'https://fineract.apache.org'
                     licenses {
@@ -624,7 +629,23 @@ configure(project.fineractPublishProjects) {
             }
         }
 
-        // TODO FINERACT-1102: Actually use this to deploy to ASF (Apache Software Foundation) Nexus Maven Repository
+        repositories {
+            def releaseUrl = 'https://repository.apache.org/content/repositories/releases'
+            def stagingUrl = 'https://repository.apache.org/content/repositories/snapshots'
+
+            maven {
+                name 'apache'
+                url hasProperty('fineract.release.version') ? releaseUrl : stagingUrl
+                credentials {
+                    username "${findProperty('fineract.config.username')}"
+                    password "${findProperty('fineract.config.password')}"
+                }
+            }
+        }
+    }
+
+    signing {
+        sign publishing.publications.mavenJava
     }
 }
 
