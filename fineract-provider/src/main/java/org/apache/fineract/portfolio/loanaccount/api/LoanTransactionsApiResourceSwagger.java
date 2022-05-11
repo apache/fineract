@@ -133,6 +133,8 @@ final class LoanTransactionsApiResourceSwagger {
         public GetLoansType type;
         @Schema(example = "[2012, 5, 14]")
         public LocalDate date;
+        @Schema(example = "[2012, 5, 14]")
+        public LocalDate submittedOnDate;
         @Schema(example = "false")
         public Boolean manuallyReversed;
         public GetLoansCurrency currency;
@@ -146,6 +148,21 @@ final class LoanTransactionsApiResourceSwagger {
     public static final class PostLoansLoanIdTransactionsRequest {
 
         private PostLoansLoanIdTransactionsRequest() {}
+
+        @Schema(example = "en_GB")
+        public String locale;
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
+        @Schema(example = "[2012, 5, 25]")
+        public LocalDate transactionDate;
+        @Schema(example = "50000.00")
+        public Double transactionAmount;
+        @Schema(example = "An optional note about why your adjusting or changing the transaction.")
+        public String note;
+        @Schema(example = "3e7791ce-aa10-11ec-b909-0242ac120002")
+        public String externalId;
+        @Schema(example = "3")
+        public Integer paymentTypeId;
     }
 
     @Schema(description = "PostLoansLoanIdTransactionsResponse")
@@ -170,8 +187,8 @@ final class LoanTransactionsApiResourceSwagger {
         public String locale;
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
-        @Schema(example = "25 May 2012")
-        public String transactionDate;
+        @Schema(example = "[2012, 5, 25]")
+        public LocalDate transactionDate;
         @Schema(example = "50,000.00")
         public Double transactionAmount;
         @Schema(example = "An optional note about why your adjusting or changing the transaction.")

@@ -546,7 +546,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             createStandingInstruction(loan);
 
             postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
-
         }
 
         final Set<LoanCharge> loanCharges = loan.charges();
@@ -585,9 +584,17 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.LOAN_DISBURSAL,
                 constructEntityMap(BusinessEntity.LOAN, loan));
+
+        Long entityId = loan.getId();
+
+        // During a disbursement, the entityId should be the disbursement transaction id
+        if (!isAccountTransfer) {
+            entityId = loan.getLoanTransactions().get(loan.getLoanTransactions().size() - 1).getId();
+        }
+
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
-                .withEntityId(loan.getId()) //
+                .withEntityId(entityId) //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
                 .withGroupId(loan.getGroupId()) //

@@ -2109,7 +2109,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " (SUM(COALESCE(mr.principal_completed_derived, 0))  " + " + SUM(COALESCE(mr.interest_completed_derived, 0)) "
                     + " + SUM(COALESCE(mr.fee_charges_completed_derived, 0)) "
                     + "+  SUM(COALESCE(mr.penalty_charges_completed_derived, 0))) > 0";
-            BigDecimal bigDecimal = this.jdbcTemplate.queryForObject(sql, BigDecimal.class, new Object[] { loanId }); // NOSONAR
+            BigDecimal bigDecimal = this.jdbcTemplate.queryForObject(sql, BigDecimal.class, loanId); // NOSONAR
             return new PaidInAdvanceData(bigDecimal);
         } catch (DataAccessException e) {
             return new PaidInAdvanceData(new BigDecimal(0));

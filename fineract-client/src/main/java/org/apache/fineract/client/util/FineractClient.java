@@ -77,6 +77,7 @@ import org.apache.fineract.client.services.JournalEntriesApi;
 import org.apache.fineract.client.services.ListReportMailingJobHistoryApi;
 import org.apache.fineract.client.services.LoanChargesApi;
 import org.apache.fineract.client.services.LoanCollateralApi;
+import org.apache.fineract.client.services.LoanDisbursementDetailsApi;
 import org.apache.fineract.client.services.LoanProductsApi;
 import org.apache.fineract.client.services.LoanReschedulingApi;
 import org.apache.fineract.client.services.LoanTransactionsApi;
@@ -208,6 +209,7 @@ public final class FineractClient {
     public final LoanProductsApi loanProducts;
     public final LoanReschedulingApi loanSchedules;
     public final LoansApi loans;
+    public final LoanDisbursementDetailsApi loanDisbursementDetails;
     public final LoanTransactionsApi loanTransactions;
     public final MakerCheckerOr4EyeFunctionalityApi makerCheckers;
     public final MappingFinancialActivitiesToAccountsApi financialActivyAccountMappings;
@@ -318,6 +320,7 @@ public final class FineractClient {
         loanProducts = retrofit.create(LoanProductsApi.class);
         loanSchedules = retrofit.create(LoanReschedulingApi.class);
         loans = retrofit.create(LoansApi.class);
+        loanDisbursementDetails = retrofit.create(LoanDisbursementDetailsApi.class);
         loanTransactions = retrofit.create(LoanTransactionsApi.class);
         makerCheckers = retrofit.create(MakerCheckerOr4EyeFunctionalityApi.class);
         financialActivyAccountMappings = retrofit.create(MappingFinancialActivitiesToAccountsApi.class);

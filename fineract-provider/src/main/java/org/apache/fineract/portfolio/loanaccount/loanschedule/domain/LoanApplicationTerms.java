@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -53,12 +54,9 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanPreClosureInterestCa
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public final class LoanApplicationTerms {
-
-    private static final Logger LOG = LoggerFactory.getLogger(LoanApplicationTerms.class);
 
     private final ApplicationCurrency currency;
 
@@ -675,7 +673,7 @@ public final class LoanApplicationTerms {
             case INVALID:
             break;
             case WHOLE_TERM:
-                LOG.error("TODO Implement getPeriodEndDate for WHOLE_TERM");
+                log.error("TODO Implement getPeriodEndDate for WHOLE_TERM");
             break;
         }
         return dueRepaymentPeriodDate;
@@ -1080,7 +1078,7 @@ public final class LoanApplicationTerms {
                         periodicInterestRate = oneDayOfYearInterestRate.multiply(numberOfDaysInPeriod, mc);
                     break;
                     case WHOLE_TERM:
-                        LOG.error("TODO Implement periodicInterestRate for WHOLE_TERM");
+                        log.error("TODO Implement periodicInterestRate for WHOLE_TERM");
                     break;
                 }
             break;
