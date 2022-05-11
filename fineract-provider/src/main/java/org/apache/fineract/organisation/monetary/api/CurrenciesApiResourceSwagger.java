@@ -51,7 +51,7 @@ final class CurrenciesApiResourceSwagger {
 
         @Schema(example = "[\"KES\",\n" + "        \"BND\",\n" + "        \"LBP\",\n" + "        \"GHC\",\n" + "        \"USD\",\n"
                 + "        \"XOF\",\n" + "        \"AED\",\n" + "        \"AMD\"]")
-        public String currencies;
+        public String[] currencies;
 
     }
 
@@ -64,6 +64,6 @@ final class CurrenciesApiResourceSwagger {
 
         @Schema(example = "[\"KES\",\n" + "        \"BND\",\n" + "        \"LBP\",\n" + "        \"GHC\",\n" + "        \"USD\",\n"
                 + "        \"XOF\",\n" + "        \"AED\",\n" + "        \"AMD\"]")
-        public String currencies;
+        public String[] currencies;
     }
 }

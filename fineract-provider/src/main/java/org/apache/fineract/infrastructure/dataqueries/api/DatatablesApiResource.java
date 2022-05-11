@@ -306,7 +306,7 @@ public class DatatablesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update Entry in Data Table (One to One)", description = "Updates the row (if it exists) of the data table.")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PutDataTablesAppTableIdRequest.class)))
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = String.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PutDataTablesAppTableIdResponse.class))) })
     public String updateDatatableEntryOnetoOne(@PathParam("datatable") @Parameter(description = "datatable") final String datatable,
@@ -328,7 +328,7 @@ public class DatatablesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update Entry in Data Table (One to Many)", description = "Updates the row (if it exists) of the data table.")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PutDataTablesAppTableIdDatatableIdRequest.class)))
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = String.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PutDataTablesAppTableIdDatatableIdResponse.class))) })
     public String updateDatatableEntryOneToMany(@PathParam("datatable") @Parameter(description = "datatable") final String datatable,

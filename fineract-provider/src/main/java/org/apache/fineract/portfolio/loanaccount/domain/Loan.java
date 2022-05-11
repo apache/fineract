@@ -45,6 +45,7 @@ import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -1953,7 +1954,7 @@ public class Loan extends AbstractPersistableCustom {
 
     private void removeChargesByDisbursementID(Long id) {
         List<LoanCharge> tempCharges = new ArrayList<>();
-        for (LoanCharge charge : this.charges) {
+        for (LoanCharge charge : getCharges()) {
             LoanTrancheDisbursementCharge transCharge = charge.getTrancheDisbursementCharge();
             if (transCharge != null && id.equals(transCharge.getloanDisbursementDetails().getId())) {
                 tempCharges.add(charge);
@@ -1966,7 +1967,7 @@ public class Loan extends AbstractPersistableCustom {
 
     private List<Long> fetchLoanTrancheChargeIds() {
         List<Long> list = new ArrayList<>();
-        for (LoanCharge charge : this.charges) {
+        for (LoanCharge charge : getCharges()) {
             if (charge.isTrancheDisbursementCharge() && charge.isActive()) {
                 list.add(charge.getId());
             }
@@ -6887,4 +6888,15 @@ public class Loan extends AbstractPersistableCustom {
         this.netDisbursalAmount = adjustedAmount.subtract(this.deriveSumTotalOfChargesDueAtDisbursement());
     }
 
+    /**
+     * Get the charges.
+     *
+     * @return the charges
+     */
+    public Collection<LoanCharge> getCharges() {
+        // At the time of loan creation, "this.charges" will be null if no charges found in the request.
+        // In that case, fetch loan (before commit) will return null for the charges.
+        // Return empty set instead of null to avoid NPE
+        return Optional.ofNullable(this.charges).orElse(new HashSet<>());
+    }
 }

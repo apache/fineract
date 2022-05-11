@@ -26,6 +26,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import javax.ws.rs.HttpMethod;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.junit.jupiter.api.Assertions;
@@ -236,14 +237,52 @@ public final class BatchHelper {
         br.setMethod("POST");
         br.setReference(reference);
 
-        final String body = "{\"dateFormat\": \"dd MMMM yyyy\", \"locale\": \"en_GB\", \"clientId\": \"$.clientId\"," + "\"productId\": "
+        String body = "{\"dateFormat\": \"dd MMMM yyyy\", \"locale\": \"en_GB\", \"clientId\": \"$.clientId\"," + "\"productId\": "
                 + productId + ", \"principal\": \"10,000.00\", \"loanTermFrequency\": 10,"
                 + "\"loanTermFrequencyType\": 2, \"loanType\": \"individual\", \"numberOfRepayments\": 10,"
                 + "\"repaymentEvery\": 1, \"repaymentFrequencyType\": 2, \"interestRatePerPeriod\": 10,"
                 + "\"amortizationType\": 1, \"interestType\": 0, \"interestCalculationPeriodType\": 1,"
+                + "\"transactionProcessingStrategyId\": 1, \"expectedDisbursementDate\": \"10 Jun 2013\",";
+
+        if (clientCollateralId != null) {
+            body = body + "\"collateral\": [{\"clientCollateralId\": \"" + clientCollateralId.toString() + "\", \"quantity\": \"1\"}],";
+        }
+
+        body = body + "\"submittedOnDate\": \"10 Jun 2013\"}";
+
+        br.setBody(body);
+
+        return br;
+    }
+
+    /**
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.ApplyLoanCommandStrategy} request with
+     * given clientId and product id.
+     *
+     * @param requestId
+     *            the request id
+     * @param clientId
+     *            the client id
+     * @param productId
+     *            the product id
+     * @return {@link BatchRequest}
+     */
+    public static BatchRequest applyLoanRequestWithClientId(final Long requestId, final Integer clientId, final Integer productId) {
+
+        final BatchRequest br = new BatchRequest();
+
+        br.setRequestId(requestId);
+        br.setRelativeUrl("loans");
+        br.setMethod("POST");
+
+        String body = String.format("{\"dateFormat\": \"dd MMMM yyyy\", \"locale\": \"en_GB\", \"clientId\": %s, "
+                + "\"productId\": %s, \"principal\": \"10,000.00\", \"loanTermFrequency\": 10,"
+                + "\"loanTermFrequencyType\": 2, \"loanType\": \"individual\", \"numberOfRepayments\": 10,"
+                + "\"repaymentEvery\": 1, \"repaymentFrequencyType\": 2, \"interestRatePerPeriod\": 10,"
+                + "\"amortizationType\": 1, \"interestType\": 0, \"interestCalculationPeriodType\": 1,"
                 + "\"transactionProcessingStrategyId\": 1, \"expectedDisbursementDate\": \"10 Jun 2013\","
-                + "\"collateral\": [{\"clientCollateralId\": \"" + clientCollateralId.toString() + "\", \"quantity\": \"1\"}],"
-                + "\"submittedOnDate\": \"10 Jun 2013\"}";
+                + "\"submittedOnDate\": \"10 Jun 2013\"}", clientId, productId);
+
         br.setBody(body);
 
         return br;
@@ -418,5 +457,58 @@ public final class BatchHelper {
         final String CLIENT_URL = "/fineract-provider/api/v1/clients?externalId=" + externalId + "&" + Utils.TENANT_IDENTIFIER;
         final Integer responseRecords = Utils.performServerGet(requestSpec, responseSpec, CLIENT_URL, "totalFilteredRecords");
         Assertions.assertEquals((long) 0, (long) responseRecords, "No records found with given externalId");
+    }
+
+    /**
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.GetTransactionByIdCommandStrategy}
+     * request with given requestId and reference.
+     *
+     * @param requestId
+     *            the request id
+     * @param reference
+     *            the reference
+     * @return the {@link BatchRequest}
+     */
+    public static BatchRequest getTransactionByIdRequest(final Long requestId, final Long reference) {
+
+        final BatchRequest br = new BatchRequest();
+        String relativeUrl = "loans/$.loanId/transactions/$.resourceId";
+
+        br.setRequestId(requestId);
+        br.setRelativeUrl(relativeUrl);
+        br.setMethod(HttpMethod.GET);
+        br.setReference(reference);
+        br.setBody("{}");
+
+        return br;
+    }
+
+    /**
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.GetLoanByIdCommandStrategy} request with
+     * given requestId and reference.
+     *
+     * @param requestId
+     *            the request id
+     * @param reference
+     *            the reference
+     * @param queryParameter
+     *            the query parameters
+     * @return the {@link BatchRequest}
+     */
+    public static BatchRequest getLoanByIdRequest(final Long requestId, final Long reference, final String queryParameter) {
+
+        final BatchRequest br = new BatchRequest();
+        String relativeUrl = "loans/$.loanId";
+        if (queryParameter != null) {
+            relativeUrl = relativeUrl + "?" + queryParameter;
+        }
+
+        br.setRequestId(requestId);
+        br.setRelativeUrl(relativeUrl);
+        br.setMethod(HttpMethod.GET);
+        br.setReference(reference);
+        br.setBody("{}");
+
+        return br;
     }
 }
