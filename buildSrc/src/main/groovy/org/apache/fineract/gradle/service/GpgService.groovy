@@ -92,11 +92,13 @@ class GpgService {
     }
 
     void sign(FineractPluginExtension.FineractPluginGpgParams params) {
-        InputStream is = new FileInputStream(params.file)
+        params.files.findAll {
+            InputStream is = new FileInputStream(it)
 
-        BCPGOutputStream os = new BCPGOutputStream(new ArmoredOutputStream(new FileOutputStream(params.file + ".asc")))
-        sign(is).encode(os)
-        os.close();
+            BCPGOutputStream os = new BCPGOutputStream(new ArmoredOutputStream(new FileOutputStream(it + ".asc")))
+            sign(is).encode(os)
+            os.close();
+        }
     }
 
     PGPSignature sign(InputStream is) throws IOException, PGPException, GeneralSecurityException {
@@ -115,12 +117,20 @@ class GpgService {
     }
 
 
-    String md5(FineractPluginExtension.FineractPluginGpgParams params) {
-        return calc(new FileInputStream(params.file), MessageDigest.getInstance("MD5", BouncyCastleProvider.PROVIDER_NAME))
+    void md5(FineractPluginExtension.FineractPluginGpgParams params) {
+        params.files.findAll {
+            def result = calc(new FileInputStream(it), MessageDigest.getInstance("MD5", BouncyCastleProvider.PROVIDER_NAME))
+            def file = new File("${it}.md5")
+            file.write result
+        }
     }
 
-    String sha512(FineractPluginExtension.FineractPluginGpgParams params) {
-        return calc(new FileInputStream(params.file), MessageDigest.getInstance("SHA-512", BouncyCastleProvider.PROVIDER_NAME))
+    void sha512(FineractPluginExtension.FineractPluginGpgParams params) {
+        params.files.findAll {
+            def result = calc(new FileInputStream(it), MessageDigest.getInstance("SHA-512", BouncyCastleProvider.PROVIDER_NAME))
+            def file = new File("${it}.sha512")
+            file.write result
+        }
     }
 
     private static String calc(InputStream is, MessageDigest digest) {

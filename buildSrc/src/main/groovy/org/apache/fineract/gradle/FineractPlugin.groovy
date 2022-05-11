@@ -324,7 +324,7 @@ class FineractPlugin implements Plugin<Project> {
 
         // step 6
         project.tasks.register("fineractReleaseStep6") {
-            dependsOn(":fineract-war:binaryDistTar")
+            dependsOn(":fineract-war:distTar")
         }
 
         // step 7
@@ -334,13 +334,11 @@ class FineractPlugin implements Plugin<Project> {
 
                 gpgService.sign(step.gpg)
 
-                def md5 = gpgService.md5(step.gpg)
-                def md5File = new File("${step.gpg.file}.md5")
-                md5File.write md5
+                step.gpg.files.findAll {
+                    gpgService.md5(step.gpg)
 
-                def sha512 = gpgService.sha512(step.gpg)
-                def sha512File = new File("${step.gpg.file}.sha512")
-                sha512File.write sha512
+                    gpgService.sha512(step.gpg)
+                }
             }
         }
 
