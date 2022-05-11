@@ -20,6 +20,7 @@ package org.apache.fineract.batch.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -92,9 +93,9 @@ public class BatchApiResource {
     @Operation(summary = "Batch requests in a single transaction", description = "The Apache Fineract Batch API is also capable of executing all the requests in a single transaction, by setting a Query Parameter, \"enclosingTransaction=true\". So, if one or more of the requests in a batch returns an erroneous response all of the Data base transactions made by other successful requests will be rolled back.\n"
             + "\n"
             + "If there has been a rollback in a transaction then a single response will be provided, with a '400' status code and a body consisting of the error details of the first failed request.")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = BatchApiResourceSwagger.PostBatchesRequest.class, description = "request body")))
+    @RequestBody(required = true, content = @Content(array = @ArraySchema(schema = @Schema(implementation = BatchRequest.class, description = "request body"))))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Success", content = @Content(schema = @Schema(implementation = BatchResponse.class))) })
+            @ApiResponse(responseCode = "200", description = "Success", content = @Content(array = @ArraySchema(schema = @Schema(implementation = BatchResponse.class)))) })
     public String handleBatchRequests(
             @DefaultValue("false") @QueryParam("enclosingTransaction") @Parameter(description = "enclosingTransaction", required = false) final boolean enclosingTransaction,
             @Parameter(hidden = true) final String jsonRequestString, @Context UriInfo uriInfo) {
