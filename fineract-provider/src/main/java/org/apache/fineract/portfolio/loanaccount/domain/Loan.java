@@ -2452,11 +2452,8 @@ public class Loan extends AbstractPersistableCustom {
         validateDisbursementDateIsOnNonWorkingDay(holidayDetailDTO.getWorkingDays(), holidayDetailDTO.isAllowTransactionsOnNonWorkingDay());
         validateDisbursementDateIsOnHoliday(holidayDetailDTO.isAllowTransactionsOnHoliday(), holidayDetailDTO.getHolidays());
 
-        if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()
-                && (fetchRepaymentScheduleInstallment(1).getDueDate().isBefore(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()))
-                        || isDisbursementMissed())) {
-            regenerateRepaymentScheduleWithInterestRecalculation(scheduleGeneratorDTO, currentUser);
-        }
+        regenerateRepaymentScheduleWithInterestRecalculationIfNeeded(this.repaymentScheduleDetail().isInterestRecalculationEnabled(),
+                isDisbursementMissed(), scheduleGeneratorDTO, currentUser);
 
         updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
         updateLoanRepaymentPeriodsDerivedFields(actualDisbursementDate);
@@ -2478,6 +2475,26 @@ public class Loan extends AbstractPersistableCustom {
         }
 
         return reprocessTransactionForDisbursement();
+
+    }
+
+    private void regenerateRepaymentScheduleWithInterestRecalculationIfNeeded(boolean interestRecalculationEnabledParam,
+            boolean disbursementMissedParam, ScheduleGeneratorDTO scheduleGeneratorDTO, AppUser currentUser) {
+        /*
+         * There may be no schedule built pre-disbursal e.g. multi-disbursal products that disallow expected
+         * disbursements
+         */
+        LocalDate firstInstallmentDueDate = null;
+        LoanRepaymentScheduleInstallment firstInstallment = fetchRepaymentScheduleInstallment(1);
+        if (firstInstallment == null) {
+            firstInstallmentDueDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        } else {
+            firstInstallmentDueDate = firstInstallment.getDueDate();
+        }
+        if (interestRecalculationEnabledParam
+                && (firstInstallmentDueDate.isBefore(LocalDate.now(DateUtils.getDateTimeZoneOfTenant())) || disbursementMissedParam)) {
+            regenerateRepaymentScheduleWithInterestRecalculation(scheduleGeneratorDTO, currentUser);
+        }
 
     }
 
