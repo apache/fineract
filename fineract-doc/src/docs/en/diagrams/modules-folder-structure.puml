@@ -1,0 +1,39 @@
+@startsalt
+{
+    {T
+    + module
+    ++ mymodule
+    +++ core
+    ++++ src
+    +++++ main
+    ++++++ java
+    +++++++ org.apache.fineract.mymodule.core
+    ++++++++ data
+    +++++++++ MyData.java
+    ++++++++ service
+    +++++++++ MyService.java
+    ++++ build.gradle
+    ++++ dependencies.gradle
+    +++ service
+    ++++ src
+    +++++ main
+    ++++++ java
+    +++++++ org.apache.fineract.mymodule.service
+    ++++++++ MyServiceImpl.java
+    ++++ build.gradle
+    ++++ dependencies.gradle
+    +++ starter
+    ++++ src
+    +++++ main
+    ++++++ java
+    +++++++ org.apache.fineract.mymodule.starter
+    ++++++++ MyAutoConfiguration.java
+    ++++ resources
+    +++++ META-INF
+    ++++++ spring.factories
+    ++++ build.gradle
+    ++++ dependencies.gradle
+    +++ build.gradle
+    }
+}
+@endsalt

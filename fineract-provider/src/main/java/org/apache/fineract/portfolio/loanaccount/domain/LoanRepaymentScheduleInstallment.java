@@ -134,12 +134,14 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     @Column(name = "recalculated_interest_component", nullable = false)
     private boolean recalculatedInterestComponent;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name = "loan_repayment_schedule_id", referencedColumnName = "id", nullable = false)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "loanRepaymentScheduleInstallment")
     private Set<LoanInterestRecalcualtionAdditionalDetails> loanCompoundingDetails = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "loanRepaymentScheduleInstallment")
     private Set<PostDatedChecks> postDatedChecks;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "installment")
+    private Set<LoanInstallmentCharge> installmentCharges = new HashSet<>();
 
     LoanRepaymentScheduleInstallment() {
         this.installmentNumber = null;
@@ -162,6 +164,9 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         this.penaltyCharges = defaultToNullIfZero(penaltyCharges);
         this.obligationsMet = false;
         this.recalculatedInterestComponent = recalculatedInterestComponent;
+        if (compoundingDetails != null) {
+            compoundingDetails.forEach(cd -> cd.setLoanRepaymentScheduleInstallment(this));
+        }
         this.loanCompoundingDetails = compoundingDetails;
         this.rescheduleInterestPortion = rescheduleInterestPortion;
     }
@@ -180,6 +185,9 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         this.penaltyCharges = defaultToNullIfZero(penaltyCharges);
         this.obligationsMet = false;
         this.recalculatedInterestComponent = recalculatedInterestComponent;
+        if (compoundingDetails != null) {
+            compoundingDetails.forEach(cd -> cd.setLoanRepaymentScheduleInstallment(this));
+        }
         this.loanCompoundingDetails = compoundingDetails;
     }
 
@@ -861,4 +869,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         this.feeChargesWaived = newFeeChargesCharged;
     }
 
+    public Set<LoanInstallmentCharge> getInstallmentCharges() {
+        return installmentCharges;
+    }
 }

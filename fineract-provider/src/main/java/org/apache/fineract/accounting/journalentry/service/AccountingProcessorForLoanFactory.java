@@ -18,20 +18,16 @@
  */
 package org.apache.fineract.accounting.journalentry.service;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.journalentry.data.LoanDTO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class AccountingProcessorForLoanFactory {
 
     private final ApplicationContext applicationContext;
-
-    @Autowired
-    public AccountingProcessorForLoanFactory(final ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
-    }
 
     public AccountingProcessorForLoan determineProcessor(final LoanDTO loanDTO) {
 

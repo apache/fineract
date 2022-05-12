@@ -78,7 +78,7 @@ public class RateWriteServiceImpl implements RateWriteService {
             }
             final Rate rate = Rate.fromJson(command, approveUser);
 
-            this.rateRepository.save(rate);
+            this.rateRepository.saveAndFlush(rate);
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(rate.getId()).build();
 

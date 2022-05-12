@@ -1,0 +1,96 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements. See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership. The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License. You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+
+# NB: Travis CI (dist: bionic) supports up to v3.7
+# (unless we'd install a more recent version in .travis.yml)
+version: '3.7'
+services:
+  # Backend service
+  fineractpostgresql:
+    image: postgres:14.2
+    volumes:
+      - ./fineract-db/docker/postgresql:/docker-entrypoint-initdb.d/:Z,ro
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: skdcnwauicn2ucnaecasdsajdnizucawencascdca
+      FINERACT_DB_USER: postgres
+      FINERACT_DB_PASS: skdcnwauicn2ucnaecasdsajdnizucawencascdca
+      FINERACT_TENANTS_DB_NAME: fineract_tenants
+      FINERACT_TENANT_DEFAULT_DB_NAME: fineract_default
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
+      timeout: 10s
+      retries: 10
+    ports:
+      - "5432:5432"
+  fineract-server:
+    image: fineract:latest
+    volumes:
+      - ./fineract-provider/build/data:/data
+    healthcheck:
+      test: ["CMD", 'sh', '-c', 'echo -e "Checking for the availability of Fineract server deployment"; while ! nc -z "fineract-server" 8443; do sleep 1; printf "-"; done; echo -e " >> Fineract server has started";' ]
+      timeout: 10s
+      retries: 10
+    ports:
+      - 8443:8443
+    depends_on:
+      fineractpostgresql:
+        condition: service_healthy
+    environment:
+      # TODO: env vars prefixed with "fineract_tenants_*" will be removed with one of the next releases
+      #- fineract_tenants_driver=org.postgresql.Driver
+      #- fineract_tenants_url=jdbc:postgresql://fineractpostgresql:5432/fineract_tenants
+      #- fineract_tenants_uid=postgres
+      #- fineract_tenants_pwd=skdcnwauicn2ucnaecasdsajdnizucawencascdca
+      # NOTE: node aware scheduler
+      - FINERACT_NODE_ID=1
+      # NOTE: env vars prefixed "FINERACT_HIKARI_*" are used to configure the database connection pool
+      - FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME=org.postgresql.Driver
+      - FINERACT_HIKARI_JDBC_URL=jdbc:postgresql://fineractpostgresql:5432/fineract_tenants
+      - FINERACT_HIKARI_USERNAME=postgres
+      - FINERACT_HIKARI_PASSWORD=skdcnwauicn2ucnaecasdsajdnizucawencascdca
+      # ... following variables are optional; "application.properties" contains reasonable defaults (same as here)
+      - FINERACT_HIKARI_MINIMUM_IDLE=3
+      - FINERACT_HIKARI_MAXIMUM_POOL_SIZE=10
+      - FINERACT_HIKARI_IDLE_TIMEOUT=60000
+      - FINERACT_HIKARI_CONNECTION_TIMEOUT=20000
+      - FINERACT_HIKARI_TEST_QUERY=SELECT 1
+      - FINERACT_HIKARI_AUTO_COMMIT=true
+      - FINERACT_HIKARI_DS_PROPERTIES_CACHE_PREP_STMTS=true
+      - FINERACT_HIKARI_DS_PROPERTIES_PREP_STMT_CACHE_SIZE=250
+      - FINERACT_HIKARI_DS_PROPERTIES_PREP_STMT_CACHE_SQL_LIMIT=2048
+      - FINERACT_HIKARI_DS_PROPERTIES_USE_SERVER_PREP_STMTS=true
+      - FINERACT_HIKARI_DS_PROPERTIES_USE_LOCAL_SESSION_STATE=true
+      - FINERACT_HIKARI_DS_PROPERTIES_REWRITE_BATCHED_STATEMENTS=true
+      - FINERACT_HIKARI_DS_PROPERTIES_CACHE_RESULT_SET_METADATA=true
+      - FINERACT_HIKARI_DS_PROPERTIES_CACHE_SERVER_CONFIGURATION=true
+      - FINERACT_HIKARI_DS_PROPERTIES_ELIDE_SET_AUTO_COMMITS=true
+      - FINERACT_HIKARI_DS_PROPERTIES_MAINTAIN_TIME_STATS=false
+      - FINERACT_HIKARI_DS_PROPERTIES_LOG_SLOW_QUERIES=true
+      - FINERACT_HIKARI_DS_PROPERTIES_DUMP_QUERIES_IN_EXCEPTION=true
+      # NOTE: env vars prefixed "FINERACT_DEFAULT_TENANTDB_*" are used to create the default tenant database
+      - FINERACT_DEFAULT_TENANTDB_HOSTNAME=fineractpostgresql
+      - FINERACT_DEFAULT_TENANTDB_PORT=5432
+      - FINERACT_DEFAULT_TENANTDB_UID=postgres
+      - FINERACT_DEFAULT_TENANTDB_PWD=skdcnwauicn2ucnaecasdsajdnizucawencascdca
+      - FINERACT_DEFAULT_TENANTDB_CONN_PARAMS=
+      - FINERACT_DEFAULT_TENANTDB_TIMEZONE=Asia/Kolkata
+      - FINERACT_DEFAULT_TENANTDB_IDENTIFIER=default
+      - FINERACT_DEFAULT_TENANTDB_NAME=fineract_default
+      - FINERACT_DEFAULT_TENANTDB_DESCRIPTION=Default Demo Tenant

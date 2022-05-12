@@ -22,6 +22,5 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <!-- An example how to include upcoming changes -->
-    <!-- <include file="parts/0003_upcoming_change.xml" relativeToChangelogFile="true"/> -->
+     <include file="parts/0003_reset_postgresql_sequences.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

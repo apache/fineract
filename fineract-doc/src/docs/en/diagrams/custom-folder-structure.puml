@@ -1,0 +1,17 @@
+@startsalt
+{
+    {T
+    + custom
+    ++ mycustom
+    +++ service
+    ++++ src
+    +++++ main
+    ++++++ java
+    +++++++ org.apache.fineract.mymodule.service
+    ++++++++ MyServiceImpl.java
+    ++++ build.gradle
+    ++++ dependencies.gradle
+    +++ build.gradle
+    }
+}
+@endsalt

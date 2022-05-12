@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -44,8 +45,8 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.infrastructure.security.utils.SQLBuilder;
@@ -69,7 +70,6 @@ import org.apache.fineract.portfolio.group.domain.GroupTypes;
 import org.apache.fineract.portfolio.group.domain.GroupingTypeEnumerations;
 import org.apache.fineract.portfolio.group.exception.CenterNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -77,6 +77,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 @Service
+@RequiredArgsConstructor
 public class CenterReadPlatformServiceImpl implements CenterReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
@@ -94,28 +95,10 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     private final CenterDataMapper centerMapper = new CenterDataMapper();
     private final GroupDataMapper groupDataMapper = new GroupDataMapper();
 
-    private final PaginationHelper<CenterData> paginationHelper = new PaginationHelper<>();
+    private final PaginationHelper paginationHelper;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final PaginationParametersDataValidator paginationParametersDataValidator;
     private static final Set<String> SUPPORTED_ORDER_BY_VALUES = new HashSet<>(Arrays.asList("id", "name", "officeId", "officeName"));
-
-    @Autowired
-    public CenterReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-            final ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
-            final StaffReadPlatformService staffReadPlatformService, final CodeValueReadPlatformService codeValueReadPlatformService,
-            final PaginationParametersDataValidator paginationParametersDataValidator,
-            final ConfigurationDomainService configurationDomainService, final CalendarReadPlatformService calendarReadPlatformService,
-            final ColumnValidator columnValidator) {
-        this.context = context;
-        this.clientReadPlatformService = clientReadPlatformService;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.officeReadPlatformService = officeReadPlatformService;
-        this.staffReadPlatformService = staffReadPlatformService;
-        this.codeValueReadPlatformService = codeValueReadPlatformService;
-        this.paginationParametersDataValidator = paginationParametersDataValidator;
-        this.configurationDomainService = configurationDomainService;
-        this.calendarReadPlatformService = calendarReadPlatformService;
-        this.columnValidator = columnValidator;
-    }
 
     // 'g.' preffix because of ERROR 1052 (23000): Column 'column_name' in where
     // clause is ambiguous
@@ -212,14 +195,12 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
                     + " g.hierarchy as hierarchy,   c.id as calendarId, ci.id as calendarInstanceId, ci.entity_id as entityId,"
                     + " ci.entity_type_enum as entityTypeId, c.title as title,  c.description as description,"
                     + "c.location as location, c.start_date as startDate, c.end_date as endDate, c.recurrence as recurrence,c.meeting_time as meetingTime,"
-                    + "sum(if(l.loan_status_id=300 and lrs.duedate = ?,"
-                    + "(ifnull(lrs.principal_amount,0)) + (ifnull(lrs.interest_amount,0)),0)) as installmentDue,"
-                    + "sum(if(l.loan_status_id=300 and lrs.duedate = ?,"
-                    + "(ifnull(lrs.principal_completed_derived,0)) + (ifnull(lrs.interest_completed_derived,0)),0)) as totalCollected,"
-                    + "sum(if(l.loan_status_id=300 and lrs.duedate <= ?, (ifnull(lrs.principal_amount,0)) + (ifnull(lrs.interest_amount,0)),0))"
-                    + "- sum(if(l.loan_status_id=300 and lrs.duedate <= ?, (ifnull(lrs.principal_completed_derived,0)) + (ifnull(lrs.interest_completed_derived,0)),0)) as totaldue, "
-                    + "sum(if(l.loan_status_id=300 and lrs.duedate < ?, (ifnull(lrs.principal_amount,0)) + (ifnull(lrs.interest_amount,0)),0))"
-                    + "- sum(if(l.loan_status_id=300 and lrs.duedate < ?, (ifnull(lrs.principal_completed_derived,0)) + (ifnull(lrs.interest_completed_derived,0)),0)) as totaloverdue"
+                    + "sum(CASE WHEN l.loan_status_id=300 and lrs.duedate = ? THEN COALESCE(lrs.principal_amount,0)) + (COALESCE(lrs.interest_amount,0) ELSE 0 END)) as installmentDue,"
+                    + "sum(CASE WHEN l.loan_status_id=300 and lrs.duedate = ? THEN COALESCE(lrs.principal_completed_derived,0) + COALESCE(lrs.interest_completed_derived,0) ELSE 0 END) as totalCollected,"
+                    + "sum(CASE WHEN l.loan_status_id=300 and lrs.duedate <= ? THEN COALESCE(lrs.principal_amount,0) + COALESCE(lrs.interest_amount,0) ELSE 0 END)"
+                    + "- sum(CASE WHEN l.loan_status_id=300 and lrs.duedate <= ? THEN COALESCE(lrs.principal_completed_derived,0) + COALESCE(lrs.interest_completed_derived,0) ELSE 0 END) as totaldue, "
+                    + "sum(CASE WHEN l.loan_status_id=300 and lrs.duedate < ? THEN COALESCE(lrs.principal_amount,0) + COALESCE(lrs.interest_amount,0) ELSE 0 END)"
+                    + "- sum(CASE WHEN l.loan_status_id=300 and lrs.duedate < ? THEN COALESCE(lrs.principal_completed_derived,0) + COALESCE(lrs.interest_completed_derived,0) ELSE 0 END) as totaloverdue"
                     + " from m_calendar c join m_calendar_instance ci on ci.calendar_id=c.id and ci.entity_type_enum=4"
                     + " join m_group ce on ce.id = ci.entity_id" + " join m_group g   on g.parent_id = ce.id"
                     + " join m_group_client gc on gc.group_id=g.id" + " join m_client cl on cl.id=gc.client_id"
@@ -338,7 +319,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         final String hierarchySearchString = hierarchy + "%";
 
         final StringBuilder sqlBuilder = new StringBuilder(200);
-        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
         sqlBuilder.append(this.centerMapper.schema());
         final SQLBuilder extraCriteria = getCenterExtraCriteria(this.centerMapper.schema(), searchParameters);
         extraCriteria.addNonNullCriteria("o.hierarchy like ", hierarchySearchString);
@@ -351,15 +332,15 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         }
 
         if (searchParameters.isLimited()) {
-            sqlBuilder.append(" limit ").append(searchParameters.getLimit());
+            sqlBuilder.append(" ");
             if (searchParameters.isOffset()) {
-                sqlBuilder.append(" offset ").append(searchParameters.getOffset());
+                sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
+            } else {
+                sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
             }
         }
 
-        final String sqlCountRows = "SELECT FOUND_ROWS()";
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), extraCriteria.getArguments(),
-                this.centerMapper);
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), extraCriteria.getArguments(), this.centerMapper);
     }
 
     @Override
@@ -385,14 +366,16 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             }
 
             if (searchParameters.isLimited()) {
-                sqlBuilder.append(" limit ").append(searchParameters.getLimit());
+                sqlBuilder.append(" ");
                 if (searchParameters.isOffset()) {
-                    sqlBuilder.append(" offset ").append(searchParameters.getOffset());
+                    sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
+                } else {
+                    sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
                 }
             }
         }
 
-        return this.jdbcTemplate.query(sqlBuilder.toString(), this.centerMapper, extraCriteria.getArguments());
+        return this.jdbcTemplate.query(sqlBuilder.toString(), this.centerMapper, extraCriteria.getArguments()); // NOSONAR
     }
 
     @Override
@@ -405,7 +388,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         final String sql = "select " + this.centerMapper.schema()
                 + " where g.office_id = ? and g.parent_id is null and g.level_Id = ? and o.hierarchy like ? order by g.hierarchy";
 
-        return this.jdbcTemplate.query(sql, this.centerMapper, new Object[] { officeId, GroupTypes.CENTER.getId(), hierarchySearchString });
+        return this.jdbcTemplate.query(sql, this.centerMapper, new Object[] { officeId, GroupTypes.CENTER.getId(), hierarchySearchString }); // NOSONAR
     }
 
     @Override
@@ -458,7 +441,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             final String hierarchySearchString = hierarchy + "%";
 
             final String sql = "select " + this.centerMapper.schema() + " where g.id = ? and o.hierarchy like ?";
-            return this.jdbcTemplate.queryForObject(sql, this.centerMapper, new Object[] { centerId, hierarchySearchString });
+            return this.jdbcTemplate.queryForObject(sql, this.centerMapper, new Object[] { centerId, hierarchySearchString }); // NOSONAR
 
         } catch (final EmptyResultDataAccessException e) {
             throw new CenterNotFoundException(centerId, e);
@@ -500,8 +483,8 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
     @Override
     public Collection<GroupGeneralData> retrieveAssociatedGroups(final Long centerId) {
-        final String sql = "select " + this.groupDataMapper.schema() + " where g.parent_id = ? ";
-        return this.jdbcTemplate.query(sql, this.groupDataMapper, new Object[] { centerId });
+        final String sql = "select " + this.groupDataMapper.schema() + " where g.parent_id = ? order by g.id";
+        return this.jdbcTemplate.query(sql, this.groupDataMapper, new Object[] { centerId }); // NOSONAR
     }
 
     @Override
@@ -518,15 +501,15 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         final CenterCalendarDataMapper centerCalendarMapper = new CenterCalendarDataMapper();
         String passeddate = formatter.format(localDate);
         String sql = centerCalendarMapper.schema();
-        Collection<CenterData> centerDataArray = null;
+        Collection<CenterData> centerDataArray;
         if (staffId != null) {
             sql += " and g.staff_id=? ";
             sql += "and lrs.duedate<='" + passeddate + "' and l.loan_type_enum=3";
             sql += " group by c.id, ci.id, g.account_no, g.external_id, g.status_enum, g.activation_date, g.hierarchy";
-            centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper,
+            centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper, // NOSONAR
                     new Object[] { passeddate, passeddate, passeddate, passeddate, passeddate, passeddate, officeId, staffId });
         } else {
-            centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper,
+            centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper, // NOSONAR
                     new Object[] { passeddate, passeddate, passeddate, passeddate, passeddate, passeddate, officeId });
         }
 

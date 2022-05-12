@@ -41,6 +41,8 @@ public interface SavingsAccountWritePlatformService {
 
     CommandProcessingResult calculateInterest(Long savingsId);
 
+    CommandProcessingResult reverseTransaction(Long savingsId, Long transactionId, boolean allowAccountTransferModification);
+
     CommandProcessingResult undoTransaction(Long savingsId, Long transactionId, boolean allowAccountTransferModification);
 
     CommandProcessingResult adjustSavingsTransaction(Long savingsId, Long transactionId, JsonCommand command);
@@ -94,17 +96,17 @@ public interface SavingsAccountWritePlatformService {
     SavingsAccountData postInterest(SavingsAccountData account, boolean postInterestAs, LocalDate transactionDate,
             boolean backdatedTxnsAllowedTill);
 
-    CommandProcessingResult blockAccount(Long savingsId);
+    CommandProcessingResult blockAccount(Long savingsId, JsonCommand command);
 
     CommandProcessingResult unblockAccount(Long savingsId);
 
     CommandProcessingResult holdAmount(Long savingsId, JsonCommand command);
 
-    CommandProcessingResult blockCredits(Long savingsId);
+    CommandProcessingResult blockCredits(Long savingsId, JsonCommand command);
 
     CommandProcessingResult unblockCredits(Long savingsId);
 
-    CommandProcessingResult blockDebits(Long savingsId);
+    CommandProcessingResult blockDebits(Long savingsId, JsonCommand command);
 
     CommandProcessingResult unblockDebits(Long savingsId);
 

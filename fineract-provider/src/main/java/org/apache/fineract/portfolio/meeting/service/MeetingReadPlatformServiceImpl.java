@@ -24,7 +24,6 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.meeting.data.MeetingData;
 import org.apache.fineract.portfolio.meeting.exception.MeetingNotFoundException;
@@ -40,8 +39,8 @@ public class MeetingReadPlatformServiceImpl implements MeetingReadPlatformServic
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public MeetingReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public MeetingReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private static final class MeetingDataMapper implements RowMapper<MeetingData> {
@@ -70,7 +69,7 @@ public class MeetingReadPlatformServiceImpl implements MeetingReadPlatformServic
 
             final String sql = rm.schema() + " where m.id = ? and ci.entity_id = ? and ci.entity_type_enum = ? ";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { meetingId, entityId, entityTypeId });
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { meetingId, entityId, entityTypeId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new MeetingNotFoundException(meetingId, e);
         }
@@ -82,10 +81,10 @@ public class MeetingReadPlatformServiceImpl implements MeetingReadPlatformServic
         String sql = rm.schema() + " where ci.entity_id = ? and ci.entity_type_enum = ? ";
         if (limit != null && limit > 0) {
             sql = sql + " order by m.meeting_date desc " + " limit ? ";
-            return this.jdbcTemplate.query(sql, rm, new Object[] { entityId, entityTypeId, limit });
+            return this.jdbcTemplate.query(sql, rm, new Object[] { entityId, entityTypeId, limit }); // NOSONAR
         }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { entityId, entityTypeId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { entityId, entityTypeId }); // NOSONAR
     }
 
     @Override
@@ -97,7 +96,7 @@ public class MeetingReadPlatformServiceImpl implements MeetingReadPlatformServic
                 + " inner join m_calendar c on ci.calendar_id=c.id  where ci.entity_id = ? and ci.entity_type_enum = ? and c.calendar_type_enum in ("
                 + sqlCalendarTypeOptions + ") order by c.start_date ";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { entityId, entityTypeId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { entityId, entityTypeId }); // NOSONAR
     }
 
     @Override
@@ -107,7 +106,7 @@ public class MeetingReadPlatformServiceImpl implements MeetingReadPlatformServic
 
             final String sql = rm.schema() + " where ci.id = ? order by m.meeting_date desc, m.id desc limit 1";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { calendarInstanceId });
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { calendarInstanceId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             return null;
         }

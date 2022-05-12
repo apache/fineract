@@ -326,7 +326,7 @@ public final class ImportHandlerUtils {
                     }
                 }
             }
-        } else if (sheetName.equals(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME)) {
+        } else {
             for (Row row : sheet) {
                 for (int i = 0; i < 2; i++) {
                     if (name != null) {

@@ -24,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.savings.SavingsTransactionBooleanValues;
+import org.apache.fineract.useradministration.domain.AppUser;
 
 public interface SavingsAccountDomainService {
 
@@ -40,4 +41,10 @@ public interface SavingsAccountDomainService {
 
     SavingsAccountTransaction handleDividendPayout(SavingsAccount account, LocalDate transactionDate, BigDecimal transactionAmount,
             boolean backdatedTxnsAllowedTill);
+
+    SavingsAccountTransaction handleReversal(SavingsAccount account, SavingsAccountTransaction savingsAccountTransaction,
+            boolean backdatedTxnsAllowedTill);
+
+    SavingsAccountTransaction handleHold(SavingsAccount account, AppUser createdUser, BigDecimal amount, LocalDate transactionDate,
+            Boolean lienAllowed);
 }

@@ -1,32 +1,32 @@
 name: Fineract Sonarqube
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - develop
+
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-20.04
     env:
         TZ: Asia/Kolkata
-        SONAR_ORGANIZATION: apache
-        SONAR_HOST_URL: https://sonarcloud.io
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
+        SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
     steps:
-      - name: Set up cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Set up JDK 17
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'zulu'
+          cache: gradle
       - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
+        uses: gradle/wrapper-validation-action@859c33240bd026ce8d5f711f5adcc65c2f8eafc1
       - name: Sonarqube
-        run: ./gradlew --no-daemon --console=plain -Dsonar.verbose=true -Dsonar.login=$SONAR_TOKEN -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.organization=$SONAR_ORGANIZATION --info -x rat -x test -x spotbugsMain -x spotbugsTest -x spotbugsGenerated -x licenseMain -x licenseTest -x checkstyleMain -x checkstyleTest --info --stacktrace build sonarqube
+        run: ./gradlew --no-daemon --console=plain -Dsonar.verbose=true -Dsonar.login=$SONAR_TOKEN -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.organization=$SONAR_ORGANIZATION -Dsonar.projectKey=$SONAR_PROJECT_KEY --info --stacktrace sonarqube

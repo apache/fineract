@@ -23,7 +23,6 @@ import org.apache.fineract.infrastructure.core.boot.AbstractApplicationConfigura
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * Fineract main() application which launches Fineract in an embedded Tomcat HTTP (using Spring Boot).
@@ -52,7 +51,7 @@ public class ServerApplication extends SpringBootServletInitializer {
     }
 
     public static void main(String[] args) throws IOException {
-        ConfigurableApplicationContext ctx = configureApplication(new SpringApplicationBuilder(ServerApplication.class)).run(args);
+        configureApplication(new SpringApplicationBuilder(ServerApplication.class)).run(args);
         // ApplicationExitUtil.waitForKeyPressToCleanlyExit(ctx);
     }
 }

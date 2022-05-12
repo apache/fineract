@@ -1,0 +1,32 @@
+= Publish Release Artifacts
+
+NOTE: More on releases at the ASF see https://www.apache.org/legal/release-policy.html#distribute-raw-artifact
+
+== Requirements
+
+You need to have your GPG keypairs properly set up. The JAR release artifacts (currently only `fineract-client`) are signed with a Gradle plugin just before being uploaded to the Maven repository. Please make sure that the following properties are set in your private `gradle.properties` file in your home folder:
+
+[source,properties]
+----
+signing.keyId=7890ABCD
+signing.password=*****
+signing.secretKeyRingFile=~/.gnupg/secring.gpg
+----
+
+This is quite similiar to the Fineract release plugin properties for GPG. In one of the next release we'll merge these two setups to avoid this duplicated configuration.
+
+== Maven Repository
+
+We are using the ASF's official https://repository.apache.org[Nexus Maven repository] to publish our snapshot and release artifacts.
+
+NOTE: Find more information at https://infra.apache.org/publishing-maven-artifacts.html
+
+== NPM Registry
+
+For convenience we will be using Github Packages to publish Fineract's Typescript API client.
+
+TBD
+
+== Docker Hub
+
+TBD

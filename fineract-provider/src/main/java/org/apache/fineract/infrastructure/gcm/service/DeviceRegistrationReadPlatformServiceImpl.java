@@ -25,7 +25,6 @@ import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Date;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.gcm.domain.DeviceRegistrationData;
 import org.apache.fineract.infrastructure.gcm.exception.DeviceRegistrationNotFoundException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -43,9 +42,9 @@ public class DeviceRegistrationReadPlatformServiceImpl implements DeviceRegistra
     private final PlatformSecurityContext context;
 
     @Autowired
-    public DeviceRegistrationReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
+    public DeviceRegistrationReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private static final class DeviceRegistrationDataMapper implements RowMapper<DeviceRegistrationData> {
@@ -84,7 +83,7 @@ public class DeviceRegistrationReadPlatformServiceImpl implements DeviceRegistra
         this.context.authenticatedUser();
         DeviceRegistrationDataMapper drm = new DeviceRegistrationDataMapper();
         String sql = "select " + drm.schema();
-        return this.jdbcTemplate.query(sql, drm, new Object[] {});
+        return this.jdbcTemplate.query(sql, drm); // NOSONAR
     }
 
     @Override
@@ -93,7 +92,7 @@ public class DeviceRegistrationReadPlatformServiceImpl implements DeviceRegistra
             this.context.authenticatedUser();
             DeviceRegistrationDataMapper drm = new DeviceRegistrationDataMapper();
             String sql = "select " + drm.schema() + " where cdr.id = ? ";
-            return this.jdbcTemplate.queryForObject(sql, drm, new Object[] { id });
+            return this.jdbcTemplate.queryForObject(sql, drm, new Object[] { id }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new DeviceRegistrationNotFoundException(id, e);
         }
@@ -105,7 +104,7 @@ public class DeviceRegistrationReadPlatformServiceImpl implements DeviceRegistra
             this.context.authenticatedUser();
             DeviceRegistrationDataMapper drm = new DeviceRegistrationDataMapper();
             String sql = "select " + drm.schema() + " where c.id = ? ";
-            return this.jdbcTemplate.queryForObject(sql, drm, new Object[] { clientId });
+            return this.jdbcTemplate.queryForObject(sql, drm, new Object[] { clientId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new DeviceRegistrationNotFoundException(clientId, "client", e);
         }

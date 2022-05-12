@@ -1,0 +1,39 @@
+= Step 6: Create Distribution
+
+== Description
+
+Create source and binary artifacts. Make sure to do some sanity checks. The tar and the release branch should match.
+
+[source,bash,subs="attributes+,+macros"]
+----
+% cd /fineract-release-preparations <1>
+% tar -xvf apache-fineract-{revnumber}-src.tar.gz
+% git clone https://git-wip-us.apache.org/repos/asf/fineract.git
+% cd fineract/
+% git checkout tags/{revnumber}
+% cd ..
+% diff -r fineract apache-fineract-{revnumber}-src
+----
+<1> Do a fresh clone of the tag.
+
+Make sure code compiles and tests pass on the uncompressed source.
+
+[source,bash,subs="attributes+,+macros"]
+----
+% cd apache-fineract-{revnumber}-src/fineract-provider <1>
+% gradlew clean integrationTest <2>
+% gradlew clean build <3>
+% gradlew rat <4>
+----
+<1> Make sure prerequisites are met before running these commands.
+<2> For running integration tests
+<3> For building deploy able war
+<4> For RAT checks
+
+== Gradle Task
+
+.Command
+[source,bash]
+----
+% ./gradlew fineractReleaseStep6
+----

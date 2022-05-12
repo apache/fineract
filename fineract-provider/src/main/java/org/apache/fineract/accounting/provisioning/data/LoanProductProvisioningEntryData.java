@@ -19,45 +19,29 @@
 package org.apache.fineract.accounting.provisioning.data;
 
 import java.math.BigDecimal;
+import lombok.Getter;
 
+@Getter
 public class LoanProductProvisioningEntryData {
 
     private final Long historyId;
-
     private final Long officeId;
-
     private final String officeName;
-
     private final String currencyCode;
-
     private final Long productId;
-
     private final String productName;
-
     private final Long categoryId;
-
     private final String categoryName;
-
     private final Long overdueInDays;
-
     private final BigDecimal percentage;
-
     private final BigDecimal balance;
-
     private final BigDecimal amountreserved;
-
     private final Long liablityAccount;
-
     private final String liabilityAccountCode;
-
     private final String liabilityAccountName;
-
     private final Long expenseAccount;
-
     private final String expenseAccountCode;
-
     private final String expenseAccountName;
-
     private final Long criteriaId;
 
     public LoanProductProvisioningEntryData(final Long historyId, final Long officeId, final String currencyCode, final Long productId,
@@ -108,49 +92,4 @@ public class LoanProductProvisioningEntryData {
         this.expenseAccountName = expenseAccountName;
         this.criteriaId = criteriaId;
     }
-
-    public Long getHistoryId() {
-        return this.historyId;
-    }
-
-    public Long getOfficeId() {
-        return this.officeId;
-    }
-
-    public Long getProductId() {
-        return this.productId;
-    }
-
-    public Long getCategoryId() {
-        return this.categoryId;
-    }
-
-    public Long getOverdueInDays() {
-        return this.overdueInDays;
-    }
-
-    public BigDecimal getOutstandingBalance() {
-        return balance;
-    }
-
-    public BigDecimal getPercentage() {
-        return percentage;
-    }
-
-    public Long getLiablityAccount() {
-        return this.liablityAccount;
-    }
-
-    public Long getExpenseAccount() {
-        return this.expenseAccount;
-    }
-
-    public String getCurrencyCode() {
-        return this.currencyCode;
-    }
-
-    public Long getCriteriaId() {
-        return this.criteriaId;
-    }
-
 }

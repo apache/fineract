@@ -24,7 +24,6 @@ import java.sql.SQLException;
 import java.util.List;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.collateral.data.CollateralData;
@@ -44,10 +43,10 @@ public class CollateralReadPlatformServiceImpl implements CollateralReadPlatform
     private final LoanRepositoryWrapper loanRepositoryWrapper;
 
     @Autowired
-    public CollateralReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
+    public CollateralReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             final LoanRepositoryWrapper loanRepositoryWrapper) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.loanRepositoryWrapper = loanRepositoryWrapper;
     }
 
@@ -98,7 +97,7 @@ public class CollateralReadPlatformServiceImpl implements CollateralReadPlatform
 
         final String sql = "select " + rm.schema() + " where lc.loan_id=? order by id ASC";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { loanId }); // NOSONAR
     }
 
     @Override
@@ -107,7 +106,7 @@ public class CollateralReadPlatformServiceImpl implements CollateralReadPlatform
             final CollateralMapper rm = new CollateralMapper();
             String sql = "select " + rm.schema();
             sql += " where lc.loan_id=? and lc.id = ?";
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId, collateralId });
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId, collateralId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new CollateralNotFoundException(loanId, collateralId, e);
         }

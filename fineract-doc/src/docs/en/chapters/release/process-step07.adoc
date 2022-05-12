@@ -1,0 +1,23 @@
+= Step 7: Sign Distribution
+
+== Description
+
+All release artifacts must be signed. In order to sign a release you will need a PGP key. You should get your key signed by a few other people. You will also need to receive their keys from a public key server.   See the Apache release signing page for more details. Please follow the steps defined in Release Sign.
+
+[source,bash,subs="attributes+,+macros"]
+----
+% gpg --armor --output apache-fineract-{revnumber}-src.tar.gz.asc --detach-sig apache-fineract-{revnumber}-src.tar.gz
+% gpg --print-md MD5 apache-fineract-{revnumber}-src.tar.gz > apache-fineract-{revnumber}-src.tar.gz.md5
+% gpg --print-md SHA512 apache-fineract-{revnumber}-src.tar.gz > apache-fineract-{revnumber}-src.tar.gz.sha512
+% gpg --armor --output apache-fineract-{revnumber}--binary.tar.gz.asc --detach-sig apache-fineract-{revnumber}-binary.tar.gz
+% gpg --print-md MD5 apache-fineract-{revnumber}-binary.tar.gz > apache-fineract-{revnumber}-binary.tar.gz.md5
+% gpg --print-md SHA512 apache-fineract-{revnumber}-binary.tar.gz > apache-fineract-{revnumber}-binary.tar.gz.sha512
+----
+
+== Gradle Task
+
+.Command
+[source,bash]
+----
+% ./gradlew fineractReleaseStep7
+----

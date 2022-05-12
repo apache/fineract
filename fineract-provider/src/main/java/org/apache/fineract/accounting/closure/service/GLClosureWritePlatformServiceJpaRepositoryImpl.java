@@ -21,6 +21,8 @@ package org.apache.fineract.accounting.closure.service;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.closure.api.GLClosureJsonInputParams;
 import org.apache.fineract.accounting.closure.command.GLClosureCommand;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
@@ -38,9 +40,6 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -48,21 +47,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosureWritePlatformService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(GLClosureWritePlatformServiceJpaRepositoryImpl.class);
 
     private final GLClosureRepository glClosureRepository;
     private final OfficeRepositoryWrapper officeRepositoryWrapper;
     private final GLClosureCommandFromApiJsonDeserializer fromApiJsonDeserializer;
-
-    @Autowired
-    public GLClosureWritePlatformServiceJpaRepositoryImpl(final GLClosureRepository glClosureRepository,
-            final OfficeRepositoryWrapper officeRepositoryWrapper, final GLClosureCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
-        this.glClosureRepository = glClosureRepository;
-        this.officeRepositoryWrapper = officeRepositoryWrapper;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-    }
 
     @Transactional
     @Override
@@ -154,7 +145,7 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
                             DateUtils.getDateTimeZoneOfTenant()));
         }
 
-        LOG.error("Error occured.", dve);
+        log.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.glClosure.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource GL Closure: " + realCause.getMessage());
     }

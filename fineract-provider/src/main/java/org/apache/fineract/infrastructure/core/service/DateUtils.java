@@ -27,6 +27,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -38,6 +39,10 @@ public final class DateUtils {
 
     private DateUtils() {
 
+    }
+
+    public static ZoneId getSystemZoneId() {
+        return ZoneId.systemDefault();
     }
 
     public static ZoneId getDateTimeZoneOfTenant() {
@@ -59,13 +64,28 @@ public final class DateUtils {
     }
 
     public static Date getDateOfTenant() {
-        return Date.from(getLocalDateOfTenant().atStartOfDay(getDateTimeZoneOfTenant()).toInstant());
+        return convertLocalDateToDate(getLocalDateOfTenant());
+    }
+
+    public static Date convertLocalDateToDate(LocalDate localDate) {
+        return createDate(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
+    }
+
+    public static Date createDate(int year, int month, int day) {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, year);
+        cal.set(Calendar.MONTH, month - 1);
+        cal.set(Calendar.DAY_OF_MONTH, day);
+        return cal.getTime();
     }
 
     public static LocalDate getLocalDateOfTenant() {
         final ZoneId zone = getDateTimeZoneOfTenant();
-        LocalDate today = LocalDate.now(zone);
-        return today;
+        return LocalDate.now(zone);
+    }
+
+    public static LocalDate getLocalDateOfTenant(final ZoneId zone) {
+        return LocalDate.now(zone);
     }
 
     public static LocalDateTime getLocalDateTimeOfTenant() {

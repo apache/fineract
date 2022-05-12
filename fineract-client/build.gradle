@@ -22,12 +22,16 @@ apply plugin: 'org.openapi.generator'
 
 apply from: 'dependencies.gradle'
 
+// enable when all tests are migrated
+tasks.cucumber.onlyIf {false}
+
 // TODO: @vidakovic we should publish this lib to Maven Central; do in separate PR
 
 openApiMeta {
     generatorName = 'Fineract'
     packageName = 'org.apache.fineract.client'
     outputFolder = "$buildDir/meta".toString()
+    // trick to make sure fineract.yaml is generated first
 }
 
 openApiValidate {
@@ -35,7 +39,7 @@ openApiValidate {
     recommend = true
 }
 
-task buildJavaSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask){
+task buildJavaSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
     generatorName = 'java'
     verbose = false
     validateSpec = false
@@ -56,16 +60,7 @@ task buildJavaSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateT
     generateModelTests = false
     generateApiTests = false
     ignoreFileOverride = "$projectDir/.openapi-generator-ignore"
-    // trick to make sure fineract.yaml is generated first
-    dependsOn = [
-        ':fineract-provider:resolve'
-    ]
-    finalizedBy = [licenseFormat]
-    // uncomment below block to automatically copy the custom files in generated SDK
-    /*copy {
-     from file('src/main/java')
-     into file("$buildDir/generated/java/src/main/java")
-     }*/
+    dependsOn(':fineract-provider:resolve')
 }
 
 task buildTypescriptAngularSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask){
@@ -75,40 +70,53 @@ task buildTypescriptAngularSdk(type: org.openapitools.generator.gradle.plugin.ta
     skipValidateSpec = true
     inputSpec = "file:///$swaggerFile"
     outputDir = "$buildDir/generated/typescript".toString()
+    apiPackage = 'apache-fineract-client/services'
+    invokerPackage = 'apache-fineract-client/invoker'
+    modelPackage = 'apache-fineract-client/models'
+    configOptions = [
+        apiModulePrefix: 'apacheFineractClient',
+        configurationPrefix: 'apacheFineractClient',
+        ngVersion: '12.0.0',
+        npmName: '@apache/fineract-client',
+        npmRepository: "${npmRepository}"
+    ]
+    dependsOn(':fineract-provider:resolve')
+}
+
+task buildAsciidoc(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask){
+    generatorName = 'asciidoc'
+    verbose = false
+    validateSpec = false
+    skipValidateSpec = true
+    inputSpec = "file:///$swaggerFile"
+    outputDir = "$buildDir/generated/asciidoc".toString()
     apiPackage = 'org.apache.fineract.client.services'
     invokerPackage = 'org.apache.fineract.client'
     modelPackage = 'org.apache.fineract.client.models'
     configOptions = [
-        apiModulePrefix: 'fineract',
-        configurationPrefix: 'fineract',
-        ngVersion: '10.0.0',
-        npmName: 'apache-fineract-client'
+        appName: 'Apache Fineract REST API',
+        appDescription: '''Apache Fineract is a secure, multi-tenanted microfinance platform.
+            The goal of the Apache Fineract API is to empower developers to build apps on top of the Apache Fineract Platform.
+            The https://cui.fineract.dev[reference app] (username: mifos, password: password) works on the same demo tenant as the interactive links in this documentation.
+            Until we complete the new REST API documentation you still have the legacy documentation available https://fineract.apache.org/legacy-docs/apiLive.htm[here].
+            Please check https://fineract.apache.org/docs/current[the Fineract documentation] for more information.''',
+        headerAttributes: 'false',
+        infoEmail: 'dev@fineract.apache.org',
+        infoUrl: 'https://fineract.apache.org',
+        licenseInfo: 'Apache 2.0',
+        licenseUrl: 'http://www.apache.org/licenses/LICENSE-2.0.html',
+        useMethodAndPath: 'true'
     ]
-    dependsOn = [
-        ':fineract-provider:resolve'
-    ]
-    finalizedBy = [licenseFormat]
+    dependsOn(':fineract-provider:resolve')
 }
 
 // TODO: @vidakovic we could provide even more client libs in different languages (Go, Ruby, Swift etc.)
-compileJava.dependsOn buildJavaSdk, spotlessJavaApply, buildTypescriptAngularSdk, spotlessMiscApply
-
-sourceSets {
-    generated {
-        java {
-            srcDir "$buildDir/generated/java/src/main/java"
-        }
-    }
-}
+compileJava.dependsOn(buildJavaSdk, buildTypescriptAngularSdk, buildAsciidoc, licenseFormatMain, spotlessMiscApply)
 
 java {
     // keep this at Java 8, not 17; see https://issues.apache.org/jira/browse/FINERACT-1214
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
-}
-
-compileJava {
-    source += sourceSets.generated.java
 }
 
 tasks.withType(JavaCompile) {
@@ -129,5 +137,8 @@ test {
     useJUnitPlatform()
 }
 
-// Gradle 7.x asks for explicit dependencies between tasks
-licenseFormatBuildScripts.dependsOn spotlessGroovyGradle, spotlessJava, spotlessMisc, compileJava, processResources, compileGeneratedJava, compileTestJava, rat, test
+sourceSets.main.java.srcDir new File(buildDir, "generated/java/src/main/java")
+
+// NOTE: Gradle suggested these dependencies
+licenseFormatMain.dependsOn buildJavaSdk
+licenseMain.dependsOn buildJavaSdk

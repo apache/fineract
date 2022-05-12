@@ -29,7 +29,6 @@ import java.util.Date;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.holiday.data.HolidayData;
 import org.apache.fineract.organisation.holiday.domain.RescheduleType;
@@ -47,9 +46,9 @@ public class HolidayReadPlatformServiceImpl implements HolidayReadPlatformServic
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public HolidayReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
+    public HolidayReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private static final class HolidayMapper implements RowMapper<HolidayData> {
@@ -121,7 +120,7 @@ public class HolidayReadPlatformServiceImpl implements HolidayReadPlatformServic
 
         final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
 
-        return this.jdbcTemplate.query(sql, rm, finalObjectArray);
+        return this.jdbcTemplate.query(sql, rm, finalObjectArray); // NOSONAR
     }
 
     @Override
@@ -131,7 +130,7 @@ public class HolidayReadPlatformServiceImpl implements HolidayReadPlatformServic
 
             final String sql = " select " + rm.schema() + " where h.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { holidayId });
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { holidayId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new HolidayNotFoundException(holidayId, e);
         }

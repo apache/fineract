@@ -26,7 +26,6 @@ import org.apache.fineract.infrastructure.configuration.data.ExternalServicesPro
 import org.apache.fineract.infrastructure.configuration.data.S3CredentialsData;
 import org.apache.fineract.infrastructure.configuration.data.SMTPCredentialsData;
 import org.apache.fineract.infrastructure.configuration.exception.ExternalServiceConfigurationNotFoundException;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.gcm.domain.NotificationConfigurationData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -41,8 +40,8 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public ExternalServicesPropertiesReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public ExternalServicesPropertiesReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private static final class S3CredentialsDataExtractor implements ResultSetExtractor<S3CredentialsData> {
@@ -196,7 +195,7 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
         final ExternalServiceMapper mapper = new ExternalServiceMapper();
         final String sql = "SELECT esp.name, esp.value FROM c_external_service_properties esp inner join c_external_service es on esp.external_service_id = es.id where es.name = '"
                 + serviceNameToUse + "'";
-        return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, mapper); // NOSONAR
 
     }
 

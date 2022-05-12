@@ -19,86 +19,26 @@
 package org.apache.fineract.accounting.journalentry.data;
 
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
+@AllArgsConstructor
+@Getter
 public class LoanDTO {
 
+    @Setter
     private Long loanId;
+    @Setter
     private Long loanProductId;
+    @Setter
     private Long officeId;
-
+    @Setter
     private String currencyCode;
+    @Setter
     private boolean cashBasedAccountingEnabled;
-    final boolean upfrontAccrualBasedAccountingEnabled;
-    final boolean periodicAccrualBasedAccountingEnabled;
+    private final boolean upfrontAccrualBasedAccountingEnabled;
+    private final boolean periodicAccrualBasedAccountingEnabled;
+    @Setter
     private List<LoanTransactionDTO> newLoanTransactions;
-
-    public LoanDTO(final Long loanId, final Long loanProductId, final Long officeId, final String currencyCode,
-            final boolean cashBasedAccountingEnabled, final boolean upfrontAccrualBasedAccountingEnabled,
-            final boolean periodicAccrualBasedAccountingEnabled, final List<LoanTransactionDTO> newLoanTransactions) {
-        this.loanId = loanId;
-        this.loanProductId = loanProductId;
-        this.officeId = officeId;
-        this.cashBasedAccountingEnabled = cashBasedAccountingEnabled;
-        this.newLoanTransactions = newLoanTransactions;
-        this.currencyCode = currencyCode;
-        this.upfrontAccrualBasedAccountingEnabled = upfrontAccrualBasedAccountingEnabled;
-        this.periodicAccrualBasedAccountingEnabled = periodicAccrualBasedAccountingEnabled;
-    }
-
-    public Long getLoanId() {
-        return this.loanId;
-    }
-
-    public void setLoanId(final Long loanId) {
-        this.loanId = loanId;
-    }
-
-    public Long getLoanProductId() {
-        return this.loanProductId;
-    }
-
-    public void setLoanProductId(final Long loanProductId) {
-        this.loanProductId = loanProductId;
-    }
-
-    public Long getOfficeId() {
-        return this.officeId;
-    }
-
-    public void setOfficeId(final Long officeId) {
-        this.officeId = officeId;
-    }
-
-    public boolean isCashBasedAccountingEnabled() {
-        return this.cashBasedAccountingEnabled;
-    }
-
-    public void setCashBasedAccountingEnabled(final boolean cashBasedAccountingEnabled) {
-        this.cashBasedAccountingEnabled = cashBasedAccountingEnabled;
-    }
-
-    public boolean isUpfrontAccrualBasedAccountingEnabled() {
-        return this.upfrontAccrualBasedAccountingEnabled;
-    }
-
-    public boolean isPeriodicAccrualBasedAccountingEnabled() {
-        return this.periodicAccrualBasedAccountingEnabled;
-    }
-
-    public List<LoanTransactionDTO> getNewLoanTransactions() {
-        return this.newLoanTransactions;
-    }
-
-    public void setNewLoanTransactions(final List<LoanTransactionDTO> newLoanTransactions) {
-        this.newLoanTransactions = newLoanTransactions;
-    }
-
-    public String getCurrencyCode() {
-        return this.currencyCode;
-    }
-
-    public void setCurrencyCode(final String currencyCode) {
-        this.currencyCode = currencyCode;
-    }
-
 }

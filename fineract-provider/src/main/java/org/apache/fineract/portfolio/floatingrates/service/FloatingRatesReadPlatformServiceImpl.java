@@ -25,7 +25,6 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateData;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRatePeriodData;
 import org.apache.fineract.portfolio.floatingrates.data.InterestRatePeriodData;
@@ -42,29 +41,29 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public FloatingRatesReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public FloatingRatesReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
     public List<FloatingRateData> retrieveAll() {
         FloatingRateRowMapper rateMapper = new FloatingRateRowMapper(false);
         final String sql = "select " + rateMapper.schema();
-        return this.jdbcTemplate.query(sql, rateMapper);
+        return this.jdbcTemplate.query(sql, rateMapper); // NOSONAR
     }
 
     @Override
     public List<FloatingRateData> retrieveAllActive() {
         FloatingRateRowMapper rateMapper = new FloatingRateRowMapper(false);
-        final String sql = "select " + rateMapper.schema() + " where rate.is_active = 1 ";
-        return this.jdbcTemplate.query(sql, rateMapper);
+        final String sql = "select " + rateMapper.schema() + " where rate.is_active = true ";
+        return this.jdbcTemplate.query(sql, rateMapper);// NOSONAR
     }
 
     @Override
     public List<FloatingRateData> retrieveLookupActive() {
         FloatingRateLookupMapper rateMapper = new FloatingRateLookupMapper();
-        final String sql = "select " + rateMapper.schema() + " where rate.is_active = 1 ";
-        return this.jdbcTemplate.query(sql, rateMapper);
+        final String sql = "select " + rateMapper.schema() + " where rate.is_active = true ";
+        return this.jdbcTemplate.query(sql, rateMapper); // NOSONAR
     }
 
     @Override
@@ -72,7 +71,7 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
         try {
             FloatingRateRowMapper rateMapper = new FloatingRateRowMapper(true);
             final String sql = "select " + rateMapper.schema() + " where rate.id = ?";
-            return this.jdbcTemplate.queryForObject(sql, rateMapper, new Object[] { floatingRateId });
+            return this.jdbcTemplate.queryForObject(sql, rateMapper, new Object[] { floatingRateId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new FloatingRateNotFoundException(floatingRateId, e);
         }
@@ -82,7 +81,7 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
     public List<InterestRatePeriodData> retrieveInterestRatePeriods(final Long productId) {
         try {
             FloatingInterestRatePeriodRowMapper mapper = new FloatingInterestRatePeriodRowMapper();
-            return this.jdbcTemplate.query(mapper.schema(), mapper, new Object[] { productId });
+            return this.jdbcTemplate.query(mapper.schema(), mapper, new Object[] { productId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new FloatingRateNotFoundException("error.msg.floatingrate.not.found.for.product", e);
         }
@@ -92,8 +91,8 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
     public FloatingRateData retrieveBaseLendingRate() {
         try {
             FloatingRateRowMapper rateMapper = new FloatingRateRowMapper(true);
-            final String sql = "select " + rateMapper.schema() + " where rate.is_base_lending_rate = 1 and rate.is_active = 1";
-            return this.jdbcTemplate.queryForObject(sql, rateMapper);
+            final String sql = "select " + rateMapper.schema() + " where rate.is_base_lending_rate = true and rate.is_active = true";
+            return this.jdbcTemplate.queryForObject(sql, rateMapper); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new FloatingRateNotFoundException("error.msg.floatingrate.base.lending.rate.not.found", e);
         }
@@ -127,9 +126,9 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
             List<FloatingRatePeriodData> ratePeriods = null;
             if (addRatePeriods) {
                 FloatingRatePeriodRowMapper ratePeriodMapper = new FloatingRatePeriodRowMapper();
-                final String sql = "select " + ratePeriodMapper.schema() + " where period.is_active = 1 and period.floating_rates_id = ? "
-                        + " order by period.from_date desc ";
-                ratePeriods = jdbcTemplate.query(sql, ratePeriodMapper, new Object[] { id });
+                final String sql = "select " + ratePeriodMapper.schema()
+                        + " where period.is_active = true and period.floating_rates_id = ? " + " order by period.from_date desc ";
+                ratePeriods = jdbcTemplate.query(sql, ratePeriodMapper, new Object[] { id }); // NOSONAR
             }
             return new FloatingRateData(id, name, isBaseLendingRate, isActive, createdBy, createdOn, modifiedBy, modifiedOn, ratePeriods,
                     null);
@@ -199,19 +198,19 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
                 .append(" from m_product_loan as lp ")
                 .append(" join m_product_loan_floating_rates as plfr on lp.id = plfr.loan_product_id ")
                 .append(" join  m_floating_rates as linkedrate on linkedrate.id = plfr.floating_rates_id ")
-                .append("left join m_floating_rates_periods as linkedrateperiods on (linkedrate.id = linkedrateperiods.floating_rates_id and linkedrateperiods.is_active = 1) ")
+                .append("left join m_floating_rates_periods as linkedrateperiods on (linkedrate.id = linkedrateperiods.floating_rates_id and linkedrateperiods.is_active = true) ")
                 .append("left join ( ").append("    select blr.name, ").append("    blr.is_base_lending_rate, ")
                 .append("    blr.is_active, ").append("    blrperiods.from_date, ").append("    blrperiods.interest_rate ")
                 .append("    from m_floating_rates as blr ")
-                .append("    left join m_floating_rates_periods as blrperiods on (blr.id = blrperiods.floating_rates_id and blrperiods.is_active = 1) ")
-                .append("    where blr.is_base_lending_rate = 1 and blr.is_active = 1 ")
-                .append(") as baserate on (linkedrateperiods.is_differential_to_base_lending_rate = 1 and linkedrate.is_base_lending_rate = 0) ")
+                .append("    left join m_floating_rates_periods as blrperiods on (blr.id = blrperiods.floating_rates_id and blrperiods.is_active = true) ")
+                .append("    where blr.is_base_lending_rate = true and blr.is_active = true ")
+                .append(") as baserate on (linkedrateperiods.is_differential_to_base_lending_rate = true and linkedrate.is_base_lending_rate = false) ")
                 .append("where (baserate.from_date is null ").append("    or baserate.from_date = (select MAX(b.from_date) ")
                 .append("        from (select blr.name, ").append("            blr.is_base_lending_rate, ")
                 .append("            blr.is_active, ").append("            blrperiods.from_date, ")
                 .append("            blrperiods.interest_rate ").append("            from m_floating_rates as blr ")
-                .append("            left join m_floating_rates_periods as blrperiods on (blr.id = blrperiods.floating_rates_id and blrperiods.is_active = 1) ")
-                .append("            where blr.is_base_lending_rate = 1 and blr.is_active = 1 ").append("        ) as b ")
+                .append("            left join m_floating_rates_periods as blrperiods on (blr.id = blrperiods.floating_rates_id and blrperiods.is_active = true) ")
+                .append("            where blr.is_base_lending_rate = true and blr.is_active = true ").append("        ) as b ")
                 .append("        where b.from_date <= linkedrateperiods.from_date)) ").append("and lp.id = ? ")
                 .append("order by linkedratePeriods_from_date desc ");
 

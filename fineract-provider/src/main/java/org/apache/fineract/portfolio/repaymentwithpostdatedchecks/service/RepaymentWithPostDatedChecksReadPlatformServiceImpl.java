@@ -32,8 +32,10 @@ import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDat
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.exception.PostDatedCheckNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true)
 public class RepaymentWithPostDatedChecksReadPlatformServiceImpl implements RepaymentWithPostDatedChecksReadPlatformService {
 
     private final PostDatedChecksRepository postDatedChecksRepository;

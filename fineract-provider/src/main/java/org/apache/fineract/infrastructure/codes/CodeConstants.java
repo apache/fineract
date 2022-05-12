@@ -38,6 +38,7 @@ public class CodeConstants {
         }
 
         private static final Set<String> values = new HashSet<>();
+
         static {
             for (final CodevalueJSONinputParams type : CodevalueJSONinputParams.values()) {
                 values.add(type.value);

@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.organisation.workingdays.data.WorkingDaysData;
 import org.apache.fineract.organisation.workingdays.domain.RepaymentRescheduleType;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysEnumerations;
@@ -41,8 +40,8 @@ public class WorkingDaysReadPlatformServiceImpl implements WorkingDaysReadPlatfo
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public WorkingDaysReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public WorkingDaysReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private static final class WorkingDaysMapper implements RowMapper<WorkingDaysData> {
@@ -82,7 +81,7 @@ public class WorkingDaysReadPlatformServiceImpl implements WorkingDaysReadPlatfo
         try {
             final WorkingDaysMapper rm = new WorkingDaysMapper();
             final String sql = " select " + rm.schema();
-            WorkingDaysData data = this.jdbcTemplate.queryForObject(sql, rm, new Object[] {});
+            WorkingDaysData data = this.jdbcTemplate.queryForObject(sql, rm); // NOSONAR
             Collection<EnumOptionData> repaymentRescheduleOptions = repaymentRescheduleTypeOptions();
             return new WorkingDaysData(data, repaymentRescheduleOptions);
         } catch (final EmptyResultDataAccessException e) {

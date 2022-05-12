@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauConfigurationData;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,9 +38,9 @@ public class CreditBureauReadConfigurationServiceImpl implements CreditBureauRea
     private final PlatformSecurityContext context;
 
     @Autowired
-    public CreditBureauReadConfigurationServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
+    public CreditBureauReadConfigurationServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private static final class CbConfigMapper implements RowMapper<CreditBureauConfigurationData> {
@@ -74,7 +73,7 @@ public class CreditBureauReadConfigurationServiceImpl implements CreditBureauRea
         final CbConfigMapper rm = new CbConfigMapper();
         final String sql = "select " + rm.schema() + " where cbconfig.organisation_creditbureau_id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { id });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { id }); // NOSONAR
 
     }
 
@@ -85,7 +84,7 @@ public class CreditBureauReadConfigurationServiceImpl implements CreditBureauRea
         final CbConfigMapper rm = new CbConfigMapper();
         final String sql = "select " + rm.schema() + " where cbconfig.organisation_creditbureau_id= ?";
 
-        List<CreditBureauConfigurationData> config = this.jdbcTemplate.query(sql, rm, new Object[] { id });
+        List<CreditBureauConfigurationData> config = this.jdbcTemplate.query(sql, rm, new Object[] { id }); // NOSONAR
         Map<String, String> configuration = new HashMap<String, String>();
         for (CreditBureauConfigurationData data : config) {
             configuration.put(data.getConfigurationKey(), data.getValue());

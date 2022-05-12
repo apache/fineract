@@ -73,6 +73,10 @@ public class PortfolioAccountDTO {
         return this.accountStatus;
     }
 
+    public long getFirstAccountStatus() {
+        return this.accountStatus[0];
+    }
+
     public Integer getDepositType() {
         return this.depositType;
     }

@@ -26,7 +26,6 @@ import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.glaccount.service.GLAccountReadPlatformService;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.organisation.provisioning.data.ProvisioningCategoryData;
 import org.apache.fineract.organisation.provisioning.data.ProvisioningCriteriaData;
 import org.apache.fineract.organisation.provisioning.data.ProvisioningCriteriaDefinitionData;
@@ -49,12 +48,12 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
     private final LoanProductReadPlatformService loanProductReaPlatformService;
 
     @Autowired
-    public ProvisioningCriteriaReadPlatformServiceImpl(final RoutingDataSource dataSource,
+    public ProvisioningCriteriaReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate,
             final ProvisioningCategoryReadPlatformService provisioningCategoryReadPlatformService,
             final LoanProductReadPlatformService loanProductReadPlatformService,
             final GLAccountReadPlatformService glAccountReadPlatformService,
             final LoanProductReadPlatformService loanProductReaPlatformService) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.provisioningCategoryReadPlatformService = provisioningCategoryReadPlatformService;
         this.loanProductReadPlatformService = loanProductReadPlatformService;
         this.glAccountReadPlatformService = glAccountReadPlatformService;
@@ -95,7 +94,7 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
     public Collection<ProvisioningCriteriaData> retrieveAllProvisioningCriterias() {
         ProvisioningCriteriaRowMapper mapper = new ProvisioningCriteriaRowMapper();
         final String sql = "select " + mapper.schema();
-        return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, mapper); // NOSONAR
     }
 
     private static final class ProvisioningCriteriaRowMapper implements RowMapper<ProvisioningCriteriaData> {
@@ -131,7 +130,7 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
     private List<ProvisioningCriteriaDefinitionData> retrieveProvisioningDefinitions(Long criteriaId) {
         ProvisioningCriteriaDefinitionRowMapper rowMapper = new ProvisioningCriteriaDefinitionRowMapper();
         final String sql = "select " + rowMapper.schema() + " where pc.criteria_id = ?";
-        return this.jdbcTemplate.query(sql, rowMapper, new Object[] { criteriaId });
+        return this.jdbcTemplate.query(sql, rowMapper, new Object[] { criteriaId }); // NOSONAR
     }
 
     private static final class ProvisioningCriteriaDefinitionRowMapper implements RowMapper<ProvisioningCriteriaDefinitionData> {
@@ -173,7 +172,7 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
     private String retrieveCriteriaName(Long criteriaId) {
         ProvisioningCriteriaNameRowMapper rowMapper = new ProvisioningCriteriaNameRowMapper();
         final String sql = "select " + rowMapper.schema() + " from m_provisioning_criteria pc where pc.id = ?";
-        return this.jdbcTemplate.queryForObject(sql, rowMapper, new Object[] { criteriaId });
+        return this.jdbcTemplate.queryForObject(sql, rowMapper, new Object[] { criteriaId }); // NOSONAR
     }
 
     private static final class ProvisioningCriteriaNameRowMapper implements RowMapper<String> {

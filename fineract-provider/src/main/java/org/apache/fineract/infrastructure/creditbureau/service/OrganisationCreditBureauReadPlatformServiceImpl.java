@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.creditbureau.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.creditbureau.data.OrganisationCreditBureauData;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,9 +35,9 @@ public class OrganisationCreditBureauReadPlatformServiceImpl implements Organisa
     private final PlatformSecurityContext context;
 
     @Autowired
-    public OrganisationCreditBureauReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
+    public OrganisationCreditBureauReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private static final class OrganisationCreditBureauMapper implements RowMapper<OrganisationCreditBureauData> {
@@ -46,7 +45,7 @@ public class OrganisationCreditBureauReadPlatformServiceImpl implements Organisa
         public String schema() {
             return "ocb.id as orgCbId,ocb.alias as orgCbAlias,cb.name as creditbureauName,cb.product as creditbureauProduct,cb.country as creditbureauCountry,"
                     + "concat(cb.product,' - ',cb.name,' - ',cb.country) as CreditBureauSummary,"
-                    + "ocb.creditbureau_id as cbid,ocb.isActive  as isActive"
+                    + "ocb.creditbureau_id as cbid,ocb.is_active  as isActive"
                     + " from m_organisation_creditbureau ocb,m_creditbureau cb where ocb.creditbureau_id=cb.id";
 
         }
@@ -75,7 +74,7 @@ public class OrganisationCreditBureauReadPlatformServiceImpl implements Organisa
         final OrganisationCreditBureauMapper rm = new OrganisationCreditBureauMapper();
         final String sql = "select " + rm.schema() + " order by ocb.id";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
     }
 
     @Override
@@ -85,7 +84,7 @@ public class OrganisationCreditBureauReadPlatformServiceImpl implements Organisa
         final OrganisationCreditBureauMapper rm = new OrganisationCreditBureauMapper();
         final String sql = "select " + rm.schema() + " and ocb.id=?";
 
-        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { orgCbId });
+        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { orgCbId }); // NOSONAR
     }
 
 }

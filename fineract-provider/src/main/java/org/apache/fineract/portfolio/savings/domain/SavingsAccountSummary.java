@@ -123,7 +123,7 @@ public final class SavingsAccountSummary {
     public void updateSummaryWithPivotConfig(final MonetaryCurrency currency, final SavingsAccountTransactionSummaryWrapper wrapper,
             final SavingsAccountTransaction transaction, final List<SavingsAccountTransaction> savingsAccountTransactions) {
 
-        if (transaction != null) {
+        if (transaction != null && !transaction.isReversalTransaction()) {
             Money transactionAmount = Money.of(currency, transaction.getAmount());
             switch (SavingsAccountTransactionType.fromInt(transaction.getTypeOf())) {
                 case DEPOSIT:
@@ -260,6 +260,10 @@ public final class SavingsAccountSummary {
 
     public BigDecimal getAccountBalance() {
         return this.accountBalance;
+    }
+
+    public void setAccountBalance(BigDecimal accountBalance) {
+        this.accountBalance = accountBalance;
     }
 
     public BigDecimal getTotalInterestPosted() {

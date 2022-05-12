@@ -38,7 +38,6 @@ import org.apache.fineract.infrastructure.campaigns.email.exception.EmailBusines
 import org.apache.fineract.infrastructure.campaigns.email.exception.EmailCampaignNotFound;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -57,8 +56,8 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
     private final EmailCampaignMapper emailCampaignMapper;
 
     @Autowired
-    public EmailCampaignReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public EmailCampaignReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
         this.businessRuleMapper = new BusinessRuleMapper();
         this.emailCampaignMapper = new EmailCampaignMapper();
     }
@@ -72,7 +71,7 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
             sql.append("ec.id as id, ");
             sql.append("ec.campaign_name as campaignName, ");
             sql.append("ec.campaign_type as campaignType, ");
-            sql.append("ec.businessRule_id as businessRuleId, ");
+            sql.append("ec.business_rule_id as businessRuleId, ");
             sql.append("ec.email_subject as emailSubject, ");
             sql.append("ec.email_message as emailMessage, ");
             sql.append("ec.email_attachment_file_format as emailAttachmentFileFormat, ");
@@ -232,7 +231,7 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
         final String searchType = "Email";
         final String sql = "select " + this.businessRuleMapper.schema() + " where sr.report_type = ?";
 
-        return this.jdbcTemplate.query(sql, this.businessRuleMapper, searchType);
+        return this.jdbcTemplate.query(sql, this.businessRuleMapper, searchType); // NOSONAR
     }
 
     @Override
@@ -241,7 +240,8 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
 
         final String sql = "select " + this.businessRuleMapper.schema() + " where sr.report_type = ? and sr.id = ?";
 
-        List<EmailBusinessRulesData> retrieveOne = this.jdbcTemplate.query(sql, this.businessRuleMapper, searchType, resourceId);
+        List<EmailBusinessRulesData> retrieveOne = this.jdbcTemplate.query(sql, this.businessRuleMapper, // NOSONAR
+                new Object[] { searchType, resourceId });
         try {
             EmailBusinessRulesData emailBusinessRulesData = retrieveOne.get(0);
             return emailBusinessRulesData;
@@ -253,10 +253,10 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
 
     @Override
     public EmailCampaignData retrieveOne(Long resourceId) {
-        final Integer isVisible = 1;
+        final boolean isVisible = true;
         try {
             final String sql = "select " + this.emailCampaignMapper.schema + " where ec.id = ? and ec.is_visible = ?";
-            return this.jdbcTemplate.queryForObject(sql, this.emailCampaignMapper, resourceId, isVisible);
+            return this.jdbcTemplate.queryForObject(sql, this.emailCampaignMapper, new Object[] { resourceId, isVisible }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new EmailCampaignNotFound(resourceId, e);
         }
@@ -264,19 +264,19 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
 
     @Override
     public Collection<EmailCampaignData> retrieveAllCampaign() {
-        final Integer visible = 1;
+        final boolean visible = true;
         final String sql = "select " + this.emailCampaignMapper.schema() + " where ec.is_visible = ?";
-        return this.jdbcTemplate.query(sql, this.emailCampaignMapper, visible);
+        return this.jdbcTemplate.query(sql, this.emailCampaignMapper, visible); // NOSONAR
     }
 
     @Override
     public Collection<EmailCampaignData> retrieveAllScheduleActiveCampaign() {
         final Integer scheduleCampaignType = EmailCampaignType.SCHEDULE.getValue();
         final Integer statusEnum = EmailCampaignStatus.ACTIVE.getValue();
-        final Integer visible = 1;
+        final boolean visible = true;
         final String sql = "select " + this.emailCampaignMapper.schema()
                 + " where ec.status_enum = ? and ec.campaign_type = ? and ec.is_visible = ?";
-        return this.jdbcTemplate.query(sql, this.emailCampaignMapper, statusEnum, scheduleCampaignType, visible);
+        return this.jdbcTemplate.query(sql, this.emailCampaignMapper, new Object[] { statusEnum, scheduleCampaignType, visible }); // NOSONAR
     }
 
 }

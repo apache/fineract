@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -178,7 +179,7 @@ public class LoanImportHandlerTest {
         firstLoanRow.createCell(LoanConstants.CLIENT_EXTERNAL_ID).setCellValue(externalId);
         firstLoanRow.createCell(LoanConstants.PRODUCT_COL).setCellValue(loanProductJson.getString("name"));
         firstLoanRow.createCell(LoanConstants.LOAN_OFFICER_NAME_COL).setCellValue((String) staffMap.get("displayName"));
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         Date date = simpleDateFormat.parse("13 May 2017");
         firstLoanRow.createCell(LoanConstants.SUBMITTED_ON_DATE_COL).setCellValue(date);
         firstLoanRow.createCell(LoanConstants.APPROVED_DATE_COL).setCellValue(date);

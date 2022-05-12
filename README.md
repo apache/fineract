@@ -25,11 +25,11 @@ Requirements
 
 You can run the required version of the database server in a container, instead of having to install it, like this:
 
-    docker run --name mariadb-10.6 -p 3306:3306 -e MARIADB_ROOT_PASSWORD=mysql -d mariadb:10.6
+    docker run --name mariadb-10.8 -p 3306:3306 -e MARIADB_ROOT_PASSWORD=mysql -d mariadb:10.8
 
 and stop and destroy it like this:
 
-    docker rm -f mariadb-10.6
+    docker rm -f mariadb-10.8
 
 Beware that this database container database keeps its state inside the container and not on the host filesystem.  It is lost when you destroy (rm) this container.  This is typically fine for development.  See [Caveats: Where to Store Data on the database container documentation](https://hub.docker.com/_/mariadb) re. how to make it persistent instead of ephemeral.
 
@@ -49,8 +49,10 @@ Instructions to build the JAR file
 ============
 1. Clone the repository or download and extract the archive file to your local directory.
 2. Run `./gradlew clean bootJar` to build a modern cloud native fully self contained JAR file which will be created at `fineract-provider/build/libs` directory.
-3. As we are not allowed to include a JDBC driver in the built JAR, download a JDBC driver of your choice. For example: `wget https://downloads.mariadb.com/Connectors/java/connector-java-2.7.3/mariadb-java-client-2.7.3.jar`
+3. As we are not allowed to include a JDBC driver in the built JAR, download a JDBC driver of your choice. For example: `wget https://downloads.mariadb.com/Connectors/java/connector-java-2.7.5/mariadb-java-client-2.7.5.jar`
 4. Start the jar and pass the directory where you have downloaded the JDBC driver as loader.path, for example: `java -Dloader.path=. -jar fineract-provider/build/libs/fineract-provider.jar` (does not require external Tomcat)
+
+NOTE: we cannot upgrade to version 3.0.x of the MariaDB driver just yet; have to wait until 3.0.4 is out for a bug fix.
 
 The tenants database connection details are configured [via environment variables (as with Docker container)](#instructions-to-run-using-docker-and-docker-compose), e.g. like this:
 
@@ -188,6 +190,8 @@ NOTE: we'll keep backwards compatibility until one of the next releases to ensur
 
 SSL configuration
 =================
+
+Read also [the HTTPS related doc](fineract-doc/src/docs/en/deployment.adoc#https).
 
 By default SSL is enabled, but all SSL related properties are now tunable. SSL can be turned off by setting the environment variable `FINERACT_SERVER_SSL_ENABLED` to false. If you do that then please make sure to also change the server port to `8080` via the variable `FINERACT_SERVER_PORT`, just for the sake of keeping the conventions.
 You can choose now easily a different SSL keystore by setting `FINERACT_SERVER_SSL_KEY_STORE` with a path to a different (not embedded) keystore. The password can be set via `FINERACT_SERVER_SSL_KEY_STORE_PASSWORD`. See the `application.properties` file and the latest Spring Boot documentation (https://docs.spring.io/spring-boot/docs/current/reference/html/application-properties.html) for more details.
@@ -334,7 +338,7 @@ complies with the [Apache Software Foundation third-party license policy](https:
 Apache Fineract Platform API
 ============
 
-The API for Fineract is documented in [apiLive.htm](fineract-provider/src/main/resources/static/api-docs/apiLive.htm), and the [apiLive.htm can be viewed on Fineract.dev](https://demo.fineract.dev/fineract-provider/api-docs/apiLive.htm "API Documentation").  If you have your own Fineract instance running, you can find this documentation under [/fineract-provider/api-docs/apiLive.htm](https://localhost:8443/fineract-provider/api-docs/apiLive.htm).
+The API for Fineract is documented in [apiLive.htm](fineract-provider/src/main/resources/static/api-docs/apiLive.htm), and the [apiLive.htm can be viewed on Fineract.dev](https://fineract.apache.org/legacy-docs/apiLive.htm "API Documentation").  If you have your own Fineract instance running, you can find this documentation under [/fineract-provider/api-docs/apiLive.htm](https://localhost:8443/fineract-provider/api-docs/apiLive.htm).
 
 The Swagger documentation (work in progress; see [FINERACT-733](https://issues.apache.org/jira/browse/FINERACT-733)) can be accessed under [/fineract-provider/swagger-ui/index.html](https://localhost:8443/fineract-provider/swagger-ui/index.html) and [live Swagger UI here on Fineract.dev](https://demo.fineract.dev/fineract-provider/swagger-ui/index.html).
 
@@ -452,59 +456,6 @@ Upgrades sometimes require package name changes.  Changed code should ideally ha
 
 Our `ClasspathHellDuplicatesCheckRuleTest` detects classes that appear in more than 1 JAR.  If a version bump in [`build.gradle`](https://github.com/search?q=repo%3Aapache%2Ffineract+filename%3Abuild.gradle&type=Code&ref=advsearch&l=&l=) causes changes in transitives dependencies, then you may have to add related `exclude` to our [`dependencies.gradle`](https://github.com/apache/fineract/search?q=dependencies.gradle).  Running `./gradlew dependencies` helps to understand what is required.
 
-
-Releasing
----------
-
-[How to Release Apache Fineract](https://cwiki.apache.org/confluence/x/DRwIB) documents the process how we make the source code that is available here in this Git repository into a binary release tar.gz available on http://fineract.apache.org.
-
-Before you use Gradle to create a release you need to make sure that you provide the proper GPG parameters. You have to options:
-
-1. Provide the parameters via ~/.gradle/gradle.properties in your home folder:
-```
-signing.gnupg.keyName=7890ABCD
-signing.gnupg.passphrase=secret
-```
-
-IMPORTANT: Do not set your GPG secrets in one of the project gradle.properties and double check that you are not accidentally committing them to Git.
-
-The release command would look then look like this:
-```
-./gradlew -Pfineract.release clean build
-```
-
-2. Another way to provide these parameters are via project parameters on the command line. A release command would then look like this:
-```
-./gradlew -Pfineract.release -Psigning.gnupg.keyName=7890ABCD -Psigning.gnupg.passphrase=secret clean build
-```
-
-NOTE: Let's assume your GPG key ID would be "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCD" then you have to use the last 8 characters (i. e. "7890ABCD") for the signing plugin property "signing.gnupg.keyName".
-
-Above tasks will create the following files in folder build/distributions:
-
-- binary distribution file: apache-fineract-1.6.0-binary.tar.gz
-- ASCII armored signature for binary distribution: apache-fineract-1.6.0-binary.tar.gz.asc
-- SHA512 checksum for binary distribution: apache-fineract-1.6.0-binary.tar.gz.sha512
-- source distribution file: apache-fineract-1.6.0-src.tar.gz
-- ASCII armored signature for source distribution: apache-fineract-1.6.0-src.tar.gz.asc
-- SHA512 checksum for source distribution: apache-fineract-1.6.0-src.tar.gz.sha512
-
-The signatures are automatically verified by the build script. It will throw an exception if the verification fails.
-
-Additionally, you can verify the validity of the release distribution files e. g. with:
-```
-gpg --verify build/distributions/apache-fineract-1.6.0-binary.tar.gz.asc
-```
-
-The output should look somewhat like this:
-```
-gpg: assuming signed data in 'build/distributions/apache-fineract-1.6.0-binary.tgz'
-gpg: Signature made Mi 26 Aug 2020 17:17:45 CEST
-gpg:                using RSA key ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCD
-gpg: Good signature from "Aleksandar Vidakovic (Apache Fineract Release Manager) <aleks@apache.org>" [ultimate]
-```
-
-NOTE: All commands shown above are assuming that the current working directory is the project root folder.
 
 More Information
 ============

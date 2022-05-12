@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.documentmanagement.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.documentmanagement.api.ImagesApiResource.EntityTypeForImages;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepository;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepositoryFactory;
@@ -48,10 +47,10 @@ public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
     private final StaffRepositoryWrapper staffRepositoryWrapper;
 
     @Autowired
-    public ImageReadPlatformServiceImpl(final RoutingDataSource dataSource, final ContentRepositoryFactory documentStoreFactory,
+    public ImageReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final ContentRepositoryFactory documentStoreFactory,
             final ClientRepositoryWrapper clientRepositoryWrapper, StaffRepositoryWrapper staffRepositoryWrapper) {
         this.staffRepositoryWrapper = staffRepositoryWrapper;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.contentRepositoryFactory = documentStoreFactory;
         this.clientRepositoryWrapper = clientRepositoryWrapper;
     }
@@ -101,7 +100,7 @@ public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
 
             final String sql = "select " + imageMapper.schema(entityType);
 
-            final ImageData imageData = this.jdbcTemplate.queryForObject(sql, imageMapper, entityId);
+            final ImageData imageData = this.jdbcTemplate.queryForObject(sql, imageMapper, entityId); // NOSONAR
             final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(imageData.storageType());
             return contentRepository.fetchImage(imageData);
         } catch (final EmptyResultDataAccessException e) {

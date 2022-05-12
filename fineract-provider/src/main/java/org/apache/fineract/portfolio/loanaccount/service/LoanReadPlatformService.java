@@ -28,6 +28,7 @@ import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.apache.fineract.portfolio.floatingrates.data.InterestRatePeriodData;
+import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
@@ -37,6 +38,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.data.PaidInAdvanceData;
 import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
@@ -113,7 +115,7 @@ public interface LoanReadPlatformService {
 
     List<Long> fetchLoansForInterestRecalculation(Integer pageSize, Long maxLoanIdInList, String officeHierarchy);
 
-    LoanTransactionData retrieveLoanPrePaymentTemplate(Long loanId, LocalDate onDate);
+    LoanTransactionData retrieveLoanPrePaymentTemplate(LoanTransactionType repaymentTransactionType, Long loanId, LocalDate onDate);
 
     Collection<LoanTransactionData> retrieveWaiverLoanTransactions(Long loanId);
 
@@ -126,6 +128,8 @@ public interface LoanReadPlatformService {
     PaidInAdvanceData retrieveTotalPaidInAdvance(Long loanId);
 
     LoanTransactionData retrieveRefundByCashTemplate(Long loanId);
+
+    LoanTransactionData retrieveCreditBalanceRefundTemplate(Long loanId);
 
     Collection<InterestRatePeriodData> retrieveLoanInterestRatePeriodData(LoanAccountData loan);
 
@@ -147,4 +151,5 @@ public interface LoanReadPlatformService {
 
     List<LoanRepaymentScheduleInstallmentData> getRepaymentDataResponse(Long loanId);
 
+    CollectionData retrieveLoanCollectionData(Long loanId);
 }

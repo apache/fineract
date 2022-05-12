@@ -32,7 +32,7 @@
 
     <!-- See https://github.com/apache/fineract/#logging-guidelines for why by default we log only to INFO, only (WARN and) ERROR
          but it's still possible to override this using java -Dlogging.level.root=info -jar fineract-provider.jar, as per https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-custom-log-levels -->
-    <root level="warn">
+    <root level="info">
         <appender-ref ref="CONSOLE" />
     </root>
 

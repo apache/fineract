@@ -250,12 +250,8 @@ public class ShareAccountIntegrationTests {
         Assertions.assertEquals("shareAccountStatusType.rejected", String.valueOf(statusMap.get("code")));
         Map<String, Object> timelineMap = (Map<String, Object>) shareAccountData.get("timeline");
         List<Integer> dateList = (List<Integer>) timelineMap.get("rejectedDate");
-        Calendar cal = Calendar.getInstance();
-        cal.set(dateList.get(0), dateList.get(1) - 1, dateList.get(2));
-        Date rejectedDate = cal.getTime();
-        Assertions.assertEquals(
-                simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant())),
-                simple.format(rejectedDate));
+        Date rejectedDate = DateUtils.createDate(dateList.get(0), dateList.get(1), dateList.get(2));
+        Assertions.assertEquals(simple.format(DateUtils.convertLocalDateToDate(Utils.getLocalDateOfTenant())), simple.format(rejectedDate));
 
         List<Map<String, Object>> transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
         Assertions.assertNotNull(transactions);
@@ -264,9 +260,7 @@ public class ShareAccountIntegrationTests {
             Map<String, Object> transaction = transactions.get(i);
             Map<String, Object> transactionTypeMap = (Map<String, Object>) transaction.get("type");
             dateList = (List<Integer>) transaction.get("purchasedDate");
-            cal = Calendar.getInstance();
-            cal.set(dateList.get(0), dateList.get(1) - 1, dateList.get(2));
-            Date date = cal.getTime();
+            Date date = DateUtils.createDate(dateList.get(0), dateList.get(1), dateList.get(2));
             String transactionType = (String) transactionTypeMap.get("code");
             if (transactionType.equals("purchasedSharesType.purchased")) {
                 Assertions.assertEquals("25", String.valueOf(transaction.get("numberOfShares")));

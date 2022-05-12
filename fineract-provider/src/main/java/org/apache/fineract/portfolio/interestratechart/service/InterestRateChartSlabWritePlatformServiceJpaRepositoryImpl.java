@@ -76,7 +76,7 @@ public class InterestRateChartSlabWritePlatformServiceJpaRepositoryImpl implemen
 
         final InterestRateChartSlab interestRateChartSlab = this.interestRateChartSlabAssembler.assembleFrom(command);
 
-        this.chartSlabRepository.save(interestRateChartSlab);
+        this.chartSlabRepository.saveAndFlush(interestRateChartSlab);
 
         final Long interestRateChartId = interestRateChartSlab.getId();
 

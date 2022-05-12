@@ -41,7 +41,7 @@ public class ApiDocsTest {
 
     @Test
     public void testApiDocsAccess() {
-        Utils.performServerGet(requestSpec, responseSpec, "/fineract-provider/api-docs/apiLive.htm", null);
+        Utils.performServerGet(requestSpec, responseSpec, "/fineract-provider/legacy-docs/apiLive.htm", null);
     }
 
 }

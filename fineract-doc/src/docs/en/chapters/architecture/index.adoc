@@ -1,0 +1,25 @@
+= Architecture
+
+This document captures the major architectural decisions in platform. The purpose of the document is to provide a guide to the overall structure of the platform; where it fits in the overall context of an MIS solution and its internals so that contributors can more effectively understand how changes that they are considering can be made, and the consequences of those changes.
+
+The target audience for this report is both system integrators (who will use the document to gain an understanding of the structure of the platform and its design rationale) and platform contributors who will use the document to reason about future changes and who will update the document as the system evolves.
+
+include::history.adoc[leveloffset=+1]
+
+include::resources.adoc[leveloffset=+1]
+
+include::system.adoc[leveloffset=+1]
+
+include::functional.adoc[leveloffset=+1]
+
+include::principles.adoc[leveloffset=+1]
+
+include::design.adoc[leveloffset=+1]
+
+include::persistence.adoc[leveloffset=+1]
+
+include::validation.adoc[leveloffset=+1]
+
+include::technology.adoc[leveloffset=+1]
+
+include::modules.adoc[leveloffset=+1]

@@ -509,7 +509,8 @@ public class SchedulerJobsTestResults {
                 "Verifying Loan Repayment in Advance after Running Update Loan Paid in Advance Scheduler Job");
     }
 
-    // Invalid test case as it won't affect summary (Loan summary is properly updated before running this job)
+    // Invalid test case as it won't affect summary (Loan summary is properly
+    // updated before running this job)
     @Disabled
     @Test
     public void testUpdateLoanSummaryJobOutcome() throws InterruptedException {
@@ -575,10 +576,11 @@ public class SchedulerJobsTestResults {
         DateFormat monthDayFormat = new SimpleDateFormat("dd MMMM", Locale.US);
 
         Calendar todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.WEEK_OF_YEAR, -1);
-        final String VALID_FROM = dateFormat.format(todaysDate.getTime());
 
         final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+
+        todaysDate.add(Calendar.WEEK_OF_YEAR, -1);
+        final String VALID_FROM = dateFormat.format(todaysDate.getTime());
 
         todaysDate.add(Calendar.YEAR, 1);
         final String VALID_TO = dateFormat.format(todaysDate.getTime());
@@ -880,7 +882,8 @@ public class SchedulerJobsTestResults {
 
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String minOpenningBalance) {
-        // system.out.println("------------------------------CREATING NEW SAVINGS PRODUCT
+        // system.out.println("------------------------------CREATING NEW SAVINGS
+        // PRODUCT
         // ---------------------------------------");
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
         final String savingsProductJSON = savingsProductHelper //
@@ -892,7 +895,8 @@ public class SchedulerJobsTestResults {
     }
 
     private Integer createSavingsProduct(final String minOpenningBalance, final Account... accounts) {
-        // system.out.println("------------------------------CREATING NEW SAVINGS PRODUCT
+        // system.out.println("------------------------------CREATING NEW SAVINGS
+        // PRODUCT
         // ---------------------------------------");
         final String savingsProductJSON = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily() //
                 .withInterestPostingPeriodTypeAsQuarterly() //
@@ -958,7 +962,8 @@ public class SchedulerJobsTestResults {
     }
 
     private Integer createFixedDepositProduct(final String validFrom, final String validTo) {
-        // system.out.println("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT
+        // system.out.println("------------------------------CREATING NEW FIXED DEPOSIT
+        // PRODUCT
         // ---------------------------------------");
         FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(requestSpec, responseSpec);
         final String fixedDepositProductJSON = fixedDepositProductHelper //
@@ -970,7 +975,8 @@ public class SchedulerJobsTestResults {
 
     private Integer applyForFixedDepositApplication(final String clientID, final String productID, final String submittedOnDate,
             final String penalInterestType, String savingsId) {
-        // system.out.println("--------------------------------APPLYING FOR FIXED DEPOSIT ACCOUNT
+        // system.out.println("--------------------------------APPLYING FOR FIXED
+        // DEPOSIT ACCOUNT
         // --------------------------------");
         final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(requestSpec, responseSpec)
                 .withSubmittedOnDate(submittedOnDate).withSavings(savingsId).transferInterest(true)

@@ -1,0 +1,401 @@
+= Cheatsheet
+
+You can find the definitive manual on AsciiDoc syntax at https://docs.asciidoctor.org/asciidoc/latest[AsciiDoc documentation]. To help people get started, however, here is a simpler cheat sheet.
+
+== AsciiDoc vs Asciidoctor (format vs tool)
+
+When we refer to _AsciiDoc_ then we mean the language or format that this documentation is written in. AsciiDoc is a markup language similar to Markdown (but more powerful and expressive) designed for technical documentation. You don't need necessarily any specialized editors or tools to write your documentation in AsciiDoc, a plain text editor will do, but there are plenty of choices that give you a better experience (in this documentation we describe the basic usage with AsciiDoc plugins for IntelliJ, Eclipse and VSCode).
+
+Asciidoctor on the other hand is the command line tool we use to transform documents written in AsciiDoc into HTML and PDF (Epub3 and Docbook are also available). There are three variants available:
+
+- Asciidoctor (written in Ruby)
+- Asciidoctor.js (written in JavaScript, often used for browser previews)
+- AsciidoctorJ (Java lib that integrates the Ruby implementation via JRuby, e. g. the Asciidoctor Gradle plugin is based on that)
+
+CAUTION: Sometimes you will still find documentation related to the original incarnation of AsciiDoc/tor (written in Python). The format evolved quite a bit since then and the tools try to maintain a certain degree of backward compatibility, but there is no guarantee. We prefer to use the latest language specs as documented https://docs.asciidoctor.org/asciidoc/latest[here].
+
+== Basic AsciiDoc Syntax
+
+=== Bold
+
+Put asterisks around text to make it *bold*.
+
+NOTE: More info at https://docs.asciidoctor.org/asciidoc/latest/text/bold
+
+
+=== Italics
+
+Use underlines on either side of a string to put text into _italics_.
+
+NOTE: More info at https://docs.asciidoctor.org/asciidoc/latest/text/italic
+
+=== Headings
+
+Equal signs (`=`) are used for heading levels. Each equal sign is a level. Each page can *only* have one top level (i.e., only one section with a single `=`).
+
+Levels should be appropriately nested. During the build, validation occurs to ensure that level 3s are preceded by level 2s, level 4s are preceded by level 3s, etc. Including out-of-sequence heading levels (such as a level 3 then a level 5) will not fail the build, but will produce an error.
+
+NOTE: More info at https://docs.asciidoctor.org/asciidoc/latest/sections/titles-and-levels/
+
+== Code Examples
+
+Use backticks ``` for text that should be monospaced, such as code or a class name in the body of a paragraph.
+
+NOTE: More info at https://docs.asciidoctor.org/asciidoc/latest/text/monospace/
+
+Longer code examples can be separated from text with `source` blocks.
+These allow defining the syntax being used so the code is properly highlighted.
+
+.Example Source Block
+[source,asciidoc]
+----
+[source,xml]
+<field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false" />
+----
+
+If your code block will include line breaks, put 4 hyphens (`----`) before and after the entire block.
+
+NOTE: More info at https://docs.asciidoctor.org/asciidoc/latest/verbatim/source-blocks/
+
+=== Source Block Syntax Highlighting
+
+The HTML output uses Rouge to add syntax highlighting to code examples. This is done by adding the language of the code block after the `source`, as shown in the above example source block (`xml` in that case).
+
+Rouge has a long selection of lexers available. You can see the full list at https://github.com/rouge-ruby/rouge/wiki/List-of-supported-languages-and-lexers. Use one of the valid short names to get syntax highlighting for that language.
+
+Ideally, we will have an appropriate lexer to use for all source blocks, but that's not possible.
+When in doubt, choose `text`, or leave it blank.
+
+=== Importing Code Snippets from Other Files
+
+The build system has the ability to "include" snippets located in other files -- even non-AsciiDoc files such as `*.java` source code files.
+
+We've configured a global attribute called `\{rootdir}` that you can use to reference these files consistently from Fineract's project root folder.
+
+Snippets are bounded by _tag_ comments placed at the start and end of the section you would like to import. Opening tags look like: `// tag::snippetName[]`. Closing tags follow the format: `// end::snippetName[]`.
+
+Snippets can be inserted into an `.adoc` file using an `include` directive, following the format: `include::\{rootdir}/<directory-under-root-folder>/<file-name>[tag=snippetName]`.
+
+IMPORTANT: You could also use relative paths to reference include files, but it is preferred to always use the root folder as a starting point. Like this you can be sure that the preview in your editor of choice works.
+
+For example, if we wanted to highlight a specific section of the following Cucumber test definition (more on that in section Cucumber Testing) `ClasspathDuplicatesStepDefinitions.java` file located under `fineract-provider/src/test/java/org/apache/fineract/infrastructure/classpath/`.
+
+[source,asciidoc]
+--
+[source,java,indent=0]
+----
+\include::{rootdir}/fineract-provider/src/test/java/org/apache/fineract/infrastructure/classpath/ClasspathDuplicatesStepDefinitions.java[tag=then]
+----
+--
+
+For more information on the `include` directive, see the documentation at https://docs.asciidoctor.org/asciidoc/latest/directives/include.
+
+=== Block Titles
+
+Titles can be added to most blocks (images, source blocks, tables, etc.) by simply prefacing the title with a period (`.`). For example, to add a title to the source block example above:
+
+[source,asciidoc]
+----
+.Example ID field
+[source,xml]
+<field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false" />
+----
+
+NOTE: More info at https://docs.asciidoctor.org/asciidoc/latest/blocks/add-title
+
+== Links
+
+=== Link to Sites on the Internet
+
+When converting content to HTML, Asciidoctor will automatically render many link types (such as `http:` and `mailto:`) without any additional syntax. However, you can add a name to a link by adding the URI followed by square brackets:
+
+[source,asciidoc]
+----
+http://fineract.apache.org/[Fineract Website]
+----
+
+NOTE: More info at https://docs.asciidoctor.org/asciidoc/latest/macros/url-macro
+
+=== Link to Other Pages/Sections of the Guide
+
+A warning up front, linking to other pages can be a little painful. There are slightly different rules depending on the type of link you want to create, and where you are linking from. The build process includes a validation for _internal_ or _inter-page_ links, so if you can build the docs locally, you can use that to verify you constructed your link properly. With all the below examples, you can add text to display as the link title by putting the display text in brackets after the link, as in:
+
+[source,asciidoc]
+----
+xref:indexing-guide:schema-api.adoc#modify-the-schema[Modify the Schema]
+----
+
+You can also use the title of the Page or Section you are linking to by using an empty display text.
+This is useful in case the title of the page or section changes. In that case you won't need to change the display text for every link that refers to that page/section.
+
+See an example below:
+
+[source,asciidoc]
+----
+xref:indexing-guide:schema-api.adoc#modify-the-schema[]
+----
+
+==== Link to a Section on the Same Page
+
+To link to an anchor (or section title) on the _same page_, you can simply use double angle brackets (`<< >>`) around the anchor/heading/section title you want to link to. Any section title (a heading that starts with equal signs) automatically becomes an anchor during conversion and is available for deep linking.
+
+Example::
+If I have a section on a page that looks like this (from `process.adoc`):
++
+[source,asciidoc]
+----
+== Steps
+
+Common parameters for all steps are:
+----
++
+To link to this section from another part of the same `process.adoc` page, I simply need to put the section title in double angle brackets, as in:
++
+[source,asciidoc]
+See also the <<Steps>> section.
++
+The section title will be used as the display text; to customize that add a comma after the the section title, then the text you want used for display.
+
+NOTE: More info at https://docs.asciidoctor.org/asciidoc/latest/macros/xref/#internal-cross-references
+
+==== Link to a Section with an Anchor ID
+
+When linking to any section (on the same page or another one), you must also be aware of any pre-defined anchors that may be in use (these will be in double brackets, like `[[ ]]`).
+When the page is converted, those will be the references your link needs to point to.
+
+Example::
+Take this example from `configsets-api.adoc`:
++
+[source,asciidoc]
+----
+[[configsets-create]]
+== Create a ConfigSet
+----
++
+To link to this section, there are two approaches depending on where you are linking from:
+
+* From the same page, simply use the anchor name: `\<<configsets-create>>`.
+* From another page, use the page name and the anchor name: `\xref:configuration-guide:configsets-api.adoc#configsets-create[]`.
+
+==== Link to Another Page
+
+To link to _another page_ or a section on another page, you must refer to the full filename and refer to the section you want to link to.
+
+When you want to refer the reader to another page without deep-linking to a section, Asciidoctor allows this by merely omitting the `#` and section id.
+
+Example::
+To construct a link to the `process.adoc` page, we need to refer to the file name (`process.adoc`), as well as the module that the file resides in (`release/`).
++
+It's preferred to also always use the page name to give the reader better context for where the link goes.
+As in:
++
+[source,asciidoc]
+----
+For more about upgrades, see xref:release:process.adoc[Fineract Release Process].
+----
+
+==== Link to Another Page in the same folder
+
+If the page that contains the link and the page being linked to reside in the same module, there is no need to include the module name after `xref:`
+
+Example::
+To construct a link to the `process-step01.adoc` page from `process.adoc` page, we do not need to include the module name because they both reside in the `upgrade-notes` module.
++
+[source,asciidoc]
+----
+For more information on the first step of the release process, see the section \xref:process-step01.adoc[].
+----
+
+==== Link to a Section on Another Page
+
+Linking to a section is the same conceptually as linking to the top of a page, you just need to take a little extra care to format the anchor ID in your link reference properly.
+
+When you link to a section on another page, you must make a simple conversion of the title into the format of the section ID that will be created during the conversion. These are the rules that transform the sections:
+
+Example::
+TBD
+
+NOTE: More info at https://docs.asciidoctor.org/asciidoc/latest/macros/inter-document-xref
+
+== Ordered and Unordered Lists
+
+AsciiDoc supports three types of lists:
+
+* Unordered lists
+* Ordered lists
+* Labeled lists
+
+Each type of list can be mixed with the other types. So, you could have an ordered list inside a labeled list if necessary.
+
+=== Unordered Lists
+
+Simple bulleted lists need each line to start with an asterisk (`*`). It should be the first character of the line, and be followed by a space.
+
+NOTE: More info at https://docs.asciidoctor.org/asciidoc/latest/lists/unordered
+
+=== Ordered Lists
+
+Numbered lists need each line to start with a period (`.`). It should be the first character of the line, and be followed by a space. This style is preferred over manually numbering your list.
+
+NOTE: More info at https://docs.asciidoctor.org/asciidoc/latest/lists/ordered
+
+=== Description Lists
+
+These are like question & answer lists or glossary definitions.
+Each line should start with the list item followed by double colons (`::`), then a space or new line. Labeled lists can be nested by adding an additional colon (such as `:::`, etc.). If your content will span multiple paragraphs or include source blocks, etc., you will want to add a plus sign (`+`) to keep the sections together for your reader.
+
+TIP: We prefer this style of list for parameters because it allows more freedom in how you present the details for each parameter. For example, it supports ordered or unordered lists inside it automatically, and you can include multiple paragraphs and source blocks without trying to cram them into a smaller table cell.
+
+NOTE: More info at https://docs.asciidoctor.org/asciidoc/latest/lists/description
+
+== Images
+
+There are two ways to include an image: inline or as a block. Inline images are those where text will flow around the image. Block images are those that appear on their own line, set off from any other text on the page. Both approaches use the `image` tag before the image filename, but the number of colons after `image` define if it is inline or a block. Inline images use one colon (`image:`), while block images use two colons (`image::`). Block images automatically include a caption label and a number (such as `Figure 1`). If a block image includes a title, it will be included as the text of the caption. Optional attributes allow you to set the alt text, the size of the image, if it should be a link, float and alignment. We have defined a global attribute `\{imagesdir}` to standardize the location for all images (`fineract-doc/src/docs/en/images`).
+
+NOTE: More info at https://docs.asciidoctor.org/asciidoc/latest/macros/images
+
+== Tables
+
+Tables can be complex, but it is pretty easy to make a basic table that fits most needs.
+
+=== Basic Tables
+
+The basic structure of a table is similar to Markdown, with pipes (`|`) delimiting columns between rows:
+
+[source,asciidoc]
+----
+|===
+| col 1 row 1 | col 2 row 1|
+| col 1 row 2 | col 2 row 2|
+|===
+----
+
+Note the use of `|===` at the start and end. For basic tables that's not exactly required, but it does help to delimit the start and end of the table in case you accidentally introduce (or maybe prefer) spaces between the rows.
+
+=== Header Rows
+
+To add a header to a table, you need only set the `header` attribute at the start of the table:
+
+[source,asciidoc]
+----
+[options="header"]
+|===
+| header col 1 | header col 2|
+| col 1 row 1 | col 2 row 1|
+| col 1 row 2 | col 2 row 2|
+|===
+----
+
+=== Defining Column Styles
+
+If you need to define specific styles to all rows in a column, you can do so with the attributes.
+
+This example will center all content in all rows:
+
+[source,asciidoc]
+----
+[cols="2*^" options="header"]
+|===
+| header col 1 | header col 2|
+| col 1 row 1 | col 2 row 1|
+| col 1 row 2 | col 2 row 2|
+|===
+----
+
+Alignments or any other styles can be applied only to a specific column. For example, this would only center the last column of the table:
+
+[source,asciidoc]
+----
+[cols="2*,^" options="header"]
+|===
+| header col 1 | header col 2|
+| col 1 row 1 | col 2 row 1|
+| col 1 row 2 | col 2 row 2|
+|===
+----
+
+[NOTE]
+.Many more examples of formatting:
+====
+* Columns: https://docs.asciidoctor.org/asciidoc/latest/tables/add-columns/
+* Cells and rows: https://docs.asciidoctor.org/asciidoc/latest/tables/add-cells-and-rows/
+====
+
+=== More Options
+
+Tables can also be given footer rows, borders, and captions. You can  determine the width of columns, or the width of the table as a whole.
+
+CSV or DSV can also be used instead of formatting the data in pipes.
+
+NOTE: More info at https://docs.asciidoctor.org/asciidoc/latest/tables/build-a-basic-table/
+
+== Admonitions (Notes, Warnings)
+
+AsciiDoc supports several types of callout boxes, called "admonitions":
+
+* NOTE
+* TIP
+* IMPORTANT
+* CAUTION
+* WARNING
+
+It is enough to start a paragraph with one of these words followed by a colon (such as `NOTE:`). When it is converted to HTML, those sections will be formatted properly - indented from the main text and showing an icon inline.
+
+You can add titles to admonitions by making it an admonition block. The structure of an admonition block is like this:
+
+[source,asciidoc]
+----
+.Title of Note
+[NOTE]
+====
+Text of note
+====
+----
+
+In this example, the type of admonition is included in square brackets (`[NOTE]`), and the title is prefixed with a period. Four equal signs give the start and end points of the note text (which can include new lines, lists, code examples, etc.).
+
+NOTE: More info at https://docs.asciidoctor.org/asciidoc/latest/blocks/admonitions/
+
+== STEM Notation Support
+
+We have set up the Ref Guide to be able to support STEM notation whenever it's needed.
+
+The http://asciimath.org/[AsciiMath] syntax is supported by default, but LaTeX syntax is also available.
+
+To insert a mathematical formula inline with your text, you can simply write:
+
+[source,asciidoc]
+----
+stem:[a//b]
+----
+
+MathJax.js will render the formula as proper mathematical notation when a user loads the page. When the above example is converted to HTML, it will look like this to a user: stem:[a//b]
+
+To insert LaTeX, preface the formula with `latexmath` instead of `stem`:
+
+[source,asciidoc]
+----
+latexmath:[tp \leq 1 - (1 - sim^{rows})^{bands}]
+----
+
+Long formulas, or formulas which should to be set off from the main text, can use the block syntax prefaced by `stem` or `latexmath`:
+
+[source,asciidoc]
+----
+[stem]
+++++
+sqrt(3x-1)+(1+x)^2 < y
+++++
+----
+
+or for LaTeX:
+
+[source,asciidoc]
+----
+[latexmath]
+++++
+[tp \leq 1 - (1 - sim^{rows})^{bands}]
+++++
+----
+
+NOTE: More info at https://docs.asciidoctor.org/asciidoc/latest/stem/stem

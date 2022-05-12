@@ -27,7 +27,6 @@ import java.util.Date;
 import java.util.List;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.address.data.AddressData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,10 +42,10 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
     private final CodeValueReadPlatformService readService;
 
     @Autowired
-    public AddressReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
+    public AddressReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             final CodeValueReadPlatformService readService) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.readService = readService;
     }
 
@@ -181,7 +180,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
         final AddFieldsMapper rm = new AddFieldsMapper();
         final String sql = "select " + rm.schema() + " where client.id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { clientid });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { clientid }); // NOSONAR
     }
 
     @Override
@@ -189,7 +188,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
         this.context.authenticatedUser();
         final AddMapper rm = new AddMapper();
         final String sql = "select " + rm.schema() + " and ca.client_id=?";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { clientid });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { clientid }); // NOSONAR
     }
 
     @Override
@@ -199,31 +198,29 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
         final AddMapper rm = new AddMapper();
         final String sql = "select " + rm.schema() + " and ca.client_id=? and ca.address_type_id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { clientid, typeid });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { clientid, typeid }); // NOSONAR
     }
 
     @Override
     public Collection<AddressData> retrieveAddressbyTypeAndStatus(final long clientid, final long typeid, final String status) {
         this.context.authenticatedUser();
-        Boolean temp = false;
-        temp = Boolean.parseBoolean(status);
+        boolean temp = Boolean.parseBoolean(status);
 
         final AddMapper rm = new AddMapper();
         final String sql = "select " + rm.schema() + " and ca.client_id=? and ca.address_type_id=? and ca.is_active=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { clientid, typeid, temp });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { clientid, typeid, temp }); // NOSONAR
     }
 
     @Override
     public Collection<AddressData> retrieveAddressbyStatus(final long clientid, final String status) {
         this.context.authenticatedUser();
-        Boolean temp = false;
-        temp = Boolean.parseBoolean(status);
+        boolean temp = Boolean.parseBoolean(status);
 
         final AddMapper rm = new AddMapper();
         final String sql = "select " + rm.schema() + " and ca.client_id=? and ca.is_active=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { clientid, temp });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { clientid, temp }); // NOSONAR
     }
 
     @Override

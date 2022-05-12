@@ -22,6 +22,7 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import javax.persistence.PersistenceException;
@@ -34,7 +35,6 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauConfigurations;
 import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauReportData;
 import org.apache.fineract.infrastructure.creditbureau.domain.CreditBureau;
@@ -67,9 +67,8 @@ public class CreditReportWritePlatformServiceImpl implements CreditReportWritePl
             .resource("creditBureauIntegration");
 
     @Autowired
-    public CreditReportWritePlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-            final FromJsonHelper fromApiJsonHelper, final TokenRepositoryWrapper tokenRepository,
-            final CreditBureauConfigurationRepositoryWrapper configDataRepository,
+    public CreditReportWritePlatformServiceImpl(final PlatformSecurityContext context, final FromJsonHelper fromApiJsonHelper,
+            final TokenRepositoryWrapper tokenRepository, final CreditBureauConfigurationRepositoryWrapper configDataRepository,
             final CreditBureauTokenCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final CreditBureauLoanProductMappingRepository loanProductMappingRepository,
             final CreditBureauRepository creditBureauRepository, final CreditReportRepository creditReportRepository,
@@ -103,14 +102,18 @@ public class CreditReportWritePlatformServiceImpl implements CreditReportWritePl
                 CreditBureauReportData reportobj = this.thitsaWorksCreditBureauIntegrationWritePlatformService
                         .getCreditReportFromThitsaWorks(command);
 
-                return new CommandProcessingResultBuilder().withCreditReport(reportobj).build();
+                Map<String, Object> reportMap = Map.of("name", reportobj.getName(), "gender", reportobj.getGender(), "address",
+                        reportobj.getAddress(), "creditScore", reportobj.getCreditScore(), "borrowerInfo", reportobj.getBorrowerInfo(),
+                        "openAccounts", reportobj.getOpenAccounts(), "closedAccounts", reportobj.getClosedAccounts());
+
+                return new CommandProcessingResultBuilder().withCreditReport(reportMap).build();
             }
 
             baseDataValidator.reset().failWithCode("creditBureau.has.not.been.Integrated");
             throw new PlatformApiDataValidationException("creditBureau.has.not.been.Integrated", "creditBureau.has.not.been.Integrated",
                     dataValidationErrors);
 
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleTokenDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException ee) {
@@ -189,7 +192,7 @@ public class CreditReportWritePlatformServiceImpl implements CreditReportWritePl
             }
 
             return new CommandProcessingResultBuilder().withEntityId(creditReport.getId()).build();
-        } catch (final DataIntegrityViolationException dve) {
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleTokenDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException ee) {

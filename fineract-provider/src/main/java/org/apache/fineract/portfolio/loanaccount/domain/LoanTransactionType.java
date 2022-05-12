@@ -51,7 +51,11 @@ public enum LoanTransactionType {
     REFUND(16, "loanTransactionType.refund"), //
     CHARGE_PAYMENT(17, "loanTransactionType.chargePayment"), //
     REFUND_FOR_ACTIVE_LOAN(18, "loanTransactionType.refund"), //
-    INCOME_POSTING(19, "loanTransactionType.incomePosting");
+    INCOME_POSTING(19, "loanTransactionType.incomePosting"), //
+    CREDIT_BALANCE_REFUND(20, "loanTransactionType.creditBalanceRefund"), //
+    MERCHANT_ISSUED_REFUND(21, "loanTransactionType.merchantIssuedRefund"), //
+    PAYOUT_REFUND(22, "loanTransactionType.payoutRefund"), //
+    GOODWILL_CREDIT(23, "loanTransactionType.goodwillCredit");
 
     private final Integer value;
     private final String code;
@@ -131,6 +135,18 @@ public enum LoanTransactionType {
             case 19:
                 loanTransactionType = LoanTransactionType.INCOME_POSTING;
             break;
+            case 20:
+                loanTransactionType = LoanTransactionType.CREDIT_BALANCE_REFUND;
+            break;
+            case 21:
+                loanTransactionType = LoanTransactionType.MERCHANT_ISSUED_REFUND;
+            break;
+            case 22:
+                loanTransactionType = LoanTransactionType.PAYOUT_REFUND;
+            break;
+            case 23:
+                loanTransactionType = LoanTransactionType.GOODWILL_CREDIT;
+            break;
             default:
                 loanTransactionType = LoanTransactionType.INVALID;
             break;
@@ -148,6 +164,22 @@ public enum LoanTransactionType {
 
     public boolean isRepayment() {
         return this.value.equals(LoanTransactionType.REPAYMENT.getValue());
+    }
+
+    public boolean isMerchantIssuedRefund() {
+        return this.value.equals(LoanTransactionType.MERCHANT_ISSUED_REFUND.getValue());
+    }
+
+    public boolean isPayoutRefund() {
+        return this.value.equals(LoanTransactionType.PAYOUT_REFUND.getValue());
+    }
+
+    public boolean isGoodwillCredit() {
+        return this.value.equals(LoanTransactionType.GOODWILL_CREDIT.getValue());
+    }
+
+    public boolean isRepaymentType() {
+        return (isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit());
     }
 
     public boolean isRecoveryRepayment() {

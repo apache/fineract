@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
 import org.apache.fineract.accounting.closure.domain.GLClosureRepository;
@@ -78,9 +80,6 @@ import org.apache.fineract.portfolio.client.domain.ClientTransaction;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -89,9 +88,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements JournalEntryWritePlatformService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(JournalEntryWritePlatformServiceJpaRepositoryImpl.class);
 
     private final GLClosureRepository glClosureRepository;
     private final GLAccountRepository glAccountRepository;
@@ -109,37 +108,6 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
     private final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper;
     private final CashBasedAccountingProcessorForClientTransactions accountingProcessorForClientTransactions;
-
-    @Autowired
-    public JournalEntryWritePlatformServiceJpaRepositoryImpl(final GLClosureRepository glClosureRepository,
-            final JournalEntryRepository glJournalEntryRepository, final OfficeRepositoryWrapper officeRepositoryWrapper,
-            final GLAccountRepository glAccountRepository, final JournalEntryCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final AccountingProcessorHelper accountingProcessorHelper, final AccountingRuleRepository accountingRuleRepository,
-            final AccountingProcessorForLoanFactory accountingProcessorForLoanFactory,
-            final AccountingProcessorForSavingsFactory accountingProcessorForSavingsFactory,
-            final AccountingProcessorForSharesFactory accountingProcessorForSharesFactory,
-            final GLAccountReadPlatformService glAccountReadPlatformService,
-            final OrganisationCurrencyRepositoryWrapper organisationCurrencyRepository, final PlatformSecurityContext context,
-            final PaymentDetailWritePlatformService paymentDetailWritePlatformService,
-            final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper,
-            final CashBasedAccountingProcessorForClientTransactions accountingProcessorForClientTransactions) {
-        this.glClosureRepository = glClosureRepository;
-        this.officeRepositoryWrapper = officeRepositoryWrapper;
-        this.glJournalEntryRepository = glJournalEntryRepository;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.glAccountRepository = glAccountRepository;
-        this.accountingProcessorForLoanFactory = accountingProcessorForLoanFactory;
-        this.accountingProcessorForSavingsFactory = accountingProcessorForSavingsFactory;
-        this.accountingProcessorForSharesFactory = accountingProcessorForSharesFactory;
-        this.helper = accountingProcessorHelper;
-        this.accountingRuleRepository = accountingRuleRepository;
-        this.glAccountReadPlatformService = glAccountReadPlatformService;
-        this.organisationCurrencyRepository = organisationCurrencyRepository;
-        this.context = context;
-        this.paymentDetailWritePlatformService = paymentDetailWritePlatformService;
-        this.financialActivityAccountRepositoryWrapper = financialActivityAccountRepositoryWrapper;
-        this.accountingProcessorForClientTransactions = accountingProcessorForClientTransactions;
-    }
 
     @Transactional
     @Override
@@ -412,11 +380,11 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                         journalEntry.getShareTransactionId());
             }
             // save the reversal entry
-            this.glJournalEntryRepository.save(reversalJournalEntry);
+            this.glJournalEntryRepository.saveAndFlush(reversalJournalEntry);
             journalEntry.setReversalJournalEntry(reversalJournalEntry);
             journalEntry.setReversed(true);
             // save the updated journal entry
-            this.glJournalEntryRepository.save(journalEntry);
+            this.glJournalEntryRepository.saveAndFlush(journalEntry);
         }
         return reversalTransactionId;
 
@@ -580,11 +548,11 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                             journalEntry.getShareTransactionId());
                 }
                 // save the reversal entry
-                this.glJournalEntryRepository.save(reversalJournalEntry);
+                this.glJournalEntryRepository.saveAndFlush(reversalJournalEntry);
                 journalEntry.setReversalJournalEntry(reversalJournalEntry);
                 journalEntry.setReversed(true);
                 // save the updated journal entry
-                this.glJournalEntryRepository.save(journalEntry);
+                this.glJournalEntryRepository.saveAndFlush(journalEntry);
             }
         }
     }
@@ -662,7 +630,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
     private PlatformDataIntegrityException handleJournalEntryDataIntegrityIssues(final Throwable realCause,
             final NonTransientDataAccessException dve) {
-        LOG.error("Error occured.", dve);
+        log.error("Error occured.", dve);
         return new PlatformDataIntegrityException("error.msg.glJournalEntry.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource Journal Entry: " + realCause.getMessage());
     }

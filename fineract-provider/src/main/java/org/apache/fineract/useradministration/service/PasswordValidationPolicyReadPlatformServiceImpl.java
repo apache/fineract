@@ -22,7 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.useradministration.data.PasswordValidationPolicyData;
 import org.apache.fineract.useradministration.exception.PasswordValidationPolicyNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,32 +35,40 @@ import org.springframework.stereotype.Service;
 public class PasswordValidationPolicyReadPlatformServiceImpl implements PasswordValidationPolicyReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final PasswordValidationPolicyMapper passwordValidationPolicyMapper;
 
     @Autowired
-    public PasswordValidationPolicyReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.passwordValidationPolicyMapper = new PasswordValidationPolicyMapper();
+    public PasswordValidationPolicyReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, DatabaseSpecificSQLGenerator sqlGenerator) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.sqlGenerator = sqlGenerator;
+        this.passwordValidationPolicyMapper = new PasswordValidationPolicyMapper(sqlGenerator);
     }
 
     @Override
     public Collection<PasswordValidationPolicyData> retrieveAll() {
         final String sql = "select " + this.passwordValidationPolicyMapper.schema() + " order by pvp.id";
 
-        return this.jdbcTemplate.query(sql, this.passwordValidationPolicyMapper);
+        return this.jdbcTemplate.query(sql, this.passwordValidationPolicyMapper); // NOSONAR
     }
 
     @Override
     public PasswordValidationPolicyData retrieveActiveValidationPolicy() {
         try {
             final String sql = "select " + this.passwordValidationPolicyMapper.schema() + " where pvp.active = true";
-            return this.jdbcTemplate.queryForObject(sql, this.passwordValidationPolicyMapper);
+            return this.jdbcTemplate.queryForObject(sql, this.passwordValidationPolicyMapper); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new PasswordValidationPolicyNotFoundException(e);
         }
     }
 
     protected static final class PasswordValidationPolicyMapper implements RowMapper<PasswordValidationPolicyData> {
+
+        private final DatabaseSpecificSQLGenerator sqlGenerator;
+
+        public PasswordValidationPolicyMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
+            this.sqlGenerator = sqlGenerator;
+        }
 
         @Override
         public PasswordValidationPolicyData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
@@ -74,8 +82,8 @@ public class PasswordValidationPolicyReadPlatformServiceImpl implements Password
         }
 
         public String schema() {
-            return " pvp.id as id, pvp.active as active, pvp.description as description, pvp.`key` as `key`"
-                    + " from m_password_validation_policy pvp";
+            return " pvp.id as id, pvp.active as active, pvp.description as description, pvp." + sqlGenerator.escape("key") + " as "
+                    + sqlGenerator.escape("key") + "" + " from m_password_validation_policy pvp";
         }
     }
 

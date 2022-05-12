@@ -26,7 +26,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import javax.sql.DataSource;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
 import org.apache.fineract.accounting.closure.domain.GLClosureRepository;
@@ -60,7 +60,6 @@ import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGL
 import org.apache.fineract.accounting.producttoaccountmapping.exception.ProductToGLAccountMappingNotFoundException;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
@@ -77,14 +76,11 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumD
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionRepository;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionEnumData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class AccountingProcessorHelper {
 
     public static final String LOAN_TRANSACTION_IDENTIFIER = "L";
@@ -92,6 +88,7 @@ public class AccountingProcessorHelper {
     public static final String CLIENT_TRANSACTION_IDENTIFIER = "C";
     public static final String PROVISIONING_TRANSACTION_IDENTIFIER = "P";
     public static final String SHARE_TRANSACTION_IDENTIFIER = "SH";
+
     private final JournalEntryRepository glJournalEntryRepository;
     private final ProductToGLAccountMappingRepository accountMappingRepository;
     private final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepository;
@@ -103,34 +100,6 @@ public class AccountingProcessorHelper {
     private final SavingsAccountTransactionRepository savingsAccountTransactionRepository;
     private final AccountTransfersReadPlatformService accountTransfersReadPlatformService;
     private final ChargeRepositoryWrapper chargeRepositoryWrapper;
-    private final JdbcTemplate jdbcTemplate;
-    private final DataSource dataSource;
-    private static final Logger LOG = LoggerFactory.getLogger(AccountingProcessorHelper.class);
-
-    @Autowired
-    public AccountingProcessorHelper(final JournalEntryRepository glJournalEntryRepository,
-            final ProductToGLAccountMappingRepository accountMappingRepository, final GLClosureRepository closureRepository,
-            final OfficeRepositoryWrapper officeRepositoryWrapper, final LoanTransactionRepository loanTransactionRepository,
-            final SavingsAccountTransactionRepository savingsAccountTransactionRepository,
-            final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepository,
-            final AccountTransfersReadPlatformService accountTransfersReadPlatformService,
-            final GLAccountRepositoryWrapper accountRepositoryWrapper,
-            final ClientTransactionRepositoryWrapper clientTransactionRepositoryWrapper,
-            final ChargeRepositoryWrapper chargeRepositoryWrapper, final RoutingDataSource dataSource) {
-        this.glJournalEntryRepository = glJournalEntryRepository;
-        this.dataSource = dataSource;
-        this.accountMappingRepository = accountMappingRepository;
-        this.closureRepository = closureRepository;
-        this.officeRepositoryWrapper = officeRepositoryWrapper;
-        this.loanTransactionRepository = loanTransactionRepository;
-        this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
-        this.financialActivityAccountRepository = financialActivityAccountRepository;
-        this.accountTransfersReadPlatformService = accountTransfersReadPlatformService;
-        this.accountRepositoryWrapper = accountRepositoryWrapper;
-        this.clientTransactionRepository = clientTransactionRepositoryWrapper;
-        this.chargeRepositoryWrapper = chargeRepositoryWrapper;
-        this.jdbcTemplate = new JdbcTemplate(this.dataSource);
-    }
 
     public LoanDTO populateLoanDtoFromMap(final Map<String, Object> accountingBridgeData, final boolean cashBasedAccountingEnabled,
             final boolean upfrontAccrualBasedAccountingEnabled, final boolean periodicAccrualBasedAccountingEnabled) {
@@ -169,7 +138,7 @@ public class AccountingProcessorHelper {
                     final Long loanChargeId = (Long) loanChargePaid.get("loanChargeId");
                     final boolean isPenalty = (Boolean) loanChargePaid.get("isPenalty");
                     final BigDecimal chargeAmountPaid = (BigDecimal) loanChargePaid.get("amount");
-                    final ChargePaymentDTO chargePaymentDTO = new ChargePaymentDTO(chargeId, loanChargeId, chargeAmountPaid);
+                    final ChargePaymentDTO chargePaymentDTO = new ChargePaymentDTO(chargeId, chargeAmountPaid, loanChargeId);
                     if (isPenalty) {
                         penaltyPaymentDetails.add(chargePaymentDTO);
                     } else {
@@ -184,12 +153,12 @@ public class AccountingProcessorHelper {
             }
             final LoanTransactionDTO transaction = new LoanTransactionDTO(transactionOfficeId, paymentTypeId, transactionId,
                     transactionDate, transactionType, amount, principal, interest, fees, penalties, overPayments, reversed,
-                    feePaymentDetails, penaltyPaymentDetails, isAccountTransfer);
+                    penaltyPaymentDetails, feePaymentDetails, isAccountTransfer);
             Boolean isLoanToLoanTransfer = (Boolean) accountingBridgeData.get("isLoanToLoanTransfer");
             if (isLoanToLoanTransfer != null && isLoanToLoanTransfer) {
-                transaction.setIsLoanToLoanTransfer(true);
+                transaction.setLoanToLoanTransfer(true);
             } else {
-                transaction.setIsLoanToLoanTransfer(false);
+                transaction.setLoanToLoanTransfer(false);
             }
             newLoanTransactions.add(transaction);
 
@@ -232,7 +201,7 @@ public class AccountingProcessorHelper {
                     final Long loanChargeId = (Long) loanChargePaid.get("savingsChargeId");
                     final boolean isPenalty = (Boolean) loanChargePaid.get("isPenalty");
                     final BigDecimal chargeAmountPaid = (BigDecimal) loanChargePaid.get("amount");
-                    final ChargePaymentDTO chargePaymentDTO = new ChargePaymentDTO(chargeId, loanChargeId, chargeAmountPaid);
+                    final ChargePaymentDTO chargePaymentDTO = new ChargePaymentDTO(chargeId, chargeAmountPaid, loanChargeId);
                     if (isPenalty) {
                         penaltyPayments.add(chargePaymentDTO);
                     } else {
@@ -299,7 +268,7 @@ public class AccountingProcessorHelper {
                     final Long chargeId = (Long) chargePaid.get("chargeId");
                     final Long loanChargeId = (Long) chargePaid.get("sharesChargeId");
                     final BigDecimal chargeAmountPaid = (BigDecimal) chargePaid.get("amount");
-                    final ChargePaymentDTO chargePaymentDTO = new ChargePaymentDTO(chargeId, loanChargeId, chargeAmountPaid);
+                    final ChargePaymentDTO chargePaymentDTO = new ChargePaymentDTO(chargeId, chargeAmountPaid, loanChargeId);
                     feePayments.add(chargePaymentDTO);
                 }
             }
@@ -1098,7 +1067,7 @@ public class AccountingProcessorHelper {
         final JournalEntry journalEntry = JournalEntry.createNew(office, paymentDetail, account, currencyCode, modifiedTransactionId,
                 manualEntry, transactionDate, JournalEntryType.DEBIT, amount, null, PortfolioProductType.SHARES.getValue(), shareAccountId,
                 null, loanTransaction, savingsAccountTransaction, clientTransaction, shareTransactionId);
-        this.glJournalEntryRepository.save(journalEntry);
+        this.glJournalEntryRepository.saveAndFlush(journalEntry);
     }
 
     private void createCreditJournalEntryForShares(final Office office, final String currencyCode, final GLAccount account,
@@ -1117,7 +1086,7 @@ public class AccountingProcessorHelper {
         final JournalEntry journalEntry = JournalEntry.createNew(office, paymentDetail, account, currencyCode, modifiedTransactionId,
                 manualEntry, transactionDate, JournalEntryType.CREDIT, amount, null, PortfolioProductType.SHARES.getValue(), shareAccountId,
                 null, loanTransaction, savingsAccountTransaction, clientTransaction, shareTransactionId);
-        this.glJournalEntryRepository.save(journalEntry);
+        this.glJournalEntryRepository.saveAndFlush(journalEntry);
     }
 
     public GLAccount getLinkedGLAccountForLoanProduct(final Long loanProductId, final int accountMappingTypeId, final Long paymentTypeId) {

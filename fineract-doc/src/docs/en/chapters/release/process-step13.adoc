@@ -1,0 +1,29 @@
+= Step 13: Close Release Branch
+
+== Description
+
+As discussed in https://issues.apache.org/jira/browse/FINERACT-1154[FINERACT-1154], now that everything is final, please do the following to remove the release branch (and just keep the tag), and make sure that everything on the release tag is merged to develop and that e.g. git describe works:
+
+[source,bash,subs="attributes+,+macros"]
+----
+% git checkout develop
+% git branch -D {revnumber}
+% git push origin :{revnumber}
+% git checkout develop
+% git checkout -b merge-{revnumber}
+% git merge -s recursive -Xignore-all-space {revnumber}  <1>
+% git commit
+% git push $USER
+% hub pull-request
+----
+<1> Manually resolve merge conflicts, if any
+
+== Gradle Task
+
+.Command
+[source,bash,subs="attributes+,+macros"]
+----
+% ./gradlew fineractReleaseStep13 -Pfineract.release.version={revnumber}
+----
+
+CAUTION: This task is not yet automated!

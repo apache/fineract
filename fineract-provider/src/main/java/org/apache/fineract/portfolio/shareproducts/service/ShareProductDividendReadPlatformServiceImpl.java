@@ -29,8 +29,8 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountDividendData;
 import org.apache.fineract.portfolio.shareaccounts.service.SharesEnumerations;
@@ -46,12 +46,16 @@ public class ShareProductDividendReadPlatformServiceImpl implements ShareProduct
 
     private final JdbcTemplate jdbcTemplate;
     private final ColumnValidator columnValidator;
-    private final PaginationHelper<ShareProductDividendPayOutData> paginationHelper = new PaginationHelper<>();
+    private final PaginationHelper paginationHelper;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     @Autowired
-    public ShareProductDividendReadPlatformServiceImpl(final RoutingDataSource dataSource, final ColumnValidator columnValidator) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public ShareProductDividendReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final ColumnValidator columnValidator,
+            DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
+        this.jdbcTemplate = jdbcTemplate;
         this.columnValidator = columnValidator;
+        this.paginationHelper = paginationHelper;
+        this.sqlGenerator = sqlGenerator;
     }
 
     @Override
@@ -59,7 +63,7 @@ public class ShareProductDividendReadPlatformServiceImpl implements ShareProduct
             final SearchParameters searchParameters) {
         ShareProductDividendMapper shareProductDividendMapper = new ShareProductDividendMapper();
         final StringBuilder sqlBuilder = new StringBuilder(200);
-        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
         sqlBuilder.append(shareProductDividendMapper.schema());
         sqlBuilder.append(" where sp.id = ? ");
         List<Object> params = new ArrayList<>(2);
@@ -79,16 +83,16 @@ public class ShareProductDividendReadPlatformServiceImpl implements ShareProduct
         }
 
         if (searchParameters.isLimited()) {
-            sqlBuilder.append(" limit ").append(searchParameters.getLimit());
+            sqlBuilder.append(" ");
             if (searchParameters.isOffset()) {
-                sqlBuilder.append(" offset ").append(searchParameters.getOffset());
+                sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
+            } else {
+                sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
             }
         }
 
-        final String sqlCountRows = "SELECT FOUND_ROWS()";
         Object[] paramsObj = params.toArray();
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), paramsObj,
-                shareProductDividendMapper);
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), paramsObj, shareProductDividendMapper);
     }
 
     private static final class ShareProductDividendMapper implements RowMapper<ShareProductDividendPayOutData> {

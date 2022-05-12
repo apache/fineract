@@ -46,6 +46,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingConstants;
 import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
@@ -63,12 +64,12 @@ import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformSer
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.data.UploadRequest;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -77,6 +78,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 @Tag(name = "General Ledger Account", description = "Ledger accounts represent an Individual account within an Organizations Chart Of Accounts(COA) and are assigned a name and unique number by which they can be identified. \n"
         + "All transactions relating to a company's assets, liabilities, owners' equity, revenue and expenses are recorded against these accounts")
+@RequiredArgsConstructor
 public class GLAccountsApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "parentId", "glCode", "disabled",
@@ -87,33 +89,15 @@ public class GLAccountsApiResource {
 
     private final String resourceNameForPermission = "GLACCOUNT";
 
+    private final PlatformSecurityContext context;
     private final GLAccountReadPlatformService glAccountReadPlatformService;
-    private final AccountingDropdownReadPlatformService dropdownReadPlatformService;
     private final DefaultToApiJsonSerializer<GLAccountData> apiJsonSerializerService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PlatformSecurityContext context;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final AccountingDropdownReadPlatformService dropdownReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final BulkImportWorkbookService bulkImportWorkbookService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
-
-    @Autowired
-    public GLAccountsApiResource(final PlatformSecurityContext context, final GLAccountReadPlatformService glAccountReadPlatformService,
-            final DefaultToApiJsonSerializer<GLAccountData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final AccountingDropdownReadPlatformService dropdownReadPlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService, final BulkImportWorkbookService bulkImportWorkbookService,
-            final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService) {
-        this.context = context;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.apiJsonSerializerService = toApiJsonSerializer;
-        this.glAccountReadPlatformService = glAccountReadPlatformService;
-        this.dropdownReadPlatformService = dropdownReadPlatformService;
-        this.codeValueReadPlatformService = codeValueReadPlatformService;
-        this.bulkImportWorkbookService = bulkImportWorkbookService;
-        this.bulkImportWorkbookPopulatorService = bulkImportWorkbookPopulatorService;
-    }
 
     @GET
     @Path("template")
@@ -291,6 +275,8 @@ public class GLAccountsApiResource {
     @POST
     @Path("uploadtemplate")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @RequestBody(description = "Upload GL accounts template", content = {
+            @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = UploadRequest.class)) })
     public String postGlAccountsTemplate(@FormDataParam("file") InputStream uploadedInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("locale") final String locale,
             @FormDataParam("dateFormat") final String dateFormat) {

@@ -133,8 +133,7 @@ public class LoanTransaction extends AbstractPersistableCustom {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "loanTransaction")
     private Set<LoanCollateralManagement> loanCollateralManagementSet = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name = "loan_transaction_id", referencedColumnName = "id", nullable = false)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "loanTransaction")
     private Set<LoanTransactionToRepaymentScheduleMapping> loanTransactionToRepaymentScheduleMappings = new HashSet<>();
 
     protected LoanTransaction() {
@@ -168,6 +167,13 @@ public class LoanTransaction extends AbstractPersistableCustom {
             final LocalDate paymentDate, final String externalId, final LocalDateTime createdDate, final AppUser appUser) {
         return new LoanTransaction(null, office, LoanTransactionType.REPAYMENT, paymentDetail, amount.getAmount(), paymentDate, externalId,
                 createdDate, appUser);
+    }
+
+    public static LoanTransaction repaymentType(final LoanTransactionType repaymentType, final Office office, final Money amount,
+            final PaymentDetail paymentDetail, final LocalDate paymentDate, final String externalId, final LocalDateTime createdDate,
+            final AppUser appUser) {
+        return new LoanTransaction(null, office, repaymentType, paymentDetail, amount.getAmount(), paymentDate, externalId, createdDate,
+                appUser);
     }
 
     public void setLoanTransactionToRepaymentScheduleMappings(final Integer installmentId, final BigDecimal chargePerInstallment) {
@@ -296,6 +302,13 @@ public class LoanTransaction extends AbstractPersistableCustom {
                 externalId, createdDate, appUser);
         applyCharge.updateChargesComponents(feeCharges, penaltyCharges);
         return applyCharge;
+    }
+
+    public static LoanTransaction creditBalanceRefund(final Loan loan, final Office office, final Money amount, final LocalDate paymentDate,
+            final String externalId, final LocalDateTime createdDate, final AppUser appUser) {
+        final PaymentDetail paymentDetail = null;
+        return new LoanTransaction(loan, office, LoanTransactionType.CREDIT_BALANCE_REFUND, paymentDetail, amount.getAmount(), paymentDate,
+                externalId, createdDate, appUser);
     }
 
     public static LoanTransaction refundForActiveLoan(final Office office, final Money amount, final PaymentDetail paymentDetail,
@@ -518,16 +531,28 @@ public class LoanTransaction extends AbstractPersistableCustom {
         this.manuallyAdjustedOrReversed = true;
     }
 
-    public boolean isAnyTypeOfRepayment() {
-        return isRepayment() || isRepaymentAtDisbursement() || isRecoveryRepayment();
+    public boolean isRepaymentType() {
+        return isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit();
     }
 
     public boolean isRepayment() {
         return LoanTransactionType.REPAYMENT.equals(getTypeOf()) && isNotReversed();
     }
 
-    public boolean isNotRepayment() {
-        return !isRepayment();
+    public boolean isMerchantIssuedRefund() {
+        return LoanTransactionType.MERCHANT_ISSUED_REFUND.equals(getTypeOf()) && isNotReversed();
+    }
+
+    public boolean isPayoutRefund() {
+        return LoanTransactionType.PAYOUT_REFUND.equals(getTypeOf()) && isNotReversed();
+    }
+
+    public boolean isGoodwillCredit() {
+        return LoanTransactionType.GOODWILL_CREDIT.equals(getTypeOf()) && isNotReversed();
+    }
+
+    public boolean isNotRepaymentType() {
+        return !isRepaymentType();
     }
 
     public boolean isIncomePosting() {
@@ -574,6 +599,10 @@ public class LoanTransaction extends AbstractPersistableCustom {
         return !isInterestWaiver() && !isChargesWaiver();
     }
 
+    public boolean isNotCreditBalanceRefund() {
+        return !isCreditBalanceRefund();
+    }
+
     public boolean isChargePayment() {
         return getTypeOf().isChargePayment() && isNotReversed();
     }
@@ -615,6 +644,10 @@ public class LoanTransaction extends AbstractPersistableCustom {
 
     public boolean isGreaterThanZero(final MonetaryCurrency currency) {
         return getAmount(currency).isGreaterThanZero();
+    }
+
+    public boolean isGreaterThanZeroAndLessThanOrEqualTo(BigDecimal totalOverpaid) {
+        return isNonZero() && this.amount.compareTo(totalOverpaid) <= 0;
     }
 
     public boolean isNotZero(final MonetaryCurrency currency) {
@@ -699,6 +732,10 @@ public class LoanTransaction extends AbstractPersistableCustom {
 
     public boolean isRefund() {
         return LoanTransactionType.REFUND.equals(getTypeOf()) && isNotReversed();
+    }
+
+    public boolean isCreditBalanceRefund() {
+        return LoanTransactionType.CREDIT_BALANCE_REFUND.equals(getTypeOf()) && isNotReversed();
     }
 
     public void updateExternalId(final String externalId) {
@@ -793,6 +830,7 @@ public class LoanTransaction extends AbstractPersistableCustom {
             }
         }
         if (!isMappingUpdated) {
+            updatedrepaymentScheduleMapping.setLoanTransaction(this);
             this.loanTransactionToRepaymentScheduleMappings.add(updatedrepaymentScheduleMapping);
             retainMappings.add(updatedrepaymentScheduleMapping);
         }

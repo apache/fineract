@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,6 +36,8 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
 import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
@@ -217,6 +220,18 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         return deposit;
     }
 
+    @Transactional
+    @Override
+    public SavingsAccountTransaction handleHold(final SavingsAccount account, final AppUser createdUser, BigDecimal amount,
+            LocalDate transactionDate, Boolean lienAllowed) {
+        final PaymentDetail paymentDetails = null;
+        Date createdDate = new Date();
+
+        SavingsAccountTransaction transaction = SavingsAccountTransaction.holdAmount(account, account.office(), paymentDetails,
+                transactionDate, Money.of(account.getCurrency(), amount), createdDate, createdUser, lienAllowed);
+        return transaction;
+    }
+
     @Override
     public SavingsAccountTransaction handleDividendPayout(final SavingsAccount account, final LocalDate transactionDate,
             final BigDecimal transactionAmount, final boolean backdatedTxnsAllowedTill) {
@@ -236,7 +251,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
     }
 
     private Long saveTransactionToGenerateTransactionId(final SavingsAccountTransaction transaction) {
-        this.savingsAccountTransactionRepository.save(transaction);
+        this.savingsAccountTransactionRepository.saveAndFlush(transaction);
         return transaction.getId();
     }
 
@@ -274,5 +289,54 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         Map<BusinessEntity, Object> map = new HashMap<>(1);
         map.put(entityEvent, entity);
         return map;
+    }
+
+    @Override
+    public SavingsAccountTransaction handleReversal(SavingsAccount account, SavingsAccountTransaction savingsAccountTransaction,
+            boolean backdatedTxnsAllowedTill) {
+
+        final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
+                .isSavingsInterestPostingAtCurrentPeriodEnd();
+        final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
+
+        final Set<SavingsAccountChargePaidBy> chargePaidBySet = savingsAccountTransaction.getSavingsAccountChargesPaid();
+
+        final Set<Long> existingTransactionIds = new HashSet<>();
+        final Set<Long> existingReversedTransactionIds = new HashSet<>();
+
+        if (backdatedTxnsAllowedTill) {
+            updateTransactionDetailsWithPivotConfig(account, existingTransactionIds, existingReversedTransactionIds);
+        } else {
+            updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
+        }
+
+        SavingsAccountTransaction reversal = SavingsAccountTransaction.reversal(savingsAccountTransaction);
+        reversal.getSavingsAccountChargesPaid().addAll(chargePaidBySet);
+        account.undoTransaction(savingsAccountTransaction);
+
+        boolean isInterestTransfer = false;
+        LocalDate postInterestOnDate = null;
+        final LocalDate today = DateUtils.getLocalDateOfTenant();
+        final MathContext mc = new MathContext(15, MoneyHelper.getRoundingMode());
+
+        if (savingsAccountTransaction.isPostInterestCalculationRequired()
+                && account.isBeforeLastPostingPeriod(savingsAccountTransaction.transactionLocalDate(), backdatedTxnsAllowedTill)) {
+            account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
+                    postInterestOnDate, backdatedTxnsAllowedTill);
+        } else {
+            account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
+                    financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill);
+        }
+
+        List<SavingsAccountTransaction> newTransactions = new ArrayList<>();
+        newTransactions.add(reversal);
+
+        account.validateAccountBalanceDoesNotBecomeNegativeMinimal(savingsAccountTransaction.getAmount(), false);
+        account.activateAccountBasedOnBalance();
+        this.savingsAccountRepository.save(account);
+        this.savingsAccountTransactionRepository.saveAll(newTransactions);
+        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, false, backdatedTxnsAllowedTill);
+
+        return reversal;
     }
 }

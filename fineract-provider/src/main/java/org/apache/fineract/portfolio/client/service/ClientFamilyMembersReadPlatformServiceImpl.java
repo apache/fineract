@@ -27,7 +27,6 @@ import java.util.List;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.data.ClientFamilyMembersData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,10 +42,10 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
     private final CodeValueReadPlatformService codeValueReadPlatformService;
 
     @Autowired
-    public ClientFamilyMembersReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
+    public ClientFamilyMembersReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             final CodeValueReadPlatformService codeValueReadPlatformService) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
 
     }
@@ -99,7 +98,7 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
         final ClientFamilyMembersMapper rm = new ClientFamilyMembersMapper();
         final String sql = "select " + rm.schema() + " where fmb.client_id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { clientId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { clientId }); // NOSONAR
     }
 
     @Override
@@ -110,7 +109,7 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
         final ClientFamilyMembersMapper rm = new ClientFamilyMembersMapper();
         final String sql = "select " + rm.schema() + " where fmb.id=? ";
 
-        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { id });
+        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { id }); // NOSONAR
     }
 
     @Override

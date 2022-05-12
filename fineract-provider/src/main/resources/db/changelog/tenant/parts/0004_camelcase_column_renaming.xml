@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet author="fineract" id="1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <renameColumn tableName="m_adhoc" oldColumnName="IsActive" newColumnName="is_active" columnDataType="BOOLEAN"/>
+        <renameColumn tableName="m_creditbureau" oldColumnName="implementationKey" newColumnName="implementation_key" columnDataType="VARCHAR(100)"/>
+        <renameColumn tableName="m_creditbureau_loanproduct_mapping" oldColumnName="isActive" newColumnName="is_active" columnDataType="BOOLEAN"/>
+        <renameColumn tableName="m_creditbureau_token" oldColumnName="tokenType" newColumnName="token_type" columnDataType="VARCHAR(128)"/>
+        <renameColumn tableName="m_creditbureau_token" oldColumnName="expiresIn" newColumnName="expires_in" columnDataType="VARCHAR(128)"/>
+        <renameColumn tableName="m_creditbureau_token" oldColumnName="expiryDate" newColumnName="expiry_date" columnDataType="DATE"/>
+        <renameColumn tableName="m_creditreport" oldColumnName="creditBureauId" newColumnName="credit_bureau_id" columnDataType="BIGINT"/>
+        <renameColumn tableName="m_creditreport" oldColumnName="nationalId" newColumnName="national_id" columnDataType="VARCHAR(128)"/>
+        <renameColumn tableName="m_creditreport" oldColumnName="creditReports" newColumnName="credit_reports" columnDataType="BLOB"/>
+        <renameColumn tableName="m_organisation_creditbureau" oldColumnName="isActive" newColumnName="is_active" columnDataType="BOOLEAN"/>
+        <renameColumn tableName="scheduled_email_campaign" oldColumnName="businessRule_id" newColumnName="business_rule_id" columnDataType="INT"/>
+    </changeSet>
+</databaseChangeLog>

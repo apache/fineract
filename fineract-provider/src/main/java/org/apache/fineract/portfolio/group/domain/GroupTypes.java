@@ -40,6 +40,7 @@ public enum GroupTypes {
     private static final Map<Long, GroupTypes> intToEnumMap = new HashMap<>();
     private static long minValue;
     private static long maxValue;
+
     static {
         int i = 0;
         for (final GroupTypes type : GroupTypes.values()) {

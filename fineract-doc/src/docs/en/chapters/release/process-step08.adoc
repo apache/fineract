@@ -1,0 +1,34 @@
+= Step 8: Upload Distribution Staging
+
+== Description
+
+Finally create a directory with release name ({revnumber} in this example) in https://dist.apache.org/repos/dist/dev/fineract and add the following files in this new directory:
+
+* apache-fineract-{revnumber}-binary.tar.gz.sha
+* apache-fineract-{revnumber}-binary.tar.gz
+* apache-fineract-{revnumber}-binary.tar.gz.asc
+* apache-fineract-{revnumber}-binary.tar.gz.md5
+* apache-fineract-{revnumber}-src.tar.gz.sha
+* apache-fineract-{revnumber}-src.tar.gz
+* apache-fineract-{revnumber}-src.tar.gz.asc
+* apache-fineract-{revnumber}-src.tar.gz.md5
+
+Upload binary and source archives to ASF's distribution dev (staging) area:
+
+[source,bash,subs="attributes+,+macros"]
+----
+% svn co https://dist.apache.org/repos/dist/dev/fineract/ fineract-dist-dev
+% mkdir fineract-dist-dev/{revnumber}
+% cp fineract/build/distributions/* fineract-dist-dev/{revnumber}/
+% svn commit
+----
+
+NOTE: You will need your ASF Committer credentials to be able to access the Subversion host https://dist.apache.org via.
+
+== Gradle Task
+
+.Command
+[source,bash,subs="attributes+,+macros"]
+----
+% ./gradlew fineractReleaseStep8 -Pfineract.release.version={revnumber}
+----

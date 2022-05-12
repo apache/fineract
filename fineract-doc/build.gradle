@@ -22,45 +22,25 @@ apply plugin: 'org.asciidoctor.jvm.revealjs'
 // apply plugin: 'org.asciidoctor.jvm.epub'
 // apply plugin: 'org.asciidoctor.kindlegen.base'
 
-// NOTE: need to wait for new release of Swagger to Asciidoc plugin
-
-//if(file("$swaggerFile").exists()) {
-//    apply plugin: 'io.github.lhotari.swagger2markup'
-//
-//    convertSwagger2markup {
-//        swaggerInput file("$swaggerFile").getAbsolutePath()
-//        outputDir file("$buildDir/generated/asciidoc")
-//        config = [
-//            'swagger2markup.markupLanguage': 'ASCIIDOC',
-//            'swagger2markup.pathsGroupedBy': 'TAGS'
-//        ]
-//        dependsOn ':fineract-provider:resolve'
-//    }
-//
-//    asciidoctor.dependsOn convertSwagger2markup
-//}
-
 asciidoctorj {
-    version = '2.4.0'
+    version = '2.5.3'
 
     attributes = [
-        revnumber: {
-            project.version.toString()
-        },
+        version: "${project.version}",
         generated: "${buildDir}/generated/asciidoc",
-        imagesdir: 'images',
-        diagrams: 'diagrams',
-        years: '2015-2020',
-        revnumber: "$version".toString(),
-        rootdir: "$rootDir".toString(),
-        baseurl: 'fineract.apache.org'
+        imagesdir: "${projectDir}/src/docs/en/images",
+        diagramsdir: "${projectDir}/src/docs/en/diagrams",
+        years: '2015-2022',
+        revnumber: "${project.version}".toString(),
+        rootdir: "${rootDir}".toString(),
+        baseurl: 'fineract.apache.org',
     ]
 
     modules {
-        pdf.version '1.5.3'
-        diagram.version '2.0.2'
-        epub.version '1.5.0-alpha.18'
-        revealjs.version '4.0.1'
+        pdf.version '1.6.2'
+        diagram.version '2.2.1'
+        epub.version '1.5.1'
+        revealjs.version '4.1.0'
     }
 
     fatalWarnings ~/include file not found|missing callout|image to embed not found or not readable/
@@ -76,6 +56,8 @@ asciidoctor {
         include('index.adoc')
     }
     outputDir 'build/docs/html'
+
+    dependsOn(':fineract-client:clean', ':fineract-client:buildAsciidoc')
 }
 
 // asciidoctorEpub {
@@ -88,6 +70,8 @@ asciidoctor {
 //     }
 //     outputDir 'build/docs/epub'
 //     ebookFormats 'epub3'
+//
+//     dependsOn ':fineract-client:buildAsciidoc'
 // }
 
 asciidoctorPdf {
@@ -108,21 +92,26 @@ asciidoctorPdf {
     //     }
     // }
     // fontsDir "$projectDir/src/resources/fonts"
+    dependsOn(':fineract-client:clean', ':fineract-client:buildAsciidoc')
 }
 
 task doc(type: Zip) {
-    dependsOn asciidoctor, asciidoctorPdf
+    dependsOn(asciidoctor, asciidoctorPdf)
 
-    into("$project.name-$project.version") {
+    into("fineract-${project.version}/html") {
         from("$buildDir/docs/html") {
             include "**/*"
+            exclude "**/.asciidoctor"
         }
     }
-    from ("$buildDir/docs/pdf") {
-        include "index.pdf"
-        rename {
-            "$project.name-$project.version\\.pdf"
+    into("fineract-${project.version}/pdf") {
+        from("$buildDir/docs/pdf") {
+            include "**/index.pdf"
+            exclude "**/.asciidoctor"
+            rename {
+                "fineract-${project.version}.pdf"
+            }
         }
     }
-    archiveName "$project.name-$project.version\\.zip"
+    archiveName "${project.name}-${project.version}.zip"
 }

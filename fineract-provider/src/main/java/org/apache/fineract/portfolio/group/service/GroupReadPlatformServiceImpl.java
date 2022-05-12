@@ -33,8 +33,8 @@ import org.apache.fineract.infrastructure.core.data.PaginationParametersDataVali
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.infrastructure.security.utils.SQLBuilder;
@@ -67,25 +67,29 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     private final CodeValueReadPlatformService codeValueReadPlatformService;
 
     private final AllGroupTypesDataMapper allGroupTypesDataMapper = new AllGroupTypesDataMapper();
-    private final PaginationHelper<GroupGeneralData> paginationHelper = new PaginationHelper<>();
+    private final PaginationHelper paginationHelper;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final PaginationParametersDataValidator paginationParametersDataValidator;
     private final ColumnValidator columnValidator;
 
     private static final Set<String> supportedOrderByValues = new HashSet<>(Arrays.asList("id", "name", "officeId", "officeName"));
 
     @Autowired
-    public GroupReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
+    public GroupReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             final CenterReadPlatformService centerReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
             final StaffReadPlatformService staffReadPlatformService, final CodeValueReadPlatformService codeValueReadPlatformService,
-            final PaginationParametersDataValidator paginationParametersDataValidator, final ColumnValidator columnValidator) {
+            final PaginationParametersDataValidator paginationParametersDataValidator, final ColumnValidator columnValidator,
+            DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.centerReadPlatformService = centerReadPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
         this.staffReadPlatformService = staffReadPlatformService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.paginationParametersDataValidator = paginationParametersDataValidator;
         this.columnValidator = columnValidator;
+        this.paginationHelper = paginationHelper;
+        this.sqlGenerator = sqlGenerator;
     }
 
     @Override
@@ -144,7 +148,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         final String hierarchySearchString = hierarchy + "%";
 
         final StringBuilder sqlBuilder = new StringBuilder(200);
-        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
         sqlBuilder.append(this.allGroupTypesDataMapper.schema());
 
         final SQLBuilder extraCriteria = getGroupExtraCriteria(this.allGroupTypesDataMapper.schema(), searchParameters);
@@ -163,8 +167,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             }
         }
 
-        final String sqlCountRows = "SELECT FOUND_ROWS()";
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), extraCriteria.getArguments(),
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), extraCriteria.getArguments(),
                 this.allGroupTypesDataMapper);
     }
 
@@ -193,7 +196,8 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), parameters.limitSql());
             }
         }
-        return this.jdbcTemplate.query(sqlBuilder.toString(), this.allGroupTypesDataMapper, extraCriteria.getArguments());
+
+        return this.jdbcTemplate.query(sqlBuilder.toString(), this.allGroupTypesDataMapper, extraCriteria.getArguments()); // NOSONAR
     }
 
     // 'g.' preffix because of ERROR 1052 (23000): Column 'column_name' in where
@@ -237,7 +241,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             final String hierarchySearchString = hierarchy + "%";
 
             final String sql = "select " + this.allGroupTypesDataMapper.schema() + " where g.id = ? and o.hierarchy like ?";
-            return this.jdbcTemplate.queryForObject(sql, this.allGroupTypesDataMapper, new Object[] { groupId, hierarchySearchString });
+            return this.jdbcTemplate.queryForObject(sql, this.allGroupTypesDataMapper, new Object[] { groupId, hierarchySearchString }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new GroupNotFoundException(groupId, e);
         }
@@ -248,7 +252,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         this.context.authenticatedUser();
         final GroupLookupDataMapper rm = new GroupLookupDataMapper();
         final String sql = "Select " + rm.schema() + " and g.office_id=?";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { officeId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { officeId }); // NOSONAR
     }
 
     private static final class GroupLookupDataMapper implements RowMapper<GroupGeneralData> {

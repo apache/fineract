@@ -138,6 +138,11 @@ public final class Utils {
         }
     }
 
+    public static String performServerGet(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String url) {
+        return performServerGet(requestSpec, responseSpec, url, null);
+    }
+
     public static <T> T performServerGet(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String getURL, final String jsonAttributeToGetBack) {
         final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
@@ -155,6 +160,11 @@ public final class Utils {
     public static byte[] performGetBinaryResponse(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String getURL) {
         return given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asByteArray();
+    }
+
+    public static String performServerPost(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String postURL, final String jsonBodyToSend) {
+        return performServerPost(requestSpec, responseSpec, postURL, jsonBodyToSend, null);
     }
 
     public static <T> T performServerPost(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,

@@ -28,9 +28,8 @@ public final class FineractEntityRelationRepositoryWrapper {
     private final FineractEntityRelationRepository fineractEntityRelationRepository;
 
     @Autowired
-    private FineractEntityRelationRepositoryWrapper(final FineractEntityRelationRepository fineractEntityRelationRepository) {
+    public FineractEntityRelationRepositoryWrapper(final FineractEntityRelationRepository fineractEntityRelationRepository) {
         this.fineractEntityRelationRepository = fineractEntityRelationRepository;
-
     }
 
     public FineractEntityRelation findOneWithNotFoundDetection(final Long id) {

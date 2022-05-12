@@ -1,0 +1,16 @@
+= Cache Properties
+
+.Cache Properties
+|===
+|Name |Env Variable |Default Value |Description
+
+|Column 1, row 1
+|Column 2, row 1
+|Column 3, row 1
+|TBD
+
+|Column 1, row 2
+|Column 2, row 2
+|Column 3, row 2
+|TBD
+|===

@@ -1,0 +1,13 @@
+@startgantt
+[Heads up email] lasts 1 day
+[Open release branch] lasts 7 day
+[Prepare distribution for staging] lasts 2 days
+[Vote for distribution on staging] lasts 3 days
+[Prepare distribution for release] lasts 2 days
+[Announce release] lasts 2 days
+[Open release branch] starts at [Heads up email]'s end
+[Prepare distribution for staging] starts at [Open release branch]'s end
+[Vote for distribution on staging] starts at [Prepare distribution for staging]'s end
+[Prepare distribution for release] starts at [Vote for distribution on staging]'s end
+[Announce release] starts at [Prepare distribution for release]'s end
+@endgantt

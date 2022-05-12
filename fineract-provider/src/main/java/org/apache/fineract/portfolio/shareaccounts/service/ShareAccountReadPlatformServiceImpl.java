@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.shareaccounts.service;
 
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -34,7 +35,7 @@ import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.accountdetails.data.ShareAccountSummaryData;
 import org.apache.fineract.portfolio.accounts.constants.AccountsApiConstants;
@@ -81,17 +82,19 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
     private final PurchasedSharesReadPlatformService purchasedSharesReadPlatformService;
     private final JdbcTemplate jdbcTemplate;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private final PaginationHelper<AccountData> shareAccountDataPaginationHelper = new PaginationHelper<>();
+    private final PaginationHelper shareAccountDataPaginationHelper;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     @Autowired
-    public ShareAccountReadPlatformServiceImpl(final RoutingDataSource dataSource, final ApplicationContext applicationContext,
+    public ShareAccountReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final ApplicationContext applicationContext,
             final ChargeReadPlatformService chargeReadPlatformService,
             final ShareProductDropdownReadPlatformService shareProductDropdownReadPlatformService,
             final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
             final ClientReadPlatformService clientReadPlatformService,
             final ShareAccountChargeReadPlatformService shareAccountChargeReadPlatformService,
-            final PurchasedSharesReadPlatformService purchasedSharesReadPlatformService) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+            final PurchasedSharesReadPlatformService purchasedSharesReadPlatformService, DatabaseSpecificSQLGenerator sqlGenerator,
+            PaginationHelper paginationHelper) {
+        this.jdbcTemplate = jdbcTemplate;
         this.applicationContext = applicationContext;
         this.chargeReadPlatformService = chargeReadPlatformService;
         this.shareProductDropdownReadPlatformService = shareProductDropdownReadPlatformService;
@@ -99,7 +102,8 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         this.clientReadPlatformService = clientReadPlatformService;
         this.shareAccountChargeReadPlatformService = shareAccountChargeReadPlatformService;
         this.purchasedSharesReadPlatformService = purchasedSharesReadPlatformService;
-
+        this.shareAccountDataPaginationHelper = paginationHelper;
+        this.sqlGenerator = sqlGenerator;
     }
 
     @Override
@@ -153,7 +157,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
 
         ShareAccountMapper mapper = new ShareAccountMapper(charges, purchasedShares);
         String query = "select " + mapper.schema() + "where sa.id=?";
-        ShareAccountData data = (ShareAccountData) this.jdbcTemplate.queryForObject(query, mapper, new Object[] { id });
+        ShareAccountData data = (ShareAccountData) this.jdbcTemplate.queryForObject(query, mapper, new Object[] { id }); // NOSONAR
         String serviceName = "share" + ProductsApiConstants.READPLATFORM_NAME;
         ProductReadPlatformService service = (ProductReadPlatformService) this.applicationContext.getBean(serviceName);
         final ShareProductData productData = (ShareProductData) service.retrieveOne(data.getProductId(), false);
@@ -180,7 +184,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
     private Collection<ShareAccountDividendData> retrieveAssociatedDividends(final Long shareAccountId) {
         ShareAccountDividendRowMapper mapper = new ShareAccountDividendRowMapper();
         String query = "select " + mapper.schema() + "where sadd.account_id=?";
-        return this.jdbcTemplate.query(query, mapper, new Object[] { shareAccountId });
+        return this.jdbcTemplate.query(query, mapper, new Object[] { shareAccountId }); // NOSONAR
     }
 
     @Override
@@ -189,7 +193,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         final Collection<ShareAccountTransactionData> purchasedShares = null;
         ShareAccountMapper mapper = new ShareAccountMapper(charges, purchasedShares);
         StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
         sqlBuilder.append(mapper.schema());
         sqlBuilder.append(" where sa.status_enum = ? ");
         if (limit != null) {
@@ -199,10 +203,8 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
             sqlBuilder.append(" offset ").append(offSet);
         }
 
-        final String sqlCountRows = "SELECT FOUND_ROWS()";
         Object[] whereClauseItemsitems = new Object[] { ShareAccountStatusType.ACTIVE.getValue() };
-        return this.shareAccountDataPaginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),
-                whereClauseItemsitems, mapper);
+        return this.shareAccountDataPaginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), whereClauseItemsitems, mapper);
     }
 
     @Override
@@ -222,17 +224,25 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         params.add(id);
         params.add(ShareAccountStatusType.ACTIVE.getValue());
         if (fetchInActiveAccounts) {
+            String formattedStartDate = formatter.format(startDate);
             sb.append(" and (sa.status_enum = ? or (sa.status_enum = ? ");
-            sb.append(" and sa.closed_date >  ?)) ");
+            sb.append(" and sa.closed_date > '" + formattedStartDate + "')) ");
             params.add(ShareAccountStatusType.CLOSED.getValue());
-            params.add(formatter.format(startDate));
         } else {
             sb.append(" and sa.status_enum = ? ");
         }
         sb.append(" and saps.status_enum = ?");
+        sb.append(" order by sa.id");
         params.add(PurchasedSharesStatusType.APPROVED.getValue());
         Object[] whereClauseItems = params.toArray();
-        return this.jdbcTemplate.query(sb.toString(), mapper, whereClauseItems);
+        return this.jdbcTemplate.query(con -> {
+            PreparedStatement preparedStatement = con.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE,
+                    ResultSet.CONCUR_UPDATABLE);
+            for (int i = 0; i < whereClauseItems.length; i++) {
+                preparedStatement.setObject(i + 1, whereClauseItems[i]);
+            }
+            return preparedStatement;
+        }, mapper);
     }
 
     public Collection<ShareAccountChargeData> convertChargesToShareAccountCharges(Collection<ChargeData> productCharges) {

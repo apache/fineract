@@ -23,7 +23,6 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidByData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +37,9 @@ public class LoanChargePaidByReadPlatformServiceImpl implements LoanChargePaidBy
     private final PlatformSecurityContext context;
 
     @Autowired
-    public LoanChargePaidByReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
+    public LoanChargePaidByReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
 
     }
 
@@ -49,7 +48,7 @@ public class LoanChargePaidByReadPlatformServiceImpl implements LoanChargePaidBy
         this.context.authenticatedUser();
         final LoanChargePaidByMapper rm = new LoanChargePaidByMapper();
         final String sql = "select " + rm.loanChargePaidBySchema() + " where lcpd.loan_transaction_id = ?";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { transactionId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { transactionId }); // NOSONAR
     }
 
     private static final class LoanChargePaidByMapper implements RowMapper<LoanChargePaidByData> {

@@ -26,6 +26,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepository;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
@@ -60,17 +62,15 @@ import org.apache.fineract.organisation.provisioning.service.ProvisioningCriteri
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements ProvisioningEntriesWritePlatformService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl.class);
     private final ProvisioningEntriesReadPlatformService provisioningEntriesReadPlatformService;
     private final ProvisioningCriteriaReadPlatformService provisioningCriteriaReadPlatformService;
     private final LoanProductRepository loanProductRepository;
@@ -82,28 +82,6 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final ProvisioningEntriesDefinitionJsonDeserializer fromApiJsonDeserializer;
     private final FromJsonHelper fromApiJsonHelper;
-
-    @Autowired
-    public ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl(
-            final ProvisioningEntriesReadPlatformService provisioningEntriesReadPlatformService,
-            final ProvisioningCriteriaReadPlatformService provisioningCriteriaReadPlatformService,
-            final LoanProductRepository loanProductRepository, final GLAccountRepository glAccountRepository,
-            final OfficeRepositoryWrapper officeRepositoryWrapper, final ProvisioningCategoryRepository provisioningCategoryRepository,
-            final PlatformSecurityContext platformSecurityContext, final ProvisioningEntryRepository provisioningEntryRepository,
-            final JournalEntryWritePlatformService journalEntryWritePlatformService,
-            final ProvisioningEntriesDefinitionJsonDeserializer fromApiJsonDeserializer, final FromJsonHelper fromApiJsonHelper) {
-        this.provisioningEntriesReadPlatformService = provisioningEntriesReadPlatformService;
-        this.provisioningCriteriaReadPlatformService = provisioningCriteriaReadPlatformService;
-        this.loanProductRepository = loanProductRepository;
-        this.glAccountRepository = glAccountRepository;
-        this.officeRepositoryWrapper = officeRepositoryWrapper;
-        this.provisioningCategoryRepository = provisioningCategoryRepository;
-        this.platformSecurityContext = platformSecurityContext;
-        this.provisioningEntryRepository = provisioningEntryRepository;
-        this.journalEntryWritePlatformService = journalEntryWritePlatformService;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.fromApiJsonHelper = fromApiJsonHelper;
-    }
 
     @Override
     public CommandProcessingResult createProvisioningJournalEntries(Long provisioningEntryId, JsonCommand command) {
@@ -128,7 +106,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
             requestedEntry.setJournalEntryCreated(Boolean.TRUE);
         }
 
-        this.provisioningEntryRepository.save(requestedEntry);
+        this.provisioningEntryRepository.saveAndFlush(requestedEntry);
         this.journalEntryWritePlatformService.createProvisioningJournalEntries(requestedEntry);
     }
 
@@ -169,9 +147,9 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
             }
             createProvsioningEntry(currentDate, addJournalEntries);
         } catch (ProvisioningEntryAlreadyCreatedException peace) {
-            LOG.error("Provisioning Entry already created", peace);
+            log.error("Provisioning Entry already created", peace);
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
-            LOG.error("Problem occurred in generateLoanLossProvisioningAmount function", dve);
+            log.error("Problem occurred in generateLoanLossProvisioningAmount function", dve);
         }
     }
 
@@ -210,7 +188,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
                     .retrieveExistingProvisioningIdDateWithJournals();
             revertAndAddJournalEntries(exisProvisioningEntryData, requestedEntry);
         } else {
-            this.provisioningEntryRepository.save(requestedEntry);
+            this.provisioningEntryRepository.saveAndFlush(requestedEntry);
         }
         return requestedEntry;
     }
@@ -220,10 +198,10 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
         ProvisioningEntry requestedEntry = this.provisioningEntryRepository.findById(provisioningEntryId)
                 .orElseThrow(() -> new ProvisioningEntryNotfoundException(provisioningEntryId));
         requestedEntry.getLoanProductProvisioningEntries().clear();
-        this.provisioningEntryRepository.save(requestedEntry);
+        this.provisioningEntryRepository.saveAndFlush(requestedEntry);
         Collection<LoanProductProvisioningEntry> entries = generateLoanProvisioningEntry(requestedEntry, requestedEntry.getCreatedDate());
         requestedEntry.setProvisioningEntries(entries);
-        this.provisioningEntryRepository.save(requestedEntry);
+        this.provisioningEntryRepository.saveAndFlush(requestedEntry);
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(requestedEntry.getId()).build();
     }
 
@@ -238,7 +216,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
             GLAccount liabilityAccount = glAccountRepository.findById(data.getLiablityAccount()).get();
             GLAccount expenseAccount = glAccountRepository.findById(data.getExpenseAccount()).get();
             MonetaryCurrency currency = loanProduct.getPrincipalAmount().getCurrency();
-            Money money = Money.of(currency, data.getOutstandingBalance());
+            Money money = Money.of(currency, data.getBalance());
             Money amountToReserve = money.percentageOf(data.getPercentage(), MoneyHelper.getRoundingMode());
             Long criteraId = data.getCriteriaId();
             LoanProductProvisioningEntry entry = new LoanProductProvisioningEntry(loanProduct, office, data.getCurrencyCode(),

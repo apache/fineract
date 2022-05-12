@@ -20,7 +20,6 @@ package org.apache.fineract.mix.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.mix.data.NamespaceData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -34,8 +33,8 @@ public class NamespaceReadPlatformServiceImpl implements NamespaceReadPlatformSe
     private final NamespaceMapper namespaceMapper;
 
     @Autowired
-    public NamespaceReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public NamespaceReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
         this.namespaceMapper = new NamespaceMapper();
     }
 
@@ -59,13 +58,13 @@ public class NamespaceReadPlatformServiceImpl implements NamespaceReadPlatformSe
     public NamespaceData retrieveNamespaceById(final Long id) {
         final String sql = this.namespaceMapper.schema() + " where id= ? ";
 
-        return this.jdbcTemplate.queryForObject(sql, this.namespaceMapper, new Object[] { id });
+        return this.jdbcTemplate.queryForObject(sql, this.namespaceMapper, new Object[] { id }); // NOSONAR
     }
 
     @Override
     public NamespaceData retrieveNamespaceByPrefix(final String prefix) {
         final String sql = this.namespaceMapper.schema() + " where prefix = ? ";
 
-        return this.jdbcTemplate.queryForObject(sql, this.namespaceMapper, new Object[] { prefix });
+        return this.jdbcTemplate.queryForObject(sql, this.namespaceMapper, new Object[] { prefix }); // NOSONAR
     }
 }

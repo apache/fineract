@@ -30,7 +30,6 @@ import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
@@ -62,11 +61,11 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
 
     @Autowired
     public SavingsAccountChargeReadPlatformServiceImpl(final PlatformSecurityContext context,
-            final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService, final RoutingDataSource dataSource,
+            final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService, final JdbcTemplate jdbcTemplate,
             final DropdownReadPlatformService dropdownReadPlatformService) {
         this.context = context;
         this.chargeDropdownReadPlatformService = chargeDropdownReadPlatformService;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.chargeDueMapper = new SavingsAccountChargeDueMapper();
         this.dropdownReadPlatformService = dropdownReadPlatformService;
     }
@@ -192,7 +191,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
 
             final String sql = "select " + rm.schema() + " where sc.id=? and sc.savings_account_id=?";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { id, savingsAccountId });
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { id, savingsAccountId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new SavingsAccountChargeNotFoundException(savingsAccountId, e);
         }
@@ -206,9 +205,9 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
         final StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("select ").append(rm.schema()).append(" where sc.savings_account_id=? ");
         if (status.equalsIgnoreCase("active")) {
-            sqlBuilder.append(" and sc.is_active = 1 ");
+            sqlBuilder.append(" and sc.is_active = true ");
         } else if (status.equalsIgnoreCase("inactive")) {
-            sqlBuilder.append(" and sc.is_active = 0 ");
+            sqlBuilder.append(" and sc.is_active = false ");
         }
         sqlBuilder.append(" order by sc.charge_time_enum ASC, sc.charge_due_date ASC, sc.is_penalty ASC");
 
@@ -252,18 +251,17 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
                 + " where sac.charge_due_date is not null and sac.charge_time_enum = ? "
                 + " and sac.charge_due_date <= NOW() and sa.status_enum = ? ";
 
-        return this.jdbcTemplate.query(sql, this.chargeDueMapper,
+        return this.jdbcTemplate.query(sql, this.chargeDueMapper, // NOSONAR
                 new Object[] { ChargeTimeType.ANNUAL_FEE.getValue(), SavingsAccountStatusType.ACTIVE.getValue() });
     }
 
     @Override
     public Collection<SavingsAccountAnnualFeeData> retrieveChargesWithDue() {
         final String sql = "select " + this.chargeDueMapper.schema()
-                + " where sac.charge_due_date is not null and sac.charge_due_date <= NOW() and sac.waived = 0 and sac.is_paid_derived=0 and sac.is_active=1 and sa.status_enum = ? "
+                + " where sac.charge_due_date is not null and sac.charge_due_date <= NOW() and sac.waived = false and sac.is_paid_derived=false and sac.is_active=true and sa.status_enum = ? "
                 + " order by sac.charge_due_date ";
 
-        return this.jdbcTemplate.query(sql, this.chargeDueMapper, new Object[] { SavingsAccountStatusType.ACTIVE.getValue() });
-
+        return this.jdbcTemplate.query(sql, this.chargeDueMapper, new Object[] { SavingsAccountStatusType.ACTIVE.getValue() }); // NOSONAR
     }
 
 }

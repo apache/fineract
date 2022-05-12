@@ -1,0 +1,47 @@
+= Release Process
+
+TODO:
+
+* create "Jira anchor ticket" with all issues linked that are going into this release.
+* maintenance: continuously update the "Jira anchor ticket" to make sure we catch all ticket changes
+* maintenance: list tickets that have discrepancies, e. g. tickets still open while associated PR merged, ticket on wrong version (i. e. associated PR already merged before with another release).
+
+TBD
+
+CAUTION: Consider the Gradle plugin commands an experimental feature!
+
+.Release Process Diagram
+[plantuml,format=svg]
+----
+include::{diagramsdir}/release-process.puml[]
+----
+
+include::process-step01.adoc[leveloffset=+1]
+
+include::process-step02.adoc[leveloffset=+1]
+
+include::process-step03.adoc[leveloffset=+1]
+
+include::process-step04.adoc[leveloffset=+1]
+
+include::process-step05.adoc[leveloffset=+1]
+
+include::process-step06.adoc[leveloffset=+1]
+
+include::process-step07.adoc[leveloffset=+1]
+
+include::process-step08.adoc[leveloffset=+1]
+
+include::process-step09.adoc[leveloffset=+1]
+
+include::process-step10.adoc[leveloffset=+1]
+
+include::process-step11.adoc[leveloffset=+1]
+
+include::process-step12.adoc[leveloffset=+1]
+
+include::process-step13.adoc[leveloffset=+1]
+
+include::process-step14.adoc[leveloffset=+1]
+
+include::process-step15.adoc[leveloffset=+1]

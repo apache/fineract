@@ -27,17 +27,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarType;
 import org.apache.fineract.portfolio.calendar.exception.CalendarNotFoundException;
 import org.apache.fineract.portfolio.meeting.data.MeetingData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -45,17 +44,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 @Service
+@RequiredArgsConstructor
 public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final ConfigurationDomainService configurationDomainService;
-
-    @Autowired
-    public CalendarReadPlatformServiceImpl(final RoutingDataSource dataSource,
-            final ConfigurationDomainService configurationDomainService) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.configurationDomainService = configurationDomainService;
-    }
 
     private static final class CalendarDataMapper implements RowMapper<CalendarData> {
 
@@ -128,7 +121,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
 
             final String sql = rm.schema() + " and c.id = ? and ci.entity_id = ? and ci.entity_type_enum = ? ";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { calendarId, entityId, entityTypeId });
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { calendarId, entityId, entityTypeId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new CalendarNotFoundException(calendarId, e);
         }
@@ -161,7 +154,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
 
         final String sql = rm.schema()
                 + " and ci.entity_id = ? and ci.entity_type_enum = ? and calendar_type_enum = ? order by c.start_date ";
-        final List<CalendarData> result = this.jdbcTemplate.query(sql, rm,
+        final List<CalendarData> result = this.jdbcTemplate.query(sql, rm, // NOSONAR
                 new Object[] { entityId, entityTypeId, CalendarType.COLLECTION.getValue() });
 
         if (!result.isEmpty() && result.size() > 0) {
@@ -386,7 +379,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
 
         final String sql = rm.schema() + " and ci.entity_id = ? and ci.entity_type_enum = ? order by c.start_date ";
         CalendarData calendarData = null;
-        final Collection<CalendarData> calendars = this.jdbcTemplate.query(sql, rm,
+        final Collection<CalendarData> calendars = this.jdbcTemplate.query(sql, rm, // NOSONAR
                 new Object[] { loanId, CalendarEntityType.LOANS.getValue() });
 
         if (!CollectionUtils.isEmpty(calendars)) {
@@ -433,7 +426,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
 
             final String sql = rm.schema() + " where c.calendar_id = ? and date(?) between c.start_date and c.end_date limit 1";
 
-            return this.jdbcTemplate.queryForObject(sql, rm,
+            return this.jdbcTemplate.queryForObject(sql, rm, // NOSONAR
                     new Object[] { calendarId, Date.from(compareDate.atStartOfDay(ZoneId.systemDefault()).toInstant()) });
         } catch (final EmptyResultDataAccessException e) {
             return null;
@@ -446,7 +439,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
 
             final String sql = rm.schema() + " where c.calendar_id = ? ";
 
-            final Collection<CalendarData> calendars = this.jdbcTemplate.query(sql, rm, new Object[] { calendarId });
+            final Collection<CalendarData> calendars = this.jdbcTemplate.query(sql, rm, new Object[] { calendarId }); // NOSONAR
             return calendars;
         } catch (final EmptyResultDataAccessException e) {
             return null;

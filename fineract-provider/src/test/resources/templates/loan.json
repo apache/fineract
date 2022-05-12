@@ -1,0 +1,22 @@
+{
+  "installments": [
+    {
+      "dueDate": "2012-07-02",
+      "installmentNumber": "1",
+      "principal": "",
+      "feeChargesCharged": ""
+    },
+    {
+      "dueDate": "2012-08-02",
+      "installmentNumber": "2",
+      "principal": "",
+      "feeChargesCharged": ""
+    },
+    {
+      "dueDate": "2012-09-02",
+      "installmentNumber": "3",
+      "principal": "",
+      "feeChargesCharged": ""
+    }
+  ]
+}

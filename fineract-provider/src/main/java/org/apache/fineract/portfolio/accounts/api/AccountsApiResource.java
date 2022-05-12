@@ -47,6 +47,7 @@ import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookP
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookService;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.data.UploadRequest;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -199,7 +200,7 @@ public class AccountsApiResource {
             + "requestedDate is requsted date of shares redeem\n" + "\n" + "requestedShares is number of shares to be redeemed\n\n"
             + "Mandatory Fields: dateFormat,locale,requestedDate,requestedShares\n\n"
             + "Showing request/response for 'Reject additional shares request on a share account'\n\n"
-            + "For more info visit this link - https://demo.fineract.dev/fineract-provider/api-docs/apiLive.htm#shareaccounts")
+            + "For more info visit this link - https://fineract.apache.org/legacy-docs/apiLive.htm#shareaccounts")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = AccountsApiResourceSwagger.PostAccountsTypeAccountIdRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AccountsApiResourceSwagger.PostAccountsTypeAccountIdResponse.class))) })
@@ -245,6 +246,8 @@ public class AccountsApiResource {
     @POST
     @Path("uploadtemplate")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @RequestBody(description = "Upload shared accounts template", content = {
+            @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = UploadRequest.class)) })
     public String postSharedAccountsTemplate(@FormDataParam("file") InputStream uploadedInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("locale") final String locale,
             @FormDataParam("dateFormat") final String dateFormat,

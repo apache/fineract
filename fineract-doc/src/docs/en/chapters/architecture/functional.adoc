@@ -1,0 +1,41 @@
+= Functional Overview
+
+As ALL capabilities of the platform are exposed through an API, The API docs are the best place to view a detailed breakdown of what the platform does. See online API Documentation.
+
+.Platform Functional Overview
+image::{imagesdir}/platform-categories.png[]
+
+At a higher level though we see the capabilities fall into the following categories:
+
+* Infrastructure
+** Codes
+** Extensible Data Tables
+** Reporting
+
+* User Administration
+** Users
+** Roles
+** Permissions
+
+* Organisation Modelling
+** Offices
+** Staff
+** Currency
+
+* Product Configuration
+** Charges
+** Loan Products
+** Deposit Products
+
+* Client Data
+** Know Your Client (KYC)
+
+* Portfolio Management
+** Loan Accounts
+** Deposit Accounts
+** Client/Groups
+
+* GL Account Management
+** Chart of Accounts
+** General Ledger
+

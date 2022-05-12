@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
@@ -41,8 +42,8 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
@@ -71,7 +72,6 @@ import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 import org.apache.fineract.portfolio.savings.service.SavingsProductReadPlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -79,6 +79,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 @Service
+@RequiredArgsConstructor
 public class ClientReadPlatformServiceImpl implements ClientReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
@@ -88,7 +89,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final SavingsProductReadPlatformService savingsProductReadPlatformService;
     // data mappers
-    private final PaginationHelper<ClientData> paginationHelper = new PaginationHelper<>();
+    private final PaginationHelper paginationHelper;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final ClientMapper clientMapper = new ClientMapper();
     private final ClientLookupMapper lookupMapper = new ClientLookupMapper();
     private final ClientMembersOfGroupMapper membersOfGroupMapper = new ClientMembersOfGroupMapper();
@@ -100,30 +102,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private final EntityDatatableChecksReadService entityDatatableChecksReadService;
     private final ColumnValidator columnValidator;
     private final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper;
-
-    @Autowired
-    public ClientReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-            final OfficeReadPlatformService officeReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService,
-            final SavingsProductReadPlatformService savingsProductReadPlatformService,
-            final AddressReadPlatformService addressReadPlatformService,
-            final ClientFamilyMembersReadPlatformService clientFamilyMembersReadPlatformService,
-            final ConfigurationReadPlatformService configurationReadPlatformService,
-            final EntityDatatableChecksReadService entityDatatableChecksReadService, final ColumnValidator columnValidator,
-            final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper) {
-        this.context = context;
-        this.officeReadPlatformService = officeReadPlatformService;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.staffReadPlatformService = staffReadPlatformService;
-        this.codeValueReadPlatformService = codeValueReadPlatformService;
-        this.savingsProductReadPlatformService = savingsProductReadPlatformService;
-        this.addressReadPlatformService = addressReadPlatformService;
-        this.clientFamilyMembersReadPlatformService = clientFamilyMembersReadPlatformService;
-        this.configurationReadPlatformService = configurationReadPlatformService;
-        this.entityDatatableChecksReadService = entityDatatableChecksReadService;
-        this.columnValidator = columnValidator;
-        this.clientCollateralManagementRepositoryWrapper = clientCollateralManagementRepositoryWrapper;
-    }
 
     @Override
     public ClientData retrieveTemplate(final Long officeId, final boolean staffInSelectedOfficeOnly) {
@@ -208,7 +186,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         // }
         List<Object> paramList = new ArrayList<>(Arrays.asList(underHierarchySearchString, underHierarchySearchString));
         final StringBuilder sqlBuilder = new StringBuilder(200);
-        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
         sqlBuilder.append(this.clientMapper.schema());
         sqlBuilder.append(" where (o.hierarchy like ? or transferToOffice.hierarchy like ?) ");
 
@@ -235,15 +213,15 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             }
 
             if (searchParameters.isLimited()) {
-                sqlBuilder.append(" limit ").append(searchParameters.getLimit());
+                sqlBuilder.append(" ");
                 if (searchParameters.isOffset()) {
-                    sqlBuilder.append(" offset ").append(searchParameters.getOffset());
+                    sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
+                } else {
+                    sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
                 }
             }
         }
-        final String sqlCountRows = "SELECT FOUND_ROWS()";
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), paramList.toArray(),
-                this.clientMapper);
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), paramList.toArray(), this.clientMapper);
     }
 
     private String buildSqlStringFromClientCriteria(String schemaSql, final SearchParameters searchParameters, List<Object> paramList) {
@@ -275,8 +253,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         if (displayName != null) {
-            // extraCriteria += " and concat(ifnull(c.firstname, ''),
-            // if(c.firstname > '',' ', '') , ifnull(c.lastname, '')) like "
+            // extraCriteria += " and concatcoalesce(c.firstname, ''),
+            // if(c.firstname > '',' ', '') , coalesce(c.lastname, '')) like "
             paramList.add("%" + displayName + "%");
             extraCriteria += " and c.display_name like ? ";
         }
@@ -319,7 +297,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             final String sql = "select " + this.clientMapper.schema()
                     + " where ( o.hierarchy like ? or transferToOffice.hierarchy like ?) and c.id = ?";
-            final ClientData clientData = this.jdbcTemplate.queryForObject(sql, this.clientMapper,
+            final ClientData clientData = this.jdbcTemplate.queryForObject(sql, this.clientMapper, // NOSONAR
                     new Object[] { hierarchySearchString, hierarchySearchString, clientId });
 
             // Get client collaterals
@@ -337,7 +315,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             final String clientGroupsSql = "select " + this.clientGroupsMapper.parentGroupsSchema();
 
-            final Collection<GroupGeneralData> parentGroups = this.jdbcTemplate.query(clientGroupsSql, this.clientGroupsMapper,
+            final Collection<GroupGeneralData> parentGroups = this.jdbcTemplate.query(clientGroupsSql, this.clientGroupsMapper, // NOSONAR
                     new Object[] { clientId });
 
             return ClientData.setParentGroups(clientData, parentGroups, clientCollateralManagementDataSet);
@@ -356,7 +334,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             sql += " and (" + extraCriteria + ")";
             this.columnValidator.validateSqlInjection(sql, extraCriteria);
         }
-        return this.jdbcTemplate.query(sql, this.lookupMapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, this.lookupMapper); // NOSONAR
     }
 
     @Override
@@ -364,7 +342,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         final String sql = "select " + this.lookupMapper.schema() + " where c.office_id = ? and c.status_enum != ?";
 
-        return this.jdbcTemplate.query(sql, this.lookupMapper, new Object[] { officeId, ClientStatus.CLOSED.getValue() });
+        return this.jdbcTemplate.query(sql, this.lookupMapper, new Object[] { officeId, ClientStatus.CLOSED.getValue() }); // NOSONAR
     }
 
     @Override
@@ -376,7 +354,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         final String sql = "select " + this.membersOfGroupMapper.schema() + " where o.hierarchy like ? and pgc.group_id = ?";
 
-        return this.jdbcTemplate.query(sql, this.membersOfGroupMapper, new Object[] { hierarchySearchString, groupId });
+        return this.jdbcTemplate.query(sql, this.membersOfGroupMapper, new Object[] { hierarchySearchString, groupId }); // NOSONAR
     }
 
     @Override
@@ -389,7 +367,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final String sql = "select " + this.membersOfGroupMapper.schema()
                 + " where o.hierarchy like ? and pgc.group_id = ? and c.status_enum = ? ";
 
-        return this.jdbcTemplate.query(sql, this.membersOfGroupMapper,
+        return this.jdbcTemplate.query(sql, this.membersOfGroupMapper, // NOSONAR
                 new Object[] { hierarchySearchString, groupId, ClientStatus.ACTIVE.getValue() });
     }
 
@@ -578,7 +556,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final String sql = "select " + this.membersOfGroupMapper.schema()
                 + " left join m_group g on pgc.group_id=g.id where o.hierarchy like ? and g.parent_id = ? and c.status_enum = ? group by c.id";
 
-        return this.jdbcTemplate.query(sql, this.membersOfGroupMapper,
+        return this.jdbcTemplate.query(sql, this.membersOfGroupMapper, // NOSONAR
                 new Object[] { hierarchySearchString, centerId, ClientStatus.ACTIVE.getValue() });
     }
 
@@ -811,7 +789,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             final String sql = "select " + mapper.clientLookupByIdentifierSchema();
 
-            return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { identifierTypeId, identifierKey });
+            return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { identifierTypeId, identifierKey }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             return null;
         }

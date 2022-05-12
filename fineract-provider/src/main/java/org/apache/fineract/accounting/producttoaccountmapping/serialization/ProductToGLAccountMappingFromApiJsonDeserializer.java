@@ -26,6 +26,7 @@ import com.google.gson.JsonElement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingConstants.LoanProductAccountingParams;
 import org.apache.fineract.accounting.common.AccountingConstants.SavingProductAccountingParams;
@@ -41,7 +42,6 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.shareproducts.constants.ShareProductApiConstants;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -65,14 +65,10 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
+@RequiredArgsConstructor
 public final class ProductToGLAccountMappingFromApiJsonDeserializer {
 
     private final FromJsonHelper fromApiJsonHelper;
-
-    @Autowired
-    public ProductToGLAccountMappingFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
-    }
 
     public void validateForLoanProductCreate(final String json) {
         if (StringUtils.isBlank(json)) {

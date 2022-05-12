@@ -22,7 +22,7 @@ version: '3.7'
 services:
   # Backend service
   fineractmysql:
-    image: mariadb:10.6
+    image: mariadb:10.8
     volumes:
       - ./fineract-db/server_collation.cnf:/etc/mysql/conf.d/server_collation.cnf
       - ./fineract-db/docker:/docker-entrypoint-initdb.d:Z,ro
@@ -57,7 +57,7 @@ services:
       # NOTE: node aware scheduler
       - FINERACT_NODE_ID=1
       # NOTE: env vars prefixed "FINERACT_HIKARI_*" are used to configure the database connection pool
-      - FINERACT_HIKARI_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
+      - FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME=org.mariadb.jdbc.Driver
       - FINERACT_HIKARI_JDBC_URL=jdbc:mariadb://fineractmysql:3306/fineract_tenants
       - FINERACT_HIKARI_USERNAME=root
       - FINERACT_HIKARI_PASSWORD=skdcnwauicn2ucnaecasdsajdnizucawencascdca
@@ -90,14 +90,3 @@ services:
       - FINERACT_DEFAULT_TENANTDB_IDENTIFIER=default
       - FINERACT_DEFAULT_TENANTDB_NAME=fineract_default
       - FINERACT_DEFAULT_TENANTDB_DESCRIPTION=Default Demo Tenant
-
-  # Frontend service
-  community-app:
-    image: openmf/community-app:latest
-    container_name: mifos-ui
-    restart: always
-    ports:
-      - 9090:80
-    depends_on:
-      fineract-server:
-        condition: service_healthy

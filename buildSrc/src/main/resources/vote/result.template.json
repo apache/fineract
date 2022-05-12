@@ -1,0 +1,22 @@
+{
+  "approve": {
+    "binding": [
+      {
+        "name": "Some Body",
+        "email": "bob@apache.org"
+      }
+    ]
+  },
+  "disapprove": {
+    "binding": [
+    ],
+    "nonBinding": [
+    ]
+  },
+  "noOpinion": {
+    "binding": [
+    ],
+    "nonBinding": [
+    ]
+  }
+}

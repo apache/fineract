@@ -22,10 +22,10 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -34,13 +34,13 @@ import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class SavingsProductReadPlatformServiceImpl implements SavingsProductReadPlatformService {
 
     private final PlatformSecurityContext context;
@@ -48,14 +48,6 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
     private final SavingProductMapper savingsProductRowMapper = new SavingProductMapper();
     private final SavingProductLookupMapper savingsProductLookupsRowMapper = new SavingProductLookupMapper();
     private final FineractEntityAccessUtil fineractEntityAccessUtil;
-
-    @Autowired
-    public SavingsProductReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-            final FineractEntityAccessUtil fineractEntityAccessUtil) {
-        this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.fineractEntityAccessUtil = fineractEntityAccessUtil;
-    }
 
     @Override
     public Collection<SavingsProductData> retrieveAll() {
@@ -72,7 +64,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             sql += " and sp.id in ( " + inClause + " ) ";
         }
 
-        return this.jdbcTemplate.query(sql, this.savingsProductRowMapper, new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() });
+        return this.jdbcTemplate.query(sql, this.savingsProductRowMapper, new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() }); // NOSONAR
     }
 
     @Override
@@ -88,7 +80,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             sql += " and id in ( " + inClause + " ) ";
         }
 
-        return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper,
+        return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper, // NOSONAR
                 new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() });
     }
 
@@ -97,7 +89,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         try {
             this.context.authenticatedUser();
             final String sql = "select " + this.savingsProductRowMapper.schema() + " where sp.id = ? and sp.deposit_type_enum = ?";
-            return this.jdbcTemplate.queryForObject(sql, this.savingsProductRowMapper,
+            return this.jdbcTemplate.queryForObject(sql, this.savingsProductRowMapper, // NOSONAR
                     new Object[] { savingProductId, DepositAccountType.SAVINGS_DEPOSIT.getValue() });
         } catch (final EmptyResultDataAccessException e) {
             throw new SavingsProductNotFoundException(savingProductId, e);
@@ -130,6 +122,8 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             sqlBuilder.append("sp.min_overdraft_for_interest_calculation as minOverdraftForInterestCalculation, ");
             sqlBuilder.append("sp.min_required_balance as minRequiredBalance, ");
             sqlBuilder.append("sp.enforce_min_required_balance as enforceMinRequiredBalance, ");
+            sqlBuilder.append("sp.max_allowed_lien_limit as maxAllowedLienLimit, ");
+            sqlBuilder.append("sp.is_lien_allowed as lienAllowed, ");
             sqlBuilder.append("sp.min_balance_for_interest_calculation as minBalanceForInterestCalculation,");
             sqlBuilder.append("sp.accounting_type as accountingType, ");
             sqlBuilder.append("sp.withhold_tax as withHoldTax,");
@@ -204,6 +198,8 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
             final BigDecimal minRequiredBalance = rs.getBigDecimal("minRequiredBalance");
             final boolean enforceMinRequiredBalance = rs.getBoolean("enforceMinRequiredBalance");
+            final BigDecimal maxAllowedLienLimit = rs.getBigDecimal("maxAllowedLienLimit");
+            final boolean lienAllowed = rs.getBoolean("lienAllowed");
             final BigDecimal minBalanceForInterestCalculation = rs.getBigDecimal("minBalanceForInterestCalculation");
 
             final boolean withHoldTax = rs.getBoolean("withHoldTax");
@@ -222,9 +218,9 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             return SavingsProductData.instance(id, name, shortName, description, currency, nominalAnnualInterestRate,
                     compoundingInterestPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
                     minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers,
-                    accountingRuleType, allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance,
-                    minBalanceForInterestCalculation, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax,
-                    taxGroupData, isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat);
+                    accountingRuleType, allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance, maxAllowedLienLimit,
+                    lienAllowed, minBalanceForInterestCalculation, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation,
+                    withHoldTax, taxGroupData, isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat);
         }
     }
 
@@ -265,7 +261,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             } else {
                 sql += " where sp.allow_overdraft=? and sp.deposit_type_enum = ?";
             }
-            return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper,
+            return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper, // NOSONAR
                     new Object[] { isOverdraftType, DepositAccountType.SAVINGS_DEPOSIT.getValue() });
         }
 
@@ -274,9 +270,8 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         } else {
             sql += " where sp.deposit_type_enum = ?";
         }
-        return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper,
+        return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper, // NOSONAR
                 new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() });
-
     }
 
     @Override
@@ -294,6 +289,6 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             sql += " and id in ( " + inClause + " ) ";
         }
 
-        return this.jdbcTemplate.query(sql, this.savingsProductRowMapper, new Object[] { currencyCode });
+        return this.jdbcTemplate.query(sql, this.savingsProductRowMapper, new Object[] { currencyCode }); // NOSONAR
     }
 }

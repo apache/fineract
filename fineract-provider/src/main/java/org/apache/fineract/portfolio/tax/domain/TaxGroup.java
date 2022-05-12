@@ -28,7 +28,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
@@ -44,8 +43,7 @@ public class TaxGroup extends AbstractAuditableCustom {
     @Column(name = "name", length = 100)
     private String name;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name = "tax_group_id", referencedColumnName = "id", nullable = false)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "taxGroup")
     private Set<TaxGroupMappings> taxGroupMappings = new HashSet<>();
 
     protected TaxGroup() {
@@ -55,6 +53,7 @@ public class TaxGroup extends AbstractAuditableCustom {
     private TaxGroup(final String name, final Set<TaxGroupMappings> taxGroupMappings) {
         this.name = name;
         this.taxGroupMappings = taxGroupMappings;
+        taxGroupMappings.forEach(m -> m.setTaxGroup(this));
     }
 
     public static TaxGroup createTaxGroup(final String name, final Set<TaxGroupMappings> taxGroupMappings) {

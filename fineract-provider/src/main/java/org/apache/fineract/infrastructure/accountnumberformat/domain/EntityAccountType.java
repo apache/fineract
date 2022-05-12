@@ -45,6 +45,7 @@ public enum EntityAccountType {
     private static final Map<Integer, EntityAccountType> intToEnumMap = new HashMap<>();
     private static int minValue;
     private static int maxValue;
+
     static {
         int i = 0;
         for (final EntityAccountType type : EntityAccountType.values()) {

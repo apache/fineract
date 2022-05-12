@@ -12,4 +12,4 @@ This demo database contains:
   -  Its mandatory to have at least one role when creating new users so we have one role created by default called 'Super user' which has the special permission 'Full Authorisation'. Any user with this role can do anything in the system.
   -  Its required to have at least one application user setup so remaining setup can be done through ui so we have on application user created by default with username 'quipo' with a password of 'quipo'. Application users must be associated with an office and a role so this user is associated with 'Latam HO' and 'Super user' role allowing this user to do any operation in any office(branch).
 
-Minimum amount of data to support api-docs interaction.
+Minimum amount of data to support legacy-docs interaction.

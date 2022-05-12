@@ -185,7 +185,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
             GuarantorFundingTransaction guarantorFundingTransaction = new GuarantorFundingTransaction(guarantorFundingDetails, null,
                     onHoldTransaction);
             guarantorFundingDetails.addGuarantorFundingTransactions(guarantorFundingTransaction);
-            this.depositAccountOnHoldTransactionRepository.save(onHoldTransaction);
+            this.depositAccountOnHoldTransactionRepository.saveAndFlush(onHoldTransaction);
         }
     }
 
@@ -206,8 +206,8 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
             guarantorFundingDetails.releaseFunds(amoutForWithdraw);
             guarantorFundingDetails.withdrawFunds(amoutForWithdraw);
             guarantorFundingDetails.getLoanAccount().updateGuaranteeAmount(amoutForWithdraw.negate());
-            this.depositAccountOnHoldTransactionRepository.save(onHoldTransaction);
-            this.guarantorFundingRepository.save(guarantorFundingDetails);
+            this.depositAccountOnHoldTransactionRepository.saveAndFlush(onHoldTransaction);
+            this.guarantorFundingRepository.saveAndFlush(guarantorFundingDetails);
         }
     }
 
@@ -482,7 +482,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
             calculateAndRelaseGuarantorFunds(guarantorList, guarantorGuarantee, amountForRelease, loanTransaction,
                     accountOnHoldTransactions);
             this.depositAccountOnHoldTransactionRepository.saveAll(accountOnHoldTransactions);
-            this.guarantorFundingRepository.save(guarantorFundingDetails);
+            this.guarantorFundingRepository.saveAndFlush(guarantorFundingDetails);
         }
     }
 

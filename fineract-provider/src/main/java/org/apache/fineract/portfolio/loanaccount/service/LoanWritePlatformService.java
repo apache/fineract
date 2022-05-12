@@ -32,6 +32,7 @@ import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulk
 import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulkRepaymentCommand;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 
 public interface LoanWritePlatformService {
@@ -43,7 +44,8 @@ public interface LoanWritePlatformService {
 
     CommandProcessingResult undoLoanDisbursal(Long loanId, JsonCommand command);
 
-    CommandProcessingResult makeLoanRepayment(Long loanId, JsonCommand command, boolean isRecoveryRepayment);
+    CommandProcessingResult makeLoanRepayment(LoanTransactionType repaymentTransactionType, Long loanId, JsonCommand command,
+            boolean isRecoveryRepayment);
 
     Map<String, Object> makeLoanBulkRepayment(CollectionSheetBulkRepaymentCommand bulkRepaymentCommand);
 
@@ -115,5 +117,7 @@ public interface LoanWritePlatformService {
     CommandProcessingResult undoGLIMLoanDisbursal(Long loanId, JsonCommand command);
 
     CommandProcessingResult makeGLIMLoanRepayment(Long loanId, JsonCommand command);
+
+    CommandProcessingResult creditBalanceRefund(Long loanId, JsonCommand command);
 
 }

@@ -22,7 +22,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.service.AccountTransferEnumerations;
@@ -43,9 +42,9 @@ public class SelfBeneficiariesTPTReadPlatformServiceImpl implements SelfBenefici
     private final AccountTemplateMapper accountTemplateMapper;
 
     @Autowired
-    public SelfBeneficiariesTPTReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
+    public SelfBeneficiariesTPTReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.mapper = new BeneficiaryMapper();
         this.accountTemplateMapper = new AccountTemplateMapper();
     }
@@ -78,7 +77,7 @@ public class SelfBeneficiariesTPTReadPlatformServiceImpl implements SelfBenefici
             sqlBuilder.append(" inner join m_office as o on b.office_id = o.id ");
             sqlBuilder.append(" inner join m_client as c on b.client_id = c.id ");
             sqlBuilder.append(" inner join m_savings_account as s on b.account_id = s.id ");
-            sqlBuilder.append(" where b.is_active = 1 ");
+            sqlBuilder.append(" where b.is_active = true ");
             sqlBuilder.append(" and b.account_type = 2 ");
             sqlBuilder.append(" and b.app_user_id = ?) ");
             sqlBuilder.append(" union all ");
@@ -93,7 +92,7 @@ public class SelfBeneficiariesTPTReadPlatformServiceImpl implements SelfBenefici
             sqlBuilder.append(" inner join m_office as o on b.office_id = o.id ");
             sqlBuilder.append(" inner join m_client as c on b.client_id = c.id ");
             sqlBuilder.append(" inner join m_loan as l on b.account_id = l.id ");
-            sqlBuilder.append(" where b.is_active = 1 ");
+            sqlBuilder.append(" where b.is_active = true ");
             sqlBuilder.append(" and b.account_type = 1 ");
             sqlBuilder.append(" and b.app_user_id = ?) ");
 
@@ -136,7 +135,7 @@ public class SelfBeneficiariesTPTReadPlatformServiceImpl implements SelfBenefici
             sqlBuilder.append(" inner join m_office as o on b.office_id = o.id ");
             sqlBuilder.append(" inner join m_client as c on b.client_id = c.id ");
             sqlBuilder.append(" inner join m_savings_account as s on b.account_id = s.id ");
-            sqlBuilder.append(" where b.is_active = 1 ");
+            sqlBuilder.append(" where b.is_active = true ");
             sqlBuilder.append(" and b.account_type = 2 ");
             sqlBuilder.append(" and b.app_user_id = ?) ");
             sqlBuilder.append(" union all ");
@@ -151,7 +150,7 @@ public class SelfBeneficiariesTPTReadPlatformServiceImpl implements SelfBenefici
             sqlBuilder.append(" inner join m_office as o on b.office_id = o.id ");
             sqlBuilder.append(" inner join m_client as c on b.client_id = c.id ");
             sqlBuilder.append(" inner join m_loan as l on b.account_id = l.id ");
-            sqlBuilder.append(" where b.is_active = 1 ");
+            sqlBuilder.append(" where b.is_active = true ");
             sqlBuilder.append(" and b.account_type = 1 ");
             sqlBuilder.append(" and b.app_user_id = ?) ");
 
@@ -184,7 +183,7 @@ public class SelfBeneficiariesTPTReadPlatformServiceImpl implements SelfBenefici
         sqlBuilder.append(" where b.app_user_id = ? ");
         sqlBuilder.append(" and b.account_id = ? ");
         sqlBuilder.append(" and b.account_type = ? ");
-        sqlBuilder.append(" and b.is_active = 1; ");
+        sqlBuilder.append(" and b.is_active = true; ");
 
         return this.jdbcTemplate.queryForObject(sqlBuilder.toString(), Long.class, appUserId, accountId, accountType);
     }

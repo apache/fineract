@@ -34,8 +34,10 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interest
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestCompoundingPeriodTypeParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestPostingPeriodTypeParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.isDormancyTrackingActiveParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lienAllowedParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.maxAllowedLienLimitParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minBalanceForInterestCalculationParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minOverdraftForInterestCalculationParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minRequiredBalanceParamName;
@@ -170,6 +172,16 @@ public class SavingsProductAssembler {
         if (command.parameterExists(minRequiredBalanceParamName)) {
             minRequiredBalance = command.bigDecimalValueOfParameterNamed(minRequiredBalanceParamName);
         }
+
+        boolean lienAllowed = false;
+        if (command.parameterExists(lienAllowedParamName)) {
+            lienAllowed = command.booleanPrimitiveValueOfParameterNamed(lienAllowedParamName);
+        }
+
+        BigDecimal maxAllowedLienLimit = BigDecimal.ZERO;
+        if (command.parameterExists(maxAllowedLienLimitParamName)) {
+            maxAllowedLienLimit = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(maxAllowedLienLimitParamName);
+        }
         final BigDecimal minBalanceForInterestCalculation = command
                 .bigDecimalValueOfParameterNamedDefaultToNullIfZero(minBalanceForInterestCalculationParamName);
 
@@ -184,9 +196,9 @@ public class SavingsProductAssembler {
         return SavingsProduct.createNew(name, shortName, description, currency, interestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer, accountingRuleType, charges,
-                allowOverdraft, overdraftLimit, enforceMinRequiredBalance, minRequiredBalance, minBalanceForInterestCalculation,
-                nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax, taxGroup, isDormancyTrackingActive,
-                daysToInactive, daysToDormancy, daysToEscheat);
+                allowOverdraft, overdraftLimit, enforceMinRequiredBalance, minRequiredBalance, lienAllowed, maxAllowedLienLimit,
+                minBalanceForInterestCalculation, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax,
+                taxGroup, isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat);
     }
 
     public Set<Charge> assembleListOfSavingsProductCharges(final JsonCommand command, final String savingsProductCurrencyCode) {

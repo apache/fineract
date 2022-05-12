@@ -177,7 +177,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
             emailCampaign.setStretchyReportParamMap(new Gson().toJson(stretchyReportParams));
         }
 
-        this.emailCampaignRepository.save(emailCampaign);
+        this.emailCampaignRepository.saveAndFlush(emailCampaign);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //

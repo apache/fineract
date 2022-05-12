@@ -29,14 +29,14 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Table(name = "m_creditreport")
 public final class CreditReport extends AbstractPersistableCustom {
 
-    @Column(name = "creditBureauId")
+    @Column(name = "credit_bureau_id")
     private Long creditBureauId;
 
-    @Column(name = "nationalId")
+    @Column(name = "national_id")
     private String nationalId;
 
     @Basic(fetch = FetchType.LAZY)
-    @Column(name = "creditReports")
+    @Column(name = "credit_reports")
     private byte[] creditReports;
 
     private CreditReport() {}

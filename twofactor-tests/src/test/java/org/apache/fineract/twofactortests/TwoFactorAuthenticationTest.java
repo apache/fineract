@@ -97,7 +97,7 @@ public class TwoFactorAuthenticationTest {
 
     @Test
     public void testApiDocsAccess() {
-        performServerGet(requestSpecWithoutBasic, responseSpec, "/fineract-provider/api-docs/apiLive.htm", null);
+        performServerGet(requestSpecWithoutBasic, responseSpec, "/fineract-provider/legacy-docs/apiLive.htm", null);
     }
 
     @Test

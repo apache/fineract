@@ -1,0 +1,38 @@
+= Gradle
+
+TBD
+
+== User Properties
+
+There are a couple of properties that contain committer/release manager related secrets. Please add the following properties to your personal global Gradle properties (you will find them at `~/.gradle/gradle.properties` in your home folder).
+
+[source,properties]
+----
+fineract.config.gnupg.keyName=ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCD<1>
+fineract.config.gnupg.password=******
+fineract.config.gnupg.publicKeyring=~/.gnupg/pubring.kbx<2>
+fineract.config.gnupg.secretKeyring=~/.gnupg/secring.gpg
+fineract.config.smtp.username=aleks@gmail.com <3>
+fineract.config.smtp.password=******
+fineract.config.name=Aleksandar Vidakovic
+fineract.config.email=aleks@apache.org
+fineract.config.username=aleks <4>
+fineract.config.password=******
+----
+<1> Make sure you use the full GPG key name (you can list yours via `gpg --list-secret-keys --keyid-format=long`)
+<2> GnuPG has it's own kbx format to store the public key ring. At the moment we are only supporting this format
+<3> Currently we only have instructions for GMail
+<4> Apache committer credentials
+
+CAUTION: **Never** add any personal secrets in the project gradle.properties. Double check that you are not accidentally committing them to Git!
+
+== Release Plugin
+
+Creating Apache Fineract releases was a very manual and tedious procedure before we created the Gradle release plugin. It was easy - even with documentation - to forget a detail. Some ideas are borrowed from the excellent https://jreleaser.org[JReleaser] tool. Unfortunately at the moment we can't use it for the full release process. Being an Apache project we have certain requirements that are not fully covered by https://jreleaser.org[JReleaser].
+
+=== Release Plugin Configuration
+
+[source,groovy]
+----
+include::{rootdir}/buildSrc/src/main/groovy/org.apache.fineract.release.gradle[lines=23..89]
+----

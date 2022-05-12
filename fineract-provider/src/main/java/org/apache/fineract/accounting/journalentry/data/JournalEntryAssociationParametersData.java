@@ -18,6 +18,11 @@
  */
 package org.apache.fineract.accounting.journalentry.data;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+@Getter
 public class JournalEntryAssociationParametersData {
 
     private final boolean transactionDetailsRequired;
@@ -26,18 +31,5 @@ public class JournalEntryAssociationParametersData {
     public JournalEntryAssociationParametersData() {
         this.transactionDetailsRequired = false;
         this.runningBalanceRequired = false;
-    }
-
-    public JournalEntryAssociationParametersData(final boolean transactionDetailsRequired, final boolean runningBalanceRequired) {
-        this.transactionDetailsRequired = transactionDetailsRequired;
-        this.runningBalanceRequired = runningBalanceRequired;
-    }
-
-    public boolean isTransactionDetailsRequired() {
-        return this.transactionDetailsRequired;
-    }
-
-    public boolean isRunningBalanceRequired() {
-        return this.runningBalanceRequired;
     }
 }

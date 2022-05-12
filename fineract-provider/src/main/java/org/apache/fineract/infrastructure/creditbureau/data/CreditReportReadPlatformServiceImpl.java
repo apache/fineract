@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.creditbureau.data;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.creditbureau.service.CreditReportReadPlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,15 +35,15 @@ public class CreditReportReadPlatformServiceImpl implements CreditReportReadPlat
     private final PlatformSecurityContext context;
 
     @Autowired
-    public CreditReportReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
+    public CreditReportReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private static final class CreditReportDataMapper implements RowMapper<CreditReportData> {
 
         public String schema() {
-            return " c.id as id, c.creditBureauId as creditBureauId , c.nationalId as nationalId from m_creditreport c ";
+            return " c.id as id, c.credit_bureau_id as creditBureauId , c.national_id as nationalId from m_creditreport c ";
         }
 
         @Override
@@ -67,7 +66,7 @@ public class CreditReportReadPlatformServiceImpl implements CreditReportReadPlat
         final CreditReportDataMapper rm = new CreditReportDataMapper();
         final String sql = " select " + rm.schema() + " where c.creditBureauId = ? ";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { creditBureauId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { creditBureauId }); // NOSONAR
 
     }
 

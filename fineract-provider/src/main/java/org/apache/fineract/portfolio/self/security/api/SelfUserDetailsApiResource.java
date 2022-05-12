@@ -52,7 +52,7 @@ public class SelfUserDetailsApiResource {
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Fetch authenticated user details", description = "Checks the Authentication and returns the set roles and permissions allowed\n\n"
-            + "For more info visit this link - https://demo.fineract.dev/fineract-provider/api-docs/apiLive.htm#selfoauth")
+            + "For more info visit this link - https://fineract.apache.org/legacy-docs/apiLive.htm#selfoauth")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SelfUserDetailsApiResourceSwagger.GetSelfUserDetailsResponse.class))) })
     public String fetchAuthenticatedUserData() {

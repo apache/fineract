@@ -32,7 +32,6 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -73,17 +72,18 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
     @Autowired
     public ChargeReadPlatformServiceImpl(final CurrencyReadPlatformService currencyReadPlatformService,
-            final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService, final RoutingDataSource dataSource,
+            final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService, final JdbcTemplate jdbcTemplate,
             final DropdownReadPlatformService dropdownReadPlatformService, final FineractEntityAccessUtil fineractEntityAccessUtil,
             final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService,
-            final TaxReadPlatformService taxReadPlatformService, final ConfigurationDomainServiceJpa configurationDomainServiceJpa) {
+            final TaxReadPlatformService taxReadPlatformService, final ConfigurationDomainServiceJpa configurationDomainServiceJpa,
+            final NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.chargeDropdownReadPlatformService = chargeDropdownReadPlatformService;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.currencyReadPlatformService = currencyReadPlatformService;
         this.dropdownReadPlatformService = dropdownReadPlatformService;
         this.fineractEntityAccessUtil = fineractEntityAccessUtil;
         this.accountingDropdownReadPlatformService = accountingDropdownReadPlatformService;
-        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
         this.taxReadPlatformService = taxReadPlatformService;
         this.configurationDomainServiceJpa = configurationDomainServiceJpa;
     }
@@ -99,7 +99,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
         sql += " order by c.name ";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
     }
 
     @Override
@@ -109,10 +109,9 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         String sql = "select " + rm.chargeSchema() + " where c.is_deleted=false and c.currency_code= ? ";
 
         sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
-
         sql += " order by c.name ";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { currencyCode });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { currencyCode }); // NOSONAR
     }
 
     @Override
@@ -125,7 +124,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
 
             sql = sql + " ;";
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { chargeId });
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { chargeId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new ChargeNotFoundException(chargeId, e);
         }
@@ -176,7 +175,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
         sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { loanProductId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { loanProductId }); // NOSONAR
     }
 
     @Override
@@ -188,7 +187,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                 + " where c.is_deleted=false and c.is_active=true and plc.product_loan_id=? and c.charge_time_enum=? ";
         sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { loanProductId, chargeTime.getValue() });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { loanProductId, chargeTime.getValue() }); // NOSONAR
     }
 
     @Override
@@ -200,7 +199,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
         sql += " order by c.name ";
 
-        return this.jdbcTemplate.query(sql, rm, params);
+        return this.jdbcTemplate.query(sql, rm, params); // NOSONAR
     }
 
     @Override
@@ -263,7 +262,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                 + " where c.is_deleted=false and c.is_active=true and c.is_penalty=true and c.charge_applies_to_enum=? ";
         sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
         sql += " order by c.name ";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.LOAN.getValue() });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.LOAN.getValue() }); // NOSONAR
     }
 
     private String addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled() {
@@ -407,7 +406,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
         sql += " order by c.name ";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.SAVINGS.getValue() });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.SAVINGS.getValue() }); // NOSONAR
     }
 
     @Override
@@ -418,17 +417,18 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                 + " where c.is_deleted=false and c.is_active=true and c.is_penalty=true and c.charge_applies_to_enum=? ";
         sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
         sql += " order by c.name ";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.SAVINGS.getValue() });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.SAVINGS.getValue() }); // NOSONAR
     }
 
     @Override
     public Collection<ChargeData> retrieveSavingsProductCharges(final Long savingsProductId) {
         final ChargeMapper rm = new ChargeMapper();
 
-        String sql = "select " + rm.savingsProductChargeSchema() + " where c.is_deleted=0 and c.is_active=1 and spc.savings_product_id=? ";
+        String sql = "select " + rm.savingsProductChargeSchema()
+                + " where c.is_deleted=false and c.is_active=true and spc.savings_product_id=? ";
         sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { savingsProductId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { savingsProductId }); // NOSONAR
     }
 
     @Override
@@ -438,7 +438,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         String sql = "select " + rm.shareProductChargeSchema() + " where c.is_deleted=false and c.is_active=true and mspc.product_id=? ";
         sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { shareProductId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { shareProductId }); // NOSONAR
     }
 
     @Override
@@ -450,7 +450,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                 + " where c.is_deleted=false and c.is_active=true and c.charge_applies_to_enum=? " + " and sa.id = ?";
         sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.SAVINGS.getValue(), savingsAccountId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.SAVINGS.getValue(), savingsAccountId }); // NOSONAR
 
     }
 
@@ -461,7 +461,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
         sql += " order by c.name ";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.CLIENT.getValue() });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.CLIENT.getValue() }); // NOSONAR
     }
 
     @Override
@@ -471,6 +471,6 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
         sql += " order by c.name ";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.SHARES.getValue() });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.SHARES.getValue() }); // NOSONAR
     }
 }

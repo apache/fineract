@@ -29,7 +29,6 @@ import java.util.regex.Pattern;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.mix.data.MixTaxonomyData;
 import org.apache.fineract.mix.data.MixTaxonomyMappingData;
 import org.apache.fineract.mix.data.XBRLData;
@@ -53,11 +52,11 @@ public class XBRLResultServiceImpl implements XBRLResultService {
     private HashMap<String, BigDecimal> accountBalanceMap;
 
     @Autowired
-    public XBRLResultServiceImpl(final RoutingDataSource dataSource, final MixTaxonomyMappingReadPlatformService readTaxonomyMappingService,
+    public XBRLResultServiceImpl(final JdbcTemplate jdbcTemplate, final MixTaxonomyMappingReadPlatformService readTaxonomyMappingService,
             final MixTaxonomyReadPlatformService readTaxonomyService) {
         this.readTaxonomyMappingService = readTaxonomyMappingService;
         this.readTaxonomyService = readTaxonomyService;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
@@ -101,7 +100,7 @@ public class XBRLResultServiceImpl implements XBRLResultService {
     }
 
     private String getAccountSql(final Date startDate, final Date endDate) {
-        final String sql = "select debits.glcode as 'glcode', debits.name as 'name', (ifnull(debits.debitamount,0)-ifnull(credits.creditamount,0)) as 'balance' "
+        final String sql = "select debits.glcode as 'glcode', debits.name as 'name', coalesce(debits.debitamount,0)-coalesce(credits.creditamount,0)) as 'balance' "
                 + "from (select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'debitamount' "
                 + "from acc_gl_journal_entry,acc_gl_account " + "where acc_gl_account.id = acc_gl_journal_entry.account_id "
                 + "and acc_gl_journal_entry.type_enum=2 " + "and acc_gl_journal_entry.entry_date <= " + endDate
@@ -118,7 +117,7 @@ public class XBRLResultServiceImpl implements XBRLResultService {
                 // ${branch}=1) "
                 // +
                 + " group by glcode " + "order by glcode) credits " + "on debits.glcode=credits.glcode " + "union "
-                + "select credits.glcode as 'glcode', credits.name as 'name', (ifnull(debits.debitamount,0)-ifnull(credits.creditamount,0)) as 'balance' "
+                + "select credits.glcode as 'glcode', credits.name as 'name', coalesce(debits.debitamount,0)-coalesce(credits.creditamount,0)) as 'balance' "
                 + "from (select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'debitamount' "
                 + "from acc_gl_journal_entry,acc_gl_account " + "where acc_gl_account.id = acc_gl_journal_entry.account_id "
                 + "and acc_gl_journal_entry.type_enum=2 " + "and acc_gl_journal_entry.entry_date <= " + endDate

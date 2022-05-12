@@ -33,6 +33,7 @@ public class LoanRescheduleRequestRepositoryWrapper {
         this.loanRescheduleRequestRepository = loanRescheduleRequestRepository;
     }
 
+    @Transactional(readOnly = true)
     public LoanRescheduleRequest findOneWithNotFoundDetection(final Long id) {
         return this.findOneWithNotFoundDetection(id, false);
     }

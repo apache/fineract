@@ -26,7 +26,7 @@ public final class PaymentTypeDomain {
     private Boolean isCashPayment;
     private Integer position;
 
-    private PaymentTypeDomain(final Integer id, final String name, final String description, final Boolean isCashPayment,
+    public PaymentTypeDomain(final Integer id, final String name, final String description, final Boolean isCashPayment,
             final Integer position) {
         this.id = id;
         this.name = name;

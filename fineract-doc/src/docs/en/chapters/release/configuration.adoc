@@ -1,0 +1,20 @@
+= Configuration
+
+Before you can start using the Fineract release plugin to create releases you have to configure and setup a couple of things first.
+
+* All official communication concerning releases happens on the mailto:dev@fineract.apache.org[mailing list]. Every release manager needs to be a member of and engaging on the mailing list for credibility.
+* Make sure you have edit permissions on the https://cwiki.apache.org/confluence/display/FINERACT[Apache Confluence Wiki]
+* You need full permissions on https://issues.apache.org/jira[Apache JIRA] to be able to move issues to the next release
+* Git committer privileges to be allowed to create tags and the release branch
+* Familiarity with building Fineract locally and creating release distributions is required
+* You need to be a member of the PMC to be able to upload release artifacts; this task can be delegated though
+* A general Familiarity with PGP/GPG is recommended (at least to setup your keypairs), but the release plugin does most of the heavy lifting
+* Make sure to read the release plugin documentation for troubleshooting
+
+include::configuration-secrets.adoc[leveloffset=+1]
+
+include::configuration-gpg.adoc[leveloffset=+1]
+
+include::configuration-email.adoc[leveloffset=+1]
+
+include::configuration-gradle.adoc[leveloffset=+1]

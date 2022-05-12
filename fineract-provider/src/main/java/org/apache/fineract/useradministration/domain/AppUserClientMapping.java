@@ -30,6 +30,10 @@ import org.apache.fineract.portfolio.client.domain.Client;
 @Table(name = "m_selfservice_user_client_mapping")
 public class AppUserClientMapping extends AbstractPersistableCustom {
 
+    @ManyToOne(optional = false, cascade = CascadeType.ALL)
+    @JoinColumn(name = "appuser_id", nullable = false)
+    private AppUser appUser;
+
     @ManyToOne(optional = false, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
@@ -38,12 +42,17 @@ public class AppUserClientMapping extends AbstractPersistableCustom {
 
     }
 
-    public AppUserClientMapping(Client client) {
+    public AppUserClientMapping(AppUser appUser, Client client) {
+        this.appUser = appUser;
         this.client = client;
     }
 
     public Client getClient() {
         return this.client;
+    }
+
+    public AppUser getAppUser() {
+        return appUser;
     }
 
     @Override

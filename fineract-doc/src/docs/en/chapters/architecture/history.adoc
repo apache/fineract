@@ -1,0 +1,18 @@
+= History
+
+== The Idea
+
+Fineract was an idea born out of a wish to create and deploy technology that allows the microfinance industry to scale. The goal is to:
+
+* Produce a gold standard management information system suitable for microfinance operations
+* Acts as the basis of a platform for microfinance
+* Open source, owned and driven by member organisations in the community
+* Enabling potential for eco-system of providers located near to MFIs
+
+== Timeline
+
+* 2006: Project intiated by Grameen Foundation
+* Late 2011: Grameen Foundation handed over full responsibility to open source community.
+* 2012: Mifos X platform started. Previous members of project come together under the name of Community for Open Source Microfinance (COSM / OpenMF)
+* 2013: COSM / OpenMF officially rebranded to Mifos Initiative and receive US 501c3 status.
+* 2016: Fineract 1.x began incubation at Apache

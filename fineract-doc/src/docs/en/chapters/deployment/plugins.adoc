@@ -1,0 +1,18 @@
+= Plugins
+
+Apache Fineract is extensible through plugin JARs (https://issues.apache.org/jira/browse/FINERACT-1177[FINERACT-1177]; based on
+https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-executable-jar-format.html[Spring Boot's support]). To launch Fineract with plugin JARs in `libs/*.jar`, use:
+
+----
+java -Dloader.path=libs/ -jar fineract-provider.jar
+----
+
+The Fineract "Docker" container image's `ENTRYPOINT` uses this, see our `Dockerfile`. You could therefore build your customized Fineract distribution container image with your own `Dockerfile` using e.g. `FROM apache/fineract:latest` and then drop some plugin JARs into `/app/libs/`.
+
+The WAR distribution does not directly support such plugins, but one could "explode" the WAR and drop JARs into `WEB-INF/lib`; if you know what you are doing, and feel nostalgic of the 1990s still using WARs, instead of the recommended modern Spring Boot distribution.
+
+Here is a list of known 3rd-party plugin projects which can be dropped into `libs/`:
+
+* https://github.com/vorburger/fineract-pentaho
+
+NOTE: The reporting module became our first module experiment out of necessity. We are currently developing a strategy to split up even more internals of Fineract into proper modules. Those that have an incompatible license will be hosted in a separate Git repository (probably on Github under the Mifos organisation). We'll send out an announcement as soon as we have more to say on this topic.

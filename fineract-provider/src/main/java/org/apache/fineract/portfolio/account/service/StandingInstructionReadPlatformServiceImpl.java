@@ -39,8 +39,8 @@ import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
@@ -76,25 +76,29 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
     private final OfficeReadPlatformService officeReadPlatformService;
     private final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService;
     private final DropdownReadPlatformService dropdownReadPlatformService;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     // mapper
     private final StandingInstructionMapper standingInstructionMapper;
 
     // pagination
-    private final PaginationHelper<StandingInstructionData> paginationHelper = new PaginationHelper<>();
+    private final PaginationHelper paginationHelper;
 
     @Autowired
-    public StandingInstructionReadPlatformServiceImpl(final RoutingDataSource dataSource,
+    public StandingInstructionReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate,
             final ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
             final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService,
-            final DropdownReadPlatformService dropdownReadPlatformService, final ColumnValidator columnValidator) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+            final DropdownReadPlatformService dropdownReadPlatformService, final ColumnValidator columnValidator,
+            DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
+        this.jdbcTemplate = jdbcTemplate;
         this.clientReadPlatformService = clientReadPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
         this.portfolioAccountReadPlatformService = portfolioAccountReadPlatformService;
         this.dropdownReadPlatformService = dropdownReadPlatformService;
+        this.sqlGenerator = sqlGenerator;
         this.standingInstructionMapper = new StandingInstructionMapper();
         this.columnValidator = columnValidator;
+        this.paginationHelper = paginationHelper;
     }
 
     @Override
@@ -257,7 +261,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
     public Page<StandingInstructionData> retrieveAll(final StandingInstructionDTO standingInstructionDTO) {
 
         final StringBuilder sqlBuilder = new StringBuilder(200);
-        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
         sqlBuilder.append(this.standingInstructionMapper.schema());
         if (standingInstructionDTO.transferType() != null || standingInstructionDTO.clientId() != null
                 || standingInstructionDTO.clientName() != null) {
@@ -315,16 +319,16 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
         }
 
         if (searchParameters.isLimited()) {
-            sqlBuilder.append(" limit ").append(searchParameters.getLimit());
+            sqlBuilder.append(" ");
             if (searchParameters.isOffset()) {
-                sqlBuilder.append(" offset ").append(searchParameters.getOffset());
+                sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
+            } else {
+                sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
             }
         }
 
         final Object[] finalObjectArray = paramObj.toArray();
-        final String sqlCountRows = "SELECT FOUND_ROWS()";
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), finalObjectArray,
-                this.standingInstructionMapper);
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), finalObjectArray, this.standingInstructionMapper);
     }
 
     @Override
@@ -332,9 +336,10 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
         final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select ");
         sqlBuilder.append(this.standingInstructionMapper.schema());
-        sqlBuilder.append(
-                " where atsi.status=? and CURRENT_DATE() >= atsi.valid_from and (atsi.valid_till IS NULL or CURRENT_DATE() < atsi.valid_till) ")
-                .append(" and  (atsi.last_run_date <> CURRENT_DATE() or atsi.last_run_date IS NULL)")
+        sqlBuilder
+                .append(" where atsi.status=? and " + sqlGenerator.currentDate() + " >= atsi.valid_from and (atsi.valid_till IS NULL or "
+                        + sqlGenerator.currentDate() + " < atsi.valid_till) ")
+                .append(" and  (atsi.last_run_date <> " + sqlGenerator.currentDate() + " or atsi.last_run_date IS NULL)")
                 .append(" ORDER BY atsi.priority DESC");
         return this.jdbcTemplate.query(sqlBuilder.toString(), this.standingInstructionMapper, status);
     }
@@ -345,7 +350,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
         try {
             final String sql = "select " + this.standingInstructionMapper.schema() + " where atsi.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, this.standingInstructionMapper, new Object[] { instructionId });
+            return this.jdbcTemplate.queryForObject(sql, this.standingInstructionMapper, new Object[] { instructionId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new AccountTransferNotFoundException(instructionId, e);
         }
@@ -354,8 +359,9 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
     @Override
     public StandingInstructionDuesData retriveLoanDuesData(final Long loanId) {
         final StandingInstructionLoanDuesMapper rm = new StandingInstructionLoanDuesMapper();
-        final String sql = "select " + rm.schema() + " where ml.id= ? and ls.duedate <= CURRENT_DATE() and ls.completed_derived <> 1";
-        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId });
+        final String sql = "select " + rm.schema() + " where ml.id= ? and ls.duedate <= " + sqlGenerator.currentDate()
+                + " and ls.completed_derived <> 1";
+        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId }); // NOSONAR
     }
 
     private static final class StandingInstructionMapper implements RowMapper<StandingInstructionData> {

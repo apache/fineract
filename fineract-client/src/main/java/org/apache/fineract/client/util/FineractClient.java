@@ -449,17 +449,17 @@ public final class FineractClient {
             // Nota bene: Similar code to this is also in Fineract Provider's
             // org.apache.fineract.infrastructure.hooks.processor.ProcessorHelper
             if (insecure) {
-                HostnameVerifier insecureHostnameVerifier = (hostname, session) -> true;
+                HostnameVerifier insecureHostnameVerifier = (hostname, session) -> true;// NOSONAR
                 okBuilder.hostnameVerifier(insecureHostnameVerifier);
 
                 try {
                     X509TrustManager insecureX509TrustManager = new X509TrustManager() {
 
                         @Override
-                        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
+                        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {}// NOSONAR
 
                         @Override
-                        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
+                        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {}// NOSONAR
 
                         @Override
                         public X509Certificate[] getAcceptedIssuers() {
@@ -468,7 +468,7 @@ public final class FineractClient {
                     };
 
                     // TODO "SSL" or "TLS" as in hooks.processor.ProcessorHelper?
-                    SSLContext sslContext = SSLContext.getInstance("SSL");
+                    SSLContext sslContext = SSLContext.getInstance("SSL");// NOSONAR
                     sslContext.init(null, new TrustManager[] { insecureX509TrustManager }, new SecureRandom());
                     SSLSocketFactory insecureSslSocketFactory = sslContext.getSocketFactory();
 

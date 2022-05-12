@@ -108,6 +108,10 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
         this.tenant = tenant;
     }
 
+    public void setConfigurationDomainService(ConfigurationDomainService configurationDomainService) {
+        this.configurationDomainService = configurationDomainService;
+    }
+
     public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }

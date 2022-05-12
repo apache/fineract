@@ -49,6 +49,7 @@ public enum LendingStrategy {
     private static final Map<Integer, LendingStrategy> intToEnumMap = new HashMap<>();
     private static int minValue;
     private static int maxValue;
+
     static {
         int i = 0;
         for (final LendingStrategy type : LendingStrategy.values()) {

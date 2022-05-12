@@ -19,6 +19,8 @@
 package org.apache.fineract.infrastructure.documentmanagement.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.apache.fineract.infrastructure.core.data.UploadRequest;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 /**
  * Created by sanyam on 7/8/17.
@@ -114,6 +116,34 @@ final class DocumentManagementApiResourceSwagger {
         public DeleteEntityTypeEntityIdDocumentsResponse.PutEntityTypeEntityIdDocumentsResponseChangesSwagger changes;
         @Schema(example = "3")
         public String resourceIdentifier;
+    }
+
+    @Schema(description = "Document upload request")
+    public static final class DocumentUploadRequest extends UploadRequest {
+
+        @Schema(name = "name", type = "string", accessMode = Schema.AccessMode.READ_WRITE)
+        @FormDataParam("name")
+        private String name;
+
+        @Schema(name = "description", type = "string", accessMode = Schema.AccessMode.READ_WRITE)
+        @FormDataParam("description")
+        private String description;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
     }
 
 }

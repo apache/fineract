@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingConstants.AccrualAccountsForLoan;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForLoan;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForSavings;
@@ -37,23 +38,17 @@ import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeToGLAcc
 import org.apache.fineract.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
 import org.apache.fineract.accounting.producttoaccountmapping.domain.PortfolioProductType;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class ProductToGLAccountMappingReadPlatformServiceImpl implements ProductToGLAccountMappingReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    public ProductToGLAccountMappingReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-    }
 
     private static final class ProductToGLAccountMappingMapper implements RowMapper<Map<String, Object>> {
 
@@ -108,7 +103,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
         final ProductToGLAccountMappingMapper rm = new ProductToGLAccountMappingMapper();
         final String sql = "select " + rm.schema() + " and product_id = ? and payment_type is null and mapping.charge_id is null";
 
-        final List<Map<String, Object>> listOfProductToGLAccountMaps = this.jdbcTemplate.query(sql, rm,
+        final List<Map<String, Object>> listOfProductToGLAccountMaps = this.jdbcTemplate.query(sql, rm, // NOSONAR
                 new Object[] { PortfolioProductType.LOAN.getValue(), loanProductId });
 
         if (AccountingRuleType.CASH_BASED.getValue().equals(accountingType)) {
@@ -194,7 +189,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
         final ProductToGLAccountMappingMapper rm = new ProductToGLAccountMappingMapper();
         final String sql = "select " + rm.schema() + " and product_id = ? and payment_type is null and mapping.charge_id is null ";
 
-        final List<Map<String, Object>> listOfProductToGLAccountMaps = this.jdbcTemplate.query(sql, rm,
+        final List<Map<String, Object>> listOfProductToGLAccountMaps = this.jdbcTemplate.query(sql, rm, // NOSONAR
                 new Object[] { PortfolioProductType.SAVING.getValue(), savingsProductId });
 
         if (AccountingRuleType.CASH_BASED.getValue().equals(accountingType)) {
@@ -255,7 +250,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
         final ProductToGLAccountMappingMapper rm = new ProductToGLAccountMappingMapper();
         final String sql = "select " + rm.schema() + " and product_id = ? and payment_type is not null";
 
-        final List<Map<String, Object>> paymentTypeToFundSourceMappingsList = this.jdbcTemplate.query(sql, rm,
+        final List<Map<String, Object>> paymentTypeToFundSourceMappingsList = this.jdbcTemplate.query(sql, rm, // NOSONAR
                 new Object[] { portfolioProductType.getValue(), loanProductId });
 
         List<PaymentTypeToGLAccountMapper> paymentTypeToGLAccountMappers = null;
@@ -303,12 +298,12 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
         final ProductToGLAccountMappingMapper rm = new ProductToGLAccountMappingMapper();
         String sql = "select " + rm.schema() + " and product_id = ? and mapping.charge_id is not null and charge.is_penalty=";
         if (penalty) {
-            sql = sql + " 1";
+            sql = sql + " true";
         } else {
-            sql = sql + " 0";
+            sql = sql + " false";
         }
 
-        final List<Map<String, Object>> chargeToFundSourceMappingsList = this.jdbcTemplate.query(sql, rm,
+        final List<Map<String, Object>> chargeToFundSourceMappingsList = this.jdbcTemplate.query(sql, rm, // NOSONAR
                 new Object[] { portfolioProductType.getValue(), loanProductId });
         List<ChargeToGLAccountMapper> chargeToGLAccountMappers = null;
         for (final Map<String, Object> chargeToIncomeAccountMap : chargeToFundSourceMappingsList) {
@@ -337,7 +332,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
         final ProductToGLAccountMappingMapper rm = new ProductToGLAccountMappingMapper();
         final String sql = "select " + rm.schema() + " and product_id = ? and payment_type is null and mapping.charge_id is null ";
 
-        final List<Map<String, Object>> listOfProductToGLAccountMaps = this.jdbcTemplate.query(sql, rm,
+        final List<Map<String, Object>> listOfProductToGLAccountMaps = this.jdbcTemplate.query(sql, rm, // NOSONAR
                 new Object[] { PortfolioProductType.SHARES.getValue(), productId });
 
         if (AccountingRuleType.CASH_BASED.getValue().equals(accountingType)) {
