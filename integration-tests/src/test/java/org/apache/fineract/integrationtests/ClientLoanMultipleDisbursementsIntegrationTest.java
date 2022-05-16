@@ -50,9 +50,6 @@ public class ClientLoanMultipleDisbursementsIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientLoanMultipleDisbursementsIntegrationTest.class);
 
-    public static final String MINIMUM_OPENING_BALANCE = "1000.0";
-    public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
-
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;
@@ -163,7 +160,6 @@ public class ClientLoanMultipleDisbursementsIntegrationTest {
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         LOG.info("-------------------------------DISBURSE 8 LOANS -------------------------------------------");
-        // String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan("12 January 2021", loanID, "1");
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
         loanStatusHashMap = this.loanTransactionHelper.disburseLoan("12 January 2021", loanID, "2");

@@ -175,9 +175,8 @@ public class LoanApplicationTestBuilder {
         if (disbursementData != null) {
             map.put("disbursementData", disbursementData);
             map.put("fixedEmiAmount", fixedEmiAmount);
-            map.put("maxOutstandingLoanBalance", maxOutstandingLoanBalance);
-
         }
+        map.put("maxOutstandingLoanBalance", maxOutstandingLoanBalance);
 
         if (datatables != null) {
             map.put("datatables", this.datatables);

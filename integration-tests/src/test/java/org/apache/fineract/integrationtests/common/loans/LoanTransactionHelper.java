@@ -456,7 +456,9 @@ public class LoanTransactionHelper {
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("actualDisbursementDate", actualDisbursementDate);
-        map.put("netDisbursalAmount", netDisbursalAmount);
+        if (netDisbursalAmount != null) {
+            map.put("netDisbursalAmount", netDisbursalAmount);
+        }
         map.put("note", "DISBURSE NOTE");
         if (transactionAmount != null) {
             map.put("transactionAmount", transactionAmount);
