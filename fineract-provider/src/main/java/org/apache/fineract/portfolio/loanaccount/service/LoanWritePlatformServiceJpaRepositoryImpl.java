@@ -513,6 +513,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 loan.addLoanTransaction(disbursementTransaction);
             }
 
+            if (loan.getRepaymentScheduleInstallments().size() == 0) {
+                /*
+                 * If no schedule, generate one (applicable to non-tranche multi-disbursal loans)
+                 */
+                recalculateSchedule = true;
+            }
             regenerateScheduleOnDisbursement(command, loan, recalculateSchedule, scheduleGeneratorDTO, nextPossibleRepaymentDate,
                     rescheduledRepaymentDate);
             if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
