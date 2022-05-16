@@ -85,7 +85,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
     private void disburseLoanOfAccountingRule(final String accountingType) {
         final String principal = "12000.00";
         final String submitApproveDisburseDate = "01 January 2022";
-        this.disbursedLoanID = fromStartToDisburseLoan(submitApproveDisburseDate, principal, ACCRUAL_PERIODIC, assetAccount, incomeAccount,
+        this.disbursedLoanID = fromStartToDisburseLoan(submitApproveDisburseDate, principal, accountingType, assetAccount, incomeAccount,
                 expenseAccount, overpaymentAccount);
     }
 
@@ -313,7 +313,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
     }
 
     @Test
-    public void newCreditBalanceRefundCreatesCorrectJournalEntriesForCashAccrualsTest() {
+    public void newCreditBalanceRefundCreatesCorrectJournalEntriesForCashAccountingTest() {
 
         disburseLoanOfAccountingRule(CASH_BASED);
         HashMap loanStatusHashMap = makeRepayment("08 January 2022", 20000.00f); // overpayment
@@ -351,6 +351,60 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
         HashMap typeMap = (HashMap) loanStatusHashMap.get("type");
         Boolean isTypeCorrect = (Boolean) typeMap.get(repaymentTransactionType);
         Assertions.assertTrue(Boolean.TRUE.equals(isTypeCorrect), "Not " + repaymentTransactionType);
+    }
+
+    @Test
+    public void newGoodwillCreditCreatesCorrectJournalEntriesForPeriodicAccrualsTest() {
+
+        disburseLoanOfAccountingRule(ACCRUAL_PERIODIC);
+        HashMap loanSummaryMap = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, disbursedLoanID);
+
+        // pay off all of principal, interest (no fees or penalties)
+        final Float principalOutstanding = (Float) loanSummaryMap.get("principalOutstanding");
+        final Float interestOutstanding = (Float) loanSummaryMap.get("interestOutstanding");
+        final Float totalOutstanding = (Float) loanSummaryMap.get("totalOutstanding");
+        final Float overpaidAmount = 159.00f;
+        final Float goodwillAmount = totalOutstanding + overpaidAmount;
+        final String goodwillDate = "09 January 2022";
+        HashMap loanStatusHashMap = this.loanTransactionHelper.makeRepaymentTypePayment(GOODWILL_CREDIT, goodwillDate, goodwillAmount,
+                this.disbursedLoanID);
+
+        // only a single credit for principal and interest as test sets up same GL account for both (summed up)
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, goodwillDate,
+                new JournalEntry(totalOutstanding, JournalEntry.TransactionType.CREDIT));
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, goodwillDate,
+                new JournalEntry(overpaidAmount, JournalEntry.TransactionType.CREDIT));
+        this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, goodwillDate,
+                new JournalEntry(goodwillAmount, JournalEntry.TransactionType.DEBIT));
+
+    }
+
+    @Test
+    public void newGoodwillCreditCreatesCorrectJournalEntriesForCashAccountingTest() {
+
+        disburseLoanOfAccountingRule(CASH_BASED);
+        HashMap loanSummaryMap = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, disbursedLoanID);
+
+        // pay off all of principal, interest (no fees or penalties)
+        final Float principalOutstanding = (Float) loanSummaryMap.get("principalOutstanding");
+        final Float interestOutstanding = (Float) loanSummaryMap.get("interestOutstanding");
+        final Float totalOutstanding = (Float) loanSummaryMap.get("totalOutstanding");
+        final Float overpaidAmount = 159.00f;
+        final Float goodwillAmount = totalOutstanding + overpaidAmount;
+        final String goodwillDate = "09 January 2022";
+        HashMap loanStatusHashMap = this.loanTransactionHelper.makeRepaymentTypePayment(GOODWILL_CREDIT, goodwillDate, goodwillAmount,
+                this.disbursedLoanID);
+
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, goodwillDate,
+                new JournalEntry(principalOutstanding, JournalEntry.TransactionType.CREDIT));
+        this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, goodwillDate,
+                new JournalEntry(interestOutstanding, JournalEntry.TransactionType.CREDIT));
+
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, goodwillDate,
+                new JournalEntry(overpaidAmount, JournalEntry.TransactionType.CREDIT));
+        this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, goodwillDate,
+                new JournalEntry(goodwillAmount, JournalEntry.TransactionType.DEBIT));
+
     }
 
 }

@@ -296,7 +296,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
                 } else {
                     if (loanTransactionDTO.getTransactionType().isGoodwillCredit()) {
                         this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode,
-                                AccrualAccountsForLoan.FUND_SOURCE.getValue(), loanProductId, paymentTypeId, loanId, transactionId,
+                                AccrualAccountsForLoan.GOODWILL_CREDIT.getValue(), loanProductId, paymentTypeId, loanId, transactionId,
                                 transactionDate, totalDebitAmount, isReversal);
 
                     } else {
