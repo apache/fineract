@@ -62,7 +62,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
              * Logic for repayments, repayments at disbursement and reversal of Repayments and Repayments at
              * disbursement
              ***/
-            else if (loanTransactionDTO.getTransactionType().isRepayment()
+            else if (loanTransactionDTO.getTransactionType().isRepaymentType()
                     || loanTransactionDTO.getTransactionType().isRepaymentAtDisbursement()
                     || loanTransactionDTO.getTransactionType().isChargePayment()) {
                 createJournalEntriesForRepayments(loanDTO, loanTransactionDTO, office);
@@ -247,8 +247,14 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
             this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, FinancialActivity.LIABILITY_TRANSFER.getValue(),
                     loanProductId, paymentTypeId, loanId, transactionId, transactionDate, totalDebitAmount, isReversal);
         } else {
-            this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, CashAccountsForLoan.FUND_SOURCE.getValue(),
-                    loanProductId, paymentTypeId, loanId, transactionId, transactionDate, totalDebitAmount, isReversal);
+            if (loanTransactionDTO.getTransactionType().isGoodwillCredit()) {
+                this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, CashAccountsForLoan.GOODWILL_CREDIT.getValue(),
+                        loanProductId, paymentTypeId, loanId, transactionId, transactionDate, totalDebitAmount, isReversal);
+
+            } else {
+                this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, CashAccountsForLoan.FUND_SOURCE.getValue(),
+                        loanProductId, paymentTypeId, loanId, transactionId, transactionDate, totalDebitAmount, isReversal);
+            }
         }
     }
 

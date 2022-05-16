@@ -1114,7 +1114,8 @@ public class AccountingProcessorHelper {
 
             if (accountMapping == null) {
                 throw new ProductToGLAccountMappingNotFoundException(PortfolioProductType.LOAN, loanProductId,
-                        AccrualAccountsForLoan.OVERPAYMENT.toString());
+                        AccrualAccountsForLoan.fromInt(accountMappingTypeId).toString());
+
             }
             glAccount = accountMapping.getGlAccount();
         }
