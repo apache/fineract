@@ -2481,17 +2481,8 @@ public class Loan extends AbstractPersistableCustom {
 
     private void regenerateRepaymentScheduleWithInterestRecalculationIfNeeded(boolean interestRecalculationEnabledParam,
             boolean disbursementMissedParam, ScheduleGeneratorDTO scheduleGeneratorDTO, AppUser currentUser) {
-        /*
-         * There may be no schedule built pre-disbursal e.g. multi-disbursal products that disallow expected
-         * disbursements
-         */
-        LocalDate firstInstallmentDueDate = null;
-        LoanRepaymentScheduleInstallment firstInstallment = fetchRepaymentScheduleInstallment(1);
-        if (firstInstallment == null) {
-            firstInstallmentDueDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
-        } else {
-            firstInstallmentDueDate = firstInstallment.getDueDate();
-        }
+
+        LocalDate firstInstallmentDueDate = fetchRepaymentScheduleInstallment(1).getDueDate();
         if (interestRecalculationEnabledParam
                 && (firstInstallmentDueDate.isBefore(LocalDate.now(DateUtils.getDateTimeZoneOfTenant())) || disbursementMissedParam)) {
             regenerateRepaymentScheduleWithInterestRecalculation(scheduleGeneratorDTO, currentUser);
