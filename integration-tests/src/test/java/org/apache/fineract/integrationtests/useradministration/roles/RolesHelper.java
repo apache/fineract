@@ -26,6 +26,8 @@ import org.apache.fineract.integrationtests.common.Utils;
 
 public final class RolesHelper {
 
+    public static final long SUPER_USER_ROLE_ID = 1L; // This is hardcoded into the initial Liquibase migration
+
     private RolesHelper() {
 
     }

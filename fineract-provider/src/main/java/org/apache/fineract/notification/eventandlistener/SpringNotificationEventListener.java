@@ -16,22 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.notification.service;
+package org.apache.fineract.notification.eventandlistener;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.notification.domain.Notification;
-import org.apache.fineract.notification.domain.NotificationRepository;
-import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.notification.data.NotificationData;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
+@Profile("!activeMqEnabled")
 @RequiredArgsConstructor
-public class NotificationGeneratorWritePlatformServiceImpl implements NotificationGeneratorWritePlatformService {
+@Slf4j
+public class SpringNotificationEventListener implements ApplicationListener<SpringEvent> {
 
-    private final NotificationRepository notificationRepository;
+    private final NotificationEventListener notificationEventListener;
 
     @Override
-    public Long create(Notification notification) {
-        this.notificationRepository.saveAndFlush(notification);
-        return notification.getId();
+    public void onApplicationEvent(SpringEvent event) {
+        log.debug("Processing Spring notification event {}", event);
+        NotificationData notificationData = event.getNotificationData();
+        notificationEventListener.receive(notificationData);
     }
 }

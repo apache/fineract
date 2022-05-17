@@ -29,7 +29,7 @@ configurations {
 apply from: 'dependencies.gradle'
 
 // enable when all tests are migrated
-tasks.cucumber.onlyIf {false}
+tasks.cucumber.onlyIf { false }
 
 // Allow external drivers to be used for the tests without packaging it
 // mainly due to license incompatibilities
@@ -92,7 +92,7 @@ cargoStartLocal.dependsOn ':fineract-war:war'
 cargoStartLocal.mustRunAfter 'testClasses'
 
 test {
-    dependsOn (cargoStartLocal)
+    dependsOn(cargoStartLocal)
     finalizedBy cargoStopLocal
 }
 

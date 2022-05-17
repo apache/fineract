@@ -18,33 +18,28 @@
  */
 package org.apache.fineract.notification.eventandlistener;
 
-import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.ObjectMessage;
 import javax.jms.Session;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.notification.data.NotificationData;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.core.MessageCreator;
-import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Profile;
+import org.springframework.jms.listener.SessionAwareMessageListener;
+import org.springframework.stereotype.Component;
 
-@Service
-public class NotificationEventService {
+@Component
+@Profile("activeMqEnabled")
+@RequiredArgsConstructor
+public class ActiveMQNotificationEventListener implements SessionAwareMessageListener {
 
-    private final JmsTemplate jmsTemplate;
+    private final NotificationEventListener notificationEventListener;
 
-    @Autowired
-    public NotificationEventService(JmsTemplate jmsTemplate) {
-        this.jmsTemplate = jmsTemplate;
-    }
-
-    public void broadcastNotification(final Destination destination, final NotificationData notificationData) {
-        this.jmsTemplate.send(destination, new MessageCreator() {
-
-            @Override
-            public Message createMessage(Session session) throws JMSException {
-                return session.createObjectMessage(notificationData);
-            }
-        });
+    @Override
+    public void onMessage(Message message, Session session) throws JMSException {
+        if (message instanceof ObjectMessage) {
+            NotificationData notificationData = (NotificationData) ((ObjectMessage) message).getObject();
+            notificationEventListener.receive(notificationData);
+        }
     }
 }
