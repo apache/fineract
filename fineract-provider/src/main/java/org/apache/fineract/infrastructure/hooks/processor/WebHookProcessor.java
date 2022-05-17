@@ -27,22 +27,18 @@ import com.google.gson.JsonParser;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.hooks.domain.Hook;
 import org.apache.fineract.infrastructure.hooks.domain.HookConfiguration;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import retrofit2.Callback;
 
 @Service
+@RequiredArgsConstructor
 public class WebHookProcessor implements HookProcessor {
 
     private final ProcessorHelper processorHelper;
-
-    @Autowired
-    public WebHookProcessor(ProcessorHelper processorHelper) {
-        this.processorHelper = processorHelper;
-    }
 
     @Override
     public void process(final Hook hook, @SuppressWarnings("unused") final AppUser appUser, final String payload, final String entityName,

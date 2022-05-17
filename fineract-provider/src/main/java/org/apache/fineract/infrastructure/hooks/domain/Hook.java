@@ -68,9 +68,7 @@ public class Hook extends AbstractAuditableCustom {
     @JoinColumn(name = "ugd_template_id", referencedColumnName = "id", nullable = true)
     private Template ugdTemplate;
 
-    protected Hook() {
-        //
-    }
+    protected Hook() {}
 
     public static Hook fromJson(final JsonCommand command, final HookTemplate template, final Set<HookConfiguration> config,
             final Set<HookResource> events, final Template ugdTemplate) {
