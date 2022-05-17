@@ -118,12 +118,17 @@ public final class Utils {
     }
 
     public static String loginIntoServerAndGetBase64EncodedAuthenticationKey() {
+        return loginIntoServerAndGetBase64EncodedAuthenticationKey("mifos", "password");
+    }
+
+    public static String loginIntoServerAndGetBase64EncodedAuthenticationKey(String username, String password) {
         awaitSpringBootActuatorHealthyUp();
         try {
             LOG.info("Logging in, for integration test...");
             // system.out.println("-----------------------------------LOGIN-----------------------------------------");
-            String json = RestAssured.given().contentType(ContentType.JSON).body("{\"username\":\"mifos\", \"password\":\"password\"}")
-                    .expect().log().ifError().when().post(LOGIN_URL).asString();
+            String json = RestAssured.given().contentType(ContentType.JSON)
+                    .body("{\"username\":\"" + username + "\", \"password\":\"" + password + "\"}").expect().log().ifError().when()
+                    .post(LOGIN_URL).asString();
             assertThat("Failed to login into fineract platform", StringUtils.isBlank(json), is(false));
             String key = JsonPath.with(json).get("base64EncodedAuthenticationKey");
             assertThat("Failed to obtain key: " + json, StringUtils.isBlank(key), is(false));

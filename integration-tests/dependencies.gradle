@@ -38,6 +38,7 @@ dependencies {
         exclude group: 'org.apache.sling'
         exclude group: 'com.sun.xml.bind'
     }
+    testImplementation 'org.awaitility:awaitility'
 
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'

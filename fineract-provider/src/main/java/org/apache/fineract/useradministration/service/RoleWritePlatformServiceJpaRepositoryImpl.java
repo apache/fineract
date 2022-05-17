@@ -22,13 +22,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.PersistenceException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.notification.service.TopicDomainService;
 import org.apache.fineract.useradministration.command.PermissionsCommand;
 import org.apache.fineract.useradministration.domain.Permission;
 import org.apache.fineract.useradministration.domain.PermissionRepository;
@@ -38,9 +39,6 @@ import org.apache.fineract.useradministration.exception.PermissionNotFoundExcept
 import org.apache.fineract.useradministration.exception.RoleAssociatedException;
 import org.apache.fineract.useradministration.exception.RoleNotFoundException;
 import org.apache.fineract.useradministration.serialization.PermissionsCommandFromApiJsonDeserializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -49,27 +47,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatformService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RoleWritePlatformServiceJpaRepositoryImpl.class);
     private final PlatformSecurityContext context;
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
     private final RoleDataValidator roleCommandFromApiJsonDeserializer;
     private final PermissionsCommandFromApiJsonDeserializer permissionsFromApiJsonDeserializer;
-    private final TopicDomainService topicDomainService;
-
-    @Autowired
-    public RoleWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final RoleRepository roleRepository,
-            final PermissionRepository permissionRepository, final RoleDataValidator roleCommandFromApiJsonDeserializer,
-            final PermissionsCommandFromApiJsonDeserializer fromApiJsonDeserializer, final TopicDomainService topicDomainService) {
-        this.context = context;
-        this.roleRepository = roleRepository;
-        this.permissionRepository = permissionRepository;
-        this.roleCommandFromApiJsonDeserializer = roleCommandFromApiJsonDeserializer;
-        this.permissionsFromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.topicDomainService = topicDomainService;
-    }
 
     @Transactional
     @Override
@@ -81,9 +67,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             this.roleCommandFromApiJsonDeserializer.validateForCreate(command.json());
 
             final Role entity = Role.fromJson(command);
-            this.roleRepository.save(entity);
-
-            this.topicDomainService.createTopic(entity);
+            this.roleRepository.saveAndFlush(entity);
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(entity.getId()).build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
@@ -118,7 +102,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
-        LOG.error("Error occured.", dve);
+        log.error("Error occured.", dve);
     }
 
     @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
@@ -136,9 +120,6 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             final Map<String, Object> changes = role.update(command);
             if (!changes.isEmpty()) {
                 this.roleRepository.saveAndFlush(role);
-                if (changes.containsKey("name")) {
-                    this.topicDomainService.updateTopic(previousRoleName, role, changes);
-                }
             }
 
             return new CommandProcessingResultBuilder() //
@@ -229,8 +210,6 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             if (count > 0) {
                 throw new RoleAssociatedException("error.msg.role.associated.with.users.deleted", roleId);
             }
-
-            this.topicDomainService.deleteTopic(role);
 
             this.roleRepository.delete(role);
             return new CommandProcessingResultBuilder().withEntityId(roleId).build();

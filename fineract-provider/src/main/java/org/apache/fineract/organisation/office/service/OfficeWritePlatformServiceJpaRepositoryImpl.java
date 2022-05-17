@@ -20,6 +20,8 @@ package org.apache.fineract.organisation.office.service;
 
 import java.util.Map;
 import javax.persistence.PersistenceException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -27,7 +29,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.notification.service.TopicDomainService;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -39,9 +40,6 @@ import org.apache.fineract.organisation.office.domain.OfficeTransactionRepositor
 import org.apache.fineract.organisation.office.serialization.OfficeCommandFromApiJsonDeserializer;
 import org.apache.fineract.organisation.office.serialization.OfficeTransactionCommandFromApiJsonDeserializer;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -50,9 +48,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWritePlatformService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(OfficeWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final OfficeCommandFromApiJsonDeserializer fromApiJsonDeserializer;
@@ -60,22 +58,6 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
     private final OfficeRepositoryWrapper officeRepositoryWrapper;
     private final OfficeTransactionRepository officeTransactionRepository;
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
-    private final TopicDomainService topicDomainService;
-
-    @Autowired
-    public OfficeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final OfficeCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final OfficeTransactionCommandFromApiJsonDeserializer moneyTransferCommandFromApiJsonDeserializer,
-            final OfficeRepositoryWrapper officeRepositoryWrapper, final OfficeTransactionRepository officeMonetaryTransferRepository,
-            final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository, final TopicDomainService topicDomainService) {
-        this.context = context;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.moneyTransferCommandFromApiJsonDeserializer = moneyTransferCommandFromApiJsonDeserializer;
-        this.officeRepositoryWrapper = officeRepositoryWrapper;
-        this.officeTransactionRepository = officeMonetaryTransferRepository;
-        this.applicationCurrencyRepository = applicationCurrencyRepository;
-        this.topicDomainService = topicDomainService;
-    }
 
     @Transactional
     @Override
@@ -103,8 +85,6 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
             office.generateHierarchy();
 
             this.officeRepositoryWrapper.save(office);
-
-            this.topicDomainService.createTopic(office);
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -150,8 +130,6 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 
             if (!changes.isEmpty()) {
                 this.officeRepositoryWrapper.saveAndFlush(office);
-
-                this.topicDomainService.updateTopic(office, changes);
             }
 
             return new CommandProcessingResultBuilder() //
@@ -239,7 +217,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
                     "name", name);
         }
 
-        LOG.error("Error occured.", dve);
+        log.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.office.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }

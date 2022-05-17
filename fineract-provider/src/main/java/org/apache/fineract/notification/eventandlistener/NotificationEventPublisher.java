@@ -16,14 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.notification.domain;
+package org.apache.fineract.notification.eventandlistener;
 
-import java.util.List;
-import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.apache.fineract.notification.data.NotificationData;
 
-public interface TopicSubscriberRepository extends JpaRepository<TopicSubscriber, Long>, JpaSpecificationExecutor<TopicSubscriber> {
+public interface NotificationEventPublisher {
 
-    List<TopicSubscriber> findBySubscriber(AppUser subscriber);
+    void broadcastNotification(NotificationData notificationData);
 }

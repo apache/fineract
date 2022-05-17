@@ -16,27 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.notification.service;
+package org.apache.fineract.notification.eventandlistener;
 
-import org.apache.fineract.notification.domain.Topic;
-import org.apache.fineract.notification.domain.TopicRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.jms.Queue;
+import lombok.RequiredArgsConstructor;
+import org.apache.activemq.command.ActiveMQQueue;
+import org.apache.fineract.notification.data.NotificationData;
+import org.springframework.context.annotation.Profile;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-public class TopicWritePlatformServiceJpaRepositoryImpl implements TopicWritePlatformService {
+@Profile("activeMqEnabled")
+@RequiredArgsConstructor
+public class ActiveMQNotificationEventPublisher implements NotificationEventPublisher {
 
-    private final TopicRepository topicRepository;
-
-    @Autowired
-    public TopicWritePlatformServiceJpaRepositoryImpl(TopicRepository topicRepository) {
-        this.topicRepository = topicRepository;
-    }
+    private final JmsTemplate jmsTemplate;
 
     @Override
-    public Long create(Topic topic) {
-        topicRepository.saveAndFlush(topic);
-        return topic.getId();
+    public void broadcastNotification(NotificationData notificationData) {
+        Queue queue = new ActiveMQQueue("NotificationQueue");
+        this.jmsTemplate.send(queue, session -> session.createObjectMessage(notificationData));
     }
-
 }
