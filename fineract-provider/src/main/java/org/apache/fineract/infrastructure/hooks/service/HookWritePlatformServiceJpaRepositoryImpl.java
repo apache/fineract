@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.PersistenceException;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -62,7 +63,6 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.template.domain.Template;
 import org.apache.fineract.template.domain.TemplateRepository;
 import org.apache.fineract.template.exception.TemplateNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -70,6 +70,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class HookWritePlatformServiceJpaRepositoryImpl implements HookWritePlatformService {
 
     private final PlatformSecurityContext context;
@@ -79,20 +80,6 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements HookWritePlatf
     private final HookCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final FromJsonHelper fromApiJsonHelper;
     private final ProcessorHelper processorHelper;
-
-    @Autowired
-    public HookWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final HookRepository hookRepository,
-            final HookTemplateRepository hookTemplateRepository, final TemplateRepository ugdTemplateRepository,
-            final HookCommandFromApiJsonDeserializer fromApiJsonDeserializer, final FromJsonHelper fromApiJsonHelper,
-            ProcessorHelper processorHelper) {
-        this.context = context;
-        this.hookRepository = hookRepository;
-        this.hookTemplateRepository = hookTemplateRepository;
-        this.ugdTemplateRepository = ugdTemplateRepository;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.processorHelper = processorHelper;
-    }
 
     @Transactional
     @Override

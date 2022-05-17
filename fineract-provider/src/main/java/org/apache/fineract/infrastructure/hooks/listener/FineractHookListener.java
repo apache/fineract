@@ -19,6 +19,8 @@
 package org.apache.fineract.infrastructure.hooks.listener;
 
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.hooks.domain.Hook;
@@ -29,27 +31,16 @@ import org.apache.fineract.infrastructure.hooks.processor.HookProcessorProvider;
 import org.apache.fineract.infrastructure.hooks.service.HookReadPlatformService;
 import org.apache.fineract.infrastructure.security.service.TenantDetailsService;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class FineractHookListener implements HookListener {
-
-    private static final Logger LOG = LoggerFactory.getLogger(FineractHookListener.class);
 
     private final HookProcessorProvider hookProcessorProvider;
     private final HookReadPlatformService hookReadPlatformService;
     private final TenantDetailsService tenantDetailsService;
-
-    @Autowired
-    public FineractHookListener(final HookProcessorProvider hookProcessorProvider, final HookReadPlatformService hookReadPlatformService,
-            final TenantDetailsService tenantDetailsService) {
-        this.hookReadPlatformService = hookReadPlatformService;
-        this.hookProcessorProvider = hookProcessorProvider;
-        this.tenantDetailsService = tenantDetailsService;
-    }
 
     @Override
     public void onApplicationEvent(final HookEvent event) {
@@ -73,7 +64,7 @@ public class FineractHookListener implements HookListener {
             try {
                 processor.process(hook, appUser, payload, entityName, actionName, tenantIdentifier, authToken);
             } catch (Throwable e) {
-                LOG.error("Hook {} failed in HookProcessor {} for tenantIdentifier/user {}/{}, entityName: {}, actionName: {}, payload {} ",
+                log.error("Hook {} failed in HookProcessor {} for tenantIdentifier/user {}/{}, entityName: {}, actionName: {}, payload {} ",
                         hook.getId(), processor.getClass().getSimpleName(), tenantIdentifier, appUser, entityName, actionName, payload, e);
             }
         }
