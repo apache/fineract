@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.jms.Queue;
+import lombok.RequiredArgsConstructor;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -50,34 +51,19 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
 import org.apache.fineract.useradministration.domain.Role;
 import org.apache.fineract.useradministration.domain.RoleRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class NotificationDomainServiceImpl implements NotificationDomainService {
 
     private final BusinessEventNotifierService businessEventNotifierService;
-    final PlatformSecurityContext context;
+    private final PlatformSecurityContext context;
     private final RoleRepository roleRepository;
     private final OfficeRepository officeRepository;
     private final TopicSubscriberReadPlatformService topicSubscriberReadPlatformService;
     private final NotificationEventService notificationEvent;
     private final SpringEventPublisher springEventPublisher;
-
-    @Autowired
-    public NotificationDomainServiceImpl(final BusinessEventNotifierService businessEventNotifierService,
-            final PlatformSecurityContext context, final RoleRepository roleRepository,
-            final TopicSubscriberReadPlatformService topicSubscriberReadPlatformService, final OfficeRepository officeRepository,
-            final NotificationEventService notificationEvent, final SpringEventPublisher springEventPublisher) {
-
-        this.businessEventNotifierService = businessEventNotifierService;
-        this.context = context;
-        this.roleRepository = roleRepository;
-        this.topicSubscriberReadPlatformService = topicSubscriberReadPlatformService;
-        this.officeRepository = officeRepository;
-        this.notificationEvent = notificationEvent;
-        this.springEventPublisher = springEventPublisher;
-    }
 
     @PostConstruct
     public void addListeners() {

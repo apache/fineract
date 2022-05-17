@@ -28,6 +28,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.hooks.domain.Hook;
 import org.apache.fineract.infrastructure.hooks.domain.HookConfiguration;
@@ -40,15 +42,12 @@ import org.apache.fineract.template.domain.Template;
 import org.apache.fineract.template.domain.TemplateRepository;
 import org.apache.fineract.template.service.TemplateMergeService;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class MessageGatewayHookProcessor implements HookProcessor {
-
-    private static final Logger LOG = LoggerFactory.getLogger(MessageGatewayHookProcessor.class);
 
     private final ClientRepositoryWrapper clientRepository;
     private final TemplateRepository templateRepository;
@@ -56,17 +55,6 @@ public class MessageGatewayHookProcessor implements HookProcessor {
 
     private final SmsMessageRepository smsMessageRepository;
     private final SmsMessageScheduledJobService smsMessageScheduledJobService;
-
-    @Autowired
-    public MessageGatewayHookProcessor(ClientRepositoryWrapper clientRepository, TemplateRepository templateRepository,
-            TemplateMergeService templateMergeService, SmsMessageRepository smsMessageRepository,
-            SmsMessageScheduledJobService smsMessageScheduledJobService) {
-        this.clientRepository = clientRepository;
-        this.templateRepository = templateRepository;
-        this.templateMergeService = templateMergeService;
-        this.smsMessageRepository = smsMessageRepository;
-        this.smsMessageScheduledJobService = smsMessageScheduledJobService;
-    }
 
     @Override
     public void process(final Hook hook, @SuppressWarnings("unused") final AppUser appUser, final String payload, final String entityName,
@@ -95,7 +83,7 @@ public class MessageGatewayHookProcessor implements HookProcessor {
             template = templates.get(0);
         }
         if (template == null) {
-            LOG.error("Error : {} with name {}", "Template not found", templateName);
+            log.error("Error : {} with name {}", "Template not found", templateName);
             throw new GeneralPlatformDomainRuleException("error.msg.templates.not.found", "Template not found", templateName);
         }
 

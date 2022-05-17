@@ -26,18 +26,18 @@ import com.google.gson.JsonObject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.hooks.domain.Hook;
 import org.apache.fineract.infrastructure.hooks.domain.HookConfiguration;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import retrofit2.Callback;
 
 @Service
+@RequiredArgsConstructor
 public class ElasticSearchHookProcessor implements HookProcessor {
 
-    @Autowired
-    private ProcessorHelper processorHelper;
+    private final ProcessorHelper processorHelper;
 
     @Override
     public void process(final Hook hook, @SuppressWarnings("unused") final AppUser appUser, final String payload, final String entityName,

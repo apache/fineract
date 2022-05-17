@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.hooks.data.Event;
 import org.apache.fineract.infrastructure.hooks.data.EventResultSetExtractor;
@@ -34,7 +35,6 @@ import org.apache.fineract.infrastructure.hooks.domain.Hook;
 import org.apache.fineract.infrastructure.hooks.domain.HookRepository;
 import org.apache.fineract.infrastructure.hooks.exception.HookNotFoundException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -42,37 +42,30 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class HookReadPlatformServiceImpl implements HookReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final HookRepository hookRepository;
     private final PlatformSecurityContext context;
 
-    @Autowired
-    public HookReadPlatformServiceImpl(final PlatformSecurityContext context, final HookRepository hookRepository,
-            final JdbcTemplate jdbcTemplate) {
-        this.context = context;
-        this.hookRepository = hookRepository;
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
     @Override
     public Collection<HookData> retrieveAllHooks() {
-        this.context.authenticatedUser();
-        final HookMapper rm = new HookMapper(this.jdbcTemplate);
+        context.authenticatedUser();
+        final HookMapper rm = new HookMapper(jdbcTemplate);
         final String sql = "select " + rm.schema() + " order by h.name";
 
-        return this.jdbcTemplate.query(sql, rm); // NOSONAR
+        return jdbcTemplate.query(sql, rm); // NOSONAR
     }
 
     @Override
     public HookData retrieveHook(final Long hookId) {
         try {
-            this.context.authenticatedUser();
-            final HookMapper rm = new HookMapper(this.jdbcTemplate);
+            context.authenticatedUser();
+            final HookMapper rm = new HookMapper(jdbcTemplate);
             final String sql = "select " + rm.schema() + " where h.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { hookId }); // NOSONAR
+            return jdbcTemplate.queryForObject(sql, rm, hookId); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new HookNotFoundException(hookId, e);
         }
@@ -82,24 +75,23 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
     @Override
     @Cacheable(value = "hooks", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('HK')")
     public List<Hook> retrieveHooksByEvent(final String entityName, final String actionName) {
-
-        return this.hookRepository.findAllHooksListeningToEvent(entityName, actionName);
+        return hookRepository.findAllHooksListeningToEvent(entityName, actionName);
     }
 
     @Override
     public HookData retrieveNewHookDetails(final String templateName) {
 
-        this.context.authenticatedUser();
-        final TemplateMapper rm = new TemplateMapper(this.jdbcTemplate);
+        context.authenticatedUser();
+        final TemplateMapper rm = new TemplateMapper(jdbcTemplate);
         final String sql;
         List<HookTemplateData> templateData;
 
         if (templateName == null) {
             sql = "select " + rm.schema() + " order by s.name";
-            templateData = this.jdbcTemplate.query(sql, rm); // NOSONAR
+            templateData = jdbcTemplate.query(sql, rm); // NOSONAR
         } else {
             sql = "select " + rm.schema() + " where s.name = ? order by s.name";
-            templateData = this.jdbcTemplate.query(sql, rm, new Object[] { templateName }); // NOSONAR
+            templateData = jdbcTemplate.query(sql, rm, templateName); // NOSONAR
         }
 
         final List<Grouping> events = getTemplateForEvents();
@@ -111,16 +103,13 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
         final String sql = "select p.grouping, p.entity_name, p.action_name from m_permission p "
                 + " where p.action_name NOT LIKE '%CHECKER%' AND p.action_name NOT LIKE '%READ%' " + " order by p.grouping, p.entity_name ";
         final EventResultSetExtractor extractor = new EventResultSetExtractor();
-        return this.jdbcTemplate.query(sql, extractor);
+        return jdbcTemplate.query(sql, extractor);
     }
 
+    @RequiredArgsConstructor
     private static final class HookMapper implements RowMapper<HookData> {
 
         private final JdbcTemplate jdbcTemplate;
-
-        HookMapper(final JdbcTemplate jdbcTemplate) {
-            this.jdbcTemplate = jdbcTemplate;
-        }
 
         public String schema() {
             return " h.id, s.name as name, h.name as display_name, h.is_active, h.created_date,"
@@ -152,7 +141,7 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
             final HookEventMapper rm = new HookEventMapper();
             final String sql = "select " + rm.schema() + " where h.id= ?";
 
-            return this.jdbcTemplate.query(sql, rm, new Object[] { hookId }); // NOSONAR
+            return jdbcTemplate.query(sql, rm, hookId); // NOSONAR
         }
 
         private List<Field> retrieveConfig(final Long hookId) {
@@ -160,9 +149,7 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
             final HookConfigMapper rm = new HookConfigMapper();
             final String sql = "select " + rm.schema() + " where h.id= ? order by hc.field_name";
 
-            final List<Field> fields = this.jdbcTemplate.query(sql, rm, new Object[] { hookId }); // NOSONAR
-
-            return fields;
+            return jdbcTemplate.query(sql, rm, hookId); // NOSONAR
         }
     }
 
@@ -194,13 +181,10 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
         }
     }
 
+    @RequiredArgsConstructor
     private static final class TemplateMapper implements RowMapper<HookTemplateData> {
 
         private final JdbcTemplate jdbcTemplate;
-
-        TemplateMapper(final JdbcTemplate jdbcTemplate) {
-            this.jdbcTemplate = jdbcTemplate;
-        }
 
         public String schema() {
             return " s.id, s.name from m_hook_templates s ";
@@ -221,9 +205,7 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
             final TemplateSchemaMapper rm = new TemplateSchemaMapper();
             final String sql = "select " + rm.schema() + " where s.id= ? order by hs.field_name ";
 
-            final List<Field> fields = this.jdbcTemplate.query(sql, rm, new Object[] { templateId }); // NOSONAR
-
-            return fields;
+            return jdbcTemplate.query(sql, rm, templateId); // NOSONAR;
         }
     }
 
