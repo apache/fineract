@@ -18,22 +18,25 @@
  */
 package org.apache.fineract.integrationtests.useradministration.users;
 
+import com.google.gson.Gson;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
 import java.util.List;
+import org.apache.fineract.client.models.PostUsersRequest;
+import org.apache.fineract.client.models.PostUsersResponse;
+import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Assertions;
 
 public final class UserHelper {
 
-    private UserHelper() {
-
-    }
-
     private static final String CREATE_USER_URL = "/fineract-provider/api/v1/users?" + Utils.TENANT_IDENTIFIER;
     private static final String USER_URL = "/fineract-provider/api/v1/users";
+    private static final Gson GSON = new JSON().getGson();
+
+    private UserHelper() {}
 
     public static Integer createUser(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, int roleId,
             int staffId) {
@@ -44,6 +47,13 @@ public final class UserHelper {
             int staffId, String username, String attribute) {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_USER_URL, getTestCreateUserAsJSON(roleId, staffId, username),
                 attribute);
+    }
+
+    public static PostUsersResponse createUser(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            PostUsersRequest request) {
+        String requestBody = GSON.toJson(request);
+        String response = Utils.performServerPost(requestSpec, responseSpec, CREATE_USER_URL, requestBody);
+        return GSON.fromJson(response, PostUsersResponse.class);
     }
 
     public static Object createUserForSelfService(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,

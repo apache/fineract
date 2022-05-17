@@ -19,6 +19,7 @@
 package org.apache.fineract.useradministration.domain;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -598,7 +599,11 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
         return !hasAnyPermission(permissions);
     }
 
-    private boolean hasAnyPermission(final List<String> permissions) {
+    public boolean hasAnyPermission(String... permissions) {
+        return hasAnyPermission(Arrays.asList(permissions));
+    }
+
+    public boolean hasAnyPermission(final List<String> permissions) {
         boolean hasAtLeastOneOf = false;
 
         for (final String permissionCode : permissions) {

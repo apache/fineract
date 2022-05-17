@@ -18,18 +18,24 @@
  */
 package org.apache.fineract.notification.eventandlistener;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.notification.data.NotificationData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SpringEventPublisher {
+@Profile("!activeMqEnabled")
+@RequiredArgsConstructor
+@Slf4j
+public class SpringNotificationEventPublisher implements NotificationEventPublisher {
 
-    @Autowired
-    private ApplicationEventPublisher applicationEventPublisher;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
+    @Override
     public void broadcastNotification(final NotificationData notificationData) {
+        log.debug("Sending Spring notification event: {}", notificationData);
         SpringEvent event = new SpringEvent(this, notificationData);
         applicationEventPublisher.publishEvent(event);
     }
