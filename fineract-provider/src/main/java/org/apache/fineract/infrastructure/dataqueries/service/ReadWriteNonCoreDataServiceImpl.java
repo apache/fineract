@@ -1295,7 +1295,6 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }
 
         final List<ResultsetRowData> result = fillDatatableResultSetDataRows(sql);
-
         return new GenericResultsetData(columnHeaders, result);
     }
 

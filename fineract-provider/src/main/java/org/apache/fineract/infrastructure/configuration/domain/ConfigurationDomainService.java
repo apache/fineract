@@ -112,4 +112,6 @@ public interface ConfigurationDomainService {
     boolean isRelaxingDaysConfigForPivotDateEnabled();
 
     Long retrieveRelaxingDaysConfigForPivotDate();
+
+    Integer reportsPaginationNumberOfItemsPerPage();
 }

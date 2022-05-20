@@ -34,6 +34,7 @@ import org.junit.jupiter.api.Assertions;
 @RequiredArgsConstructor
 public class GlobalConfigurationHelper {
 
+    public static final String REPORTS_PAGINATION_NUMBER_OF_ITEMS_PER_PAGE = "reports-pagination-number-of-items-per-page";
     private static final Gson GSON = new JSON().getGson();
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
@@ -98,9 +99,8 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> expectedGlobalConfigurations = getAllDefaultGlobalConfigurations();
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
-        // There are currently 37 global configurations.
-        Assertions.assertEquals(38, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(38, actualGlobalConfigurations.size());
+        Assertions.assertEquals(39, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(39, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -439,6 +439,14 @@ public class GlobalConfigurationHelper {
         isPrincipalCompoundingDisabled.put("enabled", false);
         isPrincipalCompoundingDisabled.put("trapDoor", false);
         defaults.add(isPrincipalCompoundingDisabled);
+
+        HashMap<String, Object> reportsPaginationNumberOfItemsPerPage = new HashMap<>();
+        reportsPaginationNumberOfItemsPerPage.put("id", 44);
+        reportsPaginationNumberOfItemsPerPage.put("name", REPORTS_PAGINATION_NUMBER_OF_ITEMS_PER_PAGE);
+        reportsPaginationNumberOfItemsPerPage.put("value", 20);
+        reportsPaginationNumberOfItemsPerPage.put("enabled", true);
+        reportsPaginationNumberOfItemsPerPage.put("trapDoor", false);
+        defaults.add(reportsPaginationNumberOfItemsPerPage);
 
         return defaults;
     }

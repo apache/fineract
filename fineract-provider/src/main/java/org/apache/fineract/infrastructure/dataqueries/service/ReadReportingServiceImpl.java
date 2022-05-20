@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
+import static org.apache.fineract.infrastructure.dataqueries.service.ReportingConstants.OFFSET;
+import static org.apache.fineract.infrastructure.dataqueries.service.ReportingConstants.PAGINATION_ORDER_BY;
+
 import com.lowagie.text.Document;
 import com.lowagie.text.PageSize;
 import com.lowagie.text.pdf.PdfPTable;
@@ -38,9 +41,14 @@ import java.util.Map;
 import java.util.Set;
 import javax.ws.rs.core.StreamingOutput;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.service.Page;
+import org.apache.fineract.infrastructure.core.service.PaginationHelper;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportData;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportParameterData;
@@ -51,24 +59,31 @@ import org.apache.fineract.infrastructure.dataqueries.exception.ReportNotFoundEx
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.SqlInjectionPreventerService;
-import org.apache.fineract.infrastructure.security.utils.LogParameterEscapeUtil;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.owasp.esapi.ESAPI;
 import org.owasp.esapi.codecs.UnixCodec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 
 @Service
-@Slf4j
+
 @RequiredArgsConstructor
 public class ReadReportingServiceImpl implements ReadReportingService {
+
+    private static final String ORDER_BY_REGEX_PATTERN = "^[0-9]*$";
+    private static final Logger LOG = LoggerFactory.getLogger(ReadReportingServiceImpl.class);
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final GenericDataService genericDataService;
     private final SqlInjectionPreventerService sqlInjectionPreventerService;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
+    private final ConfigurationDomainService configurationDomainService;
+    private final PaginationHelper paginationHelper;
 
     @Override
     public StreamingOutput retrieveReportCSV(final String name, final String type, final Map<String, String> queryParams,
@@ -101,7 +116,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         final StringBuilder writer = new StringBuilder();
 
         final List<ResultsetColumnHeaderData> columnHeaders = result.getColumnHeaders();
-        log.info("NO. of Columns: {}", columnHeaders.size());
+        LOG.info("NO. of Columns: {}", columnHeaders.size());
         final Integer chSize = columnHeaders.size();
         for (int i = 0; i < chSize; i++) {
             writer.append('"' + columnHeaders.get(i).getColumnName() + '"');
@@ -119,7 +134,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         String currVal;
         final String doubleQuote = "\"";
         final String twoDoubleQuotes = doubleQuote + doubleQuote;
-        log.info("NO. of Rows: {}", data.size());
+        LOG.info("NO. of Rows: {}", data.size());
         for (ResultsetRowData element : data) {
             row = element.getRow();
             rSize = row.size();
@@ -151,21 +166,45 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             final boolean isSelfServiceUserReport) {
 
         final long startTime = System.currentTimeMillis();
-        if (log.isDebugEnabled()) {
-            log.debug("STARTING REPORT: {}   Type: {}", LogParameterEscapeUtil.escapeLogParameter(name),
-                    LogParameterEscapeUtil.escapeLogParameter(type));
+        LOG.info("STARTING REPORT: {}   Type: {}", name, type);
+        StringBuilder sqlStringBuilder = new StringBuilder(200);
+        sqlStringBuilder.append(getSQLtoRun(name, type, queryParams, isSelfServiceUserReport));
+        final GenericResultsetData result;
+        boolean isPaginationAllowed = Boolean.parseBoolean(queryParams.get(ReportingConstants.IS_PAGINATION_ALLOWED));
+        Page<GenericResultsetData> reportData = this.paginationHelper.fetchPage(this.jdbcTemplate, sqlStringBuilder.toString(), null,
+                new ReportMapper(sqlStringBuilder));
+        if (isPaginationAllowed) {
+            sqlStringBuilder = retrieveGenericResultsetWithPagination(sqlStringBuilder, queryParams);
         }
-
-        final String sql = getSQLtoRun(name, type, queryParams, isSelfServiceUserReport);
-
-        final GenericResultsetData result = this.genericDataService.fillGenericResultSet(sql);
+        result = this.genericDataService.fillGenericResultSet(sqlStringBuilder.toString());
+        int pageSize = this.configurationDomainService.reportsPaginationNumberOfItemsPerPage();
 
         final long elapsed = System.currentTimeMillis() - startTime;
-        if (log.isDebugEnabled()) {
-            log.debug("FINISHING Report/Request Name: {} - {}     Elapsed Time: {}", LogParameterEscapeUtil.escapeLogParameter(name),
-                    type.replaceAll("[\n\r\t]", "_"), elapsed);
-        }
-        return result;
+        LOG.info("FINISHING Report/Request Name: {} - {}     Elapsed Time: {}", name, type, elapsed);
+        return GenericResultsetData.setTotalItemsAndRecordsPerPage(result, reportData.getTotalFilteredRecords(), pageSize);
+    }
+
+    public StringBuilder retrieveGenericResultsetWithPagination(final StringBuilder sqlStringBuilder,
+            final Map<String, String> queryParams) {
+        retrieveGenericResultsetWithPaginationDataValidator(queryParams);
+        int pageSize = this.configurationDomainService.reportsPaginationNumberOfItemsPerPage();
+        int pageNo = Integer.parseInt(queryParams.get(ReportingConstants.OFFSET));
+
+        pageNo = pageNo * pageSize;
+        sqlStringBuilder.append(" order by ").append(queryParams.get(PAGINATION_ORDER_BY));
+        sqlStringBuilder.append(" ");
+        sqlStringBuilder.append(sqlGenerator.limit(pageSize, pageNo));
+        return sqlStringBuilder;
+    }
+
+    public void retrieveGenericResultsetWithPaginationDataValidator(final Map<String, String> queryParams) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors);
+        baseDataValidator.reset().parameter(OFFSET).value(queryParams.get(OFFSET)).notNull().throwValidationErrors();
+
+        baseDataValidator.reset().parameter(PAGINATION_ORDER_BY).value(queryParams.get(PAGINATION_ORDER_BY)).ignoreIfNull()
+                .matchesRegularExpression(ORDER_BY_REGEX_PATTERN).throwValidationErrors();
     }
 
     private String getSQLtoRun(final String name, final String type, final Map<String, String> queryParams,
@@ -191,7 +230,6 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         sql = this.genericDataService.replace(sql, "${isSelfServiceUser}", Integer.toString(isSelfServiceUserReport ? 1 : 0));
 
         sql = this.genericDataService.wrapSQL(sql);
-
         return sql;
     }
 
@@ -211,6 +249,21 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             return rs.getString("the_sql");
         }
         throw new ReportNotFoundException(encodedName);
+    }
+
+    private static final class ReportMapper implements RowMapper<GenericResultsetData> {
+
+        private final StringBuilder schema;
+
+        ReportMapper(StringBuilder sql) {
+
+            this.schema = sql;
+        }
+
+        @Override
+        public GenericResultsetData mapRow(ResultSet rs, int rowNum) throws SQLException {
+            return null;
+        }
     }
 
     @Override
@@ -249,7 +302,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             final List<ResultsetRowData> data = result.getData();
             List<String> row;
 
-            log.info("NO. of Columns: {}", columnHeaders.size());
+            LOG.info("NO. of Columns: {}", columnHeaders.size());
             final Integer chSize = columnHeaders.size();
 
             final Document document = new Document(PageSize.B0.rotate());
@@ -271,7 +324,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             Integer rSize;
             String currColType;
             String currVal;
-            log.info("NO. of Rows: {}", data.size());
+            LOG.info("NO. of Rows: {}", data.size());
             for (ResultsetRowData element : data) {
                 row = element.getRow();
                 rSize = row.size();
@@ -294,7 +347,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             document.close();
             return genaratePdf;
         } catch (final Exception e) {
-            log.error("error.msg.reporting.error:", e);
+            LOG.error("error.msg.reporting.error:", e);
             throw new PlatformDataIntegrityException("error.msg.exception.error", e.getMessage(), e);
         }
     }
@@ -479,14 +532,14 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     @Override
     public GenericResultsetData retrieveGenericResultSetForSmsEmailCampaign(String name, String type, Map<String, String> queryParams) {
         final long startTime = System.currentTimeMillis();
-        log.info("STARTING REPORT: {}   Type: {}", name, type);
+        LOG.info("STARTING REPORT: {}   Type: {}", name, type);
 
         final String sql = sqlToRunForSmsEmailCampaign(name, type, queryParams);
 
         final GenericResultsetData result = this.genericDataService.fillGenericResultSet(sql);
 
         final long elapsed = System.currentTimeMillis() - startTime;
-        log.info("FINISHING Report/Request Name: {} - {}     Elapsed Time: {}", name, type, elapsed);
+        LOG.info("FINISHING Report/Request Name: {} - {}     Elapsed Time: {}", name, type, elapsed);
         return result;
     }
 

@@ -38,6 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ConfigurationDomainServiceJpa implements ConfigurationDomainService {
 
+    public static final String REPORTS_PAGINATION_NUMBER_OF_ITEMS_PER_PAGE = "reports-pagination-number-of-items-per-page";
     private final PermissionRepository permissionRepository;
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
     private final PlatformCacheRepository cacheTypeRepository;
@@ -218,6 +219,16 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
             return value;
         }
         return defaultValue;
+    }
+
+    @Override
+    public Integer reportsPaginationNumberOfItemsPerPage() {
+        final String propertyName = REPORTS_PAGINATION_NUMBER_OF_ITEMS_PER_PAGE;
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
+        if (property.isEnabled()) {
+            return property.getValue().intValue();
+        }
+        return 0;
     }
 
     @Override
