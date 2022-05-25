@@ -439,7 +439,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         RepaymentTransactionTemplateMapper mapper = new RepaymentTransactionTemplateMapper(sqlGenerator);
         String sql = "select " + mapper.schema();
         LoanTransactionData loanTransactionData = this.jdbcTemplate.queryForObject(sql, mapper, // NOSONAR
-                new Object[] { LoanTransactionType.REPAYMENT.getValue(), loanId, loanId });
+                new Object[] { LoanTransactionType.REPAYMENT.getValue(), LoanTransactionType.REPAYMENT.getValue(), loanId, loanId });
         final Collection<PaymentTypeData> paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
         return LoanTransactionData.templateOnTop(loanTransactionData, paymentOptions);
     }
@@ -2273,41 +2273,32 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         public String schema() {
             StringBuilder sqlBuilder = new StringBuilder();
-
+            sqlBuilder.append("(CASE ");
             sqlBuilder.append(
-                    "(CASE WHEN max(tr.transaction_date)>ls.dueDate THEN max(tr.transaction_date) ELSE ls.dueDate END) as transactionDate, ");
+                    "WHEN (select max(tr.transaction_date) as transaction_date from m_loan_transaction tr where tr.loan_id = l.id AND tr.transaction_type_enum = ? AND tr.is_reversed = false) > ls.dueDate ");
             sqlBuilder.append(
-                    "ls.principal_amount - coalesce(ls.principal_writtenoff_derived,0) - coalesce(ls.principal_completed_derived,0) as principalDue, ");
+                    "THEN (select max(tr.transaction_date) as transaction_date from m_loan_transaction tr where tr.loan_id = l.id AND tr.transaction_type_enum = ? AND tr.is_reversed = false) ");
+            sqlBuilder.append("ELSE ls.dueDate END) as transactionDate, ");
             sqlBuilder.append(
-                    "ls.interest_amount - coalesce(ls.interest_completed_derived,0) - coalesce(ls.interest_waived_derived,0) - coalesce(ls.interest_writtenoff_derived,0) as interestDue, ");
+                    "ls.principal_amount - coalesce(ls.principal_writtenoff_derived, 0) - coalesce(ls.principal_completed_derived, 0) as principalDue, ");
             sqlBuilder.append(
-                    "ls.fee_charges_amount - coalesce(ls.fee_charges_completed_derived,0) - coalesce(ls.fee_charges_writtenoff_derived,0) - coalesce(ls.fee_charges_waived_derived,0) as feeDue, ");
+                    "ls.interest_amount - coalesce(ls.interest_completed_derived, 0) - coalesce(ls.interest_waived_derived, 0) - coalesce(ls.interest_writtenoff_derived, 0) as interestDue, ");
             sqlBuilder.append(
-                    "ls.penalty_charges_amount - coalesce(ls.penalty_charges_completed_derived,0) - coalesce(ls.penalty_charges_writtenoff_derived,0) - coalesce(ls.penalty_charges_waived_derived,0) as penaltyDue, ");
+                    "ls.fee_charges_amount - coalesce(ls.fee_charges_completed_derived, 0) - coalesce(ls.fee_charges_writtenoff_derived, 0) - coalesce(ls.fee_charges_waived_derived, 0) as feeDue, ");
             sqlBuilder.append(
-                    "l.currency_code as currencyCode, l.currency_digits as currencyDigits, l.currency_multiplesof as inMultiplesOf, l.net_disbursal_amount as netDisbursalAmount, rc."
-                            + sqlGenerator.escape("name") + " as currencyName, ");
-            sqlBuilder.append("rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode ");
+                    "ls.penalty_charges_amount - coalesce(ls.penalty_charges_completed_derived, 0) - coalesce(ls.penalty_charges_writtenoff_derived, 0) - coalesce(ls.penalty_charges_waived_derived, 0) as penaltyDue, ");
+            sqlBuilder.append(
+                    "l.currency_code as currencyCode, l.currency_digits as currencyDigits, l.currency_multiplesof as inMultiplesOf, l.net_disbursal_amount as netDisbursalAmount, ");
+            sqlBuilder.append("rc." + sqlGenerator.escape("name")
+                    + " as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode ");
             sqlBuilder.append("FROM m_loan l ");
+            sqlBuilder.append("JOIN m_currency rc on rc." + sqlGenerator.escape("code") + " = l.currency_code ");
+            sqlBuilder.append("JOIN m_loan_repayment_schedule ls ON ls.loan_id = l.id AND ls.completed_derived = false ");
             sqlBuilder.append(
-                    "LEFT JOIN m_loan_transaction tr ON tr.loan_id = l.id AND tr.transaction_type_enum = ? and tr.is_reversed = false ");
-            sqlBuilder.append("join m_currency rc on rc." + sqlGenerator.escape("code") + " = l.currency_code ");
-            sqlBuilder.append("JOIN m_loan_repayment_schedule ls ON ls.loan_id = l.id AND ls.completed_derived = 0 ");
-            sqlBuilder.append("join( ");
-            sqlBuilder.append("(select min(ls.duedate) datedue,ls.loan_id from m_loan_repayment_schedule ls ");
-            sqlBuilder.append("where ls.loan_id = ? and ls.completed_derived = 0) )asq ");
-            sqlBuilder.append("on asq.loan_id = ls.loan_id and asq.datedue = ls.duedate ");
-            sqlBuilder.append("WHERE l.id = ? ");
-            sqlBuilder.append("GROUP BY ls.duedate, ");
-            sqlBuilder.append("ls.principal_amount,ls.principal_completed_derived,ls.principal_writtenoff_derived, ");
-            sqlBuilder
-                    .append("ls.interest_amount,ls.interest_completed_derived,ls.interest_waived_derived,ls.interest_writtenoff_derived, ");
-            sqlBuilder.append(
-                    "ls.fee_charges_amount,ls.fee_charges_completed_derived, ls.fee_charges_writtenoff_derived, ls.fee_charges_waived_derived, ");
-            sqlBuilder.append(
-                    "ls.penalty_charges_amount, ls.penalty_charges_completed_derived, ls.penalty_charges_writtenoff_derived, ls.penalty_charges_waived_derived ");
+                    "JOIN((SELECT ls.loan_id, ls.duedate as datedue FROM m_loan_repayment_schedule ls WHERE ls.loan_id = ? and ls.completed_derived = false ORDER BY ls.duedate LIMIT 1)) asq on asq.loan_id = ls.loan_id ");
+            sqlBuilder.append("AND asq.datedue = ls.duedate ");
+            sqlBuilder.append("WHERE l.id = ?");
             return sqlBuilder.toString();
-
         }
 
         @Override
