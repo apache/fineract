@@ -152,7 +152,7 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
         final AccountingRuleDataExtractor resultSetExtractor = new AccountingRuleDataExtractor(this.jdbcTemplate,
                 this.glAccountReadPlatformService, isAssociationParametersExists);
         Object[] arguments = new Object[] {};
-        String sql = "select " + resultSetExtractor.schema() + " and system_defined=0 ";
+        String sql = "select " + resultSetExtractor.schema() + " and system_defined=false ";
         if (hierarchySearchString != null) {
             sql = sql + " and office.hierarchy like ?";
             arguments = new Object[] { hierarchySearchString };
