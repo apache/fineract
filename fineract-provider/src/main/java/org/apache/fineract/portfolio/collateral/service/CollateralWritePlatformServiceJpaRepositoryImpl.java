@@ -95,7 +95,7 @@ public class CollateralWritePlatformServiceJpaRepositoryImpl implements Collater
                         LoanCollateralCannotBeCreatedReason.LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE, loan.getId());
             }
 
-            this.collateralRepository.save(collateral);
+            this.collateralRepository.saveAndFlush(collateral);
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //

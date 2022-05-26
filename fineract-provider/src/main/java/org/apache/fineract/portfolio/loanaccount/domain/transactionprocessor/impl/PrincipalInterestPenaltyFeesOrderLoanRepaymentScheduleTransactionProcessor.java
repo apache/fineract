@@ -118,8 +118,8 @@ public class PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionPr
             loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
         }
         if (principalPortion.plus(interestPortion).plus(feeChargesPortion).plus(penaltyChargesPortion).isGreaterThanZero()) {
-            transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(currentInstallment, principalPortion,
-                    interestPortion, feeChargesPortion, penaltyChargesPortion));
+            transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(loanTransaction, currentInstallment,
+                    principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion));
         }
 
         return transactionAmountRemaining;
@@ -161,8 +161,8 @@ public class PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionPr
 
         loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
         if (principalPortion.plus(interestPortion).plus(feeChargesPortion).plus(penaltyChargesPortion).isGreaterThanZero()) {
-            transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(currentInstallment, principalPortion,
-                    interestPortion, feeChargesPortion, penaltyChargesPortion));
+            transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(loanTransaction, currentInstallment,
+                    principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion));
         }
         return transactionAmountRemaining;
     }

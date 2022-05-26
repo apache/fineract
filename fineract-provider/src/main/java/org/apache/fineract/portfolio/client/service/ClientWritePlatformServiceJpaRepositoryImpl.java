@@ -294,7 +294,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             final Client newClient = Client.createNew(currentUser, clientOffice, clientParentGroup, staff, savingsProductId, gender,
                     clientType, clientClassification, legalFormValue, command);
-            this.clientRepository.save(newClient);
+            this.clientRepository.saveAndFlush(newClient);
             boolean rollbackTransaction = false;
             if (newClient.isActive()) {
                 validateParentGroupRulesBeforeClientActivation(newClient);
@@ -303,7 +303,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 rollbackTransaction = this.commandProcessingService.validateCommand(commandWrapper, currentUser);
             }
 
-            this.clientRepository.save(newClient);
+            this.clientRepository.saveAndFlush(newClient);
             if (newClient.isActive()) {
                 this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.CLIENTS_ACTIVATE,
                         constructEntityMap(BusinessEntity.CLIENT, newClient));
@@ -311,14 +311,14 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             if (newClient.isAccountNumberRequiresAutoGeneration()) {
                 AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.CLIENT);
                 newClient.updateAccountNo(accountNumberGenerator.generate(newClient, accountNumberFormat));
-                this.clientRepository.save(newClient);
+                this.clientRepository.saveAndFlush(newClient);
             }
 
             final Locale locale = command.extractLocale();
             final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
             CommandProcessingResult result = openSavingsAccount(newClient, fmt);
             if (result.getSavingsId() != null) {
-                this.clientRepository.save(newClient);
+                this.clientRepository.saveAndFlush(newClient);
 
             }
 

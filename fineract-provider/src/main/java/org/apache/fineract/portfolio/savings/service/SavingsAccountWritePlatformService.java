@@ -25,6 +25,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 
@@ -39,6 +40,8 @@ public interface SavingsAccountWritePlatformService {
     CommandProcessingResult applyAnnualFee(Long savingsAccountChargeId, Long accountId);
 
     CommandProcessingResult calculateInterest(Long savingsId);
+
+    CommandProcessingResult reverseTransaction(Long savingsId, Long transactionId, boolean allowAccountTransferModification);
 
     CommandProcessingResult undoTransaction(Long savingsId, Long transactionId, boolean allowAccountTransferModification);
 
@@ -87,17 +90,23 @@ public interface SavingsAccountWritePlatformService {
 
     void postInterest(SavingsAccount account, boolean postInterestAs, LocalDate transactionDate, boolean backdatedTxnsAllowedTill);
 
-    CommandProcessingResult blockAccount(Long savingsId);
+    // SavingsAccountData postInterest(SavingsAccountData account, boolean postInterestAs, LocalDate transactionDate,
+    // boolean backdatedTxnsAllowedTill);
+
+    SavingsAccountData postInterest(SavingsAccountData account, boolean postInterestAs, LocalDate transactionDate,
+            boolean backdatedTxnsAllowedTill);
+
+    CommandProcessingResult blockAccount(Long savingsId, JsonCommand command);
 
     CommandProcessingResult unblockAccount(Long savingsId);
 
     CommandProcessingResult holdAmount(Long savingsId, JsonCommand command);
 
-    CommandProcessingResult blockCredits(Long savingsId);
+    CommandProcessingResult blockCredits(Long savingsId, JsonCommand command);
 
     CommandProcessingResult unblockCredits(Long savingsId);
 
-    CommandProcessingResult blockDebits(Long savingsId);
+    CommandProcessingResult blockDebits(Long savingsId, JsonCommand command);
 
     CommandProcessingResult unblockDebits(Long savingsId);
 

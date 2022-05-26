@@ -41,7 +41,7 @@ public class BlockDebitsFromSavingsAccountCommandHandler implements NewCommandSo
     @Transactional
     @Override
     public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.writePlatformService.blockDebits(command.getSavingsId());
+        return this.writePlatformService.blockDebits(command.getSavingsId(), command);
     }
 
 }

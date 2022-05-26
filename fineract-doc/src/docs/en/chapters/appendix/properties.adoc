@@ -1,0 +1,16 @@
+[appendix]
+= Fineract Application Properties
+
+TBD
+
+include::properties-database.adoc[leveloffset=+1]
+
+include::properties-pool.adoc[leveloffset=+1]
+
+include::properties-ssl.adoc[leveloffset=+1]
+
+include::properties-authentication.adoc[leveloffset=+1]
+
+include::properties-tomcat.adoc[leveloffset=+1]
+
+// include::properties-cache.adoc[leveloffset=+1]

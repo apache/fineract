@@ -1,0 +1,182 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+apply plugin: 'io.spring.dependency-management'
+
+// Configuration for the dependency management plugin
+// https://github.com/spring-gradle-plugins/dependency-management-plugin
+dependencyManagement {
+    imports {
+        mavenBom 'org.springframework:spring-framework-bom:5.3.19'
+        mavenBom 'org.springframework.boot:spring-boot-dependencies:2.6.7'
+        mavenBom 'org.jetbrains.kotlin:kotlin-bom:1.6.21'
+        mavenBom 'org.junit:junit-bom:5.8.2'
+        mavenBom 'com.fasterxml.jackson:jackson-bom:2.13.2.1'
+        mavenBom 'io.cucumber:cucumber-bom:7.3.4'
+        mavenBom 'io.netty:netty-bom:4.1.76.Final'
+        mavenBom 'org.mockito:mockito-bom:4.5.1'
+    }
+
+    dependencies {
+        // We use fixed versions, instead of inheriting them from the Spring BOM, to be able to be on more recent ones.
+        // We do not use :+ to get the latest available version available on Maven Central, as that could suddenly break things.
+        // We use the Renovate Bot to automatically propose Pull Requests (PRs) when upgrades for all of these versions are available.
+
+        dependency 'org.slf4j:slf4j-api:1.7.36'
+        dependency 'org.slf4j:slf4j-simple:1.7.36'
+        dependency 'org.slf4j:jcl-over-slf4j:1.7.36'
+        dependency 'org.slf4j:jul-to-slf4j:1.7.36'
+        dependency 'org.slf4j:log4j-over-slf4j:1.7.36'
+        dependency 'ch.qos.logback:logback-core:1.2.11'
+        dependency 'ch.qos.logback:logback-classic:1.2.11'
+
+        dependency 'org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.10'
+        dependency 'com.google.guava:guava:31.1-jre'
+        dependency 'com.google.code.gson:gson:2.9.0'
+        dependency 'com.google.truth:truth:1.1.3'
+        dependency 'com.google.truth.extensions:truth-java8-extension:1.1.3'
+        dependency 'com.google.googlejavaformat:google-java-format:1.15.0'
+        dependency ('org.apache.commons:commons-email:1.5') {
+            exclude 'com.sun.mail:javax.mail'
+            exclude 'javax.activation:activation'
+        }
+        dependency 'commons-io:commons-io:2.11.0'
+        dependency 'com.github.librepdf:openpdf:1.3.27'
+        dependency ('org.mnode.ical4j:ical4j:3.2.2') {
+            exclude 'com.sun.mail:javax.mail'
+        }
+        dependency 'org.quartz-scheduler:quartz:2.3.2'
+        dependency 'com.amazonaws:aws-java-sdk-s3:1.12.213'
+        dependency 'org.ehcache:ehcache:3.10.0'
+        dependency 'com.github.spullara.mustache.java:compiler:0.9.10'
+        dependency 'com.jayway.jsonpath:json-path:2.7.0'
+        dependency 'org.apache.tika:tika-core:2.4.0'
+        dependency 'org.apache.httpcomponents:httpclient:4.5.13'
+        dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
+        dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
+        dependency 'org.glassfish.jaxb:jaxb-runtime:2.3.6' // Swagger needs exactly this version
+        dependency 'org.apache.bval:org.apache.bval.bundle:2.0.5'
+        dependency 'joda-time:joda-time:2.10.14'
+
+        dependency 'io.github.classgraph:classgraph:4.8.146'
+        dependency 'org.awaitility:awaitility:4.2.0'
+        dependency 'com.github.spotbugs:spotbugs-annotations:4.7.0'
+        dependency 'javax.cache:cache-api:1.1.1'
+        dependency 'org.mock-server:mockserver-junit-jupiter:5.13.2'
+        dependency 'org.webjars:webjars-locator-core:0.50'
+        dependency 'com.icegreen:greenmail-junit5:1.6.9'
+        dependency 'com.intuit.karate:karate-junit5:1.2.0.RC6'
+
+        // fineract client dependencies
+        dependency "com.squareup.retrofit2:retrofit:2.9.0"
+        dependency "com.squareup.retrofit2:retrofit-mock:2.9.0"
+        dependency "com.squareup.retrofit2:adapter-java8:2.9.0"
+        dependency "com.squareup.retrofit2:adapter-rxjava2:2.9.0"
+        dependency "com.squareup.retrofit2:adapter-rxjava3:2.9.0"
+        dependency "com.squareup.retrofit2:adapter-guava:2.9.0"
+        dependency "com.squareup.retrofit2:converter-wire:2.9.0"
+        dependency "com.squareup.retrofit2:converter-jackson:2.9.0"
+        dependency "com.squareup.retrofit2:converter-simplexml:2.9.0"
+        dependency "com.squareup.retrofit2:converter-jaxb:2.9.0"
+        dependency "com.squareup.retrofit2:converter-java8:2.9.0"
+        dependency "com.squareup.retrofit2:converter-scalars:2.9.0"
+        dependency "com.squareup.retrofit2:converter-gson:2.9.0"
+        dependency "com.squareup.retrofit2:converter-protobuf:2.9.0"
+        dependency "org.apache.oltu.oauth2:org.apache.oltu.oauth2.common:1.0.1"
+        dependency "org.apache.oltu.oauth2:org.apache.oltu.oauth2.client:1.0.1"
+        dependency "org.apache.oltu.oauth2:org.apache.oltu.oauth2.httpclient4:1.0.1"
+        dependency "com.squareup.okhttp3:okhttp:4.9.3"
+        dependency "com.squareup.okhttp3:okcurl:4.9.3"
+        dependency "com.squareup.okhttp3:logging-interceptor:4.9.3"
+        dependency "com.squareup.okhttp3:okhttp-apache:4.9.3"
+        dependency "com.squareup.okhttp3:okhttp-android-support:4.9.3"
+        dependency "com.squareup.okhttp3:okhttp-urlconnection:4.9.3"
+        dependency "com.squareup.okhttp3:okhttp-sse:4.9.3"
+        dependency "io.gsonfire:gson-fire:1.8.5"
+        dependency "com.google.code.findbugs:jsr305:3.0.2"
+        dependency "commons-codec:commons-codec:1.15"
+        dependency "org.projectlombok:lombok:1.18.24"
+
+        dependency 'org.bouncycastle:bcpkix-jdk15to18:1.70'
+        dependency 'org.bouncycastle:bcprov-jdk15to18:1.70'
+        dependency 'org.bouncycastle:bcprov-jdk15on:1.70'
+        dependency 'org.bouncycastle:bcpg-jdk15on:1.70'
+
+        dependency 'org.eclipse.jgit:org.eclipse.jgit:6.1.0.202203080745-r'
+        dependency 'org.eclipse.jgit:org.eclipse.jgit.ssh.apache:6.1.0.202203080745-r'
+
+        dependency 'org.tmatesoft.svnkit:svnkit:1.10.5'
+        dependency 'com.vdurmont:semver4j:3.1.0'
+        dependency 'org.beryx:text-io:3.4.1'
+
+        dependency 'org.springdoc:springdoc-openapi-ui:1.6.8'
+        dependency 'org.springdoc:springdoc-openapi-webmvc-core:1.6.8'
+        dependency 'org.springdoc:springdoc-openapi-common:1.6.8'
+        dependency 'org.springdoc:springdoc-openapi-security:1.6.8'
+        dependency 'org.springdoc:springdoc-openapi-javadoc:1.6.8'
+
+        dependency 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.6.0'
+
+        dependency ('org.apache.activemq:activemq-broker:5.17.1') {
+            exclude 'javax.annotation:javax.annotation-api'
+        }
+
+        dependency 'io.swagger:swagger-annotations:1.6.6'
+        dependency 'io.swagger.core.v3:swagger-annotations:2.2.0'
+        dependency ('io.swagger.core.v3:swagger-jaxrs2:2.2.0') {
+            exclude 'jakarta.activation:jakarta.activation-api'
+        }
+        dependency ('io.swagger.core.v3:swagger-core:2.2.0') {
+            exclude 'jakarta.activation:jakarta.activation-api'
+        }
+
+        dependency "jakarta.annotation:jakarta.annotation-api:1.3.5"
+        dependency 'jakarta.activation:jakarta.activation-api:1.2.2'
+        dependency ('com.sun.mail:jakarta.mail:1.6.7') {
+            exclude 'com.sun.activation:jakarta.activation'
+        }
+        dependency ('jakarta.xml.bind:jakarta.xml.bind-api:2.3.3') {
+            exclude 'jakarta.activation:jakarta.activation-api'
+        }
+
+        dependency ('org.liquibase:liquibase-core:4.10.0') {
+            exclude 'javax.xml.bind:jaxb-api'
+        }
+
+        dependency ('org.dom4j:dom4j:2.1.3') {
+            exclude 'relaxngDatatype:relaxngDatatype' // already in com.sun.xml.bind:jaxb-osgi:2.3.0.1
+            // FINERACT-940 && FINERACT-966 https://github.com/spotbugs/spotbugs/issues/1128
+            exclude 'xpp3:xpp3'
+            exclude 'pull-parser:pull-parser'
+        }
+
+        dependency 'org.owasp.esapi:esapi:2.4.0.0'
+
+        dependencySet(group: 'org.apache.poi', version: '5.2.2') {
+            entry 'poi'
+            entry 'poi-ooxml'
+            entry 'poi-ooxml-schemas'
+        }
+
+        dependencySet(group: 'io.rest-assured', version: '4.5.1') {
+            entry 'rest-assured'
+            entry 'json-path'
+            entry 'xml-path'
+        }
+    }
+}

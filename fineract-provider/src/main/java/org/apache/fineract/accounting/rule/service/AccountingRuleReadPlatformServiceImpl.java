@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.accounting.glaccount.data.GLAccountDataForLookup;
 import org.apache.fineract.accounting.glaccount.service.GLAccountReadPlatformService;
@@ -35,8 +36,6 @@ import org.apache.fineract.accounting.rule.exception.AccountingRuleNotFoundExcep
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -45,17 +44,11 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final GLAccountReadPlatformService glAccountReadPlatformService;
-
-    @Autowired
-    public AccountingRuleReadPlatformServiceImpl(final RoutingDataSource dataSource,
-            final GLAccountReadPlatformService glAccountReadPlatformService) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.glAccountReadPlatformService = glAccountReadPlatformService;
-    }
 
     private static final class AccountingRuleDataExtractor implements ResultSetExtractor<Map<Long, AccountingRuleData>> {
 
@@ -148,7 +141,7 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
         private List<AccountingTagRuleData> getCreditOrDebitTags(final Long creditOrDebitAccount, final Integer transactionType) {
             final AccountingTagRuleDataMapper mapper = new AccountingTagRuleDataMapper();
             final String taggedAccountsSchema = "Select " + mapper.taggedAccountSchema() + " where rule.id = ? and tag.acc_type_enum=?";
-            return this.jdbcTemplate.query(taggedAccountsSchema, mapper, new Object[] { creditOrDebitAccount, transactionType });
+            return this.jdbcTemplate.query(taggedAccountsSchema, mapper, new Object[] { creditOrDebitAccount, transactionType }); // NOSONAR
         }
 
     }
@@ -165,7 +158,7 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
             arguments = new Object[] { hierarchySearchString };
         }
         sql = sql + " order by rule.id asc";
-        final Map<Long, AccountingRuleData> extractedData = this.jdbcTemplate.query(sql, resultSetExtractor, arguments);
+        final Map<Long, AccountingRuleData> extractedData = this.jdbcTemplate.query(sql, resultSetExtractor, arguments); // NOSONAR
         return new ArrayList<>(extractedData.values());
     }
 
@@ -176,7 +169,7 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
                     this.glAccountReadPlatformService, false);
             final String sql = "select " + resultSetExtractor.schema() + " and rule.id = ?";
 
-            final Map<Long, AccountingRuleData> extractedData = this.jdbcTemplate.query(sql, resultSetExtractor,
+            final Map<Long, AccountingRuleData> extractedData = this.jdbcTemplate.query(sql, resultSetExtractor, // NOSONAR
                     new Object[] { accountingRuleId });
             final AccountingRuleData accountingRuleData = extractedData.get(accountingRuleId);
             if (accountingRuleData == null) {

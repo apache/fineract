@@ -42,6 +42,8 @@ import org.apache.fineract.portfolio.shareproducts.domain.ShareProductDividentPa
 import org.apache.fineract.portfolio.shareproducts.domain.ShareProductRepositoryWrapper;
 import org.apache.fineract.portfolio.shareproducts.exception.DividentProcessingException;
 import org.apache.fineract.portfolio.shareproducts.serialization.ShareProductDataSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -49,6 +51,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareProductWritePlatformService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ShareProductWritePlatformServiceJpaRepositoryImpl.class);
 
     private final ShareProductRepositoryWrapper repository;
     private final ShareProductDataSerializer serializer;
@@ -78,7 +82,7 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
     public CommandProcessingResult createShareProduct(JsonCommand jsonCommand) {
         try {
             ShareProduct product = this.serializer.validateAndCreate(jsonCommand);
-            this.repository.save(product);
+            this.repository.saveAndFlush(product);
 
             // save accounting mappings
             this.accountMappingWritePlatformService.createShareProductToGLAccountMapping(product.getId(), jsonCommand);
@@ -199,6 +203,7 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
     }
 
     private void handleDataIntegrityIssues(final Exception e) {
+        LOG.error("Unknown data integrity issue with resource", e);
         throw new PlatformDataIntegrityException("error.msg.shareproduct.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
@@ -211,6 +216,7 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
                     "Share Product with name `" + name + "` already exists", "name", name);
         }
 
+        LOG.error("Unknown data integrity issue with resource", dve);
         throw new PlatformDataIntegrityException("error.msg.shareproduct.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }

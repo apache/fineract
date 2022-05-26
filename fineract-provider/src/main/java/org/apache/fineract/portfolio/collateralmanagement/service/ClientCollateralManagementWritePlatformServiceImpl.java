@@ -73,7 +73,7 @@ public class ClientCollateralManagementWritePlatformServiceImpl implements Clien
         final CollateralManagementDomain collateralManagementData = this.collateralManagementRepositoryWrapper.getCollateral(collateralId);
         final ClientCollateralManagement clientCollateralManagement = ClientCollateralManagement.createNew(quantity, client,
                 collateralManagementData);
-        this.clientCollateralManagementRepositoryWrapper.save(clientCollateralManagement);
+        this.clientCollateralManagementRepositoryWrapper.saveAndFlush(clientCollateralManagement);
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withClientId(command.getClientId())
                 .withEntityId(clientCollateralManagement.getId()).build();
     }
@@ -169,7 +169,7 @@ public class ClientCollateralManagementWritePlatformServiceImpl implements Clien
 
         if (clientCollateralManagement.getLoanCollateralManagementSet().size() > 0) {
             for (LoanCollateralManagement loanCollateralManagement : clientCollateralManagement.getLoanCollateralManagementSet()) {
-                if (loanCollateralManagement.getIsReleased() == 0) {
+                if (!loanCollateralManagement.isReleased()) {
                     throw new ClientCollateralCannotBeDeletedException(
                             ClientCollateralCannotBeDeletedException.ClientCollateralCannotBeDeletedReason.CLIENT_COLLATERAL_IS_ALREADY_ATTACHED,
                             clientCollateralId);

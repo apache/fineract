@@ -56,8 +56,9 @@ public class LoanRescheduleRequestTestBuilder {
         if (extraTerms != null) {
             map.put("extraTerms", extraTerms);
         }
-
-        map.put("recalculateInterest", recalculateInterest);
+        if (recalculateInterest) {
+            map.put("recalculateInterest", recalculateInterest);
+        }
 
         if (newInterestRate != null) {
             map.put("newInterestRate", newInterestRate);

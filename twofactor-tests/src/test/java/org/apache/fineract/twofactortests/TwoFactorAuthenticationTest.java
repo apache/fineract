@@ -97,7 +97,7 @@ public class TwoFactorAuthenticationTest {
 
     @Test
     public void testApiDocsAccess() {
-        performServerGet(requestSpecWithoutBasic, responseSpec, "/fineract-provider/api-docs/apiLive.htm", null);
+        performServerGet(requestSpecWithoutBasic, responseSpec, "/fineract-provider/legacy-docs/apiLive.htm", null);
     }
 
     @Test
@@ -111,7 +111,7 @@ public class TwoFactorAuthenticationTest {
                 .log().ifError().when().post("/fineract-provider/api/v1/authentication?" + TENANT_IDENTIFIER).asString();
         assertFalse(StringUtils.isBlank(json));
         Boolean key = JsonPath.with(json).get("isTwoFactorAuthenticationRequired");
-        assertEquals(key, true);
+        assertEquals(true, key);
     }
 
     @Test

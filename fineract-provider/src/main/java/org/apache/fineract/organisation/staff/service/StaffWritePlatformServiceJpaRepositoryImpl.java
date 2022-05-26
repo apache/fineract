@@ -69,7 +69,7 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
             final Office staffOffice = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
             final Staff staff = Staff.fromJson(staffOffice, command);
 
-            this.staffRepository.save(staff);
+            this.staffRepository.saveAndFlush(staff);
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //

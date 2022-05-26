@@ -18,6 +18,10 @@
  */
 package org.apache.fineract.infrastructure.core.domain;
 
+import java.sql.Connection;
+import javax.sql.DataSource;
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Holds Tenant's DB server connection connection details.
  */
@@ -180,5 +184,24 @@ public class FineractPlatformTenantConnection {
             sb.append('?').append(this.schemaConnectionParameters);
         }
         return sb.toString();
+    }
+
+    public static String toJdbcUrl(String protocol, String host, String port, String db, String parameters) {
+        StringBuilder sb = new StringBuilder(protocol).append("://").append(host).append(":").append(port).append('/').append(db);
+
+        if (!StringUtils.isEmpty(parameters)) {
+            sb.append('?').append(parameters);
+        }
+
+        return sb.toString();
+    }
+
+    public static String toProtocol(DataSource dataSource) {
+        try (Connection connection = dataSource.getConnection()) {
+            String url = connection.getMetaData().getURL();
+            return url.substring(0, url.indexOf("://"));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

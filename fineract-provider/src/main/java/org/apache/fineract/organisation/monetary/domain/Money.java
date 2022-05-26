@@ -23,6 +23,7 @@ import java.math.RoundingMode;
 import java.util.Iterator;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 @Embeddable
 public class Money implements Comparable<Money> {
@@ -67,8 +68,16 @@ public class Money implements Comparable<Money> {
                 currency.getCurrencyInMultiplesOf());
     }
 
+    public static Money of(final CurrencyData currency, final BigDecimal newAmount) {
+        return new Money(currency.getCode(), currency.getDecimalPlaces(), defaultToZeroIfNull(newAmount), currency.getInMultiplesOf());
+    }
+
     public static Money zero(final MonetaryCurrency currency) {
         return new Money(currency.getCode(), currency.getDigitsAfterDecimal(), BigDecimal.ZERO, currency.getCurrencyInMultiplesOf());
+    }
+
+    public static Money zero(final CurrencyData currency) {
+        return new Money(currency.getCode(), currency.getDecimalPlaces(), BigDecimal.ZERO, currency.getInMultiplesOf());
     }
 
     protected Money() {

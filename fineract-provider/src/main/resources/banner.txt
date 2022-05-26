@@ -1,0 +1,12 @@
+
+    _                     _            _____ _                           _
+   / \   _ __   __ _  ___| |__   ___  |  ___(_)_ __   ___ _ __ __ _  ___| |_
+  / _ \ | '_ \ / _` |/ __| '_ \ / _ \ | |_  | | '_ \ / _ \ '__/ _` |/ __| __|
+ / ___ \| |_) | (_| | (__| | | |  __/ |  _| | | | | |  __/ | | (_| | (__| |_
+/_/   \_\ .__/ \__,_|\___|_| |_|\___| |_|   |_|_| |_|\___|_|  \__,_|\___|\__|
+        |_|
+
+${AnsiStyle.FAINT}${AnsiColor.WHITE}(c) 2015-2022 ${application.title} (https://fineract.apache.org)${AnsiColor.BLACK}
+
+${AnsiStyle.FAINT}${AnsiColor.WHITE}Powered by Spring Boot ${spring-boot.version}${AnsiColor.BLACK}
+

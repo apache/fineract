@@ -18,6 +18,11 @@
  */
 package org.apache.fineract.portfolio.savings.api;
 
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Collection;
 import javax.ws.rs.Consumes;
@@ -130,6 +135,9 @@ public class SavingsAccountTransactionsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountTransactionsApiResourceSwagger.PostSavingsAccountTransactionsRequest.class)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountTransactionsApiResourceSwagger.PostSavingsAccountTransactionsResponse.class))) })
     public String transaction(@PathParam("savingsId") final Long savingsId, @QueryParam("command") final String commandParam,
             final String apiRequestBodyAsJson) {
         try {
@@ -188,6 +196,9 @@ public class SavingsAccountTransactionsApiResource {
         if (is(commandParam, SavingsApiConstants.COMMAND_UNDO_TRANSACTION)) {
             final CommandWrapper commandRequest = builder.undoSavingsAccountTransaction(savingsId, transactionId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, SavingsApiConstants.COMMAND_REVERSE_TRANSACTION)) {
+            final CommandWrapper commandRequest = builder.reverseSavingsAccountTransaction(savingsId, transactionId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, SavingsApiConstants.COMMAND_ADJUST_TRANSACTION)) {
             final CommandWrapper commandRequest = builder.adjustSavingsAccountTransaction(savingsId, transactionId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -198,8 +209,9 @@ public class SavingsAccountTransactionsApiResource {
 
         if (result == null) {
             //
-            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { SavingsApiConstants.COMMAND_UNDO_TRANSACTION,
-                    SavingsApiConstants.COMMAND_ADJUST_TRANSACTION, SavingsApiConstants.COMMAND_RELEASE_AMOUNT });
+            throw new UnrecognizedQueryParamException("command", commandParam,
+                    new Object[] { SavingsApiConstants.COMMAND_UNDO_TRANSACTION, SavingsApiConstants.COMMAND_ADJUST_TRANSACTION,
+                            SavingsApiConstants.COMMAND_RELEASE_AMOUNT, SavingsApiConstants.COMMAND_REVERSE_TRANSACTION });
         }
 
         return this.toApiJsonSerializer.serialize(result);

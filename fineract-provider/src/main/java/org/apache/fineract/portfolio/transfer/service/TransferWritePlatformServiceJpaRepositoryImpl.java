@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.transfer.service;
 
-import com.google.common.collect.Iterables;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.time.LocalDate;
@@ -212,7 +211,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
             /** map all JLG loans for this client to the destinationGroup **/
             for (final CalendarInstance calendarInstance : activeLoanCalendarInstances) {
                 calendarInstance.updateCalendar(destinationGroupCalendar);
-                this.calendarInstanceRepository.save(calendarInstance);
+                this.calendarInstanceRepository.saveAndFlush(calendarInstance);
             }
             // reschedule all JLG Loans to follow new Calendar
             this.loanWritePlatformService.applyMeetingDateChanges(destinationGroupCalendar, activeLoanCalendarInstances);
@@ -283,7 +282,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         handleClientTransferLifecycleEvent(client, office, TransferEventType.PROPOSAL, jsonCommand);
         this.clientRepositoryWrapper.saveAndFlush(client);
         handleClientTransferLifecycleEvent(client, client.getTransferToOffice(), TransferEventType.ACCEPTANCE, jsonCommand);
-        this.clientRepositoryWrapper.save(client);
+        this.clientRepositoryWrapper.saveAndFlush(client);
 
         return new CommandProcessingResultBuilder() //
                 .withClientId(clientId) //
@@ -316,7 +315,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
 
         }
         handleClientTransferLifecycleEvent(client, office, TransferEventType.PROPOSAL, jsonCommand);
-        this.clientRepositoryWrapper.save(client);
+        this.clientRepositoryWrapper.saveAndFlush(client);
         return new CommandProcessingResultBuilder() //
                 .withClientId(clientId) //
                 .withEntityId(clientId) //
@@ -341,7 +340,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId, true);
         validateClientAwaitingTransferAcceptance(client);
         handleClientTransferLifecycleEvent(client, client.getTransferToOffice(), TransferEventType.ACCEPTANCE, jsonCommand);
-        this.clientRepositoryWrapper.save(client);
+        this.clientRepositoryWrapper.saveAndFlush(client);
 
         return new CommandProcessingResultBuilder() //
                 .withClientId(clientId) //
@@ -357,7 +356,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
         validateClientAwaitingTransferAcceptanceOnHold(client);
         handleClientTransferLifecycleEvent(client, client.getOffice(), TransferEventType.WITHDRAWAL, jsonCommand);
-        this.clientRepositoryWrapper.save(client);
+        this.clientRepositoryWrapper.saveAndFlush(client);
         return new CommandProcessingResultBuilder() //
                 .withClientId(clientId) //
                 .withEntityId(clientId) //
@@ -371,7 +370,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         this.transfersDataValidator.validateForRejectClientTransfer(jsonCommand.json());
         final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
         handleClientTransferLifecycleEvent(client, client.getOffice(), TransferEventType.REJECTION, jsonCommand);
-        this.clientRepositoryWrapper.save(client);
+        this.clientRepositoryWrapper.saveAndFlush(client);
 
         return new CommandProcessingResultBuilder() //
                 .withClientId(clientId) //
@@ -381,7 +380,6 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
 
     private void handleClientTransferLifecycleEvent(final Client client, final Office destinationOffice,
             final TransferEventType transferEventType, final JsonCommand jsonCommand) {
-        final Date todaysDate = DateUtils.getDateOfTenant();
         /** Get destination loan officer if exists **/
         Staff staff = null;
         Group destinationGroup = null;
@@ -459,7 +457,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                     } else if (!destinationGroup.isActive()) {
                         throw new GroupNotActiveException(destinationGroup.getId());
                     }
-                    transferClientBetweenGroups(Iterables.get(client.getGroups(), 0), client, destinationGroup, true, staff);
+                    transferClientBetweenGroups(client.getGroups().stream().findFirst().get(), client, destinationGroup, true, staff);
                 } else if (client.getGroups().size() == 0 && destinationGroup != null) {
                     client.getGroups().add(destinationGroup);
                     client.updateStaff(destinationGroup.getStaff());

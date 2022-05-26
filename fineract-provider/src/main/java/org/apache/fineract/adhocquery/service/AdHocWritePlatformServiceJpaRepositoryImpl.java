@@ -63,7 +63,7 @@ public class AdHocWritePlatformServiceJpaRepositoryImpl implements AdHocWritePla
             this.adHocCommandFromApiJsonDeserializer.validateForCreate(command.json());
 
             final AdHoc entity = AdHoc.fromJson(command);
-            this.adHocRepository.save(entity);
+            this.adHocRepository.saveAndFlush(entity);
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(entity.getId()).build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {

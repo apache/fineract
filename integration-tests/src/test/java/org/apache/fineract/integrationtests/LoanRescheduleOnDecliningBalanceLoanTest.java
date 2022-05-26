@@ -185,8 +185,8 @@ public class LoanRescheduleOnDecliningBalanceLoanTest {
 
         LOG.info("Sucessfully created loan (ID: {} )", this.loanId);
 
-        this.approveLoanApplication();
-        this.disburseLoan();
+        this.approveLoanApplication(this.dateString);
+        this.disburseLoan(this.dateString);
     }
 
     private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {
@@ -203,10 +203,10 @@ public class LoanRescheduleOnDecliningBalanceLoanTest {
     /**
      * approve the loan application
      **/
-    private void approveLoanApplication() {
+    private void approveLoanApplication(String approveDate) {
 
         if (this.loanId != null) {
-            this.loanTransactionHelper.approveLoan(this.dateString, this.loanId);
+            this.loanTransactionHelper.approveLoan(approveDate, this.loanId);
             LOG.info("Successfully approved loan (ID: {} )", this.loanId);
         }
     }
@@ -214,42 +214,42 @@ public class LoanRescheduleOnDecliningBalanceLoanTest {
     /**
      * disburse the newly created loan
      **/
-    private void disburseLoan() {
+    private void disburseLoan(String disburseDate) {
 
         if (this.loanId != null) {
             String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, this.loanId);
-            this.loanTransactionHelper.disburseLoan(this.dateString, this.loanId,
+            this.loanTransactionHelper.disburseLoan(disburseDate, this.loanId,
                     JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
             LOG.info("Successfully disbursed loan (ID: {} )", this.loanId);
         }
     }
 
     /**
-     * enables the configuration `is-interest-to-be-appropriated-equally-when-greater-than-emi`
+     * enables the configuration `is-interest-to-be-recovered-first-when-greater-than-emi`
      **/
     private void enableConfig() {
-        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "34", true);
+        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "42", true);
     }
 
     /**
-     * disables the configuration `is-interest-to-be-appropriated-equally-when-greater-than-emi`
+     * disables the configuration `is-interest-to-be-recovered-first-when-greater-than-emi`
      **/
     private void disableConfig() {
-        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "34", false);
+        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "42", false);
     }
 
     @Test
     public void testCreateLoanRescheduleRequestWithInterestAppropriation() {
         // create all required entities
         this.createRequiredEntities();
-        this.createAndApproveLoanRescheduleRequestForInterestAppropriation();
+        this.createAndApproveLoanRescheduleRequestForRecoverInterestInterestFirst();
 
     }
 
     /**
      * create new loan reschedule request
      **/
-    private void createAndApproveLoanRescheduleRequestForInterestAppropriation() {
+    private void createAndApproveLoanRescheduleRequestForRecoverInterestInterestFirst() {
         LOG.info(
                 "---------------------------------CREATING LOAN RESCHEDULE REQUEST FOR INTEREST APPROPRIATTION-------------------------------------");
 
@@ -279,8 +279,8 @@ public class LoanRescheduleOnDecliningBalanceLoanTest {
         final HashMap loanSummary = this.loanTransactionHelper.getLoanSummary(requestSpec, generalResponseSpec, loanId);
         final Float totalExpectedRepayment = (Float) loanSummary.get("totalExpectedRepayment");
 
-        assertEquals(12186, totalDueForPeriod.intValue(), "EXPECTED REPAYMENT is NOK");
-        assertEquals(123682, totalExpectedRepayment.intValue(), "TOTAL EXPECTED REPAYMENT is NOK");
+        assertEquals(10831, totalDueForPeriod.intValue(), "EXPECTED REPAYMENT is NOK");
+        assertEquals(125184, totalExpectedRepayment.intValue(), "TOTAL EXPECTED REPAYMENT is NOK");
 
         LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
 
@@ -327,7 +327,7 @@ public class LoanRescheduleOnDecliningBalanceLoanTest {
         final HashMap loanSummary = this.loanTransactionHelper.getLoanSummary(requestSpec, generalResponseSpec, loanId);
         final Float totalExpectedRepayment = (Float) loanSummary.get("totalExpectedRepayment");
 
-        assertEquals(12326, totalDueForPeriod.intValue(), "EXPECTED REPAYMENT is NOK");
+        assertEquals(10831, totalDueForPeriod.intValue(), "EXPECTED REPAYMENT is NOK");
         assertEquals(131512, totalExpectedRepayment.intValue(), "TOTAL EXPECTED REPAYMENT is NOK");
 
         LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
@@ -338,13 +338,13 @@ public class LoanRescheduleOnDecliningBalanceLoanTest {
     public void testCreateLoanRescheduleRequestForInterestAppropriationAndFixedEMI() {
         // create all required entities
         this.createRequiredEntities();
-        this.createAndApproveLoanRescheduleRequestForInterestAppropriationAndFixedEMI();
+        this.createAndApproveLoanRescheduleRequestForRecoverInterestFirstAndFixedEMI();
     }
 
     /**
-     * create new loan reschedule request with combination of date change, interest appropriation and fixed emi
+     * create new loan reschedule request with combination of date change, recover interest first and fixed emi
      **/
-    private void createAndApproveLoanRescheduleRequestForInterestAppropriationAndFixedEMI() {
+    private void createAndApproveLoanRescheduleRequestForRecoverInterestFirstAndFixedEMI() {
         LOG.info(
                 "---------------------------------CREATING LOAN RESCHEDULE REQUEST FOR INTEREST APPROPRIATTION-------------------------------------");
 
@@ -379,8 +379,8 @@ public class LoanRescheduleOnDecliningBalanceLoanTest {
 
         assertEquals(5000, totalFixedDueForPeriod.intValue(), "EXPECTED FIXED REPAYMENT is NOK");
 
-        assertEquals(15316, totalDueForPeriod.intValue(), "EXPECTED REPAYMENT is NOK");
-        assertEquals(120806, totalExpectedRepayment.intValue(), "TOTAL EXPECTED REPAYMENT is NOK");
+        assertEquals(15417, totalDueForPeriod.intValue(), "EXPECTED REPAYMENT is NOK");
+        assertEquals(121412, totalExpectedRepayment.intValue(), "TOTAL EXPECTED REPAYMENT is NOK");
 
         LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
 
@@ -390,7 +390,7 @@ public class LoanRescheduleOnDecliningBalanceLoanTest {
     public void testCreateLoanRescheduleRequestWithMultpleInterestAppropriation() {
         // create all required entities
         this.createRequiredEntities();
-        this.createAndApproveLoanRescheduleRequestForInterestAppropriation();
+        this.createAndApproveLoanRescheduleRequestForRecoverInterestInterestFirst();
 
         this.createAndApproveLoanRescheduleRequestForSecondInterestAppropriation();
 
@@ -429,9 +429,104 @@ public class LoanRescheduleOnDecliningBalanceLoanTest {
         final HashMap loanSummary = this.loanTransactionHelper.getLoanSummary(requestSpec, generalResponseSpec, loanId);
         final Float totalExpectedRepayment = (Float) loanSummary.get("totalExpectedRepayment");
 
-        assertEquals(12187, totalDueForPeriod.intValue(), "EXPECTED REPAYMENT in Second Reschedule is NOK");
-        assertEquals(130750, totalExpectedRepayment.intValue(), "TOTAL EXPECTED in Second Reschedule REPAYMENT is NOK");
+        assertEquals(10831, totalDueForPeriod.intValue(), "EXPECTED REPAYMENT in Second Reschedule is NOK");
+        assertEquals(133470, totalExpectedRepayment.intValue(), "TOTAL EXPECTED in Second Reschedule REPAYMENT is NOK");
 
         LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
+    }
+
+    @Test
+    public void testCreateLoanInterestGreaterThanEMIFromGapWithRecalculationEnabledAndPrincipalCompoundingOff() {
+        this.enableConfig();
+        this.enablePrincipalCompoundingConfig();
+        // create all required entities
+        this.createRequiredEntitiesWithRecalculationEnabledWithPrincipalCompoundingOff();
+        this.createApproveLoanRescheduleRequestWithRecalculationEnabledWithPrincipalCompoundingOff();
+        this.disablePrincipalCompoundingConfig();
+        this.disableConfig();
+    }
+
+    private void createRequiredEntitiesWithRecalculationEnabledWithPrincipalCompoundingOff() {
+        this.createClientEntity();
+        this.createLoanProductWithInterestRecalculation();
+        this.createLoanEntityWithScheduleGapWithInterestGreaterThanEMIAndPrincipalCompoundingOff();
+    }
+
+    /**
+     * enables the configuration `is-principal-compounding-disabled-for-overdue-loans`
+     **/
+    private void enablePrincipalCompoundingConfig() {
+        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "43", true);
+    }
+
+    /**
+     * disables the configuration `is-principal-compounding-disabled-for-overdue-loans`
+     **/
+    private void disablePrincipalCompoundingConfig() {
+        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "43", false);
+    }
+
+    /**
+     * submit a new loan application, approve and disburse the loan
+     **/
+    private void createLoanEntityWithScheduleGapWithInterestGreaterThanEMIAndPrincipalCompoundingOff() {
+        String firstRepaymentDate = "01 January 2015";
+
+        LOG.info("---------------------------------NEW LOAN APPLICATION------------------------------------------");
+
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("15000").withLoanTermFrequency("24")
+                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("24").withRepaymentEveryAfter("1")
+                .withRepaymentFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestCalculationPeriodTypeAsDays()
+                .withInterestRatePerPeriod("25").withInterestTypeAsDecliningBalance().withSubmittedOnDate(this.dateString)
+                .withExpectedDisbursementDate(this.dateString).withFirstRepaymentDate(firstRepaymentDate)
+                .withinterestChargedFromDate(this.dateString).build(this.clientId.toString(), this.loanProductId.toString(), null);
+
+        this.loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+
+        LOG.info("Sucessfully created loan (ID: {} )", this.loanId);
+
+        this.approveLoanApplication(this.dateString);
+        this.disburseLoan(this.dateString);
+    }
+
+    /**
+     * create new loan reschedule request with recalculation enabled in Loan product
+     **/
+
+    private void createApproveLoanRescheduleRequestWithRecalculationEnabledWithPrincipalCompoundingOff() {
+        LOG.info(
+                "---------------------------------CREATING LOAN RESCHEDULE REQUEST FOR LOAN WITH RECALCULATION------------------------------------");
+
+        final String requestJSON = new LoanRescheduleRequestTestBuilder().updateGraceOnPrincipal(null).updateGraceOnInterest(null)
+                .updateExtraTerms(null).updateRescheduleFromDate("01 March 2015").updateAdjustedDueDate("01 July 2015")
+                .updateRecalculateInterest(true).build(this.loanId.toString());
+
+        this.loanRescheduleRequestId = this.loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
+        this.loanRescheduleRequestHelper.verifyCreationOfLoanRescheduleRequest(this.loanRescheduleRequestId);
+
+        LOG.info("Successfully created loan reschedule request (ID: {} )", this.loanRescheduleRequestId);
+
+        final String aproveRequestJSON = new LoanRescheduleRequestTestBuilder().getApproveLoanRescheduleRequestJSON();
+        this.loanRescheduleRequestHelper.approveLoanRescheduleRequest(this.loanRescheduleRequestId, aproveRequestJSON);
+        final HashMap response = (HashMap) this.loanRescheduleRequestHelper.getLoanRescheduleRequest(loanRescheduleRequestId, "statusEnum");
+        assertTrue((Boolean) response.get("approved"));
+
+        LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
+
+        final Map repaymentSchedule = (Map) this.loanTransactionHelper.getLoanDetail(requestSpec, generalResponseSpec, loanId,
+                "repaymentSchedule");
+        final ArrayList periods = (ArrayList) repaymentSchedule.get("periods");
+
+        HashMap period = (HashMap) periods.get(5);
+        Float totalDueForPeriod = (Float) period.get("totalDueForPeriod");
+
+        final HashMap loanSummary = this.loanTransactionHelper.getLoanSummary(requestSpec, generalResponseSpec, loanId);
+        final Float totalExpectedRepayment = (Float) loanSummary.get("totalExpectedRepayment");
+
+        assertEquals(798, totalDueForPeriod.intValue(), "EXPECTED REPAYMENT is NOK");
+        assertEquals(22567, totalExpectedRepayment.intValue(), "TOTAL EXPECTED REPAYMENT is NOK");
+
+        LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
+
     }
 }

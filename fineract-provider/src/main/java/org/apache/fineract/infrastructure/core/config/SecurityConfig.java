@@ -23,10 +23,11 @@ import org.apache.fineract.infrastructure.security.filter.TenantAwareBasicAuthen
 import org.apache.fineract.infrastructure.security.filter.TwoFactorAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.service.TenantAwareJpaPlatformUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -42,7 +43,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 
 @Configuration
-@Profile("basicauth")
+@ConditionalOnProperty("fineract.security.basicauth.enabled")
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -51,6 +52,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private TwoFactorAuthenticationFilter twoFactorAuthenticationFilter;
+
+    @Autowired
+    private ServerProperties serverProperties;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -74,9 +78,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS) //
                 .and() //
                 .addFilterAfter(tenantAwareBasicAuthenticationFilter(), SecurityContextPersistenceFilter.class) //
-                .addFilterAfter(twoFactorAuthenticationFilter, BasicAuthenticationFilter.class) //
-                .requiresChannel(channel -> channel.antMatchers("/api/**").requiresSecure());
+                .addFilterAfter(twoFactorAuthenticationFilter, BasicAuthenticationFilter.class); //
 
+        if (serverProperties.getSsl().isEnabled()) {
+            http.requiresChannel(channel -> channel.antMatchers("/api/**").requiresSecure());
+        }
     }
 
     @Bean

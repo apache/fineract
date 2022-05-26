@@ -31,6 +31,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.data.AuditData;
 import org.apache.fineract.commands.data.AuditSearchData;
@@ -42,7 +44,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.infrastructure.security.utils.SQLBuilder;
@@ -64,17 +66,15 @@ import org.apache.fineract.portfolio.savings.service.SavingsProductReadPlatformS
 import org.apache.fineract.useradministration.data.AppUserData;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.service.AppUserReadPlatformService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AuditReadPlatformServiceImpl.class);
     private static final Set<String> supportedOrderByValues = new HashSet<>(Arrays.asList("id", "actionName", "entityName", "resourceId",
             "subresourceId", "madeOnDate", "checkedOnDate", "officeName", "groupName", "clientName", "loanAccountNo", "savingsAccountNo",
             "clientId", "loanId", "maker", "checker", "processingResult"));
@@ -87,33 +87,12 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
     private final ClientReadPlatformService clientReadPlatformService;
     private final LoanProductReadPlatformService loanProductReadPlatformService;
     private final StaffReadPlatformService staffReadPlatformService;
-    private final PaginationHelper<AuditData> paginationHelper = new PaginationHelper<>();
+    private final PaginationHelper paginationHelper;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final PaginationParametersDataValidator paginationParametersDataValidator;
     private final SavingsProductReadPlatformService savingsProductReadPlatformService;
     private final DepositProductReadPlatformService depositProductReadPlatformService;
     private final ColumnValidator columnValidator;
-
-    @Autowired
-    public AuditReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-            final FromJsonHelper fromApiJsonHelper, final AppUserReadPlatformService appUserReadPlatformService,
-            final OfficeReadPlatformService officeReadPlatformService, final ClientReadPlatformService clientReadPlatformService,
-            final LoanProductReadPlatformService loanProductReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
-            final PaginationParametersDataValidator paginationParametersDataValidator,
-            final SavingsProductReadPlatformService savingsProductReadPlatformService,
-            final DepositProductReadPlatformService depositProductReadPlatformService, final ColumnValidator columnValidator) {
-        this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.appUserReadPlatformService = appUserReadPlatformService;
-        this.officeReadPlatformService = officeReadPlatformService;
-        this.clientReadPlatformService = clientReadPlatformService;
-        this.loanProductReadPlatformService = loanProductReadPlatformService;
-        this.staffReadPlatformService = staffReadPlatformService;
-        this.paginationParametersDataValidator = paginationParametersDataValidator;
-        this.savingsProductReadPlatformService = savingsProductReadPlatformService;
-        this.depositProductReadPlatformService = depositProductReadPlatformService;
-        this.columnValidator = columnValidator;
-    }
 
     private static final class AuditMapper implements RowMapper<AuditData> {
 
@@ -199,7 +178,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
         final AuditMapper rm = new AuditMapper();
         final StringBuilder sqlBuilder = new StringBuilder(200);
-        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
         sqlBuilder.append(rm.schema(includeJson, hierarchy));
         sqlBuilder.append(' ').append(extraCriteria.getSQLTemplate());
         if (parameters.isOrderByRequested()) {
@@ -214,10 +193,9 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             this.columnValidator.validateSqlInjection(sqlBuilder.toString(), parameters.limitSql());
         }
 
-        LOG.info("sql: {}", sqlBuilder);
+        log.info("sql: {}", sqlBuilder);
 
-        final String sqlCountRows = "SELECT FOUND_ROWS()";
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), extraCriteria.getArguments(), rm);
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), extraCriteria.getArguments(), rm);
     }
 
     @Override
@@ -254,9 +232,9 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         }
         sql += extraCriteria.getSQLTemplate();
         sql += groupAndOrderBySQL;
-        LOG.info("sql: {}", sql);
+        log.info("sql: {}", sql);
 
-        return this.jdbcTemplate.query(sql, rm, extraCriteria.getArguments());
+        return this.jdbcTemplate.query(sql, rm, extraCriteria.getArguments()); // NOSONAR
     }
 
     @Override
@@ -269,7 +247,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
         final String sql = "select " + rm.schema(true, hierarchy) + " where aud.id = ? ";
 
-        final AuditData auditResult = this.jdbcTemplate.queryForObject(sql, rm, auditId);
+        final AuditData auditResult = this.jdbcTemplate.queryForObject(sql, rm, auditId); // NOSONAR
 
         return replaceIdsOnAuditData(auditResult);
     }
@@ -441,15 +419,15 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
         String sql = " SELECT distinct(action_name) as actionName FROM m_permission p ";
         sql += makercheckerCapabilityOnly(useType, currentUser);
-        sql += " order by if(action_name in ('CREATE', 'DELETE', 'UPDATE'), action_name, 'ZZZ'), action_name";
+        sql += " order by (CASE WHEN action_name in ('CREATE', 'DELETE', 'UPDATE') THEN action_name ELSE 'ZZZ' END), action_name";
         final ActionNamesMapper mapper = new ActionNamesMapper();
-        final List<String> actionNames = this.jdbcTemplate.query(sql, mapper);
+        final List<String> actionNames = this.jdbcTemplate.query(sql, mapper); // NOSONAR
 
         sql = " select distinct(entity_name) as entityName from m_permission p ";
         sql += makercheckerCapabilityOnly(useType, currentUser);
-        sql += " order by if(grouping = 'datatable', 'ZZZ', entity_name), entity_name";
+        sql += " order by (CASE WHEN " + sqlGenerator.escape("grouping") + " = 'datatable' THEN 'ZZZ' ELSE entity_name END), entity_name";
         final EntityNamesMapper mapper2 = new EntityNamesMapper();
-        final List<String> entityNames = this.jdbcTemplate.query(sql, mapper2);
+        final List<String> entityNames = this.jdbcTemplate.query(sql, mapper2); // NOSONAR
 
         Collection<ProcessingResultLookup> processingResults = null;
         if (useType.equals("audit")) {

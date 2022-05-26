@@ -100,6 +100,10 @@ public class SavingsAccountTransactionEnumData implements Serializable {
         return this.interestPosting;
     }
 
+    public boolean isIncomeFromInterest() {
+        return this.overdraftInterest;
+    }
+
     public boolean isFeeDeduction() {
         return this.feeDeduction;
     }
@@ -150,6 +154,26 @@ public class SavingsAccountTransactionEnumData implements Serializable {
 
     public boolean isAmountRelease() {
         return this.amountRelease;
+    }
+
+    public boolean isOverDraftInterestPosting() {
+        return this.overdraftInterest;
+    }
+
+    public boolean isChargeTransaction() {
+        return isPayCharge() || isWithdrawalFee() || isAnnualFee();
+    }
+
+    public boolean isAnnualFee() {
+        return this.value.equals(SavingsAccountTransactionType.ANNUAL_FEE.getValue().toString());
+    }
+
+    public boolean isPayCharge() {
+        return this.value.equals(SavingsAccountTransactionType.PAY_CHARGE.getValue().toString());
+    }
+
+    public boolean isWithdrawalFee() {
+        return this.value.equals(SavingsAccountTransactionType.WITHDRAWAL_FEE.getValue().toString());
     }
 
 }

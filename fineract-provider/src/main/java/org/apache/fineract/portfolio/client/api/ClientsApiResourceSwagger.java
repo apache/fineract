@@ -147,7 +147,7 @@ final class ClientsApiResourceSwagger {
             }
 
             @Schema(example = "2")
-            public Integer id;
+            public Long id;
             @Schema(example = "000000002")
             public String accountNo;
             public GetClientStatus status;
@@ -266,10 +266,42 @@ final class ClientsApiResourceSwagger {
 
         }
 
+        static final class PostClientsAddressRequest {
+
+            @Schema(example = "Ipca")
+            public String street;
+            @Schema(example = "Kandivali")
+            public String addressLine1;
+            @Schema(example = "plot47")
+            public String addressLine2;
+            @Schema(example = "charkop")
+            public String addressLine3;
+            @Schema(example = "Mumbai")
+            public String city;
+            @Schema(example = "800")
+            public Integer stateProvinceId;
+            @Schema(example = "802")
+            public Integer countryId;
+            @Schema(example = "400064")
+            public Long postalCode;
+            @Schema(example = "1")
+            public Long addressTypeId;
+            @Schema(example = "true")
+            public Boolean isActive;
+        }
+
         @Schema(example = "1")
         public Integer officeId;
+        @Schema(example = "1")
+        public Integer legalFormId;
         @Schema(example = "Client of group")
         public String fullname;
+        @Schema(example = "Client_FirstName")
+        public String firstname;
+        @Schema(example = "123")
+        public String externalId;
+        @Schema(example = "Client_LastName")
+        public String lastname;
         @Schema(example = "1")
         public Integer groupId;
         @Schema(example = "dd MMMM yyyy")
@@ -282,6 +314,8 @@ final class ClientsApiResourceSwagger {
         public String activationDate;
         @Schema(description = "List of PostClientsDatatable")
         public List<PostClientsDatatable> datatables;
+        @Schema(description = "Address requests")
+        public List<PostClientsAddressRequest> address;
 
     }
 
@@ -295,7 +329,7 @@ final class ClientsApiResourceSwagger {
         @Schema(example = "1")
         public Integer groupId;
         @Schema(example = "2")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "2")
         public Integer resourceId;
     }

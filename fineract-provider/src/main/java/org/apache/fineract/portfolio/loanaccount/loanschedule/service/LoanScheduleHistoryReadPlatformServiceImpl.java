@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -43,17 +42,19 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true)
 public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleHistoryReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
 
     @Autowired
-    public LoanScheduleHistoryReadPlatformServiceImpl(final RoutingDataSource dataSource, final PlatformSecurityContext context) {
+    public LoanScheduleHistoryReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final PlatformSecurityContext context) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @SuppressWarnings("deprecation")
@@ -79,7 +80,7 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
             final String sql = "select " + fullResultsetExtractor.schema()
                     + " where ls.loan_id = ? and ls.version = ? order by ls.loan_id, ls.installment";
 
-            return this.jdbcTemplate.query(sql, fullResultsetExtractor, new Object[] { loanId, versionNumber });
+            return this.jdbcTemplate.query(sql, fullResultsetExtractor, new Object[] { loanId, versionNumber }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new LoanNotFoundException(loanId, e);
         }

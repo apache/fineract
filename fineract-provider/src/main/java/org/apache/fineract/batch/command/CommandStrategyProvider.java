@@ -21,7 +21,6 @@ package org.apache.fineract.batch.command;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.fineract.batch.command.internal.UnknownCommandStrategy;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -46,7 +45,6 @@ public class CommandStrategyProvider {
      *
      * @param applicationContext
      */
-    @Autowired
     public CommandStrategyProvider(final ApplicationContext applicationContext) {
 
         // calls init() function of this class.

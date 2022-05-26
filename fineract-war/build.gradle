@@ -1,0 +1,104 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+description = 'Fineract WAR'
+
+apply plugin: 'war'
+apply plugin: 'distribution'
+apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.dependencies.gradle"
+
+war {
+    archiveFileName = 'fineract-provider.war'
+    from("$rootDir/licenses/binary/") {
+        // notice the parens
+        into "WEB-INF/licenses/binary/" // no leading slash
+    }
+    from("$rootDir/LICENSE_RELEASE") {
+        // notice the parens
+        into "WEB-INF/" // no leading slash
+    }
+    from("$rootDir/NOTICE_RELEASE") {
+        // notice the parens
+        into "WEB-INF/" // no leading slash
+    }
+    rename ('LICENSE_RELEASE', 'LICENSE')
+    rename ('NOTICE_RELEASE', 'NOTICE')
+
+    from("$rootDir/DISCLAIMER") {
+        // notice the parens
+        into "WEB-INF/" // no leading slash
+    }
+    enabled = true
+    classifier = ''
+}
+
+dependencies {
+    implementation project(':fineract-provider')
+}
+
+tasks.withType(Tar) {
+    compression Compression.GZIP
+    extension 'tar.gz'
+}
+
+distributions {
+    binary {
+        distributionBaseName = 'apache-fineract-binary'
+        contents {
+            from ("$rootDir/fineract-client/build/libs/") {
+                include 'fineract-client-*.jar'
+            }
+            from ("$rootDir/fineract-provider/build/libs/") {
+                include 'fineract-provider-*.jar'
+                exclude 'fineract-provider-*-plain.jar'
+            }
+            from war
+            from("$rootDir/licenses/") {
+                into "licenses/"
+            }
+            from "$rootDir/LICENSE_RELEASE"
+            from "$rootDir/NOTICE_RELEASE"
+            rename ('LICENSE_RELEASE', 'LICENSE')
+            rename ('NOTICE_RELEASE', 'NOTICE')
+
+            from "$rootDir/DISCLAIMER"
+            from "$rootDir/README.md"
+
+            from "$rootDir/fineract-doc/build/docs/pdf/en/index.pdf"
+            rename ('index.pdf', 'fineract-documentation.pdf')
+        }
+    }
+    src {
+        distributionBaseName = 'apache-fineract-src'
+        contents {
+            from "$rootDir/"
+            exclude '**/build' , '.git', '**/.gradle', '.github', '**/.settings', '**/.project', '**/.classpath', '.idea', 'out', '._.DS_Store', '.DS_Store', 'WebContent', '**/.externalToolbuilders', '.theia', '.gitpod.yml', '.travis.yml', 'LICENSE_RELEASE', 'NOTICE_RELEASE', '**/licenses', '*.class', '**/bin', '*.log', '.dockerignore', '**/.gitkeep'
+            rename ('LICENSE_SOURCE', 'LICENSE')
+            rename ('NOTICE_SOURCE', 'NOTICE')
+        }
+    }
+    doLast {
+        file("${buildDir}/distributions/apache-fineract-binary-${version}.tar.gz").renameTo("${buildDir}/distributions/apache-fineract-${version}-binary.tar.gz")
+        file("${buildDir}/distributions/apache-fineract-src-${version}.tar.gz").renameTo("${buildDir}/distributions/apache-fineract-${version}-src.tar.gz")
+    }
+}
+
+binaryDistZip.enabled false
+srcDistZip.enabled false
+// NOTE: Gradle suggested these dependencies
+binaryDistTar.dependsOn(war, ':fineract-client:jar', ':fineract-provider:build', ':fineract-doc:doc')

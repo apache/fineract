@@ -74,7 +74,7 @@ public class CreditBureauLoanProductMappingWritePlatformServiceImpl implements C
 
         final CreditBureauLoanProductMapping cb_lp = CreditBureauLoanProductMapping.fromJson(command, orgcb, lp);
 
-        this.creditBureauLoanProductMappingRepository.save(cb_lp);
+        this.creditBureauLoanProductMappingRepository.saveAndFlush(cb_lp);
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(cb_lp.getId()).build();
 

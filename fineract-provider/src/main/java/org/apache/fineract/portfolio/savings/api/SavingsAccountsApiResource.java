@@ -55,6 +55,7 @@ import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookS
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.data.UploadRequest;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
@@ -478,10 +479,10 @@ public class SavingsAccountsApiResource {
             final CommandWrapper commandRequest = builder.unblockCreditsToSavingsAccount(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, SavingsApiConstants.COMMAND_BLOCK_ACCOUNT)) {
-            final CommandWrapper commandRequest = builder.withNoJsonBody().blockSavingsAccount(accountId).build();
+            final CommandWrapper commandRequest = builder.blockSavingsAccount(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT)) {
-            final CommandWrapper commandRequest = builder.withNoJsonBody().unblockSavingsAccount(accountId).build();
+            final CommandWrapper commandRequest = builder.unblockSavingsAccount(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
@@ -529,6 +530,8 @@ public class SavingsAccountsApiResource {
     @POST
     @Path("uploadtemplate")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @RequestBody(description = "Upload savings template", content = {
+            @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = UploadRequest.class)) })
     public String postSavingsTemplate(@FormDataParam("file") InputStream uploadedInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("locale") final String locale,
             @FormDataParam("dateFormat") final String dateFormat) {
@@ -548,6 +551,8 @@ public class SavingsAccountsApiResource {
     @POST
     @Path("transactions/uploadtemplate")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @RequestBody(description = "Upload savings transaction template", content = {
+            @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = UploadRequest.class)) })
     public String postSavingsTransactionTemplate(@FormDataParam("file") InputStream uploadedInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("locale") final String locale,
             @FormDataParam("dateFormat") final String dateFormat) {

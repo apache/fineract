@@ -40,18 +40,18 @@ public class CreditBureauConfigurationHelper {
         this.responseSpec = responseSpec;
     }
 
-    public static Integer createCreditBureauConfiguration(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec) {
-        return createCreditBureauConfiguration(requestSpec, responseSpec, "1");
+    public static Integer createCreditBureauConfiguration(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            String configKey) {
+        return createCreditBureauConfiguration(requestSpec, responseSpec, "1", configKey);
     }
 
     public static Integer createCreditBureauConfiguration(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String creditBureauId) {
+            final String creditBureauId, String configKey) {
         LOG.info("---------------------------------CREATING A CREDIT_BUREAU_CONFIGURATION---------------------------------------------");
         final String CREDITBUREAU_CONFIGURATION_URL = " /fineract-provider/api/v1/CreditBureauConfiguration/configuration/" + creditBureauId
                 + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(requestSpec, responseSpec, CREDITBUREAU_CONFIGURATION_URL,
-                creditBureauConfigurationAsJson("testConfigKey", "testConfigKeyValue", "description"), "resourceId");
+                creditBureauConfigurationAsJson(configKey, "testConfigKeyValue", "description"), "resourceId");
     }
 
     /*

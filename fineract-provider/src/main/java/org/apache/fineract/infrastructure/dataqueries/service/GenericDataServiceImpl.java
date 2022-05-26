@@ -26,6 +26,7 @@ import java.util.List;
 import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseIndependentQueryService;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnValueData;
@@ -45,19 +46,21 @@ public class GenericDataServiceImpl implements GenericDataService {
 
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
+    private final DatabaseIndependentQueryService databaseIndependentQueryService;
     private static final Logger LOG = LoggerFactory.getLogger(GenericDataServiceImpl.class);
 
     @Autowired
-    public GenericDataServiceImpl(final RoutingDataSource dataSource) {
+    public GenericDataServiceImpl(final RoutingDataSource dataSource, final JdbcTemplate jdbcTemplate,
+            DatabaseIndependentQueryService databaseIndependentQueryService) {
         this.dataSource = dataSource;
+        this.databaseIndependentQueryService = databaseIndependentQueryService;
         this.jdbcTemplate = new JdbcTemplate(this.dataSource);
-
     }
 
     @Override
     public GenericResultsetData fillGenericResultSet(final String sql) {
         try {
-            final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
+            final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql); // NOSONAR
 
             final List<ResultsetColumnHeaderData> columnHeaders = new ArrayList<>();
             final List<ResultsetRowData> resultsetDataRows = new ArrayList<>();
@@ -196,58 +199,33 @@ public class GenericDataServiceImpl implements GenericDataService {
 
     @Override
     public List<ResultsetColumnHeaderData> fillResultsetColumnHeaders(final String datatable) {
-
-        LOG.debug("::3 Was inside the fill ResultSetColumnHeader");
-
         final SqlRowSet columnDefinitions = getDatatableMetaData(datatable);
 
         final List<ResultsetColumnHeaderData> columnHeaders = new ArrayList<>();
 
         columnDefinitions.beforeFirst();
         while (columnDefinitions.next()) {
-            final String columnName = columnDefinitions.getString("COLUMN_NAME");
-            final String isNullable = columnDefinitions.getString("IS_NULLABLE");
-            final String isPrimaryKey = columnDefinitions.getString("COLUMN_KEY");
-            final String columnType = columnDefinitions.getString("DATA_TYPE");
-            final Long columnLength = columnDefinitions.getLong("CHARACTER_MAXIMUM_LENGTH");
+            final String columnName = columnDefinitions.getString(1);
+            final String isNullable = columnDefinitions.getString(2);
+            final String isPrimaryKey = columnDefinitions.getString(5);
+            final String columnType = columnDefinitions.getString(3);
+            final Long columnLength = columnDefinitions.getLong(4);
 
-            final boolean columnNullable = "YES".equalsIgnoreCase(isNullable);
-            final boolean columnIsPrimaryKey = "PRI".equalsIgnoreCase(isPrimaryKey);
+            final boolean columnNullable = "YES".equalsIgnoreCase(isNullable) || "TRUE".equalsIgnoreCase(isNullable);
+            final boolean columnIsPrimaryKey = "PRI".equalsIgnoreCase(isPrimaryKey) || "TRUE".equalsIgnoreCase(isPrimaryKey);
 
             List<ResultsetColumnValueData> columnValues = new ArrayList<>();
             String codeName = null;
-            if ("varchar".equalsIgnoreCase(columnType)) {
-
-                final int codePosition = columnName.indexOf("_cv");
-                if (codePosition > 0) {
-                    codeName = columnName.substring(0, codePosition);
-
-                    columnValues = retreiveColumnValues(codeName);
-                }
-
-            } else if ("int".equalsIgnoreCase(columnType)) {
-
-                final int codePosition = columnName.indexOf("_cd");
+            final int codePosition = columnName.indexOf("_cd");
+            if ("varchar".equalsIgnoreCase(columnType) || "int".equalsIgnoreCase(columnType) || "integer".equalsIgnoreCase(columnType)) {
                 if (codePosition > 0) {
                     codeName = columnName.substring(0, codePosition);
                     columnValues = retreiveColumnValues(codeName);
                 }
             }
-            if (codeName == null) {
-                final SqlRowSet rsValues = getDatatableCodeData(datatable, columnName);
-                Integer codeId = null;
-                while (rsValues.next()) {
-                    codeId = rsValues.getInt("id");
-                    codeName = rsValues.getString("code_name");
-                }
-                columnValues = retreiveColumnValues(codeId);
 
-            }
-
-            final ResultsetColumnHeaderData rsch = ResultsetColumnHeaderData.detailed(columnName, columnType, columnLength, columnNullable,
-                    columnIsPrimaryKey, columnValues, codeName);
-
-            columnHeaders.add(rsch);
+            columnHeaders.add(ResultsetColumnHeaderData.detailed(columnName, columnType, columnLength, columnNullable, columnIsPrimaryKey,
+                    columnValues, codeName));
         }
 
         return columnHeaders;
@@ -260,10 +238,9 @@ public class GenericDataServiceImpl implements GenericDataService {
 
         final List<ResultsetColumnValueData> columnValues = new ArrayList<>();
 
-        final String sql = "select v.id, v.code_score, v.code_value from m_code m " + " join m_code_value v on v.code_id = m.id "
-                + " where m.code_name = '" + codeName + "' order by v.order_position, v.id";
+        final String sql = "select v.id, v.code_score, v.code_value from m_code m join m_code_value v on v.code_id = m.id where m.code_name = ? order by v.order_position, v.id";
 
-        final SqlRowSet rsValues = this.jdbcTemplate.queryForRowSet(sql);
+        final SqlRowSet rsValues = this.jdbcTemplate.queryForRowSet(sql, new Object[] { codeName }); // NOSONAR
 
         rsValues.beforeFirst();
         while (rsValues.next()) {
@@ -277,44 +254,12 @@ public class GenericDataServiceImpl implements GenericDataService {
         return columnValues;
     }
 
-    private List<ResultsetColumnValueData> retreiveColumnValues(final Integer codeId) {
-
-        final List<ResultsetColumnValueData> columnValues = new ArrayList<>();
-        if (codeId != null) {
-            final String sql = "select v.id, v.code_value from m_code_value v where v.code_id =" + codeId
-                    + " order by v.order_position, v.id";
-            final SqlRowSet rsValues = this.jdbcTemplate.queryForRowSet(sql);
-            rsValues.beforeFirst();
-            while (rsValues.next()) {
-                final Integer id = rsValues.getInt("id");
-                final String codeValue = rsValues.getString("code_value");
-                columnValues.add(new ResultsetColumnValueData(id, codeValue));
-            }
-        }
-
-        return columnValues;
-    }
-
+    @SuppressWarnings("AvoidHidingCauseException")
     private SqlRowSet getDatatableMetaData(final String datatable) {
-
-        final String sql = "select COLUMN_NAME, IS_NULLABLE, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, COLUMN_KEY"
-                + " from INFORMATION_SCHEMA.COLUMNS " + " where TABLE_SCHEMA = schema() and TABLE_NAME = '" + datatable
-                + "'order by ORDINAL_POSITION";
-
-        final SqlRowSet columnDefinitions = this.jdbcTemplate.queryForRowSet(sql);
-        if (columnDefinitions.next()) {
-            return columnDefinitions;
+        try {
+            return databaseIndependentQueryService.getTableColumns(dataSource, datatable);
+        } catch (IllegalArgumentException e) {
+            throw new DatatableNotFoundException(datatable);
         }
-
-        throw new DatatableNotFoundException(datatable);
-    }
-
-    private SqlRowSet getDatatableCodeData(final String datatable, final String columnName) {
-
-        final String sql = "select mc.id,mc.code_name from m_code mc join x_table_column_code_mappings xcc on xcc.code_id = mc.id where xcc.column_alias_name='"
-                + datatable.toLowerCase().replaceAll("\\s", "_") + "_" + columnName + "'";
-        final SqlRowSet rsValues = this.jdbcTemplate.queryForRowSet(sql);
-
-        return rsValues;
     }
 }

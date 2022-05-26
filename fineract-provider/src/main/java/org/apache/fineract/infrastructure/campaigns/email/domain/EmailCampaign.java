@@ -60,7 +60,7 @@ public class EmailCampaign extends AbstractPersistableCustom {
     private Integer campaignType;
 
     @ManyToOne
-    @JoinColumn(name = "businessRule_id", nullable = false)
+    @JoinColumn(name = "business_rule_id", nullable = false)
     private Report businessRuleId;
 
     @Column(name = "param_value")

@@ -22,8 +22,9 @@ version: '3.7'
 services:
   # Backend service
   fineractmysql:
-    image: mysql:5.7
+    image: mariadb:10.8
     volumes:
+      - ./fineract-db/server_collation.cnf:/etc/mysql/conf.d/server_collation.cnf
       - ./fineract-db/docker:/docker-entrypoint-initdb.d:Z,ro
     restart: always
     environment:
@@ -35,39 +36,57 @@ services:
     ports:
       - "3306:3306"
   fineract-server:
-    build:
-      context: .
-      target: fineract
+    image: fineract:latest
+    volumes:
+      - ./fineract-provider/build/data:/data
+    healthcheck:
+      test: ["CMD", 'sh', '-c', 'echo -e "Checking for the availability of Fineract server deployment"; while ! nc -z "fineract-server" 8443; do sleep 1; printf "-"; done; echo -e " >> Fineract server has started";' ]
+      timeout: 10s
+      retries: 10
     ports:
       - 8443:8443
     depends_on:
-      - fineractmysql
+      fineractmysql:
+        condition: service_healthy
     environment:
-      - DRIVERCLASS_NAME=org.drizzle.jdbc.DrizzleDriver
-      - PROTOCOL=jdbc
-      - node_id=1
-      - SUB_PROTOCOL=mysql:thin
-      - fineract_tenants_driver=org.drizzle.jdbc.DrizzleDriver
-      - fineract_tenants_url=jdbc:mysql:thin://fineractmysql:3306/fineract_tenants
-      - fineract_tenants_uid=root
-      - fineract_tenants_pwd=skdcnwauicn2ucnaecasdsajdnizucawencascdca
+      # TODO: env vars prefixed with "fineract_tenants_*" will be removed with one of the next releases
+      #- fineract_tenants_driver=org.mariadb.jdbc.Driver
+      #- fineract_tenants_url=jdbc:mariadb://fineractmysql:3306/fineract_tenants
+      #- fineract_tenants_uid=root
+      #- fineract_tenants_pwd=skdcnwauicn2ucnaecasdsajdnizucawencascdca
+      # NOTE: node aware scheduler
+      - FINERACT_NODE_ID=1
+      # NOTE: env vars prefixed "FINERACT_HIKARI_*" are used to configure the database connection pool
+      - FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME=org.mariadb.jdbc.Driver
+      - FINERACT_HIKARI_JDBC_URL=jdbc:mariadb://fineractmysql:3306/fineract_tenants
+      - FINERACT_HIKARI_USERNAME=root
+      - FINERACT_HIKARI_PASSWORD=skdcnwauicn2ucnaecasdsajdnizucawencascdca
+      # ... following variables are optional; "application.properties" contains reasonable defaults (same as here)
+      - FINERACT_HIKARI_MINIMUM_IDLE=3
+      - FINERACT_HIKARI_MAXIMUM_POOL_SIZE=10
+      - FINERACT_HIKARI_IDLE_TIMEOUT=60000
+      - FINERACT_HIKARI_CONNECTION_TIMEOUT=20000
+      - FINERACT_HIKARI_TEST_QUERY=SELECT 1
+      - FINERACT_HIKARI_AUTO_COMMIT=true
+      - FINERACT_HIKARI_DS_PROPERTIES_CACHE_PREP_STMTS=true
+      - FINERACT_HIKARI_DS_PROPERTIES_PREP_STMT_CACHE_SIZE=250
+      - FINERACT_HIKARI_DS_PROPERTIES_PREP_STMT_CACHE_SQL_LIMIT=2048
+      - FINERACT_HIKARI_DS_PROPERTIES_USE_SERVER_PREP_STMTS=true
+      - FINERACT_HIKARI_DS_PROPERTIES_USE_LOCAL_SESSION_STATE=true
+      - FINERACT_HIKARI_DS_PROPERTIES_REWRITE_BATCHED_STATEMENTS=true
+      - FINERACT_HIKARI_DS_PROPERTIES_CACHE_RESULT_SET_METADATA=true
+      - FINERACT_HIKARI_DS_PROPERTIES_CACHE_SERVER_CONFIGURATION=true
+      - FINERACT_HIKARI_DS_PROPERTIES_ELIDE_SET_AUTO_COMMITS=true
+      - FINERACT_HIKARI_DS_PROPERTIES_MAINTAIN_TIME_STATS=false
+      - FINERACT_HIKARI_DS_PROPERTIES_LOG_SLOW_QUERIES=true
+      - FINERACT_HIKARI_DS_PROPERTIES_DUMP_QUERIES_IN_EXCEPTION=true
+      # NOTE: env vars prefixed "FINERACT_DEFAULT_TENANTDB_*" are used to create the default tenant database
       - FINERACT_DEFAULT_TENANTDB_HOSTNAME=fineractmysql
       - FINERACT_DEFAULT_TENANTDB_PORT=3306
       - FINERACT_DEFAULT_TENANTDB_UID=root
       - FINERACT_DEFAULT_TENANTDB_PWD=skdcnwauicn2ucnaecasdsajdnizucawencascdca
       - FINERACT_DEFAULT_TENANTDB_CONN_PARAMS=
-
-  # Frontend service
-  community-app:
-    image: openmf/community-app:latest
-    container_name: mifos-ui
-    restart: always
-    ports:
-      - 9090:80
-
-
-# https://issues.apache.org/jira/browse/FINERACT-762
-# To use an altnerative JDBC driver (which is faster, but not allowed to be default in Apache distribution)
-# replace org.drizzle.jdbc.DrizzleDriver with com.mysql.jdbc.Driver in DRIVERCLASS_NAME and fineract_tenants_driver,
-# and remove ":thin:" from SUB_PROTOCOL and fineract_tenants_url.  Note that the mysql-connector-java-*.jar is already
-# bundled in the container by the Dockerfile, but just not used by default.
+      - FINERACT_DEFAULT_TENANTDB_TIMEZONE=Asia/Kolkata
+      - FINERACT_DEFAULT_TENANTDB_IDENTIFIER=default
+      - FINERACT_DEFAULT_TENANTDB_NAME=fineract_default
+      - FINERACT_DEFAULT_TENANTDB_DESCRIPTION=Default Demo Tenant

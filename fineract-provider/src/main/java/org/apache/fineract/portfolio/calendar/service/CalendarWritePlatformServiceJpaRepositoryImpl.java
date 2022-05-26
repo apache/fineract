@@ -153,7 +153,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
 
-        this.calendarRepository.save(newCalendar);
+        this.calendarRepository.saveAndFlush(newCalendar);
 
         final CalendarInstance newCalendarInstance = CalendarInstance.from(newCalendar, entityId, entityTypeId);
         this.calendarInstanceRepository.save(newCalendarInstance);

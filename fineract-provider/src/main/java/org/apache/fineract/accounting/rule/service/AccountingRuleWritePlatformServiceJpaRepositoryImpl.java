@@ -25,6 +25,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.closure.api.GLClosureJsonInputParams;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
@@ -47,9 +49,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -57,9 +56,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements AccountingRuleWritePlatformService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(AccountingRuleWritePlatformServiceJpaRepositoryImpl.class);
 
     private final AccountingRuleRepositoryWrapper accountingRuleRepositoryWrapper;
     private final AccountingRuleRepository accountingRuleRepository;
@@ -67,19 +66,6 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
     private final OfficeRepositoryWrapper officeRepositoryWrapper;
     private final AccountingRuleCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final CodeValueRepository codeValueRepository;
-
-    @Autowired
-    public AccountingRuleWritePlatformServiceJpaRepositoryImpl(final AccountingRuleRepositoryWrapper accountingRuleRepositoryWrapper,
-            final GLAccountRepositoryWrapper accountRepositoryWrapper, final OfficeRepositoryWrapper officeRepositoryWrapper,
-            final AccountingRuleRepository ruleRepository, final AccountingRuleCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final CodeValueRepository codeValueRepository) {
-        this.accountRepositoryWrapper = accountRepositoryWrapper;
-        this.officeRepositoryWrapper = officeRepositoryWrapper;
-        this.accountingRuleRepository = ruleRepository;
-        this.accountingRuleRepositoryWrapper = accountingRuleRepositoryWrapper;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.codeValueRepository = codeValueRepository;
-    }
 
     /**
      * @param command
@@ -93,7 +79,7 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
             throw new AccountingRuleDuplicateException();
         }
 
-        LOG.error("Error occured.", dve);
+        log.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.accounting.rule.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource Accounting Rule: " + realCause.getMessage());
     }

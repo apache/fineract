@@ -29,7 +29,6 @@ import java.util.List;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.RescheduleLoansApiConstants;
@@ -53,9 +52,9 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
     private final CodeValueReadPlatformService codeValueReadPlatformService;
 
     @Autowired
-    public LoanRescheduleRequestReadPlatformServiceImpl(final RoutingDataSource dataSource, LoanRepositoryWrapper loanRepositoryWrapper,
+    public LoanRescheduleRequestReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, LoanRepositoryWrapper loanRepositoryWrapper,
             final CodeValueReadPlatformService codeValueReadPlatformService) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
     }
@@ -230,7 +229,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
         this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
         final String sql = "select " + this.loanRescheduleRequestRowMapper.schema() + " where lr.loan_id = ?";
 
-        return this.jdbcTemplate.query(sql, this.loanRescheduleRequestRowMapper, new Object[] { loanId });
+        return this.jdbcTemplate.query(sql, this.loanRescheduleRequestRowMapper, new Object[] { loanId }); // NOSONAR
     }
 
     @Override
@@ -239,7 +238,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
         try {
             final String sql = "select " + this.loanRescheduleRequestRowMapper.schema() + " where lr.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, this.loanRescheduleRequestRowMapper, new Object[] { requestId });
+            return this.jdbcTemplate.queryForObject(sql, this.loanRescheduleRequestRowMapper, new Object[] { requestId }); // NOSONAR
         }
 
         catch (final EmptyResultDataAccessException e) {
@@ -251,7 +250,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
     public List<LoanRescheduleRequestData> readLoanRescheduleRequests(Long loanId, Integer statusEnum) {
         this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
         final String sql = "select " + this.loanRescheduleRequestRowMapper.schema() + " where lr.loan_id = ?" + " and lr.status_enum = ?";
-        return this.jdbcTemplate.query(sql, this.loanRescheduleRequestRowMapper, new Object[] { loanId, statusEnum });
+        return this.jdbcTemplate.query(sql, this.loanRescheduleRequestRowMapper, new Object[] { loanId, statusEnum }); // NOSONAR
     }
 
     @Override
@@ -289,8 +288,8 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
             } else if (command.equalsIgnoreCase(RescheduleLoansApiConstants.rejectCommandParamName)) {
                 statusParam = 300;
             }
-            return this.jdbcTemplate.query(sql, loanRescheduleRequestRowMapperForBulkApproval, new Object[] { statusParam });
+            return this.jdbcTemplate.query(sql, loanRescheduleRequestRowMapperForBulkApproval, new Object[] { statusParam }); // NOSONAR
         }
-        return this.jdbcTemplate.query(sql, loanRescheduleRequestRowMapperForBulkApproval, new Object[] {});
+        return this.jdbcTemplate.query(sql, loanRescheduleRequestRowMapperForBulkApproval); // NOSONAR
     }
 }

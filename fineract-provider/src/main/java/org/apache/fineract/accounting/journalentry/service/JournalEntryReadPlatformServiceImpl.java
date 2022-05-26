@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccount;
@@ -47,8 +48,8 @@ import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRu
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.office.data.OfficeData;
@@ -61,7 +62,6 @@ import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -69,6 +69,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 @Service
+@RequiredArgsConstructor
 public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
@@ -77,19 +78,8 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
     private final ColumnValidator columnValidator;
     private final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper;
 
-    private final PaginationHelper<JournalEntryData> paginationHelper = new PaginationHelper<>();
-
-    @Autowired
-    public JournalEntryReadPlatformServiceImpl(final RoutingDataSource dataSource,
-            final GLAccountReadPlatformService glAccountReadPlatformService, final ColumnValidator columnValidator,
-            final OfficeReadPlatformService officeReadPlatformService,
-            final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.glAccountReadPlatformService = glAccountReadPlatformService;
-        this.officeReadPlatformService = officeReadPlatformService;
-        this.financialActivityAccountRepositoryWrapper = financialActivityAccountRepositoryWrapper;
-        this.columnValidator = columnValidator;
-    }
+    private final PaginationHelper paginationHelper;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     private static final class GLJournalEntryMapper implements RowMapper<JournalEntryData> {
 
@@ -250,7 +240,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
         GLJournalEntryMapper rm = new GLJournalEntryMapper(associationParametersData);
         final StringBuilder sqlBuilder = new StringBuilder(200);
-        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
         sqlBuilder.append(rm.schema());
 
         final Object[] objectArray = new Object[15];
@@ -304,28 +294,19 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             String fromDateString = null;
             String toDateString = null;
             if (fromDate != null && toDate != null) {
-                sqlBuilder.append(whereClose + " journalEntry.entry_date between ? and ? ");
-
-                whereClose = " and ";
-
                 fromDateString = df.format(fromDate);
                 toDateString = df.format(toDate);
-                objectArray[arrayPos] = fromDateString;
-                arrayPos = arrayPos + 1;
-                objectArray[arrayPos] = toDateString;
-                arrayPos = arrayPos + 1;
+                sqlBuilder.append(whereClose + " journalEntry.entry_date between '" + fromDateString + "' and '" + toDateString + "' ");
+
+                whereClose = " and ";
             } else if (fromDate != null) {
-                sqlBuilder.append(whereClose + " journalEntry.entry_date >= ? ");
                 fromDateString = df.format(fromDate);
-                objectArray[arrayPos] = fromDateString;
-                arrayPos = arrayPos + 1;
+                sqlBuilder.append(whereClose + " journalEntry.entry_date >= '" + fromDateString + "' ");
                 whereClose = " and ";
 
             } else if (toDate != null) {
-                sqlBuilder.append(whereClose + " journalEntry.entry_date <= ? ");
                 toDateString = df.format(toDate);
-                objectArray[arrayPos] = toDateString;
-                arrayPos = arrayPos + 1;
+                sqlBuilder.append(whereClose + " journalEntry.entry_date <= '" + toDateString + "' ");
 
                 whereClose = " and ";
             }
@@ -333,7 +314,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
         if (onlyManualEntries != null) {
             if (onlyManualEntries) {
-                sqlBuilder.append(whereClose + " journalEntry.manual_entry = 1");
+                sqlBuilder.append(whereClose + " journalEntry.manual_entry = true");
 
                 whereClose = " and ";
             }
@@ -368,15 +349,16 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         }
 
         if (searchParameters.isLimited()) {
-            sqlBuilder.append(" limit ").append(searchParameters.getLimit());
+            sqlBuilder.append(" ");
             if (searchParameters.isOffset()) {
-                sqlBuilder.append(" offset ").append(searchParameters.getOffset());
+                sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
+            } else {
+                sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
             }
         }
 
         final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
-        final String sqlCountRows = "SELECT FOUND_ROWS()";
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), finalObjectArray, rm);
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), finalObjectArray, rm);
     }
 
     @Override
@@ -387,7 +369,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             final GLJournalEntryMapper rm = new GLJournalEntryMapper(associationParametersData);
             final String sql = "select " + rm.schema() + " where journalEntry.id = ?";
 
-            final JournalEntryData glJournalEntryData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glJournalEntryId });
+            final JournalEntryData glJournalEntryData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glJournalEntryId }); // NOSONAR
 
             return glJournalEntryData;
         } catch (final EmptyResultDataAccessException e) {
@@ -530,9 +512,8 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             final GLJournalEntryMapper rm = new GLJournalEntryMapper(associationParametersData);
             final String sql = "select " + rm.schema()
                     + " where journalEntry.transaction_id = ? and journalEntry.entity_id = ? and journalEntry.entity_type_enum = ?";
-            final String sqlCountRows = "SELECT FOUND_ROWS()";
             Object[] data = { transactionId, entityId, entityType };
-            return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sql, data, rm);
+            return this.paginationHelper.fetchPage(this.jdbcTemplate, sql, data, rm);
         } catch (final EmptyResultDataAccessException e) {
             throw new JournalEntriesNotFoundException(entityId, e);
         }

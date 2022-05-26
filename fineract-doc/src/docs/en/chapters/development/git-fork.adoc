@@ -1,0 +1,17 @@
+= Fork
+
+Make sure to disable Github Actions in your forked repository. See: https://github.com/vidakovic/fineract/settings/actions
+
+TBD
+
+== Upstream Configuration
+
+TBD
+
+== Syncing Upstream
+
+TBD
+
+== Pull Requests
+
+TBD

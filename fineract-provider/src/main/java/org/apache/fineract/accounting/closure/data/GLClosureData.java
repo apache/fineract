@@ -21,6 +21,9 @@ package org.apache.fineract.accounting.closure.data;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.apache.fineract.organisation.office.data.OfficeData;
 
 /**
@@ -28,59 +31,23 @@ import org.apache.fineract.organisation.office.data.OfficeData;
  *
  * Note: no getter/setters required as google-gson will produce json from fields of object.
  */
+@RequiredArgsConstructor
+@Getter
 public class GLClosureData {
 
-    @SuppressWarnings("unused")
     private final Long id;
-    @SuppressWarnings("unused")
     private final Long officeId;
-    @SuppressWarnings("unused")
     private final String officeName;
-    @SuppressWarnings("unused")
     private final LocalDate closingDate;
-    @SuppressWarnings("unused")
     private final boolean deleted;
-    @SuppressWarnings("unused")
     private final LocalDate createdDate;
-    @SuppressWarnings("unused")
     private final LocalDate lastUpdatedDate;
-    @SuppressWarnings("unused")
     private final Long createdByUserId;
-    @SuppressWarnings("unused")
     private final String createdByUsername;
-    @SuppressWarnings("unused")
     private final Long lastUpdatedByUserId;
-    @SuppressWarnings("unused")
     private final String lastUpdatedByUsername;
-    @SuppressWarnings("unused")
     private final String comments;
 
+    @Setter
     private Collection<OfficeData> allowedOffices = new ArrayList<>();
-
-    public GLClosureData(final Long id, final Long officeId, final String officeName, final LocalDate closingDate, final boolean deleted,
-            final LocalDate createdDate, final LocalDate lastUpdatedDate, final Long createdByUserId, final String createdByUsername,
-            final Long lastUpdatedByUserId, final String lastUpdatedByUsername, final String comments) {
-        this.id = id;
-        this.officeId = officeId;
-        this.officeName = officeName;
-        this.closingDate = closingDate;
-        this.deleted = deleted;
-        this.createdDate = createdDate;
-        this.lastUpdatedDate = lastUpdatedDate;
-        this.createdByUserId = createdByUserId;
-        this.createdByUsername = createdByUsername;
-        this.lastUpdatedByUserId = lastUpdatedByUserId;
-        this.lastUpdatedByUsername = lastUpdatedByUsername;
-        this.comments = comments;
-        this.allowedOffices = null;
-    }
-
-    public final Collection<OfficeData> getAllowedOffices() {
-        return this.allowedOffices;
-    }
-
-    public void setAllowedOffices(final Collection<OfficeData> allowedOffices) {
-        this.allowedOffices = allowedOffices;
-    }
-
 }

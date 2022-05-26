@@ -1,0 +1,14 @@
+= Fineract Documentation Guide
+
+TBD
+
+include::layout.adoc[leveloffset=+1]
+
+include::asciidoc.adoc[leveloffset=+1]
+
+include::diagram.adoc[leveloffset=+1]
+
+include::editor.adoc[leveloffset=+1]
+
+include::antora.adoc[leveloffset=+1]
+

@@ -30,8 +30,10 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interest
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestCalculationTypeParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestCompoundingPeriodTypeParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestPostingPeriodTypeParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lienAllowedParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.maxAllowedLienLimitParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minOverdraftForInterestCalculationParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minRequiredBalanceParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minRequiredOpeningBalanceParamName;
@@ -55,7 +57,6 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
@@ -73,6 +74,7 @@ import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYea
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
@@ -103,7 +105,7 @@ public class SavingsAccountAssembler {
             final StaffRepositoryWrapper staffRepository, final SavingsProductRepository savingProductRepository,
             final SavingsAccountRepositoryWrapper savingsAccountRepository,
             final SavingsAccountChargeAssembler savingsAccountChargeAssembler, final FromJsonHelper fromApiJsonHelper,
-            final AccountTransfersReadPlatformService accountTransfersReadPlatformService, final RoutingDataSource dataSource,
+            final AccountTransfersReadPlatformService accountTransfersReadPlatformService, final JdbcTemplate jdbcTemplate,
             final ConfigurationDomainService configurationDomainService) {
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.clientRepository = clientRepository;
@@ -114,7 +116,7 @@ public class SavingsAccountAssembler {
         this.savingsAccountChargeAssembler = savingsAccountChargeAssembler;
         this.fromApiJsonHelper = fromApiJsonHelper;
         savingsHelper = new SavingsHelper(accountTransfersReadPlatformService);
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.configurationDomainService = configurationDomainService;
     }
 
@@ -294,6 +296,20 @@ public class SavingsAccountAssembler {
             minRequiredBalance = product.minRequiredBalance();
         }
 
+        boolean lienAllowed = false;
+        if (command.parameterExists(lienAllowedParamName)) {
+            lienAllowed = command.booleanPrimitiveValueOfParameterNamed(lienAllowedParamName);
+        } else {
+            lienAllowed = product.isLienAllowed();
+        }
+
+        BigDecimal maxAllowedLienLimit = BigDecimal.ZERO;
+        if (command.parameterExists(maxAllowedLienLimitParamName)) {
+            maxAllowedLienLimit = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(maxAllowedLienLimitParamName);
+        } else {
+            maxAllowedLienLimit = product.maxAllowedLienLimit();
+        }
+
         boolean withHoldTax = product.withHoldTax();
         if (command.parameterExists(withHoldTaxParamName)) {
             withHoldTax = command.booleanPrimitiveValueOfParameterNamed(withHoldTaxParamName);
@@ -306,8 +322,8 @@ public class SavingsAccountAssembler {
                 externalId, accountType, submittedOnDate, submittedBy, interestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer, charges, allowOverdraft,
-                overdraftLimit, enforceMinRequiredBalance, minRequiredBalance, nominalAnnualInterestRateOverdraft,
-                minOverdraftForInterestCalculation, withHoldTax);
+                overdraftLimit, enforceMinRequiredBalance, minRequiredBalance, maxAllowedLienLimit, lienAllowed,
+                nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
 
         account.validateNewApplicationState(DateUtils.getLocalDateOfTenant(), SAVINGS_ACCOUNT_RESOURCE_NAME);
@@ -354,6 +370,18 @@ public class SavingsAccountAssembler {
         // Update last running balance on account level
         if (savingsAccountTransactions != null) {
             account.getSummary().setRunningBalanceOnPivotDate(savingsAccountTransactions.get(savingsAccountTransactions.size() - 1)
+                    .getRunningBalance(account.getCurrency()).getAmount());
+        }
+
+        account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
+        return account;
+    }
+
+    public SavingsAccountData assembleSavings(final SavingsAccountData account) {
+
+        // Update last running balance on account level
+        if (account.getTransactions() != null && account.getTransactions().size() != 0) {
+            account.getSummary().setRunningBalanceOnPivotDate(account.getTransactions().get(account.getTransactions().size() - 1)
                     .getRunningBalance(account.getCurrency()).getAmount());
         }
 
@@ -411,8 +439,9 @@ public class SavingsAccountAssembler {
                 product.interestPostingPeriodType(), product.interestCalculationType(), product.interestCalculationDaysInYearType(),
                 product.minRequiredOpeningBalance(), product.lockinPeriodFrequency(), product.lockinPeriodFrequencyType(),
                 product.isWithdrawalFeeApplicableForTransfer(), charges, product.isAllowOverdraft(), product.overdraftLimit(),
-                product.isMinRequiredBalanceEnforced(), product.minRequiredBalance(), product.nominalAnnualInterestRateOverdraft(),
-                product.minOverdraftForInterestCalculation(), product.withHoldTax());
+                product.isMinRequiredBalanceEnforced(), product.minRequiredBalance(), product.maxAllowedLienLimit(),
+                product.isLienAllowed(), product.nominalAnnualInterestRateOverdraft(), product.minOverdraftForInterestCalculation(),
+                product.withHoldTax());
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
 
         account.validateNewApplicationState(DateUtils.getLocalDateOfTenant(), SAVINGS_ACCOUNT_RESOURCE_NAME);
@@ -424,5 +453,9 @@ public class SavingsAccountAssembler {
 
     public void assignSavingAccountHelpers(final SavingsAccount savingsAccount) {
         savingsAccount.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
+    }
+
+    public void assignSavingAccountHelpers(final SavingsAccountData savingsAccountData) {
+        savingsAccountData.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
     }
 }

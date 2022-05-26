@@ -40,6 +40,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -303,6 +304,43 @@ public class ClientLoanIntegrationTest {
         validateCharge(interestPercentage, loanCharges, "1.0", "0.0", "5.05", "0.0");
         validateCharge(amountPlusInterestPercentage, loanCharges, "1.0", "0.0", "105.05", "0.0");
         validateNumberForEqual("210.1", String.valueOf(disbursementDetail.get("feeChargesDue")));
+
+    }
+
+    @Test
+    public void testLoanDisbursedTodayIsRetrieved() {
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer loanProductID = createLoanProduct(false, NONE);
+
+        final Integer loanID = applyForLoanApplication(clientID, loanProductID, "5", null);
+        Assertions.assertNotNull(loanID);
+
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
+        final String LOAN_DISBURSEMENT_DATE = dateFormat.format(todaysDate.getTime());
+
+        LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
+        loanStatusHashMap = this.loanTransactionHelper.approveLoan(LOAN_DISBURSEMENT_DATE, loanID);
+        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+
+        // DISBURSE on todays date so that loan can't be in arrears
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(LOAN_DISBURSEMENT_DATE, loanID, "10000",
+                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
+        LOG.info("DISBURSE {}", loanStatusHashMap.toString());
+        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+        loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
+        // Test added because loans created without arrears were failing to be retrieved (associations=all) due to inner
+        // join on m_loan_arrears_aging (now left join)
+        Assertions.assertNotNull(loanDetails, "Empty Loan Details");
+        Assertions.assertNotNull(JsonPath.from(loanDetails).get("id"), "No id Found");
 
     }
 
@@ -3399,7 +3437,7 @@ public class ClientLoanIntegrationTest {
     public void testLoanScheduleWithInterestRecalculation_WITH_REST_SAME_AS_REPAYMENT_INTEREST_COMPOUND_NONE_STRATEGY_REDUCE_EMI() {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -3509,7 +3547,7 @@ public class ClientLoanIntegrationTest {
     private void testLoanScheduleWithInterestRecalculation_WITH_REST_SAME_AS_REPAYMENT_INTEREST_COMPOUND_NONE_STRATEGY_REDUCE_EMI_PRE_CLOSE_INTEREST(
             String preCloseInterestStrategy, String preCloseAmount) {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -3590,7 +3628,7 @@ public class ClientLoanIntegrationTest {
     public void testLoanScheduleWithInterestRecalculation_WITH_REST_SAME_AS_REPAYMENT_INTEREST_COMPOUND_NONE_STRATEGY_REDUCE_EMI_WITH_INSTALLMENT_CHARGE() {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -3688,7 +3726,7 @@ public class ClientLoanIntegrationTest {
     public void testLoanScheduleWithInterestRecalculation_WITH_REST_DAILY_INTEREST_COMPOUND_INTEREST_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS() {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -3802,7 +3840,7 @@ public class ClientLoanIntegrationTest {
     public void testLoanScheduleWithInterestRecalculation_WITH_REST_WEEKLY_INTEREST_COMPOUND_INTEREST_FEE_STRATEGY_REDUCE_NEXT_INSTALLMENTS() {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -3939,7 +3977,7 @@ public class ClientLoanIntegrationTest {
             String preCloseInterestStrategy, String preCloseAmount) {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -4041,7 +4079,7 @@ public class ClientLoanIntegrationTest {
             throws InterruptedException {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -4157,7 +4195,7 @@ public class ClientLoanIntegrationTest {
         this.periodicAccrualAccountingHelper = new PeriodicAccrualAccountingHelper(this.requestSpec, this.responseSpec);
         this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         final Account assetAccount = this.accountHelper.createAssetAccount();
@@ -4263,7 +4301,7 @@ public class ClientLoanIntegrationTest {
     public void testLoanScheduleWithInterestRecalculation_WITH_CURRENT_REPAYMENT_BASED_ARREARS_AGEING() {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -4345,7 +4383,7 @@ public class ClientLoanIntegrationTest {
     public void testLoanScheduleWithInterestRecalculation_WITH_ORIGINAL_REPAYMENT_BASED_ARREARS_AGEING() {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -4440,7 +4478,7 @@ public class ClientLoanIntegrationTest {
             final String preCloseAmount) {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -5387,7 +5425,7 @@ public class ClientLoanIntegrationTest {
     public void testLoanScheduleWithInterestRecalculation_WITH_INTEREST_FIRST_STRATEGY_AND_REST_DAILY_INTEREST_COMPOUND_INTEREST_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS() {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -5502,7 +5540,7 @@ public class ClientLoanIntegrationTest {
     public void testLoanScheduleWithInterestRecalculation_WITH_INTEREST_FIRST_STRATEGY_AND_REST_DAILY_INTEREST_COMPOUND_INTEREST_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS_EARLY_REPAYMENT() {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -5608,6 +5646,31 @@ public class ClientLoanIntegrationTest {
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
 
+    }
+
+    @Test
+    public void testCollateralDataIsAvailableWhenRequested() {
+        // given
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        List<HashMap> collaterals = new ArrayList<>();
+        Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+
+        Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                String.valueOf(clientId), collateralId);
+        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
+
+        Integer loanProductId = createLoanProduct(false, NONE);
+
+        // when
+        Integer loanId = applyForLoanApplication(clientId, loanProductId, null, null, "12,000.00", collaterals);
+
+        // then
+        List<Integer> clientCollateralIds = (List<Integer>) loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanId,
+                "collateral.clientCollateralId");
+        Integer clientCollateralIdResult = clientCollateralIds.get(0);
+        assertEquals(clientCollateralId, clientCollateralIdResult);
     }
 
     private void validateIfValuesAreNotOverridden(Integer loanID, Integer loanProductID) {

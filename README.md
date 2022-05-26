@@ -20,18 +20,18 @@ If you are interested in contributing to this project, but perhaps don't quite k
 
 Requirements
 ============
-* Java >= 11 (OpenJDK JVM is tested by our CI on Travis)
-* MySQL 5.7
+* Java >= 17 (OpenJDK JVM is tested by our CI on Travis)
+* MariaDB 10.6
 
 You can run the required version of the database server in a container, instead of having to install it, like this:
 
-    docker run --name mysql-5.7 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mysql -d mysql:5.7
+    docker run --name mariadb-10.8 -p 3306:3306 -e MARIADB_ROOT_PASSWORD=mysql -d mariadb:10.8
 
 and stop and destroy it like this:
 
-    docker rm -f mysql-5.7
+    docker rm -f mariadb-10.8
 
-Beware that this database container database keeps its state inside the container and not on the host filesystem.  It is lost when you destroy (rm) this container.  This is typically fine for development.  See [Caveats: Where to Store Data on the database container documentation](https://hub.docker.com/_/mysql) re. how to make it persistent instead of ephemeral.
+Beware that this database container database keeps its state inside the container and not on the host filesystem.  It is lost when you destroy (rm) this container.  This is typically fine for development.  See [Caveats: Where to Store Data on the database container documentation](https://hub.docker.com/_/mariadb) re. how to make it persistent instead of ephemeral.
 
 Tomcat v9 is only required if you wish to deploy the Fineract WAR to a separate external servlet container.  Note that you do not require to install Tomcat to develop Fineract, or to run it in production if you use the self-contained JAR, which transparently embeds a servlet container using Spring Boot.  (Until FINERACT-730, Tomcat 7/8 were also supported, but now Tomcat 9 is required.)
 
@@ -48,20 +48,67 @@ Run the following commands:
 Instructions to build the JAR file
 ============
 1. Clone the repository or download and extract the archive file to your local directory.
-2. Run `./gradlew clean bootJar` to build a modern cloud native fully self contained JAR file which will be created at `build/libs` directory.
-3. Start it using `java -jar build/libs/fineract-provider.jar` (does not require external Tomcat)
+2. Run `./gradlew clean bootJar` to build a modern cloud native fully self contained JAR file which will be created at `fineract-provider/build/libs` directory.
+3. As we are not allowed to include a JDBC driver in the built JAR, download a JDBC driver of your choice. For example: `wget https://downloads.mariadb.com/Connectors/java/connector-java-2.7.5/mariadb-java-client-2.7.5.jar`
+4. Start the jar and pass the directory where you have downloaded the JDBC driver as loader.path, for example: `java -Dloader.path=. -jar fineract-provider/build/libs/fineract-provider.jar` (does not require external Tomcat)
+
+NOTE: we cannot upgrade to version 3.0.x of the MariaDB driver just yet; have to wait until 3.0.4 is out for a bug fix.
 
 The tenants database connection details are configured [via environment variables (as with Docker container)](#instructions-to-run-using-docker-and-docker-compose), e.g. like this:
 
-    export fineract_tenants_pwd=verysecret
+    export FINERACT_HIKARI_PASSWORD=verysecret
     ...
     java -jar fineract-provider.jar
+
+
+Security
+============
+NOTE: The HTTP Basic and OAuth2 authentication schemes are mutually exclusive. You can't enable them both at the same time. Fineract checks these settings on startup and will fail if more than one authentication scheme is enabled.
+
+HTTP Basic Authentication
+------------
+By default Fineract is configured with a HTTP Basic Authentication scheme, so you actually don't have to do anything if you want to use it. But if you would like to explicitly choose this authentication scheme then there are two ways to enable it:
+1. Use environment variables (best choice if you run with Docker Compose):
+```
+FINERACT_SECURITY_BASICAUTH_ENABLED=true
+FINERACT_SECURITY_OAUTH_ENABLED=false
+```
+2. Use JVM parameters (best choice if you run the Spring Boot JAR):
+```
+java -Dfineract.security.basicauth.enabled=true -Dfineract.security.oauth.enabled=false -jar fineract-provider.jar
+```
+
+OAuth2 Authentication
+------------
+There is also an OAuth2 authentication scheme available. Again, two ways to enable it:
+1. Use environment variables (best choice if you run with Docker Compose):
+```
+FINERACT_SECURITY_BASICAUTH_ENABLED=false
+FINERACT_SECURITY_OAUTH_ENABLED=true
+```
+2. Use JVM parameters (best choice if you run the Spring Boot JAR):
+```
+java -Dfineract.security.basicauth.enabled=false -Dfineract.security.oauth.enabled=true -jar fineract-provider.jar
+```
+
+Two Factor Authentication
+------------
+You can also enable 2FA authentication. Depending on how you start Fineract add the following:
+
+1. Use environment variable (best choice if you run with Docker Compose):
+```
+FINERACT_SECURITY_2FA_ENABLED=true
+```
+2. Use JVM parameter (best choice if you run the Spring Boot JAR):
+```
+-Dfineract.security.2fa.enabled=true
+```
 
 
 Instructions to build a WAR file
 ============
 1. Clone the repository or download and extract the archive file to your local directory.
-2. Run `./gradlew clean war` to build a traditional WAR file which will be created at `build/libs` directory.
+2. Run `./gradlew :fineract-war:clean :fineract-war:war` to build a traditional WAR file which will be created at `fineract-war/build/libs` directory.
 3. Deploy this WAR to your Tomcat v9 Servlet Container.
 
 We recommend using the JAR instead of the WAR file deployment, because it's much easier.
@@ -117,15 +164,13 @@ Now to run a new Fineract instance you can simply:
 
 1. `git clone https://github.com/apache/fineract.git ; cd fineract`
 1. for windows, use `git clone https://github.com/apache/fineract.git --config core.autocrlf=input ; cd fineract`
-1. `docker-compose build`
+1. `./gradlew :fineract-provider:jibDockerBuild -x test`
 1. `docker-compose up -d`
 1. fineract (back-end) is running at https://localhost:8443/fineract-provider/
 1. wait for https://localhost:8443/fineract-provider/actuator/health to return `{"status":"UP"}`
 1. you must go to https://localhost:8443 and remember to accept the self-signed SSL certificate of the API once in your browser, otherwise  you get a message that is rather misleading from the UI.
 1. community-app (UI) is running at http://localhost:9090/?baseApiUrl=https://localhost:8443/fineract-provider&tenantIdentifier=default
 1. login using default _username_ `mifos` and _password_ `password`
-
-The [`docker-compose.yml`](docker-compose.yml) will build the `fineract` container from the source based on the [`Dockerfile`](Dockerfile).  You could change that to use the pre-built container image instead of having to re-build it.
 
 https://hub.docker.com/r/apache/fineract has a pre-built container image of this project, built continuously.
 
@@ -134,6 +179,28 @@ variables; please consult the [`docker-compose.yml`](docker-compose.yml) for exa
 _(Note that in previous versions, the `mysqlserver` environment variable used at `docker build` time instead of at
 `docker run` time did something similar; this has changed in [FINERACT-773](https://issues.apache.org/jira/browse/FINERACT-773)),
 and the `mysqlserver` environment variable is now no longer supported.)_
+
+
+Connection pool configuration
+=============================
+
+Please check `application.properties` to see which connection pool settings can be tweaked. The associated environment variables are prefixed with `FINERACT_HIKARI_*`. You can find more information about specific connection pool settings (Hikari) at https://github.com/brettwooldridge/HikariCP#configuration-knobs-baby
+
+NOTE: we'll keep backwards compatibility until one of the next releases to ensure that things are working as expected. Environment variables prefixed `fineract_tenants_*` can still be used to configure the database connection, but we strongly encourage using `FINERACT_HIKARI_*` with more options.
+
+SSL configuration
+=================
+
+Read also [the HTTPS related doc](fineract-doc/src/docs/en/deployment.adoc#https).
+
+By default SSL is enabled, but all SSL related properties are now tunable. SSL can be turned off by setting the environment variable `FINERACT_SERVER_SSL_ENABLED` to false. If you do that then please make sure to also change the server port to `8080` via the variable `FINERACT_SERVER_PORT`, just for the sake of keeping the conventions.
+You can choose now easily a different SSL keystore by setting `FINERACT_SERVER_SSL_KEY_STORE` with a path to a different (not embedded) keystore. The password can be set via `FINERACT_SERVER_SSL_KEY_STORE_PASSWORD`. See the `application.properties` file and the latest Spring Boot documentation (https://docs.spring.io/spring-boot/docs/current/reference/html/application-properties.html) for more details.
+
+
+Tomcat configuration
+====================
+
+Please refer to the `application.properties` and the official Spring Boot documentation (https://docs.spring.io/spring-boot/docs/current/reference/html/application-properties.html) on how to do performance tuning for Tomcat. Note: you can set now the acceptable form POST size (default is 2MB) via environment variable `FINERACT_SERVER_TOMCAT_MAX_HTTP_FORM_POST_SIZE`.
 
 
 Instructions to run on Kubernetes
@@ -259,11 +326,11 @@ License
 This project is licensed under Apache License Version 2.0. See <https://github.com/apache/incubator-fineract/blob/develop/LICENSE.md> for reference.
 
 The Connector/J JDBC Driver client library from MariaDB.org, which is licensed under the LGPL,
-is used in development when running integration tests that use the Flyway library.  That JDBC
+is used in development when running integration tests that use the Liquibase library.  That JDBC
 driver is however not included in and distributed with the Fineract product and is not
 required to use the product.
 If you are developer and object to using the LGPL licensed Connector/J JDBC driver,
-simply do not run the integration tests that use the Flyway library.
+simply do not run the integration tests that use the Liquibase library and/or use another JDBC driver.
 As discussed in [LEGAL-462](https://issues.apache.org/jira/browse/LEGAL-462), this project therefore
 complies with the [Apache Software Foundation third-party license policy](https://www.apache.org/legal/resolved.html).
 
@@ -271,7 +338,7 @@ complies with the [Apache Software Foundation third-party license policy](https:
 Apache Fineract Platform API
 ============
 
-The API for Fineract is documented in [apiLive.htm](fineract-provider/src/main/resources/static/api-docs/apiLive.htm), and the [apiLive.htm can be viewed on Fineract.dev](https://demo.fineract.dev/fineract-provider/api-docs/apiLive.htm "API Documentation").  If you have your own Fineract instance running, you can find this documentation under [/fineract-provider/api-docs/apiLive.htm](https://localhost:8443/fineract-provider/api-docs/apiLive.htm).
+The API for Fineract is documented in [apiLive.htm](fineract-provider/src/main/resources/static/api-docs/apiLive.htm), and the [apiLive.htm can be viewed on Fineract.dev](https://fineract.apache.org/legacy-docs/apiLive.htm "API Documentation").  If you have your own Fineract instance running, you can find this documentation under [/fineract-provider/api-docs/apiLive.htm](https://localhost:8443/fineract-provider/api-docs/apiLive.htm).
 
 The Swagger documentation (work in progress; see [FINERACT-733](https://issues.apache.org/jira/browse/FINERACT-733)) can be accessed under [/fineract-provider/swagger-ui/index.html](https://localhost:8443/fineract-provider/swagger-ui/index.html) and [live Swagger UI here on Fineract.dev](https://demo.fineract.dev/fineract-provider/swagger-ui/index.html).
 
@@ -389,59 +456,6 @@ Upgrades sometimes require package name changes.  Changed code should ideally ha
 
 Our `ClasspathHellDuplicatesCheckRuleTest` detects classes that appear in more than 1 JAR.  If a version bump in [`build.gradle`](https://github.com/search?q=repo%3Aapache%2Ffineract+filename%3Abuild.gradle&type=Code&ref=advsearch&l=&l=) causes changes in transitives dependencies, then you may have to add related `exclude` to our [`dependencies.gradle`](https://github.com/apache/fineract/search?q=dependencies.gradle).  Running `./gradlew dependencies` helps to understand what is required.
 
-
-Releasing
----------
-
-[How to Release Apache Fineract](https://cwiki.apache.org/confluence/x/DRwIB) documents the process how we make the source code that is available here in this Git repository into a binary release tar.gz available on http://fineract.apache.org.
-
-Before you use Gradle to create a release you need to make sure that you provide the proper GPG parameters. You have to options:
-
-1. Provide the parameters via ~/gradle/gradle.properties in your home folder:
-```
-signing.gnupg.keyName=7890ABCD
-signing.gnupg.passphrase=secret
-```
-
-IMPORTANT: Do not set your GPG secrets in one of the project gradle.properties and double check that you are not accidentally committing them to Git.
-
-The release command would look then look like this:
-```
-./gradlew -Pfineract.release clean build
-```
-
-2. Another way to provide these parameters are via project parameters on the command line. A release command would then look like this:
-```
-./gradlew -Pfineract.release -Psigning.gnupg.keyName=7890ABCD -Psigning.gnupg.passphrase=secret clean build
-```
-
-NOTE: Let's assume your GPG key ID would be "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCD" then you have to use the last 8 characters (i. e. "7890ABCD") for the signing plugin property "signing.gnupg.keyName".
-
-Above tasks will create the following files in folder build/distributions:
-
-- binary distribution file: apache-fineract-1.4.0-binary.tar.gz
-- ASCII armored signature for binary distribution: apache-fineract-1.4.0-binary.tar.gz.asc
-- SHA512 checksum for binary distribution: apache-fineract-1.4.0-binary.tar.gz.sha512
-- source distribution file: apache-fineract-1.4.0-src.tar.gz
-- ASCII armored signature for source distribution: apache-fineract-1.4.0-src.tar.gz.asc
-- SHA512 checksum for source distribution: apache-fineract-1.4.0-src.tar.gz.sha512
-
-The signatures are automatically verified by the build script. It will throw an exception if the verification fails.
-
-Additionally, you can verify the validity of the release distribution files e. g. with:
-```
-gpg --verify build/distributions/apache-fineract-1.4.0-binary.tar.gz.asc
-```
-
-The output should look somewhat like this:
-```
-gpg: assuming signed data in 'build/distributions/apache-fineract-1.4.0-binary.tgz'
-gpg: Signature made Mi 26 Aug 2020 17:17:45 CEST
-gpg:                using RSA key ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCD
-gpg: Good signature from "Aleksandar Vidakovic (Apache Fineract Release Manager) <aleks@apache.org>" [ultimate]
-```
-
-NOTE: All commands shown above are assuming that the current working directory is the project root folder.
 
 More Information
 ============

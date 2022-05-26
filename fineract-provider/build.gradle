@@ -20,10 +20,8 @@ description = 'Fineract Provider'
 
 apply plugin: 'org.zeroturnaround.gradle.jrebel'
 apply plugin: 'java'
-apply plugin: 'war'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
-apply plugin: 'openjpa'
 apply plugin: 'com.gorylenko.gradle-git-properties'
 apply plugin: 'io.swagger.core.v3.swagger-gradle-plugin'
 apply plugin: 'distribution'
@@ -37,18 +35,25 @@ repositories {
         url "https://public.nexus.pentaho.org/repository/omni/"
     }
 }
+apply plugin: 'com.google.cloud.tools.jib'
 
-// Configuration for the OpenJPA enhance task
-// https://github.com/radcortez/openjpa-gradle-plugin
-System.setProperty("openjpa.Log", "commons")
 
-openjpa {
-    includes = [
-        '**/AbstractPersistableCustom.class',
-        '**/domain/*.class'
-    ]
-    enhance {
-        enforcePropertyRestrictions true
+compileJava.doLast {
+    def mainSS = sourceSets.main
+    def source = mainSS.java.classesDirectory.get()
+    copy {
+        from file("src/main/resources/jpa/persistence.xml")
+        into "${source}/META-INF/"
+    }
+    javaexec {
+        description = 'Performs EclipseLink static weaving of entity classes'
+        def target = source
+        main 'org.eclipse.persistence.tools.weaving.jpa.StaticWeave'
+        args '-persistenceinfo', source, '-classpath', configurations.runtimeClasspath, source, target
+        classpath configurations.runtimeClasspath
+    }
+    delete {
+        delete "${source}/META-INF/persistence.xml"
     }
 }
 
@@ -56,36 +61,30 @@ openjpa {
 // https://github.com/swagger-api/swagger-core/tree/master/modules/swagger-gradle-plugin
 import org.apache.tools.ant.filters.ReplaceTokens
 
-task prepareInputYaml(dependsOn: 'generateGitProperties') {
+task prepareInputYaml {
+    outputs.file("${buildDir}/tmp/swagger/fineract-input.yaml")
+
     doLast {
-        def versionForSwagger
-
-        if(project.ext.properties.containsKey("gitProps"))
-            versionForSwagger = project.ext.gitProps['git.commit.id.describe']
-        else
-            versionForSwagger = "unknown"
-
         copy {
-            from file('config/swagger/fineract-input.yaml.template')
-            into file('config/swagger')
+            from file("${projectDir}/config/swagger/fineract-input.yaml.template")
+            into file("${buildDir}/tmp/swagger")
             rename { String filename -> return 'fineract-input.yaml' }
-            filter(ReplaceTokens, tokens: [VERSION: versionForSwagger])
+            filter(ReplaceTokens, tokens: [VERSION: "${project.version}".toString()])
         }
     }
 }
 
-
 resolve {
-    logging.captureStandardOutput LogLevel.INFO
+    logging.captureStandardOutput LogLevel.QUIET
     outputFileName = 'fineract'
-    outputFormat = 'YAML'
-    prettyPrint = 'TRUE'
+    outputFormat = 'JSONANDYAML'
+    prettyPrint = false
     classpath = sourceSets.main.runtimeClasspath
-    outputDir = file("${buildDir}/classes/java/main/static/swagger-ui")
-    openApiFile = file("config/swagger/fineract-input.yaml")
+    outputDir = file("${buildDir}/classes/java/main/static")
+    openApiFile = file("${buildDir}/tmp/swagger/fineract-input.yaml")
+    sortOutput = true
+    dependsOn(prepareInputYaml)
 }
-
-resolve.dependsOn prepareInputYaml
 
 configurations {
     providedRuntime // needed for Spring Boot executable WAR
@@ -109,82 +108,15 @@ configurations {
 }
 
 apply from: 'dependencies.gradle'
-/* TODO https://issues.apache.org/jira/browse/FINERACT-939 (dev-dependencies.gradle has been removed, as totally broken)
- // Pick up dependencies based on the environment, defaults to production
- if (project.hasProperty('env') && project.getProperty('env') == 'dev') {
- apply from:  'dev-dependencies.gradle'
- }  else {
- apply from: 'dependencies.gradle'
- }
- */
-
-/* Enable Oauth2 authentication based on environment, default to HTTP basic auth */
-if (project.hasProperty('security') && project.getProperty('security') == 'oauth') {
-    if(project.hasProperty('twofactor') && project.getProperty('twofactor') == 'enabled') {
-        copy {
-            from './properties/oauth/twofactor/'
-            into 'src/main/resources/'
-            include '*.properties'
-        }
-    } else {
-        copy {
-            from './properties/oauth/'
-            into 'src/main/resources/'
-            include '*.properties'
-        }
-    }
-}  else {
-    if(project.hasProperty('twofactor') && project.getProperty('twofactor') == 'enabled') {
-        copy {
-            from './properties/basicauth/twofactor/'
-            into 'src/main/resources/'
-            include '*.properties'
-        }
-    } else {
-        copy {
-            from './properties/basicauth/'
-            into 'src/main/resources/'
-            include '*.properties'
-        }
-    }
-}
 
 // Configuration for the modernizer plugin
 // https://github.com/andygoossens/gradle-modernizer-plugin
 modernizer {
     ignoreClassNamePatterns = [
         '.*AbstractPersistableCustom',
-        '.*EntityTables'
+        '.*EntityTables',
+        '.*domain.*'
     ]
-}
-
-compileJava {
-    dependsOn rat
-    finalizedBy resolve
-}
-
-war {
-    from("$rootDir/licenses/") {
-        // notice the parens
-        into "WEB-INF/licenses/" // no leading slash
-    }
-    from("$rootDir/LICENSE_RELEASE") {
-        // notice the parens
-        into "WEB-INF/" // no leading slash
-    }
-    from("$rootDir/NOTICE_RELEASE") {
-        // notice the parens
-        into "WEB-INF/" // no leading slash
-    }
-    rename ('LICENSE_RELEASE', 'LICENSE')
-    rename ('NOTICE_RELEASE', 'NOTICE')
-
-    from("$rootDir/DISCLAIMER") {
-        // notice the parens
-        into "WEB-INF/" // no leading slash
-    }
-    enabled = true
-    classifier = ''
 }
 
 // If we are running Gradle within Eclipse to enhance classes with OpenJPA,
@@ -205,15 +137,8 @@ eclipse
 sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir
 sourceSets.test.output.resourcesDir = sourceSets.test.java.outputDir
 
-/* Exclude maria db related files for non dev builds */
 if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
     sourceSets {
-        main {
-            java {
-                exclude '**/ServerWithMariaDB*'
-                exclude '**/MariaDB4j*'
-            }
-        }
         test {
             java {
                 exclude '**/core/boot/tests/**'
@@ -228,12 +153,16 @@ import groovy.sql.Sql
 
 project.ext.mysqlUser='root'
 project.ext.mysqlPassword='mysql'
+project.ext.pgUser='root'
+project.ext.pgPassword='postgres'
 
 configurations {
     driver
 }
 dependencies {
-    driver 'mysql:mysql-connector-java:8.0.23'
+    driver 'org.mariadb.jdbc:mariadb-java-client:2.7.5'
+    driver 'org.postgresql:postgresql:42.3.5'
+    driver 'mysql:mysql-connector-java:8.0.29'
 }
 
 URLClassLoader loader = GroovyObject.class.classLoader
@@ -242,7 +171,7 @@ configurations.driver.each {File file ->
 }
 
 task createDB {
-    description= "Creates the Database. Needs database name to be passed (like: -PdbName=someDBname)"
+    description= "Creates the MariaDB Database. Needs database name to be passed (like: -PdbName=someDBname)"
     doLast {
         def sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.cj.jdbc.Driver' )
         sql.execute( 'create database '+"`$dbName`" )
@@ -250,12 +179,45 @@ task createDB {
 }
 
 task dropDB {
-    description= "Drops the specified database. The database name has to be passed (like: -PdbName=someDBname)"
+    description= "Drops the specified MariaDB database. The database name has to be passed (like: -PdbName=someDBname)"
     doLast {
         def sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.cj.jdbc.Driver' )
         sql.execute( 'DROP DATABASE '+"`$dbName`")
     }
 }
+
+task createPGDB {
+    description= "Creates the PostgreSQL Database. Needs database name to be passed (like: -PdbName=someDBname)"
+    doLast {
+        def sql = Sql.newInstance( 'jdbc:postgresql://localhost:5432/', pgUser, pgPassword, 'org.postgresql.Driver' )
+        sql.execute( 'create database '+"$dbName" )
+    }
+}
+
+task dropPGDB {
+    description= "Drops the specified PostgreSQL database. The database name has to be passed (like: -PdbName=someDBname)"
+    doLast {
+        def sql = Sql.newInstance( 'jdbc:postgresql://localhost:5432/', pgUser, pgPassword, 'org.postgresql.Driver' )
+        sql.execute( 'DROP DATABASE '+ "$dbName")
+    }
+}
+
+task createMySQLDB {
+    description= "Creates the MySQL Database. Needs database name to be passed (like: -PdbName=someDBname)"
+    doLast {
+        def sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.cj.jdbc.Driver' )
+        sql.execute( 'create database '+"`$dbName`" )
+    }
+}
+
+task dropMySQLDB {
+    description= "Drops the specified MySQL database. The database name has to be passed (like: -PdbName=someDBname)"
+    doLast {
+        def sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.cj.jdbc.Driver' )
+        sql.execute( 'DROP DATABASE '+"`$dbName`")
+    }
+}
+
 task setBlankPassword {
     doLast {
         def sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.cj.jdbc.Driver' )
@@ -268,6 +230,37 @@ bootRun {
     jvmArgs = [
         "-Dspring.output.ansi.enabled=ALWAYS"
     ]
+
+    dependencies {
+        implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.5'
+        implementation 'org.postgresql:postgresql:42.3.5'
+        implementation 'mysql:mysql-connector-java:8.0.29'
+
+        implementation 'org.apache.poi:poi:4.1.2'
+        implementation 'org.apache.poi:poi-ooxml:4.1.2'
+        implementation 'org.apache.poi:poi-ooxml-schemas:4.1.2'
+
+        //Pentaho
+        implementation 'org.pentaho.reporting.engine:classic-core:9.1.0.0-SNAPSHOT'
+        implementation 'org.pentaho.reporting.engine:classic-extensions:9.1.0.0-SNAPSHOT'
+        implementation 'org.pentaho.reporting.engine:classic-extensions-scripting:9.1.0.0-SNAPSHOT'
+        implementation 'org.pentaho.reporting.engine:wizard-core:9.1.0.0-SNAPSHOT'
+        implementation 'org.pentaho.reporting.designer:wizard-xul:9.1.0.0-SNAPSHOT'
+        implementation 'org.pentaho.reporting.library:libbase:9.1.0.0-SNAPSHOT'
+        implementation 'org.pentaho.reporting.library:libdocbundle:9.1.0.0-SNAPSHOT'
+        implementation 'org.pentaho.reporting.library:libfonts:9.1.0.0-SNAPSHOT'
+        implementation 'org.pentaho.reporting.library:libformat:9.1.0.0-SNAPSHOT'
+        implementation 'org.pentaho.reporting.library:libformula:9.1.0.0-SNAPSHOT'
+        implementation 'org.pentaho.reporting.library:libloader:9.1.0.0-SNAPSHOT'
+        implementation 'org.pentaho.reporting.library:librepository:9.1.0.0-SNAPSHOT'
+        implementation 'org.pentaho.reporting.library:libserializer:9.1.0.0-SNAPSHOT'
+        implementation 'org.pentaho.reporting.library:libsparkline:9.1.0.0-SNAPSHOT'
+        implementation 'org.pentaho.reporting.library:libxml:9.1.0.0-SNAPSHOT'
+
+        //Fiter custom dependencies
+        implementation 'org.json:json:20171018'
+        implementation 'org.apache.pdfbox:pdfbox:2.0.20'
+    }
 }
 
 springBoot {
@@ -277,96 +270,78 @@ springBoot {
 bootJar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
-        attributes 'Main-Class': 'org.springframework.boot.loader.PropertiesLauncher'
+        attributes('Main-Class': 'org.springframework.boot.loader.PropertiesLauncher', 'Implementation-Title': 'Apache Fineract', 'Implementation-Version': project.version)
     }
-    dependsOn resolve
     classifier = ''
+    dependsOn resolve
 }
 
-bootWar {
-    enabled = true
-}
-
-tasks.withType(Tar) {
-    compression Compression.GZIP
-    extension 'tar.gz'
-}
-
-distributions {
-    binary {
-        if(project.hasProperty("distVersion")) {
-            distributionBaseName = "apache-fineract-$distVersion-binary"
-        } else {
-            distributionBaseName = "apache-fineract-binary"
-        }
-        contents {
-            from bootJar
-            from war
-            // TODO: @vidakovic add client library
-            from("$rootDir/licenses/") {
-                into "licenses/"
-            }
-            from "$rootDir/LICENSE_RELEASE"
-            from "$rootDir/NOTICE_RELEASE"
-            rename ('LICENSE_RELEASE', 'LICENSE')
-            rename ('NOTICE_RELEASE', 'NOTICE')
-
-            from "$rootDir/DISCLAIMER"
-            from "$rootDir/README.md"
-        }
+jib {
+    from {
+        image = 'azul/zulu-openjdk-alpine:17'
     }
-    src {
-        if(project.hasProperty("distVersion")) {
-            distributionBaseName = "apache-fineract-$distVersion-src"
-        } else {
-            distributionBaseName = "apache-fineract-src"
-        }
 
-        contents {
-            from "$rootDir/"
-            exclude '**/build' , '.git', '**/.gradle', '.github', '**/.settings', '**/.project', '**/.classpath', '.idea', 'out', '._.DS_Store', '.DS_Store', 'WebContent', '**/.externalToolbuilders', '.theia', '.gitpod.yml', '.travis.yml', 'LICENSE_RELEASE', 'NOTICE_RELEASE', '**/licenses', '*.class', '**/bin', '*.log', '.dockerignore', '**/gradle', '**/.gitkeep'
-            rename ('LICENSE_SOURCE', 'LICENSE')
-            rename ('NOTICE_SOURCE', 'NOTICE')
-        }
+    to {
+        image = 'fineract'
+        tags = [
+            "${project.version}",
+            'latest'
+        ]
     }
-}
 
-tasks.binaryDistZip.enabled false
-tasks.srcDistZip.enabled false
-tasks.binaryDistTar.dependsOn bootJar
+    container {
+        creationTime = 'USE_CURRENT_TIMESTAMP'
+        mainClass = 'org.apache.fineract.ServerApplication'
+        jvmFlags = [
+            '-Xmx1G',
+            '-Xms1G',
+            '-XshowSettings:vm',
+            '-XX:+UseContainerSupport',
+            '-XX:+UseStringDeduplication',
+            '-XX:MinRAMPercentage=25',
+            '-XX:MaxRAMPercentage=80',
+            '--add-exports=java.naming/com.sun.jndi.ldap=ALL-UNNAMED',
+            '--add-opens=java.base/java.lang=ALL-UNNAMED',
+            '--add-opens=java.base/java.lang.invoke=ALL-UNNAMED',
+            '--add-opens=java.base/java.io=ALL-UNNAMED',
+            '--add-opens=java.base/java.security=ALL-UNNAMED',
+            '--add-opens=java.base/java.util=ALL-UNNAMED',
+            '--add-opens=java.management/javax.management=ALL-UNNAMED',
+            '--add-opens=java.naming/javax.naming=ALL-UNNAMED'
+        ]
+        args = [
+            '-Duser.home=/tmp',
+            '-Dfile.encoding=UTF-8',
+            '-Duser.timezone=UTC',
+            '-Djava.security.egd=file:/dev/./urandom'
+        ]
+        ports = ['8080/tcp', '8443/tcp']
+        labels = [maintainer: 'Aleksandar Vidakovic <aleks@apache.org>']
+        user = 'nobody:nogroup'
+    }
 
-// create signatures and checksums only if project parameter "fineract.release" is provided on the command line
-if( project.hasProperty("fineract.release") ) {
-    signing {
-        useGpgCmd()
-        sign (binaryDistTar, srcDistTar)
+    allowInsecureRegistries = true
+
+    dependencies {
+        implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.5'
+        implementation 'org.postgresql:postgresql:42.3.5'
     }
-    tasks.withType(Tar) { task ->
-        task.doLast {
-            ant.checksum file: task.archivePath, algorithm: 'SHA-512', fileext: '.sha512'
-        }
-    }
-    tasks.withType(Sign) { task ->
-        task.doLast {
-            task.getFilesToSign().each { f ->
-                new ByteArrayOutputStream().withStream { os ->
-                    def result = exec {
-                        workingDir "$buildDir/distributions"
-                        executable 'sh'
-                        args '-c', "gpg --verify ${f}.asc"
-                        standardOutput = os
-                    }
-                    if(result.exitValue==0) {
-                        println '+++ GPG signature correct!'
-                    } else {
-                        println '--- GPG signature incorrect!'
-                        throw new RuntimeException('--- GPG signature incorrect!')
+
+    pluginExtensions {
+        pluginExtension {
+            implementation = 'com.google.cloud.tools.jib.gradle.extension.layerfilter.JibLayerFilterExtension'
+            configuration {
+                filters {
+                    filter {
+                        glob = '/app/resources/**'
                     }
                 }
             }
         }
     }
 }
+
+tasks.jibDockerBuild.dependsOn(bootJar)
 
 // Configuration for git properties gradle plugin
 // https://github.com/n0mer/gradle-git-properties
@@ -375,17 +350,17 @@ gitProperties {
     dateFormat = "yyyy-MM-dd'T'HH:mmZ"
     dateFormatTimeZone = "GMT"
     failOnNoGitDirectory = false
-    extProperty = 'gitProps'
 }
 
 // make sure the generateGitProperties task always executes (even when git.properties is not changed)
 generateGitProperties.outputs.upToDateWhen { false }
 
-// Gradle 7.x asks for explicit dependencies between tasks
-processResources.dependsOn generateGitProperties
+// NOTE: Gradle suggested these dependencies
+jar.dependsOn resolve
+test.dependsOn resolve
 checkstyleMain.dependsOn resolve
 checkstyleTest.dependsOn resolve
-licenseMain.dependsOn processResources, generateGitProperties
-war.dependsOn resolve
+rat.dependsOn prepareInputYaml
 spotbugsTest.dependsOn resolve
-test.dependsOn resolve
+compileTestJava.dependsOn ':fineract-client:processResources'
+bootJarMainClassName.dependsOn resolve

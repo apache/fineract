@@ -23,7 +23,6 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.productmix.data.ProductMixData;
@@ -44,10 +43,10 @@ public class ProductMixReadPlatformServiceImpl implements ProductMixReadPlatform
     private final LoanProductReadPlatformService loanProductReadPlatformService;
 
     @Autowired
-    public ProductMixReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
+    public ProductMixReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             final LoanProductReadPlatformService loanProductReadPlatformService) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.loanProductReadPlatformService = loanProductReadPlatformService;
     }
 
@@ -61,7 +60,7 @@ public class ProductMixReadPlatformServiceImpl implements ProductMixReadPlatform
 
             final String sql = "Select " + extractor.schema() + " where pm.product_id=? group by pm.product_id";
 
-            final Map<Long, ProductMixData> productMixData = this.jdbcTemplate.query(sql, extractor, new Object[] { productId });
+            final Map<Long, ProductMixData> productMixData = this.jdbcTemplate.query(sql, extractor, new Object[] { productId }); // NOSONAR
 
             return productMixData.get(productId);
 
@@ -79,7 +78,7 @@ public class ProductMixReadPlatformServiceImpl implements ProductMixReadPlatform
 
         final String sql = "Select " + extractor.schema() + " group by pm.product_id";
 
-        final Map<Long, ProductMixData> productMixData = this.jdbcTemplate.query(sql, extractor, new Object[] {});
+        final Map<Long, ProductMixData> productMixData = this.jdbcTemplate.query(sql, extractor); // NOSONAR
 
         return productMixData.values();
     }

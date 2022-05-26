@@ -37,13 +37,13 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.batch.serialization.BatchRequestJsonHelper;
 import org.apache.fineract.batch.service.BatchApiService;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -70,30 +70,13 @@ import org.springframework.stereotype.Component;
         + "Batch API uses Json Path to handle dependent parameters. For example, if request '2' is referencing request '1' and in the \"body\" or in \"relativeUrl\" of request '2', there is a dependent parameter (which will look like \"$.parameter_name\"), then Batch API will internally substitute this dependent parameter from the response body of request '1'.\n"
         + "\n"
         + "Batch API is able to handle deeply nested dependent requests as well nested parameters. As shown in the example, requests are dependent on each other as, 1<--2<--6, i.e a nested dependency, where request '6' is not directly dependent on request '1' but still it is one of the nested child of request '1'. In the same way Batch API could handle a deeply nested dependent value, such as {..[..{..,$.parameter_name,..}..]}.")
+@RequiredArgsConstructor
 public class BatchApiResource {
 
     private final PlatformSecurityContext context;
     private final ToApiJsonSerializer<BatchResponse> toApiJsonSerializer;
     private final BatchApiService service;
     private final BatchRequestJsonHelper batchRequestJsonHelper;
-
-    /**
-     * Constructs a 'BatchApiService' with context, toApiJsonSerializer, service and batchRequestJsonHelper.
-     *
-     * @param context
-     * @param toApiJsonSerializer
-     * @param service
-     * @param batchRequestJsonHelper
-     */
-    @Autowired
-    public BatchApiResource(final PlatformSecurityContext context, final ToApiJsonSerializer<BatchResponse> toApiJsonSerializer,
-            final BatchApiService service, final BatchRequestJsonHelper batchRequestJsonHelper) {
-
-        this.context = context;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.service = service;
-        this.batchRequestJsonHelper = batchRequestJsonHelper;
-    }
 
     /**
      * Rest assured POST method to get {@link BatchRequest} and returns back the consolidated {@link BatchResponse}

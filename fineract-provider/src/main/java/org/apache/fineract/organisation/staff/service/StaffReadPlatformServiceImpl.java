@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.infrastructure.security.utils.SQLBuilder;
@@ -52,10 +51,10 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
     private final ColumnValidator columnValidator;
 
     @Autowired
-    public StaffReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
+    public StaffReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             final ColumnValidator columnValidator) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.columnValidator = columnValidator;
     }
 
@@ -99,7 +98,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
             sqlBuilder.append("s.mobile_no as mobileNo, s.is_active as isActive, s.joining_date as joiningDate ");
             sqlBuilder.append("from m_office o ");
             sqlBuilder.append("join m_office ohierarchy on o.hierarchy like concat(ohierarchy.hierarchy, '%') ");
-            sqlBuilder.append("join m_staff s on s.office_id = ohierarchy.id and s.is_active=1 ");
+            sqlBuilder.append("join m_staff s on s.office_id = ohierarchy.id and s.is_active=true ");
 
             if (loanOfficersOnly) {
                 sqlBuilder.append("and s.is_loan_officer is true ");
@@ -161,7 +160,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
     public Collection<StaffData> retrieveAllLoanOfficersInOfficeById(final Long officeId) {
         SQLBuilder extraCriteria = new SQLBuilder();
         extraCriteria.addCriteria(" office_id = ", officeId);
-        extraCriteria.addCriteria(" is_loan_officer = ", 1);
+        extraCriteria.addCriteria(" is_loan_officer = ", true);
         return retrieveAllStaff(extraCriteria);
     }
 
@@ -175,9 +174,9 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
         final Long defaultOfficeId = defaultToUsersOfficeIfNull(officeId);
 
-        final String sql = "select " + this.lookupMapper.schema() + " where s.office_id = ? and s.is_active=1 and o.hierarchy like ? ";
+        final String sql = "select " + this.lookupMapper.schema() + " where s.office_id = ? and s.is_active=true and o.hierarchy like ? ";
 
-        return this.jdbcTemplate.query(sql, this.lookupMapper, new Object[] { defaultOfficeId, hierarchy });
+        return this.jdbcTemplate.query(sql, this.lookupMapper, new Object[] { defaultOfficeId, hierarchy }); // NOSONAR
     }
 
     private Long defaultToUsersOfficeIfNull(final Long officeId) {
@@ -200,7 +199,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
             final StaffMapper rm = new StaffMapper();
             final String sql = "select " + rm.schema() + " where s.id = ? and o.hierarchy like ? ";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { staffId, hierarchy });
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { staffId, hierarchy }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new StaffNotFoundException(staffId, e);
         }
@@ -226,7 +225,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
         sql += " " + extraCriteria.getSQLTemplate();
         sql = sql + " order by s.lastname ";
 
-        return this.jdbcTemplate.query(sql, rm, extraCriteria.getArguments());
+        return this.jdbcTemplate.query(sql, rm, extraCriteria.getArguments()); // NOSONAR
     }
 
     private SQLBuilder getStaffCriteria(final Long officeId, final boolean loanOfficersOnly, final String status) {
@@ -236,15 +235,15 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
         extraCriteria.addNonNullCriteria(" s.office_id = ", officeId);
 
         if (loanOfficersOnly) {
-            extraCriteria.addCriteria(" s.is_loan_officer is ", " true ");
+            extraCriteria.addCriteria(" s.is_loan_officer = ", true);
         }
         // Passing status parameter to get ACTIVE (By Default), INACTIVE or ALL
         // (Both active and Inactive) employees
         if (status != null) {
             if (status.equalsIgnoreCase("active")) {
-                extraCriteria.addCriteria(" s.is_active =", 1);
+                extraCriteria.addCriteria(" s.is_active =", true);
             } else if (status.equalsIgnoreCase("inActive")) {
-                extraCriteria.addCriteria(" s.is_active =", 0);
+                extraCriteria.addCriteria(" s.is_active =", false);
             } else {
                 if (!status.equalsIgnoreCase("all")) {
                     throw new UnrecognizedQueryParamException("status", status, new Object[] { "all", "active", "inactive" });
@@ -260,7 +259,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
         String sql = "select " + this.staffInOfficeHierarchyMapper.schema(loanOfficersOnly);
         sql = sql + " order by s.lastname";
-        return this.jdbcTemplate.query(sql, this.staffInOfficeHierarchyMapper, new Object[] { officeId });
+        return this.jdbcTemplate.query(sql, this.staffInOfficeHierarchyMapper, new Object[] { officeId }); // NOSONAR
     }
 
     @Override

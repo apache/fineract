@@ -133,6 +133,8 @@ public class ClientAddressApiResources {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
+        // TODO: This is quite a confusing implementation with all these checks
+        // These have to be considered as filtering criterias instead
         if (addressTypeId == 0 && status == null) {
             address = this.readPlatformService.retrieveAllClientAddress(clientid);
         } else if (addressTypeId != 0 && status == null) {

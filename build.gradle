@@ -21,7 +21,7 @@ buildscript {
     ext {
         jacocoVersion = '0.8.7'
         retrofitVersion = '2.9.0'
-        okhttpVersion = '4.9.2'
+        okhttpVersion = '4.9.3'
         oltuVersion = '1.0.1'
         fineractJavaProjects = subprojects.findAll{
             [
@@ -29,7 +29,11 @@ buildscript {
                 'fineract-provider',
                 'integration-tests',
                 'twofactor-tests',
-                'fineract-client'
+                'oauth2-tests',
+                'fineract-client',
+                'core',
+                'service',
+                'starter'
             ].contains(it.name)
         }
         fineractPublishProjects = subprojects.findAll{
@@ -37,50 +41,55 @@ buildscript {
                 'fineract-client'
             ].contains(it.name)
         }
+        npmRepository = 'https://npm.pkg.github.com'
     }
     repositories {
-        maven { url "https://plugins.gradle.org/m2/" }
+        maven { url 'https://plugins.gradle.org/m2/' }
     }
 
     dependencies {
-        classpath 'com.bmuschko:gradle-cargo-plugin:2.8.0'
-        classpath 'org.apache.openjpa:openjpa:3.2.0' // when upgrading, also change OpenJPA version repeated in fineract-provider/build.gradle!
-        classpath 'com.radcortez.gradle:openjpa-gradle-plugin:3.1.0'
-        classpath 'gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.7.5'
-        classpath 'gradle.plugin.com.github.andygoossens:gradle-modernizer-plugin:1.3.0'
+        classpath 'com.bmuschko:gradle-cargo-plugin:2.9.0'
+        classpath 'org.eclipse.persistence:eclipselink:2.7.10'
+        classpath 'jakarta.ws.rs:jakarta.ws.rs-api:2.1.6'
+        classpath 'com.google.cloud.tools:jib-layer-filter-extension-gradle:0.3.0'
     }
 }
 
 plugins {
-    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-    id "org.barfuin.gradle.taskinfo" version "1.3.1"
-    id 'com.adarshr.test-logger' version '3.1.0'
-    id 'com.diffplug.spotless' version '5.17.1' apply false
-    id 'org.nosphere.apache.rat' version '0.7.0' apply false
+    id "org.barfuin.gradle.taskinfo" version "1.4.0"
+    id 'com.adarshr.test-logger' version '3.2.0'
+    id 'com.diffplug.spotless' version '6.5.2' apply false
+    id 'org.nosphere.apache.rat' version '0.7.1' apply false
     id 'com.github.hierynomus.license' version '0.16.1' apply false
-    id 'com.github.jk1.dependency-license-report' version '2.0' apply false
-    id 'org.openapi.generator' version '4.3.1' apply false
+    id 'com.github.jk1.dependency-license-report' version '2.1' apply false
+    id 'org.openapi.generator' version '5.4.0' apply false
     id 'org.zeroturnaround.gradle.jrebel' version '1.1.11' apply false
-    id 'org.springframework.boot' version '2.6.0' apply false
+    id 'org.springframework.boot' version '2.6.7' apply false
     id 'net.ltgt.errorprone' version '2.0.2' apply false
-    id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.1.11' apply false
-    id 'com.gorylenko.gradle-git-properties' version '2.3.1' apply false
+    id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.0' apply false
+    id 'com.gorylenko.gradle-git-properties' version '2.4.1' apply false
     id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.pdf' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.epub' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.revealjs' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.gems' version '3.3.2' apply false
     id 'org.asciidoctor.kindlegen.base' version '3.2.0' apply false
-    id "org.sonarqube" version "3.3"
+    id 'com.google.cloud.tools.jib' version '3.2.1' apply false
+    id 'fr.brouillard.oss.gradle.jgitver' version '0.10.0-rc03'
+    id 'org.sonarqube' version '3.3'
+    id 'com.github.andygoossens.modernizer' version '1.6.2' apply false
+    id 'com.github.spotbugs' version '5.0.6' apply false
+    id 'se.thinkcode.cucumber-runner' version '0.0.11' apply false
 }
+
+apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.release.gradle"
 
 description = '''\
 Run as:
 gradle clean bootRun'''
 
-project.ext.jerseyVersion = '1.19.4'
-ext['groovy.version'] = '3.0.6'
-ext['swaggerFile'] = "$rootDir/fineract-provider/build/classes/java/main/static/swagger-ui/fineract.yaml".toString()
+ext['groovy.version'] = '3.0.10'
+ext['swaggerFile'] = "$rootDir/fineract-provider/build/classes/java/main/static/fineract.yaml".toString()
 def pentahoReportDir = System.properties['user.home'] + System.properties['file.separator'] + '.mifosx' + System.properties['file.separator'] + 'pentahoReports'
 copy {
     from "fineract-provider/pentahoReports"
@@ -90,11 +99,15 @@ copy {
 allprojects  {
     group = 'org.apache.fineract'
 
-    repositories {
-        jcenter()
+    jgitver {
+        strategy 'PATTERN'
+        versionPattern ( project.hasProperty('fineract.release.version') ? '${v}' : '${M}.${m}.${p}-${meta.GIT_SHA1_8}' )
     }
 
-    apply plugin: 'io.spring.dependency-management'
+    repositories {
+        mavenCentral()
+    }
+
     apply plugin: 'com.adarshr.test-logger'
     apply plugin: 'com.diffplug.spotless'
     apply plugin: 'com.github.hierynomus.license'
@@ -102,150 +115,15 @@ allprojects  {
     apply plugin: 'project-report'
     apply plugin: 'com.github.jk1.dependency-license-report'
 
-    // Configuration for the dependency management plugin
-    // https://github.com/spring-gradle-plugins/dependency-management-plugin
-    dependencyManagement {
-        imports {
-            mavenBom 'org.springframework:spring-framework-bom:5.3.12'
-            mavenBom 'org.springframework.boot:spring-boot-dependencies:2.6.0'
-            mavenBom 'org.junit:junit-bom:5.8.1'
-        }
 
-        dependencies {
-            // We use fixed versions, instead of inheriting them from the Spring BOM, to be able to be on more recent ones.
-            // We do not use :+ to get the latest available version available on Maven Central, as that could suddenly break things.
-            // We use the Renovate Bot to automatically propose Pull Requests (PRs) when upgrades for all of these versions are available.
-
-            dependency 'org.springframework.security.oauth:spring-security-oauth2:2.5.1.RELEASE'
-            dependency 'org.apache.openjpa:openjpa:3.2.0' // when upgrading, also change OpenJPA version repeated above in buildscript!
-            dependency 'com.google.guava:guava:31.0.1-jre'
-            dependency 'com.google.code.gson:gson:2.8.9'
-            dependency 'com.google.truth:truth:1.1.3'
-            dependency 'com.google.truth.extensions:truth-java8-extension:1.1.3'
-            dependency 'org.apache.commons:commons-email:1.5'
-            dependency 'commons-io:commons-io:2.11.0'
-            dependency 'com.github.librepdf:openpdf:1.3.26'
-            dependency 'org.mnode.ical4j:ical4j:3.1.1'
-            dependency 'org.quartz-scheduler:quartz:2.3.2'
-            dependency 'com.amazonaws:aws-java-sdk-s3:1.12.100'
-            dependency 'org.ehcache:ehcache:3.9.7'
-            dependency 'com.github.spullara.mustache.java:compiler:0.9.10'
-            dependency 'com.jayway.jsonpath:json-path:2.6.0'
-            dependency 'org.apache.tika:tika-core:2.1.0'
-            dependency 'org.apache.httpcomponents:httpclient:4.5.13'
-            dependency 'io.swagger.core.v3:swagger-annotations:2.1.11'
-            dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
-            dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
-            dependency 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
-            dependency 'org.glassfish.jaxb:jaxb-runtime:2.3.5'
-            dependency 'org.apache.activemq:activemq-broker:5.16.3'
-            dependency 'org.apache.bval:org.apache.bval.bundle:2.0.5'
-            dependency 'io.github.classgraph:classgraph:4.8.129'
-            dependency 'org.awaitility:awaitility:4.1.1'
-            dependency 'com.github.spotbugs:spotbugs-annotations:4.4.2'
-            dependency 'javax.cache:cache-api:1.1.1'
-            dependency 'org.mock-server:mockserver-junit-jupiter:5.11.2'
-            dependency 'org.webjars.npm:swagger-ui-dist:4.0.1'
-            dependency 'org.webjars:webjars-locator-core:0.48'
-            dependency 'org.springframework.boot:spring-boot-starter-mail:2.6.0'
-            dependency 'com.icegreen:greenmail-junit5:1.6.5'
-
-            // fineract client dependencies
-            dependency "com.squareup.retrofit2:retrofit:$retrofitVersion"
-            dependency "com.squareup.retrofit2:retrofit-mock:$retrofitVersion"
-            dependency "com.squareup.retrofit2:adapter-java8:$retrofitVersion"
-            dependency "com.squareup.retrofit2:adapter-rxjava2:$retrofitVersion"
-            dependency "com.squareup.retrofit2:adapter-rxjava3:$retrofitVersion"
-            dependency "com.squareup.retrofit2:adapter-guava:$retrofitVersion"
-            dependency "com.squareup.retrofit2:converter-wire:$retrofitVersion"
-            dependency "com.squareup.retrofit2:converter-jackson:$retrofitVersion"
-            dependency "com.squareup.retrofit2:converter-simplexml:$retrofitVersion"
-            dependency "com.squareup.retrofit2:converter-jaxb:$retrofitVersion"
-            dependency "com.squareup.retrofit2:converter-java8:$retrofitVersion"
-            dependency "com.squareup.retrofit2:converter-scalars:$retrofitVersion"
-            dependency "com.squareup.retrofit2:converter-gson:$retrofitVersion"
-            dependency "com.squareup.retrofit2:converter-protobuf:$retrofitVersion"
-            dependency "org.apache.oltu.oauth2:org.apache.oltu.oauth2.common:$oltuVersion"
-            dependency "org.apache.oltu.oauth2:org.apache.oltu.oauth2.client:$oltuVersion"
-            dependency "org.apache.oltu.oauth2:org.apache.oltu.oauth2.httpclient4:$oltuVersion"
-            dependency "com.squareup.okhttp3:okhttp:$okhttpVersion"
-            dependency "com.squareup.okhttp3:okcurl:$okhttpVersion"
-            dependency "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
-            dependency "com.squareup.okhttp3:okhttp-apache:$okhttpVersion"
-            dependency "com.squareup.okhttp3:okhttp-android-support:$okhttpVersion"
-            dependency "com.squareup.okhttp3:okhttp-urlconnection:$okhttpVersion"
-            dependency "com.squareup.okhttp3:okhttp-sse:$okhttpVersion"
-            dependency "io.gsonfire:gson-fire:1.8.5"
-            dependency "io.swagger:swagger-core:1.6.3"
-            dependency "io.swagger:swagger-annotations:1.6.3"
-            dependency "javax.annotation:javax.annotation-api:1.3.2"
-            dependency "com.google.code.findbugs:jsr305:3.0.2"
-            dependency "commons-codec:commons-codec:1.15"
-
-            //Pentaho
-            dependency 'org.pentaho.reporting.engine:classic-core:9.1.0.0-SNAPSHOT'
-            dependency 'org.pentaho.reporting.engine:classic-extensions:9.1.0.0-SNAPSHOT'
-            dependency 'org.pentaho.reporting.engine:classic-extensions-scripting:9.1.0.0-SNAPSHOT'
-            dependency 'org.pentaho.reporting.engine:wizard-core:9.1.0.0-SNAPSHOT'
-            dependency 'org.pentaho.reporting.designer:wizard-xul:9.1.0.0-SNAPSHOT'
-            dependency 'org.pentaho.reporting.library:libbase:9.1.0.0-SNAPSHOT'
-            dependency 'org.pentaho.reporting.library:libdocbundle:9.1.0.0-SNAPSHOT'
-            dependency 'org.pentaho.reporting.library:libfonts:9.1.0.0-SNAPSHOT'
-            dependency 'org.pentaho.reporting.library:libformat:9.1.0.0-SNAPSHOT'
-            dependency 'org.pentaho.reporting.library:libformula:9.1.0.0-SNAPSHOT'
-            dependency 'org.pentaho.reporting.library:libloader:9.1.0.0-SNAPSHOT'
-            dependency 'org.pentaho.reporting.library:librepository:9.1.0.0-SNAPSHOT'
-            dependency 'org.pentaho.reporting.library:libserializer:9.1.0.0-SNAPSHOT'
-            dependency 'org.pentaho.reporting.library:libsparkline:9.1.0.0-SNAPSHOT'
-            dependency 'org.pentaho.reporting.library:libxml:9.1.0.0-SNAPSHOT'
-
-            //Fiter custom dependencies
-            dependency 'org.json:json:20171018'
-            dependency 'org.apache.pdfbox:pdfbox:2.0.20'
-            dependency 'mysql:mysql-connector-java:8.0.23'
-            dependency ('org.flywaydb:flyway-core:7.15.0') {
-                // https://issues.apache.org/jira/browse/FINERACT-1172
-                // https://github.com/apache/fineract/pull/1355
-                // https://github.com/flyway/flyway/issues/2957
-                // exclude conflicting non-<optional> dependencies from https://github.com/flyway/flyway/blob/master/flyway-core/pom.xml
-                exclude 'software.amazon.awssdk:s3'
-            }
-
-            dependency ('org.dom4j:dom4j:2.1.3') {
-                exclude 'relaxngDatatype:relaxngDatatype' // already in com.sun.xml.bind:jaxb-osgi:2.3.0.1
-                // FINERACT-940 && FINERACT-966 https://github.com/spotbugs/spotbugs/issues/1128
-                exclude 'xpp3:xpp3'
-                exclude 'pull-parser:pull-parser'
-            }
-
-            dependencySet(group: 'org.apache.poi', version: '4.1.2') {
-                entry 'poi'
-                entry 'poi-ooxml'
-                entry 'poi-ooxml-schemas'
-            }
-            dependencySet(group: 'io.rest-assured', version: '4.3.0')
-            {
-                entry 'rest-assured'
-                entry 'json-path'
-                entry 'xml-path'
-            }
-        }
-    }
-
-    // Configuration for the sonarqube plugin
-    // https://docs.sonarqube.org/latest/analysis/scan/sonarscanner-for-gradle/
-    sonarqube {
-        properties {
-            property "sonar.projectKey", "apache_fineract"
-        }
-    }
+    // Configuration for the sonarqube plugin is now in GitHub Actions
 
     // Configuration for the spotless plugin
     // https://github.com/diffplug/spotless/tree/main/plugin-gradle
     spotless {
         format 'misc', {
             target '**/*.md', '**/*.properties', '**/.gitignore', '**/.openapi-generator-ignore', '**/*.yml', '**/*.xml', '**/**.json', '**/*.sql'
-            targetExclude '**/build/**', '**/bin/**', '**/.settings/**', '**/.idea/**', '**/.gradle/**', '**/gradlew.bat', '**/licenses/**'
+            targetExclude '**/build/**', '**/bin/**', '**/.settings/**', '**/.idea/**', '**/.gradle/**', '**/gradlew.bat', '**/licenses/**', '**/banner.txt'
             indentWithSpaces(4)
             endWithNewline()
             trimTrailingWhitespace()
@@ -271,26 +149,18 @@ allprojects  {
             "**/gradlew*",
             "**/git.properties",
             "**/*.html",
-            "**/*.mustache",
+            "**/templates/**",
+            "**/features/**",
+            "**/results/**",
             "**/package-info.java",
             "**/keystore.jks",
-            "**/static/swagger-ui/**",
-            "**/api-docs/**",
+            "**/legacy-docs/**",
+            "**/banner.txt",
+            "**/build.gradle.mustache",
+            "**/pom.mustache",
         ])
         strictCheck true
     }
-
-    task licenseFormatBuildScripts (type:nl.javadude.gradle.plugins.license.License) {
-        source = fileTree(dir: "$rootDir/", includes: [
-            '**/*.bat',
-            '**/*.sh',
-            '**/*.sql'
-        ], excludes: [
-            '**/gradlew*'
-        ])
-    }
-
-    licenseFormat.dependsOn licenseFormatBuildScripts
 
     licenseReport {
         outputDir = "$projectDir/licenses"
@@ -312,13 +182,15 @@ allprojects  {
             '**/*.puml',
             '**/*.github/**',
             '**/MANIFEST.MF',
+            '**/spring.factories',
             '**/*.json',
             '**/*.json.template',
             '**/*.txt',
             '**/*.log',
             '**/fineractdev-eclipse-preferences.epf',
-            '**/template-expected.html',
-            '**/template.mustache',
+            '**/features/**',
+            '**/templates/**',
+            '**/results/**',
             '**/.classpath',
             '**/.project',
             '**/.idea/**',
@@ -335,8 +207,6 @@ allprojects  {
             // Notice files
             '**/NOTICE_RELEASE',
             '**/NOTICE_SOURCE',
-            // Swagger License
-            '**/src/main/resources/static/swagger-ui/**',
             // gradle
             '**/.gradle/**',
             '**/gradlew',
@@ -348,7 +218,7 @@ allprojects  {
             '**/wrapper/**',
             '**/build/**',
             // Api Docs
-            '**/api-docs/*.*',
+            '**/legacy-docs/*.*',
             '**/docs/system-architecture/.htaccess',
             '**/docs/system-architecture/404.html',
             '**/docs/system-architecture/index.html',
@@ -367,7 +237,7 @@ allprojects  {
             '**/css/fonts/glyphicons-halflings-regular.svg',
             '**/assets/jszip.js',
             '**/assets/jquery.js',
-            '**/api-docs/jquery-1.7.min.js',
+            '**/legacy-docs/jquery-1.7.min.js',
             '**/css/toc-0.1.2/**/*.*',
             '**/docs/system-architecture/css/main.css',
             '**/system-architecture/js/vendor/jquery-1.9.1.min.js',
@@ -385,6 +255,7 @@ allprojects  {
             '**/*.prpt',
             '**/*.properties',
             '**/*.PROPERTIES',
+            '**/images/diag-*.svg'
         ]
     }
 }
@@ -397,14 +268,18 @@ configure(project.fineractJavaProjects) {
     apply plugin: 'eclipse'
     apply plugin: 'checkstyle'
     apply plugin: 'jacoco'
-    apply plugin: "net.ltgt.errorprone"
-    apply plugin: "com.github.spotbugs"
-    apply plugin: 'com.github.andygoossens.gradle-modernizer-plugin'
+    apply plugin: 'net.ltgt.errorprone'
+    apply plugin: 'com.github.spotbugs'
+    apply plugin: 'com.github.andygoossens.modernizer'
+    apply plugin: 'se.thinkcode.cucumber-runner'
+    apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.dependencies.gradle"
+
+    group = 'org.apache.fineract'
 
     /* define the valid syntax level for source files */
-    sourceCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
     /* define binary compatibility version */
-    targetCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_17
 
     /* http://stackoverflow.com/questions/19653311/jpa-repository-works-in-idea-and-production-but-not-in-gradle */
     sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir
@@ -441,24 +316,21 @@ configure(project.fineractJavaProjects) {
             "-Xlint:varargs",
             "-Xlint:preview",
             "-Xlint:static",
-            "-Werror"
-        ]
-        // TODO FINERACT-959 (gradually) enable -Xlint:all (see "javac -help -X")
-
-        options.deprecation = true
-
-        options.compilerArgs +=[
+            // -Werror needs to be disabled because EclipseLink's static weaving doesn't generate warning-free code
+            // and during an IntelliJ recompilation, it fails
+            //"-Werror",
             "-Xmaxwarns",
             1500,
             "-Xmaxerrs",
             1500
         ]
-    }
+        // TODO FINERACT-959 (gradually) enable -Xlint:all (see "javac -help -X")
 
+        options.deprecation = true
+    }
 
     dependencies {
         spotbugsPlugins 'jp.skypencil.findbugs.slf4j:bug-pattern:1.5.0@jar'
-        spotbugs 'com.github.spotbugs:spotbugs:4.4.2'
     }
 
     // Configuration for the spotless plugin
@@ -504,13 +376,7 @@ configure(project.fineractJavaProjects) {
         lineEndings 'UNIX'
     }
 
-    compileJava.dependsOn spotlessCheck
-
-    // compileJava may create more source files into generated, hence we need to run these tasks after it
-    licenseMain.dependsOn compileJava
-    processResources.dependsOn compileJava
-
-    // If we are running Gradle within Eclipse to enhance classes with OpenJPA,
+    // If we are running Gradle within Eclipse to enhance classes,
     // set the classes directory to point to Eclipse's default build directory
     if (project.hasProperty('env') && project.getProperty('env') == 'eclipse') {
         sourceSets.main.java.outputDir = file("$projectDir/bin/main")
@@ -519,8 +385,8 @@ configure(project.fineractJavaProjects) {
     // Configuration for the Checkstyle plugin
     // https://docs.gradle.org/current/userguide/checkstyle_plugin.html
     dependencies {
-        checkstyle 'com.puppycrawl.tools:checkstyle:9.1'
-        checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.40.0'
+        checkstyle 'com.puppycrawl.tools:checkstyle:10.2'
+        checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.42.0'
     }
 
     // Configuration for JaCoCo code coverage task
@@ -541,7 +407,7 @@ configure(project.fineractJavaProjects) {
     // Configuration for the errorprone plugin
     // https://github.com/tbroyer/gradle-errorprone-plugin
     dependencies {
-        errorprone "com.google.errorprone:error_prone_core:2.10.0"
+        errorprone "com.google.errorprone:error_prone_core:2.13.1"
     }
 
     tasks.withType(JavaCompile) {
@@ -559,7 +425,9 @@ configure(project.fineractJavaProjects) {
                     "AlmostJavadoc",
                     "InvalidBlockTag",
                     "JavaUtilDate", // TODO FINERACT-1298
-                    "ReturnValueIgnored"
+                    "ReturnValueIgnored",
+                    "SameNameButDifferent", // Until errorprone recognizes Lombok
+                    "MultiVariableDeclaration" // Until errorprone recognizes Lombok
                     )
             error(
                     "DefaultCharset",
@@ -570,7 +438,6 @@ configure(project.fineractJavaProjects) {
                     "UnnecessaryParentheses",
                     "MultipleTopLevelClasses",
                     "MixedMutabilityReturnType",
-                    "MultiVariableDeclaration",
                     "AssertEqualsArgumentOrderChecker",
                     "EmptySetMultibindingContributions",
                     "BigDecimalEquals",
@@ -584,7 +451,6 @@ configure(project.fineractJavaProjects) {
                     "StreamResourceLeak",
                     "TruthIncompatibleType",
                     "ByteBufferBackingArray",
-                    "SameNameButDifferent",
                     "OrphanedFormatString",
                     "CatchAndPrintStackTrace",
                     "ObjectToString",
@@ -603,7 +469,6 @@ configure(project.fineractJavaProjects) {
                     "UnsafeFinalization",
                     "JavaTimeDefaultTimeZone",
                     "JodaPlusMinusLong",
-                    "MutableMethodReturnType",
                     "SwitchDefault",
                     "VarTypeName",
                     "ArgumentSelectionDefectChecker",
@@ -614,7 +479,6 @@ configure(project.fineractJavaProjects) {
                     "MissingCasesInEnumSwitch",
                     "ReferenceEquality",
                     "UndefinedEquals",
-                    "PublicConstructorForAbstractClass",
                     "UnescapedEntity",
                     "ModifyCollectionInEnhancedForLoop",
                     "NonCanonicalType",
@@ -644,12 +508,57 @@ configure(project.fineractJavaProjects) {
         }
     }
 
+    compileJava {
+        dependsOn(rat, licenseMain, licenseTest)
+    }
+
+    dependencies {
+        implementation (
+                'ch.qos.logback:logback-core',
+                'org.slf4j:slf4j-api',
+                'org.slf4j:log4j-over-slf4j',
+                'org.slf4j:jul-to-slf4j',
+                )
+        implementation ("ch.qos.logback:logback-classic") {
+            exclude(module: "slf4j-api")
+        }
+
+        testImplementation( 'org.mockito:mockito-core',
+                'org.mockito:mockito-junit-jupiter',
+                'org.junit.jupiter:junit-jupiter-api',
+                'org.junit.jupiter:junit-jupiter-engine',
+                'org.junit.platform:junit-platform-runner', // required to be able to run tests directly under Eclipse, see FINERACT-943 & FINERACT-1021
+                'org.bouncycastle:bcpkix-jdk15to18',
+                'org.bouncycastle:bcprov-jdk15to18',
+                'org.awaitility:awaitility',
+                'com.google.truth:truth',
+                'com.google.truth.extensions:truth-java8-extension',
+                'io.cucumber:cucumber-core',
+                'io.cucumber:cucumber-java',
+                'io.cucumber:cucumber-java8',
+                'io.cucumber:cucumber-junit-platform-engine',
+                )
+    }
+
     test {
         useJUnitPlatform()
+        dependsOn 'cucumber'
+
+        if (project.hasProperty('excludeTests')) {
+            filter {
+                excludeTestsMatching project.property('excludeTests')
+            }
+        }
     }
 
     testlogger {
         logLevel 'quiet'
+    }
+
+    cucumber {
+        tags = 'not @ignore'
+        main = 'io.cucumber.core.cli.Main'
+        shorten = 'argfile'
     }
 
     // Configuration for spotbugs plugin
@@ -659,6 +568,7 @@ configure(project.fineractJavaProjects) {
     spotbugs {
         reportLevel = 'high'
         showProgress = false
+        excludeFilter = file("$rootDir/config/spotbugs/exclude.xml")
     }
     // https://github.com/spotbugs/spotbugs-gradle-plugin/issues/242
     spotbugsMain {
@@ -690,10 +600,15 @@ configure(project.fineractJavaProjects) {
 
 configure(project.fineractPublishProjects) {
     apply plugin: 'maven-publish'
+    apply plugin: 'signing'
 
     publishing {
         publications {
             mavenJava(MavenPublication) {
+                groupId 'org.apache.fineract'
+                artifactId project.name
+                version "${project.version}-SNAPSHOT"
+
                 from components.java
 
                 versionMapping {
@@ -706,7 +621,7 @@ configure(project.fineractPublishProjects) {
                 }
 
                 pom {
-                    name = 'Fineract'
+                    name = "Fineract: ${project.name}"
                     description = 'A secure, multi-tenanted microfinance platform'
                     url = 'https://fineract.apache.org'
                     licenses {
@@ -724,7 +639,23 @@ configure(project.fineractPublishProjects) {
             }
         }
 
-        // TODO FINERACT-1102: Actually use this to deploy to ASF (Apache Software Foundation) Nexus Maven Repository
+        repositories {
+            def releaseUrl = 'https://repository.apache.org/content/repositories/releases'
+            def stagingUrl = 'https://repository.apache.org/content/repositories/snapshots'
+
+            maven {
+                name 'apache'
+                url hasProperty('fineract.release.version') ? releaseUrl : stagingUrl
+                credentials {
+                    username "${findProperty('fineract.config.username')}"
+                    password "${findProperty('fineract.config.password')}"
+                }
+            }
+        }
+    }
+
+    signing {
+        sign publishing.publications.mavenJava
     }
 }
 

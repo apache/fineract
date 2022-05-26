@@ -1,0 +1,22 @@
+= Authentication Properties
+
+.Authentication Properties
+|===
+|Name |Env Variable |Default Value |Description
+
+|fineract.security.basicauth.enabled
+|FINERACT_SECURITY_BASICAUTH_ENABLED
+|true
+|TBD
+
+|fineract.security.oauth.enabled
+|FINERACT_SECURITY_OAUTH_ENABLED
+|false
+|TBD
+
+|fineract.security.2fa.enabled
+|FINERACT_SECURITY_2FA_ENABLED
+|false
+|TBD
+|===
+

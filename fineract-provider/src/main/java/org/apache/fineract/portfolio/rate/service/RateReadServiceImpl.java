@@ -25,10 +25,8 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.rate.data.RateData;
-import org.apache.fineract.portfolio.rate.domain.Rate;
 import org.apache.fineract.portfolio.rate.domain.RateAppliesTo;
 import org.apache.fineract.portfolio.rate.exception.RateNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,9 +45,9 @@ public class RateReadServiceImpl implements RateReadService {
     private final PlatformSecurityContext context;
 
     @Autowired
-    public RateReadServiceImpl(PlatformSecurityContext context, final RoutingDataSource dataSource) {
+    public RateReadServiceImpl(PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
@@ -57,7 +55,7 @@ public class RateReadServiceImpl implements RateReadService {
         this.context.authenticatedUser();
         final RateMapper rm = new RateMapper();
         final String sql = "select " + rm.rateSchema();
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
     }
 
     @Override
@@ -66,7 +64,7 @@ public class RateReadServiceImpl implements RateReadService {
             this.context.authenticatedUser();
             final RateMapper rm = new RateMapper();
             final String sql = "select " + rm.rateSchema() + " where r.id = ?";
-            final RateData selectedRate = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { rateId });
+            final RateData selectedRate = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { rateId }); // NOSONAR
             return selectedRate;
 
         } catch (final EmptyResultDataAccessException e) {
@@ -80,7 +78,7 @@ public class RateReadServiceImpl implements RateReadService {
             this.context.authenticatedUser();
             final RateMapper rm = new RateMapper();
             final String sql = "select " + rm.rateSchema() + " where r.name = ?";
-            final RateData selectedRate = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { name });
+            final RateData selectedRate = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { name }); // NOSONAR
             return selectedRate;
 
         } catch (final EmptyResultDataAccessException e) {
@@ -93,21 +91,21 @@ public class RateReadServiceImpl implements RateReadService {
         this.context.authenticatedUser();
         final RateMapper rm = new RateMapper();
         final String sql = "select " + rm.rateSchema() + " where r.active = ? and product_apply=?";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { true, RateAppliesTo.LOAN.getValue() });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { true, RateAppliesTo.LOAN.getValue() }); // NOSONAR
     }
 
     @Override
     public List<RateData> retrieveLoanRates(Long loanId) {
         final RateMapper rm = new RateMapper();
         final String sql = "select " + rm.loanRateSchema() + " where lr.loan_id = ?";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { loanId }); // NOSONAR
     }
 
     @Override
     public List<RateData> retrieveProductLoanRates(Long loanId) {
         final RateMapper rm = new RateMapper();
         final String sql = "select " + rm.productLoanRateSchema() + " where lr.product_loan_id = ?";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { loanId }); // NOSONAR
     }
 
     private static final class RateMapper implements RowMapper<RateData> {
@@ -138,13 +136,5 @@ public class RateReadServiceImpl implements RateReadService {
             return RateData.instance(id, name, percentage, productAppliesTo, active);
         }
 
-        public RateData mapRow(Rate rateResponse, int i) {
-            final Long id = rateResponse.getId();
-            final String name = rateResponse.getName();
-            final BigDecimal percentage = rateResponse.getPercentage();
-            final EnumOptionData productApply = RateEnumerations.rateAppliesTo(rateResponse.getProductApply());
-            final boolean active = rateResponse.isActive();
-            return RateData.instance(id, name, percentage, productApply, active);
-        }
     }
 }

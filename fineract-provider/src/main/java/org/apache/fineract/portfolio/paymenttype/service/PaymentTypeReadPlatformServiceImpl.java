@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.paymenttype.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,9 +35,9 @@ public class PaymentTypeReadPlatformServiceImpl implements PaymentTypeReadPlatfo
     private final PlatformSecurityContext context;
 
     @Autowired
-    public PaymentTypeReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
+    public PaymentTypeReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
@@ -49,7 +48,7 @@ public class PaymentTypeReadPlatformServiceImpl implements PaymentTypeReadPlatfo
         final PaymentTypeMapper ptm = new PaymentTypeMapper();
         final String sql = "select " + ptm.schema() + "order by position";
 
-        return this.jdbcTemplate.query(sql, ptm, new Object[] {});
+        return this.jdbcTemplate.query(sql, ptm); // NOSONAR
     }
 
     @Override
@@ -60,7 +59,7 @@ public class PaymentTypeReadPlatformServiceImpl implements PaymentTypeReadPlatfo
         final PaymentTypeMapper ptm = new PaymentTypeMapper();
         final String sql = "select " + ptm.schema() + "where pt.id = ?";
 
-        return this.jdbcTemplate.queryForObject(sql, ptm, new Object[] { paymentTypeId });
+        return this.jdbcTemplate.queryForObject(sql, ptm, new Object[] { paymentTypeId }); // NOSONAR
     }
 
     private static final class PaymentTypeMapper implements RowMapper<PaymentTypeData> {

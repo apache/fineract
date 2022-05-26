@@ -327,4 +327,23 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         generatedDate = adjustRepaymentDate(generatedDate, loanApplicationTerms, holidayDetailDTO).getChangedScheduleDate();
         return generatedDate;
     }
+
+    @Override
+    public LocalDate generateNextScheduleDateStartingFromDisburseDateOrRescheduleDate(LocalDate lastRepaymentDate,
+            LoanApplicationTerms loanApplicationTerms, final HolidayDetailDTO holidayDetailDTO) {
+
+        LocalDate generatedDate = loanApplicationTerms.getExpectedDisbursementDate();
+        boolean isFirstRepayment = true;
+        if (loanApplicationTerms.getNewScheduledDueDateStart() != null) {
+            generatedDate = loanApplicationTerms.getNewScheduledDueDateStart();
+            isFirstRepayment = false;
+        }
+        LocalDate adjustedDate = generatedDate;
+        while (!adjustedDate.isAfter(lastRepaymentDate)) {
+            generatedDate = generateNextRepaymentDate(generatedDate, loanApplicationTerms, isFirstRepayment);
+            adjustedDate = adjustRepaymentDate(generatedDate, loanApplicationTerms, holidayDetailDTO).getChangedScheduleDate();
+            isFirstRepayment = false;
+        }
+        return adjustedDate;
+    }
 }

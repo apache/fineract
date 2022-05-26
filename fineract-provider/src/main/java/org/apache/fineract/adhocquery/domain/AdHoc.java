@@ -55,7 +55,7 @@ public final class AdHoc extends AbstractAuditableCustom {
     @Column(name = "report_run_every")
     private Long reportRunEvery;
 
-    @Column(name = "IsActive", nullable = false)
+    @Column(name = "is_active", nullable = false)
     private boolean isActive = false;
 
     private AdHoc() {}

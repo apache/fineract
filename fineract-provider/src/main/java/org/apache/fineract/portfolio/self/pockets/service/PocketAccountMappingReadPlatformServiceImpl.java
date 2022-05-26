@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.self.pockets.service;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.EntityAccountType;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.self.pockets.data.PocketAccountMappingData;
 import org.apache.fineract.portfolio.self.pockets.domain.PocketAccountMapping;
@@ -41,10 +40,10 @@ public class PocketAccountMappingReadPlatformServiceImpl implements PocketAccoun
     private final PocketAccountMappingRepositoryWrapper pocketAccountMappingRepositoryWrapper;
 
     @Autowired
-    public PocketAccountMappingReadPlatformServiceImpl(final RoutingDataSource dataSource, final PlatformSecurityContext context,
+    public PocketAccountMappingReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final PlatformSecurityContext context,
             final PocketRepositoryWrapper pocketRepositoryWrapper,
             final PocketAccountMappingRepositoryWrapper pocketAccountMappingRepositoryWrapper) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.context = context;
         this.pocketRepositoryWrapper = pocketRepositoryWrapper;
         this.pocketAccountMappingRepositoryWrapper = pocketAccountMappingRepositoryWrapper;

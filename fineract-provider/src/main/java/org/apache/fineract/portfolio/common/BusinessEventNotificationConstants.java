@@ -33,6 +33,10 @@ public class BusinessEventNotificationConstants {
         LOAN_UNDO_TRANSACTION("loan_undo_transaction"), //
         LOAN_ADJUST_TRANSACTION("loan_adjust_transaction"), //
         LOAN_MAKE_REPAYMENT("loan_repayment_transaction"), //
+        LOAN_MERCHANT_ISSUED_REFUND("loan_merchant_issued_refund"), //
+        LOAN_PAYOUT_REFUND("loan_payout_refund"), //
+        LOAN_GOODWILL_CREDIT("loan_goodwill_credit"), //
+        LOAN_RECOVERY_PAYMENT("loan_recovery_payment"), //
         LOAN_WRITTEN_OFF("loan_writtenoff"), //
         LOAN_UNDO_WRITTEN_OFF("loan_undo_writtenoff"), //
         LOAN_DISBURSAL("loan_disbursal"), //
@@ -55,6 +59,7 @@ public class BusinessEventNotificationConstants {
         LOAN_INTEREST_RECALCULATION("loan_interest_recalculation"), //
         LOAN_REFUND("loan_refund"), //
         LOAN_FORECLOSURE("loan_foreclosure"), //
+        LOAN_CREDIT_BALANCE_REFUND("loan_credit_balance_refund"), //
         LOAN_CREATE("loan_create"), //
         LOAN_PRODUCT_CREATE("loan_product_create"), //
         SAVINGS_ACTIVATE("savings_activated"), //
@@ -83,6 +88,7 @@ public class BusinessEventNotificationConstants {
         }
 
         private static final Set<String> values = new HashSet<>();
+
         static {
             for (final BusinessEvents type : BusinessEvents.values()) {
                 values.add(type.value);

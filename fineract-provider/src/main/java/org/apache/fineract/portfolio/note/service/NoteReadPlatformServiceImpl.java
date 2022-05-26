@@ -28,24 +28,19 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.portfolio.note.data.NoteData;
 import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.note.exception.NoteNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
 
-@Service
 public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    public NoteReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public NoteReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private static final class NoteMapper implements RowMapper<NoteData> {
@@ -96,7 +91,7 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
 
             final String sql = rm.schema() + " where n.id = ? " + conditionSql + " order by n.created_date DESC";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, paramList.toArray());
+            return this.jdbcTemplate.queryForObject(sql, rm, paramList.toArray()); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new NoteNotFoundException(noteId, resourceId, noteType.name().toLowerCase(), e);
         }
@@ -111,7 +106,7 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
 
         final String sql = rm.schema() + " where " + conditionSql + " order by n.created_date DESC";
 
-        return this.jdbcTemplate.query(sql, rm, paramList.toArray());
+        return this.jdbcTemplate.query(sql, rm, paramList.toArray()); // NOSONAR
     }
 
     public static String getResourceCondition(final NoteType noteType, List<Object> paramList) {

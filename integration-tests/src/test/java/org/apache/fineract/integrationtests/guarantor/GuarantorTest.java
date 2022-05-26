@@ -339,7 +339,8 @@ public class GuarantorTest {
         verifySavingsOnHoldBalance(externalSavigsId_1, external1_hold_funds);
         verifySavingsOnHoldBalance(externalSavigsId_2, external2_hold_funds);
         List<HashMap> guarantors = this.guarantorHelper.getAllGuarantor(loanID);
-        this.guarantorHelper.deleteGuarantor(externalGuarantor, loanID);
+        HashMap response = this.guarantorHelper.deleteGuarantor(externalGuarantor, loanID);
+        assertEquals(externalGuarantor, response.get("resourceId"));
         assertFalse((Boolean) this.guarantorHelper.getGuarantor(externalGuarantor, loanID, "status"));
         HashMap errorlog = this.guarantorHelper.deleteGuarantor(withoutGuaranteeAmount, loanID);
         ArrayList<HashMap> error = (ArrayList<HashMap>) errorlog.get(CommonConstants.RESPONSE_ERROR);
@@ -359,7 +360,8 @@ public class GuarantorTest {
         verifySavingsOnHoldBalance(externalSavigsId_3, EXTERNAL1_GURANTEE);
         Assertions.assertNotNull(externalGuarantee_3);
 
-        this.guarantorHelper.deleteGuarantor(externalGuarantee_1, fundDetailId, loanID);
+        response = this.guarantorHelper.deleteGuarantor(externalGuarantee_3, fundDetailId, loanID);
+        assertEquals(externalGuarantee_3, response.get("resourceId"));
         guarantors = this.guarantorHelper.getAllGuarantor(loanID);
         assertEquals(4, guarantors.size());
         externalGuarantee_1_details = (List<HashMap>) this.guarantorHelper.getGuarantor(externalGuarantee_1, loanID,

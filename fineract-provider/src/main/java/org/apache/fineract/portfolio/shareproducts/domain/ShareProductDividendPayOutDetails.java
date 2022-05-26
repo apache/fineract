@@ -27,7 +27,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -57,8 +56,7 @@ public class ShareProductDividendPayOutDetails extends AbstractAuditableCustom {
     @Column(name = "status", nullable = false)
     private Integer status;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name = "dividend_pay_out_id", referencedColumnName = "id", nullable = false)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "productDividentPayOutDetails")
     private List<ShareAccountDividendDetails> accountDividendDetails = new ArrayList<>();
 
     protected ShareProductDividendPayOutDetails() {

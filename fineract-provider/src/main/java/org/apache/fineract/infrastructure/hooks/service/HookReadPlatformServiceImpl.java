@@ -24,7 +24,6 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.hooks.data.Event;
 import org.apache.fineract.infrastructure.hooks.data.EventResultSetExtractor;
 import org.apache.fineract.infrastructure.hooks.data.Field;
@@ -51,10 +50,10 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
 
     @Autowired
     public HookReadPlatformServiceImpl(final PlatformSecurityContext context, final HookRepository hookRepository,
-            final RoutingDataSource dataSource) {
+            final JdbcTemplate jdbcTemplate) {
         this.context = context;
         this.hookRepository = hookRepository;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
@@ -63,7 +62,7 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
         final HookMapper rm = new HookMapper(this.jdbcTemplate);
         final String sql = "select " + rm.schema() + " order by h.name";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
     }
 
     @Override
@@ -73,7 +72,7 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
             final HookMapper rm = new HookMapper(this.jdbcTemplate);
             final String sql = "select " + rm.schema() + " where h.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { hookId });
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { hookId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new HookNotFoundException(hookId, e);
         }
@@ -97,10 +96,10 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
 
         if (templateName == null) {
             sql = "select " + rm.schema() + " order by s.name";
-            templateData = this.jdbcTemplate.query(sql, rm, new Object[] {});
+            templateData = this.jdbcTemplate.query(sql, rm); // NOSONAR
         } else {
             sql = "select " + rm.schema() + " where s.name = ? order by s.name";
-            templateData = this.jdbcTemplate.query(sql, rm, new Object[] { templateName });
+            templateData = this.jdbcTemplate.query(sql, rm, new Object[] { templateName }); // NOSONAR
         }
 
         final List<Grouping> events = getTemplateForEvents();
@@ -153,7 +152,7 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
             final HookEventMapper rm = new HookEventMapper();
             final String sql = "select " + rm.schema() + " where h.id= ?";
 
-            return this.jdbcTemplate.query(sql, rm, new Object[] { hookId });
+            return this.jdbcTemplate.query(sql, rm, new Object[] { hookId }); // NOSONAR
         }
 
         private List<Field> retrieveConfig(final Long hookId) {
@@ -161,7 +160,7 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
             final HookConfigMapper rm = new HookConfigMapper();
             final String sql = "select " + rm.schema() + " where h.id= ? order by hc.field_name";
 
-            final List<Field> fields = this.jdbcTemplate.query(sql, rm, new Object[] { hookId });
+            final List<Field> fields = this.jdbcTemplate.query(sql, rm, new Object[] { hookId }); // NOSONAR
 
             return fields;
         }
@@ -222,7 +221,7 @@ public class HookReadPlatformServiceImpl implements HookReadPlatformService {
             final TemplateSchemaMapper rm = new TemplateSchemaMapper();
             final String sql = "select " + rm.schema() + " where s.id= ? order by hs.field_name ";
 
-            final List<Field> fields = this.jdbcTemplate.query(sql, rm, new Object[] { templateId });
+            final List<Field> fields = this.jdbcTemplate.query(sql, rm, new Object[] { templateId }); // NOSONAR
 
             return fields;
         }

@@ -49,6 +49,8 @@ final class ClientAddressApiResourcesSwagger {
         public Integer countryId;
         @Schema(example = "400064")
         public Long postalCode;
+        @Schema(example = "true")
+        public Boolean isActive;
     }
 
     @Schema(description = "PostClientClientIdAddressesResponse")

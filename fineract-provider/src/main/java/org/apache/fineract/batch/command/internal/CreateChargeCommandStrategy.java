@@ -21,13 +21,13 @@ package org.apache.fineract.batch.command.internal;
 import com.google.common.base.Splitter;
 import java.util.List;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.batch.exception.ErrorHandler;
 import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -44,14 +44,10 @@ import org.springframework.stereotype.Component;
  * @see org.apache.fineract.batch.domain.BatchResponse
  */
 @Component
+@RequiredArgsConstructor
 public class CreateChargeCommandStrategy implements CommandStrategy {
 
     private final LoanChargesApiResource loanChargesApiResource;
-
-    @Autowired
-    public CreateChargeCommandStrategy(final LoanChargesApiResource loanChargesApiResource) {
-        this.loanChargesApiResource = loanChargesApiResource;
-    }
 
     @Override
     public BatchResponse execute(BatchRequest request, @SuppressWarnings("unused") UriInfo uriInfo) {

@@ -28,16 +28,21 @@ configurations {
 
 apply from: 'dependencies.gradle'
 
+// enable when all tests are migrated
+tasks.cucumber.onlyIf {false}
+
 cargo {
     containerId "tomcat9x"
 
     // looks like Cargo doesn't detect the WAR file automatically in the multi-module setup
     deployable {
-        file = file("$rootDir/fineract-provider/build/libs/fineract-provider.war")
+        file = file("$rootDir/fineract-war/build/libs/fineract-provider.war")
         context = 'fineract-provider'
     }
 
     local {
+        // logLevel = 'medium'
+        // outputFile = file('build/output.log')
         installer {
             installConfiguration = configurations.tomcat
             downloadDir = file("$buildDir/download")
@@ -45,7 +50,13 @@ cargo {
         }
         startStopTimeout = 240000
         containerProperties {
-            property 'cargo.start.jvmargs', '-Dspring.profiles.active=twofactor,basicauth'
+            def jvmArgs = '--add-exports=java.naming/com.sun.jndi.ldap=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.security=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.management/javax.management=ALL-UNNAMED --add-opens=java.naming/javax.naming=ALL-UNNAMED -Dfineract.security.basicauth.enabled=true -Dfineract.security.oauth.enabled=false -Dfineract.security.2fa.enabled=true '
+            if (project.hasProperty('dbType') && 'postgresql'.equalsIgnoreCase(dbType)) {
+                jvmArgs += '-Dspring.datasource.hikari.driverClassName=org.postgresql.Driver -Dspring.datasource.hikari.jdbcUrl=jdbc:postgresql://localhost:5432/fineract_tenants -Dspring.datasource.hikari.username=root -Dspring.datasource.hikari.password=postgres -Dfineract.tenant.host=localhost -Dfineract.tenant.port=5432 -Dfineract.tenant.username=root -Dfineract.tenant.password=postgres'
+            } else {
+                jvmArgs += '-Dspring.datasource.hikari.driverClassName=org.mariadb.jdbc.Driver -Dspring.datasource.hikari.jdbcUrl=jdbc:mariadb://localhost:3306/fineract_tenants -Dspring.datasource.hikari.username=root -Dspring.datasource.hikari.password=mysql -Dfineract.tenant.host=localhost -Dfineract.tenant.port=3306 -Dfineract.tenant.username=root -Dfineract.tenant.password=mysql'
+            }
+            property 'cargo.start.jvmargs', jvmArgs
             property 'cargo.tomcat.connector.keystoreFile', file("$rootDir/fineract-provider/src/main/resources/keystore.jks")
             property 'cargo.tomcat.connector.keystorePass', 'openmf'
             property 'cargo.tomcat.httpSecure', true
@@ -57,11 +68,15 @@ cargo {
     }
 }
 
-cargoRunLocal.dependsOn ':fineract-provider:war'
-cargoStartLocal.dependsOn ':fineract-provider:war'
+cargoRunLocal.dependsOn ':fineract-war:war'
+cargoStartLocal.dependsOn ':fineract-war:war'
 cargoStartLocal.mustRunAfter 'testClasses'
 
 test {
-    dependsOn cargoStartLocal
+    dependsOn (cargoStartLocal)
     finalizedBy cargoStopLocal
 }
+
+// NOTE: Gradle suggested these dependencies
+compileTestJava.dependsOn(':fineract-provider:generateGitProperties', ':fineract-provider:processResources', ':fineract-provider:resolve')
+spotbugsTest.dependsOn(':fineract-provider:generateGitProperties', ':fineract-provider:processResources', ':fineract-provider:resolve')

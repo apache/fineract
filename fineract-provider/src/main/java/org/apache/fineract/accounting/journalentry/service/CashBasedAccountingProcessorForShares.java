@@ -21,24 +21,20 @@ package org.apache.fineract.accounting.journalentry.service;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForShares;
 import org.apache.fineract.accounting.journalentry.data.ChargePaymentDTO;
 import org.apache.fineract.accounting.journalentry.data.SharesDTO;
 import org.apache.fineract.accounting.journalentry.data.SharesTransactionDTO;
 import org.apache.fineract.organisation.office.domain.Office;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class CashBasedAccountingProcessorForShares implements AccountingProcessorForShares {
 
     private final AccountingProcessorHelper helper;
-
-    @Autowired
-    public CashBasedAccountingProcessorForShares(final AccountingProcessorHelper helper) {
-        this.helper = helper;
-    }
 
     @Override
     public void createJournalEntriesForShares(SharesDTO sharesDTO) {

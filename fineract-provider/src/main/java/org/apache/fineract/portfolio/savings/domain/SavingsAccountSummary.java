@@ -123,7 +123,7 @@ public final class SavingsAccountSummary {
     public void updateSummaryWithPivotConfig(final MonetaryCurrency currency, final SavingsAccountTransactionSummaryWrapper wrapper,
             final SavingsAccountTransaction transaction, final List<SavingsAccountTransaction> savingsAccountTransactions) {
 
-        if (transaction != null) {
+        if (transaction != null && !transaction.isReversalTransaction()) {
             Money transactionAmount = Money.of(currency, transaction.getAmount());
             switch (SavingsAccountTransactionType.fromInt(transaction.getTypeOf())) {
                 case DEPOSIT:
@@ -262,6 +262,10 @@ public final class SavingsAccountSummary {
         return this.accountBalance;
     }
 
+    public void setAccountBalance(BigDecimal accountBalance) {
+        this.accountBalance = accountBalance;
+    }
+
     public BigDecimal getTotalInterestPosted() {
         return this.totalInterestPosted;
     }
@@ -286,4 +290,39 @@ public final class SavingsAccountSummary {
         return this.runningBalanceOnInterestPostingTillDate;
     }
 
+    public BigDecimal getTotalWithdrawals() {
+        return this.totalWithdrawals;
+    }
+
+    public BigDecimal getTotalDeposits() {
+        return this.totalDeposits;
+    }
+
+    public BigDecimal getTotalWithdrawalFees() {
+        return this.totalWithdrawalFees;
+    }
+
+    public BigDecimal getTotalFeeCharge() {
+        return this.totalFeeCharge;
+    }
+
+    public BigDecimal getTotalPenaltyCharge() {
+        return this.totalPenaltyCharge;
+    }
+
+    public BigDecimal getTotalAnnualFees() {
+        return this.totalAnnualFees;
+    }
+
+    public BigDecimal getTotalInterestEarned() {
+        return this.totalInterestEarned;
+    }
+
+    public BigDecimal getTotalOverdraftInterestDerived() {
+        return this.totalOverdraftInterestDerived;
+    }
+
+    public BigDecimal getTotalWithholdTax() {
+        return this.totalWithholdTax;
+    }
 }

@@ -27,10 +27,10 @@ import com.jayway.jsonpath.ReadContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -41,6 +41,7 @@ import org.springframework.stereotype.Component;
  * @see BatchApiServiceImpl
  */
 @Component
+@RequiredArgsConstructor
 public class ResolutionHelper {
 
     /**
@@ -76,12 +77,7 @@ public class ResolutionHelper {
 
     }
 
-    private FromJsonHelper fromJsonHelper;
-
-    @Autowired
-    public ResolutionHelper(final FromJsonHelper fromJsonHelper) {
-        this.fromJsonHelper = fromJsonHelper;
-    }
+    private final FromJsonHelper fromJsonHelper;
 
     /**
      * Returns a map containing requests that are divided in accordance of dependency relations among them. Each

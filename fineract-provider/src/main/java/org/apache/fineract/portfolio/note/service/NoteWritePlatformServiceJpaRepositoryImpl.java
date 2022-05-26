@@ -42,10 +42,7 @@ import org.apache.fineract.portfolio.note.exception.NoteResourceNotSupportedExce
 import org.apache.fineract.portfolio.note.serialization.NoteCommandFromApiJsonDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
 public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatformService {
 
     private static final Logger LOG = LoggerFactory.getLogger(NoteWritePlatformServiceJpaRepositoryImpl.class);
@@ -56,7 +53,6 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
     private final LoanTransactionRepository loanTransactionRepository;
     private final NoteCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
-    @Autowired
     public NoteWritePlatformServiceJpaRepositoryImpl(final NoteRepository noteRepository, final ClientRepositoryWrapper clientRepository,
             final GroupRepository groupRepository, final LoanRepositoryWrapper loanRepository,
             final LoanTransactionRepository loanTransactionRepository, final NoteCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
@@ -78,7 +74,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
         }
         final Note newNote = Note.clientNoteFromJson(client, command);
 
-        this.noteRepository.save(newNote);
+        this.noteRepository.saveAndFlush(newNote);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -105,7 +101,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
         final Group group = this.groupRepository.findById(resourceId).orElseThrow(() -> new GroupNotFoundException(resourceId));
         final Note newNote = Note.groupNoteFromJson(group, command);
 
-        this.noteRepository.save(newNote);
+        this.noteRepository.saveAndFlush(newNote);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -123,7 +119,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
         final String note = command.stringValueOfParameterNamed("note");
         final Note newNote = Note.loanNote(loan, note);
 
-        this.noteRepository.save(newNote);
+        this.noteRepository.saveAndFlush(newNote);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -145,7 +141,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
         final String note = command.stringValueOfParameterNamed("note");
         final Note newNote = Note.loanTransactionNote(loan, loanTransaction, note);
 
-        this.noteRepository.save(newNote);
+        this.noteRepository.saveAndFlush(newNote);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //

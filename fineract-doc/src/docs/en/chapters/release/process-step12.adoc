@@ -1,0 +1,24 @@
+= Step 12: Upload Distribution Release
+
+== Description
+
+In order to release you have to checkout release repository located on https://dist.apache.org/repos/dist/release/fineract and add release artifacts there.
+
+[source,bash,subs="attributes+,+macros"]
+----
+% svn co https://dist.apache.org/repos/dist/release/fineract fineract-release
+% mkdir fineract-release/{revnumber}/
+% cp fineract-dist-dev/{revnumber}/* fineract-release/{revnumber}/
+% svn add fineract-release/{revnumber}/
+% svn commit -m "Fineract Release {revnumber}" fineract-release/{revnumber}/
+----
+
+You will now get an automated email from the Apache Reporter Service (no-reply@reporter.apache.org), subject "Please add your release data for 'fineract'" to add the release data (version and date) to the database on https://reporter.apache.org/addrelease.html?fineract (requires PMC membership).
+
+== Gradle Task
+
+.Command
+[source,bash,subs="attributes+,+macros"]
+----
+% ./gradlew fineractReleaseStep12 -Pfineract.release.version={revnumber}
+----

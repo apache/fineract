@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.fund.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.fund.data.FundData;
 import org.apache.fineract.portfolio.fund.exception.FundNotFoundException;
@@ -39,9 +38,9 @@ public class FundReadPlatformServiceImpl implements FundReadPlatformService {
     private final PlatformSecurityContext context;
 
     @Autowired
-    public FundReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
+    public FundReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private static final class FundMapper implements RowMapper<FundData> {
@@ -70,7 +69,7 @@ public class FundReadPlatformServiceImpl implements FundReadPlatformService {
         final FundMapper rm = new FundMapper();
         final String sql = "select " + rm.schema() + " order by f.name";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
     }
 
     @Override
@@ -82,7 +81,7 @@ public class FundReadPlatformServiceImpl implements FundReadPlatformService {
             final FundMapper rm = new FundMapper();
             final String sql = "select " + rm.schema() + " where f.id = ?";
 
-            final FundData selectedFund = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { fundId });
+            final FundData selectedFund = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { fundId }); // NOSONAR
 
             return selectedFund;
         } catch (final EmptyResultDataAccessException e) {

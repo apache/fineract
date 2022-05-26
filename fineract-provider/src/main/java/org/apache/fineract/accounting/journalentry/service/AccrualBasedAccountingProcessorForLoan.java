@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
 import org.apache.fineract.accounting.common.AccountingConstants.AccrualAccountsForLoan;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForLoan;
@@ -33,18 +34,13 @@ import org.apache.fineract.accounting.journalentry.data.ChargePaymentDTO;
 import org.apache.fineract.accounting.journalentry.data.LoanDTO;
 import org.apache.fineract.accounting.journalentry.data.LoanTransactionDTO;
 import org.apache.fineract.organisation.office.domain.Office;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class AccrualBasedAccountingProcessorForLoan implements AccountingProcessorForLoan {
 
     private final AccountingProcessorHelper helper;
-
-    @Autowired
-    public AccrualBasedAccountingProcessorForLoan(final AccountingProcessorHelper accountingProcessorHelper) {
-        this.helper = accountingProcessorHelper;
-    }
 
     @Override
     public void createJournalEntriesForLoan(final LoanDTO loanDTO) {
@@ -65,9 +61,10 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
             }
 
             /***
-             * Handle repayments, repayments at disbursement and reversal of Repayments and Repayments at disbursement
+             * Handle repayments, loan refunds, repayments at disbursement and reversal of Repayments and Repayments at
+             * disbursement
              ***/
-            else if (loanTransactionDTO.getTransactionType().isRepayment()
+            else if (loanTransactionDTO.getTransactionType().isRepaymentType()
                     || loanTransactionDTO.getTransactionType().isRepaymentAtDisbursement()
                     || loanTransactionDTO.getTransactionType().isChargePayment()) {
                 createJournalEntriesForRepaymentsAndWriteOffs(loanDTO, loanTransactionDTO, office, false,
@@ -82,6 +79,11 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
             /** Logic for Refunds of Overpayments **/
             else if (loanTransactionDTO.getTransactionType().isRefund()) {
                 createJournalEntriesForRefund(loanDTO, loanTransactionDTO, office);
+            }
+
+            /** Logic for Credit Balance Refunds **/
+            else if (loanTransactionDTO.getTransactionType().isCreditBalanceRefund()) {
+                createJournalEntriesForCreditBalanceRefund(loanDTO, loanTransactionDTO, office);
             }
 
             /** Handle Write Offs, waivers and their reversals **/
@@ -292,9 +294,16 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
                             FinancialActivity.LIABILITY_TRANSFER.getValue(), loanProductId, paymentTypeId, loanId, transactionId,
                             transactionDate, totalDebitAmount, isReversal);
                 } else {
-                    this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode,
-                            AccrualAccountsForLoan.FUND_SOURCE.getValue(), loanProductId, paymentTypeId, loanId, transactionId,
-                            transactionDate, totalDebitAmount, isReversal);
+                    if (loanTransactionDTO.getTransactionType().isGoodwillCredit()) {
+                        this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode,
+                                AccrualAccountsForLoan.FUND_SOURCE.getValue(), loanProductId, paymentTypeId, loanId, transactionId,
+                                transactionDate, totalDebitAmount, isReversal);
+
+                    } else {
+                        this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode,
+                                AccrualAccountsForLoan.FUND_SOURCE.getValue(), loanProductId, paymentTypeId, loanId, transactionId,
+                                transactionDate, totalDebitAmount, isReversal);
+                    }
                 }
             }
         }
@@ -401,6 +410,25 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         }
     }
 
+    private void createJournalEntriesForCreditBalanceRefund(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO,
+            final Office office) {
+        // loan properties
+        final Long loanProductId = loanDTO.getLoanProductId();
+        final Long loanId = loanDTO.getLoanId();
+        final String currencyCode = loanDTO.getCurrencyCode();
+
+        // transaction properties
+        final String transactionId = loanTransactionDTO.getTransactionId();
+        final Date transactionDate = loanTransactionDTO.getTransactionDate();
+        final BigDecimal refundAmount = loanTransactionDTO.getAmount();
+        final boolean isReversal = loanTransactionDTO.isReversed();
+        final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
+
+        this.helper.createAccrualBasedJournalEntriesAndReversalsForLoan(office, currencyCode,
+                AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue(), AccrualAccountsForLoan.OVERPAYMENT.getValue(), loanProductId,
+                paymentTypeId, loanId, transactionId, transactionDate, refundAmount, isReversal);
+    }
+
     private void createJournalEntriesForRefundForActiveLoan(LoanDTO loanDTO, LoanTransactionDTO loanTransactionDTO, Office office) {
         // TODO Auto-generated method stub
         // loan properties
@@ -439,9 +467,10 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
             List<ChargePaymentDTO> chargePaymentDTOs = new ArrayList<>();
 
             for (ChargePaymentDTO chargePaymentDTO : loanTransactionDTO.getFeePayments()) {
-                chargePaymentDTOs.add(new ChargePaymentDTO(chargePaymentDTO.getChargeId(), chargePaymentDTO.getLoanChargeId(),
+                chargePaymentDTOs.add(new ChargePaymentDTO(chargePaymentDTO.getChargeId(),
                         chargePaymentDTO.getAmount().floatValue() < 0 ? chargePaymentDTO.getAmount().multiply(new BigDecimal(-1))
-                                : chargePaymentDTO.getAmount()));
+                                : chargePaymentDTO.getAmount(),
+                        chargePaymentDTO.getLoanChargeId()));
             }
             this.helper.createCreditJournalEntryOrReversalForLoanCharges(office, currencyCode,
                     CashAccountsForLoan.INCOME_FROM_FEES.getValue(), loanProductId, loanId, transactionId, transactionDate, feesAmount,
@@ -453,9 +482,10 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
             List<ChargePaymentDTO> chargePaymentDTOs = new ArrayList<>();
 
             for (ChargePaymentDTO chargePaymentDTO : loanTransactionDTO.getPenaltyPayments()) {
-                chargePaymentDTOs.add(new ChargePaymentDTO(chargePaymentDTO.getChargeId(), chargePaymentDTO.getLoanChargeId(),
+                chargePaymentDTOs.add(new ChargePaymentDTO(chargePaymentDTO.getChargeId(),
                         chargePaymentDTO.getAmount().floatValue() < 0 ? chargePaymentDTO.getAmount().multiply(new BigDecimal(-1))
-                                : chargePaymentDTO.getAmount()));
+                                : chargePaymentDTO.getAmount(),
+                        chargePaymentDTO.getLoanChargeId()));
             }
 
             this.helper.createCreditJournalEntryOrReversalForLoanCharges(office, currencyCode,

@@ -68,9 +68,11 @@ public class AccountNumberFormatWritePlatformServiceJpaRepositoryImpl implements
                 accountNumberPrefixType = AccountNumberPrefixType.fromInt(prefixTypeId);
             }
 
-            AccountNumberFormat accountNumberFormat = new AccountNumberFormat(entityAccountType, accountNumberPrefixType);
+            String prefixCharacter = command.stringValueOfParameterNamed(AccountNumberFormatConstants.prefixCharacterParamName);
 
-            this.accountNumberFormatRepository.save(accountNumberFormat);
+            AccountNumberFormat accountNumberFormat = new AccountNumberFormat(entityAccountType, accountNumberPrefixType, prefixCharacter);
+
+            this.accountNumberFormatRepository.saveAndFlush(accountNumberFormat);
 
             return new CommandProcessingResultBuilder() //
                     .withEntityId(accountNumberFormat.getId()) //
@@ -104,6 +106,13 @@ public class AccountNumberFormatWritePlatformServiceJpaRepositoryImpl implements
                 final AccountNumberPrefixType accountNumberPrefixType = AccountNumberPrefixType.fromInt(newValue);
                 actualChanges.put(AccountNumberFormatConstants.prefixTypeParamName, accountNumberPrefixType);
                 accountNumberFormatForUpdate.setPrefix(accountNumberPrefixType);
+            }
+
+            if (command.isChangeInStringParameterNamed(AccountNumberFormatConstants.prefixCharacterParamName,
+                    accountNumberFormatForUpdate.getPrefixCharacter())) {
+                final String newValue = command.stringValueOfParameterNamed(AccountNumberFormatConstants.prefixCharacterParamName);
+                actualChanges.put(AccountNumberFormatConstants.prefixCharacterParamName, newValue);
+                accountNumberFormatForUpdate.setPrefixCharacter(newValue);
             }
 
             if (!actualChanges.isEmpty()) {

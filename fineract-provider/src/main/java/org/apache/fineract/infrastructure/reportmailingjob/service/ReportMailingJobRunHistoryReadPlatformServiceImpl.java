@@ -26,8 +26,8 @@ import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobRunHistoryData;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,15 +39,19 @@ import org.springframework.stereotype.Service;
 public class ReportMailingJobRunHistoryReadPlatformServiceImpl implements ReportMailingJobRunHistoryReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final ReportMailingJobRunHistoryMapper reportMailingJobRunHistoryMapper;
     private final ColumnValidator columnValidator;
-    private final PaginationHelper<ReportMailingJobRunHistoryData> paginationHelper = new PaginationHelper<>();
+    private final PaginationHelper paginationHelper;
 
     @Autowired
-    public ReportMailingJobRunHistoryReadPlatformServiceImpl(final RoutingDataSource dataSource, final ColumnValidator columnValidator) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public ReportMailingJobRunHistoryReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final ColumnValidator columnValidator,
+            DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.sqlGenerator = sqlGenerator;
         this.reportMailingJobRunHistoryMapper = new ReportMailingJobRunHistoryMapper();
         this.columnValidator = columnValidator;
+        this.paginationHelper = paginationHelper;
     }
 
     @Override
@@ -56,7 +60,7 @@ public class ReportMailingJobRunHistoryReadPlatformServiceImpl implements Report
         final StringBuilder sqlStringBuilder = new StringBuilder(200);
         final List<Object> queryParameters = new ArrayList<>();
 
-        sqlStringBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlStringBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
         sqlStringBuilder.append(this.reportMailingJobRunHistoryMapper.reportMailingJobRunHistorySchema());
 
         if (reportMailingJobId != null) {
@@ -74,15 +78,16 @@ public class ReportMailingJobRunHistoryReadPlatformServiceImpl implements Report
         }
 
         if (searchParameters.isLimited()) {
-            sqlStringBuilder.append(" limit ").append(searchParameters.getLimit());
-
+            sqlStringBuilder.append(" ");
             if (searchParameters.isOffset()) {
-                sqlStringBuilder.append(" offset ").append(searchParameters.getOffset());
+                sqlStringBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
+            } else {
+                sqlStringBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
             }
         }
 
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, "SELECT FOUND_ROWS()", sqlStringBuilder.toString(),
-                queryParameters.toArray(), this.reportMailingJobRunHistoryMapper);
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlStringBuilder.toString(), queryParameters.toArray(),
+                this.reportMailingJobRunHistoryMapper);
     }
 
     private static final class ReportMailingJobRunHistoryMapper implements RowMapper<ReportMailingJobRunHistoryData> {

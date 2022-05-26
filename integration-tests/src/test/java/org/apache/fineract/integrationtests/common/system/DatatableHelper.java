@@ -72,6 +72,7 @@ public class DatatableHelper {
         final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
         map.put("datatableName", Utils.randomNameGenerator(apptableName + "_", 5));
         map.put("apptableName", apptableName);
+        map.put("entitySubType", "PERSON");
         map.put("multiRow", multiRow);
         addDatatableColumns(datatableColumnsList, "Spouse Name", "String", true, 25);
         addDatatableColumns(datatableColumnsList, "Number of Dependents", "Number", true, null);

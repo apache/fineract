@@ -23,25 +23,20 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.closure.data.GLClosureData;
 import org.apache.fineract.accounting.closure.exception.GLClosureNotFoundException;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    public GLClosureReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-    }
 
     private static final class GLClosureMapper implements RowMapper<GLClosureData> {
 
@@ -80,7 +75,7 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
     public List<GLClosureData> retrieveAllGLClosures(final Long officeId) {
         final GLClosureMapper rm = new GLClosureMapper();
 
-        String sql = "select " + rm.schema() + " and glClosure.is_deleted = 0";
+        String sql = "select " + rm.schema() + " and glClosure.is_deleted = false";
         final Object[] objectArray = new Object[1];
         int arrayPos = 0;
         if (officeId != null && officeId != 0) {
@@ -92,7 +87,7 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
         sql = sql + " order by glClosure.closing_date desc";
 
         final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
-        return this.jdbcTemplate.query(sql, rm, finalObjectArray);
+        return this.jdbcTemplate.query(sql, rm, finalObjectArray); // NOSONAR
     }
 
     @Override
@@ -102,7 +97,7 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
             final GLClosureMapper rm = new GLClosureMapper();
             final String sql = "select " + rm.schema() + " and glClosure.id = ?";
 
-            final GLClosureData glAccountData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glClosureId });
+            final GLClosureData glAccountData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glClosureId }); // NOSONAR
 
             return glAccountData;
         } catch (final EmptyResultDataAccessException e) {

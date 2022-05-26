@@ -22,7 +22,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityRelationData;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityToEntityMappingData;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
@@ -48,10 +47,10 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
     private final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepository;
 
     @Autowired
-    public FineractEntityAccessReadServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
+    public FineractEntityAccessReadServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepository) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.fineractEntityRelationRepository = fineractEntityRelationRepository;
     }
 

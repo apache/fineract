@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.savings.service;
 
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -29,7 +30,7 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
@@ -58,21 +59,24 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
     private final PlatformSecurityContext context;
     private final JdbcTemplate jdbcTemplate;
     private final DepositAccountInterestRateChartMapper chartRowMapper = new DepositAccountInterestRateChartMapper();
-    private final DepositAccountInterestRateChartExtractor chartExtractor = new DepositAccountInterestRateChartExtractor();
+    private final DepositAccountInterestRateChartExtractor chartExtractor;
     private final InterestRateChartDropdownReadPlatformService chartDropdownReadPlatformService;
     private final InterestIncentiveDropdownReadPlatformService interestIncentiveDropdownReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     @Autowired
-    public DepositAccountInterestRateChartReadPlatformServiceImpl(PlatformSecurityContext context, final RoutingDataSource dataSource,
+    public DepositAccountInterestRateChartReadPlatformServiceImpl(PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             InterestRateChartDropdownReadPlatformService chartDropdownReadPlatformService,
             final InterestIncentiveDropdownReadPlatformService interestIncentiveDropdownReadPlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService) {
+            final CodeValueReadPlatformService codeValueReadPlatformService, DatabaseSpecificSQLGenerator sqlGenerator) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.chartDropdownReadPlatformService = chartDropdownReadPlatformService;
         this.interestIncentiveDropdownReadPlatformService = interestIncentiveDropdownReadPlatformService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
+        this.sqlGenerator = sqlGenerator;
+        chartExtractor = new DepositAccountInterestRateChartExtractor(sqlGenerator);
     }
 
     @Override
@@ -80,7 +84,7 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
         try {
             this.context.authenticatedUser();
             final String sql = "select " + this.chartRowMapper.schema() + " where irc.id = ? ";
-            return this.jdbcTemplate.queryForObject(sql, this.chartRowMapper, new Object[] { chartId });
+            return this.jdbcTemplate.queryForObject(sql, this.chartRowMapper, new Object[] { chartId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new DepositAccountInterestRateChartNotFoundException(chartId, e);
         }
@@ -94,13 +98,13 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
         sql.append(this.chartExtractor.schema());
         sql.append(" where irc.id = ? order by irc.id asc, ");
         sql.append("CASE ");
-        sql.append("WHEN isPrimaryGroupingByAmount then ircd.amount_range_from ");
-        sql.append("WHEN isPrimaryGroupingByAmount then ircd.amount_range_to ");
+        sql.append("WHEN irc.is_primary_grouping_by_amount then ircd.amount_range_from ");
+        sql.append("WHEN irc.is_primary_grouping_by_amount then ircd.amount_range_to ");
         sql.append("END,");
         sql.append("ircd.from_period, ircd.to_period,");
         sql.append("CASE ");
-        sql.append("WHEN !isPrimaryGroupingByAmount then ircd.amount_range_from ");
-        sql.append("WHEN !isPrimaryGroupingByAmount then ircd.amount_range_to ");
+        sql.append("WHEN NOT irc.is_primary_grouping_by_amount then ircd.amount_range_from ");
+        sql.append("WHEN NOT irc.is_primary_grouping_by_amount then ircd.amount_range_to ");
         sql.append("END");
         Collection<DepositAccountInterestRateChartData> chartDatas = this.jdbcTemplate.query(sql.toString(), this.chartExtractor,
                 new Object[] { chartId });
@@ -140,17 +144,21 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
         sql.append(this.chartExtractor.schema());
         sql.append(" where irc.savings_account_id = ? order by irc.id asc, ");
         sql.append("CASE ");
-        sql.append("WHEN isPrimaryGroupingByAmount then ircd.amount_range_from ");
-        sql.append("WHEN isPrimaryGroupingByAmount then ircd.amount_range_to ");
+        sql.append("WHEN irc.is_primary_grouping_by_amount then ircd.amount_range_from ");
+        sql.append("WHEN irc.is_primary_grouping_by_amount then ircd.amount_range_to ");
         sql.append("END,");
         sql.append("ircd.from_period, ircd.to_period,");
         sql.append("CASE ");
-        sql.append("WHEN !isPrimaryGroupingByAmount then ircd.amount_range_from ");
-        sql.append("WHEN !isPrimaryGroupingByAmount then ircd.amount_range_to ");
+        sql.append("WHEN NOT irc.is_primary_grouping_by_amount then ircd.amount_range_from ");
+        sql.append("WHEN NOT irc.is_primary_grouping_by_amount then ircd.amount_range_to ");
         sql.append("END");
 
-        Collection<DepositAccountInterestRateChartData> chartDatas = this.jdbcTemplate.query(sql.toString(), this.chartExtractor,
-                new Object[] { accountId });
+        Collection<DepositAccountInterestRateChartData> chartDatas = this.jdbcTemplate.query(con -> {
+            PreparedStatement preparedStatement = con.prepareStatement(sql.toString(), ResultSet.TYPE_SCROLL_SENSITIVE,
+                    ResultSet.CONCUR_UPDATABLE);
+            preparedStatement.setLong(1, accountId);
+            return preparedStatement;
+        }, this.chartExtractor);
         if (chartDatas == null || chartDatas.isEmpty()) {
             throw new DepositAccountInterestRateChartNotFoundException(accountId);
         }
@@ -189,7 +197,7 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
             return this.schemaSql;
         }
 
-        private DepositAccountInterestRateChartExtractor() {
+        private DepositAccountInterestRateChartExtractor(DatabaseSpecificSQLGenerator sqlGenerator) {
             final StringBuilder sqlBuilder = new StringBuilder(400);
 
             sqlBuilder.append("irc.id as ircId, irc.name as ircName, irc.description as ircDescription,")
@@ -207,7 +215,7 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
                     .append("from ")
                     .append("m_savings_account_interest_rate_chart irc left join m_savings_account_interest_rate_slab ircd on irc.id=ircd.savings_account_interest_rate_chart_id ")
                     .append(" left join m_savings_interest_incentives  iri on iri.deposit_account_interest_rate_slab_id =ircd.id ")
-                    .append(" left join m_code_value code on code.id = iri.attribute_value ")
+                    .append(" left join m_code_value code on " + sqlGenerator.castChar("code.id") + " = iri.attribute_value ")
                     .append("left join m_currency curr on ircd.currency_code= curr.code ")
                     .append("left join m_savings_account sa on irc.savings_account_id=sa.id ");
 

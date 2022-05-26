@@ -61,4 +61,8 @@ public final class TaxGroupData implements Serializable {
         this.taxComponents = taxComponents;
     }
 
+    public Collection<TaxGroupMappingsData> getTaxAssociations() {
+        return this.taxAssociations;
+    }
+
 }

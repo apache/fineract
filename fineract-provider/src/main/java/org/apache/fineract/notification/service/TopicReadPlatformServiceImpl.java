@@ -21,7 +21,6 @@ package org.apache.fineract.notification.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.notification.data.TopicData;
 import org.apache.fineract.notification.exception.TopicNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +35,8 @@ public class TopicReadPlatformServiceImpl implements TopicReadPlatformService {
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public TopicReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public TopicReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private static final class TopicMapper implements RowMapper<TopicData> {
@@ -74,14 +73,14 @@ public class TopicReadPlatformServiceImpl implements TopicReadPlatformService {
     public Collection<TopicData> getAllTopics() {
         final TopicMapper tm = new TopicMapper();
         String sql = "select " + tm.schema();
-        return this.jdbcTemplate.query(sql, tm, new Object[] {});
+        return this.jdbcTemplate.query(sql, tm); // NOSONAR
     }
 
     @Override
     public Collection<TopicData> getAllEnabledTopics() {
         final TopicMapper tm = new TopicMapper();
         final String sql = "select " + tm.schema() + " where t.is_active = ?";
-        return this.jdbcTemplate.query(sql, tm, new Object[] { true });
+        return this.jdbcTemplate.query(sql, tm, new Object[] { true }); // NOSONAR
     }
 
     @Override
@@ -89,7 +88,7 @@ public class TopicReadPlatformServiceImpl implements TopicReadPlatformService {
         try {
             final TopicMapper tm = new TopicMapper();
             final String sql = "select " + tm.schema() + " where t.id = ?";
-            return this.jdbcTemplate.queryForObject(sql, tm, new Object[] { topicId });
+            return this.jdbcTemplate.queryForObject(sql, tm, new Object[] { topicId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new TopicNotFoundException(topicId, e);
         }

@@ -18,24 +18,20 @@
  */
 package org.apache.fineract.accounting.journalentry.handler;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryRunningBalanceUpdateService;
 import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 @CommandType(entity = "JOURNALENTRY", action = "UPDATERUNNINGBALANCE")
+@RequiredArgsConstructor
 public class UpdateRunningBalanceCommandHandler implements NewCommandSourceHandler {
 
     private final JournalEntryRunningBalanceUpdateService journalEntryRunningBalanceUpdateService;
-
-    @Autowired
-    public UpdateRunningBalanceCommandHandler(final JournalEntryRunningBalanceUpdateService journalEntryRunningBalanceUpdateService) {
-        this.journalEntryRunningBalanceUpdateService = journalEntryRunningBalanceUpdateService;
-    }
 
     @Override
     public CommandProcessingResult processCommand(JsonCommand command) {

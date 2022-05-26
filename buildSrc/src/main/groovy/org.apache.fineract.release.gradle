@@ -1,0 +1,268 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+apply plugin: 'org.apache.fineract.gradle'
+apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.dependencies.gradle"
+
+fineract {
+    config {
+        username = "${findProperty('fineract.config.username')}"
+        password = "${findProperty('fineract.config.password')}"
+
+        doc {
+            url = 'git@github.com:apache/fineract-site.git'
+            directory = "${System.getProperty("java.io.tmpdir")}/fineract-site"
+            branch = "asf-site"
+        }
+        git {
+            dir = "${projectDir.absolutePath}/.git"
+            sections = [
+                [
+                    section: "user",
+                    name: "name",
+                    value: "${findProperty('fineract.config.name')}",
+                ],
+                [
+                    section: "user",
+                    name: "email",
+                    value: "${findProperty('fineract.config.email')}",
+                ],
+                [
+                    section: "user",
+                    name: "signingkey",
+                    value: "${findProperty('fineract.config.gnupg.keyName')}",
+                ],
+                [
+                    section: "commit",
+                    name: "gpgsign",
+                    value: "true",
+                ],
+            ]
+        }
+        template {
+            templateDir = "${projectDir}/buildSrc/src/main/resources"
+        }
+        gpg {
+            keyName = "${findProperty('fineract.config.gnupg.keyName')}"
+            publicKeyring = "${findProperty('fineract.config.gnupg.publicKeyring')}"
+            secretKeyring = "${findProperty('fineract.config.gnupg.secretKeyring')}"
+            password = "${findProperty('fineract.config.gnupg.password')}"
+        }
+        smtp {
+            host = 'smtp.gmail.com'
+            username = "${findProperty('fineract.config.smtp.username')}"
+            password = "${findProperty('fineract.config.smtp.password')}"
+            tls = true
+            ssl = true
+        }
+        subversion {
+            username = "${findProperty('fineract.config.username')}"
+            password = "${findProperty('fineract.config.password')}"
+            revision = 'HEAD'
+        }
+        jira {
+            url = 'https://issues.apache.org/jira/rest/api/2/'
+            username = "${findProperty('fineract.config.username')}"
+            password = "${findProperty('fineract.config.password')}"
+        }
+        confluence {
+            url = 'https://cwiki.apache.org/confluence/rest/api/'
+            username = "${findProperty('fineract.config.username')}"
+            password = "${findProperty('fineract.config.password')}"
+        }
+    }
+
+    steps = [
+        test: [
+            order: 0,
+            description: 'Test',
+            email: [
+                from: "${findProperty('fineract.config.email')}",
+                to: "${findProperty('fineract.config.email')}",
+                mime: 'text/plain',
+                subject: "[FINERACT] [TEST] 📣 🏁 🗳️ 🚀 📈 🔀 🌠 Propose new release ${version}",
+                messageTemplate: [
+                    templateFile: "${projectDir}/buildSrc/src/main/resources/email/release.step01.headsup.message.ftl"
+                ]
+            ],
+            subversion: [
+                url: 'https://dist.apache.org/repos/dist/dev/fineract',
+                directory: "${System.getProperty("java.io.tmpdir")}"
+            ],
+            jira: [
+                query: "project in (\'FINERACT\') and fixVersion = ${findProperty('fineract.release.version')} and status in (CLOSED, RESOLVED)"
+            ],
+            template: [
+                templateFile: "${projectDir}/buildSrc/src/main/resources/jira/changelog.txt.ftl"
+            ],
+            gpg: [
+                files: [
+                    "${projectDir}/buildSrc/build/libs/buildSrc.jar"
+                ]
+            ]
+        ],
+        step1: [
+            order: 1,
+            description: 'Send heads-up email to dev mailing list',
+            email: [
+                from: "${findProperty('fineract.config.email')}",
+                name: "${findProperty('fineract.config.name')}",
+                to: "${findProperty('fineract.config.email')}",
+                // to: 'dev@fineract.apache.org',
+                mime: 'text/plain',
+                subjectTemplate: [
+                    templateFile: "${projectDir}/buildSrc/src/main/resources/email/release.step01.headsup.subject.ftl"
+                ],
+                messageTemplate: [
+                    templateFile: "${projectDir}/buildSrc/src/main/resources/email/release.step01.headsup.message.ftl"
+                ]
+            ]
+        ],
+        step2: [
+            order: 2,
+            description: 'Clean up JIRA',
+        ],
+        step3: [
+            order: 3,
+            description: 'Create a release branch',
+            email: [
+                from: "${findProperty('fineract.config.email')}",
+                name: "${findProperty('fineract.config.name')}",
+                to: "${findProperty('fineract.config.email')}",
+                // to: 'dev@fineract.apache.org',
+                mime: 'text/plain',
+                subjectTemplate: [
+                    templateFile: "${projectDir}/buildSrc/src/main/resources/email/release.step03.branch.subject.ftl"
+                ],
+                messageTemplate: [
+                    templateFile: "${projectDir}/buildSrc/src/main/resources/email/release.step03.branch.message.ftl"
+                ]
+            ]
+        ],
+        step4: [
+            order: 4,
+            description: 'Freeze JIRA version',
+        ],
+        step5: [
+            order: 5,
+            description: 'Create release tag',
+            git: [
+                messageTemplate: [
+                    templateFile: "${projectDir}/buildSrc/src/main/resources/git/release.step05.tag.message.ftl"
+                ]
+            ]
+        ],
+        step6: [
+            order: 6,
+            description: 'Create a distribution',
+        ],
+        step7: [
+            order: 7,
+            description: 'Sign the distribution artifacts',
+            gpg: [
+                files: [
+                    "${rootDir}/fineract-war/build/distributions/apache-fineract-${project.version}-src.tar.gz",
+                    "${rootDir}/fineract-war/build/distributions/apache-fineract-${project.version}-binary.tar.gz"
+                ]
+            ]
+        ],
+        step8: [
+            order: 8,
+            description: 'Upload distribution artifacts to staging environment',
+            subversion: [
+                url: 'https://dist.apache.org/repos/dist/dev/fineract',
+                directory: "${System.getProperty("java.io.tmpdir")}/fineract-dist-dev"
+            ],
+        ],
+        step9: [
+            order: 9,
+            description: 'Verify distribution in staging environment',
+        ],
+        step10: [
+            order: 10,
+            description: 'Start voting on the dev mailing list',
+            email: [
+                from: "${findProperty('fineract.config.email')}",
+                name: "${findProperty('fineract.config.name')}",
+                to: "${findProperty('fineract.config.email')}",
+                // to: 'dev@fineract.apache.org',
+                mime: 'text/plain',
+                subjectTemplate: [
+                    templateFile: "${projectDir}/buildSrc/src/main/resources/email/release.step10.vote.subject.ftl"
+                ],
+                messageTemplate: [
+                    templateFile: "${projectDir}/buildSrc/src/main/resources/email/release.step10.vote.message.ftl"
+                ]
+            ]
+        ],
+        step11: [
+            order: 11,
+            description: 'Conclude the vote and announce results',
+            email: [
+                from: "${findProperty('fineract.config.email')}",
+                name: "${findProperty('fineract.config.name')}",
+                to: "${findProperty('fineract.config.email')}",
+                // to: 'dev@fineract.apache.org',
+                mime: 'text/plain',
+                subjectTemplate: [
+                    templateFile: "${projectDir}/buildSrc/src/main/resources/email/release.step11.vote.subject.ftl"
+                ],
+                messageTemplate: [
+                    templateFile: "${projectDir}/buildSrc/src/main/resources/email/release.step11.vote.message.ftl"
+                ]
+            ]
+        ],
+        step12: [
+            order: 12,
+            description: 'Upload distribution artifacts to release environment',
+            subversion: [
+                url: 'https://dist.apache.org/repos/dist/release/fineract',
+                directory: "${System.getProperty("java.io.tmpdir")}/fineract-dist-release"
+            ],
+        ],
+        step13: [
+            order: 13,
+            description: 'Close release branch and merge to \'develop\'',
+        ],
+        step14: [
+            order: 14,
+            description: 'Update website (not yet automated)',
+        ],
+        step15: [
+            order: 15,
+            description: 'Send email to announcement mailing list',
+            jira: [
+                projectId: "12319420",
+                query: "project in (\'FINERACT\') and fixVersion = ${findProperty('fineract.release.version')} and status in (CLOSED, RESOLVED, WONTFIX)"
+            ],
+            email: [
+                from: "${findProperty('fineract.config.email')}",
+                name: "${findProperty('fineract.config.name')}",
+                to: "${findProperty('fineract.config.email')}",
+                // to: 'dev@fineract.apache.org',
+                mime: 'text/plain',
+                subjectTemplate: [
+                    templateFile: "${projectDir}/buildSrc/src/main/resources/email/release.step15.announce.subject.ftl"
+                ],
+                messageTemplate: [
+                    templateFile: "${projectDir}/buildSrc/src/main/resources/email/release.step15.announce.message.ftl"
+                ]
+            ]
+        ]
+    ]
+}

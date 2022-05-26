@@ -1,0 +1,109 @@
+= Cucumber Cheatsheet
+
+Cucumber is a test framework based on Behavior-Driven Development (BDD). Tests are written in plain text with very basic syntax rules. These rules form a mini language that is called Gherkin.
+
+A specification resembles spoken language. This makes it ideal for use with non-technical people that have domain specific knowledge. The emphasis of Cucumber lies on finding examples to describe your test cases. The few keywords and language rules are easy to explain to anyone (compared JUnit for example).
+
+== Keywords
+
+The Gherkin language has the following keywords:
+
+* `Feature`
+* `Rule`
+* `Scenario Outline` or `Scenario Template`
+* `Example` or `Scenario`
+* `Examples` or `Scenarios`
+* `Background`
+* `Given`
+* `And`
+* `But`
+* `When`
+* `Then`
+
+There are a couple of additional signs used in Gherkin:
+
+* `|` is as column delimiters in `Examples` tables
+* with `@` you can assign any kind of tags to categorize the specs (or e.g. relate them to certain Jira tickets)
+* `#` is used to indicate line comments
+
+IMPORTANT: The tag `@ignore` is used to skip tests. This is a somewhat arbitrary choice (we could use any other tag to indicate temporarily disabled tests).
+
+Each non-empty line of a test specification needs to start with one of these keywords. The text blocks that follows the keywords are mapped to so called step definitions that contain the actual test code.
+
+A typical Cucumber test specification written in Gherkin looks like this:
+
+[source,gherkin,subs="attributes+,+macros"]
+----
+include::{rootdir}/fineract-provider/src/test/resources/features/template/template.service.feature[lines=19..]
+----
+
+The corresponding step definitions would look like this:
+
+[source,java,subs="attributes+,+macros"]
+----
+include::{rootdir}/fineract-provider/src/test/java/org/apache/fineract/template/service/TemplateServiceStepDefinitions.java[lines=19..]
+----
+
+NOTE: This example is an actual test specification that you can find in the `fineract-provider` module.
+
+=== Feature
+
+This keyword is used to group scenarios and to group related scenarios. All Gherkin specifications must start with the word `Feature`.
+
+=== Descriptions
+
+A description is any non-empty line that doesn't start with a keyword. Descriptions can be placed under the keywords:
+
+* `Feature`
+* `Rule`
+* `Background`
+* `Example`/`Scenario`
+* `Scenario Outline`
+
+=== Rule
+
+Rule is used to group multiple related scenarios together.
+
+=== Example/Scenario
+
+This is the important part of the specification as it should describe the business logic in more detail with the usage of steps (usually `Given`, `When`, `Then`)
+
+=== Steps
+
+TBD
+
+=== Given
+
+TBD
+
+=== When
+
+TBD
+
+=== Then
+
+TBD
+
+=== And, But
+
+TBD
+
+=== Background
+
+TBD
+
+=== Scenario Outline
+
+TBD
+
+=== Examples/Tables
+
+TBD
+
+== Outlook
+
+As a proof of concept we've converted all unit tests in `fineract-provider` into Cucumber tests. The more interesting part starts when we'll attack the integration tests with over 400 mostly business logic related tests. These tests fit very well in Cucumber's test specification structure (a lot of _if-then-else_ or in Gherkin: _Given-When-Then_). Migrating all tests will take a while, but we would already recommend trying to implement tests as Cucumber specifications. It should be relatively easy to convert these tests into the new syntax.
+
+Hopefully this will motivate even more people from the broader Fineract community to participate in the project by sharing their domain specific knowledge as Cucumber specifications. Specifications are written in Englisch (although not a technical requirement).
+
+NOTE: Have a look at the specifications in `fineract-provider` for an initial inspiration. For more information please see https://cucumber.io/docs

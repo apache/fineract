@@ -44,6 +44,7 @@ public enum CalendarRemindBy {
     private static final Map<Integer, CalendarRemindBy> intToEnumMap = new HashMap<>();
     private static int minValue;
     private static int maxValue;
+
     static {
         int i = 0;
         for (final CalendarRemindBy remindBy : CalendarRemindBy.values()) {

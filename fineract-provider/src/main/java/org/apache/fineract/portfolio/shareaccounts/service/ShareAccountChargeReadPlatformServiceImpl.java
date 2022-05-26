@@ -24,7 +24,6 @@ import java.sql.SQLException;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.service.ChargeEnumerations;
@@ -40,8 +39,8 @@ public class ShareAccountChargeReadPlatformServiceImpl implements ShareAccountCh
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public ShareAccountChargeReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public ShareAccountChargeReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
@@ -50,9 +49,9 @@ public class ShareAccountChargeReadPlatformServiceImpl implements ShareAccountCh
         final StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("select ").append(rm.schema()).append(" where sc.account_id=? ");
         if (status.equalsIgnoreCase("active")) {
-            sqlBuilder.append(" and sc.is_active = 1 ");
+            sqlBuilder.append(" and sc.is_active = true ");
         } else if (status.equalsIgnoreCase("inactive")) {
-            sqlBuilder.append(" and sc.is_active = 0 ");
+            sqlBuilder.append(" and sc.is_active = false ");
         }
         sqlBuilder.append(" order by sc.charge_time_enum ASC");
 

@@ -19,6 +19,7 @@
 dependencies {
     // project(':fineract-provider')
     implementation(
+            'jakarta.annotation:jakarta.annotation-api',
             'io.swagger:swagger-annotations',
             'com.squareup.retrofit2:retrofit',
             'com.squareup.retrofit2:adapter-java8',
@@ -34,13 +35,4 @@ dependencies {
         exclude group: 'org.apache.oltu.oauth2', module: 'org.apache.oltu.oauth2.common'
         exclude group: 'org.slf4j'
     }
-
-    testImplementation(
-            'org.junit.jupiter:junit-jupiter-api',
-            'com.google.truth:truth',
-            'com.google.truth.extensions:truth-java8-extension'
-            )
-    testRuntimeOnly(
-            'org.junit.jupiter:junit-jupiter-engine'
-            )
 }

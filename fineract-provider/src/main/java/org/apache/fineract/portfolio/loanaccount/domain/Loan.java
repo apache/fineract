@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -121,6 +122,7 @@ import org.apache.fineract.portfolio.loanaccount.exception.LoanForeclosureExcept
 import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerAssignmentDateException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerUnassignmentDateException;
+import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataNotAllowedException;
 import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
 import org.apache.fineract.portfolio.loanaccount.exception.UndoLastTrancheDisbursementException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
@@ -182,7 +184,7 @@ public class Loan extends AbstractPersistableCustom {
     @Column(name = "loan_type_enum", nullable = false)
     private Integer loanType;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private LoanProduct loanProduct;
 
@@ -316,14 +318,14 @@ public class Loan extends AbstractPersistableCustom {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<LoanCollateral> collateral = null;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<LoanCollateralManagement> loanCollateralManagements = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<LoanOfficerAssignmentHistory> loanOfficerHistory;
 
     @OrderBy(value = "installmentNumber")
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
     private List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = new ArrayList<>();
 
     @OrderBy(value = "dateOf, id")
@@ -362,7 +364,7 @@ public class Loan extends AbstractPersistableCustom {
     @OrderBy(value = "expectedDisbursementDate, id")
     private List<LoanDisbursementDetails> disbursementDetails = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch = FetchType.LAZY)
     private List<PostDatedChecks> postDatedChecks = new ArrayList<>();
 
     @OrderBy(value = "termApplicableFrom, id")
@@ -372,7 +374,7 @@ public class Loan extends AbstractPersistableCustom {
     @Column(name = "total_recovered_derived", scale = 6, precision = 19)
     private BigDecimal totalRecovered;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loan", optional = true, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loan", optional = true, orphanRemoval = true, fetch = FetchType.LAZY)
     private LoanInterestRecalculationDetails loanInterestRecalculationDetails;
 
     @Column(name = "is_npa", nullable = false)
@@ -408,7 +410,7 @@ public class Loan extends AbstractPersistableCustom {
     @Column(name = "is_topup", nullable = false)
     private boolean isTopup = false;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loan", optional = true, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loan", optional = true, orphanRemoval = true, fetch = FetchType.LAZY)
     private LoanTopupDetails loanTopupDetails;
 
     @OneToMany(fetch = FetchType.LAZY)
@@ -1244,8 +1246,17 @@ public class Loan extends AbstractPersistableCustom {
     }
 
     public void updateLoanSchedule(final Collection<LoanRepaymentScheduleInstallment> installments, AppUser currentUser) {
-        this.repaymentScheduleInstallments.clear();
+        List<LoanRepaymentScheduleInstallment> existingInstallments = new ArrayList<>(this.repaymentScheduleInstallments);
+        repaymentScheduleInstallments.clear();
         for (final LoanRepaymentScheduleInstallment installment : installments) {
+            LoanRepaymentScheduleInstallment existingInstallment = findByInstallmentNumber(existingInstallments,
+                    installment.getInstallmentNumber());
+            if (existingInstallment != null) {
+                Set<LoanInstallmentCharge> existingCharges = existingInstallment.getInstallmentCharges();
+                installment.getInstallmentCharges().addAll(existingCharges);
+                existingCharges.forEach(c -> c.setInstallment(installment));
+                existingInstallment.getInstallmentCharges().clear();
+            }
             addLoanRepaymentScheduleInstallment(installment);
         }
         updateLoanScheduleDependentDerivedFields();
@@ -1254,15 +1265,27 @@ public class Loan extends AbstractPersistableCustom {
 
     }
 
+    private LoanRepaymentScheduleInstallment findByInstallmentNumber(Collection<LoanRepaymentScheduleInstallment> installments,
+            Integer installmentNumber) {
+        for (LoanRepaymentScheduleInstallment installment : installments) {
+            if (Objects.equals(installment.getInstallmentNumber(), installmentNumber)) {
+                return installment;
+            }
+        }
+        return null;
+    }
+
     /**
      * method updates accrual derived fields on installments and reverse the unprocessed transactions
      */
     private void applyAccurals(AppUser currentUser) {
         Collection<LoanTransaction> accruals = retreiveListOfAccrualTransactions();
-        if (isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
-            applyPeriodicAccruals(accruals);
-        } else if (isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()) {
-            updateAccrualsForNonPeriodicAccruals(accruals, currentUser);
+        if (accruals.size() > 0) {
+            if (isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
+                applyPeriodicAccruals(accruals);
+            } else if (isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()) {
+                updateAccrualsForNonPeriodicAccruals(accruals, currentUser);
+            }
         }
     }
 
@@ -1330,8 +1353,10 @@ public class Loan extends AbstractPersistableCustom {
     }
 
     public void updateLoanScheduleDependentDerivedFields() {
-        this.expectedMaturityDate = Date.from(determineExpectedMaturityDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
-        this.actualMaturityDate = Date.from(determineExpectedMaturityDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+        if (this.getLoanRepaymentScheduleInstallmentsSize() > 0) {
+            this.expectedMaturityDate = Date.from(determineExpectedMaturityDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.actualMaturityDate = Date.from(determineExpectedMaturityDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+        }
     }
 
     private void updateLoanSummaryDerivedFields() {
@@ -1620,9 +1645,16 @@ public class Loan extends AbstractPersistableCustom {
             }
             final JsonArray disbursementDataArray = command.arrayOfParameterNamed(LoanApiConstants.disbursementDataParameterName);
 
-            if (disbursementDataArray == null || disbursementDataArray.size() == 0) {
-                final String errorMessage = "For this loan product, disbursement details must be provided";
-                throw new MultiDisbursementDataRequiredException(LoanApiConstants.disbursementDataParameterName, errorMessage);
+            if (loanProduct.isDisallowExpectedDisbursements()) {
+                if (disbursementDataArray != null) {
+                    final String errorMessage = "For this loan product, disbursement details are not allowed";
+                    throw new MultiDisbursementDataNotAllowedException(LoanApiConstants.disbursementDataParameterName, errorMessage);
+                }
+            } else {
+                if (disbursementDataArray == null || disbursementDataArray.size() == 0) {
+                    final String errorMessage = "For this loan product, disbursement details must be provided";
+                    throw new MultiDisbursementDataRequiredException(LoanApiConstants.disbursementDataParameterName, errorMessage);
+                }
             }
             if (disbursementDataArray.size() > loanProduct.maxTrancheCount()) {
                 final String errorMessage = "Number of tranche shouldn't be greter than " + loanProduct.maxTrancheCount();
@@ -2224,31 +2256,19 @@ public class Loan extends AbstractPersistableCustom {
             LocalDate expecteddisbursementDate = command.localDateValueOfParameterNamed("expectedDisbursementDate");
 
             BigDecimal approvedLoanAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.approvedLoanAmountParameterName);
-
             if (approvedLoanAmount != null) {
+                compareApprovedToProposedPrincipal(approvedLoanAmount);
 
-                // Approved amount has to be less than or equal to principal
-                // amount demanded
+                /*
+                 * All the calculations are done based on the principal amount, so it is necessary to set principal
+                 * amount to approved amount
+                 */
+                this.approvedPrincipal = approvedLoanAmount;
 
-                if (approvedLoanAmount.compareTo(this.proposedPrincipal) < 0) {
-
-                    this.approvedPrincipal = approvedLoanAmount;
-
-                    /*
-                     * All the calculations are done based on the principal amount, so it is necessary to set principal
-                     * amount to approved amount
-                     */
-
-                    this.loanRepaymentScheduleDetail.setPrincipal(approvedLoanAmount);
-
-                    actualChanges.put(LoanApiConstants.approvedLoanAmountParameterName, approvedLoanAmount);
-                    actualChanges.put(LoanApiConstants.disbursementPrincipalParameterName, approvedLoanAmount);
-                    actualChanges.put(LoanApiConstants.disbursementNetDisbursalAmountParameterName, netDisbursalAmount);
-                } else if (approvedLoanAmount.compareTo(this.proposedPrincipal) > 0) {
-                    final String errorMessage = "Loan approved amount can't be greater than loan amount demanded.";
-                    throw new InvalidLoanStateTransitionException("approval", "amount.can't.be.greater.than.loan.amount.demanded",
-                            errorMessage, this.proposedPrincipal, approvedLoanAmount);
-                }
+                this.loanRepaymentScheduleDetail.setPrincipal(approvedLoanAmount);
+                actualChanges.put(LoanApiConstants.approvedLoanAmountParameterName, approvedLoanAmount);
+                actualChanges.put(LoanApiConstants.disbursementPrincipalParameterName, approvedLoanAmount);
+                actualChanges.put(LoanApiConstants.disbursementNetDisbursalAmountParameterName, netDisbursalAmount);
 
                 /* Update disbursement details */
                 if (disbursementDataArray != null) {
@@ -2259,10 +2279,16 @@ public class Loan extends AbstractPersistableCustom {
             recalculateAllCharges();
 
             if (loanProduct.isMultiDisburseLoan()) {
-
-                if (this.disbursementDetails.isEmpty()) {
-                    final String errorMessage = "For this loan product, disbursement details must be provided";
-                    throw new MultiDisbursementDataRequiredException(LoanApiConstants.disbursementDataParameterName, errorMessage);
+                if (loanProduct.isDisallowExpectedDisbursements()) {
+                    if (!disbursementDetails.isEmpty()) {
+                        final String errorMessage = "For this loan product, disbursement details are not allowed";
+                        throw new MultiDisbursementDataNotAllowedException(LoanApiConstants.disbursementDataParameterName, errorMessage);
+                    }
+                } else {
+                    if (disbursementDetails.isEmpty()) {
+                        final String errorMessage = "For this loan product, disbursement details must be provided";
+                        throw new MultiDisbursementDataRequiredException(LoanApiConstants.disbursementDataParameterName, errorMessage);
+                    }
                 }
 
                 if (this.disbursementDetails.size() > loanProduct.maxTrancheCount()) {
@@ -2313,6 +2339,39 @@ public class Loan extends AbstractPersistableCustom {
         }
 
         return actualChanges;
+
+    }
+
+    private void compareApprovedToProposedPrincipal(BigDecimal approvedLoanAmount) {
+
+        if (this.loanProduct().isDisallowExpectedDisbursements() && this.loanProduct().isAllowApprovedDisbursedAmountsOverApplied()) {
+            BigDecimal maxApprovedLoanAmount = getOverAppliedMax();
+            if (approvedLoanAmount.compareTo(maxApprovedLoanAmount) > 0) {
+                final String errorMessage = "Loan approved amount can't be greater than maximum applied loan amount calculation.";
+                throw new InvalidLoanStateTransitionException("approval",
+                        "amount.can't.be.greater.than.maximum.applied.loan.amount.calculation", errorMessage, approvedLoanAmount,
+                        maxApprovedLoanAmount);
+            }
+        } else {
+            if (approvedLoanAmount.compareTo(this.proposedPrincipal) > 0) {
+                final String errorMessage = "Loan approved amount can't be greater than loan amount demanded.";
+                throw new InvalidLoanStateTransitionException("approval", "amount.can't.be.greater.than.loan.amount.demanded", errorMessage,
+                        this.proposedPrincipal, approvedLoanAmount);
+            }
+        }
+    }
+
+    private BigDecimal getOverAppliedMax() {
+        BigDecimal maxAmount = null;
+        if (this.getLoanProduct().getOverAppliedCalculationType().equals("percentage")) {
+            BigDecimal overAppliedNumber = BigDecimal.valueOf(getLoanProduct().getOverAppliedNumber());
+            BigDecimal x = overAppliedNumber.divide(BigDecimal.valueOf(100));
+            BigDecimal totalPercentage = BigDecimal.valueOf(1).add(x);
+            maxAmount = this.proposedPrincipal.multiply(totalPercentage);
+        } else {
+            maxAmount = this.proposedPrincipal.add(BigDecimal.valueOf(getLoanProduct().getOverAppliedNumber()));
+        }
+        return maxAmount;
     }
 
     public Map<String, Object> undoApproval(final LoanLifecycleStateMachine loanLifecycleStateMachine) {
@@ -2542,11 +2601,7 @@ public class Loan extends AbstractPersistableCustom {
                     totalAmount = totalAmount.add(disbursementDetails.principal());
                 }
                 this.loanRepaymentScheduleDetail.setPrincipal(setPrincipalAmount);
-                if (totalAmount.compareTo(this.approvedPrincipal) > 0) {
-                    final String errorMsg = "Loan can't be disbursed,disburse amount is exceeding approved principal ";
-                    throw new LoanDisbursalException(errorMsg, "disburse.amount.must.be.less.than.approved.principal", principalDisbursed,
-                            this.approvedPrincipal);
-                }
+                compareDisbursedToApprovedOrProposedPrincipal(disburseAmount.getAmount(), totalAmount);
             } else {
                 this.loanRepaymentScheduleDetail.setPrincipal(this.loanRepaymentScheduleDetail.getPrincipal().minus(diff).getAmount());
             }
@@ -2557,6 +2612,25 @@ public class Loan extends AbstractPersistableCustom {
             }
         }
         return disburseAmount;
+    }
+
+    private void compareDisbursedToApprovedOrProposedPrincipal(BigDecimal disbursedAmount, BigDecimal totalDisbursed) {
+
+        if (this.loanProduct().isDisallowExpectedDisbursements() && this.loanProduct().isAllowApprovedDisbursedAmountsOverApplied()) {
+            BigDecimal maxDisbursedAmount = getOverAppliedMax();
+            if (disbursedAmount.compareTo(maxDisbursedAmount) > 0) {
+                final String errorMessage = "Loan disbursal amount can't be greater than maximum applied loan amount calculation.";
+                throw new InvalidLoanStateTransitionException("disbursal",
+                        "amount.can't.be.greater.than.maximum.applied.loan.amount.calculation", errorMessage, disbursedAmount,
+                        maxDisbursedAmount);
+            }
+        } else {
+            if (totalDisbursed.compareTo(this.approvedPrincipal) > 0) {
+                final String errorMsg = "Loan can't be disbursed,disburse amount is exceeding approved principal ";
+                throw new LoanDisbursalException(errorMsg, "disburse.amount.must.be.less.than.approved.principal", totalDisbursed,
+                        this.approvedPrincipal);
+            }
+        }
     }
 
     private ChangedTransactionDetail reprocessTransactionForDisbursement() {
@@ -3105,7 +3179,7 @@ public class Loan extends AbstractPersistableCustom {
             addLoanTransaction(loanTransaction);
         }
 
-        if (loanTransaction.isNotRepayment() && loanTransaction.isNotWaiver() && loanTransaction.isNotRecoveryRepayment()) {
+        if (loanTransaction.isNotRepaymentType() && loanTransaction.isNotWaiver() && loanTransaction.isNotRecoveryRepayment()) {
             final String errorMessage = "A transaction of type repayment or recovery repayment or waiver was expected but not received.";
             throw new InvalidLoanTransactionTypeException("transaction", "is.not.a.repayment.or.waiver.or.recovery.transaction",
                     errorMessage);
@@ -3428,7 +3502,7 @@ public class Loan extends AbstractPersistableCustom {
 
         final LocalDate currentTransactionDate = loanTransaction.getTransactionDate();
         for (final LoanTransaction previousTransaction : loanTransactions) {
-            if (previousTransaction.isRepayment() && previousTransaction.isNotReversed()) {
+            if (previousTransaction.isRepaymentType() && previousTransaction.isNotReversed()) {
                 if (currentTransactionDate.isBefore(previousTransaction.getTransactionDate())) {
                     isAfterLatRepayment = false;
                     break;
@@ -3469,7 +3543,7 @@ public class Loan extends AbstractPersistableCustom {
 
         LocalDate lastTransactionDate = null;
         for (final LoanTransaction transaction : this.loanTransactions) {
-            if (transaction.isRepayment() && transaction.isNonZero()) {
+            if (transaction.isRepaymentType() && transaction.isNonZero()) {
                 lastTransactionDate = transaction.getTransactionDate();
             }
         }
@@ -3541,10 +3615,11 @@ public class Loan extends AbstractPersistableCustom {
         validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_REPAYMENT_OR_WAIVER,
                 transactionForAdjustment.getTransactionDate());
 
-        if (transactionForAdjustment.isNotRepayment() && transactionForAdjustment.isNotWaiver()) {
-            final String errorMessage = "Only transactions of type repayment or waiver can be adjusted.";
-            throw new InvalidLoanTransactionTypeException("transaction", "adjustment.is.only.allowed.to.repayment.or.waiver.transaction",
-                    errorMessage);
+        if (transactionForAdjustment.isNotRepaymentType() && transactionForAdjustment.isNotWaiver()
+                && transactionForAdjustment.isNotCreditBalanceRefund()) {
+            final String errorMessage = "Only transactions of type repayment, waiver or credit balance refund can be adjusted.";
+            throw new InvalidLoanTransactionTypeException("transaction",
+                    "adjustment.is.only.allowed.to.repayment.or.waiver.or.creditbalancerefund.transactions", errorMessage);
         }
 
         transactionForAdjustment.reverse();
@@ -3560,7 +3635,7 @@ public class Loan extends AbstractPersistableCustom {
             this.loanStatus = LoanStatus.ACTIVE.getValue();
         }
 
-        if (newTransactionDetail.isRepayment() || newTransactionDetail.isInterestWaiver()) {
+        if (newTransactionDetail.isRepaymentType() || newTransactionDetail.isInterestWaiver()) {
             changedTransactionDetail = handleRepaymentOrRecoveryOrWaiverTransaction(newTransactionDetail, loanLifecycleStateMachine,
                     transactionForAdjustment, scheduleGeneratorDTO, currentUser);
         }
@@ -3624,7 +3699,8 @@ public class Loan extends AbstractPersistableCustom {
         }
 
         for (final LoanTransaction loanTransaction : this.loanTransactions) {
-            if ((loanTransaction.isRefund() || loanTransaction.isRefundForActiveLoan()) && !loanTransaction.isReversed()) {
+            if ((loanTransaction.isRefund() || loanTransaction.isRefundForActiveLoan() || loanTransaction.isCreditBalanceRefund())
+                    && !loanTransaction.isReversed()) {
                 totalPaidInRepayments = totalPaidInRepayments.minus(loanTransaction.getAmount(currency));
             }
         }
@@ -4063,7 +4139,7 @@ public class Loan extends AbstractPersistableCustom {
         Money cumulativePaid = Money.zero(loanCurrency());
 
         for (final LoanTransaction repayment : this.loanTransactions) {
-            if (repayment.isRepayment() && !repayment.isReversed()) {
+            if (repayment.isRepaymentType() && !repayment.isReversed()) {
                 cumulativePaid = cumulativePaid.plus(repayment.getAmount(loanCurrency()));
             }
         }
@@ -4388,7 +4464,7 @@ public class Loan extends AbstractPersistableCustom {
                     && !transaction.getTransactionDate().isAfter(tillDate)) {
                 if (transaction.isAccrual()) {
                     receivableInterest = receivableInterest.plus(transaction.getInterestPortion(getCurrency()));
-                } else if (transaction.isRepayment() || transaction.isInterestWaiver()) {
+                } else if (transaction.isRepaymentType() || transaction.isInterestWaiver()) {
                     receivableInterest = receivableInterest.minus(transaction.getInterestPortion(getCurrency()));
                 }
             }
@@ -4877,7 +4953,7 @@ public class Loan extends AbstractPersistableCustom {
     public LocalDate getLastRepaymentDate() {
         LocalDate currentTransactionDate = getDisbursementDate();
         for (final LoanTransaction previousTransaction : this.loanTransactions) {
-            if (previousTransaction.isRepayment()) {
+            if (previousTransaction.isRepaymentType()) {
                 if (currentTransactionDate.isBefore(previousTransaction.getTransactionDate())) {
                     currentTransactionDate = previousTransaction.getTransactionDate();
                 }
@@ -4932,6 +5008,7 @@ public class Loan extends AbstractPersistableCustom {
                             .getAmount();
                 }
                 final LoanInstallmentCharge loanInstallmentCharge = new LoanInstallmentCharge(amount, loanCharge, installment);
+                installment.getInstallmentCharges().add(loanInstallmentCharge);
                 loanChargePerInstallments.add(loanInstallmentCharge);
             }
         }
@@ -4986,7 +5063,7 @@ public class Loan extends AbstractPersistableCustom {
             break;
             case LOAN_REPAYMENT_OR_WAIVER:
                 if (!isOpen()) {
-                    final String defaultUserMessage = "Loan Repayment or Waiver is not allowed. Loan Account is not active.";
+                    final String defaultUserMessage = "Loan Repayment (or its types) or Waiver is not allowed. Loan Account is not active.";
                     final ApiParameterError error = ApiParameterError
                             .generalError("error.msg.loan.repayment.or.waiver.account.is.not.active", defaultUserMessage);
                     dataValidationErrors.add(error);
@@ -5079,6 +5156,14 @@ public class Loan extends AbstractPersistableCustom {
                     final String defaultUserMessage = "Loan foreclosure is not allowed. Loan Account is not active.";
                     final ApiParameterError error = ApiParameterError.generalError("error.msg.loan.foreclosure.account.is.not.active",
                             defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
+            break;
+            case LOAN_CREDIT_BALANCE_REFUND:
+                if (!status().isOverpaid()) {
+                    final String defaultUserMessage = "Loan Credit Balance Refund is not allowed. Loan Account is not Overpaid.";
+                    final ApiParameterError error = ApiParameterError
+                            .generalError("error.msg.loan.credit.balance.refund.account.is.not.overpaid", defaultUserMessage);
                     dataValidationErrors.add(error);
                 }
             break;
@@ -5623,7 +5708,8 @@ public class Loan extends AbstractPersistableCustom {
                 rescheduleStrategyMethod, calendar, getApprovedPrincipal(), annualNominalInterestRate, loanTermVariations,
                 calendarHistoryDataWrapper, scheduleGeneratorDTO.getNumberOfdays(), scheduleGeneratorDTO.isSkipRepaymentOnFirstDayofMonth(),
                 holidayDetailDTO, allowCompoundingOnEod, scheduleGeneratorDTO.isFirstRepaymentDateAllowedOnHoliday(),
-                scheduleGeneratorDTO.isInterestToBeAppropriatedEquallyWhenGreaterThanEMI(), this.fixedPrincipalPercentagePerInstallment);
+                scheduleGeneratorDTO.isInterestToBeRecoveredFirstWhenGreaterThanEMI(), this.fixedPrincipalPercentagePerInstallment,
+                scheduleGeneratorDTO.isPrincipalCompoundingDisabledForOverdueLoans());
         return loanApplicationTerms;
     }
 
@@ -5905,7 +5991,7 @@ public class Loan extends AbstractPersistableCustom {
                 compoundingCalendarInstance, compoundingFrequencyType, this.loanProduct.preCloseInterestCalculationStrategy(),
                 rescheduleStrategyMethod, loanCalendar, getApprovedPrincipal(), annualNominalInterestRate, loanTermVariations,
                 calendarHistoryDataWrapper, numberofdays, isSkipRepaymentonmonthFirst, holidayDetailDTO, allowCompoundingOnEod, false,
-                false, this.fixedPrincipalPercentagePerInstallment);
+                false, this.fixedPrincipalPercentagePerInstallment, false);
     }
 
     /**
@@ -5984,6 +6070,40 @@ public class Loan extends AbstractPersistableCustom {
 
     public BigDecimal getGuaranteeAmount() {
         return this.guaranteeAmountDerived == null ? BigDecimal.ZERO : this.guaranteeAmountDerived;
+    }
+
+    public void creditBalanceRefund(LoanTransaction newCreditBalanceRefundTransaction,
+            LoanLifecycleStateMachine defaultLoanLifecycleStateMachine, List<Long> existingTransactionIds,
+            List<Long> existingReversedTransactionIds) {
+        validateAccountStatus(LoanEvent.LOAN_CREDIT_BALANCE_REFUND);
+
+        validateRefundDateIsAfterLastRepayment(newCreditBalanceRefundTransaction.getTransactionDate());
+
+        if (!newCreditBalanceRefundTransaction.isGreaterThanZeroAndLessThanOrEqualTo(this.totalOverpaid)) {
+            final String errorMessage = "Transaction Amount ("
+                    + newCreditBalanceRefundTransaction.getAmount(getCurrency()).getAmount().toString()
+                    + ") must be > zero and <= Overpaid amount (" + this.totalOverpaid.toString() + ").";
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+            final ApiParameterError error = ApiParameterError.parameterError(
+                    "error.msg.transactionAmount.invalid.must.be.>zero.and<=overpaidamount", errorMessage, "transactionAmount",
+                    newCreditBalanceRefundTransaction.getAmount(getCurrency()));
+            dataValidationErrors.add(error);
+
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
+
+        existingTransactionIds.addAll(findExistingTransactionIds());
+        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
+
+        this.loanTransactions.add(newCreditBalanceRefundTransaction);
+
+        updateLoanSummaryDerivedFields();
+
+        if (this.totalOverpaid == null || BigDecimal.ZERO.compareTo(this.totalOverpaid) == 0) {
+            this.loanStatus = LoanStatus.CLOSED_OBLIGATIONS_MET.getValue();
+        }
+
     }
 
     public ChangedTransactionDetail makeRefundForActiveLoan(final LoanTransaction loanTransaction,
@@ -6103,7 +6223,8 @@ public class Loan extends AbstractPersistableCustom {
 
         LocalDate lastTransactionDate = null;
         for (final LoanTransaction transaction : this.loanTransactions) {
-            if ((transaction.isRepayment() || transaction.isRefundForActiveLoan()) && transaction.isNonZero()) {
+            if ((transaction.isRepaymentType() || transaction.isRefundForActiveLoan() || transaction.isCreditBalanceRefund())
+                    && transaction.isNonZero() && transaction.isNotReversed()) {
                 lastTransactionDate = transaction.getTransactionDate();
             }
         }
@@ -6147,7 +6268,7 @@ public class Loan extends AbstractPersistableCustom {
         Collections.reverse(loanTransactions);
         for (final LoanTransaction previousTransaction : loanTransactions) {
             if (lastTransactionDate.isBefore(previousTransaction.getTransactionDate())) {
-                if (previousTransaction.isRepayment() || previousTransaction.isWaiver() || previousTransaction.isChargePayment()) {
+                if (previousTransaction.isRepaymentType() || previousTransaction.isWaiver() || previousTransaction.isChargePayment()) {
                     throw new UndoLastTrancheDisbursementException(previousTransaction.getId());
                 }
             }
@@ -6481,7 +6602,7 @@ public class Loan extends AbstractPersistableCustom {
                     receivableInterest = receivableInterest.plus(transaction.getInterestPortion(currency));
                     receivableFee = receivableFee.plus(transaction.getFeeChargesPortion(currency));
                     receivablePenalty = receivablePenalty.plus(transaction.getPenaltyChargesPortion(currency));
-                } else if (transaction.isRepayment() || transaction.isChargePayment()) {
+                } else if (transaction.isRepaymentType() || transaction.isChargePayment()) {
                     receivableInterest = receivableInterest.minus(transaction.getInterestPortion(currency));
                     receivableFee = receivableFee.minus(transaction.getFeeChargesPortion(currency));
                     receivablePenalty = receivablePenalty.minus(transaction.getPenaltyChargesPortion(currency));
@@ -6765,4 +6886,5 @@ public class Loan extends AbstractPersistableCustom {
     public void adjustNetDisbursalAmount(BigDecimal adjustedAmount) {
         this.netDisbursalAmount = adjustedAmount.subtract(this.deriveSumTotalOfChargesDueAtDisbursement());
     }
+
 }

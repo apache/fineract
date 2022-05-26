@@ -30,6 +30,7 @@ import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import org.apache.fineract.infrastructure.bulkimport.constants.OfficeConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
@@ -72,7 +73,7 @@ public class OfficeImportHandlerTest {
                 .setCellValue(firstOfficeRow.getCell(OfficeConstants.LOOKUP_OFFICE_COL).getStringCellValue());
         firstOfficeRow.createCell(OfficeConstants.PARENT_OFFICE_ID_COL)
                 .setCellValue(firstOfficeRow.getCell(OfficeConstants.LOOKUP_OFFICE_ID_COL).getNumericCellValue());
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         Date date = simpleDateFormat.parse("14 May 2001");
         firstOfficeRow.createCell(OfficeConstants.OPENED_ON_COL).setCellValue(date);
 

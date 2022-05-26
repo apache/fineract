@@ -39,7 +39,6 @@ import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
 import org.apache.fineract.infrastructure.documentmanagement.domain.Document;
@@ -74,13 +73,13 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
     @Autowired
     public BulkImportWorkbookServiceImpl(final ApplicationContext applicationContext, final PlatformSecurityContext securityContext,
             final DocumentWritePlatformService documentWritePlatformService, final DocumentRepository documentRepository,
-            final ImportDocumentRepository importDocumentRepository, final RoutingDataSource dataSource) {
+            final ImportDocumentRepository importDocumentRepository, final JdbcTemplate jdbcTemplate) {
         this.applicationContext = applicationContext;
         this.securityContext = securityContext;
         this.documentWritePlatformService = documentWritePlatformService;
         this.documentRepository = documentRepository;
         this.importDocumentRepository = importDocumentRepository;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
@@ -209,7 +208,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
         final ImportMapper rm = new ImportMapper();
         final String sql = "select " + rm.schema() + " order by i.id desc";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { type.getValue() });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { type.getValue() }); // NOSONAR
     }
 
     private static final class ImportMapper implements RowMapper<ImportData> {
@@ -248,7 +247,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
         final ImportTemplateLocationMapper importTemplateLocationMapper = new ImportTemplateLocationMapper();
         final String sql = "select " + importTemplateLocationMapper.schema();
 
-        return this.jdbcTemplate.queryForObject(sql, importTemplateLocationMapper, new Object[] { importDocumentId });
+        return this.jdbcTemplate.queryForObject(sql, importTemplateLocationMapper, new Object[] { Integer.parseInt(importDocumentId) }); // NOSONAR
     }
 
     @Override
@@ -256,7 +255,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
         this.securityContext.authenticatedUser();
         final ImportTemplateLocationMapper importTemplateLocationMapper = new ImportTemplateLocationMapper();
         final String sql = "select " + importTemplateLocationMapper.schema();
-        DocumentData documentData = this.jdbcTemplate.queryForObject(sql, importTemplateLocationMapper, new Object[] { importDocumentId });
+        DocumentData documentData = this.jdbcTemplate.queryForObject(sql, importTemplateLocationMapper, new Object[] { importDocumentId }); // NOSONAR
         return buildResponse(documentData);
     }
 

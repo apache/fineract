@@ -21,6 +21,8 @@ package org.apache.fineract.accounting.financialactivityaccount.service;
 import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.PersistenceException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
 import org.apache.fineract.accounting.financialactivityaccount.api.FinancialActivityAccountsJsonInputParams;
@@ -35,31 +37,19 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class FinancialActivityAccountWritePlatformServiceImpl implements FinancialActivityAccountWritePlatformService {
 
     private final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepository;
     private final FinancialActivityAccountDataValidator fromApiJsonDeserializer;
     private final GLAccountRepositoryWrapper glAccountRepositoryWrapper;
-    private static final Logger LOG = LoggerFactory.getLogger(FinancialActivityAccountWritePlatformServiceImpl.class);
-
-    @Autowired
-    public FinancialActivityAccountWritePlatformServiceImpl(
-            final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepository,
-            final FinancialActivityAccountDataValidator fromApiJsonDeserializer,
-            final GLAccountRepositoryWrapper glAccountRepositoryWrapper) {
-        this.financialActivityAccountRepository = financialActivityAccountRepository;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.glAccountRepositoryWrapper = glAccountRepositoryWrapper;
-    }
 
     @Override
     public CommandProcessingResult createFinancialActivityAccountMapping(JsonCommand command) {
@@ -74,7 +64,7 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
             FinancialActivityAccount financialActivityAccount = FinancialActivityAccount.createNew(glAccount, financialActivityId);
 
             validateFinancialActivityAndAccountMapping(financialActivityAccount);
-            this.financialActivityAccountRepository.save(financialActivityAccount);
+            this.financialActivityAccountRepository.saveAndFlush(financialActivityAccount);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withEntityId(financialActivityAccount.getId()) //
@@ -122,7 +112,7 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
 
             if (!changes.isEmpty()) {
                 validateFinancialActivityAndAccountMapping(financialActivityAccount);
-                this.financialActivityAccountRepository.save(financialActivityAccount);
+                this.financialActivityAccountRepository.saveAndFlush(financialActivityAccount);
             }
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -158,7 +148,7 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
             throw new DuplicateFinancialActivityAccountFoundException(financialActivityId);
         }
 
-        LOG.error("Error occured.", dve);
+        log.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.glAccount.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource GL Account: " + realCause.getMessage());
     }
@@ -170,7 +160,7 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
             throw new DuplicateFinancialActivityAccountFoundException(financialActivityId);
         }
 
-        LOG.error("Error occured.", dve);
+        log.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.glAccount.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource GL Account: " + realCause.getMessage());
     }

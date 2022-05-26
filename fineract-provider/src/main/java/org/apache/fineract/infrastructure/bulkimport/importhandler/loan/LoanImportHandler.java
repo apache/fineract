@@ -39,6 +39,7 @@ import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSe
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.EnumOptionDataValueSerializer;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
@@ -466,7 +467,7 @@ public class LoanImportHandler implements ImportHandler {
     }
 
     private Integer importLoanRepayment(CommandProcessingResult result, int rowIndex, String dateFormat) {
-        GsonBuilder gsonBuilder = new GsonBuilder();
+        GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
         JsonObject loanRepaymentJsonob = gsonBuilder.create().toJsonTree(loanRepayments.get(rowIndex)).getAsJsonObject();
         loanRepaymentJsonob.remove("manuallyReversed");
@@ -486,7 +487,7 @@ public class LoanImportHandler implements ImportHandler {
 
             DisbursementData disbusalData = disbursalDates.get(rowIndex);
             String linkAccountId = disbusalData.getLinkAccountId();
-            GsonBuilder gsonBuilder = new GsonBuilder();
+            GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
             gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
             if (linkAccountId != null && !"".equals(linkAccountId)) {
                 String payload = gsonBuilder.create().toJson(disbusalData);
@@ -510,7 +511,7 @@ public class LoanImportHandler implements ImportHandler {
 
     private Integer importLoanApproval(CommandProcessingResult result, int rowIndex, String dateFormat) {
         if (approvalDates.get(rowIndex) != null) {
-            GsonBuilder gsonBuilder = new GsonBuilder();
+            GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
             gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
             String payload = gsonBuilder.create().toJson(approvalDates.get(rowIndex));
             final CommandWrapper commandRequest = new CommandWrapperBuilder() //
@@ -524,7 +525,7 @@ public class LoanImportHandler implements ImportHandler {
     }
 
     private CommandProcessingResult importLoan(int rowIndex, String dateFormat) {
-        GsonBuilder gsonBuilder = new GsonBuilder();
+        GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
         gsonBuilder.registerTypeAdapter(EnumOptionData.class, new EnumOptionDataValueSerializer());
         JsonObject loanJsonOb = gsonBuilder.create().toJsonTree(loans.get(rowIndex)).getAsJsonObject();

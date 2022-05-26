@@ -25,7 +25,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.accountdetails.data.LoanAccountSummaryData;
 import org.apache.fineract.portfolio.accountdetails.service.AccountDetailsReadPlatformService;
@@ -46,10 +45,10 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
     private final AccountDetailsReadPlatformService accountDetailsReadPlatforService;
 
     @Autowired
-    public GLIMAccountInfoReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
+    public GLIMAccountInfoReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             final AccountDetailsReadPlatformService accountDetailsReadPlatforService) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.accountDetailsReadPlatforService = accountDetailsReadPlatforService;
 
     }
@@ -94,7 +93,7 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
         final GLIMFieldsMapper rm = new GLIMFieldsMapper();
         final String sql = "select " + rm.schema() + " and glim.id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { glimId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { glimId }); // NOSONAR
     }
 
     @Override
@@ -104,7 +103,7 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
         final GLIMFieldsMapper rm = new GLIMFieldsMapper();
         final String sql = "select " + rm.schema() + " and ln.group_id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { groupId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { Long.parseLong(groupId) }); // NOSONAR
     }
 
     @Override
@@ -115,7 +114,7 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
 
         final String sql = "select " + rm.schema() + " where glim.group_id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { groupId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { Long.parseLong(groupId) }); // NOSONAR
     }
 
     @Override
@@ -125,7 +124,7 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
         final GLIMFieldsMapper rm = new GLIMFieldsMapper();
         final String sql = "select " + rm.schema() + " and glim.accountNumber=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { parentAccountIds });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { parentAccountIds }); // NOSONAR
     }
 
     @Override
@@ -136,7 +135,7 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
 
         final String sql = "select " + rm.schema() + " where glim.group_id=? and glim.account_number=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { groupId, accountNo });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { groupId, accountNo }); // NOSONAR
     }
 
     @Override
@@ -189,7 +188,7 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
 
         final String sql = "select " + rm.schema() + " where glim.id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { glimId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { glimId }); // NOSONAR
 
     }
 

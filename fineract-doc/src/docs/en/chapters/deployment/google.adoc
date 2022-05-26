@@ -1,0 +1,5 @@
+= Google Cloud
+
+The https://www.fineract.dev demo server runs on Google Cloud.
+
+https://docs.google.com/presentation/d/1-VP4bNkc5kZ3B0yme_vYLiY1qpswnfz8ainnX5fp3l8/[The Running Fineract.dev, SRE style presentation] given at _ApacheCon 2020_ has some related background.

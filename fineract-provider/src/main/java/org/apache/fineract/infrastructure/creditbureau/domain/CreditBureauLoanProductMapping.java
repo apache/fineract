@@ -33,15 +33,16 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 @Table(name = "m_creditbureau_loanproduct_mapping")
 public class CreditBureauLoanProductMapping extends AbstractPersistableCustom {
 
-    @Column(name = "is_CreditCheck_Mandatory")
+    @Column(name = "is_credit_check_mandatory")
     private boolean isCreditCheckMandatory;
 
-    @Column(name = "skip_CreditCheck_in_Failure")
+    @Column(name = "skip_credit_check_in_failure")
     private boolean skipCreditCheckInFailure;
 
-    @Column(name = "stale_Period")
+    @Column(name = "stale_period")
     private int stalePeriod;
 
+    @Column(name = "is_active")
     private boolean isActive;
 
     @ManyToOne

@@ -448,7 +448,10 @@ public class LoanScheduleAssembler {
                 Date.from(expectedDisbursementDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         HolidayDetailDTO detailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
-
+        final boolean isInterestToBeRecoveredFirstWhenGreaterThanEMI = this.configurationDomainService
+                .isInterestToBeRecoveredFirstWhenGreaterThanEMI();
+        final boolean isPrincipalCompoundingDisabledForOverdueLoans = this.configurationDomainService
+                .isPrincipalCompoundingDisabledForOverdueLoans();
         return LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, numberOfRepayments,
                 repaymentEvery, repaymentPeriodFrequencyType, nthDay, weekDayType, amortizationMethod, interestMethod,
                 interestRatePerPeriod, interestRatePeriodFrequencyType, annualNominalInterestRate, interestCalculationPeriodMethod,
@@ -460,7 +463,8 @@ public class LoanScheduleAssembler {
                 compoundingMethod, compoundingCalendarInstance, compoundingFrequencyType, principalThresholdForLastInstalment,
                 installmentAmountInMultiplesOf, loanProduct.preCloseInterestCalculationStrategy(), calendar, BigDecimal.ZERO,
                 loanTermVariations, isInterestChargedFromDateSameAsDisbursalDateEnabled, numberOfDays, isSkipMeetingOnFirstDay, detailDTO,
-                allowCompoundingOnEod, isEqualAmortization, fixedPrincipalPercentagePerInstallment);
+                allowCompoundingOnEod, isEqualAmortization, isInterestToBeRecoveredFirstWhenGreaterThanEMI,
+                fixedPrincipalPercentagePerInstallment, isPrincipalCompoundingDisabledForOverdueLoans);
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,
@@ -580,7 +584,7 @@ public class LoanScheduleAssembler {
             if (!meetingFrequency.equals(repaymentFrequency)) {
                 throw new MeetingFrequencyMismatchException("loanapplication.repayment.frequency",
                         "Loan repayment frequency period must match that of meeting frequency period", repaymentFrequency);
-            } else if (meetingFrequency.equals(repaymentFrequency)) {
+            } else {
                 // repayment frequency is same as meeting frequency repayment
                 // interval should be same or multiple of meeting interval
                 if (repaymentInterval % meetingInterval != 0) {

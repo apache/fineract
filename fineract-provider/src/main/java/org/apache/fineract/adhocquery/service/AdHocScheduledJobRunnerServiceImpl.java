@@ -26,7 +26,6 @@ import java.util.Date;
 import org.apache.fineract.adhocquery.data.AdHocData;
 import org.apache.fineract.adhocquery.domain.ReportRunFrequency;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
@@ -45,8 +44,8 @@ public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunn
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public AdHocScheduledJobRunnerServiceImpl(final RoutingDataSource dataSource, final AdHocReadPlatformService adHocReadPlatformService) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public AdHocScheduledJobRunnerServiceImpl(final JdbcTemplate jdbcTemplate, final AdHocReadPlatformService adHocReadPlatformService) {
+        this.jdbcTemplate = jdbcTemplate;
         this.adHocReadPlatformService = adHocReadPlatformService;
 
     }

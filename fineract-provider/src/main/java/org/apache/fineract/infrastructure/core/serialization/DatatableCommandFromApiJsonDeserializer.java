@@ -46,11 +46,11 @@ public class DatatableCommandFromApiJsonDeserializer {
      * The parameters supported for this command.
      */
     private final Set<String> supportedParametersForCreate = new HashSet<>(
-            Arrays.asList("datatableName", "apptableName", "multiRow", "columns"));
+            Arrays.asList("datatableName", "entitySubType", "apptableName", "multiRow", "columns"));
     private final Set<String> supportedParametersForCreateColumns = new HashSet<>(
             Arrays.asList("name", "type", "length", "mandatory", "code"));
     private final Set<String> supportedParametersForUpdate = new HashSet<>(
-            Arrays.asList("apptableName", "changeColumns", "addColumns", "dropColumns"));
+            Arrays.asList("apptableName", "entitySubType", "changeColumns", "addColumns", "dropColumns"));
     private final Set<String> supportedParametersForAddColumns = new HashSet<>(
             Arrays.asList("name", "type", "length", "mandatory", "after", "code"));
     private final Set<String> supportedParametersForChangeColumns = new HashSet<>(
@@ -122,6 +122,11 @@ public class DatatableCommandFromApiJsonDeserializer {
         final String apptableName = this.fromApiJsonHelper.extractStringNamed("apptableName", element);
         baseDataValidator.reset().parameter("apptableName").value(apptableName).notBlank().notExceedingLengthOf(50)
                 .isOneOfTheseValues(this.supportedApptableNames);
+
+        if ("m_client".equals(apptableName)) {
+            String entitySubType = this.fromApiJsonHelper.extractStringNamed("entitySubType", element);
+            baseDataValidator.reset().parameter("entitySubType").value(entitySubType).notBlank(); // Person or Entity
+        }
         final String fkColumnName = (apptableName != null) ? apptableName.substring(2) + "_id" : "";
 
         final Boolean multiRow = this.fromApiJsonHelper.extractBooleanNamed("multiRow", element);
@@ -156,7 +161,7 @@ public class DatatableCommandFromApiJsonDeserializer {
         // parameter
         // has been specified is necessary in order to avoid JSON requests with
         // no parameters
-        if (!json.matches("(?s)\\A\\{.*?(\\\".*?\\\"\\s*?:\\s*?)+.*?\\}\\z")) {
+        if (!json.matches("(?s)\\A\\{.*?(\\\".*?\\\"\\s*?:\\s*?)+.*?\\}\\z")) { // NOSONAR
             throw new PlatformDataIntegrityException("error.msg.invalid.request.body.no.parameters",
                     "Provided JSON request body does not have any parameters.");
         }
@@ -171,6 +176,12 @@ public class DatatableCommandFromApiJsonDeserializer {
         final String apptableName = this.fromApiJsonHelper.extractStringNamed("apptableName", element);
         baseDataValidator.reset().parameter("apptableName").value(apptableName).ignoreIfNull().notBlank()
                 .isOneOfTheseValues(this.supportedApptableNames);
+
+        if ("m_client".equals(apptableName)) {
+            String entitySubType = this.fromApiJsonHelper.extractStringNamed("entitySubType", element);
+            baseDataValidator.reset().parameter("entitySubType").value(entitySubType).notBlank(); // Person or Entity
+        }
+
         final String fkColumnName = (apptableName != null) ? apptableName.substring(2) + "_id" : "";
 
         final JsonArray changeColumns = this.fromApiJsonHelper.extractJsonArrayNamed("changeColumns", element);

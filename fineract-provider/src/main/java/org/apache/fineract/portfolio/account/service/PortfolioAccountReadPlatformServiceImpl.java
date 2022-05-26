@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountDTO;
@@ -48,11 +48,11 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
     private final PortfolioLoanAccountRefundByTransferMapper accountRefundByTransferMapper;
 
     @Autowired
-    public PortfolioAccountReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public PortfolioAccountReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, DatabaseSpecificSQLGenerator sqlGenerator) {
+        this.jdbcTemplate = jdbcTemplate;
         this.savingsAccountMapper = new PortfolioSavingsAccountMapper();
         this.loanAccountMapper = new PortfolioLoanAccountMapper();
-        this.accountRefundByTransferMapper = new PortfolioLoanAccountRefundByTransferMapper();
+        this.accountRefundByTransferMapper = new PortfolioLoanAccountRefundByTransferMapper(sqlGenerator);
     }
 
     @Override
@@ -105,12 +105,9 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
         // sqlParams.add(portfolioAccountDTO.getClientId());
         Collection<PortfolioAccountData> accounts = null;
         String sql = null;
-        String defaultAccountStatus = "300";
+        long defaultAccountStatus = 300; // Active Status
         if (portfolioAccountDTO.getAccountStatus() != null) {
-            for (final long status : portfolioAccountDTO.getAccountStatus()) {
-                defaultAccountStatus += ", " + status;
-            }
-            defaultAccountStatus = defaultAccountStatus.substring(defaultAccountStatus.indexOf(",") + 1);
+            defaultAccountStatus = portfolioAccountDTO.getFirstAccountStatus();
         }
         final PortfolioAccountType accountType = PortfolioAccountType.fromInt(portfolioAccountDTO.getAccountTypeId());
         switch (accountType) {
@@ -119,25 +116,29 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
             case LOAN:
                 sql = "select " + this.loanAccountMapper.schema() + " where ";
                 if (portfolioAccountDTO.getClientId() != null) {
-                    sql += " la.client_id = ? and la.loan_status_id in (" + defaultAccountStatus.toString() + ") ";
+                    sql += " la.client_id = ? and la.loan_status_id in (?) ";
                     sqlParams.add(portfolioAccountDTO.getClientId());
+                    sqlParams.add(defaultAccountStatus);
                 } else {
-                    sql += " la.loan_status_id in (" + defaultAccountStatus.toString() + ") ";
+                    sql += " la.loan_status_id in (?) ";
+                    sqlParams.add(defaultAccountStatus);
                 }
                 if (portfolioAccountDTO.getCurrencyCode() != null) {
                     sql += " and la.currency_code = ?";
                     sqlParams.add(portfolioAccountDTO.getCurrencyCode());
                 }
 
-                accounts = this.jdbcTemplate.query(sql, this.loanAccountMapper, sqlParams.toArray());
+                accounts = this.jdbcTemplate.query(sql, this.loanAccountMapper, sqlParams.toArray()); // NOSONAR
             break;
             case SAVINGS:
                 sql = "select " + this.savingsAccountMapper.schema() + " where ";
                 if (portfolioAccountDTO.getClientId() != null) {
-                    sql += " sa.client_id = ? and sa.status_enum in (" + defaultAccountStatus.toString() + ") ";
+                    sql += " sa.client_id = ? and sa.status_enum in (?) ";
                     sqlParams.add(portfolioAccountDTO.getClientId());
+                    sqlParams.add(defaultAccountStatus);
                 } else {
-                    sql += " sa.status_enum in (" + defaultAccountStatus.toString() + ") ";
+                    sql += " sa.status_enum in (?) ";
+                    sqlParams.add(defaultAccountStatus);
                 }
                 if (portfolioAccountDTO.getCurrencyCode() != null) {
                     sql += " and sa.currency_code = ?";
@@ -146,11 +147,11 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
 
                 if (portfolioAccountDTO.getDepositType() != null) {
                     sql += " and sa.deposit_type_enum = ?";
-                    sqlParams.add(portfolioAccountDTO.getDepositType());
+                    sqlParams.add(portfolioAccountDTO.getDepositType().shortValue());
                 }
 
                 if (portfolioAccountDTO.isExcludeOverDraftAccounts()) {
-                    sql += " and sa.allow_overdraft = 0";
+                    sql += " and sa.allow_overdraft = false";
                 }
 
                 if (portfolioAccountDTO.getClientId() == null && portfolioAccountDTO.getGroupId() != null) {
@@ -158,7 +159,7 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
                     sqlParams.add(portfolioAccountDTO.getGroupId());
                 }
 
-                accounts = this.jdbcTemplate.query(sql, this.savingsAccountMapper, sqlParams.toArray());
+                accounts = this.jdbcTemplate.query(sql, this.savingsAccountMapper, sqlParams.toArray()); // NOSONAR
             break;
         }
 
@@ -295,20 +296,20 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
 
         private final String schemaSql;
 
-        PortfolioLoanAccountRefundByTransferMapper() {
+        PortfolioLoanAccountRefundByTransferMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
 
             final StringBuilder amountQueryString = new StringBuilder(400);
-            amountQueryString.append("(select (SUM(ifnull(mr.principal_completed_derived, 0)) +");
-            amountQueryString.append("SUM(ifnull(mr.interest_completed_derived, 0)) + ");
-            amountQueryString.append("SUM(ifnull(mr.fee_charges_completed_derived, 0)) + ");
-            amountQueryString.append(" SUM(ifnull(mr.penalty_charges_completed_derived, 0))) as total_in_advance_derived");
+            amountQueryString.append("(select (SUM(COALESCE(mr.principal_completed_derived, 0)) +");
+            amountQueryString.append("SUM(COALESCE(mr.interest_completed_derived, 0)) + ");
+            amountQueryString.append("SUM(COALESCE(mr.fee_charges_completed_derived, 0)) + ");
+            amountQueryString.append(" SUM(COALESCE(mr.penalty_charges_completed_derived, 0))) as total_in_advance_derived");
             amountQueryString.append(" from m_loan ml INNER JOIN m_loan_repayment_schedule mr on mr.loan_id = ml.id");
             amountQueryString.append(" where ml.id=? and ml.loan_status_id = 300");
-            amountQueryString.append("  and  mr.duedate >= CURDATE() group by ml.id having");
-            amountQueryString.append(" (SUM(ifnull(mr.principal_completed_derived, 0)) + ");
-            amountQueryString.append(" SUM(ifnull(mr.interest_completed_derived, 0)) + ");
-            amountQueryString.append("SUM(ifnull(mr.fee_charges_completed_derived, 0)) + ");
-            amountQueryString.append("SUM(ifnull(mr.penalty_charges_completed_derived, 0))) > 0) as totalOverpaid ");
+            amountQueryString.append("  and  mr.duedate >= " + sqlGenerator.currentDate() + " group by ml.id having");
+            amountQueryString.append(" (SUM(COALESCE(mr.principal_completed_derived, 0)) + ");
+            amountQueryString.append(" SUM(COALESCE(mr.interest_completed_derived, 0)) + ");
+            amountQueryString.append("SUM(COALESCE(mr.fee_charges_completed_derived, 0)) + ");
+            amountQueryString.append("SUM(COALESCE(mr.penalty_charges_completed_derived, 0))) > 0) as totalOverpaid ");
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("la.id as id, la.account_no as accountNo, la.external_id as externalId, ");

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests.common.savings;
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
@@ -69,6 +70,7 @@ public class SavingsAccountHelper {
     private static final String GSIM_DEPOSIT_SAVINGS_COMMAND = "gsimDeposit";
     private static final String MODIFY_TRASACTION_COMMAND = "modify";
     private static final String UNDO_TRASACTION_COMMAND = "undo";
+    private static final String REVERSE_TRASACTION_COMMAND = "reverse";
 
     private static final String BLOCK_SAVINGS_COMMAND = "block";
     private static final String UNBLOCK_SAVINGS_COMMAND = "unblock";
@@ -272,6 +274,12 @@ public class SavingsAccountHelper {
                 getSavingsTransactionJSON("0", LAST_TRANSACTION_DATE), CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
+    public Integer reverseSavingsAccountTransaction(final Integer savingsId, final Integer transactionId) {
+        LOG.info("\n--------------------------------- REVERSE SAVINGS TRANSACTION  --------------------------------");
+        return (Integer) performSavingActions(createAdjustTransactionURL(REVERSE_TRASACTION_COMMAND, savingsId, transactionId),
+                getSavingsTransactionJSON("0", LAST_TRANSACTION_DATE), CommonConstants.RESPONSE_RESOURCE_ID);
+    }
+
     public void calculateInterestForSavings(final Integer savingsId) {
         LOG.info("--------------------------------- CALCULATING INTEREST FOR SAVINGS --------------------------------");
         performSavingActions(createSavingsCalculateInterestURL(CALCULATE_INTEREST_SAVINGS_COMMAND, savingsId),
@@ -330,8 +338,8 @@ public class SavingsAccountHelper {
     public HashMap blockSavings(final Integer savingsID) {
         LOG.info("---------------------------------- BLOCKING SAVINGS ACCOUNT ----------------------------------");
         Boolean isBlock = true;
-        return performSavingApplicationActions(createSavingsOperationURL(BLOCK_SAVINGS_COMMAND, savingsID), getActivatedSavingsAsJSON(),
-                isBlock);
+        return performSavingApplicationActions(createSavingsOperationURL(BLOCK_SAVINGS_COMMAND, savingsID),
+                getActivatedSavingsAsForHoldJSON(), isBlock);
     }
 
     public HashMap unblockSavings(final Integer savingsID) {
@@ -345,7 +353,7 @@ public class SavingsAccountHelper {
         LOG.info("---------------------------------- BLOCKING DEBIT TRANSACTIONS ----------------------------------");
         Boolean isBlock = true;
         return performSavingApplicationActions(createSavingsOperationURL(BLOCK_DEBITS_SAVINGS_COMMAND, savingsID),
-                getActivatedSavingsAsJSON(), isBlock);
+                getActivatedSavingsAsForHoldJSON(), isBlock);
     }
 
     public HashMap unblockDebit(final Integer savingsID) {
@@ -359,7 +367,7 @@ public class SavingsAccountHelper {
         LOG.info("---------------------------------- BLOCKING CREDIT TRANSACTIONS ----------------------------------");
         Boolean isBlock = true;
         return performSavingApplicationActions(createSavingsOperationURL(BLOCK_CREDITS_SAVINGS_COMMAND, savingsID),
-                getActivatedSavingsAsJSON(), isBlock);
+                getActivatedSavingsAsForHoldJSON(), isBlock);
     }
 
     public HashMap unblockCredit(final Integer savingsID) {
@@ -369,10 +377,12 @@ public class SavingsAccountHelper {
                 getActivatedSavingsAsJSON(), isBlock);
     }
 
-    public Object holdAmountInSavingsAccount(final Integer savingsID, final String amount, String date, String jsonAttributeToGetback) {
+    public Object holdAmountInSavingsAccount(final Integer savingsID, final String amount, final Boolean lienAllowed, String date,
+            String jsonAttributeToGetback) {
         LOG.info("--------------------------------- SAVINGS TRANSACTION HOLD AMOUNT--------------------------------");
+
         return performSavingActions(createSavingsTransactionURL(HOLD_AMOUNT_SAVINGS_COMMAND, savingsID),
-                getSavingsTransactionJSON(amount, date), jsonAttributeToGetback);
+                getLienSavingsTransactionJSON(amount, date, lienAllowed), jsonAttributeToGetback);
     }
 
     public Integer releaseAmount(final Integer savingsId, final Integer transactionId) {
@@ -428,12 +438,36 @@ public class SavingsAccountHelper {
         return savingsAccountActivateJson;
     }
 
+    private String getActivatedSavingsAsForHoldJSON() {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
+        map.put("activatedOnDate", TRANSACTION_DATE);
+        map.put("reasonForBlock", "unUsualActivity");
+        String savingsAccountActivateJson = new Gson().toJson(map);
+        LOG.info(savingsAccountActivateJson);
+        return savingsAccountActivateJson;
+    }
+
     private String getSavingsTransactionJSON(final String amount, final String transactionDate) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", CommonConstants.LOCALE);
         map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("transactionDate", transactionDate);
         map.put("transactionAmount", amount);
+        String savingsAccountWithdrawalJson = new Gson().toJson(map);
+        LOG.info(savingsAccountWithdrawalJson);
+        return savingsAccountWithdrawalJson;
+    }
+
+    private String getLienSavingsTransactionJSON(final String amount, final String transactionDate, final Boolean lienAllowed) {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
+        map.put("transactionDate", transactionDate);
+        map.put("transactionAmount", amount);
+        map.put("lienAllowed", lienAllowed);
+        map.put("reasonForBlock", "unUsualActivity");
         String savingsAccountWithdrawalJson = new Gson().toJson(map);
         LOG.info(savingsAccountWithdrawalJson);
         return savingsAccountWithdrawalJson;
@@ -583,6 +617,12 @@ public class SavingsAccountHelper {
     public HashMap getSavingsTransaction(final Integer savingsID, final Integer savingsTransactionId) {
         final String URL = SAVINGS_ACCOUNT_URL + "/" + savingsID + "/transactions/" + savingsTransactionId + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, URL, "");
+    }
+
+    public List<HashMap> getSavingsTransactions(final Integer savingsID) {
+        final Object get = getSavingsCollectionAttribute(savingsID, "transactions");
+        final String json = new Gson().toJson(get);
+        return new Gson().fromJson(json, new TypeToken<ArrayList<HashMap>>() {}.getType());
     }
 
     public Object getSavingsInterest(final Integer savingsID) {

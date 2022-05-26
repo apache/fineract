@@ -20,7 +20,6 @@ package org.apache.fineract.mix.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.mix.data.MixTaxonomyMappingData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -34,8 +33,8 @@ public class MixTaxonomyMappingReadPlatformServiceImpl implements MixTaxonomyMap
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public MixTaxonomyMappingReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public MixTaxonomyMappingReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private static final class TaxonomyMappingMapper implements RowMapper<MixTaxonomyMappingData> {
@@ -58,7 +57,7 @@ public class MixTaxonomyMappingReadPlatformServiceImpl implements MixTaxonomyMap
         try {
             final TaxonomyMappingMapper rm = new TaxonomyMappingMapper();
             final String sqlString = "select " + rm.schema();
-            return this.jdbcTemplate.queryForObject(sqlString, rm);
+            return this.jdbcTemplate.queryForObject(sqlString, rm); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             return null;
         }

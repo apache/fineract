@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.bulkimport.importhandler;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
 import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
@@ -134,7 +133,7 @@ public final class ImportHandlerUtils {
 
     public static String trimEmptyDecimalPortion(String result) {
         if (result != null && result.endsWith(".0")) {
-            return Iterables.get(Splitter.on("\\.").split(result), 0);
+            return Splitter.on("\\.").split(result).iterator().next();
         } else {
             return result;
         }
@@ -327,7 +326,7 @@ public final class ImportHandlerUtils {
                     }
                 }
             }
-        } else if (sheetName.equals(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME)) {
+        } else {
             for (Row row : sheet) {
                 for (int i = 0; i < 2; i++) {
                     if (name != null) {

@@ -52,6 +52,7 @@ public class SavingsApiConstants {
 
     // command
     public static final String COMMAND_UNDO_TRANSACTION = "undo";
+    public static final String COMMAND_REVERSE_TRANSACTION = "reverse";
     public static final String COMMAND_ADJUST_TRANSACTION = "modify";
     public static final String COMMAND_WAIVE_CHARGE = "waive";
     public static final String COMMAND_PAY_CHARGE = "paycharge";
@@ -79,6 +80,7 @@ public class SavingsApiConstants {
     public static final String externalIdParamName = "externalId";
     public static final String statusParamName = "status";
     public static final String subStatusParamName = "subStatus";
+    public static final String reasonForBlockParamName = "reasonForBlock";
     public static final String clientIdParamName = "clientId";
     public static final String isRetailAccountParamName = "isRetailAccount";
     public static final String autogenerateTransactionIdParamName = "autogenerateTransactionId";
@@ -133,6 +135,8 @@ public class SavingsApiConstants {
     public static final String minOverdraftForInterestCalculationParamName = "minOverdraftForInterestCalculation";
     public static final String minRequiredBalanceParamName = "minRequiredBalance";
     public static final String enforceMinRequiredBalanceParamName = "enforceMinRequiredBalance";
+    public static final String maxAllowedLienLimitParamName = "maxAllowedLienLimit";
+    public static final String lienAllowedParamName = "lienAllowed";
     public static final String minBalanceForInterestCalculationParamName = "minBalanceForInterestCalculation";
     public static final String withdrawBalanceParamName = "withdrawBalance";
     public static final String onHoldFundsParamName = "onHoldFunds";
@@ -142,6 +146,7 @@ public class SavingsApiConstants {
 
     // transaction parameters
     public static final String transactionDateParamName = "transactionDate";
+    public static final String lienParamName = "lien";
     public static final String transactionAmountParamName = "transactionAmount";
     public static final String paymentDetailDataParamName = "paymentDetailData";
     public static final String runningBalanceParamName = "runningBalance";

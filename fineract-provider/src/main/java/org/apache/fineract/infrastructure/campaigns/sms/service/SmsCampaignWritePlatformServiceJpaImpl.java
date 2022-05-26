@@ -150,7 +150,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
             throw new GeneralPlatformDomainRuleException("error.msg.campaign.recurrenceStartDate.in.the.past",
                     "Recurrence start date cannot be the past date.", smsCampaign.getRecurrenceStartDate());
         }
-        this.smsCampaignRepository.save(smsCampaign);
+        this.smsCampaignRepository.saveAndFlush(smsCampaign);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //

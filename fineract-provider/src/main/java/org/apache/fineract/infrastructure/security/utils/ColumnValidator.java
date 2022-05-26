@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,8 +44,8 @@ public class ColumnValidator {
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public ColumnValidator(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public ColumnValidator(final JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private void validateColumn(Map<String, Set<String>> tableColumnMap) {

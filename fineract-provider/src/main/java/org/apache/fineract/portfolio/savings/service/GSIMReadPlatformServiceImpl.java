@@ -29,7 +29,6 @@ import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -55,10 +54,10 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
     private final ColumnValidator columnValidator;
 
     @Autowired
-    public GSIMReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
+    public GSIMReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             final ColumnValidator columnValidator) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.columnValidator = columnValidator;
 
     }
@@ -190,7 +189,7 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
         final GSIMFieldsMapper rm = new GSIMFieldsMapper();
         final String sql = "select " + rm.schema() + " and gsim.id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { gsimId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { gsimId }); // NOSONAR
     }
 
     @Override
@@ -200,7 +199,7 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
         final GSIMMapper rm = new GSIMMapper();
         final String sql = "select " + rm.schema() + " where gsim.id=?";
 
-        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { gsimId });
+        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { gsimId }); // NOSONAR
     }
 
     @Override
@@ -210,7 +209,7 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
         final GSIMMapper rm = new GSIMMapper();
         final String sql = "select " + rm.schema() + " where gsim.group_id=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { groupId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { Long.parseLong(groupId) }); // NOSONAR
     }
 
     @Override
@@ -220,7 +219,7 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
         final GSIMMapper rm = new GSIMMapper();
         final String sql = "select " + rm.schema() + " where gsim.account_number=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { parentAccountIds });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { parentAccountIds }); // NOSONAR
     }
 
     @Override
@@ -231,14 +230,14 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
 
         final String sql = "select " + rm.schema() + " where gsim.group_id=? and gsim.account_number=?";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { accountNo });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { groupId, accountNo });// NOSONAR
     }
 
     private List<SavingsSummaryCustom> retrieveAccountDetails(final String savingswhereClause, final Object[] inputs) {
         final SavingsAccountSummaryDataMapper savingsAccountSummaryDataMapper = new SavingsAccountSummaryDataMapper();
         final String savingsSql = "select " + savingsAccountSummaryDataMapper.schema() + savingswhereClause;
         this.columnValidator.validateSqlInjection(savingsAccountSummaryDataMapper.schema(), savingswhereClause);
-        return this.jdbcTemplate.query(savingsSql, savingsAccountSummaryDataMapper, inputs);
+        return this.jdbcTemplate.query(savingsSql, savingsAccountSummaryDataMapper, inputs); // NOSONAR
     }
 
     private static final class SavingsAccountSummaryDataMapper implements RowMapper<SavingsSummaryCustom> {
@@ -273,9 +272,9 @@ public class GSIMReadPlatformServiceImpl implements GSIMReadPlatformService {
             accountsSummary.append("avbu.firstname as activatedByFirstname, avbu.lastname as activatedByLastname,");
 
             accountsSummary.append("sa.sub_status_enum as subStatusEnum, ");
-            accountsSummary.append("(select IFNULL(max(sat.transaction_date),sa.activatedon_date) ");
+            accountsSummary.append("(select coalesce(max(sat.transaction_date),sa.activatedon_date) ");
             accountsSummary.append("from m_savings_account_transaction as sat ");
-            accountsSummary.append("where sat.is_reversed = 0 ");
+            accountsSummary.append("where sat.is_reversed = false ");
             accountsSummary.append("and sat.transaction_type_enum in (1,2) ");
             accountsSummary.append("and sat.savings_account_id = sa.id) as lastActiveTransactionDate, ");
 

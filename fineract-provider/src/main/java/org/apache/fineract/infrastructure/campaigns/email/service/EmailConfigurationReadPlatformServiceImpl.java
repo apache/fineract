@@ -24,7 +24,6 @@ import java.util.Collection;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailConfigurationData;
 import org.apache.fineract.infrastructure.campaigns.email.exception.EmailConfigurationNotFoundException;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -38,10 +37,9 @@ public class EmailConfigurationReadPlatformServiceImpl implements EmailConfigura
     private final EmailConfigurationRowMapper emailConfigurationRowMapper;
 
     @Autowired
-    public EmailConfigurationReadPlatformServiceImpl(final RoutingDataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public EmailConfigurationReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
         this.emailConfigurationRowMapper = new EmailConfigurationRowMapper();
-
     }
 
     private static final class EmailConfigurationRowMapper implements RowMapper<EmailConfigurationData> {
@@ -78,7 +76,7 @@ public class EmailConfigurationReadPlatformServiceImpl implements EmailConfigura
     public Collection<EmailConfigurationData> retrieveAll() {
         final String sql = "select " + this.emailConfigurationRowMapper.schema();
 
-        return this.jdbcTemplate.query(sql, this.emailConfigurationRowMapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, this.emailConfigurationRowMapper); // NOSONAR
     }
 
     @Override
@@ -86,7 +84,7 @@ public class EmailConfigurationReadPlatformServiceImpl implements EmailConfigura
         try {
             final String sql = "select " + this.emailConfigurationRowMapper.schema() + " where cnf.name = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, this.emailConfigurationRowMapper, name);
+            return this.jdbcTemplate.queryForObject(sql, this.emailConfigurationRowMapper, new Object[] { name }); // NOSONAR
         }
 
         catch (final EmptyResultDataAccessException e) {

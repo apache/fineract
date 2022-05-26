@@ -119,8 +119,7 @@ public class SurveyApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create an entry in the survey table", description = "Insert and entry in a survey table (full fill the survey)."
-            + "\n" + "\n"
-            + "Refer Link for sample Body:  [ https://demo.fineract.dev/fineract-provider/api-docs/apiLive.htm#survey_create ] ")
+            + "\n" + "\n" + "Refer Link for sample Body:  [ https://fineract.apache.org/legacy-docs/apiLive.htm#survey_create ] ")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SurveyApiResourceSwagger.PostSurveySurveyNameApptableIdRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SurveyApiResourceSwagger.PostSurveySurveyNameApptableIdResponse.class))) })

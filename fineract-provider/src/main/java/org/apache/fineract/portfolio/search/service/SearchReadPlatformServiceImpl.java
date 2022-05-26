@@ -28,7 +28,6 @@ import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
@@ -54,17 +53,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class SearchReadPlatformServiceImpl implements SearchReadPlatformService {
 
-    private final NamedParameterJdbcTemplate namedParameterjdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final PlatformSecurityContext context;
     private final LoanProductReadPlatformService loanProductReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
 
     @Autowired
-    public SearchReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
+    public SearchReadPlatformServiceImpl(final PlatformSecurityContext context, final NamedParameterJdbcTemplate namedParameterJdbcTemplate,
             final LoanProductReadPlatformService loanProductReadPlatformService,
             final OfficeReadPlatformService officeReadPlatformService) {
         this.context = context;
-        this.namedParameterjdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
         this.loanProductReadPlatformService = loanProductReadPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
     }
@@ -83,7 +82,7 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
         } else {
             params.addValue("search", "%" + searchConditions.getSearchQuery() + "%");
         }
-        return this.namedParameterjdbcTemplate.query(rm.searchSchema(searchConditions), params, rm);
+        return this.namedParameterJdbcTemplate.query(rm.searchSchema(searchConditions), params, rm);
     }
 
     private static final class SearchMapper implements RowMapper<SearchData> {
@@ -96,11 +95,11 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
                     + " from m_client c join m_office o on o.id = c.office_id where o.hierarchy like :hierarchy and (c.account_no like :search or c.display_name like :search or c.external_id like :search or c.mobile_no like :search)) ";
 
             final String loanMatchSql = " (select 'LOAN' as entityType, l.id as entityId, pl.name as entityName, l.external_id as entityExternalId, l.account_no as entityAccountNo "
-                    + " , IFNULL(c.id,g.id) as parentId, IFNULL(c.display_name,g.display_name) as parentName, null as entityMobileNo, l.loan_status_id as entityStatusEnum, null as subEntityType, IF(g.id is null, 'client', 'group') as parentType "
+                    + " , coalesce(c.id,g.id) as parentId, coalesce(c.display_name,g.display_name) as parentName, null as entityMobileNo, l.loan_status_id as entityStatusEnum, null as subEntityType, CASE WHEN g.id is null THEN 'client' ELSE 'group' END as parentType "
                     + " from m_loan l left join m_client c on l.client_id = c.id left join m_group g ON l.group_id = g.id left join m_office o on o.id = c.office_id left join m_product_loan pl on pl.id=l.product_id where (o.hierarchy IS NULL OR o.hierarchy like :hierarchy) and (l.account_no like :search or l.external_id like :search)) ";
 
             final String savingMatchSql = " (select 'SAVING' as entityType, s.id as entityId, sp.name as entityName, s.external_id as entityExternalId, s.account_no as entityAccountNo "
-                    + " , IFNULL(c.id,g.id) as parentId, IFNULL(c.display_name,g.display_name) as parentName, null as entityMobileNo, s.status_enum as entityStatusEnum, s.deposit_type_enum as subEntityType,IF(g.id is null, 'client', 'group') as parentType "
+                    + " , coalesce(c.id,g.id) as parentId, coalesce(c.display_name,g.display_name) as parentName, null as entityMobileNo, s.status_enum as entityStatusEnum, s.deposit_type_enum as subEntityType, CASE WHEN g.id is null THEN 'client' ELSE 'group' END as parentType "
                     + " from m_savings_account s left join m_client c on s.client_id = c.id left join m_group g ON s.group_id = g.id left join m_office o on o.id = c.office_id left join m_savings_product sp on sp.id=s.product_id "
                     + " where (o.hierarchy IS NULL OR o.hierarchy like :hierarchy) and (s.account_no like :search or s.external_id like :search)) ";
 
@@ -204,7 +203,7 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
         final AdHocQuerySearchMapper rm = new AdHocQuerySearchMapper();
         final MapSqlParameterSource params = new MapSqlParameterSource();
 
-        return this.namedParameterjdbcTemplate.query(rm.schema(searchConditions, params), params, rm);
+        return this.namedParameterJdbcTemplate.query(rm.schema(searchConditions, params), params, rm);
     }
 
     private static final class AdHocQuerySearchMapper implements RowMapper<AdHocSearchQueryData> {
@@ -217,9 +216,9 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
             final StringBuilder sql = new StringBuilder();
             sql.append(
                     "Select a.name as officeName, a.Product as productName, a.cnt as 'count', a.outstandingAmt as outstanding, a.percentOut as percentOut  ")
-                    .append("from (select mo.name, mp.name Product, sum(ifnull(ml.total_expected_repayment_derived,0.0)) TotalAmt, count(*) cnt, ")
-                    .append("sum(ifnull(ml.total_outstanding_derived,0.0)) outstandingAmt,  ")
-                    .append("(sum(ifnull(ml.total_outstanding_derived,0.0)) * 100 / sum(ifnull(ml.total_expected_repayment_derived,0.0))) percentOut ")
+                    .append("from (select mo.name, mp.name Product, SUM(COALESCE(ml.total_expected_repayment_derived,0.0)) TotalAmt, count(*) cnt, ")
+                    .append("SUM(COALESCE(ml.total_outstanding_derived,0.0)) outstandingAmt,  ")
+                    .append("(SUM(COALESCE(ml.total_outstanding_derived,0.0)) * 100 / SUM(COALESCE(ml.total_expected_repayment_derived,0.0))) percentOut ")
                     .append("from m_loan ml inner join m_product_loan mp on mp.id=ml.product_id  ")
                     .append("inner join m_client mc on mc.id=ml.client_id  ").append("inner join m_office mo on mo.id=mc.office_id  ");
 

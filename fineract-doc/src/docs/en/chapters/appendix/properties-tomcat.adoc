@@ -1,0 +1,42 @@
+= Tomcat Properties
+
+.Tomcat Properties
+|===
+|Name |Env Variable |Default Value |Description
+
+|server.tomcat.accept-count
+|FINERACT_SERVER_TOMCAT_ACCEPT_COUNT
+|100
+|TBD
+
+|server.tomcat.accesslog.enabled
+|FINERACT_SERVER_TOMCAT_ACCESSLOG_ENABLED
+|false
+|TBD
+
+|server.tomcat.max-connections
+|FINERACT_SERVER_TOMCAT_MAX_CONNECTIONS
+|8192
+|TBD
+
+|server.tomcat.max-http-form-post-size
+|FINERACT_SERVER_TOMCAT_MAX_HTTP_FORM_POST_SIZE
+|2MB
+|TBD
+
+|server.tomcat.max-keep-alive-requests
+|FINERACT_SERVER_TOMCAT_MAX_KEEP_ALIVE_REQUESTS
+|100
+|TBD
+
+|server.tomcat.threads.max
+|FINERACT_SERVER_TOMCAT_THREADS_MAX
+|200
+|TBD
+
+|server.tomcat.threads.min-spare
+|FINERACT_SERVER_TOMCAT_THREADS_MIN_SPARE
+|10
+|TBD
+|===
+

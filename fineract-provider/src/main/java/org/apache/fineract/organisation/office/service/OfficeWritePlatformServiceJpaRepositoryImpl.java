@@ -98,7 +98,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
             final Office office = Office.fromJson(parent, command);
 
             // pre save to generate id for use in office hierarchy
-            this.officeRepositoryWrapper.save(office);
+            this.officeRepositoryWrapper.saveAndFlush(office);
 
             office.generateHierarchy();
 

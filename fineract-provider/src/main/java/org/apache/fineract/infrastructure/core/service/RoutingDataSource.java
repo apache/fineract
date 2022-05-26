@@ -46,7 +46,7 @@ public class RoutingDataSource extends AbstractDataSource {
         return determineTargetDataSource().getConnection();
     }
 
-    private DataSource determineTargetDataSource() {
+    public DataSource determineTargetDataSource() {
         return this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource();
     }
 

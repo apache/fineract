@@ -31,6 +31,10 @@ import org.apache.fineract.integrationtests.common.Utils;
 
 public final class CodeHelper {
 
+    private static final String COUNTRY_CODE_NAME = "COUNTRY";
+    private static final String STATE_CODE_NAME = "STATE";
+    private static final String ADDRESS_TYPE_CODE_NAME = "ADDRESS_TYPE";
+
     private CodeHelper() {
 
     }
@@ -148,6 +152,32 @@ public final class CodeHelper {
         return Utils.performServerDelete(requestSpec, responseSpec, CODE_URL + "/" + codeId + "?" + Utils.TENANT_IDENTIFIER,
                 jsonAttributeToGetback);
 
+    }
+
+    public static Integer createAddressTypeCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String addressTypeName, final Integer position) {
+        HashMap<String, Object> code = getCodeByName(requestSpec, responseSpec, ADDRESS_TYPE_CODE_NAME);
+        Integer countryCode = (Integer) code.get("id");
+        return createCodeValue(requestSpec, responseSpec, countryCode, addressTypeName, position);
+    }
+
+    public static Integer createStateCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String stateName, final Integer position) {
+        HashMap<String, Object> code = getCodeByName(requestSpec, responseSpec, STATE_CODE_NAME);
+        Integer countryCode = (Integer) code.get("id");
+        return createCodeValue(requestSpec, responseSpec, countryCode, stateName, position);
+    }
+
+    public static Integer createCountryCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String countryName, final Integer position) {
+        HashMap<String, Object> code = getCodeByName(requestSpec, responseSpec, COUNTRY_CODE_NAME);
+        Integer countryCode = (Integer) code.get("id");
+        return createCodeValue(requestSpec, responseSpec, countryCode, countryName, position);
+    }
+
+    public static Integer createCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer codeId, final String codeValueName, final Integer position) {
+        return (Integer) createCodeValue(requestSpec, responseSpec, codeId, codeValueName, position, SUBRESPONSE_ID_ATTRIBUTE_NAME);
     }
 
     public static Object createCodeValue(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,

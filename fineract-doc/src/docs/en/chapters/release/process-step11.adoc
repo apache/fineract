@@ -1,0 +1,20 @@
+= Step 11: Finish Vote
+
+== Description
+
+Upon receiving 3 x +1 from the PMC, or after 72 hours (whichever one comes first), reply to the voting thread and add the prefix "[RESULT]" to the subject line with the results, as follows:
+
+[source,text]
+----
+include::{rootdir}/buildSrc/src/main/resources/email/release.step11.vote.subject.ftl[lines=21..]
+
+include::{rootdir}/buildSrc/src/main/resources/email/release.step11.vote.message.ftl[lines=21..]
+----
+
+== Gradle Task
+
+.Command
+[source,text,subs="attributes+,+macros"]
+----
+% ./gradlew fineractReleaseStep11 -Pfineract.release.version={revnumber}
+----

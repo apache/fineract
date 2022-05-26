@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForLoan;
 import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
@@ -29,18 +30,13 @@ import org.apache.fineract.accounting.journalentry.data.ChargePaymentDTO;
 import org.apache.fineract.accounting.journalentry.data.LoanDTO;
 import org.apache.fineract.accounting.journalentry.data.LoanTransactionDTO;
 import org.apache.fineract.organisation.office.domain.Office;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class CashBasedAccountingProcessorForLoan implements AccountingProcessorForLoan {
 
     private final AccountingProcessorHelper helper;
-
-    @Autowired
-    public CashBasedAccountingProcessorForLoan(final AccountingProcessorHelper accountingProcessorHelper) {
-        this.helper = accountingProcessorHelper;
-    }
 
     @Override
     public void createJournalEntriesForLoan(final LoanDTO loanDTO) {
@@ -81,6 +77,12 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
             else if (loanTransactionDTO.getTransactionType().isRefund()) {
                 createJournalEntriesForRefund(loanDTO, loanTransactionDTO, office);
             }
+
+            /** Logic for Credit Balance Refunds **/
+            else if (loanTransactionDTO.getTransactionType().isCreditBalanceRefund()) {
+                createJournalEntriesForCreditBalanceRefund(loanDTO, loanTransactionDTO, office);
+            }
+
             /***
              * Only principal write off affects cash based accounting (interest and fee write off need not be
              * considered). Debit losses written off and credit Loan Portfolio
@@ -311,6 +313,25 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
         }
     }
 
+    private void createJournalEntriesForCreditBalanceRefund(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO,
+            final Office office) {
+        // loan properties
+        final Long loanProductId = loanDTO.getLoanProductId();
+        final Long loanId = loanDTO.getLoanId();
+        final String currencyCode = loanDTO.getCurrencyCode();
+
+        // transaction properties
+        final String transactionId = loanTransactionDTO.getTransactionId();
+        final Date transactionDate = loanTransactionDTO.getTransactionDate();
+        final BigDecimal refundAmount = loanTransactionDTO.getAmount();
+        final boolean isReversal = loanTransactionDTO.isReversed();
+        final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
+
+        this.helper.createCashBasedJournalEntriesAndReversalsForLoan(office, currencyCode, CashAccountsForLoan.LOAN_PORTFOLIO.getValue(),
+                CashAccountsForLoan.OVERPAYMENT.getValue(), loanProductId, paymentTypeId, loanId, transactionId, transactionDate,
+                refundAmount, isReversal);
+    }
+
     private void createJournalEntriesForRefundForActiveLoan(LoanDTO loanDTO, LoanTransactionDTO loanTransactionDTO, Office office) {
         // loan properties
         final Long loanProductId = loanDTO.getLoanProductId();
@@ -348,9 +369,10 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
             List<ChargePaymentDTO> chargePaymentDTOs = new ArrayList<>();
 
             for (ChargePaymentDTO chargePaymentDTO : loanTransactionDTO.getFeePayments()) {
-                chargePaymentDTOs.add(new ChargePaymentDTO(chargePaymentDTO.getChargeId(), chargePaymentDTO.getLoanChargeId(),
+                chargePaymentDTOs.add(new ChargePaymentDTO(chargePaymentDTO.getChargeId(),
                         chargePaymentDTO.getAmount().floatValue() < 0 ? chargePaymentDTO.getAmount().multiply(new BigDecimal(-1))
-                                : chargePaymentDTO.getAmount()));
+                                : chargePaymentDTO.getAmount(),
+                        chargePaymentDTO.getLoanChargeId()));
             }
             this.helper.createCreditJournalEntryOrReversalForLoanCharges(office, currencyCode,
                     CashAccountsForLoan.INCOME_FROM_FEES.getValue(), loanProductId, loanId, transactionId, transactionDate, feesAmount,
@@ -362,9 +384,10 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
             List<ChargePaymentDTO> chargePaymentDTOs = new ArrayList<>();
 
             for (ChargePaymentDTO chargePaymentDTO : loanTransactionDTO.getPenaltyPayments()) {
-                chargePaymentDTOs.add(new ChargePaymentDTO(chargePaymentDTO.getChargeId(), chargePaymentDTO.getLoanChargeId(),
+                chargePaymentDTOs.add(new ChargePaymentDTO(chargePaymentDTO.getChargeId(),
                         chargePaymentDTO.getAmount().floatValue() < 0 ? chargePaymentDTO.getAmount().multiply(new BigDecimal(-1))
-                                : chargePaymentDTO.getAmount()));
+                                : chargePaymentDTO.getAmount(),
+                        chargePaymentDTO.getLoanChargeId()));
             }
 
             this.helper.createCreditJournalEntryOrReversalForLoanCharges(office, currencyCode,

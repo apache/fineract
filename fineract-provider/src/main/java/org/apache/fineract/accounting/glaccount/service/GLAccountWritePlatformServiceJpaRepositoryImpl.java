@@ -20,6 +20,7 @@ package org.apache.fineract.accounting.glaccount.service;
 
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingConstants;
 import org.apache.fineract.accounting.glaccount.api.GLAccountJsonInputParams;
 import org.apache.fineract.accounting.glaccount.command.GLAccountCommand;
@@ -44,10 +45,8 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.NonTransientDataAccessException;
@@ -57,6 +56,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccountWritePlatformService {
 
     private static final Logger LOG = LoggerFactory.getLogger(GLAccountWritePlatformServiceJpaRepositoryImpl.class);
@@ -66,17 +66,6 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
     private final GLAccountCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
     private final JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    public GLAccountWritePlatformServiceJpaRepositoryImpl(final GLAccountRepository glAccountRepository,
-            final JournalEntryRepository glJournalEntryRepository, final GLAccountCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final CodeValueRepositoryWrapper codeValueRepositoryWrapper, final RoutingDataSource dataSource) {
-        this.glAccountRepository = glAccountRepository;
-        this.glJournalEntryRepository = glJournalEntryRepository;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.codeValueRepositoryWrapper = codeValueRepositoryWrapper;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-    }
 
     @Transactional
     @Override
@@ -107,7 +96,7 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
 
             glAccount.generateHierarchy();
 
-            this.glAccountRepository.save(glAccount);
+            this.glAccountRepository.saveAndFlush(glAccount);
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(glAccount.getId()).build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {

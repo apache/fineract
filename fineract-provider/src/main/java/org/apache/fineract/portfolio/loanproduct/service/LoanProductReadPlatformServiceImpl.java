@@ -28,7 +28,7 @@ import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -58,17 +58,20 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     private final JdbcTemplate jdbcTemplate;
     private final ChargeReadPlatformService chargeReadPlatformService;
     private final RateReadService rateReadService;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final FineractEntityAccessUtil fineractEntityAccessUtil;
 
     @Autowired
     public LoanProductReadPlatformServiceImpl(final PlatformSecurityContext context,
-            final ChargeReadPlatformService chargeReadPlatformService, final RoutingDataSource dataSource,
-            final FineractEntityAccessUtil fineractEntityAccessUtil, final RateReadService rateReadService) {
+            final ChargeReadPlatformService chargeReadPlatformService, final JdbcTemplate jdbcTemplate,
+            final FineractEntityAccessUtil fineractEntityAccessUtil, final RateReadService rateReadService,
+            DatabaseSpecificSQLGenerator sqlGenerator) {
         this.context = context;
         this.chargeReadPlatformService = chargeReadPlatformService;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.fineractEntityAccessUtil = fineractEntityAccessUtil;
         this.rateReadService = rateReadService;
+        this.sqlGenerator = sqlGenerator;
     }
 
     @Override
@@ -82,7 +85,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final LoanProductMapper rm = new LoanProductMapper(charges, borrowerCycleVariationDatas, rates);
             final String sql = "select " + rm.loanProductSchema() + " where lp.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId });
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId }); // NOSONAR
 
         } catch (final EmptyResultDataAccessException e) {
             throw new LoanProductNotFoundException(loanProductId, e);
@@ -93,7 +96,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     public Collection<LoanProductBorrowerCycleVariationData> retrieveLoanProductBorrowerCycleVariations(final Long loanProductId) {
         final LoanProductBorrowerCycleMapper rm = new LoanProductBorrowerCycleMapper();
         final String sql = "select " + rm.schema() + " where bc.loan_product_id=?  order by bc.borrower_cycle_number,bc.value_condition";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { loanProductId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { loanProductId }); // NOSONAR
     }
 
     @Override
@@ -113,7 +116,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             sql += " where lp.id in ( " + inClause + " ) ";
         }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
     }
 
     @Override
@@ -121,7 +124,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         this.context.authenticatedUser();
 
-        final LoanProductLookupMapper rm = new LoanProductLookupMapper();
+        final LoanProductLookupMapper rm = new LoanProductLookupMapper(sqlGenerator);
 
         String sql = "select " + rm.schema();
 
@@ -131,7 +134,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             // SQLInjectionValidator.validateSQLInput(inClause);
         }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
     }
 
     @Override
@@ -143,7 +146,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     public Collection<LoanProductData> retrieveAllLoanProductsForLookup(final boolean activeOnly) {
         this.context.authenticatedUser();
 
-        final LoanProductLookupMapper rm = new LoanProductLookupMapper();
+        final LoanProductLookupMapper rm = new LoanProductLookupMapper(sqlGenerator);
 
         String sql = "select ";
         if (activeOnly) {
@@ -164,7 +167,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             }
         }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
     }
 
     @Override
@@ -199,6 +202,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lp.amortization_method_enum as amortizationMethod, lp.arrearstolerance_amount as tolerance, "
                     + "lp.accounting_type as accountingType, lp.include_in_borrower_cycle as includeInBorrowerCycle,lp.use_borrower_cycle as useBorrowerCycle, lp.start_date as startDate, lp.close_date as closeDate,  "
                     + "lp.allow_multiple_disbursals as multiDisburseLoan, lp.max_disbursals as maxTrancheCount, lp.max_outstanding_loan_balance as outstandingLoanBalance, "
+                    + "lp.disallow_expected_disbursements as disallowExpectedDisbursements, lp.allow_approved_disbursed_amounts_over_applied as allowApprovedDisbursedAmountsOverApplied, lp.over_applied_calculation_type as overAppliedCalculationType, over_applied_number as overAppliedNumber, "
                     + "lp.days_in_month_enum as daysInMonth, lp.days_in_year_enum as daysInYear, lp.interest_recalculation_enabled as isInterestRecalculationEnabled, "
                     + "lp.can_define_fixed_emi_amount as canDefineInstallmentAmount, lp.instalment_amount_in_multiples_of as installmentAmountInMultiplesOf, "
                     + "lpr.pre_close_interest_calculation_strategy as preCloseInterestCalculationStrategy, "
@@ -356,6 +360,10 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final Boolean multiDisburseLoan = rs.getBoolean("multiDisburseLoan");
             final Integer maxTrancheCount = rs.getInt("maxTrancheCount");
             final BigDecimal outstandingLoanBalance = rs.getBigDecimal("outstandingLoanBalance");
+            final Boolean disallowExpectedDisbursements = rs.getBoolean("disallowExpectedDisbursements");
+            final Boolean allowApprovedDisbursedAmountsOverApplied = rs.getBoolean("allowApprovedDisbursedAmountsOverApplied");
+            final String overAppliedCalculationType = rs.getString("overAppliedCalculationType");
+            final Integer overAppliedNumber = rs.getInt("overAppliedNumber");
 
             final int daysInMonth = JdbcSupport.getInteger(rs, "daysInMonth");
             final EnumOptionData daysInMonthType = CommonEnumerations.daysInMonthType(daysInMonth);
@@ -466,6 +474,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     this.charges, accountingRuleType, includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId,
                     principalVariationsForBorrowerCycle, interestRateVariationsForBorrowerCycle,
                     numberOfRepaymentVariationsForBorrowerCycle, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
+                    disallowExpectedDisbursements, allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber,
                     graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
                     interestRecalculationData, minimumDaysBetweenDisbursalAndFirstRepayment, holdGuaranteeFunds, loanProductGuaranteeData,
                     principalThresholdForLastInstallment, accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineInstallmentAmount,
@@ -479,12 +488,18 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
     private static final class LoanProductLookupMapper implements RowMapper<LoanProductData> {
 
+        private final DatabaseSpecificSQLGenerator sqlGenerator;
+
+        LoanProductLookupMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
+            this.sqlGenerator = sqlGenerator;
+        }
+
         public String schema() {
             return "lp.id as id, lp.name as name, lp.allow_multiple_disbursals as multiDisburseLoan from m_product_loan lp";
         }
 
         public String activeOnlySchema() {
-            return schema() + " where (close_date is null or close_date >= CURDATE())";
+            return schema() + " where (close_date is null or close_date >= " + sqlGenerator.currentDate() + ")";
         }
 
         public String productMixSchema() {
@@ -555,7 +570,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             sql += " and id in (" + inClause + ") ";
         }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { currencyCode });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { currencyCode }); // NOSONAR
     }
 
     @Override
@@ -563,7 +578,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         this.context.authenticatedUser();
 
-        final LoanProductLookupMapper rm = new LoanProductLookupMapper();
+        final LoanProductLookupMapper rm = new LoanProductLookupMapper(sqlGenerator);
 
         String sql = "Select " + rm.productMixSchema();
 
@@ -575,7 +590,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             sql += " and lp.id in ( " + inClause + " ) ";
         }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
     }
 
     @Override
@@ -583,7 +598,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         this.context.authenticatedUser();
 
-        final LoanProductLookupMapper rm = new LoanProductLookupMapper();
+        final LoanProductLookupMapper rm = new LoanProductLookupMapper(sqlGenerator);
 
         String sql = "Select " + rm.restrictedProductsSchema() + " where pm.product_id=? ";
         // Check if branch specific products are enabled. If yes, fetch only
@@ -604,7 +619,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             sql += " and lp.id in ( " + inClause2 + " ) ";
         }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { productId, productId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { productId, productId }); // NOSONAR
     }
 
     @Override
@@ -612,7 +627,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         this.context.authenticatedUser();
 
-        final LoanProductLookupMapper rm = new LoanProductLookupMapper();
+        final LoanProductLookupMapper rm = new LoanProductLookupMapper(sqlGenerator);
 
         String sql = "Select " + rm.schema() + " where ";
 
@@ -627,7 +642,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         sql += "lp.id not in (" + "Select pm.restricted_product_id from m_product_mix pm where pm.product_id=? " + "UNION "
                 + "Select pm.product_id from m_product_mix pm where pm.restricted_product_id=?)";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { productId, productId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { productId, productId }); // NOSONAR
     }
 
     @Override
@@ -637,7 +652,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final LoanProductFloatingRateMapper rm = new LoanProductFloatingRateMapper();
             final String sql = "select " + rm.schema() + " where lp.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId });
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId }); // NOSONAR
 
         } catch (final EmptyResultDataAccessException e) {
             throw new LoanProductNotFoundException(loanProductId, e);

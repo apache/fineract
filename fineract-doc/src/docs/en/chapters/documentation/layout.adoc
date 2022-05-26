@@ -1,0 +1,14 @@
+= File and Folder Layout
+
+The general rules are::
+
+* keep things as flat as possible (avoid sub-folders as much as possible)
+* DRY (don't repeat yourself): don't copy and paste code pieces, use AsciiDoc's include feature and reference files/-sections from the project folder
+* images are located in `fineract-doc/src/docs/en/images` (or sub-folders)
+* diagrams are located in `fineract-doc/src/docs/en/diagrams` (or sub-folders)
+* specific chapters are located in `fineract-doc/src/docs/en/chapters`
+* every chapter has its own folder and at least one `index.adoc` file
+* it's recommended to keep the chapters flat (i. e. no sub-folders in the chapter folders)
+* it's recommended to create one file per chapter section; like that you can re-arrange sections very easily in the `index.adoc` file
+
+NOTE: These rules are not entirely set in stone and could be modified if necessary. If you see any issues then please report them on the mailto:dev@fineract.apache.org[mailing list] or https://issues.apache.org[open a Jira ticket].

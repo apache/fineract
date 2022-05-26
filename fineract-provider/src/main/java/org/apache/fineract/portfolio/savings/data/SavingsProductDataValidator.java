@@ -34,8 +34,10 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interest
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestCompoundingPeriodTypeParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestPostingPeriodTypeParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.isDormancyTrackingActiveParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lienAllowedParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.maxAllowedLienLimitParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minBalanceForInterestCalculationParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minOverdraftForInterestCalculationParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minRequiredOpeningBalanceParamName;
@@ -62,6 +64,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingConstants.SavingProductAccountingParams;
 import org.apache.fineract.accounting.common.AccountingRuleType;
@@ -103,6 +106,7 @@ public class SavingsProductDataValidator {
             daysToInactiveParamName, daysToEscheatParamName, allowOverdraftParamName, overdraftLimitParamName,
             nominalAnnualInterestRateOverdraftParamName, minOverdraftForInterestCalculationParamName,
             SavingsApiConstants.minRequiredBalanceParamName, SavingsApiConstants.enforceMinRequiredBalanceParamName,
+            SavingsApiConstants.maxAllowedLienLimitParamName, SavingsApiConstants.lienAllowedParamName,
             minBalanceForInterestCalculationParamName, withHoldTaxParamName, taxGroupIdParamName));
 
     @Autowired
@@ -340,9 +344,8 @@ public class SavingsProductDataValidator {
             baseDataValidator.reset().parameter(minBalanceForInterestCalculationParamName).value(minBalanceForInterestCalculation)
                     .ignoreIfNull().zeroOrPositiveAmount();
         }
-
         validateTaxWithHoldingParams(baseDataValidator, element, true);
-
+        validateLienParams(baseDataValidator, element);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -545,7 +548,7 @@ public class SavingsProductDataValidator {
         }
 
         validateTaxWithHoldingParams(baseDataValidator, element, false);
-
+        validateLienParams(baseDataValidator, element);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -648,6 +651,29 @@ public class SavingsProductDataValidator {
                     .ignoreIfNull().zeroOrPositiveAmount();
         }
 
+    }
+
+    private void validateLienParams(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
+        if (this.fromApiJsonHelper.parameterExists(lienAllowedParamName, element)) {
+            final Boolean lienAllowed = this.fromApiJsonHelper.extractBooleanNamed(lienAllowedParamName, element);
+            baseDataValidator.reset().parameter(lienAllowedParamName).value(lienAllowed).ignoreIfNull().validateForBooleanValue();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(maxAllowedLienLimitParamName, element)) {
+            final BigDecimal maxAllowedLienLimit = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(maxAllowedLienLimitParamName,
+                    element);
+            baseDataValidator.reset().parameter(maxAllowedLienLimitParamName).value(maxAllowedLienLimit).ignoreIfNull()
+                    .zeroOrPositiveAmount();
+        }
+        if (BooleanUtils.isTrue(this.fromApiJsonHelper.extractBooleanNamed(lienAllowedParamName, element))
+                && BooleanUtils.isTrue(this.fromApiJsonHelper.extractBooleanNamed(allowOverdraftParamName, element))) {
+            final BigDecimal maxAllowedLienLimit = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(maxAllowedLienLimitParamName,
+                    element);
+            final BigDecimal overdraftLimit = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(overdraftLimitParamName, element);
+            if (overdraftLimit.compareTo(maxAllowedLienLimit) > 0) {
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("Overdraft.limit.can.not.be.greater.than.lien.limit");
+            }
+        }
     }
 
     private void validateTaxWithHoldingParams(final DataValidatorBuilder baseDataValidator, final JsonElement element,

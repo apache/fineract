@@ -38,7 +38,7 @@ import org.apache.fineract.infrastructure.security.service.BasicAuthTenantDetail
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.filter.GenericFilterBean;
@@ -54,8 +54,8 @@ import org.springframework.web.filter.GenericFilterBean;
  *
  * Used to support Oauth2 authentication and the service is loaded only when "oauth" profile is active.
  */
-@Service(value = "tenantIdentifierProcessingFilter")
-@Profile("oauth")
+@Service
+@ConditionalOnProperty("fineract.security.oauth.enabled")
 public class TenantAwareTenantIdentifierFilter extends GenericFilterBean {
 
     private static boolean firstRequestProcessed = false;
@@ -94,7 +94,7 @@ public class TenantAwareTenantIdentifierFilter extends GenericFilterBean {
 
             // allows for Cross-Origin
             // Requests (CORs) to be performed against the platform API.
-            response.setHeader("Access-Control-Allow-Origin", "*");
+            response.setHeader("Access-Control-Allow-Origin", "*"); // NOSONAR
             response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
             final String reqHead = request.getHeader("Access-Control-Request-Headers");
 

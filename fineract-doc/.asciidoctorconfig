@@ -1,5 +1,8 @@
-:years: 2015-2020
-:revnumber: 1.0.0
+:years: 2015-2022
+:revnumber: 1.7.0
 :draft: true
-:rootdir: ../../../..
-:generated: ../../../build/generated/asciidoc
+:rootdir: {asciidoctorconfigdir}/..
+:generated: {asciidoctorconfigdir}/build/generated/asciidoc
+:diagramsdir: {asciidoctorconfigdir}/src/docs/en/diagrams
+:imagesdir: {asciidoctorconfigdir}/src/docs/en/images
+:icons: font

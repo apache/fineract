@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.creditbureau.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauLoanProductMappingData;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,10 +35,9 @@ public class CreditBureauLoanProductMappingReadPlatformServiceImpl implements Cr
     private final PlatformSecurityContext context;
 
     @Autowired
-    public CreditBureauLoanProductMappingReadPlatformServiceImpl(final PlatformSecurityContext context,
-            final RoutingDataSource dataSource) {
+    public CreditBureauLoanProductMappingReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
         this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private static final class CreditBureauLoanProductMapper implements RowMapper<CreditBureauLoanProductMappingData> {
@@ -48,7 +46,7 @@ public class CreditBureauLoanProductMappingReadPlatformServiceImpl implements Cr
             return "cblp.id as mappingId, cblp.organisation_creditbureau_id as orgcbId,"
                     + "orgcb.alias as alias,concat( cb.product,' - ' ,cb.name,' - ',cb.country) as creditbureau,"
                     + "cblp.loan_product_id as lpId,lp.name as loan_product_name,cblp.is_creditcheck_mandatory as crCheck,cblp.skip_creditcheck_in_failure as skipcheck,"
-                    + "cblp.stale_period as staleperiod,cblp.isActive as isActive from"
+                    + "cblp.stale_period as staleperiod,cblp.is_active as isActive from"
                     + " m_creditbureau_loanproduct_mapping cblp, m_organisation_creditbureau orgcb,m_product_loan lp,m_creditbureau cb"
                     + " where cblp.organisation_creditbureau_id=orgcb.id and cblp.loan_product_id=lp.id and orgcb.creditbureau_id=cb.id";
         }
@@ -96,7 +94,7 @@ public class CreditBureauLoanProductMappingReadPlatformServiceImpl implements Cr
         final CreditBureauLoanProductMapper rm = new CreditBureauLoanProductMapper();
         final String sql = "select " + rm.schema() + " order by cblp.id";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
     }
 
     @Override
@@ -106,7 +104,7 @@ public class CreditBureauLoanProductMappingReadPlatformServiceImpl implements Cr
         final CreditBureauLoanProductMapper rm = new CreditBureauLoanProductMapper();
         final String sql = "select " + rm.schema() + " and cblp.loan_product_id=?";
 
-        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId });
+        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId }); // NOSONAR
     }
 
     @Override
@@ -116,7 +114,7 @@ public class CreditBureauLoanProductMappingReadPlatformServiceImpl implements Cr
         final LoanProductMapper rm = new LoanProductMapper();
         final String sql = "select " + rm.schema() + " order by lp.id";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
     }
 
 }

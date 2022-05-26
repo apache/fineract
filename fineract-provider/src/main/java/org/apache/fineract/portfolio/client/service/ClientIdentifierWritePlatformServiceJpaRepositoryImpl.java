@@ -90,7 +90,7 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
 
             final ClientIdentifier clientIdentifier = ClientIdentifier.fromJson(client, documentType, command);
 
-            this.clientIdentifierRepository.save(clientIdentifier);
+            this.clientIdentifierRepository.saveAndFlush(clientIdentifier);
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //

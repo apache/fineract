@@ -1,0 +1,28 @@
+= Email
+
+Official communication related to releases needs to be done with an Apache email address. The Apache Foundation doesn't provide any real email inboxes anymore and just relays emails to your configured private account (GMail etc.).
+
+IMPORTANT: At the moment we are supporting only GMail accounts. Please let us know if you have other configuration recipes for other email providers.
+
+== GMail
+
+You can configure your GMail account and add another profile to use the Apache relay server if you need to send official messages. Please follow these instructions:
+
+TBD.
+
+See also: https://gmail.googleblog.com/2009/07/send-mail-from-another-address-without.html[Send mail from another address without "on behalf of"]
+
+To be able to send emails via SMTP with your GMail account you probably need to create an app password. Please follow these instructions:
+
+1. Go to your Google Account.
+1. Select Security.
+1. Under "Signing in to Google," select App Passwords. You may need to sign in. If you don't have this option, it might be because:
+1. 2-Step Verification is not set up for your account.
+1. 2-Step Verification is only set up for security keys.
+1. Your account is through work, school, or other organization.
+1. You turned on Advanced Protection.
+1. At the bottom, choose Select app and choose the app you using and then Select device and choose the device you're using and then Generate.
+1. Follow the instructions to enter the App Password. The App Password is the 16-character code in the yellow bar on your device.
+1. Tap Done.
+
+See also: https://support.google.com/accounts/answer/185833?p=InvalidSecondFactor&visit_id=637856439524128323-869822459&rd=1[Google Support: Sign in with App Passwords] for more details.
