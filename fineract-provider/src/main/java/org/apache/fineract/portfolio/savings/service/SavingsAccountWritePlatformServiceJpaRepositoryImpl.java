@@ -1814,7 +1814,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final boolean backdatedTxnsAllowedTill = this.savingAccountAssembler.getPivotConfigStatus();
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, backdatedTxnsAllowedTill);
         final LocalDate transactionDate = command.localDateValueOfParameterNamed(transactionDateParamName);
-        final boolean lienAllowed = command.booleanObjectValueOfParameterNamed(lienAllowedParamName);
+        final boolean lienAllowed = command.booleanPrimitiveValueOfParameterNamed(lienAllowedParamName);
 
         checkClientOrGroupActive(account);
 
