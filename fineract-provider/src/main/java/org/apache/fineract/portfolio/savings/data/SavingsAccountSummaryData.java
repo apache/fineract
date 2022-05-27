@@ -121,6 +121,10 @@ public class SavingsAccountSummaryData implements Serializable {
         return this.availableBalance;
     }
 
+    public BigDecimal getAccountBalance() {
+        return accountBalance;
+    }
+
     public BigDecimal getTotalOverdraftInterestDerived() {
         return this.totalOverdraftInterestDerived;
     }
