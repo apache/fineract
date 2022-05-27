@@ -66,6 +66,32 @@ public class SavingsInterestPostingJobIntegrationTest {
     }
 
     @Test
+    public void testSavingsBalanceCheckAfterDailyInterestPostingJob() {
+        // client activation, savings activation and 1st transaction date
+        final String startDate = "10 April 2022";
+        final String jobName = "Post Interest For Savings";
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        Assertions.assertNotNull(clientID);
+
+        final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
+
+        this.savingsAccountHelper.depositToSavingsAccount(savingsId, "10000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+
+        /***
+         * Runs Post interest posting job and verify the new account created with accounting configuration set as none
+         * is picked up by job
+         */
+        this.scheduleJobHelper.executeAndAwaitJob(jobName);
+        Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
+        ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
+        HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 48);
+        for (Map.Entry<String, Object> entry : interestPostingTransaction.entrySet()) {
+            LOG.info("{} - {}", entry.getKey(), entry.getValue().toString());
+        }
+        assertEquals("10129.582", interestPostingTransaction.get("runningBalance").toString(), "Equality check for Balance");
+    }
+
+    @Test
     public void testSavingsDailyInterestPostingJob() {
         // client activation, savings activation and 1st transaction date
         final String startDate = "10 April 2022";
