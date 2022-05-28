@@ -21,11 +21,13 @@ package org.apache.fineract.notification.config;
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.fineract.infrastructure.core.config.EnableFineractEventsCondition;
 import org.apache.fineract.notification.eventandlistener.NotificationEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
@@ -35,6 +37,7 @@ import org.springframework.jms.listener.DefaultMessageListenerContainer;
 
 @Configuration
 @Profile("activeMqEnabled")
+@Conditional(EnableFineractEventsCondition.class)
 public class MessagingConfiguration {
 
     @Autowired
