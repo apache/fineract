@@ -165,8 +165,13 @@ public class ImagesApiResource {
 
         try {
             byte[] resizedImageBytes = resizedImage.getByteSource().read();
-            final String clientImageAsBase64Text = imageDataURISuffix + Base64.getMimeEncoder().encodeToString(resizedImageBytes);
-            return Response.ok(clientImageAsBase64Text, MediaType.TEXT_PLAIN_TYPE).build();
+
+            if(resizedImageBytes != null){
+                final String clientImageAsBase64Text = imageDataURISuffix + Base64.getMimeEncoder().encodeToString(resizedImageBytes);
+                return Response.ok(clientImageAsBase64Text, MediaType.TEXT_PLAIN_TYPE).build();
+            }else{
+                return Response.noContent().build();
+            }
         } catch (IOException e) {
             throw new ContentManagementException(imageData.name(), e.getMessage(), e);
         }
