@@ -61,8 +61,9 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Path("{entity}/{entityId}/images")
-
 public class ImagesApiResource {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ImagesApiResource.class);
 
     private final PlatformSecurityContext context;
     private final ImageReadPlatformService imageReadPlatformService;
@@ -165,12 +166,12 @@ public class ImagesApiResource {
 
         try {
             byte[] resizedImageBytes = resizedImage.getByteSource().read();
-
-            if(resizedImageBytes != null){
+            if (resizedImageBytes != null) {
                 final String clientImageAsBase64Text = imageDataURISuffix + Base64.getMimeEncoder().encodeToString(resizedImageBytes);
                 return Response.ok(clientImageAsBase64Text, MediaType.TEXT_PLAIN_TYPE).build();
-            }else{
-                return Response.noContent().build();
+            } else {
+                LOG.error("resizedImageBytes is null for entityName={}, entityId={}, maxWidth={}, maxHeight={}", entityName, entityId, maxWidth, maxHeight);
+                return Response.serverError().build();
             }
         } catch (IOException e) {
             throw new ContentManagementException(imageData.name(), e.getMessage(), e);
