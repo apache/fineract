@@ -54,6 +54,8 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -170,7 +172,8 @@ public class ImagesApiResource {
                 final String clientImageAsBase64Text = imageDataURISuffix + Base64.getMimeEncoder().encodeToString(resizedImageBytes);
                 return Response.ok(clientImageAsBase64Text, MediaType.TEXT_PLAIN_TYPE).build();
             } else {
-                LOG.error("resizedImageBytes is null for entityName={}, entityId={}, maxWidth={}, maxHeight={}", entityName, entityId, maxWidth, maxHeight);
+                LOG.error("resizedImageBytes is null for entityName={}, entityId={}, maxWidth={}, maxHeight={}", entityName, entityId,
+                        maxWidth, maxHeight);
                 return Response.serverError().build();
             }
         } catch (IOException e) {
