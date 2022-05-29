@@ -1737,10 +1737,39 @@ public class Loan extends AbstractPersistableCustom {
             chargeAmt = loanCharge.amountOrPercentage();
         }
         if (loanCharge.isActive()) {
+            clearLoanInstallmentChargesBeforeRegeneration(loanCharge);
             loanCharge.update(chargeAmt, loanCharge.getDueLocalDate(), amount, fetchNumberOfInstallmensAfterExceptions(), totalChargeAmt);
             validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate(false));
         }
 
+    }
+
+    private void clearLoanInstallmentChargesBeforeRegeneration(final LoanCharge loanCharge) {
+        /*
+         * JW https://issues.apache.org/jira/browse/FINERACT-1557 For loan installment charges only : Clear down
+         * installment charges from the loanCharge and from each of the repayment installments and allow them to be
+         * recalculated fully anew. This patch is to avoid the 'merging' of existing and regenerated installment charges
+         * which results in the installment charges being deleted on loan approval if the schedule is regenerated. Not
+         * pretty. updateInstallmentCharges in LoanCharge.java: the merging looks like it will work but doesn't so this
+         * patch simply hits the part which 'adds all' rather than merge. Possibly an ORM issue. The issue could be to
+         * do with the fact that, on approval, the "recalculateLoanCharge" happens twice (probably 2 schedule
+         * regenerations) whereas it only happens once on Submit and Disburse (and no problems with them)
+         *
+         * if (this.loanInstallmentCharge.isEmpty()) { this.loanInstallmentCharge.addAll(newChargeInstallments);
+         */
+        Loan loan = loanCharge.getLoan();
+        if (loan.isSubmittedAndPendingApproval() || loan.isApproved()) { // doing for both just in case status is not
+                                                                         // updated at this points
+            if (loanCharge.isInstalmentFee()) {
+                loanCharge.clearLoanInstallmentCharges();
+                for (final LoanRepaymentScheduleInstallment installment : getRepaymentScheduleInstallments()) {
+                    if (installment.isRecalculatedInterestComponent()) {
+                        continue; // JW: does this in generateInstallmentLoanCharges - but don't understand it
+                    }
+                    installment.getInstallmentCharges().clear();
+                }
+            }
+        }
     }
 
     private BigDecimal calculateOverdueAmountPercentageAppliedTo(final LoanCharge loanCharge, final int penaltyWaitPeriod) {
