@@ -55,6 +55,9 @@ import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.address.service.AddressWritePlatformService;
+import org.apache.fineract.portfolio.businessevent.domain.BusinessEntity;
+import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
+import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.data.ClientDataValidator;
 import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
@@ -69,9 +72,6 @@ import org.apache.fineract.portfolio.client.exception.ClientHasNoStaffException;
 import org.apache.fineract.portfolio.client.exception.ClientMustBePendingToBeDeletedException;
 import org.apache.fineract.portfolio.client.exception.InvalidClientSavingProductException;
 import org.apache.fineract.portfolio.client.exception.InvalidClientStateTransitionException;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
-import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepository;
 import org.apache.fineract.portfolio.group.exception.GroupMemberCountNotInPermissibleRangeException;
@@ -305,7 +305,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             this.clientRepository.saveAndFlush(newClient);
             if (newClient.isActive()) {
-                this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.CLIENTS_ACTIVATE,
+                this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.CLIENTS_ACTIVATE,
                         constructEntityMap(BusinessEntity.CLIENT, newClient));
             }
             if (newClient.isAccountNumberRequiresAutoGeneration()) {
@@ -340,7 +340,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                         command.arrayOfParameterNamed(ClientApiConstants.datatables));
             }
 
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.CLIENTS_CREATE,
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.CLIENTS_CREATE,
                     constructEntityMap(BusinessEntity.CLIENT, newClient));
 
             this.entityDatatableChecksWritePlatformService.runTheCheck(newClient.getId(), EntityTables.CLIENT.getName(),
@@ -595,7 +595,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             client.activate(currentUser, fmt, activationDate);
             CommandProcessingResult result = openSavingsAccount(client, fmt);
             this.clientRepository.saveAndFlush(client);
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.CLIENTS_ACTIVATE,
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.CLIENTS_ACTIVATE,
                     constructEntityMap(BusinessEntity.CLIENT, client));
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -850,7 +850,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         }
         client.reject(currentUser, rejectionReason, Date.from(rejectionDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         this.clientRepository.saveAndFlush(client);
-        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.CLIENTS_REJECT,
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.CLIENTS_REJECT,
                 constructEntityMap(BusinessEntity.CLIENT, client));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //

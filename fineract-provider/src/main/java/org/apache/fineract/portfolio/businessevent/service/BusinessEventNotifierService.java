@@ -16,11 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.common.service;
+package org.apache.fineract.portfolio.businessevent.service;
 
 import java.util.Map;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
+import org.apache.fineract.portfolio.businessevent.BusinessEventListener;
+import org.apache.fineract.portfolio.businessevent.domain.BusinessEntity;
+import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
 
 /**
  * Implemented class is responsible for notifying the business event to registered listeners.
@@ -31,21 +32,21 @@ public interface BusinessEventNotifierService {
     /**
      * Method should be called to notify listeners before Business event execution for any pre-processing of event
      */
-    void notifyBusinessEventToBeExecuted(BusinessEvents businessEvent, Map<BusinessEntity, Object> businessEventEntity);
+    void notifyBusinessEventToBeExecuted(BusinessEvent businessEvent, Map<BusinessEntity, Object> businessEventEntity);
 
     /**
      * Method should be called to notify listeners after Business event execution for any post-processing of event
      */
-    void notifyBusinessEventWasExecuted(BusinessEvents businessEvent, Map<BusinessEntity, Object> businessEventEntity);
+    void notifyBusinessEventWasExecuted(BusinessEvent businessEvent, Map<BusinessEntity, Object> businessEventEntity);
 
     /**
      * Method is to register a class as listener for pre-processing of any Business event
      */
-    void addBusinessEventPreListeners(BusinessEvents businessEvent, BusinessEventListener businessEventListener);
+    void addBusinessEventPreListeners(BusinessEvent businessEvent, BusinessEventListener businessEventListener);
 
     /**
      * Method is to register a class as listener for post-processing of any Business event
      */
-    void addBusinessEventPostListeners(BusinessEvents businessEvent, BusinessEventListener businessEventListener);
+    void addBusinessEventPostListeners(BusinessEvent businessEvent, BusinessEventListener businessEventListener);
 
 }

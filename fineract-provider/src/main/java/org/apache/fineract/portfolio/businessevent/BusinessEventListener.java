@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.common.service;
+package org.apache.fineract.portfolio.businessevent;
 
 import java.util.Map;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
+import org.apache.fineract.portfolio.businessevent.domain.BusinessEntity;
 
 /**
  * The interface to be implemented by classes that want to be informed when a Business Event executes. example: on
