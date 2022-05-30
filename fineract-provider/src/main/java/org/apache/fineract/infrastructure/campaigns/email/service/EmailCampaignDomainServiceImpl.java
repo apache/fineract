@@ -28,9 +28,10 @@ import javax.annotation.PostConstruct;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailCampaign;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailCampaignRepository;
 import org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignTriggerType;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants;
-import org.apache.fineract.portfolio.common.service.BusinessEventListener;
-import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
+import org.apache.fineract.portfolio.businessevent.BusinessEventListener;
+import org.apache.fineract.portfolio.businessevent.domain.BusinessEntity;
+import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
+import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.slf4j.Logger;
@@ -56,20 +57,19 @@ public class EmailCampaignDomainServiceImpl implements EmailCampaignDomainServic
 
     @PostConstruct
     public void addListeners() {
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEventNotificationConstants.BusinessEvents.LOAN_APPROVED,
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_APPROVED,
                 new EmailCampaignDomainServiceImpl.SendEmailOnLoanApproved());
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEventNotificationConstants.BusinessEvents.LOAN_REJECTED,
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_REJECTED,
                 new EmailCampaignDomainServiceImpl.SendEmailOnLoanRejected());
-        this.businessEventNotifierService.addBusinessEventPostListeners(
-                BusinessEventNotificationConstants.BusinessEvents.LOAN_MAKE_REPAYMENT,
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_MAKE_REPAYMENT,
                 new EmailCampaignDomainServiceImpl.SendEmailOnLoanRepayment());
     }
 
     private class SendEmailOnLoanRepayment extends EmailBusinessEventAdapter {
 
         @Override
-        public void businessEventWasExecuted(Map<BusinessEventNotificationConstants.BusinessEntity, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BusinessEventNotificationConstants.BusinessEntity.LOAN_TRANSACTION);
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
+            Object entity = businessEventEntity.get(BusinessEntity.LOAN_TRANSACTION);
             if (entity instanceof LoanTransaction) {
                 LoanTransaction loanTransaction = (LoanTransaction) entity;
                 try {
@@ -84,8 +84,8 @@ public class EmailCampaignDomainServiceImpl implements EmailCampaignDomainServic
     private class SendEmailOnLoanRejected extends EmailBusinessEventAdapter {
 
         @Override
-        public void businessEventWasExecuted(Map<BusinessEventNotificationConstants.BusinessEntity, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BusinessEventNotificationConstants.BusinessEntity.LOAN);
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
+            Object entity = businessEventEntity.get(BusinessEntity.LOAN);
             if (entity instanceof Loan) {
                 Loan loan = (Loan) entity;
                 try {
@@ -100,8 +100,8 @@ public class EmailCampaignDomainServiceImpl implements EmailCampaignDomainServic
     private class SendEmailOnLoanApproved extends EmailBusinessEventAdapter {
 
         @Override
-        public void businessEventWasExecuted(Map<BusinessEventNotificationConstants.BusinessEntity, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BusinessEventNotificationConstants.BusinessEntity.LOAN);
+        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
+            Object entity = businessEventEntity.get(BusinessEntity.LOAN);
             if (entity instanceof Loan) {
                 Loan loan = (Loan) entity;
                 try {
@@ -138,7 +138,7 @@ public class EmailCampaignDomainServiceImpl implements EmailCampaignDomainServic
     private abstract static class EmailBusinessEventAdapter implements BusinessEventListener {
 
         @Override
-        public void businessEventToBeExecuted(Map<BusinessEventNotificationConstants.BusinessEntity, Object> businessEventEntity) {
+        public void businessEventToBeExecuted(Map<BusinessEntity, Object> businessEventEntity) {
             // Nothing to do
         }
     }

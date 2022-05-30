@@ -34,10 +34,10 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
-import org.apache.fineract.portfolio.common.service.BusinessEventListener;
-import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
+import org.apache.fineract.portfolio.businessevent.BusinessEventListener;
+import org.apache.fineract.portfolio.businessevent.domain.BusinessEntity;
+import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
+import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -72,17 +72,17 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
 
     @PostConstruct
     public void registerForNotification() {
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_REFUND, this);
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_ADJUST_TRANSACTION, this);
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_MAKE_REPAYMENT, this);
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_UNDO_WRITTEN_OFF, this);
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_WAIVE_INTEREST, this);
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_ADD_CHARGE, this);
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_WAIVE_CHARGE, this);
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_CHARGE_PAYMENT, this);
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_APPLY_OVERDUE_CHARGE, this);
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_DISBURSAL, new DisbursementEventListener());
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_FORECLOSURE, this);
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_REFUND, this);
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_ADJUST_TRANSACTION, this);
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_MAKE_REPAYMENT, this);
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_UNDO_WRITTEN_OFF, this);
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_WAIVE_INTEREST, this);
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_ADD_CHARGE, this);
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_WAIVE_CHARGE, this);
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_CHARGE_PAYMENT, this);
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_APPLY_OVERDUE_CHARGE, this);
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_DISBURSAL, new DisbursementEventListener());
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_FORECLOSURE, this);
     }
 
     @Transactional

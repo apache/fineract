@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import javax.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
@@ -38,10 +39,10 @@ import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
 import org.apache.fineract.portfolio.account.domain.AccountTransferDetails;
 import org.apache.fineract.portfolio.account.domain.AccountTransferType;
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
-import org.apache.fineract.portfolio.common.service.BusinessEventListener;
-import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
+import org.apache.fineract.portfolio.businessevent.BusinessEventListener;
+import org.apache.fineract.portfolio.businessevent.domain.BusinessEntity;
+import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
+import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.guarantor.GuarantorConstants;
@@ -60,10 +61,10 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.exception.InsufficientAccountBalanceException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class GuarantorDomainServiceImpl implements GuarantorDomainService {
 
     private final GuarantorRepository guarantorRepository;
@@ -75,36 +76,19 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
     private final Map<Long, Long> releaseLoanIds = new HashMap<>(2);
     private final SavingsAccountAssembler savingsAccountAssembler;
 
-    @Autowired
-    public GuarantorDomainServiceImpl(final GuarantorRepository guarantorRepository,
-            final GuarantorFundingRepository guarantorFundingRepository,
-            final GuarantorFundingTransactionRepository guarantorFundingTransactionRepository,
-            final AccountTransfersWritePlatformService accountTransfersWritePlatformService,
-            final BusinessEventNotifierService businessEventNotifierService,
-            final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository,
-            final SavingsAccountAssembler savingsAccountAssembler) {
-        this.guarantorRepository = guarantorRepository;
-        this.guarantorFundingRepository = guarantorFundingRepository;
-        this.guarantorFundingTransactionRepository = guarantorFundingTransactionRepository;
-        this.accountTransfersWritePlatformService = accountTransfersWritePlatformService;
-        this.businessEventNotifierService = businessEventNotifierService;
-        this.depositAccountOnHoldTransactionRepository = depositAccountOnHoldTransactionRepository;
-        this.savingsAccountAssembler = savingsAccountAssembler;
-    }
-
     @PostConstruct
     public void addListeners() {
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_APPROVED, new ValidateOnBusinessEvent());
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_APPROVED, new HoldFundsOnBusinessEvent());
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_UNDO_APPROVAL, new UndoAllFundTransactions());
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_UNDO_DISBURSAL,
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_APPROVED, new ValidateOnBusinessEvent());
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_APPROVED, new HoldFundsOnBusinessEvent());
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_UNDO_APPROVAL, new UndoAllFundTransactions());
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_UNDO_DISBURSAL,
                 new ReverseAllFundsOnBusinessEvent());
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_ADJUST_TRANSACTION,
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_ADJUST_TRANSACTION,
                 new AdjustFundsOnBusinessEvent());
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_MAKE_REPAYMENT,
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_MAKE_REPAYMENT,
                 new ReleaseFundsOnBusinessEvent());
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_WRITTEN_OFF, new ReleaseAllFunds());
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvents.LOAN_UNDO_WRITTEN_OFF,
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_WRITTEN_OFF, new ReleaseAllFunds());
+        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_UNDO_WRITTEN_OFF,
                 new ReverseFundsOnBusinessEvent());
     }
 

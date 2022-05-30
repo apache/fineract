@@ -55,6 +55,9 @@ import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationType;
 import org.apache.fineract.portfolio.account.domain.AccountAssociations;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationsRepository;
+import org.apache.fineract.portfolio.businessevent.domain.BusinessEntity;
+import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
+import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarFrequencyType;
@@ -66,11 +69,7 @@ import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
-import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepository;
 import org.apache.fineract.portfolio.group.exception.CenterNotActiveException;
@@ -232,10 +231,10 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             }
 
             final Long savingsId = account.getId();
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.FIXED_DEPOSIT_ACCOUNT_CREATE,
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.FIXED_DEPOSIT_ACCOUNT_CREATE,
                     constructEntityMap(BusinessEntity.DEPOSIT_ACCOUNT, account));
 
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.FIXED_DEPOSIT_ACCOUNT_CREATE,
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.FIXED_DEPOSIT_ACCOUNT_CREATE,
                     constructEntityMap(BusinessEntity.DEPOSIT_ACCOUNT, account));
 
             return new CommandProcessingResultBuilder() //
@@ -295,10 +294,10 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     financialYearBeginningMonth);
             account.validateApplicableInterestRate();
             this.savingAccountRepository.save(account);
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.RECURRING_DEPOSIT_ACCOUNT_CREATE,
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.RECURRING_DEPOSIT_ACCOUNT_CREATE,
                     constructEntityMap(BusinessEntity.DEPOSIT_ACCOUNT, account));
 
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.RECURRING_DEPOSIT_ACCOUNT_CREATE,
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.RECURRING_DEPOSIT_ACCOUNT_CREATE,
                     constructEntityMap(BusinessEntity.DEPOSIT_ACCOUNT, account));
 
             return new CommandProcessingResultBuilder() //
@@ -794,9 +793,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         }
     }
 
-    private Map<BusinessEventNotificationConstants.BusinessEntity, Object> constructEntityMap(final BusinessEntity entityEvent,
-            Object entity) {
-        Map<BusinessEventNotificationConstants.BusinessEntity, Object> map = new HashMap<>(1);
+    private Map<BusinessEntity, Object> constructEntityMap(final BusinessEntity entityEvent, Object entity) {
+        Map<BusinessEntity, Object> map = new HashMap<>(1);
         map.put(entityEvent, entity);
         return map;
     }

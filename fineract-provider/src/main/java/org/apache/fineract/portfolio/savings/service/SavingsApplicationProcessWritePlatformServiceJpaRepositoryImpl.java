@@ -56,13 +56,13 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
+import org.apache.fineract.portfolio.businessevent.domain.BusinessEntity;
+import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
+import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
-import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepository;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
@@ -305,7 +305,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             this.entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVING.getName(),
                     StatusEnum.CREATE.getCode().longValue(), EntityTables.SAVING.getForeignKeyColumnNameOnDatatable(), account.productId());
 
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.SAVINGS_CREATE,
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.SAVINGS_CREATE,
                     constructEntityMap(BusinessEntity.SAVING, account));
 
             return new CommandProcessingResultBuilder() //
@@ -534,7 +534,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             }
         }
 
-        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.SAVINGS_APPROVE,
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.SAVINGS_APPROVE,
                 constructEntityMap(BusinessEntity.SAVING, savingsAccount));
 
         return new CommandProcessingResultBuilder() //
@@ -657,7 +657,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 this.noteRepository.save(note);
             }
         }
-        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.SAVINGS_REJECT,
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.SAVINGS_REJECT,
                 constructEntityMap(BusinessEntity.SAVING, savingsAccount));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
