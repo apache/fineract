@@ -257,7 +257,7 @@ public final class Utils {
         for (int i = 0; i < len; i++) {
             sb.append(sourceSetString.charAt(random.nextInt(lengthOfSource)));
         }
-        return prefix + sb.toString();
+        return prefix + sb;
     }
 
     public static String randomStringGenerator(final String prefix, final int len) {
@@ -272,11 +272,11 @@ public final class Utils {
             "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public static Long randomNumberGenerator(final int expectedLength) {
         final String source = "1234567890";
-        final int lengthofSource = source.length();
+        final int lengthOfSource = source.length();
 
         StringBuilder stringBuilder = new StringBuilder(expectedLength);
         for (int i = 0; i < expectedLength; i++) {
-            stringBuilder.append(source.charAt(random.nextInt(lengthofSource)));
+            stringBuilder.append(source.charAt(random.nextInt(lengthOfSource)));
         }
         return Long.parseLong(stringBuilder.toString());
     }

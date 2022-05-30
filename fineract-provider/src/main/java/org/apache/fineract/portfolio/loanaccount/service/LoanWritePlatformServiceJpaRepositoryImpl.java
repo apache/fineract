@@ -54,9 +54,6 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
-import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
-import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
-import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepositoryWrapper;
@@ -121,7 +118,6 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarRepository;
 import org.apache.fineract.portfolio.calendar.domain.CalendarType;
 import org.apache.fineract.portfolio.calendar.exception.CalendarParameterUpdateNotSupportedException;
 import org.apache.fineract.portfolio.charge.domain.Charge;
-import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.charge.exception.ChargeCannotBeUpdatedException;
 import org.apache.fineract.portfolio.charge.exception.LoanChargeCannotBeAddedException;
@@ -150,9 +146,7 @@ import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.command.LoanUpdateCommand;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
-import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidByData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanInstallmentChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
@@ -2032,66 +2026,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     }
 
-    @Override
-    @CronTarget(jobName = JobName.TRANSFER_FEE_CHARGE_FOR_LOANS)
-    public void transferFeeCharges() throws JobExecutionException {
-        final Collection<LoanChargeData> chargeDatas = this.loanChargeReadPlatformService
-                .retrieveLoanChargesForFeePayment(ChargePaymentMode.ACCOUNT_TRANSFER.getValue(), LoanStatus.ACTIVE.getValue());
-        final boolean isRegularTransaction = true;
-        List<Throwable> errors = new ArrayList<>();
-        if (chargeDatas != null) {
-            for (final LoanChargeData chargeData : chargeDatas) {
-                if (chargeData.isInstallmentFee()) {
-                    final Collection<LoanInstallmentChargeData> chargePerInstallments = this.loanChargeReadPlatformService
-                            .retrieveInstallmentLoanCharges(chargeData.getId(), true);
-                    PortfolioAccountData portfolioAccountData = null;
-                    for (final LoanInstallmentChargeData installmentChargeData : chargePerInstallments) {
-                        if (!installmentChargeData.getDueDate().isAfter(DateUtils.getBusinessLocalDate())) {
-                            if (portfolioAccountData == null) {
-                                portfolioAccountData = this.accountAssociationsReadPlatformService
-                                        .retriveLoanLinkedAssociation(chargeData.getLoanId());
-                            }
-                            final SavingsAccount fromSavingsAccount = null;
-                            final boolean isExceptionForBalanceCheck = false;
-                            final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(DateUtils.getBusinessLocalDate(),
-                                    installmentChargeData.getAmountOutstanding(), PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN,
-                                    portfolioAccountData.accountId(), chargeData.getLoanId(), "Loan Charge Payment", null, null, null, null,
-                                    LoanTransactionType.CHARGE_PAYMENT.getValue(), chargeData.getId(),
-                                    installmentChargeData.getInstallmentNumber(), AccountTransferType.CHARGE_PAYMENT.getValue(), null, null,
-                                    null, null, null, fromSavingsAccount, isRegularTransaction, isExceptionForBalanceCheck);
-                            transferFeeCharge(accountTransferDTO, errors);
-                        }
-                    }
-                } else if (chargeData.getDueDate() != null && !chargeData.getDueDate().isAfter(DateUtils.getBusinessLocalDate())) {
-                    final PortfolioAccountData portfolioAccountData = this.accountAssociationsReadPlatformService
-                            .retriveLoanLinkedAssociation(chargeData.getLoanId());
-                    final SavingsAccount fromSavingsAccount = null;
-                    final boolean isExceptionForBalanceCheck = false;
-                    final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(DateUtils.getBusinessLocalDate(),
-                            chargeData.getAmountOutstanding(), PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN,
-                            portfolioAccountData.accountId(), chargeData.getLoanId(), "Loan Charge Payment", null, null, null, null,
-                            LoanTransactionType.CHARGE_PAYMENT.getValue(), chargeData.getId(), null,
-                            AccountTransferType.CHARGE_PAYMENT.getValue(), null, null, null, null, null, fromSavingsAccount,
-                            isRegularTransaction, isExceptionForBalanceCheck);
-                    transferFeeCharge(accountTransferDTO, errors);
-                }
-            }
-        }
-        if (!errors.isEmpty()) {
-            throw new JobExecutionException(errors);
-        }
-    }
-
-    private void transferFeeCharge(final AccountTransferDTO accountTransferDTO, List<Throwable> errors) {
-        try {
-            this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
-        } catch (RuntimeException e) {
-            log.error("Exception while paying charge {} for loan id {}", accountTransferDTO.getChargeId(),
-                    accountTransferDTO.getToAccountId(), e);
-            errors.add(e);
-        }
-    }
-
     private LoanCharge retrieveLoanChargeBy(final Long loanId, final Long loanChargeId) {
         final LoanCharge loanCharge = this.loanChargeRepository.findById(loanChargeId)
                 .orElseThrow(() -> new LoanChargeNotFoundException(loanChargeId));
@@ -2522,50 +2456,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             }
         }
         this.loanRepositoryWrapper.save(loansToUpdate);
-    }
-
-    @Transactional
-    @Override
-    @CronTarget(jobName = JobName.APPLY_HOLIDAYS_TO_LOANS)
-    public void applyHolidaysToLoans() {
-
-        final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
-
-        if (!isHolidayEnabled) {
-            return;
-        }
-
-        final Collection<Integer> loanStatuses = new ArrayList<>(Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),
-                LoanStatus.APPROVED.getValue(), LoanStatus.ACTIVE.getValue()));
-        // Get all Holidays which are active and not processed
-        final List<Holiday> holidays = this.holidayRepository.findUnprocessed();
-
-        // Loop through all holidays
-        for (final Holiday holiday : holidays) {
-            // All offices to which holiday is applied
-            final Set<Office> offices = holiday.getOffices();
-            final Collection<Long> officeIds = new ArrayList<>(offices.size());
-            for (final Office office : offices) {
-                officeIds.add(office.getId());
-            }
-
-            // get all loans
-            final List<Loan> loans = new ArrayList<>();
-            // get all individual and jlg loans
-            loans.addAll(this.loanRepositoryWrapper.findByClientOfficeIdsAndLoanStatus(officeIds, loanStatuses));
-            // FIXME: AA optimize to get all client and group loans belongs to a
-            // office id
-            // get all group loans
-            loans.addAll(this.loanRepositoryWrapper.findByGroupOfficeIdsAndLoanStatus(officeIds, loanStatuses));
-
-            for (final Loan loan : loans) {
-                // apply holiday
-                loan.applyHolidayToRepaymentScheduleDates(holiday, this.loanUtilService);
-            }
-            this.loanRepositoryWrapper.save(loans);
-            holiday.processed();
-        }
-        this.holidayRepository.save(holidays);
     }
 
     private void checkClientOrGroupActive(final Loan loan) {

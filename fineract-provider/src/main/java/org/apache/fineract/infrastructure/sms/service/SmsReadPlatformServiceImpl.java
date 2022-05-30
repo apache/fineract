@@ -168,9 +168,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
         final String sqlPlusLimit = limit > 0 ? " " + sqlGenerator.limit(limit) : "";
         final String sql = "select id from " + this.smsRowMapper.tableName() + " where status_enum = "
                 + SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue() + sqlPlusLimit;
-        return this.paginationHelper.fetchPage(jdbcTemplate, sql, Long.class);
-        // (this.jdbcTemplate, sqlCountRows, new Object [] {}, Long.class);
-        // this.jdbcTemplate.queryForList(sql, Long.class);
+        return paginationHelper.fetchPage(jdbcTemplate, sql, Long.class);
     }
 
     @Override

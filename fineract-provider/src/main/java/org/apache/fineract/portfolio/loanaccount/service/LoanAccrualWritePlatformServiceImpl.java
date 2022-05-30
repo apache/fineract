@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
@@ -47,13 +48,13 @@ import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlatformService {
 
     private final LoanReadPlatformService loanReadPlatformService;
@@ -64,22 +65,6 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
     private final AppUserRepositoryWrapper userRepository;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
-
-    @Autowired
-    public LoanAccrualWritePlatformServiceImpl(final JdbcTemplate jdbcTemplate, final LoanReadPlatformService loanReadPlatformService,
-            final JournalEntryWritePlatformService journalEntryWritePlatformService,
-            final LoanChargeReadPlatformService loanChargeReadPlatformService, final AppUserRepositoryWrapper userRepository,
-            final LoanRepositoryWrapper loanRepositoryWrapper, final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
-            DatabaseSpecificSQLGenerator sqlGenerator) {
-        this.loanReadPlatformService = loanReadPlatformService;
-        this.sqlGenerator = sqlGenerator;
-        this.jdbcTemplate = jdbcTemplate;
-        this.journalEntryWritePlatformService = journalEntryWritePlatformService;
-        this.loanChargeReadPlatformService = loanChargeReadPlatformService;
-        this.userRepository = userRepository;
-        this.loanRepositoryWrapper = loanRepositoryWrapper;
-        this.applicationCurrencyRepository = applicationCurrencyRepository;
-    }
 
     @Override
     @Transactional
@@ -503,10 +488,10 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
     private void postJournalEntries(final Loan loan, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds) {
         final MonetaryCurrency currency = loan.getCurrency();
-        final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
+        final ApplicationCurrency applicationCurrency = applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
         boolean isAccountTransfer = false;
         final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(applicationCurrency.toData(),
                 existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
-        this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
+        journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
     }
 }

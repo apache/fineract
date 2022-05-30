@@ -30,6 +30,8 @@ public interface SchedulerJobRunnerReadService {
 
     JobDetailData retrieveOne(Long jobId);
 
+    JobDetailData retrieveOneByName(String jobName);
+
     Page<JobDetailHistoryData> retrieveJobHistory(Long jobId, SearchParameters searchParameters);
 
     boolean isUpdatesAllowed();

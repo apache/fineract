@@ -18,13 +18,15 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.service;
 
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.fineract.infrastructure.campaigns.email.data.PreviewCampaignMessage;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailCampaign;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 
 public interface EmailCampaignWritePlatformService {
@@ -41,11 +43,10 @@ public interface EmailCampaignWritePlatformService {
 
     CommandProcessingResult reactivateEmailCampaign(Long campaignId, JsonCommand command);
 
-    void storeTemplateMessageIntoEmailOutBoundTable() throws JobExecutionException;
+    @SuppressWarnings({ "unused", "rawtypes" })
+    List<HashMap<String, Object>> getRunReportByServiceImpl(String reportName, Map<String, String> queryParams) throws IOException;
 
     PreviewCampaignMessage previewMessage(JsonQuery query);
-
-    void sendEmailMessage() throws JobExecutionException;
 
     void insertDirectCampaignIntoEmailOutboundTable(Loan loan, EmailCampaign emailCampaign, HashMap<String, String> campaignParams);
 

@@ -66,3 +66,10 @@ jobs:
 
       - name: OAuth2 Build & Test
         run: ./gradlew --no-daemon -q --console=plain :oauth2-tests:test --fail-fast -PdbType=postgresql
+
+      - name: Archive test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: home/runner/work/fineract/fineract/integration-tests/build/reports/
