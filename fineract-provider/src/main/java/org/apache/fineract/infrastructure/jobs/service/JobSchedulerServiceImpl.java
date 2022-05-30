@@ -1,0 +1,69 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.fineract.infrastructure.jobs.service;
+
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
+import org.apache.fineract.infrastructure.jobs.domain.SchedulerDetail;
+import org.apache.fineract.infrastructure.security.service.TenantDetailsService;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class JobSchedulerServiceImpl implements ApplicationListener<ContextRefreshedEvent> {
+
+    private final FineractProperties fineractProperties;
+    private final SchedularWritePlatformService schedularWritePlatformService;
+    private final TenantDetailsService tenantDetailsService;
+    private final JobRegisterService jobRegisterService;
+
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        // If the instance is not Batch Enabled will not load the Jobs
+        if (!fineractProperties.getMode().isBatchManagerEnabled()) {
+            log.warn("Batch job scheduling is disabled since this instance is not a batch manager");
+            return;
+        }
+        final List<FineractPlatformTenant> allTenants = tenantDetailsService.findAllTenants();
+        for (final FineractPlatformTenant tenant : allTenants) {
+            ThreadLocalContextUtil.setTenant(tenant);
+            final List<ScheduledJobDetail> scheduledJobDetails = schedularWritePlatformService
+                    .retrieveAllJobs(fineractProperties.getNodeId());
+            for (final ScheduledJobDetail jobDetails : scheduledJobDetails) {
+                jobRegisterService.scheduleJob(jobDetails);
+                jobDetails.updateTriggerMisfired(false);
+                schedularWritePlatformService.saveOrUpdate(jobDetails);
+            }
+            final SchedulerDetail schedulerDetail = schedularWritePlatformService.retriveSchedulerDetail();
+            if (schedulerDetail.isResetSchedulerOnBootup()) {
+                schedulerDetail.updateSuspendedState(false);
+                schedularWritePlatformService.updateSchedulerDetail(schedulerDetail);
+            }
+        }
+        log.info("Scheduling batch jobs has finished");
+    }
+}

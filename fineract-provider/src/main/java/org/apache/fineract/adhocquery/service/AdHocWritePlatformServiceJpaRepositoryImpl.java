@@ -19,6 +19,8 @@
 package org.apache.fineract.adhocquery.service;
 
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.adhocquery.domain.AdHoc;
 import org.apache.fineract.adhocquery.domain.AdHocRepository;
 import org.apache.fineract.adhocquery.exception.AdHocNotFoundException;
@@ -27,9 +29,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -37,21 +36,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class AdHocWritePlatformServiceJpaRepositoryImpl implements AdHocWritePlatformService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AdHocWritePlatformServiceJpaRepositoryImpl.class);
     private final PlatformSecurityContext context;
     private final AdHocRepository adHocRepository;
     private final AdHocDataValidator adHocCommandFromApiJsonDeserializer;
-
-    @Autowired
-    public AdHocWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final AdHocRepository adHocRepository,
-            final AdHocDataValidator adHocCommandFromApiJsonDeserializer) {
-        this.context = context;
-        this.adHocRepository = adHocRepository;
-        this.adHocCommandFromApiJsonDeserializer = adHocCommandFromApiJsonDeserializer;
-
-    }
 
     @Transactional
     @Override
@@ -69,9 +60,7 @@ public class AdHocWritePlatformServiceJpaRepositoryImpl implements AdHocWritePla
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable throwable = dve.getMostSpecificCause();
             handleDataIntegrityIssues(command, throwable, dve);
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(command.commandId()) //
-                    .build();
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).build();
         }
     }
 
@@ -88,7 +77,7 @@ public class AdHocWritePlatformServiceJpaRepositoryImpl implements AdHocWritePla
                     "AdHocQuery with name `" + name + "` already exists", "name", name);
         }
 
-        LOG.error("Error occured.", dve);
+        log.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.adhocquery.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
@@ -108,17 +97,11 @@ public class AdHocWritePlatformServiceJpaRepositoryImpl implements AdHocWritePla
                 this.adHocRepository.saveAndFlush(adHoc);
             }
 
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(command.commandId()) //
-                    .withEntityId(adHocId) //
-                    .with(changes) //
-                    .build();
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(adHocId).with(changes).build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable throwable = dve.getMostSpecificCause();
             handleDataIntegrityIssues(command, throwable, dve);
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(command.commandId()) //
-                    .build();
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).build();
         }
     }
 

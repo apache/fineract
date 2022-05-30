@@ -167,7 +167,7 @@ public class SmsCampaign extends AbstractPersistableCustom {
         LocalDateTime recurrenceStartDate = LocalDateTime.now(DateUtils.getDateTimeZoneOfTenant());
         if (SmsCampaignTriggerType.fromInt(triggerType.intValue()).isSchedule()) {
             final Locale locale = command.extractLocale();
-            String dateTimeFormat = null;
+            String dateTimeFormat;
             if (command.hasParameter(SmsCampaignValidator.dateTimeFormat)) {
                 dateTimeFormat = command.stringValueOfParameterNamed(SmsCampaignValidator.dateTimeFormat);
                 final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(dateTimeFormat).withLocale(locale);

@@ -29,11 +29,6 @@ import org.apache.fineract.infrastructure.sms.domain.SmsMessage;
 public interface SmsMessageScheduledJobService {
 
     /**
-     * sends a batch of SMS messages to the SMS gateway
-     **/
-    void sendMessagesToGateway();
-
-    /**
      * sends triggered batch SMS messages to SMS gateway
      *
      * @param smsDataMap
@@ -49,9 +44,4 @@ public interface SmsMessageScheduledJobService {
      *            the provider ID of the SMS gateway to be used
      */
     void sendTriggeredMessage(Collection<SmsMessage> smsMessage, long providerId);
-
-    /**
-     * get delivery report from the SMS gateway
-     **/
-    void getDeliveryReports();
 }

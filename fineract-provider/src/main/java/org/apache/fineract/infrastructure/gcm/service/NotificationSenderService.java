@@ -20,10 +20,10 @@ package org.apache.fineract.infrastructure.gcm.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.service.ExternalServicesPropertiesReadPlatformService;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.gcm.GcmConstants;
@@ -38,29 +38,20 @@ import org.apache.fineract.infrastructure.gcm.domain.Sender;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessage;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessageRepository;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessageStatusType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class NotificationSenderService {
 
     private final DeviceRegistrationRepositoryWrapper deviceRegistrationRepositoryWrapper;
     private final SmsMessageRepository smsMessageRepository;
-    private ExternalServicesPropertiesReadPlatformService propertiesReadPlatformService;
-
-    @Autowired
-    public NotificationSenderService(final DeviceRegistrationRepositoryWrapper deviceRegistrationRepositoryWrapper,
-            final SmsMessageRepository smsMessageRepository,
-            final ExternalServicesPropertiesReadPlatformService propertiesReadPlatformService) {
-        this.deviceRegistrationRepositoryWrapper = deviceRegistrationRepositoryWrapper;
-        this.smsMessageRepository = smsMessageRepository;
-        this.propertiesReadPlatformService = propertiesReadPlatformService;
-    }
+    private final ExternalServicesPropertiesReadPlatformService propertiesReadPlatformService;
 
     public void sendNotification(List<SmsMessage> smsMessages) {
         Map<Long, List<SmsMessage>> notificationByEachClient = getNotificationListByClient(smsMessages);
         for (Map.Entry<Long, List<SmsMessage>> entry : notificationByEachClient.entrySet()) {
-            this.sendNotifiaction(entry.getKey(), entry.getValue());
+            sendNotification(entry.getKey(), entry.getValue());
         }
     }
 
@@ -72,7 +63,7 @@ public class NotificationSenderService {
                 if (notificationByEachClient.containsKey(clientId)) {
                     notificationByEachClient.get(clientId).add(smsMessage);
                 } else {
-                    List<SmsMessage> msgList = new ArrayList<>(Arrays.asList(smsMessage));
+                    List<SmsMessage> msgList = new ArrayList<>(List.of(smsMessage));
                     notificationByEachClient.put(clientId, msgList);
                 }
 
@@ -81,10 +72,10 @@ public class NotificationSenderService {
         return notificationByEachClient;
     }
 
-    public void sendNotifiaction(Long clientId, List<SmsMessage> smsList) {
+    public void sendNotification(Long clientId, List<SmsMessage> smsList) {
 
-        DeviceRegistration deviceRegistration = this.deviceRegistrationRepositoryWrapper.findDeviceRegistrationByClientId(clientId);
-        NotificationConfigurationData notificationConfigurationData = this.propertiesReadPlatformService.getNotificationConfiguration();
+        DeviceRegistration deviceRegistration = deviceRegistrationRepositoryWrapper.findDeviceRegistrationByClientId(clientId);
+        NotificationConfigurationData notificationConfigurationData = propertiesReadPlatformService.getNotificationConfiguration();
         String registrationId = null;
         if (deviceRegistration != null) {
             registrationId = deviceRegistration.getRegistrationId();
@@ -93,18 +84,10 @@ public class NotificationSenderService {
             try {
                 Notification notification = new Notification.Builder(GcmConstants.defaultIcon).title(GcmConstants.title)
                         .body(smsMessage.getMessage()).build();
-                Message.Builder b = new Message.Builder();
-                b.notification(notification);
-                b.dryRun(false);
-                b.contentAvailable(true);
-                b.timeToLive(GcmConstants.TIME_TO_LIVE);
-                b.priority(Priority.HIGH);
-                b.delayWhileIdle(true);
-                Message msg = b.build();
-                Sender s = new Sender(notificationConfigurationData.getServerKey(), notificationConfigurationData.getFcmEndPoint());
-                Result res;
-
-                res = s.send(msg, registrationId, 3);
+                Message message = new Message.Builder().notification(notification).dryRun(false).contentAvailable(true)
+                        .timeToLive(GcmConstants.TIME_TO_LIVE).priority(Priority.HIGH).delayWhileIdle(true).build();
+                Sender sender = new Sender(notificationConfigurationData.getServerKey(), notificationConfigurationData.getFcmEndPoint());
+                Result res = sender.send(message, registrationId, 3);
                 if (res.getSuccess() != null && res.getSuccess() > 0) {
                     smsMessage.setStatusType(SmsMessageStatusType.SENT.getValue());
                     smsMessage.setDeliveredOnDate(DateUtils.getLocalDateTimeOfTenant());
@@ -116,7 +99,7 @@ public class NotificationSenderService {
             }
         }
 
-        this.smsMessageRepository.saveAll(smsList);
+        smsMessageRepository.saveAll(smsList);
 
     }
 
