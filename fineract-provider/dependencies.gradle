@@ -129,6 +129,9 @@ dependencies {
         exclude group: 'xml-apis'
     }
 
+    implementation ('org.springframework.boot:spring-boot-starter-batch') {
+    }
+
     runtimeOnly('org.glassfish.jaxb:jaxb-runtime') {
         exclude group: 'com.sun.activation'
     }

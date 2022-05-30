@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.jobs.data;
 
 import java.util.Date;
+import lombok.Getter;
 
 public class JobDetailData {
 
@@ -34,7 +35,7 @@ public class JobDetailData {
     @SuppressWarnings("unused")
     private final String initializingError;
 
-    @SuppressWarnings("unused")
+    @Getter
     private final String cronExpression;
 
     @SuppressWarnings("unused")

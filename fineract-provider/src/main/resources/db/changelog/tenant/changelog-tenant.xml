@@ -40,4 +40,5 @@
     <include file="parts/0018_pentaho_reports_to_table.xml" relativeToChangelogFile="true"/>
     <include file="parts/0019_refactor_loan_transaction.xml" relativeToChangelogFile="true"/>
     <include file="parts/0020_add_audit_entries.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0021_add_spring_batch_db_structure.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

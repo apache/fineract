@@ -42,9 +42,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
-import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -65,7 +63,8 @@ public class BusinessDateWritePlatformServiceImpl implements BusinessDateWritePl
 
     }
 
-    private void adjustDate(BusinessDateData data, Map<String, Object> changes) {
+    @Override
+    public void adjustDate(BusinessDateData data, Map<String, Object> changes) {
         boolean isCOBDateAdjustmentEnabled = configurationDomainService.isCOBDateAdjustmentEnabled();
         boolean isBusinessDateEnabled = configurationDomainService.isBusinessDateEnabled();
 
@@ -80,21 +79,19 @@ public class BusinessDateWritePlatformServiceImpl implements BusinessDateWritePl
     }
 
     @Override
-    @CronTarget(jobName = JobName.INCREASE_COB_DATE_BY_1_DAY)
     public void increaseCOBDateByOneDay() throws JobExecutionException {
         increaseDateByTypeByOneDay(BusinessDateType.COB_DATE);
     }
 
     @Override
-    @CronTarget(jobName = JobName.INCREASE_BUSINESS_DATE_BY_1_DAY)
     public void increaseBusinessDateByOneDay() throws JobExecutionException {
         increaseDateByTypeByOneDay(BusinessDateType.BUSINESS_DATE);
     }
 
     private void increaseDateByTypeByOneDay(BusinessDateType businessDateType) throws JobExecutionException {
-        List<Throwable> exceptions = new ArrayList<>();
         Map<String, Object> changes = new HashMap<>();
         Optional<BusinessDate> businessDateEntity = repository.findByType(businessDateType);
+        List<Throwable> exceptions = new ArrayList<>();
 
         LocalDate businessDate = businessDateEntity.map(BusinessDate::getDate).orElse(DateUtils.getLocalDateOfTenant());
         businessDate = businessDate.plusDays(1);
@@ -114,7 +111,6 @@ public class BusinessDateWritePlatformServiceImpl implements BusinessDateWritePl
             log.error("Increasing {} by 1 day failed due to: {}", businessDateType.getDescription(), e.getMessage());
             exceptions.add(e);
         }
-
         if (!exceptions.isEmpty()) {
             throw new JobExecutionException(exceptions);
         }
