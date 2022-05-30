@@ -79,14 +79,14 @@ import org.apache.fineract.portfolio.account.domain.StandingInstructionRepositor
 import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
 import org.apache.fineract.portfolio.account.service.AccountAssociationsReadPlatformService;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
+import org.apache.fineract.portfolio.businessevent.domain.BusinessEntity;
+import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
+import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
-import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.note.domain.Note;
@@ -272,7 +272,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         }
 
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, false);
-        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.SAVINGS_ACTIVATE,
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.SAVINGS_ACTIVATE,
                 constructEntityMap(BusinessEntity.SAVING, account));
 
         return new CommandProcessingResultBuilder() //
@@ -576,7 +576,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         }
         postInterest(account, postInterestAs, transactionDate, backdatedTxnsAllowedTill);
 
-        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.SAVINGS_POST_INTEREST,
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.SAVINGS_POST_INTEREST,
                 constructEntityMap(BusinessEntity.SAVING, account));
         return new CommandProcessingResultBuilder() //
                 .withEntityId(savingsId) //
@@ -1031,7 +1031,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         }
 
-        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.SAVINGS_CLOSE,
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.SAVINGS_CLOSE,
                 constructEntityMap(BusinessEntity.SAVING, account));
         // disable all standing orders linked to the savings account
         this.disableStandingInstructionsLinkedToClosedSavings(account);

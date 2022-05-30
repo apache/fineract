@@ -67,6 +67,9 @@ import org.apache.fineract.portfolio.account.domain.AccountAssociationType;
 import org.apache.fineract.portfolio.account.domain.AccountAssociations;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationsRepository;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
+import org.apache.fineract.portfolio.businessevent.domain.BusinessEntity;
+import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
+import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarFrequencyType;
@@ -84,10 +87,7 @@ import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement;
 import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagementRepository;
 import org.apache.fineract.portfolio.collateralmanagement.service.LoanCollateralAssembler;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
-import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.fund.domain.Fund;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
@@ -588,7 +588,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     StatusEnum.CREATE.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(),
                     newLoanApplication.productId());
 
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.LOAN_CREATE,
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.LOAN_CREATE,
                     constructEntityMap(BusinessEntity.LOAN, newLoanApplication));
 
             return new CommandProcessingResultBuilder() //
@@ -1476,7 +1476,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 this.noteRepository.save(note);
             }
 
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.LOAN_APPROVED,
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.LOAN_APPROVED,
                     constructEntityMap(BusinessEntity.LOAN, loan));
         }
 
@@ -1555,7 +1555,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 final Note note = Note.loanNote(loan, noteText);
                 this.noteRepository.save(note);
             }
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.LOAN_UNDO_APPROVAL,
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.LOAN_UNDO_APPROVAL,
                     constructEntityMap(BusinessEntity.LOAN, loan));
         }
 
@@ -1626,7 +1626,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 this.noteRepository.save(note);
             }
         }
-        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.LOAN_REJECTED,
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.LOAN_REJECTED,
                 constructEntityMap(BusinessEntity.LOAN, loan));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //

@@ -54,6 +54,9 @@ import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.office.exception.InvalidOfficeException;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
+import org.apache.fineract.portfolio.businessevent.domain.BusinessEntity;
+import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
+import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
@@ -63,10 +66,6 @@ import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.service.LoanStatusMapper;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
-import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.group.api.GroupingTypesApiConstants;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupLevel;
@@ -291,7 +290,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         CommandProcessingResult commandProcessingResult = createGroupingType(command, GroupTypes.CENTER, centerId);
 
-        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.CENTERS_CREATE,
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.CENTERS_CREATE,
                 constructEntityMap(BusinessEntity.GROUP, commandProcessingResult));
 
         return commandProcessingResult;
@@ -309,7 +308,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         CommandProcessingResult commandProcessingResult = createGroupingType(command, GroupTypes.GROUP, centerId);
 
-        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEventNotificationConstants.BusinessEvents.GROUPS_CREATE,
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.GROUPS_CREATE,
                 constructEntityMap(BusinessEntity.GROUP, commandProcessingResult));
 
         return commandProcessingResult;
@@ -999,8 +998,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         }
     }
 
-    private Map<BusinessEventNotificationConstants.BusinessEntity, Object> constructEntityMap(final BusinessEntity entityEvent,
-            Object entity) {
+    private Map<BusinessEntity, Object> constructEntityMap(final BusinessEntity entityEvent, Object entity) {
         Map<BusinessEntity, Object> map = new HashMap<>(1);
         map.put(entityEvent, entity);
         return map;

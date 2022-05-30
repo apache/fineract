@@ -35,12 +35,11 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.businessevent.domain.BusinessEntity;
+import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
+import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
-import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRate;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRateRepositoryWrapper;
 import org.apache.fineract.portfolio.fund.domain.Fund;
@@ -151,10 +150,10 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             fineractEntityAccessUtil.checkConfigurationAndAddProductResrictionsForUserOffice(
                     FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS, loanproduct.getId());
 
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.LOAN_PRODUCT_CREATE,
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.LOAN_PRODUCT_CREATE,
                     constructEntityMap(BusinessEntity.LOAN_PRODUCT, loanproduct));
 
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.LOAN_PRODUCT_CREATE,
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.LOAN_PRODUCT_CREATE,
                     constructEntityMap(BusinessEntity.LOAN_PRODUCT, loanproduct));
 
             return new CommandProcessingResultBuilder() //
@@ -383,9 +382,8 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         LOG.error("Error occured.", dve);
     }
 
-    private Map<BusinessEventNotificationConstants.BusinessEntity, Object> constructEntityMap(
-            final BusinessEventNotificationConstants.BusinessEntity entityEvent, Object entity) {
-        Map<BusinessEventNotificationConstants.BusinessEntity, Object> map = new HashMap<>(1);
+    private Map<BusinessEntity, Object> constructEntityMap(final BusinessEntity entityEvent, Object entity) {
+        Map<BusinessEntity, Object> map = new HashMap<>(1);
         map.put(entityEvent, entity);
         return map;
     }
