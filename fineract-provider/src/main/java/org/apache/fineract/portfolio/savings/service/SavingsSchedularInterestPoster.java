@@ -86,6 +86,7 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
     @Override
     @SuppressFBWarnings(value = {
             "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED, rollbackFor = Exception.class)
     public Void call() throws org.apache.fineract.infrastructure.jobs.exception.JobExecutionException {
         ThreadLocalContextUtil.init(this.context);
         Integer maxNumberOfRetries = this.context.getTenantContext().getConnection().getMaxRetriesOnDeadlock();
@@ -168,7 +169,6 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
         return null;
     }
 
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED, rollbackFor = Exception.class)
     private void batchUpdateJournalEntries(final List<SavingsAccountData> savingsAccountDataList,
             final HashMap<String, SavingsAccountTransactionData> savingsAccountTransactionDataHashMap)
             throws DataAccessException, NullPointerException {
@@ -244,7 +244,6 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
         return this.savingsAccountReadPlatformService.retrieveAllTransactionData(refNo);
     }
 
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @SuppressWarnings("unused")
     private void batchUpdate(final List<SavingsAccountData> savingsAccountDataList) throws DataAccessException {
         String queryForSavingsUpdate = batchQueryForSavingsSummaryUpdate();

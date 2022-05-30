@@ -24,9 +24,6 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.google.gson.Gson;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -36,8 +33,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -46,17 +41,14 @@ import java.util.Map;
 import java.util.Set;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.campaigns.email.data.EmailCampaignData;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailCampaignValidator;
-import org.apache.fineract.infrastructure.campaigns.email.data.EmailMessageWithAttachmentData;
 import org.apache.fineract.infrastructure.campaigns.email.data.PreviewCampaignMessage;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailCampaign;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailCampaignRepository;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessage;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessageRepository;
-import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessageStatusType;
-import org.apache.fineract.infrastructure.campaigns.email.domain.ScheduledEmailAttachmentFileFormat;
 import org.apache.fineract.infrastructure.campaigns.email.exception.EmailCampaignMustBeClosedToBeDeletedException;
 import org.apache.fineract.infrastructure.campaigns.email.exception.EmailCampaignMustBeClosedToEditException;
 import org.apache.fineract.infrastructure.campaigns.email.exception.EmailCampaignNotFound;
@@ -76,23 +68,12 @@ import org.apache.fineract.infrastructure.dataqueries.domain.ReportRepository;
 import org.apache.fineract.infrastructure.dataqueries.exception.ReportNotFoundException;
 import org.apache.fineract.infrastructure.dataqueries.service.GenericDataService;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadReportingService;
-import org.apache.fineract.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
-import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
-import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
-import org.apache.fineract.infrastructure.jobs.service.JobName;
-import org.apache.fineract.infrastructure.reportmailingjob.helper.IPv4Helper;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -100,47 +81,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampaignWritePlatformService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(EmailCampaignWritePlatformCommandHandlerImpl.class);
-
     private final PlatformSecurityContext context;
-
     private final EmailCampaignRepository emailCampaignRepository;
     private final EmailCampaignValidator emailCampaignValidator;
-    private final EmailCampaignReadPlatformService emailCampaignReadPlatformService;
     private final ReportRepository reportRepository;
     private final EmailMessageRepository emailMessageRepository;
     private final ClientRepositoryWrapper clientRepositoryWrapper;
     private final ReadReportingService readReportingService;
     private final GenericDataService genericDataService;
     private final FromJsonHelper fromJsonHelper;
-    private final LoanRepository loanRepository;
-    private final SavingsAccountRepository savingsAccountRepository;
-    private final EmailMessageJobEmailService emailMessageJobEmailService;
-
-    @Autowired
-    public EmailCampaignWritePlatformCommandHandlerImpl(final PlatformSecurityContext context,
-            final EmailCampaignRepository emailCampaignRepository, final EmailCampaignValidator emailCampaignValidator,
-            final EmailCampaignReadPlatformService emailCampaignReadPlatformService, final ReportRepository reportRepository,
-            final EmailMessageRepository emailMessageRepository, final ClientRepositoryWrapper clientRepositoryWrapper,
-            final ReadReportingService readReportingService, final GenericDataService genericDataService,
-            final FromJsonHelper fromJsonHelper, final LoanRepository loanRepository,
-            final SavingsAccountRepository savingsAccountRepository, final EmailMessageJobEmailService emailMessageJobEmailService) {
-        this.context = context;
-        this.emailCampaignRepository = emailCampaignRepository;
-        this.emailCampaignValidator = emailCampaignValidator;
-        this.emailCampaignReadPlatformService = emailCampaignReadPlatformService;
-        this.reportRepository = reportRepository;
-        this.emailMessageRepository = emailMessageRepository;
-        this.clientRepositoryWrapper = clientRepositoryWrapper;
-        this.readReportingService = readReportingService;
-        this.genericDataService = genericDataService;
-        this.fromJsonHelper = fromJsonHelper;
-        this.loanRepository = loanRepository;
-        this.savingsAccountRepository = savingsAccountRepository;
-        this.emailMessageJobEmailService = emailMessageJobEmailService;
-    }
 
     @Transactional
     @Override
@@ -178,10 +131,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
 
         this.emailCampaignRepository.saveAndFlush(emailCampaign);
 
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(emailCampaign.getId()) //
-                .build();
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(emailCampaign.getId()).build();
     }
 
     @Transactional
@@ -208,11 +158,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
             if (!changes.isEmpty()) {
                 this.emailCampaignRepository.saveAndFlush(emailCampaign);
             }
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(command.commandId()) //
-                    .withEntityId(resourceId) //
-                    .with(changes) //
-                    .build();
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(resourceId).with(changes).build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             final Throwable throwable = dve.getMostSpecificCause();
             handleDataIntegrityIssues(command, throwable, dve);
@@ -319,56 +265,6 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
         return isValid;
     }
 
-    @Override
-    @CronTarget(jobName = JobName.UPDATE_EMAIL_OUTBOUND_WITH_CAMPAIGN_MESSAGE)
-    public void storeTemplateMessageIntoEmailOutBoundTable() throws JobExecutionException {
-        final Collection<EmailCampaignData> emailCampaignDataCollection = this.emailCampaignReadPlatformService
-                .retrieveAllScheduleActiveCampaign();
-        if (emailCampaignDataCollection != null) {
-            for (EmailCampaignData emailCampaignData : emailCampaignDataCollection) {
-                LocalDateTime tenantDateNow = tenantDateTime();
-                LocalDateTime nextTriggerDate = emailCampaignData.getNextTriggerDate().toLocalDateTime();
-
-                LOG.info("tenant time {} trigger time {}", tenantDateNow, nextTriggerDate);
-                if (nextTriggerDate.isBefore(tenantDateNow)) {
-                    insertDirectCampaignIntoEmailOutboundTable(emailCampaignData.getParamValue(), emailCampaignData.getEmailSubject(),
-                            emailCampaignData.getMessage(), emailCampaignData.getCampaignName(), emailCampaignData.getId());
-                    this.updateTriggerDates(emailCampaignData.getId());
-                }
-            }
-        }
-    }
-
-    private void updateTriggerDates(Long campaignId) {
-        final EmailCampaign emailCampaign = this.emailCampaignRepository.findById(campaignId)
-                .orElseThrow(() -> new EmailCampaignNotFound(campaignId));
-        LocalDateTime nextTriggerDate = emailCampaign.getNextTriggerDate();
-        emailCampaign.setLastTriggerDate(nextTriggerDate);
-        // calculate new trigger date and insert into next trigger date
-
-        /**
-         * next run time has to be in the future if not calculate a new future date
-         */
-        LocalDateTime newTriggerDateWithTime = CalendarUtils.getNextRecurringDate(emailCampaign.getRecurrence(),
-                emailCampaign.getNextTriggerDate(), nextTriggerDate);
-        if (newTriggerDateWithTime.isBefore(DateUtils.getLocalDateTimeOfTenant())) { // means
-            // next
-            // run
-            // time is
-            // in the
-            // past
-            // calculate
-            // a new
-            // future
-            // date
-            newTriggerDateWithTime = CalendarUtils.getNextRecurringDate(emailCampaign.getRecurrence(), emailCampaign.getNextTriggerDate(),
-                    DateUtils.getLocalDateTimeOfTenant());
-        }
-
-        emailCampaign.setNextTriggerDate(newTriggerDateWithTime);
-        this.emailCampaignRepository.saveAndFlush(emailCampaign);
-    }
-
     @Transactional
     @Override
     public CommandProcessingResult activateEmailCampaign(Long campaignId, JsonCommand command) {
@@ -456,7 +352,8 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
     }
 
     @SuppressWarnings({ "unused", "rawtypes" })
-    private List<HashMap<String, Object>> getRunReportByServiceImpl(final String reportName, final Map<String, String> queryParams)
+    @Override
+    public List<HashMap<String, Object>> getRunReportByServiceImpl(final String reportName, final Map<String, String> queryParams)
             throws IOException {
         final String reportType = "report";
 
@@ -585,248 +482,4 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
         }
         return today;
     }
-
-    @Override
-    @CronTarget(jobName = JobName.EXECUTE_EMAIL)
-    public void sendEmailMessage() throws JobExecutionException {
-        if (IPv4Helper.applicationIsNotRunningOnLocalMachine()) { // remove when
-                                                                  // testing
-                                                                  // locally
-            final List<EmailMessage> emailMessages = this.emailMessageRepository
-                    .findByStatusType(EmailMessageStatusType.PENDING.getValue()); // retrieve
-                                                                                  // all
-                                                                                  // pending
-                                                                                  // message
-
-            for (final EmailMessage emailMessage : emailMessages) {
-
-                if (isValidEmail(emailMessage.getEmailAddress())) {
-
-                    final EmailCampaign emailCampaign = this.emailCampaignRepository.findById(emailMessage.getEmailCampaign().getId())
-                            .orElse(null); //
-
-                    ScheduledEmailAttachmentFileFormat emailAttachmentFileFormat = null;
-                    if (emailCampaign.getEmailAttachmentFileFormat() != null) {
-                        emailAttachmentFileFormat = ScheduledEmailAttachmentFileFormat
-                                .instance(emailCampaign.getEmailAttachmentFileFormat());
-                    }
-
-                    final List<File> attachmentList = new ArrayList<>();
-
-                    final StringBuilder errorLog = new StringBuilder();
-
-                    // check if email attachment format exist
-                    if (emailAttachmentFileFormat != null && Arrays.asList(ScheduledEmailAttachmentFileFormat.validValues())
-                            .contains(emailAttachmentFileFormat.getId())) {
-
-                        final Report stretchyReport = emailCampaign.getStretchyReport();
-
-                        final String reportName = (stretchyReport != null) ? stretchyReport.getReportName() : null;
-
-                        final HashMap<String, String> reportStretchyParams = this
-                                .validateStretchyReportParamMap(emailCampaign.getStretchyReportParamMap());
-
-                        // there is a probability that a client has one or more
-                        // loans or savings therefore we need to send two or
-                        // more attachments
-                        if (reportStretchyParams.containsKey("selectLoan") || reportStretchyParams.containsKey("loanId")) {
-                            // get all ids of the client loans
-                            if (emailMessage.getClient() != null) {
-
-                                final List<Loan> loans = this.loanRepository.findLoanByClientId(emailMessage.getClient().getId());
-
-                                HashMap<String, String> reportParams = this
-                                        .replaceStretchyParamsWithActualClientParams(reportStretchyParams, emailMessage.getClient());
-
-                                for (final Loan loan : loans) {
-                                    if (loan.isOpen()) { // only send attachment
-                                                         // for active loan
-
-                                        if (reportStretchyParams.containsKey("selectLoan")) {
-
-                                            reportParams.put("SelectLoan", loan.getId().toString());
-
-                                        } else if (reportStretchyParams.containsKey("loanId")) {
-
-                                            reportParams.put("loanId", loan.getId().toString());
-                                        }
-                                        File file = this.generateAttachments(emailCampaign, emailAttachmentFileFormat, reportParams,
-                                                reportName, errorLog);
-
-                                        if (file != null) {
-                                            attachmentList.add(file);
-                                        } else {
-                                            errorLog.append(reportParams.toString());
-                                        }
-                                    }
-                                }
-
-                            }
-                        } else if (reportStretchyParams.containsKey("savingId")) {
-                            if (emailMessage.getClient() != null) {
-
-                                final List<SavingsAccount> savingsAccounts = this.savingsAccountRepository
-                                        .findSavingAccountByClientId(emailMessage.getClient().getId());
-
-                                HashMap<String, String> reportParams = this
-                                        .replaceStretchyParamsWithActualClientParams(reportStretchyParams, emailMessage.getClient());
-
-                                for (final SavingsAccount savingsAccount : savingsAccounts) {
-
-                                    if (savingsAccount.isActive()) {
-
-                                        reportParams.put("savingId", savingsAccount.getId().toString());
-
-                                        File file = this.generateAttachments(emailCampaign, emailAttachmentFileFormat, reportParams,
-                                                reportName, errorLog);
-
-                                        if (file != null) {
-                                            attachmentList.add(file);
-                                        } else {
-                                            errorLog.append(reportParams.toString());
-                                        }
-                                    }
-                                }
-                            }
-                        } else {
-                            if (emailMessage.getClient() != null) {
-
-                                HashMap<String, String> reportParams = this
-                                        .replaceStretchyParamsWithActualClientParams(reportStretchyParams, emailMessage.getClient());
-
-                                File file = this.generateAttachments(emailCampaign, emailAttachmentFileFormat, reportParams, reportName,
-                                        errorLog);
-
-                                if (file != null) {
-                                    attachmentList.add(file);
-                                } else {
-                                    errorLog.append(reportParams.toString());
-                                }
-                            }
-                        }
-
-                    }
-
-                    final EmailMessageWithAttachmentData emailMessageWithAttachmentData = EmailMessageWithAttachmentData.createNew(
-                            emailMessage.getEmailAddress(), emailMessage.getMessage(), emailMessage.getEmailSubject(), attachmentList);
-                    try {
-
-                        this.emailMessageJobEmailService.sendEmailWithAttachment(emailMessageWithAttachmentData);
-
-                        emailMessage.setStatusType(EmailMessageStatusType.SENT.getValue());
-
-                        this.emailMessageRepository.save(emailMessage);
-                    } catch (Exception e) {
-                        emailMessage.updateErrorMessage(e.getMessage());
-                        emailMessage.setStatusType(EmailMessageStatusType.FAILED.getValue());
-                        this.emailMessageRepository.save(emailMessage);
-                    }
-                }
-            }
-
-        }
-
-    }
-
-    /**
-     * This generates the the report and converts it to a file by passing the parameters below
-     *
-     * @param emailCampaign
-     * @param emailAttachmentFileFormat
-     * @param reportParams
-     * @param reportName
-     * @param errorLog
-     * @return
-     */
-    private File generateAttachments(final EmailCampaign emailCampaign, final ScheduledEmailAttachmentFileFormat emailAttachmentFileFormat,
-            final Map<String, String> reportParams, final String reportName, final StringBuilder errorLog) {
-        if (reportName == null) {
-            return null;
-        }
-        try {
-            final ByteArrayOutputStream byteArrayOutputStream = this.readReportingService.generatePentahoReportAsOutputStream(reportName,
-                    emailAttachmentFileFormat.getValue(), reportParams, null, emailCampaign.getApprovedBy(), errorLog);
-
-            final String fileLocation = FileSystemContentRepository.FINERACT_BASE_DIR + File.separator + "";
-            final String fileNameWithoutExtension = fileLocation + File.separator + reportName;
-
-            // check if file directory exists, if not create directory
-            if (!new File(fileLocation).isDirectory()) {
-                new File(fileLocation).mkdirs();
-            }
-
-            if (byteArrayOutputStream.size() == 0) {
-                errorLog.append("Pentaho report processing failed, empty output stream created");
-            } else if (errorLog.length() == 0 && (byteArrayOutputStream.size() > 0)) {
-                final String fileName = fileNameWithoutExtension + "." + emailAttachmentFileFormat.getValue();
-
-                final File file = new File(fileName);
-                final FileOutputStream outputStream = new FileOutputStream(file);
-                byteArrayOutputStream.writeTo(outputStream);
-
-                return file;
-            }
-
-        } catch (IOException | PlatformDataIntegrityException e) {
-            errorLog.append("The ReportMailingJobWritePlatformServiceImpl.executeReportMailingJobs threw an IOException " + "exception: "
-                    + e.getMessage() + " ---------- ");
-        }
-        return null;
-    }
-
-    /**
-     * This matches the the actual values to the key in the report stretchy parameters map
-     *
-     * @param stretchyParams
-     * @param client
-     * @return
-     */
-    private HashMap<String, String> replaceStretchyParamsWithActualClientParams(final HashMap<String, String> stretchyParams,
-            final Client client) {
-
-        HashMap<String, String> actualParams = new HashMap<>();
-
-        for (Map.Entry<String, String> entry : stretchyParams.entrySet()) {
-            if (entry.getKey().equals("selectOffice")) {
-                // most at times the reports are run by picking the office of
-                // the staff Id
-                if (client.getStaff() != null) {
-                    actualParams.put(entry.getKey(), client.getStaff().officeId().toString());
-                } else {
-                    actualParams.put(entry.getKey(), client.getOffice().getId().toString());
-                }
-
-            } else if (entry.getKey().equals("selectClient")) {
-
-                actualParams.put(entry.getKey(), client.getId().toString());
-
-            } else if (entry.getKey().equals("selectLoanofficer")) {
-
-                actualParams.put(entry.getKey(), client.getStaff().getId().toString());
-
-            } else if (entry.getKey().equals("environementUrl")) {
-
-                actualParams.put(entry.getKey(), entry.getKey());
-            }
-        }
-        return actualParams;
-    }
-
-    private HashMap<String, String> validateStretchyReportParamMap(final String stretchyParams) {
-
-        HashMap<String, String> stretchyReportParamHashMap = new HashMap<>();
-
-        if (!StringUtils.isEmpty(stretchyParams)) {
-            try {
-                stretchyReportParamHashMap = new ObjectMapper().readValue(stretchyParams, new TypeReference<HashMap<String, String>>() {});
-            }
-
-            catch (Exception e) {
-                stretchyReportParamHashMap = null;
-            }
-        }
-
-        return stretchyReportParamHashMap;
-    }
-
 }

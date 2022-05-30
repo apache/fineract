@@ -78,6 +78,17 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
     }
 
     @Override
+    public JobDetailData retrieveOneByName(String jobName) {
+        try {
+            final JobDetailMapper detailMapper = new JobDetailMapper(sqlGenerator);
+            final String sql = detailMapper.schema() + " where job.name=?";
+            return this.jdbcTemplate.queryForObject(sql, detailMapper, new Object[] { jobName }); // NOSONAR
+        } catch (final EmptyResultDataAccessException e) {
+            throw new JobNotFoundException(jobName, e);
+        }
+    }
+
+    @Override
     public Page<JobDetailHistoryData> retrieveJobHistory(final Long jobId, final SearchParameters searchParameters) {
         if (!isJobExist(jobId)) {
             throw new JobNotFoundException(String.valueOf(jobId));
@@ -142,9 +153,9 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
         JobDetailMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
             sqlBuilder = new StringBuilder("select").append(
                     " job.id,job.display_name as displayName,job.next_run_time as nextRunTime,job.initializing_errorlog as initializingError,job.cron_expression as cronExpression,job.is_active as active,job.currently_running as currentlyRunning,")
-                    .append(" runHistory.version,runHistory.start_time as lastRunStartTime,runHistory.end_time as lastRunEndTime,runHistory."
-                            + sqlGenerator.escape("status")
-                            + ",runHistory.error_message as jobRunErrorMessage,runHistory.trigger_type as triggerType,runHistory.error_log as jobRunErrorLog ")
+                    .append(" runHistory.version,runHistory.start_time as lastRunStartTime,runHistory.end_time as lastRunEndTime,runHistory.")
+                    .append(sqlGenerator.escape("status"))
+                    .append(",runHistory.error_message as jobRunErrorMessage,runHistory.trigger_type as triggerType,runHistory.error_log as jobRunErrorLog ")
                     .append(" from job job  left join job_run_history runHistory ON job.id=runHistory.job_id and job.previous_run_start_time=runHistory.start_time ");
         }
 
