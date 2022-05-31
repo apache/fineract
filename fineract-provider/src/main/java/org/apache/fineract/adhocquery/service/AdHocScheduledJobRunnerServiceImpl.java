@@ -82,7 +82,7 @@ public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunn
                                 run = Math.toIntExact(ChronoUnit.YEARS.between(start, end)) >= 1;
                             break;
                             case CUSTOM:
-                                next = start.plusDays((int) (long) adhoc.getReportRunEvery());
+                                next = start.plusDays((long) adhoc.getReportRunEvery());
                                 run = Math.toIntExact(ChronoUnit.DAYS.between(start, end)) >= adhoc.getReportRunEvery();
                             break;
                             default:

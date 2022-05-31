@@ -22,6 +22,24 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-     <include file="parts/0003_reset_postgresql_sequences.xml" relativeToChangelogFile="true"/>
-     <include file="parts/0004_readonly_database_connection.xml" relativeToChangelogFile="true"/>
+    <changeSet author="fineract" id="add-readonly-database-connection-properties" context="tenant_store_db">
+        <addColumn tableName="tenant_server_connections">
+            <column name="readonly_schema_server" type="VARCHAR(100)"/>
+        </addColumn>
+        <addColumn tableName="tenant_server_connections">
+            <column name="readonly_schema_name" type="VARCHAR(100)"/>
+        </addColumn>
+        <addColumn tableName="tenant_server_connections">
+            <column name="readonly_schema_server_port" type="VARCHAR(10)"/>
+        </addColumn>
+        <addColumn tableName="tenant_server_connections">
+            <column name="readonly_schema_username" type="VARCHAR(100)"/>
+        </addColumn>
+        <addColumn tableName="tenant_server_connections">
+            <column name="readonly_schema_password" type="VARCHAR(100)"/>
+        </addColumn>
+        <addColumn tableName="tenant_server_connections">
+            <column name="readonly_schema_connection_parameters" type="TEXT"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
