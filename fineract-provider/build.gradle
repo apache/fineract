@@ -223,6 +223,7 @@ bootRun {
     dependencies {
         implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.5'
         implementation 'org.postgresql:postgresql:42.3.5'
+        implementation 'mysql:mysql-connector-java:8.0.29'
     }
 }
 
@@ -288,6 +289,7 @@ jib {
     dependencies {
         implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.5'
         implementation 'org.postgresql:postgresql:42.3.5'
+        implementation 'mysql:mysql-connector-java:8.0.29'
     }
 
     pluginExtensions {

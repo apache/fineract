@@ -18,11 +18,6 @@
  */
 package org.apache.fineract.infrastructure.core.service;
 
-import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection.toJdbcUrl;
-import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection.toProtocol;
-
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
@@ -44,12 +39,13 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
     private final Map<Long, DataSource> tenantToDataSourceMap = new HashMap<>(1);
     private final DataSource tenantDataSource;
 
-    @Autowired
-    private HikariConfig hikariConfig;
+    private final DataSourcePerTenantServiceFactory dataSourcePerTenantServiceFactory;
 
     @Autowired
-    public TomcatJdbcDataSourcePerTenantService(final @Qualifier("hikariTenantDataSource") DataSource tenantDataSource) {
+    public TomcatJdbcDataSourcePerTenantService(final @Qualifier("hikariTenantDataSource") DataSource tenantDataSource,
+            final DataSourcePerTenantServiceFactory dataSourcePerTenantServiceFactory) {
         this.tenantDataSource = tenantDataSource;
+        this.dataSourcePerTenantServiceFactory = dataSourcePerTenantServiceFactory;
     }
 
     @Override
@@ -68,42 +64,12 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
                 if (possibleDS != null) {
                     tenantDataSource = possibleDS;
                 } else {
-                    tenantDataSource = createNewDataSourceFor(tenantConnection);
+                    tenantDataSource = dataSourcePerTenantServiceFactory.createNewDataSourceFor(this.tenantDataSource, tenantConnection);
                     this.tenantToDataSourceMap.put(tenantConnection.getConnectionId(), tenantDataSource);
                 }
             }
         }
 
         return tenantDataSource;
-    }
-
-    // creates the tenant data source for the oltp and report database
-    private DataSource createNewDataSourceFor(final FineractPlatformTenantConnection tenantConnectionObj) {
-        String protocol = toProtocol(this.tenantDataSource);
-        String jdbcUrl = toJdbcUrl(protocol, tenantConnectionObj.getSchemaServer(), tenantConnectionObj.getSchemaServerPort(),
-                tenantConnectionObj.getSchemaName(), tenantConnectionObj.getSchemaConnectionParameters());
-
-        HikariConfig config = new HikariConfig();
-        config.setDriverClassName(hikariConfig.getDriverClassName());
-        config.setPoolName(tenantConnectionObj.getSchemaName() + "_pool");
-        config.setJdbcUrl(jdbcUrl);
-        config.setUsername(tenantConnectionObj.getSchemaUsername());
-        config.setPassword(tenantConnectionObj.getSchemaPassword());
-        config.setMinimumIdle(tenantConnectionObj.getInitialSize());
-        config.setMaximumPoolSize(tenantConnectionObj.getMaxActive());
-        config.setConnectionTestQuery(hikariConfig.getConnectionTestQuery());
-        config.setValidationTimeout(tenantConnectionObj.getValidationInterval());
-        config.setAutoCommit(hikariConfig.isAutoCommit());
-
-        // https://github.com/brettwooldridge/HikariCP/wiki/MBean-(JMX)-Monitoring-and-Management
-        config.setRegisterMbeans(true);
-
-        // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
-        // These are the properties for each Tenant DB; the same configuration
-        // is also in src/main/resources/META-INF/spring/hikariDataSource.xml
-        // for the all Tenants DB -->
-        config.setDataSourceProperties(hikariConfig.getDataSourceProperties());
-
-        return new HikariDataSource(config);
     }
 }
