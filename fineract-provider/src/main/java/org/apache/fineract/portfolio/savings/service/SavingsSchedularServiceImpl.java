@@ -32,6 +32,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
@@ -43,18 +45,15 @@ import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class SavingsSchedularServiceImpl implements SavingsSchedularService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(SavingsSchedularServiceImpl.class);
 
     private final SavingsAccountAssembler savingAccountAssembler;
     private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
@@ -66,23 +65,6 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
     private final TransactionTemplate transactionTemplate;
     private Queue<List<SavingsAccountData>> queue = new ArrayDeque<>();
     private int queueSize = 1;
-
-    @Autowired
-    public SavingsSchedularServiceImpl(final SavingsAccountAssembler savingAccountAssembler,
-            final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
-            final SavingsAccountReadPlatformService savingAccountReadPlatformService,
-            final SavingsAccountRepositoryWrapper savingsAccountRepository, final ApplicationContext applicationContext,
-            final ConfigurationDomainService configurationDomainService, final JdbcTemplate jdbcTemplate,
-            final TransactionTemplate transactionTemplate) {
-        this.savingAccountAssembler = savingAccountAssembler;
-        this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
-        this.savingAccountReadPlatformService = savingAccountReadPlatformService;
-        this.savingsAccountRepository = savingsAccountRepository;
-        this.applicationContext = applicationContext;
-        this.configurationDomainService = configurationDomainService;
-        this.jdbcTemplate = jdbcTemplate;
-        this.transactionTemplate = transactionTemplate;
-    }
 
     @Override
     @CronTarget(jobName = JobName.POST_INTEREST_FOR_SAVINGS)
@@ -98,14 +80,14 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
 
         long start = System.currentTimeMillis();
 
-        LOG.info("Reading Savings Account Data!");
+        log.info("Reading Savings Account Data!");
         List<SavingsAccountData> savingsAccounts = this.savingAccountReadPlatformService
                 .retrieveAllSavingsDataForInterestPosting(backdatedTxnsAllowedTill, pageSize, ACTIVE.getValue(), maxSavingsIdInList);
 
         if (savingsAccounts != null && savingsAccounts.size() > 0) {
             savingsAccounts = Collections.synchronizedList(savingsAccounts);
             long finish = System.currentTimeMillis();
-            LOG.info("Done fetching Data within {} milliseconds", finish - start);
+            log.info("Done fetching Data within {} milliseconds", finish - start);
             if (savingsAccounts != null) {
                 queue.add(savingsAccounts);
             }
@@ -113,7 +95,7 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
             if (!CollectionUtils.isEmpty(queue)) {
                 do {
                     int totalFilteredRecords = savingsAccounts.size();
-                    LOG.info("Starting Interest posting - total records - {}", totalFilteredRecords);
+                    log.info("Starting Interest posting - total records - {}", totalFilteredRecords);
                     List<SavingsAccountData> queueElement = queue.element();
                     maxSavingsIdInList = queueElement.get(queueElement.size() - 1).getId();
                     postInterest(queue.remove(), threadPoolSize, batchSize, executorService, backdatedTxnsAllowedTill, pageSize,
@@ -156,7 +138,7 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
             }
 
             while (queue.size() <= queueSize) {
-                LOG.info("Fetching while threads are running!");
+                log.info("Fetching while threads are running!");
                 List<SavingsAccountData> savingsAccountDataList = Collections.synchronizedList(this.savingAccountReadPlatformService
                         .retrieveAllSavingsDataForInterestPosting(backdatedTxnsAllowedTill, pageSize, ACTIVE.getValue(), maxId));
                 if (savingsAccountDataList == null || savingsAccountDataList.isEmpty()) {
@@ -207,21 +189,21 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
             }
 
             while (queue.size() <= queueSize) {
-                LOG.info("Fetching while threads are running!..:: this is not supposed to run........");
+                log.info("Fetching while threads are running!..:: this is not supposed to run........");
                 savingsAccounts = Collections.synchronizedList(this.savingAccountReadPlatformService
                         .retrieveAllSavingsDataForInterestPosting(backdatedTxnsAllowedTill, pageSize, ACTIVE.getValue(), maxId));
                 if (savingsAccounts == null || savingsAccounts.isEmpty()) {
                     break;
                 }
                 maxId = savingsAccounts.get(savingsAccounts.size() - 1).getId();
-                LOG.info("Add to the Queue");
+                log.info("Add to the Queue");
                 queue.add(savingsAccounts);
             }
 
             checkCompletion(responses);
-            LOG.info("Queue size {}", queue.size());
+            log.info("Queue size {}", queue.size());
         } catch (InterruptedException e1) {
-            LOG.error("Interrupted while postInterest", e1);
+            log.error("Interrupted while postInterest", e1);
         }
     }
 
@@ -253,12 +235,12 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
             }
             allThreadsExecuted = noOfThreadsExecuted == responses.size();
             if (!allThreadsExecuted) {
-                LOG.error("All threads could not execute.");
+                log.error("All threads could not execute.");
             }
         } catch (InterruptedException e1) {
-            LOG.error("Interrupted while interest posting entries", e1);
+            log.error("Interrupted while interest posting entries", e1);
         } catch (ExecutionException e2) {
-            LOG.error("Execution exception while interest posting entries", e2);
+            log.error("Execution exception while interest posting entries", e2);
         }
     }
 
