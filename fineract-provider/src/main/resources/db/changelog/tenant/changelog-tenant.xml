@@ -33,4 +33,5 @@
     <include file="parts/0011_add_credit_balance_refund_permission.xml" relativeToChangelogFile="true"/>
     <include file="parts/0012_add_merchantissuedrefund_payoutrefund_goodwillcredit_permissions.xml" relativeToChangelogFile="true"/>
     <include file="parts/0013_remove_topics.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0014_remove_unused_jobs.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

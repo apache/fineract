@@ -28,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -63,7 +64,7 @@ public class SchedulerJobsTest {
     @AfterEach
     public void tearDown() {
         schedulerJobHelper.updateSchedulerStatus(originalSchedulerStatus);
-        for (int jobId = 1; jobId < JobName.values().length; jobId++) {
+        for (Integer jobId : schedulerJobHelper.getAllSchedulerJobIds()) {
             schedulerJobHelper.updateSchedulerJob(jobId, originalJobStatus.get(jobId));
         }
     }
@@ -74,9 +75,10 @@ public class SchedulerJobsTest {
         // is a
         // java.util.Date)
         schedulerJobHelper.updateSchedulerStatus(true);
-        schedulerJobHelper.updateSchedulerJob(1, true);
-        String nextRunTimeText = await().until(() -> (String) schedulerJobHelper.getSchedulerJobById(1).get("nextRunTime"),
-                nextRunTime -> nextRunTime != null);
+        int minJobId = schedulerJobHelper.getAllSchedulerJobIds().stream().mapToInt(number -> number).min().orElse(Integer.MAX_VALUE);
+        schedulerJobHelper.updateSchedulerJob(minJobId, true);
+        String nextRunTimeText = await().until(() -> (String) schedulerJobHelper.getSchedulerJobById(minJobId).get("nextRunTime"),
+                Objects::nonNull);
         DateTimeFormatter.ISO_INSTANT.parse(nextRunTimeText);
     }
 
