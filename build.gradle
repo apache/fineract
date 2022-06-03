@@ -30,7 +30,6 @@ buildscript {
                 'integration-tests',
                 'twofactor-tests',
                 'oauth2-tests',
-                'instancemode-tests',
                 'fineract-client',
                 'core',
                 'service',

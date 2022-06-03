@@ -204,10 +204,18 @@ public final class Utils {
         return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
     }
 
+    public static String performServerPut(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String putURL, final String jsonBodyToSend) {
+        return performServerPut(requestSpec, responseSpec, putURL, jsonBodyToSend, null);
+    }
+
     public static <T> T performServerPut(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String putURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
         final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError().when().put(putURL)
                 .andReturn().asString();
+        if (jsonAttributeToGetBack == null) {
+            return (T) json;
+        }
         return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
     }
 
