@@ -19,7 +19,7 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
-import org.apache.fineract.infrastructure.security.filter.FineractInstanceModeApiFilter;
+import org.apache.fineract.infrastructure.instancemode.filter.FineractInstanceModeApiFilter;
 import org.apache.fineract.infrastructure.security.filter.TenantAwareBasicAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.filter.TwoFactorAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.service.TenantAwareJpaPlatformUserDetailsService;
@@ -65,7 +65,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-
         http //
                 .csrf().disable() // NOSONAR only creating a service that is used by non-browser clients
                 .antMatcher("/api/**").authorizeRequests() //
@@ -75,6 +74,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/api/*/self/authentication").permitAll() //
                 .antMatchers(HttpMethod.POST, "/api/*/self/registration").permitAll() //
                 .antMatchers(HttpMethod.POST, "/api/*/self/registration/user").permitAll() //
+                .antMatchers(HttpMethod.PUT, "/api/*/instance-mode").permitAll() //
                 .antMatchers(HttpMethod.POST, "/api/*/twofactor/validate").fullyAuthenticated() //
                 .antMatchers("/api/*/twofactor").fullyAuthenticated() //
                 .antMatchers("/api/**").access("isFullyAuthenticated() and hasAuthority('TWOFACTOR_AUTHENTICATED')").and() //

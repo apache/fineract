@@ -16,15 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-rootProject.name='fineract'
-include ':module:dummy:core'
-include ':module:dummy:service'
-include ':module:dummy:starter'
-include ':custom:foo:service'
-include ':fineract-provider'
-include ':fineract-war'
-include ':integration-tests'
-include ':twofactor-tests'
-include ':oauth2-tests'
-include ':fineract-client'
-include ':fineract-doc'
+package org.apache.fineract.infrastructure.instancemode.api;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+import lombok.ToString;
+
+public class InstanceModeApiResourceSwagger {
+
+    @ToString
+    @Schema(description = "ChangeInstanceModeRequest")
+    @Getter
+    public static final class ChangeInstanceModeRequest {
+
+        @Schema(required = true, example = "true")
+        public boolean readEnabled;
+        @Schema(required = true, example = "true")
+        public boolean writeEnabled;
+        @Schema(required = true, example = "true")
+        public boolean batchEnabled;
+    }
+}
