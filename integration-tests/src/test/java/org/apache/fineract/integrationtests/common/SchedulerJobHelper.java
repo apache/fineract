@@ -113,8 +113,12 @@ public class SchedulerJobHelper {
         return new Gson().toJson(map);
     }
 
-    private void runSchedulerJob(int jobId) {
+    public void runSchedulerJob(int jobId) {
         final ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(202).build();
+        runSchedulerJob(jobId, responseSpec);
+    }
+
+    public void runSchedulerJob(int jobId, ResponseSpecification responseSpec) {
         final String RUN_SCHEDULER_JOB_URL = "/fineract-provider/api/v1/jobs/" + jobId + "?command=executeJob&" + Utils.TENANT_IDENTIFIER;
         LOG.info("------------------------ RUN SCHEDULER JOB -------------------------");
         Utils.performServerPost(requestSpec, responseSpec, RUN_SCHEDULER_JOB_URL, runSchedulerJobAsJSON(), null);
@@ -127,7 +131,7 @@ public class SchedulerJobHelper {
         return runSchedulerJob;
     }
 
-    private int getSchedulerJobIdByName(String jobName) {
+    public int getSchedulerJobIdByName(String jobName) {
         List<Map<String, Object>> allSchedulerJobsData = getAllSchedulerJobs();
         for (Integer jobIndex = 0; jobIndex < allSchedulerJobsData.size(); jobIndex++) {
             if (allSchedulerJobsData.get(jobIndex).get("displayName").equals(jobName)) {

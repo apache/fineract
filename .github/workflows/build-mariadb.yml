@@ -58,13 +58,10 @@ jobs:
             sudo apt-get install ghostscript graphviz -y
 
       - name: Basic Auth Build & Test
-        run: ./gradlew --no-daemon -q --console=plain build test --fail-fast doc -x :twofactor-tests:test -x :oauth2-test:test -x :instancemode-tests:test
+        run: ./gradlew --no-daemon -q --console=plain build test --fail-fast doc -x :twofactor-tests:test -x :oauth2-test:test
 
       - name: 2FA Build & Test
         run: ./gradlew --no-daemon -q --console=plain :twofactor-tests:test --fail-fast
 
       - name: OAuth2 Build & Test
         run: ./gradlew --no-daemon -q --console=plain :oauth2-tests:test --fail-fast
-
-      - name: Instance Mode & Test
-        run: ./gradlew --no-daemon -q --console=plain :instancemode-tests:test --fail-fast

@@ -16,15 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-rootProject.name='fineract'
-include ':module:dummy:core'
-include ':module:dummy:service'
-include ':module:dummy:starter'
-include ':custom:foo:service'
-include ':fineract-provider'
-include ':fineract-war'
-include ':integration-tests'
-include ':twofactor-tests'
-include ':oauth2-tests'
-include ':fineract-client'
-include ':fineract-doc'
+package org.apache.fineract.integrationtests.support.instancemode;
+
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+@Retention(RUNTIME)
+@Target({ METHOD })
+public @interface ConfigureInstanceMode {
+
+    boolean readEnabled();
+
+    boolean writeEnabled();
+
+    boolean batchEnabled();
+}
