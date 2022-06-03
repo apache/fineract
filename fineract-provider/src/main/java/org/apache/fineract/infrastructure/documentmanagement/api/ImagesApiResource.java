@@ -54,6 +54,8 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -61,8 +63,9 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Path("{entity}/{entityId}/images")
-
 public class ImagesApiResource {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ImagesApiResource.class);
 
     private final PlatformSecurityContext context;
     private final ImageReadPlatformService imageReadPlatformService;
@@ -165,8 +168,14 @@ public class ImagesApiResource {
 
         try {
             byte[] resizedImageBytes = resizedImage.getByteSource().read();
-            final String clientImageAsBase64Text = imageDataURISuffix + Base64.getMimeEncoder().encodeToString(resizedImageBytes);
-            return Response.ok(clientImageAsBase64Text, MediaType.TEXT_PLAIN_TYPE).build();
+            if (resizedImageBytes != null) {
+                final String clientImageAsBase64Text = imageDataURISuffix + Base64.getMimeEncoder().encodeToString(resizedImageBytes);
+                return Response.ok(clientImageAsBase64Text, MediaType.TEXT_PLAIN_TYPE).build();
+            } else {
+                LOG.error("resizedImageBytes is null for entityName={}, entityId={}, maxWidth={}, maxHeight={}", entityName, entityId,
+                        maxWidth, maxHeight);
+                return Response.serverError().build();
+            }
         } catch (IOException e) {
             throw new ContentManagementException(imageData.name(), e.getMessage(), e);
         }
