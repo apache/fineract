@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
-public class EnableFineractEventsCondition implements Condition {
+public class EnableFineractEventListenerCondition implements Condition {
 
     @Override
     public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
@@ -37,6 +37,7 @@ public class EnableFineractEventsCondition implements Condition {
         boolean isBatchModeEnabled = Optional.ofNullable(
                 context.getEnvironment().getProperty(FineractInstanceModeConstants.FINERACT_MODE_BATCH_ENABLE_PROPERTY, Boolean.class))
                 .orElse(true);
-        return !isReadModeEnabled && (isWriteModeEnabled || isBatchModeEnabled);
+        return (isReadModeEnabled && isBatchModeEnabled && isWriteModeEnabled) // All mode
+                || (!isReadModeEnabled && !isBatchModeEnabled && isWriteModeEnabled); // Write mode
     }
 }
