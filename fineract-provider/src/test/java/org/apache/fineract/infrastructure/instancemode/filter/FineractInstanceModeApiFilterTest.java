@@ -29,6 +29,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.instancemode.InstanceModeMock;
 import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -70,7 +71,7 @@ class FineractInstanceModeApiFilterTest {
     @Test
     void testDoFilterInternal_ShouldLetReadApisThrough_WhenFineractIsInAllModeAndIsGetApi() throws ServletException, IOException {
         // given
-        FineractProperties.FineractModeProperties modeProperties = createModeProps(true, true, true);
+        FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(true, true, true);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.GET.name());
         given(request.getPathInfo()).willReturn("/loans");
@@ -83,7 +84,7 @@ class FineractInstanceModeApiFilterTest {
     @Test
     void testDoFilterInternal_ShouldLetReadApisThrough_WhenFineractIsInReadOnlyModeAndIsGetApi() throws ServletException, IOException {
         // given
-        FineractProperties.FineractModeProperties modeProperties = createModeProps(true, false, false);
+        FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(true, false, false);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.GET.name());
         given(request.getPathInfo()).willReturn("/loans");
@@ -97,7 +98,7 @@ class FineractInstanceModeApiFilterTest {
     void testDoFilterInternal_ShouldLetActuatorApisThrough_WhenFineractIsInReadOnlyModeAndIsHealthApi()
             throws ServletException, IOException {
         // given
-        FineractProperties.FineractModeProperties modeProperties = createModeProps(true, false, false);
+        FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(true, false, false);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.GET.name());
         given(request.getServletPath()).willReturn("/actuator/health");
@@ -111,7 +112,7 @@ class FineractInstanceModeApiFilterTest {
     @Test
     void testDoFilterInternal_ShouldNotLetWriteApisThrough_WhenFineractIsInReadOnlyModeAndIsPostApi() throws ServletException, IOException {
         // given
-        FineractProperties.FineractModeProperties modeProperties = createModeProps(true, false, false);
+        FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(true, false, false);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.POST.name());
         given(request.getPathInfo()).willReturn("/loans");
@@ -125,7 +126,7 @@ class FineractInstanceModeApiFilterTest {
     @Test
     void testDoFilterInternal_ShouldNotLetBatchApisThrough_WhenFineractIsInReadOnlyModeAndIsJobsApi() throws ServletException, IOException {
         // given
-        FineractProperties.FineractModeProperties modeProperties = createModeProps(true, false, false);
+        FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(true, false, false);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.POST.name());
         given(request.getPathInfo()).willReturn("/jobs/1");
@@ -139,7 +140,7 @@ class FineractInstanceModeApiFilterTest {
     @Test
     void testDoFilterInternal_ShouldLetReadApisThrough_WhenFineractIsInWriteModeAndIsGetApi() throws ServletException, IOException {
         // given
-        FineractProperties.FineractModeProperties modeProperties = createModeProps(false, true, false);
+        FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, true, false);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.GET.name());
         given(request.getPathInfo()).willReturn("/loans");
@@ -152,7 +153,7 @@ class FineractInstanceModeApiFilterTest {
     @Test
     void testDoFilterInternal_ShouldLetWriteApisThrough_WhenFineractIsInWriteModeAndIsPostApi() throws ServletException, IOException {
         // given
-        FineractProperties.FineractModeProperties modeProperties = createModeProps(false, true, false);
+        FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, true, false);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.POST.name());
         given(request.getPathInfo()).willReturn("/loans");
@@ -165,7 +166,7 @@ class FineractInstanceModeApiFilterTest {
     @Test
     void testDoFilterInternal_ShouldLetWriteApisThrough_WhenFineractIsInWriteModeAndIsPutApi() throws ServletException, IOException {
         // given
-        FineractProperties.FineractModeProperties modeProperties = createModeProps(false, true, false);
+        FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, true, false);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.PUT.name());
         given(request.getPathInfo()).willReturn("/loans/1");
@@ -178,7 +179,7 @@ class FineractInstanceModeApiFilterTest {
     @Test
     void testDoFilterInternal_ShouldLetActuatorApisThrough_WhenFineractIsInWriteModeAndIsHelathApi() throws ServletException, IOException {
         // given
-        FineractProperties.FineractModeProperties modeProperties = createModeProps(false, true, false);
+        FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, true, false);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.GET.name());
         given(request.getServletPath()).willReturn("/actuator/health");
@@ -192,7 +193,7 @@ class FineractInstanceModeApiFilterTest {
     @Test
     void testDoFilterInternal_ShouldNotLetBatchApisThrough_WhenFineractIsInWriteModeAndIsJobsApi() throws ServletException, IOException {
         // given
-        FineractProperties.FineractModeProperties modeProperties = createModeProps(false, true, false);
+        FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, true, false);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.POST.name());
         given(request.getPathInfo()).willReturn("/jobs/1");
@@ -206,7 +207,7 @@ class FineractInstanceModeApiFilterTest {
     @Test
     void testDoFilterInternal_ShouldLetBatchApisThrough_WhenFineractIsInBatchModeAndIsJobsApi() throws ServletException, IOException {
         // given
-        FineractProperties.FineractModeProperties modeProperties = createModeProps(false, false, true);
+        FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, false, true);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.POST.name());
         given(request.getPathInfo()).willReturn("/jobs/1");
@@ -220,7 +221,7 @@ class FineractInstanceModeApiFilterTest {
     void testDoFilterInternal_ShouldLetBatchApisThrough_WhenFineractIsInBatchModeAndIsListingJobsApi()
             throws ServletException, IOException {
         // given
-        FineractProperties.FineractModeProperties modeProperties = createModeProps(false, false, true);
+        FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, false, true);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.GET.name());
         given(request.getPathInfo()).willReturn("/jobs");
@@ -233,7 +234,7 @@ class FineractInstanceModeApiFilterTest {
     @Test
     void testDoFilterInternal_ShouldLetActuatorApisThrough_WhenFineractIsInBatchModeAndIsHealthApi() throws ServletException, IOException {
         // given
-        FineractProperties.FineractModeProperties modeProperties = createModeProps(false, false, true);
+        FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, false, true);
         given(fineractProperties.getMode()).willReturn(modeProperties);
         given(request.getMethod()).willReturn(HttpMethod.GET.name());
         given(request.getServletPath()).willReturn("/actuator/health");
@@ -242,13 +243,5 @@ class FineractInstanceModeApiFilterTest {
         underTest.doFilterInternal(request, response, filterChain);
         // then
         verify(filterChain).doFilter(request, response);
-    }
-
-    private FineractProperties.FineractModeProperties createModeProps(boolean readEnabled, boolean writeEnabled, boolean batchEnabled) {
-        FineractProperties.FineractModeProperties modeProperties = new FineractProperties.FineractModeProperties();
-        modeProperties.setReadEnabled(readEnabled);
-        modeProperties.setWriteEnabled(writeEnabled);
-        modeProperties.setBatchEnabled(batchEnabled);
-        return modeProperties;
     }
 }
