@@ -25,14 +25,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3
 
       - id: 'auth'
-        uses: google-github-actions/auth@v0
+        uses: google-github-actions/auth@ceee102ec2387dd9e844e01b530ccd4ec87ce955 # tag=v0
         with:
           credentials_json: '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS}}'
 
-      - uses: google-github-actions/setup-gcloud@v0
+      - uses: google-github-actions/setup-gcloud@877d4953d2c70a0ba7ef3290ae968eb24af233bb # tag=v0
         with:
           project_id: ${{ secrets.GOOGLE_PROJECT_ID }}
 
