@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.report.service;
 
+import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection.toJdbcUrl;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -49,8 +51,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection.toJdbcUrl;
-
 @Service
 @ReportService(type = "Pentaho")
 public class PentahoReportingProcessServiceImpl implements ReportingProcessService {
@@ -59,6 +59,7 @@ public class PentahoReportingProcessServiceImpl implements ReportingProcessServi
     public static final String MIFOS_BASE_DIR = System.getProperty("user.home") + File.separator + ".mifosx";
 
     private final PlatformSecurityContext context;
+
     @Autowired
     public PentahoReportingProcessServiceImpl(final PlatformSecurityContext context) {
         ClassicEngineBoot.getInstance().start();
@@ -178,8 +179,10 @@ public class PentahoReportingProcessServiceImpl implements ReportingProcessServi
             final var tenantConnection = tenant.getConnection();
             var tenantUrl = toJdbcUrl("jdbc:mariadb", tenantConnection.getSchemaServer(), tenantConnection.getSchemaServerPort(),
                     tenantConnection.getSchemaName(), tenantConnection.getSchemaConnectionParameters());
-            /*var tenantUrl = "jdbc:mariadb://" + tenantConnection.getSchemaServer() + ":" + tenantConnection.getSchemaServerPort() + "/"
-                    + tenantConnection.getSchemaName() + "?useSSL=false";*/
+            /*
+             * var tenantUrl = "jdbc:mariadb://" + tenantConnection.getSchemaServer() + ":" +
+             * tenantConnection.getSchemaServerPort() + "/" + tenantConnection.getSchemaName() + "?useSSL=false";
+             */
             final var userhierarchy = currentUser.getOffice().getHierarchy();
             var outPutInfo4 = "db URL:" + tenantUrl + "      userhierarchy:" + userhierarchy;
             LOGGER.info(outPutInfo4);
