@@ -22,6 +22,41 @@ apply plugin: 'war'
 apply plugin: 'distribution'
 apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.dependencies.gradle"
 
+repositories {
+    mavenCentral()
+    jcenter()
+    maven { url 'https://repo.orl.eng.hitachivantara.com/artifactory/pnt-mvn/'  }
+}
+
+dependencies {
+    implementation 'org.apache.poi:poi:4.1.2'
+    implementation 'org.apache.poi:poi-ooxml:4.1.2'
+    implementation 'org.apache.poi:poi-ooxml-schemas:4.1.2'
+
+    //Pentaho
+    implementation 'org.pentaho.reporting.engine:classic-core:9.1.0.0-SNAPSHOT'
+    implementation 'org.pentaho.reporting.engine:classic-extensions:9.1.0.0-SNAPSHOT'
+    implementation 'org.pentaho.reporting.engine:classic-extensions-scripting:9.1.0.0-SNAPSHOT'
+    implementation 'org.pentaho.reporting.engine:wizard-core:9.1.0.0-SNAPSHOT'
+    implementation 'org.pentaho.reporting.designer:wizard-xul:9.1.0.0-SNAPSHOT'
+    implementation 'org.pentaho.reporting.library:libbase:9.1.0.0-SNAPSHOT'
+    implementation 'org.pentaho.reporting.library:libdocbundle:9.1.0.0-SNAPSHOT'
+    implementation 'org.pentaho.reporting.library:libfonts:9.1.0.0-SNAPSHOT'
+    implementation 'org.pentaho.reporting.library:libformat:9.1.0.0-SNAPSHOT'
+    implementation 'org.pentaho.reporting.library:libformula:9.1.0.0-SNAPSHOT'
+    implementation 'org.pentaho.reporting.library:libloader:9.1.0.0-SNAPSHOT'
+    implementation 'org.pentaho.reporting.library:librepository:9.1.0.0-SNAPSHOT'
+    implementation 'org.pentaho.reporting.library:libserializer:9.1.0.0-SNAPSHOT'
+    implementation 'org.pentaho.reporting.library:libsparkline:9.1.0.0-SNAPSHOT'
+    implementation 'org.pentaho.reporting.library:libxml:9.1.0.0-SNAPSHOT'
+    implementation 'org.openjdk.nashorn:nashorn-core:15.1'
+
+    //Fiter custom dependencies
+    implementation 'org.json:json:20171018'
+    implementation 'org.apache.pdfbox:pdfbox:2.0.20'
+}
+
+
 war {
     archiveFileName = 'fineract-provider.war'
     from("$rootDir/licenses/binary/") {

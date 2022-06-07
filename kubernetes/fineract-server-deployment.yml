@@ -113,6 +113,10 @@ spec:
               key: password
         - name: FINERACT_DEFAULT_TENANTDB_CONN_PARAMS
           value: ''
+        - name: FINERACT_TENANT_URL_PROTOCOL
+          value: jdbc
+        - name: FINERACT_TENANT_URL_SUB_PROTOCOL
+          value: mariadb
         ports:
         - containerPort: 8443
           name: fineract-server

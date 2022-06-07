@@ -54,6 +54,8 @@ services:
       - FINERACT_DEFAULT_TENANTDB_UID=root
       - FINERACT_DEFAULT_TENANTDB_PWD=skdcnwauicn2ucnaecasdsajdnizucawencascdca
       - FINERACT_DEFAULT_TENANTDB_CONN_PARAMS=
+      - FINERACT_TENANT_URL_PROTOCOL=jdbc
+      - FINERACT_TENANT_URL_SUB_PROTOCOL=mariadb
 
   # Frontend service
   community-app:

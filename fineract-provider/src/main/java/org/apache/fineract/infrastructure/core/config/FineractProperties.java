@@ -47,6 +47,8 @@ public class FineractProperties {
         private String identifier;
         private String name;
         private String description;
+        private String protocol;
+        private String subprotocol;
     }
 
     @Getter

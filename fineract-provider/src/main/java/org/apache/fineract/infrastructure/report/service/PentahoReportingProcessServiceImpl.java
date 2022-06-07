@@ -30,6 +30,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.report.annotation.ReportService;
@@ -59,12 +60,14 @@ public class PentahoReportingProcessServiceImpl implements ReportingProcessServi
     public static final String MIFOS_BASE_DIR = System.getProperty("user.home") + File.separator + ".mifosx";
 
     private final PlatformSecurityContext context;
+    private final FineractProperties fineractProperties;
 
     @Autowired
-    public PentahoReportingProcessServiceImpl(final PlatformSecurityContext context) {
+    public PentahoReportingProcessServiceImpl(final PlatformSecurityContext context, final FineractProperties fineractProperties) {
         ClassicEngineBoot.getInstance().start();
 
         this.context = context;
+        this.fineractProperties = fineractProperties;
     }
 
     @Override
@@ -177,7 +180,7 @@ public class PentahoReportingProcessServiceImpl implements ReportingProcessServi
             // and data scoping
             final var tenant = ThreadLocalContextUtil.getTenant();
             final var tenantConnection = tenant.getConnection();
-            var tenantUrl = toJdbcUrl("jdbc:mariadb", tenantConnection.getSchemaServer(), tenantConnection.getSchemaServerPort(),
+            var tenantUrl = toJdbcUrl(fineractProperties.getTenant().getProtocol()+":"+fineractProperties.getTenant().getSubprotocol(), tenantConnection.getSchemaServer(), tenantConnection.getSchemaServerPort(),
                     tenantConnection.getSchemaName(), tenantConnection.getSchemaConnectionParameters());
             /*
              * var tenantUrl = "jdbc:mariadb://" + tenantConnection.getSchemaServer() + ":" +
