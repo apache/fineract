@@ -1,0 +1,48 @@
+// This is a template to demonstrate the existing functions
+// you can use in a global data-source script. All functions and
+// global variables you define here will be available for the
+// all query scripts.
+//
+// Feel free to delete any function you don't use.
+//
+// you can process scripts via
+// scriptHelper.eval("println \"Hello World\";", "groovy");
+//
+// or your can load your own ECMA/JavaScript files and execute them via
+// scriptHelper.evalFile ("/your/file/here.groovy", "groovy");
+//
+// both inline scripts and files will be executed in the global context -
+// any function or variable defined there will be available globally.
+//
+// The following global variables exist by default:
+//    resourceManager : The ResourceManager can be used to load files
+//    contextKey      : ResourceKey the context key points to the prpt-bundle
+//    dataFactory     : The current datafactory instance
+//    configuration   : The current report configuration
+//    resourceBundleFactory : Access to translations and locale information
+//    scriptHelper    : Allows to load and evaluate other scripts
+
+
+def init(dataRow)
+{
+  // place all initialization logic here. This is the right space to
+  // prepare complex lookup tables or to fill global variables.
+
+  // this method is called once when the data-source is first used.
+  var tenantUrl = dataRow.get("tenantUrl");
+    var user = dataRow.get("username");
+    var password = dataRow.get("password");
+    dataFactory.getConnectionProvider().setProperty("user", user);
+    dataFactory.getConnectionProvider().setProperty("password", password);
+    dataFactory.getConnectionProvider().setUrl(tenantUrl);
+}
+
+def shutdown()
+{
+  // place all shutdown logic here. If you use any persistent resources
+  // like files or connections make sure you close them here.
+
+  // this method is called once during the data-source shut-down. It
+  // will be called after all query scripts have been shut down.
+}
+

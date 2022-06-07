@@ -87,6 +87,7 @@ dependencies {
             'org.pentaho.reporting.library:libserializer',
             'org.pentaho.reporting.library:libsparkline',
             'org.pentaho.reporting.library:libxml',
+            'org.openjdk.nashorn:nashorn-core',
             'mysql:mysql-connector-java',
             'org.apache.commons:commons-email',
             'com.sun.activation:jakarta.activation',

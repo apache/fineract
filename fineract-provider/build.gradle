@@ -256,6 +256,7 @@ bootRun {
         implementation 'org.pentaho.reporting.library:libserializer:9.1.0.0-SNAPSHOT'
         implementation 'org.pentaho.reporting.library:libsparkline:9.1.0.0-SNAPSHOT'
         implementation 'org.pentaho.reporting.library:libxml:9.1.0.0-SNAPSHOT'
+        implementation 'org.openjdk.nashorn:nashorn-core:15.1'
 
         //Fiter custom dependencies
         implementation 'org.json:json:20171018'

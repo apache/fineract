@@ -49,6 +49,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection.toJdbcUrl;
+
 @Service
 @ReportService(type = "Pentaho")
 public class PentahoReportingProcessServiceImpl implements ReportingProcessService {
@@ -174,8 +176,10 @@ public class PentahoReportingProcessServiceImpl implements ReportingProcessServi
             // and data scoping
             final var tenant = ThreadLocalContextUtil.getTenant();
             final var tenantConnection = tenant.getConnection();
-            var tenantUrl = "jdbc:mysql://" + tenantConnection.getSchemaServer() + ":" + tenantConnection.getSchemaServerPort() + "/"
-                    + tenantConnection.getSchemaName() + "?useSSL=false";
+            var tenantUrl = toJdbcUrl("jdbc:mariadb", tenantConnection.getSchemaServer(), tenantConnection.getSchemaServerPort(),
+                    tenantConnection.getSchemaName(), tenantConnection.getSchemaConnectionParameters());
+            /*var tenantUrl = "jdbc:mariadb://" + tenantConnection.getSchemaServer() + ":" + tenantConnection.getSchemaServerPort() + "/"
+                    + tenantConnection.getSchemaName() + "?useSSL=false";*/
             final var userhierarchy = currentUser.getOffice().getHierarchy();
             var outPutInfo4 = "db URL:" + tenantUrl + "      userhierarchy:" + userhierarchy;
             LOGGER.info(outPutInfo4);
