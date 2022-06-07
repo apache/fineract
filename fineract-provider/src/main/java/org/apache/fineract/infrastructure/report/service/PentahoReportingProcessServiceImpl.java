@@ -180,8 +180,9 @@ public class PentahoReportingProcessServiceImpl implements ReportingProcessServi
             // and data scoping
             final var tenant = ThreadLocalContextUtil.getTenant();
             final var tenantConnection = tenant.getConnection();
-            var tenantUrl = toJdbcUrl(fineractProperties.getTenant().getProtocol()+":"+fineractProperties.getTenant().getSubprotocol(), tenantConnection.getSchemaServer(), tenantConnection.getSchemaServerPort(),
-                    tenantConnection.getSchemaName(), tenantConnection.getSchemaConnectionParameters());
+            var tenantUrl = toJdbcUrl(fineractProperties.getTenant().getProtocol() + ":" + fineractProperties.getTenant().getSubprotocol(),
+                    tenantConnection.getSchemaServer(), tenantConnection.getSchemaServerPort(), tenantConnection.getSchemaName(),
+                    tenantConnection.getSchemaConnectionParameters());
             /*
              * var tenantUrl = "jdbc:mariadb://" + tenantConnection.getSchemaServer() + ":" +
              * tenantConnection.getSchemaServerPort() + "/" + tenantConnection.getSchemaName() + "?useSSL=false";
