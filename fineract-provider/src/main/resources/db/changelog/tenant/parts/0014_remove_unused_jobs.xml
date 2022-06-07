@@ -32,4 +32,8 @@
             <where>name='Update Loan Paid In Advance'</where>
         </delete>
     </changeSet>
+    <changeSet author="fineract" id="2">
+        <dropTable cascadeConstraints="true"
+                   tableName="m_loan_paid_in_advance"/>
+    </changeSet>
 </databaseChangeLog>
