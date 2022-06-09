@@ -36,7 +36,8 @@ public final class SavingsAccountTransactionSummaryWrapper {
     public BigDecimal calculateTotalDeposits(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
         Money total = Money.zero(currency);
         for (final SavingsAccountTransaction transaction : transactions) {
-            if (transaction.isDepositAndNotReversed() || transaction.isDividendPayoutAndNotReversed()) {
+            if ((transaction.isDepositAndNotReversed() || transaction.isDividendPayoutAndNotReversed())
+                    && !transaction.isReversalTransaction()) {
                 total = total.plus(transaction.getAmount(currency));
             }
         }
@@ -56,7 +57,7 @@ public final class SavingsAccountTransactionSummaryWrapper {
     public BigDecimal calculateTotalWithdrawals(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
         Money total = Money.zero(currency);
         for (final SavingsAccountTransaction transaction : transactions) {
-            if (transaction.isWithdrawal() && transaction.isNotReversed()) {
+            if (transaction.isWithdrawal() && transaction.isNotReversed() && !transaction.isReversalTransaction()) {
                 total = total.plus(transaction.getAmount(currency));
             }
         }
