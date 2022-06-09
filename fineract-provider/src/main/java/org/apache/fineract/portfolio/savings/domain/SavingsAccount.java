@@ -975,12 +975,12 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
         boolean isTransactionsModified = false;
         for (final SavingsAccountTransaction transaction : accountTransactionsSorted) {
-            if (transaction.isReversed()) {
+            if (transaction.isReversed() || transaction.isReversalTransaction()) {
                 transaction.zeroBalanceFields();
             } else {
                 Money overdraftAmount = Money.zero(this.currency);
                 Money transactionAmount = Money.zero(this.currency);
-                if (transaction.isCredit() || transaction.isAmountRelease()) {
+                if ((transaction.isCredit() || transaction.isAmountRelease())) {
                     if (runningBalance.isLessThanZero()) {
                         Money diffAmount = transaction.getAmount(this.currency).plus(runningBalance);
                         if (diffAmount.isGreaterThanZero()) {
@@ -998,7 +998,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
                 }
 
                 runningBalance = runningBalance.plus(transactionAmount);
-                transaction.updateRunningBalance(runningBalance);
+                if (!transaction.getRunningBalance(transactionAmount.getCurrency()).isEqualTo(transactionAmount)) {
+                    transaction.updateRunningBalance(runningBalance);
+                }
                 if (overdraftAmount.isZero() && runningBalance.isLessThanZero()) {
                     overdraftAmount = overdraftAmount.plus(runningBalance.getAmount().negate());
                 }
@@ -1407,9 +1409,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
         LocalDate lastSavingsDate = null;
         final BigDecimal withdrawalFee = null;
         for (final SavingsAccountTransaction transaction : transactionsSortedByDate) {
-            if (transaction.isNotReversed() && transaction.isCredit()) {
+            if (transaction.isNotReversed() && transaction.isCredit() && !transaction.isReversalTransaction()) {
                 runningBalance = runningBalance.plus(transaction.getAmount(this.currency));
-            } else if (transaction.isNotReversed() && transaction.isDebit()) {
+            } else if (transaction.isNotReversed() && transaction.isDebit() && !transaction.isReversalTransaction()) {
                 runningBalance = runningBalance.minus(transaction.getAmount(this.currency));
             } else {
                 continue;
