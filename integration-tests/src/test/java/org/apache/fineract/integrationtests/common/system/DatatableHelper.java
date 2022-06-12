@@ -52,11 +52,11 @@ public class DatatableHelper {
     }
 
     public Integer createDatatableEntry(final String apptableName, final String datatableName, final Integer apptableId,
-            final boolean genericResultSet, final String dateFormat) {
+            final boolean genericResultSet, final String dateFormat, final String jsonAttributeToGetBack) {
         return Utils.performServerPost(
                 this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + apptableId + "?genericResultSet="
                         + Boolean.toString(genericResultSet) + "&" + Utils.TENANT_IDENTIFIER,
-                getTestDatatableEntryAsJSON(dateFormat), "resourceId");
+                getTestDatatableEntryAsJSON(dateFormat), jsonAttributeToGetBack);
     }
 
     public String readDatatableEntry(final String datatableName, final Integer resourceId, final boolean genericResultset) {
@@ -65,9 +65,16 @@ public class DatatableHelper {
     }
 
     public List<String> readDatatableEntry(final String datatableName, final Integer resourceId, final boolean genericResultset,
-            final String jsonAttributeToGetBack) {
-        return Utils.performServerGetList(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + resourceId
-                + "?genericResultSet=" + String.valueOf(genericResultset) + "&" + Utils.TENANT_IDENTIFIER, jsonAttributeToGetBack);
+            final Integer datatableResourceId, final String jsonAttributeToGetBack) {
+        if (datatableResourceId == null) {
+            return Utils.performServerGetList(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + resourceId
+                    + "?genericResultSet=" + String.valueOf(genericResultset) + "&" + Utils.TENANT_IDENTIFIER, jsonAttributeToGetBack);
+        } else {
+            return Utils.performServerGetList(
+                    this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + resourceId + "/" + datatableResourceId
+                            + "?genericResultSet=" + String.valueOf(genericResultset) + "&" + Utils.TENANT_IDENTIFIER,
+                    jsonAttributeToGetBack);
+        }
     }
 
     public Date readDatatableEntry(final String datatableName, final Integer resourceId, final boolean genericResultset, final int position,

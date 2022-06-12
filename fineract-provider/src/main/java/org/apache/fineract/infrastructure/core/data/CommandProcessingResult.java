@@ -38,7 +38,6 @@ public class CommandProcessingResult implements Serializable {
     private final String transactionId;
     private final Map<String, Object> changes;
     private final Map<String, Object> creditBureauReportData;
-    @SuppressWarnings("unused")
     private final String resourceIdentifier;
     private final Long productId;
     private final Long gsimId;
@@ -49,6 +48,13 @@ public class CommandProcessingResult implements Serializable {
         return new CommandProcessingResult(commandResult.commandId, commandResult.officeId, commandResult.groupId, commandResult.clientId,
                 commandResult.loanId, commandResult.savingsId, commandResult.resourceIdentifier, commandResult.resourceId,
                 commandResult.transactionId, commandResult.changes, commandResult.productId, commandResult.gsimId, commandResult.glimId,
+                commandResult.creditBureauReportData, commandResult.rollbackTransaction, commandResult.subResourceId);
+    }
+
+    public static CommandProcessingResult fromCommandProcessingResult(CommandProcessingResult commandResult, final Long resourceId) {
+        return new CommandProcessingResult(commandResult.commandId, commandResult.officeId, commandResult.groupId, commandResult.clientId,
+                commandResult.loanId, commandResult.savingsId, commandResult.resourceIdentifier, resourceId, commandResult.transactionId,
+                commandResult.changes, commandResult.productId, commandResult.gsimId, commandResult.glimId,
                 commandResult.creditBureauReportData, commandResult.rollbackTransaction, commandResult.subResourceId);
     }
 
