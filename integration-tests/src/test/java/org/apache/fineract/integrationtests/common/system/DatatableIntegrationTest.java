@@ -63,11 +63,11 @@ public class DatatableIntegrationTest {
         // creating new client datatable entry
         final boolean genericResultSet = true;
         Integer datatableResourceID = this.datatableHelper.createDatatableEntry(CLIENT_APP_TABLE_NAME, datatableName, clientID,
-                genericResultSet, "yyyy-MM-dd");
+                genericResultSet, "yyyy-MM-dd", "resourceId");
         assertNotNull(datatableResourceID, "ERROR IN CREATING THE ENTITY DATATABLE RECORD");
 
         // Read the Datatable entry generated with genericResultSet in true (default)
-        final List<String> items = this.datatableHelper.readDatatableEntry(datatableName, clientID, genericResultSet, "data");
+        final List<String> items = this.datatableHelper.readDatatableEntry(datatableName, clientID, genericResultSet, null, "data");
         assertEquals(1, items.size());
 
         // Read the Datatable entry generated with genericResultSet in false
@@ -84,4 +84,50 @@ public class DatatableIntegrationTest {
         assertEquals(datatableName, deletedDataTableName, "ERROR IN DELETING THE DATATABLE");
     }
 
+    @Test
+    public void validateReadDatatableMultirow() {
+        // creating multirow datatable for client entity
+        String datatableName = this.datatableHelper.createDatatable(CLIENT_APP_TABLE_NAME, true);
+        DatatableHelper.verifyDatatableCreatedOnServer(this.requestSpec, this.responseSpec, datatableName);
+
+        // creating first client with datatables
+        final Integer clientIdA = ClientHelper.createClientAsPerson(requestSpec, responseSpec);
+
+        // creating second client with datatables
+        final Integer clientIdB = ClientHelper.createClientAsPerson(requestSpec, responseSpec);
+
+        // creating new client datatable entry for first client
+        final boolean genericResultSet = true;
+        final Integer datatableResourceIdA = this.datatableHelper.createDatatableEntry(CLIENT_APP_TABLE_NAME, datatableName, clientIdA,
+                genericResultSet, "yyyy-MM-dd", "resourceId");
+        assertNotNull(datatableResourceIdA, "ERROR IN CREATING THE ENTITY DATATABLE RECORD");
+
+        // creating new client datatable entry for second client
+        final Integer datatableResourceIdB = this.datatableHelper.createDatatableEntry(CLIENT_APP_TABLE_NAME, datatableName, clientIdB,
+                genericResultSet, "yyyy-MM-dd", "resourceId");
+        assertNotNull(datatableResourceIdB, "ERROR IN CREATING THE ENTITY DATATABLE RECORD");
+
+        // Read the Datatable entry generated for first client
+        List<String> items;
+        items = this.datatableHelper.readDatatableEntry(datatableName, clientIdA, genericResultSet, datatableResourceIdA, "data");
+        assertEquals(1, items.size());
+
+        // Read the Datatable entry generated for second client
+        items = this.datatableHelper.readDatatableEntry(datatableName, clientIdB, genericResultSet, datatableResourceIdB, "data");
+        assertEquals(1, items.size());
+
+        // Read the Datatable entry generated for first client and second client's record Id
+        items = this.datatableHelper.readDatatableEntry(datatableName, clientIdA, genericResultSet, datatableResourceIdB, "data");
+        assertEquals(0, items.size());
+
+        // deleting datatable entries
+        Integer appTableIdA = this.datatableHelper.deleteDatatableEntries(datatableName, clientIdA, "clientId");
+        assertEquals(clientIdA, appTableIdA, "ERROR IN DELETING THE DATATABLE ENTRIES");
+        Integer appTableIdB = this.datatableHelper.deleteDatatableEntries(datatableName, clientIdB, "clientId");
+        assertEquals(clientIdB, appTableIdB, "ERROR IN DELETING THE DATATABLE ENTRIES");
+
+        // deleting the datatable
+        String deletedDataTableName = this.datatableHelper.deleteDatatable(datatableName);
+        assertEquals(datatableName, deletedDataTableName, "ERROR IN DELETING THE DATATABLE");
+    }
 }
