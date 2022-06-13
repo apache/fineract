@@ -69,7 +69,7 @@ dependencyManagement {
         dependency 'org.apache.httpcomponents:httpclient:4.5.13'
         dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
         dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
-        dependency 'org.glassfish.jaxb:jaxb-runtime:2.3.6' // Swagger needs exactly this version
+        dependency 'org.glassfish.jaxb:jaxb-runtime:4.0.0' // Swagger needs exactly this version
         dependency 'org.apache.bval:org.apache.bval.bundle:2.0.5'
         dependency 'joda-time:joda-time:2.10.14'
 
