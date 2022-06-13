@@ -539,18 +539,6 @@ configure(project.fineractJavaProjects) {
                 excludeTestsMatching project.property('excludeTests')
             }
         }
-
-        // Database type used in the Test
-        systemProperty 'dbType', 'mariadb'
-        if (project.hasProperty('dbType')) {
-            if ('postgresql'.equalsIgnoreCase(dbType)) {
-                systemProperty 'dbType', 'postgresql'
-            } else if ('mysql'.equalsIgnoreCase(dbType)) {
-                systemProperty 'dbType', 'mysql'
-            } else {
-                throw new GradleException('Provided dbType is not supported')
-            }
-        }
     }
 
     testlogger {
