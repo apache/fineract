@@ -23,6 +23,14 @@
     "allowedVersions": "<=2.7.10"
   },
   {
+    "matchPackageNames": ["org.glassfish.jaxb:jaxb-runtime"],
+    "allowedVersions": "<=2.3.6"
+  },
+  {
+    "matchPackageNames": ["com.sun.mail:jakarta.mail"],
+    "allowedVersions": "<=1.6.7"
+  },
+  {
     "depTypeList": ["dependencies"],
     "updateTypes": ["patch", "minor"],
     "groupName": "non-major"
