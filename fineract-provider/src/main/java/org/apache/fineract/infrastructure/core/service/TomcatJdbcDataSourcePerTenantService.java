@@ -64,7 +64,7 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
                 if (possibleDS != null) {
                     tenantDataSource = possibleDS;
                 } else {
-                    tenantDataSource = dataSourcePerTenantServiceFactory.createNewDataSourceFor(this.tenantDataSource, tenantConnection);
+                    tenantDataSource = dataSourcePerTenantServiceFactory.createNewDataSourceFor(tenantConnection);
                     this.tenantToDataSourceMap.put(tenantConnection.getConnectionId(), tenantDataSource);
                 }
             }

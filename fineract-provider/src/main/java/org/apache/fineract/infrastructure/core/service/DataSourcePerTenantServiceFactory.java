@@ -22,13 +22,12 @@ import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTen
 import static org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection.toProtocol;
 
 import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import javax.sql.DataSource;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
 import org.apache.fineract.infrastructure.security.constants.TenantConstants;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -40,14 +39,24 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Slf4j
-@RequiredArgsConstructor
 public class DataSourcePerTenantServiceFactory {
 
     private final HikariConfig hikariConfig;
     private final FineractProperties fineractProperties;
     private final ApplicationContext context;
+    private final DataSource tenantDataSource;
+    private final HikariDataSourceFactory hikariDataSourceFactory;
 
-    public DataSource createNewDataSourceFor(final DataSource tenantDataSource, final FineractPlatformTenantConnection tenantConnection) {
+    public DataSourcePerTenantServiceFactory(@Qualifier("hikariTenantDataSource") DataSource tenantDataSource, HikariConfig hikariConfig,
+            FineractProperties fineractProperties, ApplicationContext context, HikariDataSourceFactory hikariDataSourceFactory) {
+        this.hikariConfig = hikariConfig;
+        this.fineractProperties = fineractProperties;
+        this.context = context;
+        this.tenantDataSource = tenantDataSource;
+        this.hikariDataSourceFactory = hikariDataSourceFactory;
+    }
+
+    public DataSource createNewDataSourceFor(final FineractPlatformTenantConnection tenantConnection) {
         String protocol = toProtocol(tenantDataSource);
         // Default properties for Writing
         String schemaServer = tenantConnection.getSchemaServer();
@@ -57,7 +66,7 @@ public class DataSourcePerTenantServiceFactory {
         String schemaPassword = tenantConnection.getSchemaPassword();
         String schemaConnectionParameters = tenantConnection.getSchemaConnectionParameters();
         // Properties to ReadOnly case
-        if (this.fineractProperties.getMode().isReadOnlyMode()) {
+        if (fineractProperties.getMode().isReadOnlyMode()) {
             schemaServer = getPropertyValue(tenantConnection.getReadOnlySchemaServer(), TenantConstants.PROPERTY_RO_SCHEMA_SERVER_NAME,
                     schemaServer);
             schemaPort = getPropertyValue(tenantConnection.getReadOnlySchemaServerPort(), TenantConstants.PROPERTY_RO_SCHEMA_SERVER_PORT,
@@ -75,16 +84,16 @@ public class DataSourcePerTenantServiceFactory {
         log.debug("{}", jdbcUrl);
 
         HikariConfig config = new HikariConfig();
-        config.setReadOnly(this.fineractProperties.getMode().isReadOnlyMode());
-        config.setDriverClassName(hikariConfig.getDriverClassName());
-        config.setPoolName(schemaName + "_pool");
+        config.setReadOnly(fineractProperties.getMode().isReadOnlyMode());
         config.setJdbcUrl(jdbcUrl);
+        config.setPoolName(schemaName + "_pool");
         config.setUsername(schemaUsername);
         config.setPassword(schemaPassword);
         config.setMinimumIdle(tenantConnection.getInitialSize());
         config.setMaximumPoolSize(tenantConnection.getMaxActive());
-        config.setConnectionTestQuery(hikariConfig.getConnectionTestQuery());
         config.setValidationTimeout(tenantConnection.getValidationInterval());
+        config.setDriverClassName(hikariConfig.getDriverClassName());
+        config.setConnectionTestQuery(hikariConfig.getConnectionTestQuery());
         config.setAutoCommit(hikariConfig.isAutoCommit());
 
         // https://github.com/brettwooldridge/HikariCP/wiki/MBean-(JMX)-Monitoring-and-Management
@@ -96,7 +105,7 @@ public class DataSourcePerTenantServiceFactory {
         // for the all Tenants DB -->
         config.setDataSourceProperties(hikariConfig.getDataSourceProperties());
 
-        return new HikariDataSource(config);
+        return hikariDataSourceFactory.create(config);
     }
 
     private String getPropertyValue(final String baseValue, final String propertyName, final String defaultValue) {
@@ -104,10 +113,10 @@ public class DataSourcePerTenantServiceFactory {
         if (null != baseValue) {
             return baseValue;
         }
-        if (this.context == null) {
+        if (context == null) {
             return defaultValue;
         }
-        return this.context.getEnvironment().getProperty(propertyName, defaultValue);
+        return context.getEnvironment().getProperty(propertyName, defaultValue);
     }
 
 }
