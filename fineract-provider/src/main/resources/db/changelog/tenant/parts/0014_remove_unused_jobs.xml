@@ -25,11 +25,6 @@
         <dropForeignKeyConstraint baseTableName="job_run_history" constraintName="scheduledjobsFK"/>
     </changeSet>
     <changeSet author="fineract" id="1">
-        <validCheckSum>8:18ed72e1958f7db9c1a0c983ac823ab3</validCheckSum> <!-- checksum withsout delete from history -->
-        <validCheckSum>8:b4a83f9764270372a384616acf066d7c</validCheckSum> <!-- checksum with delete from history -->
-        <sql>
-            DELETE FROM job_run_history WHERE job_id IN (SELECT id FROM job WHERE name IN ('Update loan Summary', 'Update Loan Paid In Advance'))
-        </sql>
         <delete tableName="job">
             <where>name='Update loan Summary'</where>
         </delete>
