@@ -179,5 +179,8 @@ dependencyManagement {
             entry 'json-path'
             entry 'xml-path'
         }
+
+        dependency 'org.mapstruct:mapstruct:1.5.1.Final'
+        dependency 'org.mapstruct:mapstruct-processor:1.5.1.Final'
     }
 }

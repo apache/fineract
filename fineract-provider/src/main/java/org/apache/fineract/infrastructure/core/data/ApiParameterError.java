@@ -133,6 +133,6 @@ public final class ApiParameterError {
 
     @Override
     public String toString() {
-        return "ApiParameterError{developerMessage=" + developerMessage + "; ... }";
+        return developerMessage;
     }
 }

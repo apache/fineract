@@ -59,4 +59,9 @@ public class PlatformApiDataValidationException extends AbstractPlatformExceptio
     public List<ApiParameterError> getErrors() {
         return this.errors;
     }
+
+    @Override
+    public String toString() {
+        return "PlatformApiDataValidationException{" + "errors=" + errors + '}';
+    }
 }

@@ -552,9 +552,20 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
     }
 
     public void validateHasReadPermission(final String resourceType) {
+        validateHasPermission("READ", resourceType);
+    }
 
-        final String authorizationMessage = "User has no authority to view " + resourceType.toLowerCase() + "s";
-        final String matchPermission = "READ_" + resourceType.toUpperCase();
+    public void validateHasCreatePermission(final String resourceType) {
+        validateHasPermission("CREATE", resourceType);
+    }
+
+    public void validateHasUpdatePermission(final String resourceType) {
+        validateHasPermission("UPDATE", resourceType);
+    }
+
+    private void validateHasPermission(final String prefix, final String resourceType) {
+        final String authorizationMessage = "User has no authority to " + prefix + " " + resourceType.toLowerCase() + "s";
+        final String matchPermission = prefix + "_" + resourceType.toUpperCase();
 
         if (!hasNotPermissionForAnyOf("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", matchPermission)) {
             return;

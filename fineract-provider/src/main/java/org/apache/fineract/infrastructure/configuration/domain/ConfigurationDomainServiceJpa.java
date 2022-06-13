@@ -432,4 +432,13 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         return property.isEnabled();
     }
 
+    @Override
+    public boolean isBusinessDateEnabled() {
+        return getGlobalConfigurationPropertyData("enable_business_date").isEnabled();
+    }
+
+    @Override
+    public boolean isCOBDateAdjustmentEnabled() {
+        return getGlobalConfigurationPropertyData("enable_automatic_cob_date_adjustment").isEnabled();
+    }
 }
