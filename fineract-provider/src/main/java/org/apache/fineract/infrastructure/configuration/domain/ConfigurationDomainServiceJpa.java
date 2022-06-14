@@ -38,6 +38,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ConfigurationDomainServiceJpa implements ConfigurationDomainService {
 
+    public static final String ENABLE_BUSINESS_DATE = "enable_business_date";
+    public static final String ENABLE_AUTOMATIC_COB_DATE_ADJUSTMENT = "enable_automatic_cob_date_adjustment";
     private final PermissionRepository permissionRepository;
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
     private final PlatformCacheRepository cacheTypeRepository;
@@ -432,4 +434,13 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         return property.isEnabled();
     }
 
+    @Override
+    public boolean isBusinessDateEnabled() {
+        return getGlobalConfigurationPropertyData(ENABLE_BUSINESS_DATE).isEnabled();
+    }
+
+    @Override
+    public boolean isCOBDateAdjustmentEnabled() {
+        return getGlobalConfigurationPropertyData(ENABLE_AUTOMATIC_COB_DATE_ADJUSTMENT).isEnabled();
+    }
 }

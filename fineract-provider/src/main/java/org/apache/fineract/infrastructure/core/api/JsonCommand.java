@@ -175,6 +175,11 @@ public final class JsonCommand {
         this.organisationCreditBureauId = null;
     }
 
+    public static JsonCommand from(final String jsonCommand) {
+        return new JsonCommand(null, jsonCommand, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+
+    }
+
     public Long getOrganisationCreditBureauId() {
         return this.organisationCreditBureauId;
     }

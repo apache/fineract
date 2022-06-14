@@ -22,14 +22,17 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
+import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.AfterEach;
@@ -134,6 +137,8 @@ public class SchedulerJobsTest {
 
     @Test
     public void testTriggeringManualExecutionOfAllSchedulerJobs() {
+        ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
         for (String jobName : schedulerJobHelper.getAllSchedulerJobNames()) {
             schedulerJobHelper.executeAndAwaitJob(jobName);
         }

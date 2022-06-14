@@ -21,10 +21,12 @@ package org.apache.fineract.infrastructure.core.data;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.ToString;
 
 /**
  * Represents the successful result of an REST API call that results in processing a command.
  */
+@ToString
 public class CommandProcessingResult implements Serializable {
 
     private Long commandId;
