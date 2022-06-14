@@ -28,7 +28,7 @@ import org.mapstruct.Mappings;
 @Mapper(componentModel = "spring")
 public interface BusinessDateMapper {
 
-    @Mappings({@Mapping(target = "businessDateType", source = "source.type"), @Mapping(target = "date", source = "source.date") })
+    @Mappings({ @Mapping(target = "businessDateType", source = "source.type"), @Mapping(target = "date", source = "source.date") })
     BusinessDateData map(BusinessDate source);
 
     List<BusinessDateData> map(List<BusinessDate> sources);

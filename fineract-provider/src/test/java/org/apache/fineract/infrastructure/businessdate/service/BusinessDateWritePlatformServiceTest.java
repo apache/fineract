@@ -18,6 +18,13 @@
  */
 package org.apache.fineract.infrastructure.businessdate.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Optional;
@@ -32,19 +39,13 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import static org.mockito.BDDMockito.given;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -209,8 +210,8 @@ public class BusinessDateWritePlatformServiceTest {
         given(configurationDomainService.isBusinessDateEnabled()).willReturn(Boolean.TRUE);
         given(configurationDomainService.isCOBDateAdjustmentEnabled()).willReturn(Boolean.TRUE);
         given(businessDateDataParserAndValidator.validateAndParseUpdate(command)).willReturn(businessDateData);
-        Optional<BusinessDate> newBusinessEntity = Optional.of(
-                BusinessDate.instance(BusinessDateType.BUSINESS_DATE, LocalDate.of(2022, 6, 13)));
+        Optional<BusinessDate> newBusinessEntity = Optional
+                .of(BusinessDate.instance(BusinessDateType.BUSINESS_DATE, LocalDate.of(2022, 6, 13)));
         Optional<BusinessDate> newCOBEntity = Optional.of(BusinessDate.instance(BusinessDateType.COB_DATE, LocalDate.of(2022, 6, 12)));
         given(businessDateRepository.findByType(BusinessDateType.BUSINESS_DATE)).willReturn(newBusinessEntity);
         given(businessDateRepository.findByType(BusinessDateType.COB_DATE)).willReturn(newCOBEntity);

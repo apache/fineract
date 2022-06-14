@@ -18,13 +18,14 @@
  */
 package org.apache.fineract.infrastructure.businessdate.validator;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+
 import java.time.LocalDate;
 import org.apache.fineract.infrastructure.businessdate.data.BusinessDateData;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
 import org.junit.Test;
 
 public class BusinessDateValidatorTest {

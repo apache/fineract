@@ -687,7 +687,8 @@ public class DataValidatorBuilder {
     public void expectedArrayButIsNot() {
         final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                 .append(this.parameter).append(".is.not.an.array");
-        final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter `").append(this.parameter).append("` is not an array.");
+        final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter `").append(this.parameter)
+                .append("` is not an array.");
         final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(),
                 this.parameter);
         this.dataValidationErrors.add(error);
@@ -793,8 +794,9 @@ public class DataValidatorBuilder {
             if (maximumBalance.compareTo(minimumBalance) < 0) {
                 final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                         .append(this.parameter).append(".is.not.within.expected.range");
-                final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter `").append(this.parameter).append("` minimum amount ")
-                        .append(minimumBalance).append(" should less than the maximum amount ").append(maximumBalance).append(".");
+                final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter `").append(this.parameter)
+                        .append("` minimum amount ").append(minimumBalance).append(" should less than the maximum amount ")
+                        .append(maximumBalance).append(".");
                 final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
                         defaultEnglishMessage.toString(), this.parameter, minimumBalance, maximumBalance);
                 this.dataValidationErrors.add(error);

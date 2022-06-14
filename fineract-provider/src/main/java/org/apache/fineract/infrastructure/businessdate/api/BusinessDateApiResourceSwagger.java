@@ -45,7 +45,7 @@ final class BusinessDateApiResourceSwagger {
     }
 
     @Schema(description = "BusinessDateRequest")
-    public final static class BusinessDateRequest {
+    public static final class BusinessDateRequest {
 
         @Schema(example = "yyyy-MM-dd")
         public String dateFormat;
@@ -56,8 +56,7 @@ final class BusinessDateApiResourceSwagger {
         @Schema(example = "en")
         private String locale;
 
-        private BusinessDateRequest() {
-        }
+        private BusinessDateRequest() {}
 
     }
 

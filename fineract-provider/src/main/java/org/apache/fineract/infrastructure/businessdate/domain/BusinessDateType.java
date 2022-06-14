@@ -24,6 +24,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum BusinessDateType {
+
     BUSINESS_DATE(1, "Business Date"), COB_DATE(2, "Close of Business Date");
 
     private final Integer id;

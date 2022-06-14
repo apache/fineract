@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.businessdate.mapper;
 
+import static org.junit.Assert.assertEquals;
+
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collections;
@@ -25,7 +27,6 @@ import java.util.List;
 import org.apache.fineract.infrastructure.businessdate.data.BusinessDateData;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDate;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.mapstruct.factory.Mappers;
 

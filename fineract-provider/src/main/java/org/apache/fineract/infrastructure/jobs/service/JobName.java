@@ -20,38 +20,36 @@ package org.apache.fineract.infrastructure.jobs.service;
 
 public enum JobName {
 
-    UPDATE_LOAN_ARREARS_AGEING("Update Loan Arrears Ageing"),
-    APPLY_ANNUAL_FEE_FOR_SAVINGS("Apply Annual Fee For Savings"),
-    APPLY_HOLIDAYS_TO_LOANS("Apply Holidays To Loans"),
-    POST_INTEREST_FOR_SAVINGS("Post Interest For Savings"),
-    TRANSFER_FEE_CHARGE_FOR_LOANS("Transfer Fee For Loans From Savings"),
-    ACCOUNTING_RUNNING_BALANCE_UPDATE("Update Accounting Running Balances"),
-    PAY_DUE_SAVINGS_CHARGES("Pay Due Savings Charges"),
-    APPLY_CHARGE_TO_OVERDUE_LOAN_INSTALLMENT("Apply penalty to overdue loans"),
-    EXECUTE_STANDING_INSTRUCTIONS("Execute Standing Instruction"),
-    ADD_ACCRUAL_ENTRIES("Add Accrual Transactions"),
-    UPDATE_NPA("Update Non Performing Assets"),
-    UPDATE_DEPOSITS_ACCOUNT_MATURITY_DETAILS("Update Deposit Accounts Maturity details"),
-    TRANSFER_INTEREST_TO_SAVINGS("Transfer Interest To Savings"),
-    ADD_PERIODIC_ACCRUAL_ENTRIES("Add Periodic Accrual Transactions"),
-    RECALCULATE_INTEREST_FOR_LOAN("Recalculate Interest For Loans"),
-    GENERATE_RD_SCEHDULE("Generate Mandatory Savings Schedule"),
-    GENERATE_LOANLOSS_PROVISIONING("Generate Loan Loss Provisioning"),
-    POST_DIVIDENTS_FOR_SHARES("Post Dividends For Shares"),
-    UPDATE_SAVINGS_DORMANT_ACCOUNTS("Update Savings Dormant Accounts"),
-    ADD_PERIODIC_ACCRUAL_ENTRIES_FOR_LOANS_WITH_INCOME_POSTED_AS_TRANSACTIONS(
-            "Add Accrual Transactions For Loans With Income Posted As Transactions"),
-    EXECUTE_REPORT_MAILING_JOBS("Execute Report Mailing Jobs"),
-    UPDATE_SMS_OUTBOUND_WITH_CAMPAIGN_MESSAGE("Update SMS Outbound with Campaign Message"),
-    SEND_MESSAGES_TO_SMS_GATEWAY("Send Messages to SMS Gateway"),
-    GET_DELIVERY_REPORTS_FROM_SMS_GATEWAY("Get Delivery Reports from SMS Gateway"),
-    GENERATE_ADHOCCLIENT_SCEHDULE("Generate AdhocClient Schedule"),
-    UPDATE_EMAIL_OUTBOUND_WITH_CAMPAIGN_MESSAGE("Update Email Outbound with campaign message"),
-    EXECUTE_EMAIL("Execute Email"),
-    UPDATE_TRAIL_BALANCE_DETAILS("Update Trial Balance Details"),
-    EXECUTE_DIRTY_JOBS("Execute All Dirty Jobs"),
-    INCREASE_BUSINESS_DATE_BY_1_DAY("Increase Business Date by 1 day"),
-    INCREASE_COB_DATE_BY_1_DAY("Increase COB Date by 1 day");
+    UPDATE_LOAN_ARREARS_AGEING("Update Loan Arrears Ageing"), APPLY_ANNUAL_FEE_FOR_SAVINGS(
+            "Apply Annual Fee For Savings"), APPLY_HOLIDAYS_TO_LOANS("Apply Holidays To Loans"), POST_INTEREST_FOR_SAVINGS(
+                    "Post Interest For Savings"), TRANSFER_FEE_CHARGE_FOR_LOANS(
+                            "Transfer Fee For Loans From Savings"), ACCOUNTING_RUNNING_BALANCE_UPDATE(
+                                    "Update Accounting Running Balances"), PAY_DUE_SAVINGS_CHARGES(
+                                            "Pay Due Savings Charges"), APPLY_CHARGE_TO_OVERDUE_LOAN_INSTALLMENT(
+                                                    "Apply penalty to overdue loans"), EXECUTE_STANDING_INSTRUCTIONS(
+                                                            "Execute Standing Instruction"), ADD_ACCRUAL_ENTRIES(
+                                                                    "Add Accrual Transactions"), UPDATE_NPA(
+                                                                            "Update Non Performing Assets"), UPDATE_DEPOSITS_ACCOUNT_MATURITY_DETAILS(
+                                                                                    "Update Deposit Accounts Maturity details"), TRANSFER_INTEREST_TO_SAVINGS(
+                                                                                            "Transfer Interest To Savings"), ADD_PERIODIC_ACCRUAL_ENTRIES(
+                                                                                                    "Add Periodic Accrual Transactions"), RECALCULATE_INTEREST_FOR_LOAN(
+                                                                                                            "Recalculate Interest For Loans"), GENERATE_RD_SCEHDULE(
+                                                                                                                    "Generate Mandatory Savings Schedule"), GENERATE_LOANLOSS_PROVISIONING(
+                                                                                                                            "Generate Loan Loss Provisioning"), POST_DIVIDENTS_FOR_SHARES(
+                                                                                                                                    "Post Dividends For Shares"), UPDATE_SAVINGS_DORMANT_ACCOUNTS(
+                                                                                                                                            "Update Savings Dormant Accounts"), ADD_PERIODIC_ACCRUAL_ENTRIES_FOR_LOANS_WITH_INCOME_POSTED_AS_TRANSACTIONS(
+                                                                                                                                                    "Add Accrual Transactions For Loans With Income Posted As Transactions"), EXECUTE_REPORT_MAILING_JOBS(
+                                                                                                                                                            "Execute Report Mailing Jobs"), UPDATE_SMS_OUTBOUND_WITH_CAMPAIGN_MESSAGE(
+                                                                                                                                                                    "Update SMS Outbound with Campaign Message"), SEND_MESSAGES_TO_SMS_GATEWAY(
+                                                                                                                                                                            "Send Messages to SMS Gateway"), GET_DELIVERY_REPORTS_FROM_SMS_GATEWAY(
+                                                                                                                                                                                    "Get Delivery Reports from SMS Gateway"), GENERATE_ADHOCCLIENT_SCEHDULE(
+                                                                                                                                                                                            "Generate AdhocClient Schedule"), UPDATE_EMAIL_OUTBOUND_WITH_CAMPAIGN_MESSAGE(
+                                                                                                                                                                                                    "Update Email Outbound with campaign message"), EXECUTE_EMAIL(
+                                                                                                                                                                                                            "Execute Email"), UPDATE_TRAIL_BALANCE_DETAILS(
+                                                                                                                                                                                                                    "Update Trial Balance Details"), EXECUTE_DIRTY_JOBS(
+                                                                                                                                                                                                                            "Execute All Dirty Jobs"), INCREASE_BUSINESS_DATE_BY_1_DAY(
+                                                                                                                                                                                                                                    "Increase Business Date by 1 day"), INCREASE_COB_DATE_BY_1_DAY(
+                                                                                                                                                                                                                                            "Increase COB Date by 1 day");
 
     private final String name;
 
