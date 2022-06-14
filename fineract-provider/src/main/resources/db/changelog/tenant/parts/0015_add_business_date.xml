@@ -27,7 +27,9 @@
             <column autoIncrement="true" name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
-            <column name="type" type="VARCHAR(100)"/>
+            <column name="type" type="VARCHAR(100)">
+                <constraints unique="true" nullable="false"/>
+            </column>
             <column name="date" type="DATE">
                 <constraints unique="false" nullable="false"/>
             </column>

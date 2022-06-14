@@ -70,6 +70,7 @@ public class BusinessDateWritePlatformServiceImpl implements BusinessDateWritePl
         boolean isBusinessDateEnabled = configurationDomainService.isBusinessDateEnabled();
 
         if (!isBusinessDateEnabled) {
+            log.error("Business date functionality is not enabled!");
             throw new BusinessDateActionException("business.date.is.not.enabled", "Business date functionality is not enabled");
         }
         updateOrCreateBusinessDate(data.getType(), data.getDate(), changes);
@@ -94,7 +95,7 @@ public class BusinessDateWritePlatformServiceImpl implements BusinessDateWritePl
         List<Throwable> exceptions = new ArrayList<>();
         Map<String, Object> changes = new HashMap<>();
         Optional<BusinessDate> businessDateEntity = repository.findByType(businessDateType);
-        LocalDate businessDate = businessDateEntity.isPresent() ? businessDateEntity.get().getDate() : DateUtils.getLocalDateOfTenant();
+        LocalDate businessDate = businessDateEntity.map(BusinessDate::getDate).orElse(DateUtils.getLocalDateOfTenant());
         businessDate = businessDate.plusDays(1);
         try {
             BusinessDateData businessDateData = BusinessDateData.instance(businessDateType, businessDate);

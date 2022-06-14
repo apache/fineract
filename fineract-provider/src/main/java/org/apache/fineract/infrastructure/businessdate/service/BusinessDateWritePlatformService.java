@@ -20,17 +20,13 @@ package org.apache.fineract.infrastructure.businessdate.service;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
-import org.apache.fineract.infrastructure.jobs.service.JobName;
 
 public interface BusinessDateWritePlatformService {
 
     CommandProcessingResult updateBusinessDate(JsonCommand command);
 
-    @CronTarget(jobName = JobName.INCREASE_COB_DATE_BY_1_DAY)
     void increaseCOBDateByOneDay() throws JobExecutionException;
 
-    @CronTarget(jobName = JobName.APPLY_CHARGE_TO_OVERDUE_LOAN_INSTALLMENT)
     void increaseBusinessDateByOneDay() throws JobExecutionException;
 }

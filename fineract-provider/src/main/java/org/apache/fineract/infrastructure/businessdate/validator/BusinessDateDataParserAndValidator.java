@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import javax.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.businessdate.data.BusinessDateData;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
@@ -33,18 +35,14 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+@Slf4j
+@RequiredArgsConstructor
 @Component
 public class BusinessDateDataParserAndValidator {
 
     private final FromJsonHelper jsonHelper;
-
-    @Autowired
-    public BusinessDateDataParserAndValidator(final FromJsonHelper fromJsonHelper) {
-        this.jsonHelper = fromJsonHelper;
-    }
 
     public BusinessDateData validateAndParseUpdate(@NotNull final JsonCommand command) {
         final DataValidatorBuilder dataValidator = new DataValidatorBuilder(new ArrayList<>()).resource("businessdate.update");
@@ -58,7 +56,9 @@ public class BusinessDateDataParserAndValidator {
 
     private JsonObject extractJsonObject(JsonCommand command) {
         String json = command.json();
-        if (StringUtils.isBlank(json)) throw new InvalidJsonException();
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
         final JsonElement element = jsonHelper.parse(json);
         return element.getAsJsonObject();
@@ -66,6 +66,7 @@ public class BusinessDateDataParserAndValidator {
 
     private void throwExceptionIfValidationWarningsExist(DataValidatorBuilder dataValidator) {
         if (dataValidator.hasError()) {
+            log.error("Business date - Validation errors: {}", dataValidator.getDataValidationErrors());
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
                     dataValidator.getDataValidationErrors());
         }

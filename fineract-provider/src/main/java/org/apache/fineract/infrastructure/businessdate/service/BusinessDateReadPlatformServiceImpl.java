@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.businessdate.service;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.businessdate.data.BusinessDateData;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDate;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateRepository;
@@ -29,6 +30,7 @@ import org.apache.fineract.infrastructure.businessdate.exception.BusinessDateNot
 import org.apache.fineract.infrastructure.businessdate.mapper.BusinessDateMapper;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BusinessDateReadPlatformServiceImpl implements BusinessDateReadPlatformService {
@@ -48,10 +50,12 @@ public class BusinessDateReadPlatformServiceImpl implements BusinessDateReadPlat
         try {
             businessDateType = BusinessDateType.valueOf(type);
         } catch (IllegalArgumentException e) {
-            throw BusinessDateNotFoundException.notExist(type);
+            log.error("Provided business date type cannot be found: {}", type);
+            throw BusinessDateNotFoundException.notExist(type, e);
         }
         Optional<BusinessDate> businessDate = repository.findByType(businessDateType);
         if (businessDate.isEmpty()) {
+            log.error("Business date with the provided type cannot be found {}", type);
             throw BusinessDateNotFoundException.notFound(type);
         }
         return mapper.map(businessDate.get());

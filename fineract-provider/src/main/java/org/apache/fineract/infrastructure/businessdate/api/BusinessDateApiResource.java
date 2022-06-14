@@ -37,6 +37,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -47,13 +48,11 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+@RequiredArgsConstructor
 @Path("businessdate")
 @Component
-@Scope("singleton")
 @Tag(name = "Business Date Management", description = "Business date management enables you to set up, fetch and adjust organisation business dates")
 public class BusinessDateApiResource {
 
@@ -62,18 +61,6 @@ public class BusinessDateApiResource {
     private final DefaultToApiJsonSerializer<BusinessDateData> jsonSerializer;
     private final BusinessDateReadPlatformService readPlatformService;
     private final PortfolioCommandSourceWritePlatformService commandWritePlatformService;
-
-    @Autowired
-    public BusinessDateApiResource(ApiRequestParameterHelper parameterHelper, PlatformSecurityContext securityContext,
-            DefaultToApiJsonSerializer<BusinessDateData> jsonSerializer, BusinessDateReadPlatformService readPlatformService,
-            PortfolioCommandSourceWritePlatformService commandWritePlatformService) {
-        this.parameterHelper = parameterHelper;
-
-        this.securityContext = securityContext;
-        this.jsonSerializer = jsonSerializer;
-        this.readPlatformService = readPlatformService;
-        this.commandWritePlatformService = commandWritePlatformService;
-    }
 
     @GET
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })

@@ -29,13 +29,13 @@ public class BusinessDateNotFoundException extends AbstractPlatformResourceNotFo
         super(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
     }
 
-    public static BusinessDateNotFoundException notExist(final String type) {
+    public static BusinessDateNotFoundException notExist(final String type, Throwable... e) {
         return new BusinessDateNotFoundException("error.msg.businessdate.type.not.exist",
-                "Business date with type `" + type + "` does not exist.", type);
+                "Business date with type `" + type + "` does not exist.", type, e);
     }
 
-    public static BusinessDateNotFoundException notFound(final String type) {
+    public static BusinessDateNotFoundException notFound(final String type, Throwable... e) {
         return new BusinessDateNotFoundException("error.msg.businessdate.not.found",
-                "Business date with type `" + type + "` does not found.", type);
+                "Business date with type `" + type + "` does not found.", type, e);
     }
 }
