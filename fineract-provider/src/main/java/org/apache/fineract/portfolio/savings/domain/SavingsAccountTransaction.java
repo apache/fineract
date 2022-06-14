@@ -304,7 +304,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
 
     public static SavingsAccountTransaction copyTransaction(SavingsAccountTransaction accountTransaction) {
         return new SavingsAccountTransaction(accountTransaction.savingsAccount, accountTransaction.office, accountTransaction.paymentDetail,
-                accountTransaction.typeOf, accountTransaction.transactionLocalDate(), accountTransaction.createdDate,
+                accountTransaction.typeOf, accountTransaction.transactionLocalDate(), DateUtils.getDateOfTenant(),
                 accountTransaction.amount, accountTransaction.reversed, accountTransaction.appUser, accountTransaction.isManualTransaction,
                 accountTransaction.lienTransaction);
     }

@@ -2689,7 +2689,6 @@ public class ClientSavingsIntegrationTest {
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
         // Assertions.assertNotNull(clientID);
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = "0";
