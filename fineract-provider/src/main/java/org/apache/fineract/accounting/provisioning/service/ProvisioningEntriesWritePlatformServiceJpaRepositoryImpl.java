@@ -210,11 +210,11 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
                 .retrieveLoanProductsProvisioningData(date);
         Map<Integer, LoanProductProvisioningEntry> provisioningEntries = new HashMap<>();
         for (LoanProductProvisioningEntryData data : entries) {
-            LoanProduct loanProduct = this.loanProductRepository.findById(data.getProductId()).get();
+            LoanProduct loanProduct = this.loanProductRepository.findById(data.getProductId()).orElseThrow();
             Office office = this.officeRepositoryWrapper.findOneWithNotFoundDetection(data.getOfficeId());
-            ProvisioningCategory provisioningCategory = provisioningCategoryRepository.findById(data.getCategoryId()).get();
-            GLAccount liabilityAccount = glAccountRepository.findById(data.getLiablityAccount()).get();
-            GLAccount expenseAccount = glAccountRepository.findById(data.getExpenseAccount()).get();
+            ProvisioningCategory provisioningCategory = provisioningCategoryRepository.findById(data.getCategoryId()).orElse(null);
+            GLAccount liabilityAccount = glAccountRepository.findById(data.getLiablityAccount()).orElseThrow();
+            GLAccount expenseAccount = glAccountRepository.findById(data.getExpenseAccount()).orElseThrow();
             MonetaryCurrency currency = loanProduct.getPrincipalAmount().getCurrency();
             Money money = Money.of(currency, data.getBalance());
             Money amountToReserve = money.percentageOf(data.getPercentage(), MoneyHelper.getRoundingMode());

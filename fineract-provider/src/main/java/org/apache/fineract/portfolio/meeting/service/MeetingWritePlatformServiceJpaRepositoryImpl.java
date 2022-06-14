@@ -164,7 +164,7 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
             /*
              * If group is within a center then center entityType should be passed for retrieving CalendarInstance.
              */
-            final Group group = this.groupRepository.findById(entityId).get();
+            final Group group = this.groupRepository.findById(entityId).orElseThrow();
             if (group.isCenter()) {
                 entityType = CalendarEntityType.CENTERS;
             } else if (group.isChildGroup()) {

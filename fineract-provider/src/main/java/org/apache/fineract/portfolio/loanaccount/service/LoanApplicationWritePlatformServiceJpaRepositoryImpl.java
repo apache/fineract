@@ -1338,7 +1338,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     public CommandProcessingResult approveGLIMLoanAppication(final Long loanId, final JsonCommand command) {
 
         final Long parentLoanId = loanId;
-        GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(parentLoanId).get();
+        GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(parentLoanId).orElseThrow();
         JsonArray approvalFormData = command.arrayOfParameterNamed("approvalFormData");
 
         JsonObject jsonObject = null;
@@ -1498,7 +1498,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         // GroupLoanIndividualMonitoringAccount
         // glimAccount=glimRepository.findOne(loanId);
         final Long parentLoanId = loanId;
-        GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(parentLoanId).get();
+        GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(parentLoanId).orElseThrow();
         List<Loan> childLoans = this.loanRepository.findByGlimId(loanId);
 
         CommandProcessingResult result = null;
@@ -1577,7 +1577,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         // GroupLoanIndividualMonitoringAccount
         // glimAccount=glimRepository.findOne(loanId);
         final Long parentLoanId = glimId;
-        GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(parentLoanId).get();
+        GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(parentLoanId).orElseThrow();
         List<Loan> childLoans = this.loanRepository.findByGlimId(glimId);
 
         CommandProcessingResult result = null;

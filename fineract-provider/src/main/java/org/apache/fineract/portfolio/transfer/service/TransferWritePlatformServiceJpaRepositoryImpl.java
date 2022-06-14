@@ -457,7 +457,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                     } else if (!destinationGroup.isActive()) {
                         throw new GroupNotActiveException(destinationGroup.getId());
                     }
-                    transferClientBetweenGroups(client.getGroups().stream().findFirst().get(), client, destinationGroup, true, staff);
+                    transferClientBetweenGroups(client.getGroups().iterator().next(), client, destinationGroup, true, staff);
                 } else if (client.getGroups().size() == 0 && destinationGroup != null) {
                     client.getGroups().add(destinationGroup);
                     client.updateStaff(destinationGroup.getStaff());

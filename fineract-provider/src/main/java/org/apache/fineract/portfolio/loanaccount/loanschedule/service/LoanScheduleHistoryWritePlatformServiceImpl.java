@@ -76,7 +76,7 @@ public class LoanScheduleHistoryWritePlatformServiceImpl implements LoanSchedule
 
             Date createdOnDate = null;
             if (repaymentScheduleInstallment.getCreatedDate().isPresent()) {
-                createdOnDate = Date.from(repaymentScheduleInstallment.getCreatedDate().get());
+                createdOnDate = Date.from(repaymentScheduleInstallment.getCreatedDate().get()); // NOSONAR
             }
 
             final AppUser createdByUser = repaymentScheduleInstallment.getCreatedBy().orElse(null);
@@ -85,7 +85,7 @@ public class LoanScheduleHistoryWritePlatformServiceImpl implements LoanSchedule
             Date lastModifiedOnDate = null;
 
             if (repaymentScheduleInstallment.getLastModifiedDate().isPresent()) {
-                lastModifiedOnDate = Date.from(repaymentScheduleInstallment.getLastModifiedDate().get());
+                lastModifiedOnDate = Date.from(repaymentScheduleInstallment.getLastModifiedDate().get()); // NOSONAR
             }
 
             LoanRepaymentScheduleHistory loanRepaymentScheduleHistory = LoanRepaymentScheduleHistory.instance(loan, loanRescheduleRequest,

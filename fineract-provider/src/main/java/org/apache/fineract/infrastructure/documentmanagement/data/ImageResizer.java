@@ -52,7 +52,7 @@ public class ImageResizer {
 
                     @Override
                     public InputStream openStream() throws IOException {
-                        return optResizedIS.get();
+                        return optResizedIS.get(); // NOSONAR
                     }
                 }, fileData.name(), fileData.contentType());
                 return resizedImage;
