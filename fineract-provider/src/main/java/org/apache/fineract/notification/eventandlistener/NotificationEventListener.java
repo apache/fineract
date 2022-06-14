@@ -52,7 +52,7 @@ public class NotificationEventListener {
         if (notificationData.getOfficeId() != null) {
             List<Long> tempUserIds = new ArrayList<>(userIds);
             for (Long userId : tempUserIds) {
-                AppUser appUser = appUserRepository.findById(userId).get();
+                AppUser appUser = appUserRepository.findById(userId).orElseThrow();
                 if (!Objects.equals(appUser.getOffice().getId(), notificationData.getOfficeId())) {
                     userIds.remove(userId);
                 }

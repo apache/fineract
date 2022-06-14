@@ -488,7 +488,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         // GroupLoanIndividualMonitoringAccount
         // glimAccount=glimRepository.findOne(loanId);
         Long parentSavingId = gsimId;
-        GroupSavingsIndividualMonitoring parentSavings = gsimRepository.findById(parentSavingId).get();
+        GroupSavingsIndividualMonitoring parentSavings = gsimRepository.findById(parentSavingId).orElseThrow();
         List<SavingsAccount> childSavings = this.savingAccountRepository.findByGsimId(gsimId);
         CommandProcessingResult result = null;
         int count = 0;
@@ -552,7 +552,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     @Override
     public CommandProcessingResult undoGSIMApplicationApproval(final Long gsimId, final JsonCommand command) {
         final Long parentSavingId = gsimId;
-        GroupSavingsIndividualMonitoring parentSavings = gsimRepository.findById(parentSavingId).get();
+        GroupSavingsIndividualMonitoring parentSavings = gsimRepository.findById(parentSavingId).orElseThrow();
         List<SavingsAccount> childSavings = this.savingAccountRepository.findByGsimId(gsimId);
 
         CommandProcessingResult result = null;
@@ -612,7 +612,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     public CommandProcessingResult rejectGSIMApplication(final Long gsimId, final JsonCommand command) {
 
         final Long parentSavingId = gsimId;
-        GroupSavingsIndividualMonitoring parentSavings = gsimRepository.findById(parentSavingId).get();
+        GroupSavingsIndividualMonitoring parentSavings = gsimRepository.findById(parentSavingId).orElseThrow();
         List<SavingsAccount> childSavings = this.savingAccountRepository.findByGsimId(gsimId);
 
         CommandProcessingResult result = null;
