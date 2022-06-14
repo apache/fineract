@@ -151,7 +151,7 @@ public class AdHocQueryDataValidator {
                         .extractBigDecimalWithLocaleNamed(AdHocQuerySearchConstants.maxOutStandingAmountPercentageParamName, element);
                 baseDataValidator.reset().parameter(AdHocQuerySearchConstants.maxOutStandingAmountPercentageParamName)
                         .value(maxOutStandingAmountPercentage).notNull().notLessThanMin(BigDecimal.ZERO);
-                baseDataValidator.reset().comapareMinAndMaxOfTwoBigDecmimalNos(minOutStandingAmountPercentage,
+                baseDataValidator.reset().compareMinAndMaxOfTwoBigDecmimalNos(minOutStandingAmountPercentage,
                         maxOutStandingAmountPercentage);
             } else {
                 if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.outStandingAmountPercentageParamName, element)) {
@@ -184,7 +184,7 @@ public class AdHocQueryDataValidator {
                         .extractBigDecimalWithLocaleNamed(AdHocQuerySearchConstants.maxOutstandingAmountParamName, element);
                 baseDataValidator.reset().parameter(AdHocQuerySearchConstants.maxOutstandingAmountParamName).value(maxOutstandingAmount)
                         .notNull().notLessThanMin(BigDecimal.ZERO);
-                baseDataValidator.reset().comapareMinAndMaxOfTwoBigDecmimalNos(minOutstandingAmount, maxOutstandingAmount);
+                baseDataValidator.reset().compareMinAndMaxOfTwoBigDecmimalNos(minOutstandingAmount, maxOutstandingAmount);
             } else {
                 final BigDecimal outstandingAmount = this.fromApiJsonHelper
                         .extractBigDecimalWithLocaleNamed(AdHocQuerySearchConstants.outstandingAmountParamName, element);

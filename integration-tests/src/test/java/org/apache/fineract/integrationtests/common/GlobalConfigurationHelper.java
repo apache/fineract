@@ -99,8 +99,8 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
         // There are currently 37 global configurations.
-        Assertions.assertEquals(38, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(38, actualGlobalConfigurations.size());
+        Assertions.assertEquals(40, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(40, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -440,6 +440,22 @@ public class GlobalConfigurationHelper {
         isPrincipalCompoundingDisabled.put("trapDoor", false);
         defaults.add(isPrincipalCompoundingDisabled);
 
+        HashMap<String, Object> isBusinessDateEnabled = new HashMap<>();
+        isBusinessDateEnabled.put("id", 44);
+        isBusinessDateEnabled.put("name", "enable_business_date");
+        isBusinessDateEnabled.put("value", 0);
+        isBusinessDateEnabled.put("enabled", true);
+        isBusinessDateEnabled.put("trapDoor", false);
+        defaults.add(isBusinessDateEnabled);
+
+        HashMap<String, Object> isAutomaticCOBDateAdjustmentEnabled = new HashMap<>();
+        isAutomaticCOBDateAdjustmentEnabled.put("id", 45);
+        isAutomaticCOBDateAdjustmentEnabled.put("name", "enable_automatic_cob_date_adjustment");
+        isAutomaticCOBDateAdjustmentEnabled.put("value", 0);
+        isAutomaticCOBDateAdjustmentEnabled.put("enabled", true);
+        isAutomaticCOBDateAdjustmentEnabled.put("trapDoor", false);
+        defaults.add(isAutomaticCOBDateAdjustmentEnabled);
+
         return defaults;
     }
 
@@ -530,4 +546,9 @@ public class GlobalConfigurationHelper {
         return new Gson().toJson(map);
     }
 
+    public static Integer updateIsBusinessDateEnabled(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final boolean enabled) {
+        long configId = 44;
+        return updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, configId, enabled);
+    }
 }

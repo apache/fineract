@@ -73,6 +73,7 @@ dependencies {
             'org.springdoc:springdoc-openapi-ui',
             'org.springdoc:springdoc-openapi-common',
             'org.springdoc:springdoc-openapi-security',
+            'org.mapstruct:mapstruct',
             )
 
     implementation ('org.apache.commons:commons-email') {
@@ -128,7 +129,6 @@ dependencies {
         exclude group: 'xml-apis'
     }
 
-
     runtimeOnly('org.glassfish.jaxb:jaxb-runtime') {
         exclude group: 'com.sun.activation'
     }
@@ -144,6 +144,7 @@ dependencies {
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor 'org.mapstruct:mapstruct-processor'
 
     // testCompile dependencies are ONLY used in src/test, not src/main.
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!

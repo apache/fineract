@@ -112,4 +112,8 @@ public interface ConfigurationDomainService {
     boolean isRelaxingDaysConfigForPivotDateEnabled();
 
     Long retrieveRelaxingDaysConfigForPivotDate();
+
+    boolean isBusinessDateEnabled();
+
+    boolean isCOBDateAdjustmentEnabled();
 }

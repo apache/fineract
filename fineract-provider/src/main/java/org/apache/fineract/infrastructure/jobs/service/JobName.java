@@ -45,9 +45,11 @@ public enum JobName {
                                                                                                                                                                                     "Get Delivery Reports from SMS Gateway"), GENERATE_ADHOCCLIENT_SCEHDULE(
                                                                                                                                                                                             "Generate AdhocClient Schedule"), UPDATE_EMAIL_OUTBOUND_WITH_CAMPAIGN_MESSAGE(
                                                                                                                                                                                                     "Update Email Outbound with campaign message"), EXECUTE_EMAIL(
-                                                                                                                                                                                                            "Execute Email"), UPDATE_TRAIL_BALANCE_DETAILS(
+                                                                                                                                                                                                            "Execute Email"), UPDATE_TRIAL_BALANCE_DETAILS(
                                                                                                                                                                                                                     "Update Trial Balance Details"), EXECUTE_DIRTY_JOBS(
-                                                                                                                                                                                                                            "Execute All Dirty Jobs");
+                                                                                                                                                                                                                            "Execute All Dirty Jobs"), INCREASE_BUSINESS_DATE_BY_1_DAY(
+                                                                                                                                                                                                                                    "Increase Business Date by 1 day"), INCREASE_COB_DATE_BY_1_DAY(
+                                                                                                                                                                                                                                            "Increase COB Date by 1 day");
 
     private final String name;
 

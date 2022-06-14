@@ -20,7 +20,6 @@ package org.apache.fineract.scheduledjobs.service;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -329,7 +328,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     }
 
     @Override
-    @CronTarget(jobName = JobName.UPDATE_TRAIL_BALANCE_DETAILS)
+    @CronTarget(jobName = JobName.UPDATE_TRIAL_BALANCE_DETAILS)
     public void updateTrialBalanceDetails() throws JobExecutionException {
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
         final StringBuilder tbGapSqlBuilder = new StringBuilder(500);
@@ -344,15 +343,14 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             if (days < 1) {
                 continue;
             }
-            final String formattedDate = new SimpleDateFormat("yyyy-MM-dd").format(tbGap);
             final StringBuilder sqlBuilder = new StringBuilder(600);
             sqlBuilder.append("Insert Into m_trial_balance(office_id, account_id, Amount, entry_date, created_date,closing_balance) ")
                     .append("Select je.office_id, je.account_id, SUM(CASE WHEN je.type_enum=1 THEN (-1) * je.amount ELSE je.amount END) ")
-                    .append("as Amount, Date(je.entry_date) as 'Entry_Date', je.transaction_date as 'Created_Date',sum(je.amount) as closing_balance ")
+                    .append("as Amount, Date(je.entry_date) as Entry_Date, je.transaction_date as Created_Date,sum(je.amount) as closing_balance ")
                     .append("from acc_gl_journal_entry je WHERE je.transaction_date = ? ")
                     .append("group by je.account_id, je.office_id, je.transaction_date, Date(je.entry_date)");
 
-            final int result = jdbcTemplate.update(sqlBuilder.toString(), formattedDate);
+            final int result = jdbcTemplate.update(sqlBuilder.toString(), tbGap);
             LOG.info("{}: Records affected by updateTrialBalanceDetails: {}", ThreadLocalContextUtil.getTenant().getName(), result);
         }
 
