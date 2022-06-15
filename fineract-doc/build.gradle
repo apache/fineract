@@ -57,6 +57,8 @@ asciidoctor {
     }
     outputDir 'build/docs/html'
 
+    logging.captureStandardError LogLevel.INFO
+
     dependsOn(':fineract-client:clean', ':fineract-client:buildAsciidoc')
 }
 
@@ -83,6 +85,8 @@ asciidoctorPdf {
         include('index.adoc')
     }
     outputDir 'build/docs/pdf'
+
+    logging.captureStandardError LogLevel.INFO
 
     // TODO: @vidakovic prepare a nicer theme
     // theme 'fineract-default'
