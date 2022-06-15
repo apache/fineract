@@ -64,7 +64,7 @@ task prepareInputYaml {
 }
 
 resolve {
-    logging.captureStandardOutput LogLevel.QUIET
+    logging.captureStandardOutput LogLevel.INFO
     outputFileName = 'fineract'
     outputFormat = 'JSONANDYAML'
     prettyPrint = false

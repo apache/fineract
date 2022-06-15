@@ -7,11 +7,11 @@ Currently modules are a proof of concept feature in Fineract.
 NOTE: At the moment the only module we have that follows these stricter guidelines is the example module we describe in detail in the next section. In the future we will try to split up Fineract's monolithic code base and move features (like loan product, accounts etc.) to separate modules as described here. Before that happens we need to do some code cleanups first.
 
 1. Create a folder under `module` and name it _mymodule_.
-1. Create a folder named _core_ under `module/mymodule`.
-1. Create a folder named _service_ under `module/mymodule`.
-1. Create a folder named _starter_ under `module/mymodule`.
-1. Setup folders and Gradle build files for a Java project under `core`, `service` and `starter`.
-1. Create a text file called _spring.factories in folder `modules/mymodule/starter/src/main/resources/META-INF`.
+2. Create a folder named _core_ under `module/mymodule`.
+3. Create a folder named _service_ under `module/mymodule`.
+4. Create a folder named _starter_ under `module/mymodule`.
+5. Setup folders and Gradle build files for a Java project under `core`, `service` and `starter`.
+6. Create a text file called _spring.factories in folder `modules/mymodule/starter/src/main/resources/META-INF`.
 +
 The final folder and file structure should look somewhat like this:
 +
@@ -20,7 +20,7 @@ The final folder and file structure should look somewhat like this:
 include::{diagramsdir}/modules-folder-structure.puml[]
 ----
 
-1. Make sure that your new modules are present in settings.gradle:
+7. Make sure that your new modules are present in settings.gradle:
 +
 [source,groovy]
 ----
@@ -47,9 +47,9 @@ You can of course choose whatever folder/project structure you like for your cus
 As soon as we can publish Fineract module JARs to Maven Central you'll have more freedom to setup your projects (including to setup separate Git repos).
 
 1. Create a folder under `custom` and name it _mycustom_.
-1. Create a folder named _service_ under `custom/mycustom`.
-1. Setup folders and Gradle build files for a Java project under `service`.
-1. Create a text file called _spring.factories in folder `modules/mymodule/starter/src/main/resources/META-INF`:
+2. Create a folder named _service_ under `custom/mycustom`.
+3. Setup folders and Gradle build files for a Java project under `service`.
+4. Create a text file called _spring.factories in folder `modules/mymodule/starter/src/main/resources/META-INF`:
 +
 [source,properties]
 ----
@@ -77,7 +77,7 @@ apply from: 'dependencies.gradle'
 +
 <.> The best choice here is to name it like you would name your JAR artifact on Maven Central.
 
-1. Make sure that your custom modules are present in settings.gradle: :
+5. Make sure that your custom modules are present in settings.gradle: :
 +
 [source,groovy]
 ----
@@ -92,7 +92,7 @@ include ':fineract-client'
 include ':fineract-doc'
 ----
 <.> The `settings.gradle` file should contain something like this.
-1. The dependency.gradle file could look something like this:
+6. The dependency.gradle file could look something like this:
 [source,groovy]
 ----
 dependencies {
