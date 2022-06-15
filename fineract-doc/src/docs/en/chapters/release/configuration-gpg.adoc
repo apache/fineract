@@ -34,7 +34,7 @@ Compression: Uncompressed, ZIP, ZLIB, BZIP2
 +
 CAUTION: The insecure hash algorithm SHA1 is still supported in version 2.2.27. SHA1 is obsolete and you don't want to use it to generate your signature.
 
-1. Generate your GPG key pair:
+2. Generate your GPG key pair:
 +
 .Input generate GPG key pair
 [source,bash]
@@ -158,21 +158,21 @@ sub rsa2048/4FGHIJ56 2022-04-16 [] [expires: 2024-04-16]
 +
 Now you can find that there are two files created under ~/.gnupg/private-keys-v1.d/ directory. These two files are binary files with .key extension.
 
-1. Export your public key:
+3. Export your public key:
 +
 [source,bash]
 ----
 gpg --armor --export aleks@apache.org > pubkey.asc
 ----
 
-1. Export Your Private Key:
+4. Export Your Private Key:
 +
 [source,bash]
 ----
 gpg --export-secret-keys --armor aleks@apache.org > privkey.asc
 ----
 
-1. Protect Your Private Key and Revocation Certificate
+5. Protect Your Private Key and Revocation Certificate
 +
 Your private key should be kept in a safe place, like an encrypted flash drive. Treat it like your house key. Only you can have it and don't lose it. And you must remember your passphrase, otherwise you can't unlock your private key.
 +
