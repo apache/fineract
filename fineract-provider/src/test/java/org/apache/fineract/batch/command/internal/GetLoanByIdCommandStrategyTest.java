@@ -24,6 +24,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Stream;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.UriInfo;
@@ -46,8 +48,10 @@ import org.mockito.MockitoAnnotations;
 public class GetLoanByIdCommandStrategyTest {
 
     private static Stream<Arguments> provideQueryParameters() {
-        return Stream.of(Arguments.of(null, 0), Arguments.of("associations=all", 1),
-                Arguments.of("fields=id,principal,annualInterestRate&associations=repaymentSchedule,transactions", 2));
+        return Stream.of(Arguments.of(null, null, null, 0), Arguments.of("all", null, null, 1),
+                Arguments.of("repaymentSchedule,transactions", null, "guarantors,futureSchedule", 2),
+                Arguments.of("repaymentSchedule,transactions", "id,principal,annualInterestRate", null, 2),
+                Arguments.of("repaymentSchedule,transactions", "id,principal,annualInterestRate", "guarantors,futureSchedule", 3));
     }
 
     /**
@@ -56,15 +60,17 @@ public class GetLoanByIdCommandStrategyTest {
      */
     @ParameterizedTest
     @MethodSource("provideQueryParameters")
-    public void testExecuteSuccessScenario(final String queryParameter, final int noOfQueryParams) {
+    public void testExecuteSuccessScenario(final String associations, final String fields, final String exclude,
+            final int noOfQueryParams) {
         // given
         final TestContext testContext = new TestContext();
 
         final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final BatchRequest request = getBatchRequest(loanId, queryParameter);
+        final BatchRequest request = getBatchRequest(loanId, associations, exclude, fields);
         final String responseBody = "{\\\"id\\\":2,\\\"accountNo\\\":\\\"000000002\\\"}";
 
-        given(testContext.loansApiResource.retrieveLoan(eq(loanId), eq(false), any(UriInfo.class))).willReturn(responseBody);
+        given(testContext.loansApiResource.retrieveLoan(eq(loanId), eq(false), eq(associations), eq(exclude), eq(fields),
+                any(UriInfo.class))).willReturn(responseBody);
 
         // when
         final BatchResponse response = testContext.underTest.execute(request, testContext.uriInfo);
@@ -75,7 +81,8 @@ public class GetLoanByIdCommandStrategyTest {
         assertThat(response.getHeaders()).isEqualTo(request.getHeaders());
         assertThat(response.getBody()).isEqualTo(responseBody);
 
-        verify(testContext.loansApiResource).retrieveLoan(eq(loanId), eq(false), testContext.uriInfoCaptor.capture());
+        verify(testContext.loansApiResource).retrieveLoan(eq(loanId), eq(false), eq(associations), eq(exclude), eq(fields),
+                testContext.uriInfoCaptor.capture());
         MutableUriInfo mutableUriInfo = testContext.uriInfoCaptor.getValue();
         assertThat(mutableUriInfo.getAdditionalQueryParameters()).hasSize(noOfQueryParams);
     }
@@ -88,9 +95,9 @@ public class GetLoanByIdCommandStrategyTest {
         // given
         final TestContext testContext = new TestContext();
         final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final BatchRequest request = getBatchRequest(loanId, null);
+        final BatchRequest request = getBatchRequest(loanId, null, null, null);
 
-        given(testContext.loansApiResource.retrieveLoan(eq(loanId), eq(false), any(UriInfo.class)))
+        given(testContext.loansApiResource.retrieveLoan(eq(loanId), eq(false), eq(null), eq(null), eq(null), any(UriInfo.class)))
                 .willThrow(new RuntimeException("Some error"));
 
         // when
@@ -111,9 +118,9 @@ public class GetLoanByIdCommandStrategyTest {
         // given
         final TestContext testContext = new TestContext();
         final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final BatchRequest request = getBatchRequest(loanId, null);
+        final BatchRequest request = getBatchRequest(loanId, null, null, null);
 
-        given(testContext.loansApiResource.retrieveLoan(eq(loanId), eq(false), any(UriInfo.class)))
+        given(testContext.loansApiResource.retrieveLoan(eq(loanId), eq(false), eq(null), eq(null), eq(null), any(UriInfo.class)))
                 .willThrow(new LoanNotFoundException(loanId));
 
         // when
@@ -145,12 +152,23 @@ public class GetLoanByIdCommandStrategyTest {
      *            the loan id
      * @return BatchRequest
      */
-    private BatchRequest getBatchRequest(final Long loanId, final String queryParamStr) {
+    private BatchRequest getBatchRequest(final Long loanId, final String associations, final String exclude, final String fields) {
 
         final BatchRequest br = new BatchRequest();
         String relativeUrl = "loans/" + loanId;
-        if (queryParamStr != null) {
-            relativeUrl = relativeUrl + "?" + queryParamStr;
+
+        Set<String> queryParams = new HashSet<>();
+        if (associations != null) {
+            queryParams.add("associations=" + associations);
+        }
+        if (exclude != null) {
+            queryParams.add("exclude=" + exclude);
+        }
+        if (fields != null) {
+            queryParams.add("fields=" + fields);
+        }
+        if (!queryParams.isEmpty()) {
+            relativeUrl = relativeUrl + "?" + String.join("&", queryParams);
         }
 
         br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));

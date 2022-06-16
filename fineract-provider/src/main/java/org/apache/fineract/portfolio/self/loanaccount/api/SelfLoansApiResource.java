@@ -43,6 +43,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.exception.ClientNotFoundException;
+import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource;
 import org.apache.fineract.portfolio.loanaccount.api.LoanTransactionsApiResource;
 import org.apache.fineract.portfolio.loanaccount.api.LoansApiResource;
@@ -106,7 +107,10 @@ public class SelfLoansApiResource {
         validateAppuserLoanMapping(loanId);
 
         final boolean staffInSelectedOfficeOnly = false;
-        return this.loansApiResource.retrieveLoan(loanId, staffInSelectedOfficeOnly, uriInfo);
+        final String associations = LoanApiConstants.LOAN_ASSOCIATIONS_ALL;
+        final String exclude = null;
+        final String fields = null;
+        return this.loansApiResource.retrieveLoan(loanId, staffInSelectedOfficeOnly, associations, exclude, fields, uriInfo);
     }
 
     @GET
