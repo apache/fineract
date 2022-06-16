@@ -142,7 +142,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidByRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
@@ -152,7 +151,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalcualtio
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanOverdueInstallmentCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
@@ -238,7 +236,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final FromJsonHelper fromApiJsonHelper;
     private final AccountTransferRepository accountTransferRepository;
     private final CalendarRepository calendarRepository;
-    private final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository;
     private final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService;
     private final LoanApplicationCommandFromApiJsonHelper loanApplicationCommandFromApiJsonHelper;
     private final AccountAssociationsRepository accountAssociationRepository;
@@ -255,7 +252,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanRepository loanRepository;
     private final RepaymentWithPostDatedChecksAssembler repaymentWithPostDatedChecksAssembler;
     private final PostDatedChecksRepository postDatedChecksRepository;
-    private final LoanChargePaidByRepository loanChargePaidByRepository;
 
     @Autowired
     public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -274,7 +270,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final LoanChargeReadPlatformService loanChargeReadPlatformService, final LoanReadPlatformService loanReadPlatformService,
             final FromJsonHelper fromApiJsonHelper, final AccountTransferRepository accountTransferRepository,
             final CalendarRepository calendarRepository,
-            final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository,
             final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService,
             final LoanApplicationCommandFromApiJsonHelper loanApplicationCommandFromApiJsonHelper,
             final AccountAssociationsRepository accountAssociationRepository,
@@ -286,7 +281,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final CodeValueRepositoryWrapper codeValueRepository, final LoanRepositoryWrapper loanRepositoryWrapper,
             final CashierTransactionDataValidator cashierTransactionDataValidator, final GLIMAccountInfoRepository glimRepository,
             final LoanRepository loanRepository, final RepaymentWithPostDatedChecksAssembler repaymentWithPostDatedChecksAssembler,
-            final PostDatedChecksRepository postDatedChecksRepository, final LoanChargePaidByRepository loanChargePaidByRepository) {
+            final PostDatedChecksRepository postDatedChecksRepository) {
         this.context = context;
         this.loanEventApiJsonValidator = loanEventApiJsonValidator;
         this.loanAssembler = loanAssembler;
@@ -312,7 +307,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.accountTransferRepository = accountTransferRepository;
         this.calendarRepository = calendarRepository;
-        this.repaymentScheduleInstallmentRepository = repaymentScheduleInstallmentRepository;
         this.loanScheduleHistoryWritePlatformService = loanScheduleHistoryWritePlatformService;
         this.loanApplicationCommandFromApiJsonHelper = loanApplicationCommandFromApiJsonHelper;
         this.accountAssociationRepository = accountAssociationRepository;
@@ -329,7 +323,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.glimRepository = glimRepository;
         this.repaymentWithPostDatedChecksAssembler = repaymentWithPostDatedChecksAssembler;
         this.postDatedChecksRepository = postDatedChecksRepository;
-        this.loanChargePaidByRepository = loanChargePaidByRepository;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -1760,7 +1753,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             break;
         }
 
-        AppUser currentUser = getAppUserIfPresent();
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
         final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
@@ -2813,10 +2805,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         LocalDate startDate = dueDate.plusDays(penaltyWaitPeriodValue.intValue() + 1);
         Integer frequencyNunber = 1;
         if (feeFrequency == null) {
-            scheduleDates.put(frequencyNunber++, startDate.minusDays(diff.intValue()));
+            scheduleDates.put(frequencyNunber++, startDate.minusDays(diff));
         } else {
             while (!startDate.isAfter(DateUtils.getLocalDateOfTenant())) {
-                scheduleDates.put(frequencyNunber++, startDate.minusDays(diff.intValue()));
+                scheduleDates.put(frequencyNunber++, startDate.minusDays(diff));
                 LocalDate scheduleDate = scheduledDateGenerator.getRepaymentPeriodDate(PeriodFrequencyType.fromInt(feeFrequency),
                         chargeDefinition.feeInterval(), startDate);
 

@@ -72,9 +72,10 @@ public class GetLoanByIdCommandStrategy implements CommandStrategy {
             // - Add them to the UriInfo query parameters list
             // - Call loansApiResource.retrieveLoan(loanId, false, uriInfo)
             // - Remove the relative url query parameters from UriInfo in the finally (after loan details are retrieved)
+            Map<String, String> queryParameters = null;
             if (relativeUrl.indexOf('?') > 0) {
                 loanId = Long.parseLong(StringUtils.substringBetween(relativeUrl, "/", "?"));
-                Map<String, String> queryParameters = getQueryParameters(relativeUrl);
+                queryParameters = getQueryParameters(relativeUrl);
 
                 // Add the query parameters sent in the relative URL to UriInfo
                 addQueryParametersToUriInfo(parameterizedUriInfo, queryParameters);
@@ -84,7 +85,24 @@ public class GetLoanByIdCommandStrategy implements CommandStrategy {
 
             // Calls 'retrieveLoan' function from 'LoansApiResource' to
             // get the loan details based on the loan id
-            responseBody = loansApiResource.retrieveLoan(loanId, false, parameterizedUriInfo);
+            final boolean staffInSelectedOfficeOnly = false;
+            String associations = null;
+            String exclude = null;
+            String fields = null;
+            if (queryParameters != null && queryParameters.size() > 0) {
+                if (queryParameters.containsKey("associations")) {
+                    associations = queryParameters.get("associations");
+                }
+                if (queryParameters.containsKey("exclude")) {
+                    exclude = queryParameters.get("exclude");
+                }
+                if (queryParameters.containsKey("fields")) {
+                    fields = queryParameters.get("fields");
+                }
+            }
+
+            responseBody = loansApiResource.retrieveLoan(loanId, staffInSelectedOfficeOnly, associations, exclude, fields,
+                    parameterizedUriInfo);
 
             response.setStatusCode(HttpStatus.SC_OK);
 

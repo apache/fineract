@@ -48,11 +48,11 @@ public final class ApiParameterHelper {
 
     public static Set<String> extractFieldsForResponseIfProvided(final MultivaluedMap<String, String> queryParams) {
         Set<String> fields = new HashSet<>();
-        String commaSerperatedParameters = "";
+        String commaSeparatedParameters = "";
         if (queryParams.getFirst("fields") != null) {
-            commaSerperatedParameters = queryParams.getFirst("fields");
-            if (StringUtils.isNotBlank(commaSerperatedParameters)) {
-                fields = new HashSet<>(Arrays.asList(commaSerperatedParameters.split("\\s*,\\s*"))); // NOSONAR
+            commaSeparatedParameters = queryParams.getFirst("fields");
+            if (StringUtils.isNotBlank(commaSeparatedParameters)) {
+                fields = new HashSet<>(Arrays.asList(commaSeparatedParameters.split("\\s*,\\s*"))); // NOSONAR
             }
         }
         return fields;
@@ -60,23 +60,25 @@ public final class ApiParameterHelper {
 
     public static Set<String> extractAssociationsForResponseIfProvided(final MultivaluedMap<String, String> queryParams) {
         Set<String> fields = new HashSet<>();
-        String commaSerperatedParameters = "";
+        String commaSeparatedParameters = "";
         if (queryParams.getFirst("associations") != null) {
-            commaSerperatedParameters = queryParams.getFirst("associations");
-            if (StringUtils.isNotBlank(commaSerperatedParameters)) {
-                fields = new HashSet<>(Arrays.asList(commaSerperatedParameters.split("\\s*,\\s*"))); // NOSONAR
+            commaSeparatedParameters = queryParams.getFirst("associations");
+            if (StringUtils.isNotBlank(commaSeparatedParameters)) {
+                fields = new HashSet<>(Arrays.asList(commaSeparatedParameters.split("\\s*,\\s*"))); // NOSONAR
             }
         }
         return fields;
     }
 
+    public static void excludeAssociationsForResponseIfProvided(final String commaSeparatedParameters, Set<String> fields) {
+        if (StringUtils.isNotBlank(commaSeparatedParameters)) {
+            fields.removeAll(new HashSet<>(Arrays.asList(commaSeparatedParameters.split("\\s*,\\s*")))); // NOSONAR
+        }
+    }
+
     public static void excludeAssociationsForResponseIfProvided(final MultivaluedMap<String, String> queryParams, Set<String> fields) {
-        String commaSerperatedParameters = "";
         if (queryParams.getFirst("exclude") != null) {
-            commaSerperatedParameters = queryParams.getFirst("exclude");
-            if (StringUtils.isNotBlank(commaSerperatedParameters)) {
-                fields.removeAll(new HashSet<>(Arrays.asList(commaSerperatedParameters.split("\\s*,\\s*")))); // NOSONAR
-            }
+            excludeAssociationsForResponseIfProvided(queryParams.getFirst("exclude"), fields);
         }
     }
 
