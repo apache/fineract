@@ -180,6 +180,12 @@ public class LoanTransactionHelper {
         return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_CHARGES_URL, "");
     }
 
+    public List getRepaymentTemplate(final Integer loanId) {
+        final String GET_REPAYMENTS_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/template?command=repayment&"
+                + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerGet(requestSpec, responseSpec, GET_REPAYMENTS_URL, "$");
+    }
+
     public ArrayList<HashMap> getRepayments(final Integer loanId) {
         final String GET_REPAYMENTS_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/template?command=disburse&"
                 + Utils.TENANT_IDENTIFIER;

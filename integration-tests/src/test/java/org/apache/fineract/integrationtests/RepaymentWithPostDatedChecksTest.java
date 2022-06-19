@@ -90,8 +90,12 @@ public class RepaymentWithPostDatedChecksTest {
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
 
-        // Get repayments
-        final ArrayList<HashMap> installmentData = this.loanTransactionHelper.getRepayments(loanID);
+        // Get repayments Template for Repayment
+        ArrayList<HashMap> installmentData = this.loanTransactionHelper.getRepayments(loanID);
+        Assertions.assertNotNull(installmentData, "Empty Installment Data Template");
+
+        // Get repayments for Disburse
+        installmentData = this.loanTransactionHelper.getRepayments(loanID);
         Assertions.assertNotNull(installmentData, "Empty Installment Data");
         List<HashMap> postDatedChecks = new ArrayList<>();
         Gson gson = new Gson();
