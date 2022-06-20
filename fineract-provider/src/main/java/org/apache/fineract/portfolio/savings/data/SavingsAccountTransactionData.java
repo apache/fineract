@@ -948,4 +948,9 @@ public final class SavingsAccountTransactionData implements Serializable {
         this.id = id;
         this.modifiedId = id;
     }
+
+    public boolean isReversalTransaction() {
+        return Boolean.TRUE.equals(this.isReversal);
+    }
+
 }

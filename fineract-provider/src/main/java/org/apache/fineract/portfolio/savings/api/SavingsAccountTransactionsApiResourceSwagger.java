@@ -57,4 +57,13 @@ final class SavingsAccountTransactionsApiResourceSwagger {
         @Schema(example = "1")
         public Integer resourceId;
     }
+
+    @Schema(description = "PostSavingsAccountBulkReversalTransactionsRequest")
+    public static final class PostSavingsAccountBulkReversalTransactionsRequest {
+
+        private PostSavingsAccountBulkReversalTransactionsRequest() {}
+
+        @Schema(example = "true")
+        public String isBulk;
+    }
 }
