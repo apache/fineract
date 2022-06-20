@@ -752,13 +752,13 @@ public class RecurringDepositAccount extends SavingsAccount {
         return interestOnMaturity;
     }
 
-    @Override
     public void postInterest(final MathContext mc, final LocalDate postingDate, final boolean isInterestTransfer,
             final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
             final LocalDate postInterestAson, final boolean backdatedTxnsAllowedTill) {
         final LocalDate interestPostingUpToDate = interestPostingUpToDate(postingDate);
+        boolean postReversals = false;
         super.postInterest(mc, interestPostingUpToDate, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                financialYearBeginningMonth, postInterestAson, backdatedTxnsAllowedTill);
+                financialYearBeginningMonth, postInterestAson, backdatedTxnsAllowedTill, postReversals);
     }
 
     @Override

@@ -280,6 +280,12 @@ public class SavingsAccountHelper {
                 getSavingsTransactionJSON("0", LAST_TRANSACTION_DATE), CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
+    public Integer reverseSavingsAccountTransaction(final Integer savingsId, final Integer transactionId, final boolean isBulk) {
+        LOG.info("\n--------------------------------- REVERSE SAVINGS TRANSACTION  --------------------------------");
+        return (Integer) performSavingActions(createAdjustTransactionURL(REVERSE_TRASACTION_COMMAND, savingsId, transactionId),
+                getSavingsTransactionJSON("0", LAST_TRANSACTION_DATE, isBulk), CommonConstants.RESPONSE_RESOURCE_ID);
+    }
+
     public void calculateInterestForSavings(final Integer savingsId) {
         LOG.info("--------------------------------- CALCULATING INTEREST FOR SAVINGS --------------------------------");
         performSavingActions(createSavingsCalculateInterestURL(CALCULATE_INTEREST_SAVINGS_COMMAND, savingsId),
@@ -455,6 +461,18 @@ public class SavingsAccountHelper {
         map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("transactionDate", transactionDate);
         map.put("transactionAmount", amount);
+        String savingsAccountWithdrawalJson = new Gson().toJson(map);
+        LOG.info(savingsAccountWithdrawalJson);
+        return savingsAccountWithdrawalJson;
+    }
+
+    private String getSavingsTransactionJSON(final String amount, final String transactionDate, final boolean isBulk) {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("locale", CommonConstants.LOCALE);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
+        map.put("transactionDate", transactionDate);
+        map.put("transactionAmount", amount);
+        map.put("isBulk", String.valueOf(isBulk));
         String savingsAccountWithdrawalJson = new Gson().toJson(map);
         LOG.info(savingsAccountWithdrawalJson);
         return savingsAccountWithdrawalJson;

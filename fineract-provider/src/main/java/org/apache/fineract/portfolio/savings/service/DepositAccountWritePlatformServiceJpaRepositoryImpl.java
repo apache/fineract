@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -296,7 +297,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         for (SavingsAccountCharge savingsAccountCharge : account.charges()) {
             if (savingsAccountCharge.isSavingsActivation()) {
                 account.payCharge(savingsAccountCharge, savingsAccountCharge.getAmount(account.getCurrency()),
-                        account.getActivationLocalDate(), user, false);
+                        account.getActivationLocalDate(), user, false, null);
             }
         }
     }
@@ -571,8 +572,9 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final MathContext mc = new MathContext(10, MoneyHelper.getRoundingMode());
         boolean isInterestTransfer = false;
         LocalDate postInterestOnDate = null;
+        boolean postReversals = false;
         account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
-                postInterestOnDate, false);
+                postInterestOnDate, false, postReversals);
         this.savingAccountRepositoryWrapper.saveAndFlush(account);
 
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
@@ -744,6 +746,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         SavingsAccountTransaction transaction = null;
         Integer accountType = null;
+        UUID refNo = UUID.randomUUID();
         if (savingsAccountTransaction.isDeposit()) {
             final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
                     paymentDetail, savingsAccountTransaction.createdDate(), user, accountType);
@@ -751,7 +754,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         } else {
             final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
                     paymentDetail, savingsAccountTransaction.createdDate(), user, accountType);
-            transaction = account.withdraw(transactionDTO, true, false);
+            transaction = account.withdraw(transactionDTO, true, false, refNo.toString());
         }
         final Long newtransactionId = saveTransactionToGenerateTransactionId(transaction);
         boolean isInterestTransfer = false;
@@ -1218,8 +1221,9 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final MathContext mc = MathContext.DECIMAL64;
         if (account.isBeforeLastPostingPeriod(savingsAccountCharge.getDueLocalDate(), false)) {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
+            boolean postReversals = false;
             account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
-                    postInterestOnDate, false);
+                    postInterestOnDate, false, postReversals);
         } else {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
             account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
@@ -1351,14 +1355,15 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
-        account.payCharge(savingsAccountCharge, amountPaid, transactionDate, formatter, user, false);
+        account.payCharge(savingsAccountCharge, amountPaid, transactionDate, formatter, user, false, null);
         boolean isInterestTransfer = false;
         LocalDate postInterestOnDate = null;
         final MathContext mc = MathContext.DECIMAL64;
         if (account.isBeforeLastPostingPeriod(transactionDate, false)) {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
+            boolean postReversals = false;
             account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
-                    postInterestOnDate, false);
+                    postInterestOnDate, false, postReversals);
         } else {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
             account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,

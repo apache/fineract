@@ -42,4 +42,6 @@ public interface SavingsAccountTransactionRepository
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<SavingsAccountTransaction> findBySavingsAccount(@Param("savingsAccount") SavingsAccount savingsAccount);
 
+    @Query("select sat from SavingsAccountTransaction sat where sat.refNo = :refNo")
+    List<SavingsAccountTransaction> findAllTransactionByRefNo(@Param("refNo") String refNo);
 }

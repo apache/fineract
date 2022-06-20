@@ -45,6 +45,6 @@ public class ReverseTransactionSavingsAccountCommandHandler implements NewComman
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
         final Long transactionId = Long.valueOf(command.getTransactionId());
-        return this.writePlatformService.reverseTransaction(command.getSavingsId(), transactionId, false);
+        return this.writePlatformService.reverseTransaction(command.getSavingsId(), transactionId, false, command);
     }
 }
