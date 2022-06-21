@@ -94,3 +94,4 @@ services:
       - FINERACT_DEFAULT_TENANTDB_IDENTIFIER=default
       - FINERACT_DEFAULT_TENANTDB_NAME=fineract_default
       - FINERACT_DEFAULT_TENANTDB_DESCRIPTION=Default Demo Tenant
+      - JAVA_TOOL_OPTIONS="-Xmx1G"
