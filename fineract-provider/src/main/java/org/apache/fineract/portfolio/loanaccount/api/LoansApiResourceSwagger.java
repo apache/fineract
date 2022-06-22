@@ -660,8 +660,8 @@ final class LoansApiResourceSwagger {
         public Integer daysInYearType;
         @Schema(example = "individual")
         public String loanType;
-        @Schema(example = "[2012, 4, 3]")
-        public LocalDate submittedOnDate;
+        @Schema(example = "20 September 2011")
+        public String submittedOnDate;
         @Schema(example = "786444UUUYYH7")
         public String externalId;
         @Schema(description = "List of PostLoansDisbursementData")
