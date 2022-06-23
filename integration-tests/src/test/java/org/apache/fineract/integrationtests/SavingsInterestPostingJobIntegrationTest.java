@@ -33,6 +33,7 @@ import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
@@ -146,12 +147,56 @@ public class SavingsInterestPostingJobIntegrationTest {
 
     }
 
+    @Test
+    public void testAccountBalanceWithWithdrawalFeeAfterInterestPostingJob() {
+        final String startDate = "21 June 2022";
+        final String jobName = "Post Interest For Savings";
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        Assertions.assertNotNull(clientID);
+
+        final Integer savingsId = createSavingsAccountDailyPostingWithCharge(clientID, startDate);
+        this.savingsAccountHelper.depositToSavingsAccount(savingsId, "1000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+
+        this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "100", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        Float balance = Float.parseFloat("800.0");
+        assertEquals(balance, summary.get("accountBalance"), "Verifying account balance is 800");
+
+        this.scheduleJobHelper.executeAndAwaitJob(jobName);
+        Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
+        ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
+        HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 5);
+        for (Map.Entry<String, Object> entry : interestPostingTransaction.entrySet()) {
+            LOG.info("{} - {}", entry.getKey(), entry.getValue().toString());
+        }
+        assertEquals("800.4932", interestPostingTransaction.get("runningBalance").toString(), "Equality check for Balance");
+    }
+
     private Integer createSavingsAccountDailyPosting(final Integer clientID, final String startDate) {
         final Integer savingsProductID = createSavingsProductDailyPosting();
         Assertions.assertNotNull(savingsProductID);
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplicationOnDate(clientID, savingsProductID,
                 ACCOUNT_TYPE_INDIVIDUAL, startDate);
         Assertions.assertNotNull(savingsId);
+        HashMap savingsStatusHashMap = this.savingsAccountHelper.approveSavingsOnDate(savingsId, startDate);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavingsAccount(savingsId, startDate);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+        return savingsId;
+    }
+
+    private Integer createSavingsAccountDailyPostingWithCharge(final Integer clientID, final String startDate) {
+        final Integer savingsProductID = createSavingsProductDailyPosting();
+        Assertions.assertNotNull(savingsProductID);
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplicationOnDate(clientID, savingsProductID,
+                ACCOUNT_TYPE_INDIVIDUAL, startDate);
+        Assertions.assertNotNull(savingsId);
+
+        final Integer withdrawalChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
+                ChargesHelper.getSavingsWithdrawalFeeJSON());
+        Assertions.assertNotNull(withdrawalChargeId);
+
+        this.savingsAccountHelper.addChargesForSavings(savingsId, withdrawalChargeId, false);
         HashMap savingsStatusHashMap = this.savingsAccountHelper.approveSavingsOnDate(savingsId, startDate);
         SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
         savingsStatusHashMap = this.savingsAccountHelper.activateSavingsAccount(savingsId, startDate);

@@ -155,7 +155,7 @@ public final class SavingsAccountTransactionData implements Serializable {
     }
 
     public boolean isWithdrawalFeeAndNotReversed() {
-        return this.transactionType.isWithdrawalFee() && isNotReversed();
+        return this.transactionType.isFeeDeduction() && isNotReversed();
     }
 
     public boolean isPayCharge() {
@@ -183,6 +183,10 @@ public final class SavingsAccountTransactionData implements Serializable {
     }
 
     public Money getRunningBalance(final CurrencyData currency) {
+        return Money.of(currency, this.runningBalance);
+    }
+
+    public Money getRunningBalance(final MonetaryCurrency currency) {
         return Money.of(currency, this.runningBalance);
     }
 
