@@ -49,7 +49,7 @@ import org.apache.fineract.portfolio.businessevent.domain.client.ClientActivateB
 import org.apache.fineract.portfolio.businessevent.domain.client.ClientRejectBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.LoanApprovedBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.LoanRejectedBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanMakeRepaymentBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanTransactionMakeRepaymentPostBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.savings.SavingsActivateBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.savings.SavingsRejectBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.savings.transaction.SavingsDepositBusinessEvent;
@@ -82,16 +82,18 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
 
     @PostConstruct
     public void addListeners() {
-        businessEventNotifierService.addBusinessEventListener(LoanApprovedBusinessEvent.class, new SendSmsOnLoanApproved());
-        businessEventNotifierService.addBusinessEventListener(LoanRejectedBusinessEvent.class, new SendSmsOnLoanRejected());
-        businessEventNotifierService.addBusinessEventListener(LoanMakeRepaymentBusinessEvent.class, new SendSmsOnLoanRepayment());
-        businessEventNotifierService.addBusinessEventListener(ClientActivateBusinessEvent.class, new ClientActivatedListener());
-        businessEventNotifierService.addBusinessEventListener(ClientRejectBusinessEvent.class, new ClientRejectedListener());
-        businessEventNotifierService.addBusinessEventListener(SavingsActivateBusinessEvent.class, new SavingsAccountActivatedListener());
-        businessEventNotifierService.addBusinessEventListener(SavingsRejectBusinessEvent.class, new SavingsAccountRejectedListener());
-        businessEventNotifierService.addBusinessEventListener(SavingsDepositBusinessEvent.class,
+        businessEventNotifierService.addPostBusinessEventListener(LoanApprovedBusinessEvent.class, new SendSmsOnLoanApproved());
+        businessEventNotifierService.addPostBusinessEventListener(LoanRejectedBusinessEvent.class, new SendSmsOnLoanRejected());
+        businessEventNotifierService.addPostBusinessEventListener(LoanTransactionMakeRepaymentPostBusinessEvent.class,
+                new SendSmsOnLoanRepayment());
+        businessEventNotifierService.addPostBusinessEventListener(ClientActivateBusinessEvent.class, new ClientActivatedListener());
+        businessEventNotifierService.addPostBusinessEventListener(ClientRejectBusinessEvent.class, new ClientRejectedListener());
+        businessEventNotifierService.addPostBusinessEventListener(SavingsActivateBusinessEvent.class,
+                new SavingsAccountActivatedListener());
+        businessEventNotifierService.addPostBusinessEventListener(SavingsRejectBusinessEvent.class, new SavingsAccountRejectedListener());
+        businessEventNotifierService.addPostBusinessEventListener(SavingsDepositBusinessEvent.class,
                 new DepositSavingsAccountTransactionListener());
-        businessEventNotifierService.addBusinessEventListener(SavingsWithdrawalBusinessEvent.class,
+        businessEventNotifierService.addPostBusinessEventListener(SavingsWithdrawalBusinessEvent.class,
                 new NonDepositSavingsAccountTransactionListener());
     }
 
@@ -388,10 +390,10 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
         }
     }
 
-    private class SendSmsOnLoanRepayment implements BusinessEventListener<LoanMakeRepaymentBusinessEvent> {
+    private class SendSmsOnLoanRepayment implements BusinessEventListener<LoanTransactionMakeRepaymentPostBusinessEvent> {
 
         @Override
-        public void onBusinessEvent(LoanMakeRepaymentBusinessEvent event) {
+        public void onBusinessEvent(LoanTransactionMakeRepaymentPostBusinessEvent event) {
             sendSmsForLoanRepayment(event.get());
         }
     }

@@ -42,10 +42,10 @@ import org.apache.fineract.portfolio.businessevent.domain.loan.LoanApplyOverdueC
 import org.apache.fineract.portfolio.businessevent.domain.loan.LoanDisbursalBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.charge.LoanAddChargeBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.charge.LoanWaiveChargeBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanChargePaymentBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanForeClosureBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanMakeRepaymentBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanRefundBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanChargePaymentPostBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanForeClosurePostBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanRefundPostBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanTransactionMakeRepaymentPostBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanUndoWrittenOffBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanWaiveInterestBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
@@ -74,19 +74,22 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
 
     @PostConstruct
     public void registerForNotification() {
-        businessEventNotifierService.addBusinessEventListener(LoanRefundBusinessEvent.class, new RefundEventListener());
-        businessEventNotifierService.addBusinessEventListener(LoanAdjustTransactionBusinessEvent.class,
+        businessEventNotifierService.addPostBusinessEventListener(LoanRefundPostBusinessEvent.class, new RefundEventListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanAdjustTransactionBusinessEvent.class,
                 new AdjustTransactionBusinessEventEventListener());
-        businessEventNotifierService.addBusinessEventListener(LoanMakeRepaymentBusinessEvent.class, new MakeRepaymentEventListener());
-        businessEventNotifierService.addBusinessEventListener(LoanUndoWrittenOffBusinessEvent.class, new UndoWrittenOffEventListener());
-        businessEventNotifierService.addBusinessEventListener(LoanWaiveInterestBusinessEvent.class, new WaiveInterestEventListener());
-        businessEventNotifierService.addBusinessEventListener(LoanAddChargeBusinessEvent.class, new AddChargeEventListener());
-        businessEventNotifierService.addBusinessEventListener(LoanWaiveChargeBusinessEvent.class, new WaiveChargeEventListener());
-        businessEventNotifierService.addBusinessEventListener(LoanChargePaymentBusinessEvent.class, new LoanChargePaymentEventListener());
-        businessEventNotifierService.addBusinessEventListener(LoanApplyOverdueChargeBusinessEvent.class,
+        businessEventNotifierService.addPostBusinessEventListener(LoanTransactionMakeRepaymentPostBusinessEvent.class,
+                new MakeRepaymentEventListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanUndoWrittenOffBusinessEvent.class, new UndoWrittenOffEventListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanWaiveInterestBusinessEvent.class, new WaiveInterestEventListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanAddChargeBusinessEvent.class, new AddChargeEventListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanWaiveChargeBusinessEvent.class, new WaiveChargeEventListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanChargePaymentPostBusinessEvent.class,
+                new LoanChargePaymentEventListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanApplyOverdueChargeBusinessEvent.class,
                 new ApplyOverdueChargeEventListener());
-        businessEventNotifierService.addBusinessEventListener(LoanDisbursalBusinessEvent.class, new DisbursementEventListener());
-        businessEventNotifierService.addBusinessEventListener(LoanForeClosureBusinessEvent.class, new LoanForeClosureEventListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanDisbursalBusinessEvent.class, new DisbursementEventListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanForeClosurePostBusinessEvent.class,
+                new LoanForeClosureEventListener());
     }
 
     @Transactional
@@ -487,11 +490,11 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         }
     }
 
-    private class RefundEventListener implements BusinessEventListener<LoanRefundBusinessEvent> {
+    private class RefundEventListener implements BusinessEventListener<LoanRefundPostBusinessEvent> {
 
         @SuppressWarnings("unused")
         @Override
-        public void onBusinessEvent(LoanRefundBusinessEvent event) {
+        public void onBusinessEvent(LoanRefundPostBusinessEvent event) {
             LoanTransaction loanTransaction = event.get();
             Loan loan = loanTransaction.getLoan();
             handleArrearsForLoan(loan);
@@ -511,10 +514,10 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         }
     }
 
-    private class MakeRepaymentEventListener implements BusinessEventListener<LoanMakeRepaymentBusinessEvent> {
+    private class MakeRepaymentEventListener implements BusinessEventListener<LoanTransactionMakeRepaymentPostBusinessEvent> {
 
         @Override
-        public void onBusinessEvent(LoanMakeRepaymentBusinessEvent event) {
+        public void onBusinessEvent(LoanTransactionMakeRepaymentPostBusinessEvent event) {
             LoanTransaction loanTransaction = event.get();
             Loan loan = loanTransaction.getLoan();
             handleArrearsForLoan(loan);
@@ -541,20 +544,20 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         }
     }
 
-    private class LoanForeClosureEventListener implements BusinessEventListener<LoanForeClosureBusinessEvent> {
+    private class LoanForeClosureEventListener implements BusinessEventListener<LoanForeClosurePostBusinessEvent> {
 
         @Override
-        public void onBusinessEvent(LoanForeClosureBusinessEvent event) {
+        public void onBusinessEvent(LoanForeClosurePostBusinessEvent event) {
             LoanTransaction loanTransaction = event.get();
             Loan loan = loanTransaction.getLoan();
             handleArrearsForLoan(loan);
         }
     }
 
-    private class LoanChargePaymentEventListener implements BusinessEventListener<LoanChargePaymentBusinessEvent> {
+    private class LoanChargePaymentEventListener implements BusinessEventListener<LoanChargePaymentPostBusinessEvent> {
 
         @Override
-        public void onBusinessEvent(LoanChargePaymentBusinessEvent event) {
+        public void onBusinessEvent(LoanChargePaymentPostBusinessEvent event) {
             LoanTransaction loanTransaction = event.get();
             Loan loan = loanTransaction.getLoan();
             handleArrearsForLoan(loan);

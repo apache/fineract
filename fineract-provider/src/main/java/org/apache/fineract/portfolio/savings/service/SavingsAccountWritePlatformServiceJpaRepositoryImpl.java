@@ -273,7 +273,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         }
 
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, false);
-        businessEventNotifierService.notifyBusinessEvent(new SavingsActivateBusinessEvent(account));
+        businessEventNotifierService.notifyPostBusinessEvent(new SavingsActivateBusinessEvent(account));
 
         return new CommandProcessingResultBuilder() //
                 .withEntityId(savingsId) //
@@ -577,7 +577,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         }
         postInterest(account, postInterestAs, transactionDate, backdatedTxnsAllowedTill);
 
-        businessEventNotifierService.notifyBusinessEvent(new SavingsPostInterestBusinessEvent(account));
+        businessEventNotifierService.notifyPostBusinessEvent(new SavingsPostInterestBusinessEvent(account));
         return new CommandProcessingResultBuilder() //
                 .withEntityId(savingsId) //
                 .withOfficeId(account.officeId()) //
@@ -1031,7 +1031,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         }
 
-        businessEventNotifierService.notifyBusinessEvent(new SavingsCloseBusinessEvent(account));
+        businessEventNotifierService.notifyPostBusinessEvent(new SavingsCloseBusinessEvent(account));
         // disable all standing orders linked to the savings account
         disableStandingInstructionsLinkedToClosedSavings(account);
         return new CommandProcessingResultBuilder() //

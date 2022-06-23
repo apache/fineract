@@ -20,9 +20,9 @@ package org.apache.fineract.portfolio.businessevent.domain.loan.transaction;
 
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 
-public class LoanForeClosureBusinessEvent extends LoanTransactionBusinessEvent {
+public class LoanForeClosurePostBusinessEvent extends LoanTransactionBusinessEvent {
 
-    public LoanForeClosureBusinessEvent(LoanTransaction value) {
+    public LoanForeClosurePostBusinessEvent(LoanTransaction value) {
         super(value);
     }
 }

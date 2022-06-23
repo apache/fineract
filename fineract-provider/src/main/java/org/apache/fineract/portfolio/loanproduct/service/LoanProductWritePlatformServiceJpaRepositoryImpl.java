@@ -148,7 +148,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             fineractEntityAccessUtil.checkConfigurationAndAddProductResrictionsForUserOffice(
                     FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS, loanProduct.getId());
 
-            businessEventNotifierService.notifyBusinessEvent(new LoanProductCreateBusinessEvent(loanProduct));
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanProductCreateBusinessEvent(loanProduct));
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //

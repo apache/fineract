@@ -257,7 +257,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         CommandProcessingResult commandProcessingResult = createGroupingType(command, GroupTypes.CENTER, centerId);
 
-        businessEventNotifierService.notifyBusinessEvent(new CentersCreateBusinessEvent(commandProcessingResult));
+        businessEventNotifierService.notifyPostBusinessEvent(new CentersCreateBusinessEvent(commandProcessingResult));
 
         return commandProcessingResult;
     }
@@ -274,7 +274,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         CommandProcessingResult commandProcessingResult = createGroupingType(command, GroupTypes.GROUP, centerId);
 
-        businessEventNotifierService.notifyBusinessEvent(new GroupsCreateBusinessEvent(commandProcessingResult));
+        businessEventNotifierService.notifyPostBusinessEvent(new GroupsCreateBusinessEvent(commandProcessingResult));
 
         return commandProcessingResult;
     }

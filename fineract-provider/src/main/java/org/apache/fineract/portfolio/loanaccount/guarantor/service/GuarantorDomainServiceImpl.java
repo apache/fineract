@@ -44,9 +44,9 @@ import org.apache.fineract.portfolio.businessevent.domain.loan.LoanAdjustTransac
 import org.apache.fineract.portfolio.businessevent.domain.loan.LoanApprovedBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.LoanUndoApprovalBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.LoanUndoDisbursalBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanMakeRepaymentBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanTransactionMakeRepaymentPostBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanUndoWrittenOffBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanWrittenOffBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanWrittenOffPostBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
@@ -83,14 +83,17 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
 
     @PostConstruct
     public void addListeners() {
-        businessEventNotifierService.addBusinessEventListener(LoanApprovedBusinessEvent.class, new ValidateOnBusinessEvent());
-        businessEventNotifierService.addBusinessEventListener(LoanApprovedBusinessEvent.class, new HoldFundsOnBusinessEvent());
-        businessEventNotifierService.addBusinessEventListener(LoanUndoApprovalBusinessEvent.class, new UndoAllFundTransactions());
-        businessEventNotifierService.addBusinessEventListener(LoanUndoDisbursalBusinessEvent.class, new ReverseAllFundsOnBusinessEvent());
-        businessEventNotifierService.addBusinessEventListener(LoanAdjustTransactionBusinessEvent.class, new AdjustFundsOnBusinessEvent());
-        businessEventNotifierService.addBusinessEventListener(LoanMakeRepaymentBusinessEvent.class, new ReleaseFundsOnBusinessEvent());
-        businessEventNotifierService.addBusinessEventListener(LoanWrittenOffBusinessEvent.class, new ReleaseAllFunds());
-        businessEventNotifierService.addBusinessEventListener(LoanUndoWrittenOffBusinessEvent.class, new ReverseFundsOnBusinessEvent());
+        businessEventNotifierService.addPostBusinessEventListener(LoanApprovedBusinessEvent.class, new ValidateOnBusinessEvent());
+        businessEventNotifierService.addPostBusinessEventListener(LoanApprovedBusinessEvent.class, new HoldFundsOnBusinessEvent());
+        businessEventNotifierService.addPostBusinessEventListener(LoanUndoApprovalBusinessEvent.class, new UndoAllFundTransactions());
+        businessEventNotifierService.addPostBusinessEventListener(LoanUndoDisbursalBusinessEvent.class,
+                new ReverseAllFundsOnBusinessEvent());
+        businessEventNotifierService.addPostBusinessEventListener(LoanAdjustTransactionBusinessEvent.class,
+                new AdjustFundsOnBusinessEvent());
+        businessEventNotifierService.addPostBusinessEventListener(LoanTransactionMakeRepaymentPostBusinessEvent.class,
+                new ReleaseFundsOnBusinessEvent());
+        businessEventNotifierService.addPostBusinessEventListener(LoanWrittenOffPostBusinessEvent.class, new ReleaseAllFunds());
+        businessEventNotifierService.addPostBusinessEventListener(LoanUndoWrittenOffBusinessEvent.class, new ReverseFundsOnBusinessEvent());
     }
 
     @Override
@@ -528,10 +531,10 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         }
     }
 
-    private class ReleaseFundsOnBusinessEvent implements BusinessEventListener<LoanMakeRepaymentBusinessEvent> {
+    private class ReleaseFundsOnBusinessEvent implements BusinessEventListener<LoanTransactionMakeRepaymentPostBusinessEvent> {
 
         @Override
-        public void onBusinessEvent(LoanMakeRepaymentBusinessEvent event) {
+        public void onBusinessEvent(LoanTransactionMakeRepaymentPostBusinessEvent event) {
             LoanTransaction loanTransaction = event.get();
             if (releaseLoanIds.containsKey(loanTransaction.getLoan().getId())) {
                 completeGuarantorFund(loanTransaction);
@@ -589,10 +592,10 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         }
     }
 
-    private class ReleaseAllFunds implements BusinessEventListener<LoanWrittenOffBusinessEvent> {
+    private class ReleaseAllFunds implements BusinessEventListener<LoanWrittenOffPostBusinessEvent> {
 
         @Override
-        public void onBusinessEvent(LoanWrittenOffBusinessEvent event) {
+        public void onBusinessEvent(LoanWrittenOffPostBusinessEvent event) {
             LoanTransaction loanTransaction = event.get();
             releaseAllGuarantors(loanTransaction);
         }

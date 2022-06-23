@@ -41,7 +41,7 @@ import org.apache.fineract.portfolio.businessevent.domain.loan.LoanCloseAsResche
 import org.apache.fineract.portfolio.businessevent.domain.loan.LoanCloseBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.LoanCreatedBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.product.LoanProductCreateBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanMakeRepaymentBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanTransactionMakeRepaymentPostBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.savings.SavingsApproveBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.savings.SavingsCloseBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.savings.SavingsCreateBusinessEvent;
@@ -76,29 +76,32 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
 
     @PostConstruct
     public void addListeners() {
-        businessEventNotifierService.addBusinessEventListener(ClientCreateBusinessEvent.class, new ClientCreatedListener());
-        businessEventNotifierService.addBusinessEventListener(SavingsApproveBusinessEvent.class, new SavingsAccountApprovedListener());
-        businessEventNotifierService.addBusinessEventListener(CentersCreateBusinessEvent.class, new CenterCreatedListener());
-        businessEventNotifierService.addBusinessEventListener(GroupsCreateBusinessEvent.class, new GroupCreatedListener());
-        businessEventNotifierService.addBusinessEventListener(SavingsDepositBusinessEvent.class, new SavingsAccountDepositListener());
-        businessEventNotifierService.addBusinessEventListener(ShareProductDividentsCreateBusinessEvent.class,
+        businessEventNotifierService.addPostBusinessEventListener(ClientCreateBusinessEvent.class, new ClientCreatedListener());
+        businessEventNotifierService.addPostBusinessEventListener(SavingsApproveBusinessEvent.class, new SavingsAccountApprovedListener());
+        businessEventNotifierService.addPostBusinessEventListener(CentersCreateBusinessEvent.class, new CenterCreatedListener());
+        businessEventNotifierService.addPostBusinessEventListener(GroupsCreateBusinessEvent.class, new GroupCreatedListener());
+        businessEventNotifierService.addPostBusinessEventListener(SavingsDepositBusinessEvent.class, new SavingsAccountDepositListener());
+        businessEventNotifierService.addPostBusinessEventListener(ShareProductDividentsCreateBusinessEvent.class,
                 new ShareProductDividendCreatedListener());
-        businessEventNotifierService.addBusinessEventListener(FixedDepositAccountCreateBusinessEvent.class,
+        businessEventNotifierService.addPostBusinessEventListener(FixedDepositAccountCreateBusinessEvent.class,
                 new FixedDepositAccountCreatedListener());
-        businessEventNotifierService.addBusinessEventListener(RecurringDepositAccountCreateBusinessEvent.class,
+        businessEventNotifierService.addPostBusinessEventListener(RecurringDepositAccountCreateBusinessEvent.class,
                 new RecurringDepositAccountCreatedListener());
-        businessEventNotifierService.addBusinessEventListener(SavingsPostInterestBusinessEvent.class, new SavingsPostInterestListener());
-        businessEventNotifierService.addBusinessEventListener(LoanCreatedBusinessEvent.class, new LoanCreatedListener());
-        businessEventNotifierService.addBusinessEventListener(LoanApprovedBusinessEvent.class, new LoanApprovedListener());
-        businessEventNotifierService.addBusinessEventListener(LoanCloseBusinessEvent.class, new LoanClosedListener());
-        businessEventNotifierService.addBusinessEventListener(LoanCloseAsRescheduleBusinessEvent.class,
+        businessEventNotifierService.addPostBusinessEventListener(SavingsPostInterestBusinessEvent.class,
+                new SavingsPostInterestListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanCreatedBusinessEvent.class, new LoanCreatedListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanApprovedBusinessEvent.class, new LoanApprovedListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanCloseBusinessEvent.class, new LoanClosedListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanCloseAsRescheduleBusinessEvent.class,
                 new LoanCloseAsRescheduledListener());
-        businessEventNotifierService.addBusinessEventListener(LoanMakeRepaymentBusinessEvent.class, new LoanMakeRepaymentListener());
-        businessEventNotifierService.addBusinessEventListener(LoanProductCreateBusinessEvent.class, new LoanProductCreatedListener());
-        businessEventNotifierService.addBusinessEventListener(SavingsCreateBusinessEvent.class, new SavingsAccountCreatedListener());
-        businessEventNotifierService.addBusinessEventListener(SavingsCloseBusinessEvent.class, new SavingsAccountClosedListener());
-        businessEventNotifierService.addBusinessEventListener(ShareAccountCreateBusinessEvent.class, new ShareAccountCreatedListener());
-        businessEventNotifierService.addBusinessEventListener(ShareAccountApproveBusinessEvent.class, new ShareAccountApprovedListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanTransactionMakeRepaymentPostBusinessEvent.class,
+                new LoanMakeRepaymentListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanProductCreateBusinessEvent.class, new LoanProductCreatedListener());
+        businessEventNotifierService.addPostBusinessEventListener(SavingsCreateBusinessEvent.class, new SavingsAccountCreatedListener());
+        businessEventNotifierService.addPostBusinessEventListener(SavingsCloseBusinessEvent.class, new SavingsAccountClosedListener());
+        businessEventNotifierService.addPostBusinessEventListener(ShareAccountCreateBusinessEvent.class, new ShareAccountCreatedListener());
+        businessEventNotifierService.addPostBusinessEventListener(ShareAccountApproveBusinessEvent.class,
+                new ShareAccountApprovedListener());
     }
 
     private class ClientCreatedListener implements BusinessEventListener<ClientCreateBusinessEvent> {
@@ -244,10 +247,10 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         }
     }
 
-    private class LoanMakeRepaymentListener implements BusinessEventListener<LoanMakeRepaymentBusinessEvent> {
+    private class LoanMakeRepaymentListener implements BusinessEventListener<LoanTransactionMakeRepaymentPostBusinessEvent> {
 
         @Override
-        public void onBusinessEvent(LoanMakeRepaymentBusinessEvent event) {
+        public void onBusinessEvent(LoanTransactionMakeRepaymentPostBusinessEvent event) {
             Loan loan = event.get().getLoan();
             buildNotification("READ_LOAN", "loan", loan.getId(), "Repayment made", "repaymentMade", context.authenticatedUser().getId(),
                     loan.getOfficeId());
