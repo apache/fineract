@@ -32,7 +32,7 @@ import org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignTri
 import org.apache.fineract.portfolio.businessevent.BusinessEventListener;
 import org.apache.fineract.portfolio.businessevent.domain.loan.LoanApprovedBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.LoanRejectedBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanMakeRepaymentBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanTransactionMakeRepaymentPostBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
@@ -49,15 +49,16 @@ public class EmailCampaignDomainServiceImpl implements EmailCampaignDomainServic
 
     @PostConstruct
     public void addListeners() {
-        businessEventNotifierService.addBusinessEventListener(LoanApprovedBusinessEvent.class, new SendEmailOnLoanApproved());
-        businessEventNotifierService.addBusinessEventListener(LoanRejectedBusinessEvent.class, new SendEmailOnLoanRejected());
-        businessEventNotifierService.addBusinessEventListener(LoanMakeRepaymentBusinessEvent.class, new SendEmailOnLoanRepayment());
+        businessEventNotifierService.addPostBusinessEventListener(LoanApprovedBusinessEvent.class, new SendEmailOnLoanApproved());
+        businessEventNotifierService.addPostBusinessEventListener(LoanRejectedBusinessEvent.class, new SendEmailOnLoanRejected());
+        businessEventNotifierService.addPostBusinessEventListener(LoanTransactionMakeRepaymentPostBusinessEvent.class,
+                new SendEmailOnLoanRepayment());
     }
 
-    private class SendEmailOnLoanRepayment implements BusinessEventListener<LoanMakeRepaymentBusinessEvent> {
+    private class SendEmailOnLoanRepayment implements BusinessEventListener<LoanTransactionMakeRepaymentPostBusinessEvent> {
 
         @Override
-        public void onBusinessEvent(LoanMakeRepaymentBusinessEvent event) {
+        public void onBusinessEvent(LoanTransactionMakeRepaymentPostBusinessEvent event) {
             LoanTransaction loanTransaction = event.get();
             try {
                 notifyLoanOwner(loanTransaction, "Loan Repayment");

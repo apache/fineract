@@ -303,7 +303,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             this.clientRepository.saveAndFlush(newClient);
             if (newClient.isActive()) {
-                businessEventNotifierService.notifyBusinessEvent(new ClientActivateBusinessEvent(newClient));
+                businessEventNotifierService.notifyPostBusinessEvent(new ClientActivateBusinessEvent(newClient));
             }
             if (newClient.isAccountNumberRequiresAutoGeneration()) {
                 AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.CLIENT);
@@ -337,7 +337,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                         command.arrayOfParameterNamed(ClientApiConstants.datatables));
             }
 
-            businessEventNotifierService.notifyBusinessEvent(new ClientCreateBusinessEvent(newClient));
+            businessEventNotifierService.notifyPostBusinessEvent(new ClientCreateBusinessEvent(newClient));
 
             entityDatatableChecksWritePlatformService.runTheCheck(newClient.getId(), EntityTables.CLIENT.getName(),
                     StatusEnum.CREATE.getCode().longValue(), EntityTables.CLIENT.getForeignKeyColumnNameOnDatatable());
@@ -591,7 +591,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             client.activate(currentUser, fmt, activationDate);
             CommandProcessingResult result = openSavingsAccount(client, fmt);
             clientRepository.saveAndFlush(client);
-            businessEventNotifierService.notifyBusinessEvent(new ClientActivateBusinessEvent(client));
+            businessEventNotifierService.notifyPostBusinessEvent(new ClientActivateBusinessEvent(client));
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withOfficeId(client.officeId()) //
@@ -845,7 +845,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         }
         client.reject(currentUser, rejectionReason, Date.from(rejectionDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         clientRepository.saveAndFlush(client);
-        businessEventNotifierService.notifyBusinessEvent(new ClientRejectBusinessEvent(client));
+        businessEventNotifierService.notifyPostBusinessEvent(new ClientRejectBusinessEvent(client));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withClientId(entityId) //

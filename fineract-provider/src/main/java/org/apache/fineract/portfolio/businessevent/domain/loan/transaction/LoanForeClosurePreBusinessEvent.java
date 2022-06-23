@@ -18,11 +18,12 @@
  */
 package org.apache.fineract.portfolio.businessevent.domain.loan.transaction;
 
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.businessevent.domain.loan.LoanBusinessEvent;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 
-public class LoanRecoveryPaymentBusinessEvent extends LoanTransactionBusinessEvent {
+public class LoanForeClosurePreBusinessEvent extends LoanBusinessEvent {
 
-    public LoanRecoveryPaymentBusinessEvent(LoanTransaction value) {
+    public LoanForeClosurePreBusinessEvent(Loan value) {
         super(value);
     }
 }

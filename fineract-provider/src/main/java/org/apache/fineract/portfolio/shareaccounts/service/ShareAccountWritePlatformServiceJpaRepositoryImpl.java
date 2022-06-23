@@ -105,7 +105,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
             journalEntryWritePlatformService.createJournalEntriesForShares(
                     populateJournalEntries(account, account.getPendingForApprovalSharePurchaseTransactions()));
 
-            businessEventNotifierService.notifyBusinessEvent(new ShareAccountCreateBusinessEvent(account));
+            businessEventNotifierService.notifyPostBusinessEvent(new ShareAccountCreateBusinessEvent(account));
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(jsonCommand.commandId()) //
@@ -281,7 +281,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
 
             this.journalEntryWritePlatformService.createJournalEntriesForShares(populateJournalEntries(account, journalTransactions));
 
-            businessEventNotifierService.notifyBusinessEvent(new ShareAccountApproveBusinessEvent(account));
+            businessEventNotifierService.notifyPostBusinessEvent(new ShareAccountApproveBusinessEvent(account));
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(jsonCommand.commandId()) //

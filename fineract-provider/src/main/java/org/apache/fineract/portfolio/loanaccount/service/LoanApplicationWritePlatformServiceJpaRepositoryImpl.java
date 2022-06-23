@@ -590,7 +590,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     StatusEnum.CREATE.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(),
                     newLoanApplication.productId());
 
-            businessEventNotifierService.notifyBusinessEvent(new LoanCreatedBusinessEvent(newLoanApplication));
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanCreatedBusinessEvent(newLoanApplication));
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -1477,7 +1477,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 this.noteRepository.save(note);
             }
 
-            businessEventNotifierService.notifyBusinessEvent(new LoanApprovedBusinessEvent(loan));
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanApprovedBusinessEvent(loan));
         }
 
         return new CommandProcessingResultBuilder() //
@@ -1555,7 +1555,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 final Note note = Note.loanNote(loan, noteText);
                 this.noteRepository.save(note);
             }
-            businessEventNotifierService.notifyBusinessEvent(new LoanUndoApprovalBusinessEvent(loan));
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanUndoApprovalBusinessEvent(loan));
         }
 
         return new CommandProcessingResultBuilder() //
@@ -1625,7 +1625,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 this.noteRepository.save(note);
             }
         }
-        businessEventNotifierService.notifyBusinessEvent(new LoanRejectedBusinessEvent(loan));
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanRejectedBusinessEvent(loan));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(loan.getId()) //
