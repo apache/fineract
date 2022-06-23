@@ -21,9 +21,10 @@ package org.apache.fineract.portfolio.shareproducts.service;
 import com.google.gson.JsonElement;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.PersistenceException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -31,8 +32,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.portfolio.businessevent.domain.BusinessEntity;
-import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.share.ShareProductDividentsCreateBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.shareproducts.constants.ShareProductApiConstants;
 import org.apache.fineract.portfolio.shareproducts.domain.ShareProduct;
@@ -41,17 +41,14 @@ import org.apache.fineract.portfolio.shareproducts.domain.ShareProductDividentPa
 import org.apache.fineract.portfolio.shareproducts.domain.ShareProductRepositoryWrapper;
 import org.apache.fineract.portfolio.shareproducts.exception.DividentProcessingException;
 import org.apache.fineract.portfolio.shareproducts.serialization.ShareProductDataSerializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareProductWritePlatformService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ShareProductWritePlatformServiceJpaRepositoryImpl.class);
 
     private final ShareProductRepositoryWrapper repository;
     private final ShareProductDataSerializer serializer;
@@ -60,22 +57,6 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
     private final ShareProductDividendAssembler shareProductDividendAssembler;
     private final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService;
     private final BusinessEventNotifierService businessEventNotifierService;
-
-    @Autowired
-    public ShareProductWritePlatformServiceJpaRepositoryImpl(final ShareProductRepositoryWrapper repository,
-            final ShareProductDataSerializer serializer, final FromJsonHelper fromApiJsonHelper,
-            final ShareProductDividentPayOutDetailsRepositoryWrapper shareProductDividentPayOutDetailsRepositor,
-            final ShareProductDividendAssembler shareProductDividendAssembler,
-            final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService,
-            final BusinessEventNotifierService businessEventNotifierService) {
-        this.repository = repository;
-        this.serializer = serializer;
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.shareProductDividentPayOutDetailsRepository = shareProductDividentPayOutDetailsRepositor;
-        this.shareProductDividendAssembler = shareProductDividendAssembler;
-        this.accountMappingWritePlatformService = accountMappingWritePlatformService;
-        this.businessEventNotifierService = businessEventNotifierService;
-    }
 
     @Override
     public CommandProcessingResult createShareProduct(JsonCommand jsonCommand) {
@@ -150,8 +131,7 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
             }
             this.shareProductDividentPayOutDetailsRepository.save(dividendPayOutDetails);
 
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.SHARE_PRODUCT_DIVIDENDS_CREATE,
-                    constructEntityMap(BusinessEntity.SHARE_PRODUCT, productId));
+            businessEventNotifierService.notifyBusinessEvent(new ShareProductDividentsCreateBusinessEvent(productId));
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(jsonCommand.commandId()) //
@@ -202,7 +182,7 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
     }
 
     private void handleDataIntegrityIssues(final Exception e) {
-        LOG.error("Unknown data integrity issue with resource", e);
+        log.error("Unknown data integrity issue with resource", e);
         throw new PlatformDataIntegrityException("error.msg.shareproduct.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
@@ -215,15 +195,8 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
                     "Share Product with name `" + name + "` already exists", "name", name);
         }
 
-        LOG.error("Unknown data integrity issue with resource", dve);
+        log.error("Unknown data integrity issue with resource", dve);
         throw new PlatformDataIntegrityException("error.msg.shareproduct.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
-
-    private Map<BusinessEntity, Object> constructEntityMap(final BusinessEntity entityEvent, Object entity) {
-        Map<BusinessEntity, Object> map = new HashMap<>(1);
-        map.put(entityEvent, entity);
-        return map;
-    }
-
 }

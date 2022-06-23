@@ -23,12 +23,12 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import javax.persistence.PersistenceException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandProcessingService;
@@ -55,8 +55,9 @@ import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.address.service.AddressWritePlatformService;
-import org.apache.fineract.portfolio.businessevent.domain.BusinessEntity;
-import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.client.ClientActivateBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.client.ClientCreateBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.client.ClientRejectBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.data.ClientDataValidator;
@@ -87,8 +88,6 @@ import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.apache.fineract.portfolio.savings.service.SavingsApplicationProcessWritePlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -96,9 +95,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
 public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWritePlatformService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ClientWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final ClientRepositoryWrapper clientRepository;
@@ -191,7 +189,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
-            LOG.error("Error occured.", throwable);
+            log.error("Error occured.", throwable);
             throw new PlatformDataIntegrityException("error.msg.client.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.", dve);
         }
@@ -305,8 +303,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             this.clientRepository.saveAndFlush(newClient);
             if (newClient.isActive()) {
-                this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.CLIENTS_ACTIVATE,
-                        constructEntityMap(BusinessEntity.CLIENT, newClient));
+                businessEventNotifierService.notifyBusinessEvent(new ClientActivateBusinessEvent(newClient));
             }
             if (newClient.isAccountNumberRequiresAutoGeneration()) {
                 AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.CLIENT);
@@ -340,10 +337,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                         command.arrayOfParameterNamed(ClientApiConstants.datatables));
             }
 
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.CLIENTS_CREATE,
-                    constructEntityMap(BusinessEntity.CLIENT, newClient));
+            businessEventNotifierService.notifyBusinessEvent(new ClientCreateBusinessEvent(newClient));
 
-            this.entityDatatableChecksWritePlatformService.runTheCheck(newClient.getId(), EntityTables.CLIENT.getName(),
+            entityDatatableChecksWritePlatformService.runTheCheck(newClient.getId(), EntityTables.CLIENT.getName(),
                     StatusEnum.CREATE.getCode().longValue(), EntityTables.CLIENT.getForeignKeyColumnNameOnDatatable());
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -594,9 +590,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final AppUser currentUser = this.context.authenticatedUser();
             client.activate(currentUser, fmt, activationDate);
             CommandProcessingResult result = openSavingsAccount(client, fmt);
-            this.clientRepository.saveAndFlush(client);
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.CLIENTS_ACTIVATE,
-                    constructEntityMap(BusinessEntity.CLIENT, client));
+            clientRepository.saveAndFlush(client);
+            businessEventNotifierService.notifyBusinessEvent(new ClientActivateBusinessEvent(client));
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withOfficeId(client.officeId()) //
@@ -627,7 +622,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
-        LOG.error("Error occured.", dve);
+        log.error("Error occured.", dve);
     }
 
     @Transactional
@@ -849,9 +844,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     rejectionDate, client.getSubmittedOnDate());
         }
         client.reject(currentUser, rejectionReason, Date.from(rejectionDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
-        this.clientRepository.saveAndFlush(client);
-        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.CLIENTS_REJECT,
-                constructEntityMap(BusinessEntity.CLIENT, client));
+        clientRepository.saveAndFlush(client);
+        businessEventNotifierService.notifyBusinessEvent(new ClientRejectBusinessEvent(client));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withClientId(entityId) //
@@ -965,11 +959,5 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 .withClientId(entityId) //
                 .withEntityId(entityId) //
                 .build();
-    }
-
-    private Map<BusinessEntity, Object> constructEntityMap(final BusinessEntity entityEvent, Object entity) {
-        Map<BusinessEntity, Object> map = new HashMap<>(1);
-        map.put(entityEvent, entity);
-        return map;
     }
 }

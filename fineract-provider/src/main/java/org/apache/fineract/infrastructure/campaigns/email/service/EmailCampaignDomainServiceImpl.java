@@ -23,92 +23,72 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailCampaign;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailCampaignRepository;
 import org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignTriggerType;
 import org.apache.fineract.portfolio.businessevent.BusinessEventListener;
-import org.apache.fineract.portfolio.businessevent.domain.BusinessEntity;
-import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.LoanApprovedBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.LoanRejectedBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanMakeRepaymentBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class EmailCampaignDomainServiceImpl implements EmailCampaignDomainService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(EmailCampaignDomainServiceImpl.class);
     private final BusinessEventNotifierService businessEventNotifierService;
     private final EmailCampaignWritePlatformService emailCampaignWritePlatformService;
     private final EmailCampaignRepository emailCampaignRepository;
 
-    @Autowired
-    public EmailCampaignDomainServiceImpl(BusinessEventNotifierService businessEventNotifierService,
-            EmailCampaignWritePlatformService emailCampaignWritePlatformService, EmailCampaignRepository emailCampaignRepository) {
-        this.businessEventNotifierService = businessEventNotifierService;
-        this.emailCampaignWritePlatformService = emailCampaignWritePlatformService;
-        this.emailCampaignRepository = emailCampaignRepository;
-    }
-
     @PostConstruct
     public void addListeners() {
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_APPROVED,
-                new EmailCampaignDomainServiceImpl.SendEmailOnLoanApproved());
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_REJECTED,
-                new EmailCampaignDomainServiceImpl.SendEmailOnLoanRejected());
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_MAKE_REPAYMENT,
-                new EmailCampaignDomainServiceImpl.SendEmailOnLoanRepayment());
+        businessEventNotifierService.addBusinessEventListener(LoanApprovedBusinessEvent.class, new SendEmailOnLoanApproved());
+        businessEventNotifierService.addBusinessEventListener(LoanRejectedBusinessEvent.class, new SendEmailOnLoanRejected());
+        businessEventNotifierService.addBusinessEventListener(LoanMakeRepaymentBusinessEvent.class, new SendEmailOnLoanRepayment());
     }
 
-    private class SendEmailOnLoanRepayment extends EmailBusinessEventAdapter {
+    private class SendEmailOnLoanRepayment implements BusinessEventListener<LoanMakeRepaymentBusinessEvent> {
 
         @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BusinessEntity.LOAN_TRANSACTION);
-            if (entity instanceof LoanTransaction) {
-                LoanTransaction loanTransaction = (LoanTransaction) entity;
-                try {
-                    notifyLoanOwner(loanTransaction, "Loan Repayment");
-                } catch (IOException e) {
-                    LOG.error("Exception when trying to send triggered email: {}", e.getMessage());
-                }
+        public void onBusinessEvent(LoanMakeRepaymentBusinessEvent event) {
+            LoanTransaction loanTransaction = event.get();
+            try {
+                notifyLoanOwner(loanTransaction, "Loan Repayment");
+            } catch (IOException e) {
+                log.error("Exception when trying to send triggered email: {}", e.getMessage());
             }
         }
     }
 
-    private class SendEmailOnLoanRejected extends EmailBusinessEventAdapter {
+    private class SendEmailOnLoanRejected implements BusinessEventListener<LoanRejectedBusinessEvent> {
 
         @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BusinessEntity.LOAN);
-            if (entity instanceof Loan) {
-                Loan loan = (Loan) entity;
-                try {
-                    notifyLoanOwner(loan, "Loan Rejected");
-                } catch (IOException e) {
-                    LOG.error("Exception when trying to send triggered email: {}", e.getMessage());
-                }
+        public void onBusinessEvent(LoanRejectedBusinessEvent event) {
+            Loan loan = event.get();
+            try {
+                notifyLoanOwner(loan, "Loan Rejected");
+            } catch (IOException e) {
+                log.error("Exception when trying to send triggered email: {}", e.getMessage());
             }
         }
     }
 
-    private class SendEmailOnLoanApproved extends EmailBusinessEventAdapter {
+    private class SendEmailOnLoanApproved implements BusinessEventListener<LoanApprovedBusinessEvent> {
 
         @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BusinessEntity.LOAN);
-            if (entity instanceof Loan) {
-                Loan loan = (Loan) entity;
-                try {
-                    notifyLoanOwner(loan, "Loan Approved");
-                } catch (IOException e) {
-                    LOG.error("Exception when trying to send triggered email: {}", e.getMessage());
-                }
+        public void onBusinessEvent(LoanApprovedBusinessEvent event) {
+            Loan loan = event.get();
+            try {
+                notifyLoanOwner(loan, "Loan Approved");
+            } catch (IOException e) {
+                log.error("Exception when trying to send triggered email: {}", e.getMessage());
             }
         }
     }
@@ -132,14 +112,6 @@ public class EmailCampaignDomainServiceImpl implements EmailCampaignDomainServic
                     new TypeReference<HashMap<String, String>>() {});
             campaignParams.put("loanId", loan.getId().toString());
             this.emailCampaignWritePlatformService.insertDirectCampaignIntoEmailOutboundTable(loan, emailCampaign, campaignParams);
-        }
-    }
-
-    private abstract static class EmailBusinessEventAdapter implements BusinessEventListener {
-
-        @Override
-        public void businessEventToBeExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            // Nothing to do
         }
     }
 

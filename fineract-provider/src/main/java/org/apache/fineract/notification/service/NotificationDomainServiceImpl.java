@@ -21,7 +21,6 @@ package org.apache.fineract.notification.service;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -32,8 +31,25 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.notification.data.NotificationData;
 import org.apache.fineract.notification.eventandlistener.NotificationEventPublisher;
 import org.apache.fineract.portfolio.businessevent.BusinessEventListener;
-import org.apache.fineract.portfolio.businessevent.domain.BusinessEntity;
-import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.client.ClientCreateBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.deposit.FixedDepositAccountCreateBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.deposit.RecurringDepositAccountCreateBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.group.CentersCreateBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.group.GroupsCreateBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.LoanApprovedBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.LoanCloseAsRescheduleBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.LoanCloseBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.LoanCreatedBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.product.LoanProductCreateBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanMakeRepaymentBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.savings.SavingsApproveBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.savings.SavingsCloseBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.savings.SavingsCreateBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.savings.SavingsPostInterestBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.savings.transaction.SavingsDepositBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.share.ShareAccountApproveBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.share.ShareAccountCreateBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.share.ShareProductDividentsCreateBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -60,318 +76,231 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
 
     @PostConstruct
     public void addListeners() {
-        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.CLIENTS_CREATE, new ClientCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.SAVINGS_APPROVE, new SavingsAccountApprovedListener());
-        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.CENTERS_CREATE, new CenterCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.GROUPS_CREATE, new GroupCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.SAVINGS_DEPOSIT, new SavingsAccountDepositListener());
-        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.SHARE_PRODUCT_DIVIDENDS_CREATE,
+        businessEventNotifierService.addBusinessEventListener(ClientCreateBusinessEvent.class, new ClientCreatedListener());
+        businessEventNotifierService.addBusinessEventListener(SavingsApproveBusinessEvent.class, new SavingsAccountApprovedListener());
+        businessEventNotifierService.addBusinessEventListener(CentersCreateBusinessEvent.class, new CenterCreatedListener());
+        businessEventNotifierService.addBusinessEventListener(GroupsCreateBusinessEvent.class, new GroupCreatedListener());
+        businessEventNotifierService.addBusinessEventListener(SavingsDepositBusinessEvent.class, new SavingsAccountDepositListener());
+        businessEventNotifierService.addBusinessEventListener(ShareProductDividentsCreateBusinessEvent.class,
                 new ShareProductDividendCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.FIXED_DEPOSIT_ACCOUNT_CREATE,
+        businessEventNotifierService.addBusinessEventListener(FixedDepositAccountCreateBusinessEvent.class,
                 new FixedDepositAccountCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.RECURRING_DEPOSIT_ACCOUNT_CREATE,
+        businessEventNotifierService.addBusinessEventListener(RecurringDepositAccountCreateBusinessEvent.class,
                 new RecurringDepositAccountCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.SAVINGS_POST_INTEREST, new SavingsPostInterestListener());
-        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_CREATE, new LoanCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_APPROVED, new LoanApprovedListener());
-        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_CLOSE, new LoanClosedListener());
-        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_CLOSE_AS_RESCHEDULE,
+        businessEventNotifierService.addBusinessEventListener(SavingsPostInterestBusinessEvent.class, new SavingsPostInterestListener());
+        businessEventNotifierService.addBusinessEventListener(LoanCreatedBusinessEvent.class, new LoanCreatedListener());
+        businessEventNotifierService.addBusinessEventListener(LoanApprovedBusinessEvent.class, new LoanApprovedListener());
+        businessEventNotifierService.addBusinessEventListener(LoanCloseBusinessEvent.class, new LoanClosedListener());
+        businessEventNotifierService.addBusinessEventListener(LoanCloseAsRescheduleBusinessEvent.class,
                 new LoanCloseAsRescheduledListener());
-        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_MAKE_REPAYMENT, new LoanMakeRepaymentListener());
-        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_PRODUCT_CREATE, new LoanProductCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.SAVINGS_CREATE, new SavingsAccountCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.SAVINGS_CLOSE, new SavingsAccountClosedListener());
-        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.SHARE_ACCOUNT_CREATE, new ShareAccountCreatedListener());
-        businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.SHARE_ACCOUNT_APPROVE, new ShareAccountApprovedListener());
+        businessEventNotifierService.addBusinessEventListener(LoanMakeRepaymentBusinessEvent.class, new LoanMakeRepaymentListener());
+        businessEventNotifierService.addBusinessEventListener(LoanProductCreateBusinessEvent.class, new LoanProductCreatedListener());
+        businessEventNotifierService.addBusinessEventListener(SavingsCreateBusinessEvent.class, new SavingsAccountCreatedListener());
+        businessEventNotifierService.addBusinessEventListener(SavingsCloseBusinessEvent.class, new SavingsAccountClosedListener());
+        businessEventNotifierService.addBusinessEventListener(ShareAccountCreateBusinessEvent.class, new ShareAccountCreatedListener());
+        businessEventNotifierService.addBusinessEventListener(ShareAccountApproveBusinessEvent.class, new ShareAccountApprovedListener());
     }
 
-    private abstract static class NotificationBusinessEventAdapter implements BusinessEventListener {
+    private class ClientCreatedListener implements BusinessEventListener<ClientCreateBusinessEvent> {
 
         @Override
-        public void businessEventToBeExecuted(Map<BusinessEntity, Object> businessEventEntity) {}
+        public void onBusinessEvent(ClientCreateBusinessEvent event) {
+            Client client = event.get();
+            buildNotification("ACTIVATE_CLIENT", "client", client.getId(), "New client created", "created",
+                    context.authenticatedUser().getId(), client.getOffice().getId());
+        }
     }
 
-    private class ClientCreatedListener extends NotificationBusinessEventAdapter {
+    private class CenterCreatedListener implements BusinessEventListener<CentersCreateBusinessEvent> {
 
         @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            Client client;
-            Object entity = businessEventEntity.get(BusinessEntity.CLIENT);
-            if (entity != null) {
-                client = (Client) entity;
-                buildNotification("ACTIVATE_CLIENT", "client", client.getId(), "New client created", "created",
-                        context.authenticatedUser().getId(), client.getOffice().getId());
+        public void onBusinessEvent(CentersCreateBusinessEvent event) {
+            CommandProcessingResult commandProcessingResult = event.get();
+            buildNotification("ACTIVATE_CENTER", "center", commandProcessingResult.getGroupId(), "New center created", "created",
+                    context.authenticatedUser().getId(), commandProcessingResult.getOfficeId());
+        }
+    }
+
+    private class GroupCreatedListener implements BusinessEventListener<GroupsCreateBusinessEvent> {
+
+        @Override
+        public void onBusinessEvent(GroupsCreateBusinessEvent event) {
+            CommandProcessingResult commandProcessingResult = event.get();
+            buildNotification("ACTIVATE_GROUP", "group", commandProcessingResult.getGroupId(), "New group created", "created",
+                    context.authenticatedUser().getId(), commandProcessingResult.getOfficeId());
+        }
+    }
+
+    private class SavingsAccountDepositListener implements BusinessEventListener<SavingsDepositBusinessEvent> {
+
+        @Override
+        public void onBusinessEvent(SavingsDepositBusinessEvent event) {
+            SavingsAccountTransaction savingsAccountTransaction = event.get();
+            buildNotification("READ_SAVINGSACCOUNT", "savingsAccount", savingsAccountTransaction.getSavingsAccount().getId(),
+                    "Deposit made", "depositMade", context.authenticatedUser().getId(),
+                    savingsAccountTransaction.getSavingsAccount().officeId());
+        }
+    }
+
+    private class ShareProductDividendCreatedListener implements BusinessEventListener<ShareProductDividentsCreateBusinessEvent> {
+
+        @Override
+        public void onBusinessEvent(ShareProductDividentsCreateBusinessEvent event) {
+            Long shareProductId = event.get();
+            buildNotification("READ_DIVIDEND_SHAREPRODUCT", "shareProduct", shareProductId, "Dividend posted to account", "dividendPosted",
+                    context.authenticatedUser().getId(), context.authenticatedUser().getOffice().getId());
+        }
+    }
+
+    private class FixedDepositAccountCreatedListener implements BusinessEventListener<FixedDepositAccountCreateBusinessEvent> {
+
+        @Override
+        public void onBusinessEvent(FixedDepositAccountCreateBusinessEvent event) {
+            FixedDepositAccount fixedDepositAccount = event.get();
+            buildNotification("APPROVE_FIXEDDEPOSITACCOUNT", "fixedDeposit", fixedDepositAccount.getId(),
+                    "New fixed deposit account created", "created", context.authenticatedUser().getId(), fixedDepositAccount.officeId());
+        }
+    }
+
+    private class RecurringDepositAccountCreatedListener implements BusinessEventListener<RecurringDepositAccountCreateBusinessEvent> {
+
+        @Override
+        public void onBusinessEvent(RecurringDepositAccountCreateBusinessEvent event) {
+            RecurringDepositAccount recurringDepositAccount = event.get();
+            buildNotification("APPROVE_RECURRINGDEPOSITACCOUNT", "recurringDepositAccount", recurringDepositAccount.getId(),
+                    "New recurring deposit account created", "created", context.authenticatedUser().getId(),
+                    recurringDepositAccount.officeId());
+        }
+    }
+
+    private class SavingsAccountApprovedListener implements BusinessEventListener<SavingsApproveBusinessEvent> {
+
+        @Override
+        public void onBusinessEvent(SavingsApproveBusinessEvent event) {
+            SavingsAccount savingsAccount = event.get();
+            if (savingsAccount.depositAccountType().equals(DepositAccountType.FIXED_DEPOSIT)) {
+
+                buildNotification("ACTIVATE_FIXEDDEPOSITACCOUNT", "fixedDeposit", savingsAccount.getId(), "Fixed deposit account approved",
+                        "approved", context.authenticatedUser().getId(), savingsAccount.officeId());
+            } else if (savingsAccount.depositAccountType().equals(DepositAccountType.RECURRING_DEPOSIT)) {
+
+                buildNotification("ACTIVATE_RECURRINGDEPOSITACCOUNT", "recurringDepositAccount", savingsAccount.getId(),
+                        "Recurring deposit account approved", "approved", context.authenticatedUser().getId(), savingsAccount.officeId());
+            } else if (savingsAccount.depositAccountType().equals(DepositAccountType.SAVINGS_DEPOSIT)) {
+
+                buildNotification("ACTIVATE_SAVINGSACCOUNT", "savingsAccount", savingsAccount.getId(), "Savings account approved",
+                        "approved", context.authenticatedUser().getId(), savingsAccount.officeId());
             }
         }
     }
 
-    private class CenterCreatedListener extends NotificationBusinessEventAdapter {
+    private class SavingsPostInterestListener implements BusinessEventListener<SavingsPostInterestBusinessEvent> {
 
         @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            CommandProcessingResult commandProcessingResult;
-            Object entity = businessEventEntity.get(BusinessEntity.GROUP);
-            if (entity != null) {
-                commandProcessingResult = (CommandProcessingResult) entity;
-                buildNotification("ACTIVATE_CENTER", "center", commandProcessingResult.getGroupId(), "New center created", "created",
-                        context.authenticatedUser().getId(), commandProcessingResult.getOfficeId());
-            }
+        public void onBusinessEvent(SavingsPostInterestBusinessEvent event) {
+            SavingsAccount savingsAccount = event.get();
+            buildNotification("READ_SAVINGSACCOUNT", "savingsAccount", savingsAccount.getId(), "Interest posted to account",
+                    "interestPosted", context.authenticatedUser().getId(), savingsAccount.officeId());
         }
     }
 
-    private class GroupCreatedListener extends NotificationBusinessEventAdapter {
+    private class LoanCreatedListener implements BusinessEventListener<LoanCreatedBusinessEvent> {
 
         @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            CommandProcessingResult commandProcessingResult;
-            Object entity = businessEventEntity.get(BusinessEntity.GROUP);
-            if (entity != null) {
-                commandProcessingResult = (CommandProcessingResult) entity;
-                buildNotification("ACTIVATE_GROUP", "group", commandProcessingResult.getGroupId(), "New group created", "created",
-                        context.authenticatedUser().getId(), commandProcessingResult.getOfficeId());
-            }
+        public void onBusinessEvent(LoanCreatedBusinessEvent event) {
+            Loan loan = event.get();
+            buildNotification("APPROVE_LOAN", "loan", loan.getId(), "New loan created", "created", context.authenticatedUser().getId(),
+                    loan.getOfficeId());
         }
     }
 
-    private class SavingsAccountDepositListener extends NotificationBusinessEventAdapter {
+    private class LoanApprovedListener implements BusinessEventListener<LoanApprovedBusinessEvent> {
 
         @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            SavingsAccountTransaction savingsAccountTransaction;
-            Object entity = businessEventEntity.get(BusinessEntity.SAVINGS_TRANSACTION);
-            if (entity != null) {
-                savingsAccountTransaction = (SavingsAccountTransaction) entity;
-                buildNotification("READ_SAVINGSACCOUNT", "savingsAccount", savingsAccountTransaction.getSavingsAccount().getId(),
-                        "Deposit made", "depositMade", context.authenticatedUser().getId(),
-                        savingsAccountTransaction.getSavingsAccount().officeId());
-            }
+        public void onBusinessEvent(LoanApprovedBusinessEvent event) {
+            Loan loan = event.get();
+            buildNotification("DISBURSE_LOAN", "loan", loan.getId(), "New loan approved", "approved", context.authenticatedUser().getId(),
+                    loan.getOfficeId());
         }
     }
 
-    private class ShareProductDividendCreatedListener extends NotificationBusinessEventAdapter {
+    private class LoanClosedListener implements BusinessEventListener<LoanCloseBusinessEvent> {
 
         @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            Long shareProductId;
-            Object entity = businessEventEntity.get(BusinessEntity.SHARE_PRODUCT);
-            if (entity != null) {
-                shareProductId = (Long) entity;
-                buildNotification("READ_DIVIDEND_SHAREPRODUCT", "shareProduct", shareProductId, "Dividend posted to account",
-                        "dividendPosted", context.authenticatedUser().getId(), context.authenticatedUser().getOffice().getId());
-            }
+        public void onBusinessEvent(LoanCloseBusinessEvent event) {
+            Loan loan = event.get();
+            buildNotification("READ_LOAN", "loan", loan.getId(), "Loan closed", "loanClosed", context.authenticatedUser().getId(),
+                    loan.getOfficeId());
         }
     }
 
-    private class FixedDepositAccountCreatedListener extends NotificationBusinessEventAdapter {
+    private class LoanCloseAsRescheduledListener implements BusinessEventListener<LoanCloseAsRescheduleBusinessEvent> {
 
         @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            FixedDepositAccount fixedDepositAccount;
-            Object entity = businessEventEntity.get(BusinessEntity.DEPOSIT_ACCOUNT);
-            if (entity != null) {
-                fixedDepositAccount = (FixedDepositAccount) entity;
-                buildNotification("APPROVE_FIXEDDEPOSITACCOUNT", "fixedDeposit", fixedDepositAccount.getId(),
-                        "New fixed deposit account created", "created", context.authenticatedUser().getId(),
-                        fixedDepositAccount.officeId());
-            }
+        public void onBusinessEvent(LoanCloseAsRescheduleBusinessEvent event) {
+            Loan loan = event.get();
+            buildNotification("READ_Rescheduled Loans", "loan", loan.getId(), "Loan has been rescheduled", "loanRescheduled",
+                    context.authenticatedUser().getId(), loan.getOfficeId());
         }
     }
 
-    private class RecurringDepositAccountCreatedListener extends NotificationBusinessEventAdapter {
+    private class LoanMakeRepaymentListener implements BusinessEventListener<LoanMakeRepaymentBusinessEvent> {
 
         @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            RecurringDepositAccount recurringDepositAccount;
-            Object entity = businessEventEntity.get(BusinessEntity.DEPOSIT_ACCOUNT);
-            if (entity != null) {
-                recurringDepositAccount = (RecurringDepositAccount) entity;
-                buildNotification("APPROVE_RECURRINGDEPOSITACCOUNT", "recurringDepositAccount", recurringDepositAccount.getId(),
-                        "New recurring deposit account created", "created", context.authenticatedUser().getId(),
-                        recurringDepositAccount.officeId());
-            }
+        public void onBusinessEvent(LoanMakeRepaymentBusinessEvent event) {
+            Loan loan = event.get().getLoan();
+            buildNotification("READ_LOAN", "loan", loan.getId(), "Repayment made", "repaymentMade", context.authenticatedUser().getId(),
+                    loan.getOfficeId());
         }
     }
 
-    private class SavingsAccountApprovedListener extends NotificationBusinessEventAdapter {
+    private class LoanProductCreatedListener implements BusinessEventListener<LoanProductCreateBusinessEvent> {
 
         @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            SavingsAccount savingsAccount;
-            Object entity = businessEventEntity.get(BusinessEntity.SAVING);
-            if (entity != null) {
-                savingsAccount = (SavingsAccount) entity;
-                if (savingsAccount.depositAccountType().equals(DepositAccountType.FIXED_DEPOSIT)) {
-
-                    buildNotification("ACTIVATE_FIXEDDEPOSITACCOUNT", "fixedDeposit", savingsAccount.getId(),
-                            "Fixed deposit account approved", "approved", context.authenticatedUser().getId(), savingsAccount.officeId());
-                } else if (savingsAccount.depositAccountType().equals(DepositAccountType.RECURRING_DEPOSIT)) {
-
-                    buildNotification("ACTIVATE_RECURRINGDEPOSITACCOUNT", "recurringDepositAccount", savingsAccount.getId(),
-                            "Recurring deposit account approved", "approved", context.authenticatedUser().getId(),
-                            savingsAccount.officeId());
-                } else if (savingsAccount.depositAccountType().equals(DepositAccountType.SAVINGS_DEPOSIT)) {
-
-                    buildNotification("ACTIVATE_SAVINGSACCOUNT", "savingsAccount", savingsAccount.getId(), "Savings account approved",
-                            "approved", context.authenticatedUser().getId(), savingsAccount.officeId());
-                }
-            }
+        public void onBusinessEvent(LoanProductCreateBusinessEvent event) {
+            LoanProduct loanProduct = event.get();
+            buildNotification("READ_LOANPRODUCT", "loanProduct", loanProduct.getId(), "New loan product created", "created",
+                    context.authenticatedUser().getId(), context.authenticatedUser().getOffice().getId());
         }
     }
 
-    private class SavingsPostInterestListener extends NotificationBusinessEventAdapter {
+    private class SavingsAccountCreatedListener implements BusinessEventListener<SavingsCreateBusinessEvent> {
 
         @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            SavingsAccount savingsAccount;
-            Object entity = businessEventEntity.get(BusinessEntity.SAVING);
-            if (entity != null) {
-                savingsAccount = (SavingsAccount) entity;
-                buildNotification("READ_SAVINGSACCOUNT", "savingsAccount", savingsAccount.getId(), "Interest posted to account",
-                        "interestPosted", context.authenticatedUser().getId(), savingsAccount.officeId());
-            }
+        public void onBusinessEvent(SavingsCreateBusinessEvent event) {
+            SavingsAccount savingsAccount = event.get();
+            buildNotification("APPROVE_SAVINGSACCOUNT", "savingsAccount", savingsAccount.getId(), "New savings account created", "created",
+                    context.authenticatedUser().getId(), savingsAccount.officeId());
         }
     }
 
-    private class LoanCreatedListener extends NotificationBusinessEventAdapter {
+    private class SavingsAccountClosedListener implements BusinessEventListener<SavingsCloseBusinessEvent> {
 
         @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            Loan loan;
-            Object entity = businessEventEntity.get(BusinessEntity.LOAN);
-            if (entity != null) {
-                loan = (Loan) entity;
-                buildNotification("APPROVE_LOAN", "loan", loan.getId(), "New loan created", "created", context.authenticatedUser().getId(),
-                        loan.getOfficeId());
-            }
-
+        public void onBusinessEvent(SavingsCloseBusinessEvent event) {
+            SavingsAccount savingsAccount = event.get();
+            buildNotification("READ_SAVINGSACCOUNT", "savingsAccount", savingsAccount.getId(), "Savings has gone into dormant", "closed",
+                    context.authenticatedUser().getId(), savingsAccount.officeId());
         }
     }
 
-    private class LoanApprovedListener extends NotificationBusinessEventAdapter {
+    private class ShareAccountCreatedListener implements BusinessEventListener<ShareAccountCreateBusinessEvent> {
 
         @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            Loan loan;
-            Object entity = businessEventEntity.get(BusinessEntity.LOAN);
-            if (entity != null) {
-                loan = (Loan) entity;
-                buildNotification("DISBURSE_LOAN", "loan", loan.getId(), "New loan approved", "approved",
-                        context.authenticatedUser().getId(), loan.getOfficeId());
-            }
+        public void onBusinessEvent(ShareAccountCreateBusinessEvent event) {
+            ShareAccount shareAccount = event.get();
+            buildNotification("APPROVE_SHAREACCOUNT", "shareAccount", shareAccount.getId(), "New share account created", "created",
+                    context.authenticatedUser().getId(), shareAccount.getOfficeId());
         }
     }
 
-    private class LoanClosedListener extends NotificationBusinessEventAdapter {
+    private class ShareAccountApprovedListener implements BusinessEventListener<ShareAccountApproveBusinessEvent> {
 
         @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-
-            Loan loan;
-            Object entity = businessEventEntity.get(BusinessEntity.LOAN);
-            if (entity != null) {
-                loan = (Loan) entity;
-                buildNotification("READ_LOAN", "loan", loan.getId(), "Loan closed", "loanClosed", context.authenticatedUser().getId(),
-                        loan.getOfficeId());
-            }
-        }
-    }
-
-    private class LoanCloseAsRescheduledListener extends NotificationBusinessEventAdapter {
-
-        @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            Loan loan;
-            Object entity = businessEventEntity.get(BusinessEntity.LOAN);
-            if (entity != null) {
-                loan = (Loan) entity;
-                buildNotification("READ_Rescheduled Loans", "loan", loan.getId(), "Loan has been rescheduled", "loanRescheduled",
-                        context.authenticatedUser().getId(), loan.getOfficeId());
-            }
-        }
-    }
-
-    private class LoanMakeRepaymentListener extends NotificationBusinessEventAdapter {
-
-        @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            Loan loan;
-            Object entity = businessEventEntity.get(BusinessEntity.LOAN);
-            if (entity != null) {
-                loan = (Loan) entity;
-                buildNotification("READ_LOAN", "loan", loan.getId(), "Repayment made", "repaymentMade", context.authenticatedUser().getId(),
-                        loan.getOfficeId());
-            }
-        }
-    }
-
-    private class LoanProductCreatedListener extends NotificationBusinessEventAdapter {
-
-        @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-
-            LoanProduct loanProduct;
-            Object entity = businessEventEntity.get(BusinessEntity.LOAN_PRODUCT);
-            if (entity != null) {
-                loanProduct = (LoanProduct) entity;
-                buildNotification("READ_LOANPRODUCT", "loanProduct", loanProduct.getId(), "New loan product created", "created",
-                        context.authenticatedUser().getId(), context.authenticatedUser().getOffice().getId());
-            }
-        }
-    }
-
-    private class SavingsAccountCreatedListener extends NotificationBusinessEventAdapter {
-
-        @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            SavingsAccount savingsAccount;
-            Object entity = businessEventEntity.get(BusinessEntity.SAVING);
-            if (entity != null) {
-                savingsAccount = (SavingsAccount) entity;
-                buildNotification("APPROVE_SAVINGSACCOUNT", "savingsAccount", savingsAccount.getId(), "New savings account created",
-                        "created", context.authenticatedUser().getId(), savingsAccount.officeId());
-            }
-        }
-    }
-
-    private class SavingsAccountClosedListener extends NotificationBusinessEventAdapter {
-
-        @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            SavingsAccount savingsAccount;
-            Object entity = businessEventEntity.get(BusinessEntity.SAVING);
-            if (entity != null) {
-                savingsAccount = (SavingsAccount) entity;
-                buildNotification("READ_SAVINGSACCOUNT", "savingsAccount", savingsAccount.getId(), "Savings has gone into dormant",
-                        "closed", context.authenticatedUser().getId(), savingsAccount.officeId());
-            }
-        }
-    }
-
-    private class ShareAccountCreatedListener extends NotificationBusinessEventAdapter {
-
-        @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            ShareAccount shareAccount;
-            Object entity = businessEventEntity.get(BusinessEntity.SHARE_ACCOUNT);
-            if (entity != null) {
-                shareAccount = (ShareAccount) entity;
-                buildNotification("APPROVE_SHAREACCOUNT", "shareAccount", shareAccount.getId(), "New share account created", "created",
-                        context.authenticatedUser().getId(), shareAccount.getOfficeId());
-            }
-        }
-    }
-
-    private class ShareAccountApprovedListener extends NotificationBusinessEventAdapter {
-
-        @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            ShareAccount shareAccount;
-            Object entity = businessEventEntity.get(BusinessEntity.SHARE_ACCOUNT);
-            if (entity != null) {
-                shareAccount = (ShareAccount) entity;
-                buildNotification("ACTIVATE_SHAREACCOUNT", "shareAccount", shareAccount.getId(), "Share account approved", "approved",
-                        context.authenticatedUser().getId(), shareAccount.getOfficeId());
-            }
+        public void onBusinessEvent(ShareAccountApproveBusinessEvent event) {
+            ShareAccount shareAccount = event.get();
+            buildNotification("ACTIVATE_SHAREACCOUNT", "shareAccount", shareAccount.getId(), "Share account approved", "approved",
+                    context.authenticatedUser().getId(), shareAccount.getOfficeId());
         }
     }
 

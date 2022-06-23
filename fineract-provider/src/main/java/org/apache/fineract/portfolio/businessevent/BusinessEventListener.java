@@ -18,24 +18,18 @@
  */
 package org.apache.fineract.portfolio.businessevent;
 
-import java.util.Map;
-import org.apache.fineract.portfolio.businessevent.domain.BusinessEntity;
+import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
 
 /**
  * The interface to be implemented by classes that want to be informed when a Business Event executes. example: on
  * completion of loan approval event need to block guarantor funds
  *
  */
-public interface BusinessEventListener {
-
-    /**
-     * Implement this method for notifications before executing Business Event
-     */
-    void businessEventToBeExecuted(Map<BusinessEntity, Object> businessEventEntity);
+public interface BusinessEventListener<T extends BusinessEvent<?>> {
 
     /**
      * Implement this method for notifications after executing Business Event
      */
-    void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity);
+    void onBusinessEvent(T event);
 
 }

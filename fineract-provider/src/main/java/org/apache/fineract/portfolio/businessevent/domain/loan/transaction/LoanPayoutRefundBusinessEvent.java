@@ -16,29 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.businessevent.domain;
+package org.apache.fineract.portfolio.businessevent.domain.loan.transaction;
 
-public enum BusinessEntity {
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 
-    LOAN("loan"), //
-    LOAN_TRANSACTION("loan_transaction"), //
-    LOAN_CHARGE("loan_charge"), //
-    LOAN_ADJUSTED_TRANSACTION("loan_adjusted_transaction"), SAVING("saving"), //
-    CLIENT("client"), //
-    SAVINGS_TRANSACTION("Savings Transaction"), //
-    GROUP("group"), //
-    SHARE_ACCOUNT("share_account"), //
-    SHARE_PRODUCT("share_product"), //
-    DEPOSIT_ACCOUNT("deposit_account"), //
-    LOAN_PRODUCT("loan_product");
+public class LoanPayoutRefundBusinessEvent extends LoanTransactionBusinessEvent {
 
-    private final String value;
-
-    BusinessEntity(final String value) {
-        this.value = value;
-    }
-
-    public String getValue() {
-        return value;
+    public LoanPayoutRefundBusinessEvent(LoanTransaction value) {
+        super(value);
     }
 }
