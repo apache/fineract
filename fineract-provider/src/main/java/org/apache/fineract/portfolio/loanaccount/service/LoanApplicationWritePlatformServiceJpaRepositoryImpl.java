@@ -67,8 +67,10 @@ import org.apache.fineract.portfolio.account.domain.AccountAssociationType;
 import org.apache.fineract.portfolio.account.domain.AccountAssociations;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationsRepository;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
-import org.apache.fineract.portfolio.businessevent.domain.BusinessEntity;
-import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.LoanApprovedBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.LoanCreatedBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.LoanRejectedBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.LoanUndoApprovalBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
@@ -588,8 +590,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     StatusEnum.CREATE.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(),
                     newLoanApplication.productId());
 
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.LOAN_CREATE,
-                    constructEntityMap(BusinessEntity.LOAN, newLoanApplication));
+            businessEventNotifierService.notifyBusinessEvent(new LoanCreatedBusinessEvent(newLoanApplication));
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -1476,8 +1477,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 this.noteRepository.save(note);
             }
 
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.LOAN_APPROVED,
-                    constructEntityMap(BusinessEntity.LOAN, loan));
+            businessEventNotifierService.notifyBusinessEvent(new LoanApprovedBusinessEvent(loan));
         }
 
         return new CommandProcessingResultBuilder() //
@@ -1555,8 +1555,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 final Note note = Note.loanNote(loan, noteText);
                 this.noteRepository.save(note);
             }
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.LOAN_UNDO_APPROVAL,
-                    constructEntityMap(BusinessEntity.LOAN, loan));
+            businessEventNotifierService.notifyBusinessEvent(new LoanUndoApprovalBusinessEvent(loan));
         }
 
         return new CommandProcessingResultBuilder() //
@@ -1626,8 +1625,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 this.noteRepository.save(note);
             }
         }
-        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.LOAN_REJECTED,
-                constructEntityMap(BusinessEntity.LOAN, loan));
+        businessEventNotifierService.notifyBusinessEvent(new LoanRejectedBusinessEvent(loan));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(loan.getId()) //
@@ -1760,12 +1758,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             user = this.context.getAuthenticatedUserIfPresent();
         }
         return user;
-    }
-
-    private Map<BusinessEntity, Object> constructEntityMap(final BusinessEntity entityEvent, Object entity) {
-        Map<BusinessEntity, Object> map = new HashMap<>(1);
-        map.put(entityEvent, entity);
-        return map;
     }
 
     private void officeSpecificLoanProductValidation(final Long productId, final Long officeId) {
