@@ -26,13 +26,14 @@ import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.PersistenceException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -56,8 +57,9 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
-import org.apache.fineract.portfolio.businessevent.domain.BusinessEntity;
-import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.savings.SavingsApproveBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.savings.SavingsCreateBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.savings.SavingsRejectBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -87,17 +89,14 @@ import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
 import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl implements SavingsApplicationProcessWritePlatformService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final SavingsAccountRepositoryWrapper savingAccountRepository;
@@ -121,45 +120,6 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final GroupRepositoryWrapper groupRepositoryWrapper;
     private final GroupSavingsIndividualMonitoringWritePlatformService gsimWritePlatformService;
 
-    @Autowired
-    public SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final SavingsAccountRepositoryWrapper savingAccountRepository, final SavingsAccountAssembler savingAccountAssembler,
-            final SavingsAccountDataValidator savingsAccountDataValidator, final AccountNumberGenerator accountNumberGenerator,
-            final ClientRepositoryWrapper clientRepository, final GroupRepository groupRepository,
-            final SavingsProductRepository savingsProductRepository, final NoteRepository noteRepository,
-            final StaffRepositoryWrapper staffRepository,
-            final SavingsAccountApplicationTransitionApiJsonValidator savingsAccountApplicationTransitionApiJsonValidator,
-            final SavingsAccountChargeAssembler savingsAccountChargeAssembler, final CommandProcessingService commandProcessingService,
-            final SavingsAccountDomainService savingsAccountDomainService,
-            final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
-            final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
-            final BusinessEventNotifierService businessEventNotifierService,
-            final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService, final GSIMRepositoy gsimRepository,
-            final GroupRepositoryWrapper groupRepositoryWrapper,
-            final GroupSavingsIndividualMonitoringWritePlatformService gsimWritePlatformService) {
-        this.context = context;
-        this.savingAccountRepository = savingAccountRepository;
-        this.savingAccountAssembler = savingAccountAssembler;
-        this.accountNumberGenerator = accountNumberGenerator;
-        this.savingsAccountDataValidator = savingsAccountDataValidator;
-        this.clientRepository = clientRepository;
-        this.groupRepository = groupRepository;
-        this.savingsProductRepository = savingsProductRepository;
-        this.noteRepository = noteRepository;
-        this.staffRepository = staffRepository;
-        this.savingsAccountApplicationTransitionApiJsonValidator = savingsAccountApplicationTransitionApiJsonValidator;
-        this.savingsAccountChargeAssembler = savingsAccountChargeAssembler;
-        this.commandProcessingService = commandProcessingService;
-        this.savingsAccountDomainService = savingsAccountDomainService;
-        this.accountNumberFormatRepository = accountNumberFormatRepository;
-        this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
-        this.businessEventNotifierService = businessEventNotifierService;
-        this.entityDatatableChecksWritePlatformService = entityDatatableChecksWritePlatformService;
-        this.gsimRepository = gsimRepository;
-        this.groupRepositoryWrapper = groupRepositoryWrapper;
-        this.gsimWritePlatformService = gsimWritePlatformService;
-    }
-
     /*
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
@@ -182,7 +142,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         }
 
         errorCodeBuilder.append(".unknown.data.integrity.issue");
-        LOG.error("Error occured.", dve);
+        log.error("Error occured.", dve);
         throw new PlatformDataIntegrityException(errorCodeBuilder.toString(), "Unknown data integrity issue with savings account.");
     }
 
@@ -305,8 +265,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             this.entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVING.getName(),
                     StatusEnum.CREATE.getCode().longValue(), EntityTables.SAVING.getForeignKeyColumnNameOnDatatable(), account.productId());
 
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.SAVINGS_CREATE,
-                    constructEntityMap(BusinessEntity.SAVING, account));
+            businessEventNotifierService.notifyBusinessEvent(new SavingsCreateBusinessEvent(account));
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -534,8 +493,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             }
         }
 
-        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.SAVINGS_APPROVE,
-                constructEntityMap(BusinessEntity.SAVING, savingsAccount));
+        businessEventNotifierService.notifyBusinessEvent(new SavingsApproveBusinessEvent(savingsAccount));
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -657,8 +615,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 this.noteRepository.save(note);
             }
         }
-        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.SAVINGS_REJECT,
-                constructEntityMap(BusinessEntity.SAVING, savingsAccount));
+        businessEventNotifierService.notifyBusinessEvent(new SavingsRejectBusinessEvent(savingsAccount));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(savingsId) //
@@ -758,11 +715,5 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 .withSavingsId(account.getId()) //
                 .setRollbackTransaction(rollbackTransaction)//
                 .build();
-    }
-
-    private Map<BusinessEntity, Object> constructEntityMap(final BusinessEntity entityEvent, Object entity) {
-        Map<BusinessEntity, Object> map = new HashMap<>(1);
-        map.put(entityEvent, entity);
-        return map;
     }
 }

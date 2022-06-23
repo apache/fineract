@@ -22,7 +22,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.PersistenceException;
@@ -35,8 +34,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.portfolio.businessevent.domain.BusinessEntity;
-import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.product.LoanProductCreateBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
@@ -136,29 +134,25 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                 floatingRate = this.floatingRateRepository
                         .findOneWithNotFoundDetection(command.longValueOfParameterNamed("floatingRatesId"));
             }
-            final LoanProduct loanproduct = LoanProduct.assembleFromJson(fund, loanTransactionProcessingStrategy, charges, command,
+            final LoanProduct loanProduct = LoanProduct.assembleFromJson(fund, loanTransactionProcessingStrategy, charges, command,
                     this.aprCalculator, floatingRate, rates);
-            loanproduct.updateLoanProductInRelatedClasses();
+            loanProduct.updateLoanProductInRelatedClasses();
 
-            this.loanProductRepository.saveAndFlush(loanproduct);
+            this.loanProductRepository.saveAndFlush(loanProduct);
 
             // save accounting mappings
-            this.accountMappingWritePlatformService.createLoanProductToGLAccountMapping(loanproduct.getId(), command);
+            this.accountMappingWritePlatformService.createLoanProductToGLAccountMapping(loanProduct.getId(), command);
             // check if the office specific products are enabled. If yes, then
             // save this savings product against a specific office
             // i.e. this savings product is specific for this office.
             fineractEntityAccessUtil.checkConfigurationAndAddProductResrictionsForUserOffice(
-                    FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS, loanproduct.getId());
+                    FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS, loanProduct.getId());
 
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.LOAN_PRODUCT_CREATE,
-                    constructEntityMap(BusinessEntity.LOAN_PRODUCT, loanproduct));
-
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvent.LOAN_PRODUCT_CREATE,
-                    constructEntityMap(BusinessEntity.LOAN_PRODUCT, loanproduct));
+            businessEventNotifierService.notifyBusinessEvent(new LoanProductCreateBusinessEvent(loanProduct));
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
-                    .withEntityId(loanproduct.getId()) //
+                    .withEntityId(loanProduct.getId()) //
                     .build();
 
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
@@ -380,11 +374,5 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
         LOG.error("Error occured.", dve);
-    }
-
-    private Map<BusinessEntity, Object> constructEntityMap(final BusinessEntity entityEvent, Object entity) {
-        Map<BusinessEntity, Object> map = new HashMap<>(1);
-        map.put(entityEvent, entity);
-        return map;
     }
 }

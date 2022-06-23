@@ -40,8 +40,13 @@ import org.apache.fineract.portfolio.account.domain.AccountTransferDetails;
 import org.apache.fineract.portfolio.account.domain.AccountTransferType;
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
 import org.apache.fineract.portfolio.businessevent.BusinessEventListener;
-import org.apache.fineract.portfolio.businessevent.domain.BusinessEntity;
-import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.LoanAdjustTransactionBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.LoanApprovedBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.LoanUndoApprovalBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.LoanUndoDisbursalBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanMakeRepaymentBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanUndoWrittenOffBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanWrittenOffBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
@@ -78,18 +83,14 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
 
     @PostConstruct
     public void addListeners() {
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_APPROVED, new ValidateOnBusinessEvent());
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_APPROVED, new HoldFundsOnBusinessEvent());
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_UNDO_APPROVAL, new UndoAllFundTransactions());
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_UNDO_DISBURSAL,
-                new ReverseAllFundsOnBusinessEvent());
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_ADJUST_TRANSACTION,
-                new AdjustFundsOnBusinessEvent());
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_MAKE_REPAYMENT,
-                new ReleaseFundsOnBusinessEvent());
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_WRITTEN_OFF, new ReleaseAllFunds());
-        this.businessEventNotifierService.addBusinessEventPostListeners(BusinessEvent.LOAN_UNDO_WRITTEN_OFF,
-                new ReverseFundsOnBusinessEvent());
+        businessEventNotifierService.addBusinessEventListener(LoanApprovedBusinessEvent.class, new ValidateOnBusinessEvent());
+        businessEventNotifierService.addBusinessEventListener(LoanApprovedBusinessEvent.class, new HoldFundsOnBusinessEvent());
+        businessEventNotifierService.addBusinessEventListener(LoanUndoApprovalBusinessEvent.class, new UndoAllFundTransactions());
+        businessEventNotifierService.addBusinessEventListener(LoanUndoDisbursalBusinessEvent.class, new ReverseAllFundsOnBusinessEvent());
+        businessEventNotifierService.addBusinessEventListener(LoanAdjustTransactionBusinessEvent.class, new AdjustFundsOnBusinessEvent());
+        businessEventNotifierService.addBusinessEventListener(LoanMakeRepaymentBusinessEvent.class, new ReleaseFundsOnBusinessEvent());
+        businessEventNotifierService.addBusinessEventListener(LoanWrittenOffBusinessEvent.class, new ReleaseAllFunds());
+        businessEventNotifierService.addBusinessEventListener(LoanUndoWrittenOffBusinessEvent.class, new ReverseFundsOnBusinessEvent());
     }
 
     @Override
@@ -509,138 +510,91 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         }
     }
 
-    private class ValidateOnBusinessEvent implements BusinessEventListener {
+    private class ValidateOnBusinessEvent implements BusinessEventListener<LoanApprovedBusinessEvent> {
 
         @Override
-        public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BusinessEntity, Object> businessEventEntity) {}
-
-        @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BusinessEntity.LOAN);
-            if (entity instanceof Loan) {
-                Loan loan = (Loan) entity;
-                validateGuarantorBusinessRules(loan);
-            }
+        public void onBusinessEvent(LoanApprovedBusinessEvent event) {
+            Loan loan = event.get();
+            validateGuarantorBusinessRules(loan);
         }
     }
 
-    private class HoldFundsOnBusinessEvent implements BusinessEventListener {
+    private class HoldFundsOnBusinessEvent implements BusinessEventListener<LoanApprovedBusinessEvent> {
 
         @Override
-        public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BusinessEntity, Object> businessEventEntity) {}
-
-        @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BusinessEntity.LOAN);
-            if (entity instanceof Loan) {
-                Loan loan = (Loan) entity;
-                holdGuarantorFunds(loan);
-            }
+        public void onBusinessEvent(LoanApprovedBusinessEvent event) {
+            Loan loan = event.get();
+            holdGuarantorFunds(loan);
         }
     }
 
-    private class ReleaseFundsOnBusinessEvent implements BusinessEventListener {
+    private class ReleaseFundsOnBusinessEvent implements BusinessEventListener<LoanMakeRepaymentBusinessEvent> {
 
         @Override
-        public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BusinessEntity, Object> businessEventEntity) {}
-
-        @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BusinessEntity.LOAN_TRANSACTION);
-            if (entity instanceof LoanTransaction) {
-                LoanTransaction loanTransaction = (LoanTransaction) entity;
-                if (releaseLoanIds.containsKey(loanTransaction.getLoan().getId())) {
-                    completeGuarantorFund(loanTransaction);
-                } else {
-                    releaseGuarantorFunds(loanTransaction);
-                }
-            }
-        }
-    }
-
-    private class ReverseFundsOnBusinessEvent implements BusinessEventListener {
-
-        @Override
-        public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BusinessEntity, Object> businessEventEntity) {}
-
-        @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BusinessEntity.LOAN_TRANSACTION);
-            if (entity instanceof LoanTransaction) {
-                LoanTransaction loanTransaction = (LoanTransaction) entity;
-                List<Long> reersedTransactions = new ArrayList<>(1);
-                reersedTransactions.add(loanTransaction.getId());
-                reverseTransaction(reersedTransactions);
-            }
-        }
-    }
-
-    private class AdjustFundsOnBusinessEvent implements BusinessEventListener {
-
-        @Override
-        public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BusinessEntity, Object> businessEventEntity) {}
-
-        @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BusinessEntity.LOAN_ADJUSTED_TRANSACTION);
-            if (entity instanceof LoanTransaction) {
-                LoanTransaction loanTransaction = (LoanTransaction) entity;
-                List<Long> reersedTransactions = new ArrayList<>(1);
-                reersedTransactions.add(loanTransaction.getId());
-                reverseTransaction(reersedTransactions);
-            }
-            Object transactionentity = businessEventEntity.get(BusinessEntity.LOAN_TRANSACTION);
-            if (transactionentity != null && transactionentity instanceof LoanTransaction) {
-                LoanTransaction loanTransaction = (LoanTransaction) transactionentity;
+        public void onBusinessEvent(LoanMakeRepaymentBusinessEvent event) {
+            LoanTransaction loanTransaction = event.get();
+            if (releaseLoanIds.containsKey(loanTransaction.getLoan().getId())) {
+                completeGuarantorFund(loanTransaction);
+            } else {
                 releaseGuarantorFunds(loanTransaction);
             }
         }
     }
 
-    private class ReverseAllFundsOnBusinessEvent implements BusinessEventListener {
+    private class ReverseFundsOnBusinessEvent implements BusinessEventListener<LoanUndoWrittenOffBusinessEvent> {
 
         @Override
-        public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BusinessEntity, Object> businessEventEntity) {}
+        public void onBusinessEvent(LoanUndoWrittenOffBusinessEvent event) {
+            LoanTransaction loanTransaction = event.get();
+            List<Long> reversedTransactions = new ArrayList<>();
+            reversedTransactions.add(loanTransaction.getId());
+            reverseTransaction(reversedTransactions);
+        }
+    }
+
+    private class AdjustFundsOnBusinessEvent implements BusinessEventListener<LoanAdjustTransactionBusinessEvent> {
 
         @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BusinessEntity.LOAN);
-            if (entity instanceof Loan) {
-                Loan loan = (Loan) entity;
-                List<Long> reersedTransactions = new ArrayList<>(1);
-                reersedTransactions.addAll(loan.findExistingTransactionIds());
-                reverseTransaction(reersedTransactions);
+        public void onBusinessEvent(LoanAdjustTransactionBusinessEvent event) {
+            LoanAdjustTransactionBusinessEvent.Data eventData = event.get();
+
+            LoanTransaction loanTransaction = eventData.getTransactionToAdjust();
+            List<Long> reersedTransactions = new ArrayList<>(1);
+            reersedTransactions.add(loanTransaction.getId());
+            reverseTransaction(reersedTransactions);
+
+            LoanTransaction newTransaction = event.get().getNewTransactionDetail();
+            if (newTransaction != null) {
+                releaseGuarantorFunds(newTransaction);
             }
         }
     }
 
-    private class UndoAllFundTransactions implements BusinessEventListener {
+    private class ReverseAllFundsOnBusinessEvent implements BusinessEventListener<LoanUndoDisbursalBusinessEvent> {
 
         @Override
-        public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BusinessEntity, Object> businessEventEntity) {}
-
-        @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BusinessEntity.LOAN);
-            if (entity instanceof Loan) {
-                Loan loan = (Loan) entity;
-                reverseAllFundTransaction(loan);
-            }
+        public void onBusinessEvent(LoanUndoDisbursalBusinessEvent event) {
+            Loan loan = event.get();
+            List<Long> reversedTransactions = new ArrayList<>(loan.findExistingTransactionIds());
+            reverseTransaction(reversedTransactions);
         }
     }
 
-    private class ReleaseAllFunds implements BusinessEventListener {
+    private class UndoAllFundTransactions implements BusinessEventListener<LoanUndoApprovalBusinessEvent> {
 
         @Override
-        public void businessEventToBeExecuted(@SuppressWarnings("unused") Map<BusinessEntity, Object> businessEventEntity) {}
+        public void onBusinessEvent(LoanUndoApprovalBusinessEvent event) {
+            Loan loan = event.get();
+            reverseAllFundTransaction(loan);
+        }
+    }
+
+    private class ReleaseAllFunds implements BusinessEventListener<LoanWrittenOffBusinessEvent> {
 
         @Override
-        public void businessEventWasExecuted(Map<BusinessEntity, Object> businessEventEntity) {
-            Object entity = businessEventEntity.get(BusinessEntity.LOAN_TRANSACTION);
-            if (entity instanceof LoanTransaction) {
-                LoanTransaction loanTransaction = (LoanTransaction) entity;
-                releaseAllGuarantors(loanTransaction);
-            }
+        public void onBusinessEvent(LoanWrittenOffBusinessEvent event) {
+            LoanTransaction loanTransaction = event.get();
+            releaseAllGuarantors(loanTransaction);
         }
     }
 
