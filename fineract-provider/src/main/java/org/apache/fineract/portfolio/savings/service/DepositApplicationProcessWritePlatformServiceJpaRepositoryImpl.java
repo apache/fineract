@@ -230,7 +230,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             }
 
             final Long savingsId = account.getId();
-            businessEventNotifierService.notifyBusinessEvent(new FixedDepositAccountCreateBusinessEvent(account));
+            businessEventNotifierService.notifyPostBusinessEvent(new FixedDepositAccountCreateBusinessEvent(account));
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -289,7 +289,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     financialYearBeginningMonth);
             account.validateApplicableInterestRate();
             savingAccountRepository.save(account);
-            businessEventNotifierService.notifyBusinessEvent(new RecurringDepositAccountCreateBusinessEvent(account));
+            businessEventNotifierService.notifyPostBusinessEvent(new RecurringDepositAccountCreateBusinessEvent(account));
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //

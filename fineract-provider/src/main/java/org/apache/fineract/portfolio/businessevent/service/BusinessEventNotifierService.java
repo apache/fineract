@@ -28,13 +28,23 @@ import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
 public interface BusinessEventNotifierService {
 
     /**
+     * Method should be called to notify listeners after Business event execution for any pre-processing of event
+     */
+    void notifyPreBusinessEvent(BusinessEvent<?> businessEvent);
+
+    /**
      * Method should be called to notify listeners after Business event execution for any post-processing of event
      */
-    void notifyBusinessEvent(BusinessEvent<?> businessEvent);
+    void notifyPostBusinessEvent(BusinessEvent<?> businessEvent);
+
+    /**
+     * Method is to register a class as listener for pre-processing of any Business event
+     */
+    <T extends BusinessEvent<?>> void addPreBusinessEventListener(Class<T> eventType, BusinessEventListener<T> listener);
 
     /**
      * Method is to register a class as listener for post-processing of any Business event
      */
-    <T extends BusinessEvent<?>> void addBusinessEventListener(Class<T> eventType, BusinessEventListener<T> listener);
+    <T extends BusinessEvent<?>> void addPostBusinessEventListener(Class<T> eventType, BusinessEventListener<T> listener);
 
 }

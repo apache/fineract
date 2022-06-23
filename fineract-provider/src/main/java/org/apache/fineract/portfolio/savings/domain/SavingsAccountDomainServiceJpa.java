@@ -138,7 +138,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, transactionBooleanValues.isAccountTransfer(),
                 backdatedTxnsAllowedTill);
 
-        businessEventNotifierService.notifyBusinessEvent(new SavingsWithdrawalBusinessEvent(withdrawal));
+        businessEventNotifierService.notifyPostBusinessEvent(new SavingsWithdrawalBusinessEvent(withdrawal));
         return withdrawal;
     }
 
@@ -213,7 +213,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         this.savingsAccountRepository.saveAndFlush(account);
 
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer, backdatedTxnsAllowedTill);
-        businessEventNotifierService.notifyBusinessEvent(new SavingsDepositBusinessEvent(deposit));
+        businessEventNotifierService.notifyPostBusinessEvent(new SavingsDepositBusinessEvent(deposit));
         return deposit;
     }
 

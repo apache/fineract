@@ -265,7 +265,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             this.entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVING.getName(),
                     StatusEnum.CREATE.getCode().longValue(), EntityTables.SAVING.getForeignKeyColumnNameOnDatatable(), account.productId());
 
-            businessEventNotifierService.notifyBusinessEvent(new SavingsCreateBusinessEvent(account));
+            businessEventNotifierService.notifyPostBusinessEvent(new SavingsCreateBusinessEvent(account));
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -493,7 +493,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             }
         }
 
-        businessEventNotifierService.notifyBusinessEvent(new SavingsApproveBusinessEvent(savingsAccount));
+        businessEventNotifierService.notifyPostBusinessEvent(new SavingsApproveBusinessEvent(savingsAccount));
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -615,7 +615,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 this.noteRepository.save(note);
             }
         }
-        businessEventNotifierService.notifyBusinessEvent(new SavingsRejectBusinessEvent(savingsAccount));
+        businessEventNotifierService.notifyPostBusinessEvent(new SavingsRejectBusinessEvent(savingsAccount));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(savingsId) //

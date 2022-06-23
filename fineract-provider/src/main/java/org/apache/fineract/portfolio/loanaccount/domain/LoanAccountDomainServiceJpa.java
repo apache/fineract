@@ -58,16 +58,26 @@ import org.apache.fineract.portfolio.account.domain.AccountTransferTransaction;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionRepository;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
-import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanChargePaymentBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanCreditBalanceRefundBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanForeClosureBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanGoodwillCreditBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanMakeRepaymentBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanMerchantIssuedRefundBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanPayoutRefundBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanRecoveryPaymentBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanRefundBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.LoanBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanChargePaymentPostBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanChargePaymentPreBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanCreditBalanceRefundPostBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanCreditBalanceRefundPreBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanForeClosurePostBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanForeClosurePreBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanRefundPostBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanRefundPreBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanTransactionBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanTransactionGoodwillCreditPostBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanTransactionGoodwillCreditPreBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanTransactionMakeRepaymentPostBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanTransactionMakeRepaymentPreBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanTransactionMerchantIssuedRefundPostBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanTransactionMerchantIssuedRefundPreBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanTransactionPayoutRefundPostBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanTransactionPayoutRefundPreBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanTransactionRecoveryPaymentPostBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanTransactionRecoveryPaymentPreBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
@@ -151,6 +161,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         AppUser currentUser = getAppUserIfPresent();
         checkClientOrGroupActive(loan);
 
+        LoanBusinessEvent repaymentEvent = getLoanRepaymentTypeBusinessEvent(repaymentTransactionType, isRecoveryRepayment, loan);
+        businessEventNotifierService.notifyPreBusinessEvent(repaymentEvent);
+
         // TODO: Is it required to validate transaction date with meeting dates
         // if repayments is synced with meeting?
         /*
@@ -213,9 +226,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         recalculateAccruals(loan);
 
-        LoanTransactionBusinessEvent repaymentEvent = getRepaymentTypeBusinessEvent(repaymentTransactionType, isRecoveryRepayment,
-                newRepaymentTransaction);
-        businessEventNotifierService.notifyBusinessEvent(repaymentEvent);
+        LoanTransactionBusinessEvent transactionRepaymentEvent = getTransactionRepaymentTypeBusinessEvent(repaymentTransactionType,
+                isRecoveryRepayment, newRepaymentTransaction);
+        businessEventNotifierService.notifyPostBusinessEvent(transactionRepaymentEvent);
 
         // disable all active standing orders linked to this loan if status
         // changes to closed
@@ -256,19 +269,36 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         return newRepaymentTransaction;
     }
 
-    private LoanTransactionBusinessEvent getRepaymentTypeBusinessEvent(LoanTransactionType repaymentTransactionType,
+    private LoanBusinessEvent getLoanRepaymentTypeBusinessEvent(LoanTransactionType repaymentTransactionType, boolean isRecoveryRepayment,
+            Loan loan) {
+        LoanBusinessEvent repaymentEvent = null;
+        if (repaymentTransactionType.isRepayment()) {
+            repaymentEvent = new LoanTransactionMakeRepaymentPreBusinessEvent(loan);
+        } else if (repaymentTransactionType.isMerchantIssuedRefund()) {
+            repaymentEvent = new LoanTransactionMerchantIssuedRefundPreBusinessEvent(loan);
+        } else if (repaymentTransactionType.isPayoutRefund()) {
+            repaymentEvent = new LoanTransactionPayoutRefundPreBusinessEvent(loan);
+        } else if (repaymentTransactionType.isGoodwillCredit()) {
+            repaymentEvent = new LoanTransactionGoodwillCreditPreBusinessEvent(loan);
+        } else if (isRecoveryRepayment) {
+            repaymentEvent = new LoanTransactionRecoveryPaymentPreBusinessEvent(loan);
+        }
+        return repaymentEvent;
+    }
+
+    private LoanTransactionBusinessEvent getTransactionRepaymentTypeBusinessEvent(LoanTransactionType repaymentTransactionType,
             boolean isRecoveryRepayment, LoanTransaction transaction) {
         LoanTransactionBusinessEvent repaymentEvent = null;
         if (repaymentTransactionType.isRepayment()) {
-            repaymentEvent = new LoanMakeRepaymentBusinessEvent(transaction);
+            repaymentEvent = new LoanTransactionMakeRepaymentPostBusinessEvent(transaction);
         } else if (repaymentTransactionType.isMerchantIssuedRefund()) {
-            repaymentEvent = new LoanMerchantIssuedRefundBusinessEvent(transaction);
+            repaymentEvent = new LoanTransactionMerchantIssuedRefundPostBusinessEvent(transaction);
         } else if (repaymentTransactionType.isPayoutRefund()) {
-            repaymentEvent = new LoanPayoutRefundBusinessEvent(transaction);
+            repaymentEvent = new LoanTransactionPayoutRefundPostBusinessEvent(transaction);
         } else if (repaymentTransactionType.isGoodwillCredit()) {
-            repaymentEvent = new LoanGoodwillCreditBusinessEvent(transaction);
+            repaymentEvent = new LoanTransactionGoodwillCreditPostBusinessEvent(transaction);
         } else if (isRecoveryRepayment) {
-            repaymentEvent = new LoanRecoveryPaymentBusinessEvent(transaction);
+            repaymentEvent = new LoanTransactionRecoveryPaymentPostBusinessEvent(transaction);
         }
         return repaymentEvent;
     }
@@ -334,6 +364,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         AppUser currentUser = getAppUserIfPresent();
         boolean isAccountTransfer = true;
         checkClientOrGroupActive(loan);
+        businessEventNotifierService.notifyPreBusinessEvent(new LoanChargePaymentPreBusinessEvent(loan));
+
         final List<Long> existingTransactionIds = new ArrayList<>();
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
 
@@ -368,7 +400,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
         recalculateAccruals(loan);
-        businessEventNotifierService.notifyBusinessEvent(new LoanChargePaymentBusinessEvent(newPaymentTransaction));
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanChargePaymentPostBusinessEvent(newPaymentTransaction));
         return newPaymentTransaction;
     }
 
@@ -417,6 +449,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         boolean isAccountTransfer = true;
         final Loan loan = this.loanAccountAssembler.assembleFrom(accountId);
         checkClientOrGroupActive(loan);
+        businessEventNotifierService.notifyPreBusinessEvent(new LoanRefundPreBusinessEvent(loan));
         final List<Long> existingTransactionIds = new ArrayList<>();
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
 
@@ -441,7 +474,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
-        businessEventNotifierService.notifyBusinessEvent(new LoanRefundBusinessEvent(newRefundTransaction));
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanRefundPostBusinessEvent(newRefundTransaction));
         builderResult.withEntityId(newRefundTransaction.getId()).withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId())
                 .withGroupId(loan.getGroupId());
 
@@ -610,6 +643,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     public CommandProcessingResultBuilder creditBalanceRefund(Long loanId, LocalDate transactionDate, BigDecimal transactionAmount,
             String noteText, String externalId) {
         final Loan loan = this.loanAccountAssembler.assembleFrom(loanId);
+        businessEventNotifierService.notifyPreBusinessEvent(new LoanCreditBalanceRefundPreBusinessEvent(loan));
         final List<Long> existingTransactionIds = new ArrayList<>();
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
         AppUser currentUser = getAppUserIfPresent();
@@ -630,7 +664,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, false);
         recalculateAccruals(loan);
-        businessEventNotifierService.notifyBusinessEvent(new LoanCreditBalanceRefundBusinessEvent(newCreditBalanceRefundTransaction));
+        businessEventNotifierService
+                .notifyPostBusinessEvent(new LoanCreditBalanceRefundPostBusinessEvent(newCreditBalanceRefundTransaction));
 
         return new CommandProcessingResultBuilder().withEntityId(newCreditBalanceRefundTransaction.getId()) //
                 .withOfficeId(loan.getOfficeId()) //
@@ -643,6 +678,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId) {
         final Loan loan = this.loanAccountAssembler.assembleFrom(accountId);
         checkClientOrGroupActive(loan);
+        businessEventNotifierService.notifyPreBusinessEvent(new LoanRefundPreBusinessEvent(loan));
         final List<Long> existingTransactionIds = new ArrayList<>();
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
         AppUser currentUser = getAppUserIfPresent();
@@ -668,7 +704,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, false);
         recalculateAccruals(loan);
-        businessEventNotifierService.notifyBusinessEvent(new LoanRefundBusinessEvent(newRefundTransaction));
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanRefundPostBusinessEvent(newRefundTransaction));
 
         builderResult.withEntityId(newRefundTransaction.getId()).withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId())
                 .withGroupId(loan.getGroupId());
@@ -678,6 +714,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
     @Override
     public Map<String, Object> foreCloseLoan(final Loan loan, final LocalDate foreClosureDate, final String noteText) {
+        businessEventNotifierService.notifyPreBusinessEvent(new LoanForeClosurePreBusinessEvent(loan));
         MonetaryCurrency currency = loan.getCurrency();
         LocalDateTime createdDate = DateUtils.getLocalDateTimeOfTenant();
         final Map<String, Object> changes = new LinkedHashMap<>();
@@ -776,7 +813,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, false);
-        businessEventNotifierService.notifyBusinessEvent(new LoanForeClosureBusinessEvent(payment));
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanForeClosurePostBusinessEvent(payment));
         return changes;
 
     }

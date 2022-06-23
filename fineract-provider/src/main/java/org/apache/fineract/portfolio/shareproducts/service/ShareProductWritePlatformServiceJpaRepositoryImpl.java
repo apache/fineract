@@ -131,7 +131,7 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
             }
             this.shareProductDividentPayOutDetailsRepository.save(dividendPayOutDetails);
 
-            businessEventNotifierService.notifyBusinessEvent(new ShareProductDividentsCreateBusinessEvent(productId));
+            businessEventNotifierService.notifyPostBusinessEvent(new ShareProductDividentsCreateBusinessEvent(productId));
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(jsonCommand.commandId()) //
