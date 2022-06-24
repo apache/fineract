@@ -151,6 +151,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final List<CodeValueData> clientNonPersonMainBusinessLineOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CLIENT_NON_PERSON_MAIN_BUSINESS_LINE));
 
+        final List<CodeValueData> socialStatusOptions = new ArrayList<>(
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.SOCIAL_STATUS));
+
         final List<EnumOptionData> clientLegalFormOptions = ClientEnumerations.legalForm(LegalForm.values());
 
         final List<DatatableData> datatableTemplates = this.entityDatatableChecksReadService
@@ -158,7 +161,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         return ClientData.template(defaultOfficeId, LocalDate.now(DateUtils.getDateTimeZoneOfTenant()), offices, staffOptions, null,
                 genderOptions, savingsProductDatas, clientTypeOptions, clientClassificationOptions, clientNonPersonConstitutionOptions,
-                clientNonPersonMainBusinessLineOptions, clientLegalFormOptions, familyMemberOptions,
+                clientNonPersonMainBusinessLineOptions, socialStatusOptions, clientLegalFormOptions, familyMemberOptions,
                 new ArrayList<AddressData>(Arrays.asList(address)), isAddressEnabled, datatableTemplates);
     }
 
@@ -395,6 +398,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             sqlBuilder.append("cvclienttype.code_value as clienttypeValue, ");
             sqlBuilder.append("c.client_classification_cv_id as classificationId, ");
             sqlBuilder.append("cvclassification.code_value as classificationValue, ");
+            sqlBuilder.append("c.social_status_cv_id as socialStatusId, ");
+            sqlBuilder.append("cvSocialStatus.code_value as socialStatusValue, ");
             sqlBuilder.append("c.legal_form_enum as legalFormEnum, ");
             sqlBuilder.append("c.activation_date as activationDate, c.image_id as imageId, ");
             sqlBuilder.append("c.staff_id as staffId, s.display_name as staffName,");
@@ -437,6 +442,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             sqlBuilder.append("left join m_code_value cv on cv.id = c.gender_cv_id ");
             sqlBuilder.append("left join m_code_value cvclienttype on cvclienttype.id = c.client_type_cv_id ");
             sqlBuilder.append("left join m_code_value cvclassification on cvclassification.id = c.client_classification_cv_id ");
+            sqlBuilder.append("left join m_code_value cvSocialStatus on cv.id = c.social_status_cv_id ");
             sqlBuilder.append("left join m_code_value cvSubStatus on cvSubStatus.id = c.sub_status ");
             sqlBuilder.append("left join m_code_value cvConstitution on cvConstitution.id = cnp.constitution_cv_id ");
             sqlBuilder.append("left join m_code_value cvMainBusinessLine on cvMainBusinessLine.id = cnp.main_business_line_cv_id ");
@@ -483,6 +489,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String genderValue = rs.getString("genderValue");
             final CodeValueData gender = CodeValueData.instance(genderId, genderValue);
 
+            final Long socialStatusId = JdbcSupport.getLong(rs, "socialStatusId");
+            final String socialStatusValue = rs.getString("socialStatusValue");
+            final CodeValueData socialStatus = CodeValueData.instance(socialStatusId, socialStatusValue);
+
             final Long clienttypeId = JdbcSupport.getLong(rs, "clienttypeId");
             final String clienttypeValue = rs.getString("clienttypeValue");
             final CodeValueData clienttype = CodeValueData.instance(clienttypeId, clienttypeValue);
@@ -541,7 +551,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             return ClientData.instance(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id,
                     firstname, middlename, lastname, fullname, displayName, externalId, mobileNo, emailAddress, dateOfBirth, gender,
                     activationDate, imageId, staffId, staffName, timeline, savingsProductId, savingsProductName, savingsAccountId,
-                    clienttype, classification, legalForm, clientNonPerson, isStaff);
+                    clienttype, classification, socialStatus, legalForm, clientNonPerson, isStaff);
 
         }
     }
@@ -584,6 +594,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             builder.append("cvclienttype.code_value as clienttypeValue, ");
             builder.append("c.client_classification_cv_id as classificationId, ");
             builder.append("cvclassification.code_value as classificationValue, ");
+            builder.append("c.social_status_cv_id as socialStatusId, ");
+            builder.append("cvSocialStatus.code_value as socialStatusValue, ");
             builder.append("c.legal_form_enum as legalFormEnum, ");
 
             builder.append("c.submittedon_date as submittedOnDate, ");
@@ -625,6 +637,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             builder.append("left join m_code_value cv on cv.id = c.gender_cv_id ");
             builder.append("left join m_code_value cvclienttype on cvclienttype.id = c.client_type_cv_id ");
             builder.append("left join m_code_value cvclassification on cvclassification.id = c.client_classification_cv_id ");
+            builder.append("left join m_code_value cvSocialStatus on cvSocialStatus.id = c.social_status_cv_id ");
             builder.append("left join m_code_value cvSubStatus on cvSubStatus.id = c.sub_status ");
             builder.append("left join m_code_value cvConstitution on cvConstitution.id = cnp.constitution_cv_id ");
             builder.append("left join m_code_value cvMainBusinessLine on cvMainBusinessLine.id = cnp.main_business_line_cv_id ");
@@ -671,6 +684,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String genderValue = rs.getString("genderValue");
             final CodeValueData gender = CodeValueData.instance(genderId, genderValue);
 
+            final Long socialStatusId = JdbcSupport.getLong(rs, "socialStatusId");
+            final String socialStatusValue = rs.getString("socialStatusValue");
+            final CodeValueData socialStatus = CodeValueData.instance(socialStatusId, socialStatusValue);
+
             final Long clienttypeId = JdbcSupport.getLong(rs, "clienttypeId");
             final String clienttypeValue = rs.getString("clienttypeValue");
             final CodeValueData clienttype = CodeValueData.instance(clienttypeId, clienttypeValue);
@@ -728,7 +745,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             return ClientData.instance(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id,
                     firstname, middlename, lastname, fullname, displayName, externalId, mobileNo, emailAddress, dateOfBirth, gender,
                     activationDate, imageId, staffId, staffName, timeline, savingsProductId, savingsProductName, savingsAccountId,
-                    clienttype, classification, legalForm, clientNonPerson, isStaff);
+                    clienttype, classification, socialStatus, legalForm, clientNonPerson, isStaff);
 
         }
     }
@@ -839,9 +856,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final Collection<CodeValueData> clientClassificationOptions = null;
         final Collection<CodeValueData> clientNonPersonConstitutionOptions = null;
         final Collection<CodeValueData> clientNonPersonMainBusinessLineOptions = null;
+        final Collection<CodeValueData> socialStatusOptions = null;
         final List<EnumOptionData> clientLegalFormOptions = null;
         return ClientData.template(null, null, null, null, narrations, null, null, clientTypeOptions, clientClassificationOptions,
-                clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions, clientLegalFormOptions, null, null, null, null);
+                clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions, socialStatusOptions, clientLegalFormOptions,
+                null, null, null, null);
     }
 
     @Override

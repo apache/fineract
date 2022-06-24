@@ -35,4 +35,5 @@
     <include file="parts/0013_remove_topics.xml" relativeToChangelogFile="true"/>
     <include file="parts/0014_remove_unused_jobs.xml" relativeToChangelogFile="true"/>
     <include file="parts/0015_add_business_date.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0017_social_status_client.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

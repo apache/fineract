@@ -61,6 +61,7 @@ public class ClientApiConstants {
     public static final String GENDER = "Gender";
     public static final String CLIENT_TYPE = "ClientType";
     public static final String CLIENT_CLASSIFICATION = "ClientClassification";
+    public static final String SOCIAL_STATUS = "SocialStatus";
 
     public static final String CLIENT_NON_PERSON_CONSTITUTION = "Constitution";
     public static final String CLIENT_NON_PERSON_MAIN_BUSINESS_LINE = "Main Business Line";
@@ -112,6 +113,7 @@ public class ClientApiConstants {
     public static final String clientTypeIdParamName = "clientTypeId";
     public static final String clientTypeParamName = "clientType";
     public static final String clientClassificationIdParamName = "clientClassificationId";
+    public static final String socialStatusParamName = "socialStatus";
     public static final String clientClassificationParamName = "clientClassification";
     public static final String legalFormIdParamName = "legalFormId";
     public static final String legalFormParamName = "legalForm";

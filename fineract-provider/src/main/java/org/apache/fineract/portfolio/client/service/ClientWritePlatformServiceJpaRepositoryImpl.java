@@ -275,6 +275,13 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                         .findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.CLIENT_CLASSIFICATION, clientClassificationId);
             }
 
+            CodeValue socialStatus = null;
+            final Long socialStatusId = command.longValueOfParameterNamed(ClientApiConstants.socialStatusParamName);
+            if (socialStatusId != null) {
+                socialStatus = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.SOCIAL_STATUS,
+                        socialStatusId);
+            }
+
             final Long savingsProductId = command.longValueOfParameterNamed(ClientApiConstants.savingsProductIdParamName);
             if (savingsProductId != null) {
                 this.savingsProductRepository.findById(savingsProductId)
@@ -293,7 +300,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             }
 
             final Client newClient = Client.createNew(currentUser, clientOffice, clientParentGroup, staff, savingsProductId, gender,
-                    clientType, clientClassification, legalFormValue, command);
+                    clientType, clientClassification, socialStatus, legalFormValue, command);
             this.clientRepository.saveAndFlush(newClient);
             boolean rollbackTransaction = false;
             if (newClient.isActive()) {
@@ -459,13 +466,14 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 clientForUpdate.updateSavingsProduct(savingsProductId);
             }
 
-            if (changes.containsKey(ClientApiConstants.genderIdParamName)) {
-                final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.genderIdParamName);
+            if (changes.containsKey(ClientApiConstants.socialStatusParamName)) {
+                final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.socialStatusParamName);
                 CodeValue newCodeVal = null;
                 if (newValue != null) {
-                    newCodeVal = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.GENDER, newValue);
+                    newCodeVal = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.SOCIAL_STATUS,
+                            newValue);
                 }
-                clientForUpdate.updateGender(newCodeVal);
+                clientForUpdate.updateSocialStatus(newCodeVal);
             }
 
             if (changes.containsKey(ClientApiConstants.clientTypeIdParamName)) {

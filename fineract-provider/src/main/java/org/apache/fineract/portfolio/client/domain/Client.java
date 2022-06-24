@@ -223,6 +223,10 @@ public final class Client extends AbstractPersistableCustom {
     @JoinColumn(name = "client_classification_cv_id", nullable = true)
     private CodeValue clientClassification;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "social_status_cv_id", nullable = true)
+    private CodeValue socialStatus;
+
     @Column(name = "legal_form_enum", nullable = true)
     private Integer legalForm;
 
@@ -243,7 +247,7 @@ public final class Client extends AbstractPersistableCustom {
 
     public static Client createNew(final AppUser currentUser, final Office clientOffice, final Group clientParentGroup, final Staff staff,
             final Long savingsProductId, final CodeValue gender, final CodeValue clientType, final CodeValue clientClassification,
-            final Integer legalForm, final JsonCommand command) {
+            final CodeValue socialStatus, final Integer legalForm, final JsonCommand command) {
 
         final String accountNo = command.stringValueOfParameterNamed(ClientApiConstants.accountNoParamName);
         final String externalId = command.stringValueOfParameterNamed(ClientApiConstants.externalIdParamName);
@@ -283,7 +287,7 @@ public final class Client extends AbstractPersistableCustom {
         final Long savingsAccountId = null;
         return new Client(currentUser, status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname,
                 activationDate, officeJoiningDate, externalId, mobileNo, emailAddress, staff, submittedOnDate, savingsProductId,
-                savingsAccountId, dataOfBirth, gender, clientType, clientClassification, legalForm, isStaff);
+                savingsAccountId, dataOfBirth, gender, clientType, clientClassification, socialStatus, legalForm, isStaff);
     }
 
     Client() {
@@ -295,7 +299,7 @@ public final class Client extends AbstractPersistableCustom {
             final LocalDate activationDate, final LocalDate officeJoiningDate, final String externalId, final String mobileNo,
             final String emailAddress, final Staff staff, final LocalDate submittedOnDate, final Long savingsProductId,
             final Long savingsAccountId, final LocalDate dateOfBirth, final CodeValue gender, final CodeValue clientType,
-            final CodeValue clientClassification, final Integer legalForm, final Boolean isStaff) {
+            final CodeValue clientClassification, final CodeValue socialStatus, final Integer legalForm, final Boolean isStaff) {
 
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
@@ -375,6 +379,7 @@ public final class Client extends AbstractPersistableCustom {
         }
         this.clientType = clientType;
         this.clientClassification = clientClassification;
+        this.socialStatus = socialStatus;
         this.setLegalForm(legalForm);
 
         deriveDisplayName();
@@ -563,6 +568,11 @@ public final class Client extends AbstractPersistableCustom {
         if (command.isChangeInLongParameterNamed(ClientApiConstants.genderIdParamName, genderId())) {
             final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.genderIdParamName);
             actualChanges.put(ClientApiConstants.genderIdParamName, newValue);
+        }
+
+        if (command.isChangeInLongParameterNamed(ClientApiConstants.socialStatusParamName, genderId())) {
+            final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.socialStatusParamName);
+            actualChanges.put(ClientApiConstants.socialStatusParamName, newValue);
         }
 
         if (command.isChangeInLongParameterNamed(ClientApiConstants.savingsProductIdParamName, savingsProductId())) {
@@ -996,6 +1006,10 @@ public final class Client extends AbstractPersistableCustom {
 
     public void updateGender(CodeValue gender) {
         this.gender = gender;
+    }
+
+    public void updateSocialStatus(CodeValue socialStatus) {
+        this.socialStatus = socialStatus;
     }
 
     public Date dateOfBirth() {
