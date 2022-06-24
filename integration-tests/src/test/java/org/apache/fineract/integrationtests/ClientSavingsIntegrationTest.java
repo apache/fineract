@@ -2731,4 +2731,88 @@ public class ClientSavingsIntegrationTest {
         assertEquals(balance, summary.get("accountBalance"), "Verifying opening Balance is 500");
 
     }
+
+    @Test
+    public void testReversalWhenIsBulkIsTrue() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final String minBalanceForInterestCalculation = null;
+        final String minRequiredBalance = "0";
+        final String enforceMinRequiredBalance = "false";
+        final boolean allowOverdraft = false;
+        final boolean isBulk = true;
+
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+                minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
+        Assertions.assertNotNull(savingsProductID);
+
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assertions.assertNotNull(savingsId);
+        final Integer withdrawalChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
+                ChargesHelper.getSavingsWithdrawalFeeJSON());
+        Assertions.assertNotNull(withdrawalChargeId);
+
+        this.savingsAccountHelper.addChargesForSavings(savingsId, withdrawalChargeId, false);
+
+        HashMap savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        Integer withdrawalTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "500",
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        Float balance = Float.parseFloat("400.0");
+        assertEquals(balance, summary.get("accountBalance"), "Verifying account balance is 400");
+        LOG.info("------------------------When Bulk transaction is true------------------------");
+        this.savingsAccountHelper.reverseSavingsAccountTransaction(savingsId, withdrawalTransactionId, isBulk);
+        summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        balance = Float.parseFloat("1000.0");
+        assertEquals(balance, summary.get("accountBalance"), "Verifying account balance is 1000");
+    }
+
+    @Test
+    public void testReversalWhenIsBulkIsFalse() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final String minBalanceForInterestCalculation = null;
+        final String minRequiredBalance = "0";
+        final String enforceMinRequiredBalance = "false";
+        final boolean allowOverdraft = false;
+        final boolean isBulk = false;
+
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+                minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
+        Assertions.assertNotNull(savingsProductID);
+
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assertions.assertNotNull(savingsId);
+        final Integer withdrawalChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
+                ChargesHelper.getSavingsWithdrawalFeeJSON());
+        Assertions.assertNotNull(withdrawalChargeId);
+
+        this.savingsAccountHelper.addChargesForSavings(savingsId, withdrawalChargeId, false);
+
+        HashMap savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        Integer withdrawalTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "500",
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        Float balance = Float.parseFloat("400.0");
+        assertEquals(balance, summary.get("accountBalance"), "Verifying account balance is 400");
+        LOG.info("------------------------When Bulk transaction is false------------------------");
+        this.savingsAccountHelper.reverseSavingsAccountTransaction(savingsId, withdrawalTransactionId, isBulk);
+        summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        balance = Float.parseFloat("900.0");
+        assertEquals(balance, summary.get("accountBalance"), "Verifying account balance is 900");
+    }
 }
