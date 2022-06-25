@@ -199,11 +199,11 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
         Collection<StandingInstructionData> instructionDatas = this.standingInstructionReadPlatformService
                 .retrieveAll(StandingInstructionStatus.ACTIVE.getValue());
         List<Throwable> errors = new ArrayList<>();
+        LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
         for (StandingInstructionData data : instructionDatas) {
             boolean isDueForTransfer = false;
             AccountTransferRecurrenceType recurrenceType = data.recurrenceType();
             StandingInstructionType instructionType = data.instructionType();
-            LocalDate transactionDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
             if (recurrenceType.isPeriodicRecurrence()) {
                 final ScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
                 PeriodFrequencyType frequencyType = data.recurrenceFrequency();
