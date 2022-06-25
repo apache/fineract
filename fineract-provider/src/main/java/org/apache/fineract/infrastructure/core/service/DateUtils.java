@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.core.service;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -74,6 +75,10 @@ public final class DateUtils {
         return createDate(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
     }
 
+    public static LocalDate convertToLocalDate(final Date dateToConvert, final ZoneId zoneId) {
+        return dateToConvert.toInstant().atZone(zoneId).toLocalDate();
+    }
+
     public static Date createDate(int year, int month, int day) {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.YEAR, year);
@@ -97,10 +102,27 @@ public final class DateUtils {
         return today;
     }
 
-    public static LocalDate parseLocalDate(final String stringDate, final String pattern) {
-
+    public static Date parseDate(final String stringDate, final String pattern, final ZoneId zoneId) {
         try {
-            final DateTimeFormatter dateStringFormat = DateTimeFormatter.ofPattern(pattern).withZone(getDateTimeZoneOfTenant());
+            return new SimpleDateFormat(pattern).parse(stringDate);
+        } catch (final ParseException e) {
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+            final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.date.pattern",
+                    "The parameter date (" + stringDate + ") is invalid w.r.t. pattern " + pattern, "date", stringDate, pattern);
+            dataValidationErrors.add(error);
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors, e);
+        }
+    }
+
+    public static LocalDate parseLocalDate(final String stringDate, final String pattern, final ZoneId zoneId) {
+        try {
+            DateTimeFormatter dateStringFormat;
+            if (zoneId != null) {
+                dateStringFormat = DateTimeFormatter.ofPattern(pattern).withZone(zoneId);
+            } else {
+                dateStringFormat = DateTimeFormatter.ofPattern(pattern);
+            }
             final ZonedDateTime dateTime = ZonedDateTime.parse(stringDate, dateStringFormat);
             return dateTime.toLocalDate();
         } catch (final IllegalArgumentException e) {
@@ -111,6 +133,10 @@ public final class DateUtils {
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
                     dataValidationErrors, e);
         }
+    }
+
+    public static LocalDate parseLocalDate(final String stringDate, final String pattern) {
+        return parseLocalDate(stringDate, pattern, getDateTimeZoneOfTenant());
     }
 
     public static String formatToSqlDate(final Date date) {

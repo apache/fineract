@@ -32,14 +32,20 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
@@ -94,6 +100,8 @@ public class SchedulerJobsTestResults {
     private JournalEntryHelper journalEntryHelper;
     private StandingInstructionsHelper standingInstructionsHelper;
 
+    private TimeZone systemTimeZone;
+
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
@@ -103,6 +111,8 @@ public class SchedulerJobsTestResults {
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.accountHelper = new AccountHelper(requestSpec, responseSpec);
         this.journalEntryHelper = new JournalEntryHelper(requestSpec, responseSpec);
+
+        this.systemTimeZone = TimeZone.getTimeZone(Utils.TENANT_TIME_ZONE);
     }
 
     @AfterEach
@@ -459,18 +469,20 @@ public class SchedulerJobsTestResults {
         this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
         this.standingInstructionsHelper = new StandingInstructionsHelper(requestSpec, responseSpec);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        DateFormat monthDayFormat = new SimpleDateFormat("dd MMMM", Locale.US);
+        final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
+        final DateTimeFormatter monthDayFormat = DateTimeFormatter.ofPattern("dd MMMM", Locale.US);
 
-        Calendar todaysDate = Calendar.getInstance();
-
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
-
-        todaysDate.add(Calendar.WEEK_OF_YEAR, -1);
-        final String VALID_FROM = dateFormat.format(todaysDate.getTime());
-
-        todaysDate.add(Calendar.YEAR, 1);
-        final String VALID_TO = dateFormat.format(todaysDate.getTime());
+        // Create the LocalDate with the Zone used by default
+        final LocalDate localDate = LocalDate.now(this.systemTimeZone.toZoneId());
+        ZonedDateTime currentDate = ZonedDateTime.of(localDate, LocalTime.MIDNIGHT, this.systemTimeZone.toZoneId());
+        // When the Stanging Instruction will be applied
+        final String MONTH_DAY = monthDayFormat.format(currentDate.toLocalDate());
+        // Standing Instruction valid from (One week before today)
+        currentDate = currentDate.minus(Duration.ofDays(7));
+        final String VALID_FROM = dateFormat.format(currentDate);
+        // Standing Instruction valid to (One year after)
+        currentDate = currentDate.plus(1, ChronoUnit.YEARS);
+        final String VALID_TO = dateFormat.format(currentDate);
 
         final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientID);

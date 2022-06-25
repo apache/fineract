@@ -788,7 +788,7 @@ public class LoanTransactionHelper {
                 LocalDate accrualEntryDate = LocalDate.of(accrualEntryDateAsArray.get(0), accrualEntryDateAsArray.get(1),
                         accrualEntryDateAsArray.get(2));
 
-                if (transactionDate.equals(accrualEntryDate)) {
+                if (transactionDate.isEqual(accrualEntryDate)) {
                     isTransactionFound = true;
                     assertEquals(interestPortion, Float.valueOf(String.valueOf(transactions.get(i).get("interestPortion"))),
                             "Mismatch in transaction amounts");
