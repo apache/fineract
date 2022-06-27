@@ -225,7 +225,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         }
 
         if (depositCloseDate == null) {
-            depositCloseDate = DateUtils.getLocalDateOfTenant();
+            depositCloseDate = DateUtils.getBusinessLocalDate();
         }
 
         final BigDecimal depositAmount = accountTermAndPreClosure.depositAmount();
@@ -248,7 +248,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         LocalDate interestCalculationUpto = null;
         List<SavingsAccountTransaction> allTransactions = null;
         if (maturityDate == null) {
-            interestCalculationUpto = DateUtils.getLocalDateOfTenant();
+            interestCalculationUpto = DateUtils.getBusinessLocalDate();
             allTransactions = getTransactions(interestCalculationUpto, false);
         } else {
             interestCalculationUpto = maturityDate.minusDays(1);
@@ -285,7 +285,7 @@ public class RecurringDepositAccount extends SavingsAccount {
             }
         }
 
-        final LocalDate todayDate = DateUtils.getLocalDateOfTenant();
+        final LocalDate todayDate = DateUtils.getBusinessLocalDate();
         if (!this.maturityDate().isAfter(todayDate)) {
             // update account status
             this.status = SavingsAccountStatusType.MATURED.getValue();
@@ -549,7 +549,7 @@ public class RecurringDepositAccount extends SavingsAccount {
 
             // update existing transactions so derived balance fields are
             // correct.
-            recalculateDailyBalances(Money.zero(this.currency), DateUtils.getLocalDateOfTenant(), backdatedTxnsAllowedTill);
+            recalculateDailyBalances(Money.zero(this.currency), DateUtils.getBusinessLocalDate(), backdatedTxnsAllowedTill);
         }
     }
 
@@ -1059,7 +1059,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         if (this.chart != null) {
             final LocalDate chartFromDate = this.chart.getFromDateAsLocalDate();
             LocalDate chartEndDate = this.chart.getEndDateAsLocalDate();
-            chartEndDate = chartEndDate == null ? DateUtils.getLocalDateOfTenant() : chartEndDate;
+            chartEndDate = chartEndDate == null ? DateUtils.getBusinessLocalDate() : chartEndDate;
 
             final LocalDateInterval chartInterval = LocalDateInterval.create(chartFromDate, chartEndDate);
             if (!chartInterval.contains(accountSubmittedOrActivationDate())) {
@@ -1067,7 +1067,7 @@ public class RecurringDepositAccount extends SavingsAccount {
             }
 
             if (maturityDate == null) {
-                maturityDate = DateUtils.getLocalDateOfTenant();
+                maturityDate = DateUtils.getBusinessLocalDate();
             }
 
             final BigDecimal maturityAmount = this.accountTermAndPreClosure.depositAmount();
@@ -1199,7 +1199,7 @@ public class RecurringDepositAccount extends SavingsAccount {
     private LocalDate calcualteScheduleTillDate(final PeriodFrequencyType frequency, final Integer recurringEvery) {
         LocalDate tillDate = calculateMaturityDate();
         if (tillDate == null) {
-            final LocalDate today = DateUtils.getLocalDateOfTenant();
+            final LocalDate today = DateUtils.getBusinessLocalDate();
             tillDate = DepositAccountUtils.calculateNextDepositDate(today, frequency,
                     recurringEvery * (DepositAccountUtils.GENERATE_MINIMUM_NUMBER_OF_FUTURE_INSTALMENTS + 1));
         }

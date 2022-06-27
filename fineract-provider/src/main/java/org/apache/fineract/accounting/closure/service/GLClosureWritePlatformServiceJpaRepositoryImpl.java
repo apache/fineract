@@ -67,7 +67,7 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
             final Office office = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
             // TODO: Get Tenant specific date
             // ensure closure date is not in the future
-            final Date todaysDate = new Date();
+            final Date todaysDate = DateUtils.getBusinessDate();
             final Date closureDate = command.dateValueOfParameterNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue());
             if (closureDate.after(todaysDate)) {
                 throw new GLClosureInvalidException(GlClosureInvalidReason.FUTURE_DATE, closureDate);

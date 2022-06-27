@@ -500,7 +500,7 @@ public final class PostingPeriod {
     private static LocalDate getPeriodEndDate(LocalDate periodEndDate, int previousMonth, int periodsInMonth, LocalDate periodStartDate) {
         int year = periodStartDate.get(ChronoField.YEAR_OF_ERA);
         int monthofYear = periodStartDate.getMonthValue();
-        LocalDate date = DateUtils.getLocalDateOfTenant();
+        LocalDate date = DateUtils.getBusinessLocalDate();
         TreeSet<Integer> monthSet = new TreeSet<>();
         date = date.withMonth(previousMonth);
         monthSet.add(date.getMonthValue());
@@ -519,14 +519,14 @@ public final class PostingPeriod {
 
         for (Integer month : monthSet) {
             if (monthofYear <= month.intValue()) {
-                periodEndDate = LocalDate.of(year, month, DateUtils.getLocalDateOfTenant().withMonth(month).lengthOfMonth());
+                periodEndDate = LocalDate.of(year, month, DateUtils.getBusinessLocalDate().withMonth(month).lengthOfMonth());
                 notInRange = false;
                 break;
             }
         }
         if (notInRange) {
             periodEndDate = LocalDate.of(year + 1, monthSet.first(),
-                    DateUtils.getLocalDateOfTenant().withMonth(monthSet.first()).lengthOfMonth());
+                    DateUtils.getBusinessLocalDate().withMonth(monthSet.first()).lengthOfMonth());
         }
         return periodEndDate;
     }

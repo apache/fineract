@@ -380,7 +380,7 @@ public class InteropServiceImpl implements InteropService {
     public InteropTransferResponseData prepareTransfer(@NotNull JsonCommand command) {
         InteropTransferRequestData request = dataValidator.validateAndParseTransferRequest(command);
         String transferCode = request.getTransferCode();
-        LocalDateTime transactionDate = DateUtils.getLocalDateTimeOfTenant();
+        LocalDate transactionDate = DateUtils.getBusinessLocalDate();
 
         // TODO validate request fee/comission and account quote amount
         // matching, at CREATE it is debited anyway
@@ -401,12 +401,11 @@ public class InteropServiceImpl implements InteropService {
             PaymentDetail paymentDetail = instance(findPaymentType(), savingsAccount.getExternalId(), null, getRoutingCode(), transferCode,
                     null);
             SavingsAccountTransaction holdTransaction = SavingsAccountTransaction.holdAmount(savingsAccount, savingsAccount.office(),
-                    paymentDetail, transactionDate.toLocalDate(), Money.of(savingsAccount.getCurrency(), total), new Date(), getLoginUser(),
-                    false);
+                    paymentDetail, transactionDate, Money.of(savingsAccount.getCurrency(), total), new Date(), getLoginUser(), false);
             MonetaryCurrency accountCurrency = savingsAccount.getCurrency().copy();
             holdTransaction.updateRunningBalance(
                     Money.of(accountCurrency, savingsAccount.getWithdrawableBalance().subtract(holdTransaction.getAmount())));
-            holdTransaction.updateCumulativeBalanceAndDates(accountCurrency, transactionDate.toLocalDate());
+            holdTransaction.updateCumulativeBalanceAndDates(accountCurrency, transactionDate);
 
             savingsAccount.holdAmount(total);
             savingsAccount.addTransaction(holdTransaction);
@@ -415,7 +414,7 @@ public class InteropServiceImpl implements InteropService {
         }
 
         return InteropTransferResponseData.build(command.commandId(), request.getTransactionCode(), InteropActionState.ACCEPTED,
-                request.getExpiration(), request.getExtensionList(), transferCode, transactionDate);
+                request.getExpiration(), request.getExtensionList(), transferCode, DateUtils.getLocalDateTimeOfTenant());
     }
 
     @Override
@@ -432,7 +431,7 @@ public class InteropServiceImpl implements InteropService {
         }
 
         LocalDateTime transactionDateTime = DateUtils.getLocalDateTimeOfTenant();
-        LocalDate transactionDate = transactionDateTime.toLocalDate();
+        LocalDate transactionDate = DateUtils.getBusinessLocalDate();
         DateTimeFormatter fmt = getDateTimeFormatter(command);
         SavingsAccountTransaction transaction;
         final boolean backdatedTxnsAllowedTill = false;
@@ -489,15 +488,15 @@ public class InteropServiceImpl implements InteropService {
         SavingsAccount savingsAccount = validateAndGetSavingAccount(request);
 
         LocalDateTime transactionDateTime = DateUtils.getLocalDateTimeOfTenant();
+        LocalDate transactionDate = DateUtils.getBusinessLocalDate();
         SavingsAccountTransaction holdTransaction = findTransaction(savingsAccount, request.getTransferCode(), AMOUNT_HOLD.getValue());
 
         if (holdTransaction != null && holdTransaction.getReleaseIdOfHoldAmountTransaction() == null) {
-            SavingsAccountTransaction releaseTransaction = releaseAmount(holdTransaction, transactionDateTime.toLocalDate(), new Date(),
-                    getLoginUser());
+            SavingsAccountTransaction releaseTransaction = releaseAmount(holdTransaction, transactionDate, new Date(), getLoginUser());
             MonetaryCurrency accountCurrency = savingsAccount.getCurrency().copy();
             releaseTransaction.updateRunningBalance(
                     Money.of(accountCurrency, savingsAccount.getWithdrawableBalance().add(holdTransaction.getAmount())));
-            releaseTransaction.updateCumulativeBalanceAndDates(accountCurrency, transactionDateTime.toLocalDate());
+            releaseTransaction.updateCumulativeBalanceAndDates(accountCurrency, transactionDate);
             releaseTransaction = savingsAccountTransactionRepository.saveAndFlush(releaseTransaction);
             holdTransaction.updateReleaseId(releaseTransaction.getId());
 
@@ -535,8 +534,6 @@ public class InteropServiceImpl implements InteropService {
     public @NotNull String disburseLoan(@NotNull String accountId, String apiRequestBodyAsJson) {
         Loan loan = validateAndGetLoan(accountId);
         Long loanId = loan.getId();
-
-        LocalDateTime disbursedOnDate = DateUtils.getLocalDateTimeOfTenant();
 
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 

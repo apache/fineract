@@ -18,27 +18,22 @@
  */
 package org.apache.fineract.notification.eventandlistener;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.core.domain.FineractContext;
+import org.apache.fineract.infrastructure.core.domain.FineractEvent;
 import org.apache.fineract.notification.data.NotificationData;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
 
-@Component
-@Profile("!activeMqEnabled")
-@RequiredArgsConstructor
-@Slf4j
-public class SpringNotificationEventListener implements ApplicationListener<NotificationEvent> {
+@SuppressWarnings("serial")
+public class NotificationEvent extends FineractEvent {
 
-    private final NotificationEventListener notificationEventListener;
+    private NotificationData notificationData;
 
-    @Override
-    public void onApplicationEvent(NotificationEvent event) {
-        log.debug("Processing Spring notification event {}", event);
-        ThreadLocalContextUtil.syncUp(event.getContext());
-        NotificationData notificationData = event.getNotificationData();
-        notificationEventListener.receive(notificationData);
+    public NotificationEvent(Object source, NotificationData notificationData, FineractContext context) {
+        super(source, context);
+        this.notificationData = notificationData;
     }
+
+    public NotificationData getNotificationData() {
+        return notificationData;
+    }
+
 }

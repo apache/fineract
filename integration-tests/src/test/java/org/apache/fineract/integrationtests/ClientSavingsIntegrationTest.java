@@ -39,7 +39,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
@@ -82,6 +81,7 @@ public class ClientSavingsIntegrationTest {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.requestSpec.header("Fineract-Platform-TenantId", "default");
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
@@ -1920,7 +1920,7 @@ public class ClientSavingsIntegrationTest {
         savingsList.add(savingsId);
 
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
-        LocalDate transactionDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        LocalDate transactionDate = LocalDate.now(Utils.getZoneIdOfTenant());
         for (int i = 0; i < 4; i++) {
             String transactionDateValue = formatter.format(transactionDate);
             Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsList.get(i), DEPOSIT_AMOUNT,
@@ -1953,7 +1953,7 @@ public class ClientSavingsIntegrationTest {
         balance -= chargeAmt;
         assertEquals(balance, summary.get("accountBalance"), "Verifying account Balance");
 
-        String transactionDateValue = formatter.format(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
+        String transactionDateValue = formatter.format(LocalDate.now(Utils.getZoneIdOfTenant()));
         Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsList.get(1), DEPOSIT_AMOUNT,
                 transactionDateValue, CommonConstants.RESPONSE_RESOURCE_ID);
         savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(1));
@@ -1972,7 +1972,7 @@ public class ClientSavingsIntegrationTest {
         balance -= chargeAmt;
         assertEquals(balance, summary.get("accountBalance"), "Verifying account Balance");
 
-        transactionDateValue = formatter.format(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
+        transactionDateValue = formatter.format(LocalDate.now(Utils.getZoneIdOfTenant()));
         depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsList.get(2), DEPOSIT_AMOUNT,
                 transactionDateValue, CommonConstants.RESPONSE_RESOURCE_ID);
         savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(2));
@@ -2225,7 +2225,7 @@ public class ClientSavingsIntegrationTest {
                 error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         Integer releaseTransactionId = this.savingsAccountHelper.releaseAmount(savingsId, holdTransactionId);
-        Date today = Date.from(Utils.getLocalDateOfTenant().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        Date today = Date.from(Utils.getLocalDateOfTenant().atStartOfDay(Utils.getZoneIdOfTenant()).toInstant());
         String todayDate = today.toString();
         SimpleDateFormat dt1 = new SimpleDateFormat("dd MMM yyyy");
         todayDate = dt1.format(today).toString();

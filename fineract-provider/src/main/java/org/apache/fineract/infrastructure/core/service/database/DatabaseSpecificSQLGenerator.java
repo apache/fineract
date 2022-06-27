@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.core.service.database;
 
 import static java.lang.String.format;
 
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -87,23 +88,33 @@ public class DatabaseSpecificSQLGenerator {
         return format("SELECT COUNT(*) FROM (%s) AS temp", sql);
     }
 
-    public String currentDate() {
+    public String currentBusinessDate() {
         if (databaseTypeResolver.isMySQL()) {
-            return "CURDATE()";
+            return format("DATE('%s')", DateUtils.getBusinessLocalDate().format(DateUtils.DEFAULT_DATE_FORMATER));
         } else if (databaseTypeResolver.isPostgreSQL()) {
-            return "CURRENT_DATE";
+            return format("DATE '%s'", DateUtils.getBusinessLocalDate().format(DateUtils.DEFAULT_DATE_FORMATER));
         } else {
             throw new IllegalStateException("Database type is not supported for current date " + databaseTypeResolver.databaseType());
         }
     }
 
-    public String currentDateTime() {
+    public String currentTenantDate() {
         if (databaseTypeResolver.isMySQL()) {
-            return "CURRENT_TIMESTAMP()";
+            return format("DATE('%s')", DateUtils.getLocalDateOfTenant().format(DateUtils.DEFAULT_DATE_FORMATER));
         } else if (databaseTypeResolver.isPostgreSQL()) {
-            return "CURRENT_TIMESTAMP";
+            return format("DATE '%s'", DateUtils.getLocalDateOfTenant().format(DateUtils.DEFAULT_DATE_FORMATER));
         } else {
             throw new IllegalStateException("Database type is not supported for current date " + databaseTypeResolver.databaseType());
+        }
+    }
+
+    public String currentTenantDateTime() {
+        if (databaseTypeResolver.isMySQL()) {
+            return format("TIMESTAMP('%s')", DateUtils.getLocalDateTimeOfTenant().format(DateUtils.DEFAULT_DATETIME_FORMATER));
+        } else if (databaseTypeResolver.isPostgreSQL()) {
+            return format("TIMESTAMP '%s'", DateUtils.getLocalDateTimeOfTenant().format(DateUtils.DEFAULT_DATETIME_FORMATER));
+        } else {
+            throw new IllegalStateException("Database type is not supported for current date time" + databaseTypeResolver.databaseType());
         }
     }
 

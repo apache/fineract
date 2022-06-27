@@ -211,7 +211,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
         final List<Guarantor> existGuarantorList = this.guarantorRepository.findByLoan(loan);
         final boolean isRegularTransaction = true;
         final boolean isExceptionForBalanceCheck = true;
-        LocalDate transactionDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        LocalDate transactionDate = DateUtils.getBusinessLocalDate();
         PortfolioAccountType fromAccountType = PortfolioAccountType.SAVINGS;
         PortfolioAccountType toAccountType = PortfolioAccountType.LOAN;
         final Long toAccountId = loan.getId();

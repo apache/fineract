@@ -83,7 +83,7 @@ public class LoanAccrualPlatformServiceImpl implements LoanAccrualPlatformServic
     @CronTarget(jobName = JobName.ADD_PERIODIC_ACCRUAL_ENTRIES)
     public void addPeriodicAccruals() throws JobExecutionException {
         try {
-            addPeriodicAccruals(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
+            addPeriodicAccruals(DateUtils.getBusinessLocalDate());
         } catch (MultiException e) {
             throw new JobExecutionException(e);
         }

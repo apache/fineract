@@ -139,7 +139,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         BigDecimal marketValue = shareProductData.getUnitPrice();
         Collection<ShareProductMarketPriceData> marketDataSet = shareProductData.getMarketPrice();
         if (marketDataSet != null && !marketDataSet.isEmpty()) {
-            Date currentDate = DateUtils.getDateOfTenant();
+            Date currentDate = DateUtils.getBusinessDate();
             for (ShareProductMarketPriceData data : marketDataSet) {
                 Date futureDate = data.getStartDate();
                 if (currentDate.after(futureDate)) {

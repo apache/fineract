@@ -29,11 +29,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import lombok.Setter;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryType;
 import org.apache.fineract.batch.command.CommandStrategyProvider;
 import org.apache.fineract.batch.service.ResolutionHelper;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
-import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
@@ -60,6 +61,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 @Component
 @Scope("prototype")
+@Setter
 public class SavingsSchedularInterestPoster implements Callable<Void> {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsSchedularInterestPoster.class);
@@ -70,7 +72,7 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
     private SavingsAccountWritePlatformService savingsAccountWritePlatformService;
     private SavingsAccountRepositoryWrapper savingsAccountRepository;
     private SavingsAccountAssembler savingAccountAssembler;
-    private FineractPlatformTenant tenant;
+    private FineractContext context;
     private ConfigurationDomainService configurationDomainService;
     private boolean backdatedTxnsAllowedTill;
     private List<SavingsAccountData> savingsAccountDataList = new ArrayList<>();
@@ -80,61 +82,13 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
     private ResolutionHelper resolutionHelper;
     private SavingsAccountReadPlatformService savingsAccountReadPlatformService;
 
-    public void setSavings(Collection<SavingsAccountData> savingAccounts) {
-        this.savingAccounts = savingAccounts;
-    }
-
-    public void setBackdatedTxnsAllowedTill(final boolean backdatedTxnsAllowedTill) {
-        this.backdatedTxnsAllowedTill = backdatedTxnsAllowedTill;
-    }
-
-    public void setSavingsAccountWritePlatformService(SavingsAccountWritePlatformService savingsAccountWritePlatformService) {
-        this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
-    }
-
-    public void setSavingsAccountReadPlatformService(SavingsAccountReadPlatformService savingsAccountReadPlatformService) {
-        this.savingsAccountReadPlatformService = savingsAccountReadPlatformService;
-    }
-
-    public void setSavingsAccountRepository(SavingsAccountRepositoryWrapper savingsAccountRepository) {
-        this.savingsAccountRepository = savingsAccountRepository;
-    }
-
-    public void setSavingAccountAssembler(SavingsAccountAssembler savingAccountAssembler) {
-        this.savingAccountAssembler = savingAccountAssembler;
-    }
-
-    public void setTenant(FineractPlatformTenant tenant) {
-        this.tenant = tenant;
-    }
-
-    public void setConfigurationDomainService(ConfigurationDomainService configurationDomainService) {
-        this.configurationDomainService = configurationDomainService;
-    }
-
-    public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
-    public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
-        this.transactionTemplate = transactionTemplate;
-    }
-
-    public void setResolutionHelper(ResolutionHelper resolutionHelper) {
-        this.resolutionHelper = resolutionHelper;
-    }
-
-    public void setStrategyProvider(CommandStrategyProvider commandStrategyProvider) {
-        this.strategyProvider = commandStrategyProvider;
-    }
-
     @Override
     @SuppressFBWarnings(value = {
             "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public Void call() throws org.apache.fineract.infrastructure.jobs.exception.JobExecutionException {
-        ThreadLocalContextUtil.setTenant(tenant);
-        Integer maxNumberOfRetries = tenant.getConnection().getMaxRetriesOnDeadlock();
-        Integer maxIntervalBetweenRetries = tenant.getConnection().getMaxIntervalBetweenRetries();
+        ThreadLocalContextUtil.syncUp(this.context);
+        Integer maxNumberOfRetries = this.context.getTenantContext().getConnection().getMaxRetriesOnDeadlock();
+        Integer maxIntervalBetweenRetries = this.context.getTenantContext().getConnection().getMaxIntervalBetweenRetries();
 
         // List<BatchResponse> responseList = new ArrayList<>();
         long start = System.currentTimeMillis();
@@ -298,17 +252,14 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
         List<String> transRefNo = new ArrayList<>();
         for (SavingsAccountData savingsAccountData : savingsAccountDataList) {
             SavingsAccountSummaryData savingsAccountSummaryData = savingsAccountData.getSummary();
-            paramsForSavingsSummary.add(new Object[] { savingsAccountSummaryData.getTotalDeposits(),
-                    savingsAccountSummaryData.getTotalWithdrawals(), savingsAccountSummaryData.getTotalInterestEarned(),
-                    savingsAccountSummaryData.getTotalInterestPosted(), savingsAccountSummaryData.getTotalWithdrawalFees(),
-                    savingsAccountSummaryData.getTotalFeeCharge(), savingsAccountSummaryData.getTotalPenaltyCharge(),
-                    savingsAccountSummaryData.getTotalAnnualFees(), savingsAccountSummaryData.getAccountBalance(),
-                    savingsAccountSummaryData.getTotalOverdraftInterestDerived(), savingsAccountSummaryData.getTotalWithholdTax(),
-                    Date.from(savingsAccountSummaryData.getLastInterestCalculationDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant())
-                            .toInstant()),
-                    Date.from(savingsAccountSummaryData.getInterestPostedTillDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant())
-                            .toInstant()),
-                    savingsAccountData.getId() });
+            paramsForSavingsSummary
+                    .add(new Object[] { savingsAccountSummaryData.getTotalDeposits(), savingsAccountSummaryData.getTotalWithdrawals(),
+                            savingsAccountSummaryData.getTotalInterestEarned(), savingsAccountSummaryData.getTotalInterestPosted(),
+                            savingsAccountSummaryData.getTotalWithdrawalFees(), savingsAccountSummaryData.getTotalFeeCharge(),
+                            savingsAccountSummaryData.getTotalPenaltyCharge(), savingsAccountSummaryData.getTotalAnnualFees(),
+                            savingsAccountSummaryData.getAccountBalance(), savingsAccountSummaryData.getTotalOverdraftInterestDerived(),
+                            savingsAccountSummaryData.getTotalWithholdTax(), savingsAccountSummaryData.getLastInterestCalculationDate(),
+                            savingsAccountSummaryData.getInterestPostedTillDate(), savingsAccountData.getId() });
             List<SavingsAccountTransactionData> savingsAccountTransactionDataList = savingsAccountData.getSavingsAccountTransactionData();
             for (SavingsAccountTransactionData savingsAccountTransactionData : savingsAccountTransactionDataList) {
                 if (savingsAccountTransactionData.getId() == null) {
@@ -321,9 +272,7 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
                                 .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
                     }
                     paramsForTransactionInsertion.add(new Object[] { savingsAccountData.getId(), savingsAccountData.getOfficeId(),
-                            savingsAccountTransactionData.getTransactionType().getId(),
-                            Date.from(savingsAccountTransactionData.getTransactionDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant())
-                                    .toInstant()),
+                            savingsAccountTransactionData.getTransactionType().getId(), savingsAccountTransactionData.getTransactionDate(),
                             savingsAccountTransactionData.getAmount(), balanceEndDate,
                             savingsAccountTransactionData.getBalanceNumberOfDays(), savingsAccountTransactionData.getRunningBalance(),
                             savingsAccountTransactionData.getCumulativeBalance(), savingsAccountTransactionData.getSubmittedOnDate(),

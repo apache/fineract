@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.loanaccount.guarantor.service;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -125,7 +124,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
                 guarantorFundingDetails.add(fundingDetails);
                 if (loan.isDisbursed()
                         || (loan.isApproved() && (loan.getGuaranteeAmount() != null || loan.loanProduct().isHoldGuaranteeFundsEnabled()))) {
-                    this.guarantorDomainService.assignGuarantor(fundingDetails, LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
+                    this.guarantorDomainService.assignGuarantor(fundingDetails, DateUtils.getBusinessLocalDate());
                     loan.updateGuaranteeAmount(fundingDetails.getAmount());
                 }
             }
@@ -312,7 +311,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
         GuarantorFundStatusType fundStatusType = GuarantorFundStatusType.DELETED;
         if (guarantorForDelete.getLoan().isDisbursed() || guarantorForDelete.getLoan().isApproved()) {
             fundStatusType = GuarantorFundStatusType.WITHDRAWN;
-            this.guarantorDomainService.releaseGuarantor(guarantorFundingDetails, LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
+            this.guarantorDomainService.releaseGuarantor(guarantorFundingDetails, DateUtils.getBusinessLocalDate());
         }
         guarantorForDelete.updateStatus(guarantorFundingDetails, fundStatusType);
     }

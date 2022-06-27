@@ -324,7 +324,7 @@ public class SavingsAccountTransactionDataValidator {
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
         Date createdDate = new Date();
-        LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
+        LocalDate transactionDate = DateUtils.getBusinessLocalDate();
         SavingsAccountTransaction transaction = SavingsAccountTransaction.releaseAmount(holdTransaction, transactionDate, createdDate,
                 createdUser);
         return transaction;

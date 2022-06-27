@@ -82,7 +82,7 @@ public class SpmService {
             this.deactivateSurvey(previousSurvey.getId());
         }
         // set valid from to start of today
-        LocalDate validFrom = DateUtils.getLocalDateOfTenant();
+        LocalDate validFrom = DateUtils.getBusinessLocalDate();
         // set valid to for 100 years
         Calendar cal = Calendar.getInstance();
         cal.setTime(Date.from(validFrom.atStartOfDay(ZoneId.systemDefault()).toInstant()));
@@ -133,7 +133,7 @@ public class SpmService {
         this.securityContext.authenticatedUser();
 
         final Survey survey = findById(id);
-        LocalDate validFrom = DateUtils.getLocalDateOfTenant();
+        LocalDate validFrom = DateUtils.getBusinessLocalDate();
         Calendar cal = Calendar.getInstance();
         cal.setTime(Date.from(validFrom.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         cal.add(Calendar.YEAR, 100);

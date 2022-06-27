@@ -36,7 +36,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
-import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
@@ -127,11 +127,11 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
         boolean lastBatch = false;
         int loopCount = size / batchSize + 1;
 
-        FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+        FineractContext context = ThreadLocalContextUtil.syncDown();
         Long finalMaxSavingsIdInList = maxSavingsIdInList;
 
         Callable<Void> fetchData = () -> {
-            ThreadLocalContextUtil.setTenant(tenant);
+            ThreadLocalContextUtil.syncUp(context);
             Long maxId = finalMaxSavingsIdInList;
             if (!queue.isEmpty()) {
                 maxId = Math.max(finalMaxSavingsIdInList, queue.element().get(queue.element().size() - 1).getId());
@@ -155,8 +155,8 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
             List<SavingsAccountData> subList = safeSubList(savingsAccounts, fromIndex, toIndex);
             SavingsSchedularInterestPoster poster = (SavingsSchedularInterestPoster) this.applicationContext
                     .getBean("savingsSchedularInterestPoster");
-            poster.setSavings(subList);
-            poster.setTenant(tenant);
+            poster.setSavingAccounts(subList);
+            poster.setContext(ThreadLocalContextUtil.syncDown());
             poster.setSavingsAccountWritePlatformService(savingsAccountWritePlatformService);
             poster.setSavingsAccountReadPlatformService(savingAccountReadPlatformService);
             poster.setSavingsAccountRepository(savingsAccountRepository);
@@ -247,7 +247,7 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
     @Override
     @CronTarget(jobName = JobName.UPDATE_SAVINGS_DORMANT_ACCOUNTS)
     public void updateSavingsDormancyStatus() throws JobExecutionException {
-        LocalDate tenantLocalDate = DateUtils.getLocalDateOfTenant();
+        LocalDate tenantLocalDate = DateUtils.getBusinessLocalDate();
 
         List<Long> savingsPendingInactive = savingAccountReadPlatformService.retrieveSavingsIdsPendingInactive(tenantLocalDate);
         if (null != savingsPendingInactive && savingsPendingInactive.size() > 0) {

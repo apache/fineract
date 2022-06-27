@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
+import java.time.LocalDate;
 import java.util.Date;
+import java.util.HashMap;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobRunHistory;
@@ -39,25 +43,23 @@ import org.springframework.stereotype.Component;
 /**
  * Global job Listener class to set Tenant details to {@link ThreadLocalContextUtil} for batch Job and stores the batch
  * job status to database after the execution
- *
  */
 @Component
 public class SchedulerJobListener implements JobListener {
 
+    private final String name = SchedulerServiceConstants.DEFAULT_LISTENER_NAME;
+    private final SchedularWritePlatformService schedularService;
+    private final AppUserRepositoryWrapper userRepository;
+    private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
+    private final BusinessDateReadPlatformService businessDateReadPlatformService;
     private int stackTraceLevel = 0;
 
-    private final String name = SchedulerServiceConstants.DEFAULT_LISTENER_NAME;
-
-    private final SchedularWritePlatformService schedularService;
-
-    private final AppUserRepositoryWrapper userRepository;
-
-    private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
-
     @Autowired
-    public SchedulerJobListener(final SchedularWritePlatformService schedularService, final AppUserRepositoryWrapper userRepository) {
+    public SchedulerJobListener(final SchedularWritePlatformService schedularService, final AppUserRepositoryWrapper userRepository,
+            BusinessDateReadPlatformService businessDateReadPlatformService) {
         this.schedularService = schedularService;
         this.userRepository = userRepository;
+        this.businessDateReadPlatformService = businessDateReadPlatformService;
     }
 
     @Override
@@ -71,6 +73,8 @@ public class SchedulerJobListener implements JobListener {
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, user.getPassword(),
                 authoritiesMapper.mapAuthorities(user.getAuthorities()));
         SecurityContextHolder.getContext().setAuthentication(auth);
+        HashMap<BusinessDateType, LocalDate> businessDates = businessDateReadPlatformService.getBusinessDates();
+        ThreadLocalContextUtil.setBusinessDates(businessDates);
     }
 
     @Override

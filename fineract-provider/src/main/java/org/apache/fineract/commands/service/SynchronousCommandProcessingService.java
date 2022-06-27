@@ -222,15 +222,15 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     private void publishEvent(final String entityName, final String actionName, JsonCommand command, final Object result) {
         Gson gson = new Gson();
         try {
-            final String authToken = ThreadLocalContextUtil.getAuthToken();
-            final String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
             final AppUser appUser = this.context.authenticatedUser(CommandWrapper.wrap(actionName, entityName, null, null));
 
             final HookEventSource hookEventSource = new HookEventSource(entityName, actionName);
 
             // TODO: Add support for publishing array events
             if (command.json() != null && command.json().startsWith("{")) {
-                Type type = new TypeToken<Map<String, Object>>() {}.getType();
+                Type type = new TypeToken<Map<String, Object>>() {
+
+                }.getType();
                 Map<String, Object> myMap = gson.fromJson(command.json(), type);
 
                 Map<String, Object> reqmap = new HashMap<>();
@@ -264,7 +264,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
                 final String serializedResult = this.toApiResultJsonSerializer.serialize(reqmap);
 
-                final HookEvent applicationEvent = new HookEvent(hookEventSource, serializedResult, tenantIdentifier, appUser, authToken);
+                final HookEvent applicationEvent = new HookEvent(hookEventSource, serializedResult, appUser,
+                        ThreadLocalContextUtil.syncDown());
 
                 applicationContext.publishEvent(applicationEvent);
             }

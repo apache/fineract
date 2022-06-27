@@ -146,7 +146,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         // set and handled separately after all installments generated
         final Set<LoanCharge> nonCompoundingCharges = seperateTotalCompoundingPercentageCharges(loanCharges);
 
-        LocalDate currentDate = DateUtils.getLocalDateOfTenant();
+        LocalDate currentDate = DateUtils.getBusinessLocalDate();
         LocalDate lastRestDate = currentDate;
         if (loanApplicationTerms.getRestCalendarInstance() != null) {
             lastRestDate = getNextRestScheduleDate(currentDate.minusDays(1), loanApplicationTerms, holidayDetailDTO);
@@ -1596,7 +1596,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             final MonetaryCurrency currency, final Map<LocalDate, Money> latePaymentMap, final LocalDate scheduledDueDate,
             List<LoanRepaymentScheduleInstallment> installments, boolean applyRestFrequencyForPrincipal, final LocalDate lastRestDate) {
         latePaymentMap.clear();
-        LocalDate currentDate = DateUtils.getLocalDateOfTenant();
+        LocalDate currentDate = DateUtils.getBusinessLocalDate();
 
         Money totalCompoundingAmount = Money.zero(currency);
         for (LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : installments) {
@@ -1632,10 +1632,10 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             for (LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : params.getInstallments()) {
                 if (params.getCompoundingDateVariations().containsKey(loanRepaymentScheduleInstallment.getFromDate())) {
                     lastInstallmentIsPastDate = params.applyInterestRecalculation()
-                            && loanRepaymentScheduleInstallment.getDueDate().isBefore(DateUtils.getLocalDateOfTenant());
+                            && loanRepaymentScheduleInstallment.getDueDate().isBefore(DateUtils.getBusinessLocalDate());
                 } else {
                     final boolean isPastDate = params.applyInterestRecalculation()
-                            && loanRepaymentScheduleInstallment.getDueDate().isBefore(DateUtils.getLocalDateOfTenant());
+                            && loanRepaymentScheduleInstallment.getDueDate().isBefore(DateUtils.getBusinessLocalDate());
                     boolean periodHasCompoundingDate = false;
                     Money amountCharged = Money.zero(currency);
                     if (loanApplicationTerms.getInterestRecalculationCompoundingMethod() != null) {
@@ -1915,7 +1915,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 periods.add(disbursementPeriod);
                 principal = principal.add(disbursementData.amount());
             } else if (!excludePastUndisbursed || disbursementData.isDisbursed()
-                    || !disbursementData.disbursementDate().isBefore(DateUtils.getLocalDateOfTenant())) {
+                    || !disbursementData.disbursementDate().isBefore(DateUtils.getBusinessLocalDate())) {
                 /*
                  * JW: sums up amounts by disbursal date in case of side-effect issues. Original assumed that there were
                  * no duplicate disbursal dates and 'put' each amount into the map keyed by date
@@ -2124,7 +2124,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             // interest calculation
             final TreeMap<LocalDate, Money> compoundingMap = new TreeMap<>();
             final Map<LocalDate, Map<LocalDate, Money>> compoundingDateVariations = new HashMap<>();
-            LocalDate currentDate = DateUtils.getLocalDateOfTenant();
+            LocalDate currentDate = DateUtils.getBusinessLocalDate();
             LocalDate lastRestDate = currentDate;
             if (loanApplicationTerms.isInterestRecalculationEnabled()) {
                 lastRestDate = getNextRestScheduleDate(currentDate.minusDays(1), loanApplicationTerms, holidayDetailDTO);
@@ -2494,7 +2494,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         }
         compoundingDateVariations.put(installment.getFromDate(), compoundingMap);
         if (totalCompounded.isGreaterThanZero()) {
-            final boolean isPastDate = installment.getDueDate().isBefore(DateUtils.getLocalDateOfTenant());
+            final boolean isPastDate = installment.getDueDate().isBefore(DateUtils.getBusinessLocalDate());
             final LocalDate restDate = getNextRestScheduleDate(installment.getDueDate().minusDays(1), loanApplicationTerms,
                     holidayDetailDTO);
             if (isPastDate) {

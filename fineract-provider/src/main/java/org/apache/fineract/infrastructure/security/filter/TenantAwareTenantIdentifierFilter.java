@@ -19,6 +19,8 @@
 package org.apache.fineract.infrastructure.security.filter;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.HashMap;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -26,6 +28,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.time.StopWatch;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
 import org.apache.fineract.infrastructure.cache.domain.CacheType;
 import org.apache.fineract.infrastructure.cache.service.CacheWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -66,6 +70,8 @@ public class TenantAwareTenantIdentifierFilter extends GenericFilterBean {
     private final ConfigurationDomainService configurationDomainService;
     private final CacheWritePlatformService cacheWritePlatformService;
 
+    private final BusinessDateReadPlatformService businessDateReadPlatformService;
+
     private final String tenantRequestHeader = "Fineract-Platform-TenantId";
     private final boolean exceptionIfHeaderMissing = true;
     private final String apiUri = "/api/v1/";
@@ -73,11 +79,12 @@ public class TenantAwareTenantIdentifierFilter extends GenericFilterBean {
     @Autowired
     public TenantAwareTenantIdentifierFilter(final BasicAuthTenantDetailsService basicAuthTenantDetailsService,
             final ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer, final ConfigurationDomainService configurationDomainService,
-            final CacheWritePlatformService cacheWritePlatformService) {
+            final CacheWritePlatformService cacheWritePlatformService, BusinessDateReadPlatformService businessDateReadPlatformService) {
         this.basicAuthTenantDetailsService = basicAuthTenantDetailsService;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.configurationDomainService = configurationDomainService;
         this.cacheWritePlatformService = cacheWritePlatformService;
+        this.businessDateReadPlatformService = businessDateReadPlatformService;
     }
 
     @Override
@@ -120,8 +127,9 @@ public class TenantAwareTenantIdentifierFilter extends GenericFilterBean {
                     isReportRequest = true;
                 }
                 final FineractPlatformTenant tenant = this.basicAuthTenantDetailsService.loadTenantById(tenantIdentifier, isReportRequest);
-
                 ThreadLocalContextUtil.setTenant(tenant);
+                HashMap<BusinessDateType, LocalDate> businessDates = this.businessDateReadPlatformService.getBusinessDates();
+                ThreadLocalContextUtil.setBusinessDates(businessDates);
                 String authToken = request.getHeader("Authorization");
 
                 if (authToken != null && authToken.startsWith("bearer ")) {

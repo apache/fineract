@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.core.domain;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import javax.sql.DataSource;
 import org.apache.commons.lang3.StringUtils;
@@ -25,7 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * Holds Tenant's DB server connection connection details.
  */
-public class FineractPlatformTenantConnection {
+public class FineractPlatformTenantConnection implements Serializable {
 
     private final Long connectionId;
     private final String schemaServer;

@@ -133,7 +133,7 @@ public class TaxComponent extends AbstractAuditableCustom {
     }
 
     private void updateStartDate(final JsonCommand command, final Map<String, Object> changes, boolean setAsCurrentDate) {
-        LocalDate startDate = DateUtils.getLocalDateOfTenant();
+        LocalDate startDate = DateUtils.getBusinessLocalDate();
         if (command.parameterExists(TaxApiConstants.startDateParamName)) {
             LocalDate startDateFromUI = command.localDateValueOfParameterNamed(TaxApiConstants.startDateParamName);
             if (startDateFromUI != null) {

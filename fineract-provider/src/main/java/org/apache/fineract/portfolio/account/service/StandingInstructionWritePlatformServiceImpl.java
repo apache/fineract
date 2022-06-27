@@ -199,7 +199,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
         Collection<StandingInstructionData> instructionDatas = this.standingInstructionReadPlatformService
                 .retrieveAll(StandingInstructionStatus.ACTIVE.getValue());
         List<Throwable> errors = new ArrayList<>();
-        LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
+        LocalDate transactionDate = DateUtils.getBusinessLocalDate();
         for (StandingInstructionData data : instructionDatas) {
             boolean isDueForTransfer = false;
             AccountTransferRecurrenceType recurrenceType = data.recurrenceType();
@@ -232,7 +232,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
                     transactionAmount = standingInstructionDuesData.totalDueAmount();
                 }
                 if (recurrenceType.isDuesRecurrence()) {
-                    isDueForTransfer = LocalDate.now(DateUtils.getDateTimeZoneOfTenant()).equals(standingInstructionDuesData.dueDate());
+                    isDueForTransfer = DateUtils.getBusinessLocalDate().equals(standingInstructionDuesData.dueDate());
                 }
             }
 
@@ -265,7 +265,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
         StringBuilder errorLog = new StringBuilder();
         StringBuilder updateQuery = new StringBuilder(
                 "INSERT INTO m_account_transfer_standing_instructions_history (standing_instruction_id, " + sqlGenerator.escape("status")
-                        + ", amount,execution_time, error_log) VALUES (");
+                        + ", amount, execution_time, error_log) VALUES (");
         try {
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
         } catch (final PlatformApiDataValidationException e) {
@@ -294,8 +294,8 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
             updateQuery.append("'success'").append(",");
         }
         updateQuery.append(accountTransferDTO.getTransactionAmount().doubleValue());
-        updateQuery.append(", now(),");
-        updateQuery.append("'").append(errorLog.toString()).append("')");
+        updateQuery.append(", ").append(sqlGenerator.currentTenantDateTime()).append(" ");
+        updateQuery.append(", '").append(errorLog).append("')");
         this.jdbcTemplate.update(updateQuery.toString());
         return transferCompleted;
     }

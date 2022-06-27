@@ -31,4 +31,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @WebAppConfiguration
 @ContextConfiguration(classes = TestConfiguration.class)
 // @SpringBootTest(classes = TestConfiguration.class)
-public class TestSuite {}
+public class TestSuite {
+
+}

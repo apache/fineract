@@ -152,7 +152,7 @@ public class TaxValidator {
         if (this.fromApiJsonHelper.parameterExists(TaxApiConstants.startDateParamName, element)) {
             final LocalDate startDate = this.fromApiJsonHelper.extractLocalDateNamed(TaxApiConstants.startDateParamName, element);
             baseDataValidator.reset().parameter(TaxApiConstants.startDateParamName).value(startDate)
-                    .validateDateAfter(DateUtils.getLocalDateOfTenant());
+                    .validateDateAfter(DateUtils.getBusinessLocalDate());
         }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -247,7 +247,7 @@ public class TaxValidator {
                             dateFormat, locale);
                     baseDataValidator.reset()
                             .parameter(TaxApiConstants.taxComponentsParamName + "." + TaxApiConstants.endDateParamName + ".at.index." + i)
-                            .value(endDate).ignoreIfNull().validateDateAfter(DateUtils.getLocalDateOfTenant());
+                            .value(endDate).ignoreIfNull().validateDateAfter(DateUtils.getBusinessLocalDate());
                     final LocalDate startDate = this.fromApiJsonHelper.extractLocalDateNamed(TaxApiConstants.startDateParamName,
                             taxComponent, dateFormat, locale);
                     if (endDate != null && startDate != null) {

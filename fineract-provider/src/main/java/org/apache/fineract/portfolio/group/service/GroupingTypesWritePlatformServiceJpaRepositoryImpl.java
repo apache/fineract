@@ -154,7 +154,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final Set<Group> groupMembers = assembleSetOfChildGroups(officeId, command);
 
             final boolean active = command.booleanPrimitiveValueOfParameterNamed(GroupingTypesApiConstants.activeParamName);
-            LocalDate submittedOnDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+            LocalDate submittedOnDate = DateUtils.getBusinessLocalDate();
             if (active && submittedOnDate.isAfter(activationDate)) {
                 submittedOnDate = activationDate;
             }
@@ -509,7 +509,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         groupForUpdate.updateStaff(staff);
 
         if (inheritStaffForClientAccounts) {
-            LocalDate loanOfficerReassignmentDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+            LocalDate loanOfficerReassignmentDate = DateUtils.getBusinessLocalDate();
             /*
              * update loan officer for client and update loan officer for clients loans and savings
              */

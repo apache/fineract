@@ -22,11 +22,11 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
-import java.util.Date;
 import org.apache.fineract.adhocquery.data.AdHocData;
 import org.apache.fineract.adhocquery.domain.ReportRunFrequency;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.slf4j.Logger;
@@ -42,12 +42,14 @@ public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunn
     private static final Logger LOG = LoggerFactory.getLogger(AdHocScheduledJobRunnerServiceImpl.class);
     private final AdHocReadPlatformService adHocReadPlatformService;
     private final JdbcTemplate jdbcTemplate;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     @Autowired
-    public AdHocScheduledJobRunnerServiceImpl(final JdbcTemplate jdbcTemplate, final AdHocReadPlatformService adHocReadPlatformService) {
+    public AdHocScheduledJobRunnerServiceImpl(final JdbcTemplate jdbcTemplate, final AdHocReadPlatformService adHocReadPlatformService,
+            DatabaseSpecificSQLGenerator sqlGenerator) {
         this.jdbcTemplate = jdbcTemplate;
         this.adHocReadPlatformService = adHocReadPlatformService;
-
+        this.sqlGenerator = sqlGenerator;
     }
 
     @Transactional
@@ -102,7 +104,8 @@ public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunn
                         LOG.info("{}: Records affected by generateClientSchedule: {}", ThreadLocalContextUtil.getTenant().getName(),
                                 result);
 
-                        this.jdbcTemplate.update("UPDATE m_adhoc SET last_run=? WHERE id=?", new Date(), adhoc.getId());
+                        this.jdbcTemplate.update("UPDATE m_adhoc SET last_run=? WHERE id=?", DateUtils.getLocalDateTimeOfTenant(),
+                                adhoc.getId());
                     }
                 } else {
                     LOG.info("{}: Skipping execution of {}, scheduled for execution on {}",

@@ -135,7 +135,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
     @Override
     @CronTarget(jobName = JobName.GENERATE_LOANLOSS_PROVISIONING)
     public void generateLoanLossProvisioningAmount() {
-        Date currentDate = Date.from(DateUtils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date currentDate = DateUtils.getBusinessDate();
         boolean addJournalEntries = true;
         try {
             Collection<ProvisioningCriteriaData> criteriaCollection = this.provisioningCriteriaReadPlatformService

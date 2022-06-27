@@ -61,16 +61,9 @@ public class ClientHelper {
     private static final String UNDOREJECT_CLIENT_COMMAND = "undoRejection";
     private static final String UNDOWITHDRAWN_CLIENT_COMMAND = "undoWithdrawal";
     private static final Integer LEGALFORM_ID_PERSON = 1;
-
-    public static final String CREATED_DATE = "27 November 2014";
-    public static final String CREATED_DATE_PLUS_ONE = "28 November 2014";
-    public static final String CREATED_DATE_PLUS_TWO = "29 November 2014";
-
-    public static final String CREATED_DATE_MINUS_ONE = "27 November 2014";
-    public static final String TRANSACTION_DATE = "01 March 2013";
-    public static final String LAST_TRANSACTION_DATE = "01 March 2013";
-    public static final String DATE_FORMAT = "dd MMMM yyyy";
-    public static final String DATE_TIME_FORMAT = "dd MMMM yyyy HH:mm";
+    public static final String CREATED_DATE = Utils.getLocalDateOfTenant().minusDays(5).format(Utils.dateFormatter);
+    public static final String CREATED_DATE_PLUS_ONE = Utils.getLocalDateOfTenant().minusDays(4).format(Utils.dateFormatter);
+    public static final String CREATED_DATE_PLUS_TWO = Utils.getLocalDateOfTenant().minusDays(3).format(Utils.dateFormatter);
 
     private static final Gson GSON = new JSON().getGson();
 
@@ -210,7 +203,7 @@ public class ClientHelper {
         map.put("firstname", Utils.randomNameGenerator("Client_FirstName_", 5));
         map.put("lastname", Utils.randomNameGenerator("Client_LastName_", 4));
         map.put("externalId", randomIDGenerator("ID_", 7));
-        map.put("dateFormat", DATE_FORMAT);
+        map.put("dateFormat", Utils.DATE_FORMAT);
         map.put("locale", "en");
         map.put("active", "true");
         map.put("activationDate", dateOfJoining);
@@ -225,7 +218,7 @@ public class ClientHelper {
         map.put("firstname", Utils.randomNameGenerator("Client_FirstName_", 5));
         map.put("lastname", Utils.randomNameGenerator("Client_LastName_", 4));
         map.put("externalId", randomIDGenerator("ID_", 7));
-        map.put("dateFormat", DATE_FORMAT);
+        map.put("dateFormat", Utils.DATE_FORMAT);
         map.put("locale", "en");
         map.put("active", "false");
         map.put("submittedOnDate", submittedOnDate);
@@ -240,7 +233,7 @@ public class ClientHelper {
         map.put("firstname", Utils.randomNameGenerator("Client_FirstName_", 5));
         map.put("lastname", Utils.randomNameGenerator("Client_LastName_", 4));
         map.put("externalId", randomIDGenerator("ID_", 7));
-        map.put("dateFormat", DATE_FORMAT);
+        map.put("dateFormat", Utils.DATE_FORMAT);
         map.put("locale", "en");
         map.put("active", "false");
         map.put("submittedOnDate", "04 March 2014");
@@ -257,7 +250,7 @@ public class ClientHelper {
         dataMap.put("Spouse Name", Utils.randomNameGenerator("Spouse_name", 4));
         dataMap.put("Number of Dependents", 5);
         dataMap.put("Time of Visit", "01 December 2016 04:03");
-        dataMap.put("dateFormat", DATE_TIME_FORMAT);
+        dataMap.put("dateFormat", Utils.DATE_TIME_FORMAT);
         dataMap.put("Date of Approval", "02 December 2016 00:00");
         datatableMap.put("registeredTableName", registeredTableName);
         datatableMap.put("data", dataMap);
@@ -271,7 +264,7 @@ public class ClientHelper {
         map.put("officeId", officeId);
         map.put("fullname", Utils.randomNameGenerator("Client_FullName_", 5));
         map.put("externalId", randomIDGenerator("ID_", 7));
-        map.put("dateFormat", DATE_FORMAT);
+        map.put("dateFormat", Utils.DATE_FORMAT);
         map.put("locale", "en");
         map.put("active", "true");
         map.put("activationDate", dateOfJoining);
@@ -287,7 +280,7 @@ public class ClientHelper {
         map.put("officeId", officeId);
         map.put("fullname", Utils.randomNameGenerator("Client_FullName_", 5));
         map.put("externalId", randomIDGenerator("ID_", 7));
-        map.put("dateFormat", DATE_FORMAT);
+        map.put("dateFormat", Utils.DATE_FORMAT);
         map.put("locale", "en");
         map.put("active", "true");
         map.put("activationDate", dateOfJoining);
@@ -308,7 +301,7 @@ public class ClientHelper {
         map.put("firstname", Utils.randomNameGenerator("Client_FirstName_", 5));
         map.put("lastname", Utils.randomNameGenerator("Client_LastName_", 4));
         map.put("externalId", randomIDGenerator("ID_", 7));
-        map.put("dateFormat", DATE_FORMAT);
+        map.put("dateFormat", Utils.DATE_FORMAT);
         map.put("locale", "en");
         map.put("active", "true");
         map.put("activationDate", dateOfJoining);
@@ -477,7 +470,7 @@ public class ClientHelper {
     public static String getSpecifiedDueDateChargesClientAsJSON(final String chargeId, final String dueDate) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en_GB");
-        map.put("dateFormat", DATE_FORMAT);
+        map.put("dateFormat", Utils.DATE_FORMAT);
         map.put("dueDate", dueDate);
         map.put("chargeId", chargeId);
         map.put("amount", "200");
@@ -488,7 +481,7 @@ public class ClientHelper {
     public static String getPayChargeJSON(final String date, String amount) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en_GB");
-        map.put("dateFormat", DATE_FORMAT);
+        map.put("dateFormat", Utils.DATE_FORMAT);
         map.put("transactionDate", date);
         map.put("amount", amount);
         String json = GSON.toJson(map);
@@ -674,6 +667,7 @@ public class ClientHelper {
     public static PostClientsRequest defaultClientCreationRequest() {
         return new PostClientsRequest().officeId(1).legalFormId(LEGALFORM_ID_PERSON)
                 .firstname(Utils.randomNameGenerator("Client_FirstName_", 5)).lastname(Utils.randomNameGenerator("Client_LastName_", 5))
-                .externalId(randomIDGenerator("ID_", 7)).dateFormat(DATE_FORMAT).locale("en").active(true).activationDate("04 March 2011");
+                .externalId(randomIDGenerator("ID_", 7)).dateFormat(Utils.DATE_FORMAT).locale("en").active(true)
+                .activationDate("04 March 2011");
     }
 }

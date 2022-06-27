@@ -384,7 +384,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     DepositAccountType.FIXED_DEPOSIT);
             checkClientOrGroupActive(account);
             account.modifyApplication(command, changes);
-            account.validateNewApplicationState(DateUtils.getLocalDateOfTenant(), DepositAccountType.FIXED_DEPOSIT.resourceName());
+            account.validateNewApplicationState(DateUtils.getBusinessLocalDate(), DepositAccountType.FIXED_DEPOSIT.resourceName());
 
             if (!changes.isEmpty()) {
                 updateFDAndRDCommonChanges(changes, command, account);
@@ -474,7 +474,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     DepositAccountType.RECURRING_DEPOSIT);
             checkClientOrGroupActive(account);
             account.modifyApplication(command, changes);
-            account.validateNewApplicationState(DateUtils.getLocalDateOfTenant(), DepositAccountType.RECURRING_DEPOSIT.resourceName());
+            account.validateNewApplicationState(DateUtils.getBusinessLocalDate(), DepositAccountType.RECURRING_DEPOSIT.resourceName());
 
             if (!changes.isEmpty()) {
                 updateFDAndRDCommonChanges(changes, command, account);
@@ -638,7 +638,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         final SavingsAccount savingsAccount = this.depositAccountAssembler.assembleFrom(savingsId, depositAccountType);
         checkClientOrGroupActive(savingsAccount);
 
-        final Map<String, Object> changes = savingsAccount.approveApplication(currentUser, command, DateUtils.getLocalDateOfTenant());
+        final Map<String, Object> changes = savingsAccount.approveApplication(currentUser, command, DateUtils.getBusinessLocalDate());
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(savingsAccount);
 
@@ -708,7 +708,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         final SavingsAccount savingsAccount = this.depositAccountAssembler.assembleFrom(savingsId, depositAccountType);
         checkClientOrGroupActive(savingsAccount);
 
-        final Map<String, Object> changes = savingsAccount.rejectApplication(currentUser, command, DateUtils.getLocalDateOfTenant());
+        final Map<String, Object> changes = savingsAccount.rejectApplication(currentUser, command, DateUtils.getBusinessLocalDate());
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(savingsAccount);
 
@@ -743,7 +743,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         checkClientOrGroupActive(savingsAccount);
 
         final Map<String, Object> changes = savingsAccount.applicantWithdrawsFromApplication(currentUser, command,
-                DateUtils.getLocalDateOfTenant());
+                DateUtils.getBusinessLocalDate());
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(savingsAccount);
 
