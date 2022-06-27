@@ -93,7 +93,7 @@ public class JournalEntryHelper {
         return url;
     }
 
-    private ArrayList<HashMap> getJournalEntriesByTransactionId(final String transactionId) {
+    public ArrayList<HashMap> getJournalEntriesByTransactionId(final String transactionId) {
         final String url = createURLForGettingAccountEntriesByTransactionId(transactionId);
         final ArrayList<HashMap> response = Utils.performServerGet(this.requestSpec, this.responseSpec, url, "pageItems");
         return response;
