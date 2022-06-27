@@ -33,6 +33,8 @@ import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
+import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
@@ -49,11 +51,13 @@ public class SavingsInterestPostingJobIntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(SavingsInterestPostingJobIntegrationTest.class);
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
+    private static ResponseSpecification responseSpec;
+    private static RequestSpecification requestSpec;
     private SavingsProductHelper savingsProductHelper;
     private SavingsAccountHelper savingsAccountHelper;
     private SchedulerJobHelper scheduleJobHelper;
+    private JournalEntryHelper journalEntryHelper;
+    private AccountHelper accountHelper;
 
     @BeforeEach
     public void setup() {
@@ -90,6 +94,23 @@ public class SavingsInterestPostingJobIntegrationTest {
             LOG.info("{} - {}", entry.getKey(), entry.getValue().toString());
         }
         assertEquals("10129.582", interestPostingTransaction.get("runningBalance").toString(), "Equality check for Balance");
+    }
+
+    @Test
+    public void testSavingsDailyInterestPostingJobWithAccountingNone() {
+        final String startDate = "10 April 2022";
+        final String jobName = "Post Interest For Savings";
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        Assertions.assertNotNull(clientID);
+        this.accountHelper = new AccountHelper(requestSpec, responseSpec);
+        this.journalEntryHelper = new JournalEntryHelper(requestSpec, responseSpec);
+
+        final Integer savingsId = createSavingsAccountDailyPostingWithAccounting(clientID, startDate);
+
+        Integer transactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "1000", startDate,
+                CommonConstants.RESPONSE_RESOURCE_ID);
+        ArrayList<HashMap> journalEntries = this.journalEntryHelper.getJournalEntriesByTransactionId(String.valueOf(transactionId));
+        assertEquals(0, journalEntries.size());
     }
 
     @Test
@@ -185,6 +206,19 @@ public class SavingsInterestPostingJobIntegrationTest {
         return savingsId;
     }
 
+    private Integer createSavingsAccountDailyPostingWithAccounting(final Integer clientID, final String startDate) {
+        final Integer savingsProductID = createSavingsProduct("1000");
+        Assertions.assertNotNull(savingsProductID);
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplicationOnDate(clientID, savingsProductID,
+                ACCOUNT_TYPE_INDIVIDUAL, startDate);
+        Assertions.assertNotNull(savingsId);
+        HashMap savingsStatusHashMap = this.savingsAccountHelper.approveSavingsOnDate(savingsId, startDate);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavingsAccount(savingsId, startDate);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+        return savingsId;
+    }
+
     private Integer createSavingsAccountDailyPostingWithCharge(final Integer clientID, final String startDate) {
         final Integer savingsProductID = createSavingsProductDailyPosting();
         Assertions.assertNotNull(savingsProductID);
@@ -229,6 +263,16 @@ public class SavingsInterestPostingJobIntegrationTest {
         final String savingsProductJSON = this.savingsProductHelper.withInterestCompoundingPeriodTypeAsDaily()
                 .withInterestPostingPeriodTypeAsDaily().withInterestCalculationPeriodTypeAsDailyBalance()
                 .withOverDraftRate(overDraftLimit, nominalAnnualInterestRateOverdraft).build();
+        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+    }
+
+    // Accounting None
+    public static Integer createSavingsProduct(final String minOpenningBalance) {
+        LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
+        final String savingsProductJSON = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily() //
+                .withInterestCompoundingPeriodTypeAsDaily() //
+                .withInterestCalculationPeriodTypeAsDailyBalance() //
+                .withMinimumOpenningBalance(minOpenningBalance).withAccountingRuleAsNone().build();
         return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
     }
 

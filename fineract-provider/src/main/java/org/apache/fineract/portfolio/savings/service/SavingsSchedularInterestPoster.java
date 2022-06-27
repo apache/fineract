@@ -230,37 +230,38 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
                         LocalDate currentDate = DateUtils.getLocalDateOfTenant();
                         final SavingsAccountTransactionData dataFromFetch = savingsAccountTransactionDataHashMap.get(key);
                         savingsAccountTransactionData.setId(dataFromFetch.getId());
+                        if (savingsAccountData.getGlAccountIdForSavingsControl() != 0
+                                && savingsAccountData.getGlAccountIdForInterestOnSavings() != 0) {
+                            paramsForGLInsertion.add(new Object[] { savingsAccountData.getGlAccountIdForSavingsControl(),
+                                    savingsAccountData.getOfficeId(), null, currencyCode,
+                                    SAVINGS_TRANSACTION_IDENTIFIER + savingsAccountTransactionData.getId().toString(),
+                                    savingsAccountTransactionData.getId(), null, false, null, false,
+                                    Date.from(savingsAccountTransactionData.getTransactionDate()
+                                            .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
+                                    JournalEntryType.CREDIT.getValue().longValue(), savingsAccountTransactionData.getAmount(), null,
+                                    JournalEntryType.CREDIT.getValue().longValue(), savingsAccountData.getId(),
+                                    Date.from(currentDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
+                                    Date.from(currentDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()), false,
+                                    BigDecimal.ZERO, BigDecimal.ZERO, null,
+                                    Date.from(savingsAccountTransactionData.getTransactionDate()
+                                            .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
+                                    null, Integer.valueOf(1), Integer.valueOf(1) });
 
-                        paramsForGLInsertion.add(
-                                new Object[] { savingsAccountData.getGlAccountIdForSavingsControl(), savingsAccountData.getOfficeId(), null,
-                                        currencyCode, SAVINGS_TRANSACTION_IDENTIFIER + savingsAccountTransactionData.getId().toString(),
-                                        savingsAccountTransactionData.getId(), null, false, null, false,
-                                        Date.from(savingsAccountTransactionData.getTransactionDate()
-                                                .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
-                                        JournalEntryType.CREDIT.getValue().longValue(), savingsAccountTransactionData.getAmount(), null,
-                                        JournalEntryType.CREDIT.getValue().longValue(), savingsAccountData.getId(),
-                                        Date.from(currentDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
-                                        Date.from(currentDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()), false,
-                                        BigDecimal.ZERO, BigDecimal.ZERO, null,
-                                        Date.from(savingsAccountTransactionData.getTransactionDate()
-                                                .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
-                                        null, Integer.valueOf(1), Integer.valueOf(1) });
-
-                        paramsForGLInsertion.add(new Object[] { savingsAccountData.getGlAccountIdForInterestOnSavings(),
-                                savingsAccountData.getOfficeId(), null, currencyCode,
-                                SAVINGS_TRANSACTION_IDENTIFIER + savingsAccountTransactionData.getId().toString(),
-                                savingsAccountTransactionData.getId(), null, false, null, false,
-                                Date.from(savingsAccountTransactionData.getTransactionDate()
-                                        .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
-                                JournalEntryType.DEBIT.getValue().longValue(), savingsAccountTransactionData.getAmount(), null,
-                                JournalEntryType.DEBIT.getValue().longValue(), savingsAccountData.getId(),
-                                Date.from(currentDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
-                                Date.from(currentDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()), false,
-                                BigDecimal.ZERO, BigDecimal.ZERO, null,
-                                Date.from(savingsAccountTransactionData.getTransactionDate()
-                                        .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
-                                null, Integer.valueOf(1), Integer.valueOf(1) });
-
+                            paramsForGLInsertion.add(new Object[] { savingsAccountData.getGlAccountIdForInterestOnSavings(),
+                                    savingsAccountData.getOfficeId(), null, currencyCode,
+                                    SAVINGS_TRANSACTION_IDENTIFIER + savingsAccountTransactionData.getId().toString(),
+                                    savingsAccountTransactionData.getId(), null, false, null, false,
+                                    Date.from(savingsAccountTransactionData.getTransactionDate()
+                                            .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
+                                    JournalEntryType.DEBIT.getValue().longValue(), savingsAccountTransactionData.getAmount(), null,
+                                    JournalEntryType.DEBIT.getValue().longValue(), savingsAccountData.getId(),
+                                    Date.from(currentDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
+                                    Date.from(currentDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()), false,
+                                    BigDecimal.ZERO, BigDecimal.ZERO, null,
+                                    Date.from(savingsAccountTransactionData.getTransactionDate()
+                                            .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
+                                    null, Integer.valueOf(1), Integer.valueOf(1) });
+                        }
                     }
                 }
             }
