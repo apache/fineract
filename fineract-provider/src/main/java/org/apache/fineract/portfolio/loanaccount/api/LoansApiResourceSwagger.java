@@ -903,8 +903,8 @@ final class LoansApiResourceSwagger {
             public String locale;
             @Schema(example = "dd MMMM yyyy")
             public String dateFormat;
-            @Schema(example = "[2012, 4, 3]")
-            public LocalDate approvedOnDate;
+            @Schema(example = "28 June 2022")
+            public String approvedOnDate;
             @Schema(example = "Loan approval note")
             public String note;
             @Schema(description = "PostLoansLoanIdStatus")
