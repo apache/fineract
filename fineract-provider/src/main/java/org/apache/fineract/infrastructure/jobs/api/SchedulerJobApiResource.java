@@ -133,7 +133,7 @@ public class SchedulerJobApiResource {
             @QueryParam(SchedulerJobApiConstants.COMMAND) @Parameter(description = "command") final String commandParam) {
         // check the logged in user have permissions to execute scheduler jobs
         Response response;
-        if (fineractProperties.getMode().isBatchEnabled()) {
+        if (fineractProperties.getMode().isBatchManagerEnabled()) {
             final boolean hasNotPermission = this.context.authenticatedUser().hasNotPermissionForAnyOf("ALL_FUNCTIONS",
                     "EXECUTEJOB_SCHEDULER");
             if (hasNotPermission) {

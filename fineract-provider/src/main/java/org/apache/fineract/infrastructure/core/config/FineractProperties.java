@@ -55,18 +55,11 @@ public class FineractProperties {
 
         private boolean readEnabled;
         private boolean writeEnabled;
-        private boolean batchEnabled;
+        private boolean batchWorkerEnabled;
+        private boolean batchManagerEnabled;
 
         public boolean isReadOnlyMode() {
-            return readEnabled && !writeEnabled && !batchEnabled;
-        }
-
-        public boolean isWriteOnlyMode() {
-            return !readEnabled && writeEnabled && !batchEnabled;
-        }
-
-        public boolean isBatchOnlyMode() {
-            return !readEnabled && !writeEnabled && batchEnabled;
+            return readEnabled && !writeEnabled && !batchWorkerEnabled && !batchManagerEnabled;
         }
     }
 }

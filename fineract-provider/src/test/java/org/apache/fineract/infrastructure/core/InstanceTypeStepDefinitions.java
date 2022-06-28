@@ -31,7 +31,8 @@ public class InstanceTypeStepDefinitions implements En {
         Given("Set every Fineract instance type to false", () -> {
             fineractProperties.getMode().setWriteEnabled(false);
             fineractProperties.getMode().setReadEnabled(false);
-            fineractProperties.getMode().setBatchEnabled(false);
+            fineractProperties.getMode().setBatchWorkerEnabled(false);
+            fineractProperties.getMode().setBatchManagerEnabled(false);
         });
         Given("Fineract instance is a write instance", () -> {
             fineractProperties.getMode().setWriteEnabled(true);
@@ -39,8 +40,8 @@ public class InstanceTypeStepDefinitions implements En {
         Given("Fineract instance is a read instance", () -> {
             fineractProperties.getMode().setReadEnabled(true);
         });
-        Given("Fineract instance is a batch instance", () -> {
-            fineractProperties.getMode().setBatchEnabled(true);
+        Given("Fineract instance is a batch manager instance", () -> {
+            fineractProperties.getMode().setBatchManagerEnabled(true);
         });
     }
 }
