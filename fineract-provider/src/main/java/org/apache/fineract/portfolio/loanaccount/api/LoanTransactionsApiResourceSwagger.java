@@ -153,8 +153,8 @@ final class LoanTransactionsApiResourceSwagger {
         public String locale;
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
-        @Schema(example = "[2012, 5, 25]")
-        public LocalDate transactionDate;
+        @Schema(example = "28 June 2022")
+        public String transactionDate;
         @Schema(example = "50000.00")
         public Double transactionAmount;
         @Schema(example = "An optional note about why your adjusting or changing the transaction.")
@@ -187,8 +187,8 @@ final class LoanTransactionsApiResourceSwagger {
         public String locale;
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
-        @Schema(example = "[2012, 5, 25]")
-        public LocalDate transactionDate;
+        @Schema(example = "28 June 2022")
+        public String transactionDate;
         @Schema(example = "50,000.00")
         public Double transactionAmount;
         @Schema(example = "An optional note about why your adjusting or changing the transaction.")
