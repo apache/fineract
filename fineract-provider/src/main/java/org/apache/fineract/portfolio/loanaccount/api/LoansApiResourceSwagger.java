@@ -848,16 +848,16 @@ final class LoansApiResourceSwagger {
         public String transactionAmount;
         @Schema(example = "Description of disbursement details.")
         public String note;
-        @Schema(example = "[2012, 4, 12]")
-        public LocalDate actualDisbursementDate;
+        @Schema(example = "28 June 2022")
+        public String actualDisbursementDate;
         @Schema(example = "3")
         public Integer paymentTypeId;
-        @Schema(example = "[2012, 4, 3]")
-        public LocalDate approvedOnDate;
+        @Schema(example = "28 June 2022")
+        public String approvedOnDate;
         @Schema(example = "1000")
         public String approvedLoanAmount;
-        @Schema(example = "[2012, 4, 10]")
-        public LocalDate expectedDisbursementDate;
+        @Schema(example = "28 June 2022")
+        public String expectedDisbursementDate;
         @Schema(description = "List of PostLoansLoanIdDisbursementData")
         public List<PostLoansLoanIdDisbursementData> disbursementData;
     }
