@@ -147,7 +147,7 @@ public class DataSourcePerTenantServiceFactoryTest {
     void testCreateNewDataSourceFor_ShouldUseNormalConfiguration_WhenInAllMode() {
         // given
         FineractProperties.FineractModeProperties modeProperties = createModeProps(MASTER_DB_AUTO_COMMIT_ENABLED,
-                MASTER_DB_AUTO_COMMIT_ENABLED, MASTER_DB_AUTO_COMMIT_ENABLED);
+                MASTER_DB_AUTO_COMMIT_ENABLED, MASTER_DB_AUTO_COMMIT_ENABLED, MASTER_DB_AUTO_COMMIT_ENABLED);
         given(fineractProperties.getMode()).willReturn(modeProperties);
 
         // when
@@ -173,7 +173,7 @@ public class DataSourcePerTenantServiceFactoryTest {
     @Test
     void testCreateNewDataSourceFor_ShouldUseReadOnlyConfiguration_WhenInReadOnlyMode() {
         // given
-        FineractProperties.FineractModeProperties modeProperties = createModeProps(true, false, false);
+        FineractProperties.FineractModeProperties modeProperties = createModeProps(true, false, false, false);
         given(fineractProperties.getMode()).willReturn(modeProperties);
 
         // when
@@ -199,7 +199,7 @@ public class DataSourcePerTenantServiceFactoryTest {
     @Test
     void testCreateNewDataSourceFor_ShouldUseNormalConfiguration_WhenInBatchOnlyMode() {
         // given
-        FineractProperties.FineractModeProperties modeProperties = createModeProps(false, false, true);
+        FineractProperties.FineractModeProperties modeProperties = createModeProps(false, false, true, true);
         given(fineractProperties.getMode()).willReturn(modeProperties);
 
         // when
@@ -222,11 +222,13 @@ public class DataSourcePerTenantServiceFactoryTest {
         assertEquals(MASTER_DB_AUTO_COMMIT_ENABLED, hikariConfig.isAutoCommit());
     }
 
-    private FineractProperties.FineractModeProperties createModeProps(boolean readEnabled, boolean writeEnabled, boolean batchEnabled) {
+    private FineractProperties.FineractModeProperties createModeProps(boolean readEnabled, boolean writeEnabled, boolean batchWorkerEnabled,
+            boolean batchManagerEnabled) {
         FineractProperties.FineractModeProperties modeProperties = new FineractProperties.FineractModeProperties();
         modeProperties.setReadEnabled(readEnabled);
         modeProperties.setWriteEnabled(writeEnabled);
-        modeProperties.setBatchEnabled(batchEnabled);
+        modeProperties.setBatchWorkerEnabled(batchWorkerEnabled);
+        modeProperties.setBatchManagerEnabled(batchManagerEnabled);
         return modeProperties;
     }
 

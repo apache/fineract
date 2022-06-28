@@ -36,7 +36,7 @@ Feature: Core Infrastructure
   @infrastructure
   Scenario: Verify that schema migration is not executed when the Fineract instance is a batch instance
     Given Set every Fineract instance type to false
-    Given Fineract instance is a batch instance
+    Given Fineract instance is a batch manager instance
     Given Liquibase is enabled with a default tenant
     When The database migration process is executed
     Then The database migration did not do anything, because it is not a write instance

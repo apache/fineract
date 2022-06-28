@@ -27,11 +27,12 @@ public final class InstanceModeMock {
     }
 
     public static FineractProperties.FineractModeProperties createModeProps(boolean readEnabled, boolean writeEnabled,
-            boolean batchEnabled) {
+            boolean batchWorkerEnabled, boolean batchManagerEnabled) {
         FineractProperties.FineractModeProperties modeProperties = new FineractProperties.FineractModeProperties();
         modeProperties.setReadEnabled(readEnabled);
         modeProperties.setWriteEnabled(writeEnabled);
-        modeProperties.setBatchEnabled(batchEnabled);
+        modeProperties.setBatchWorkerEnabled(batchWorkerEnabled);
+        modeProperties.setBatchManagerEnabled(batchManagerEnabled);
         return modeProperties;
     }
 }

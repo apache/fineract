@@ -44,7 +44,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class FineractInstanceModeApiFilter extends OncePerRequestFilter {
 
     private static final List<ExceptionListItem> EXCEPTION_LIST = List.of(
-            item(FineractProperties.FineractModeProperties::isBatchEnabled, pi -> pi.startsWith("/jobs")),
+            item(FineractProperties.FineractModeProperties::isBatchManagerEnabled, pi -> pi.startsWith("/jobs")),
             item(p -> true, pi -> pi.startsWith("/instance-mode")));
 
     private final FineractProperties fineractProperties;

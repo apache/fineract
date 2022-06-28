@@ -60,7 +60,7 @@ public class InstanceModeIntegrationTest {
         jobId = schedulerJobHelper.getSchedulerJobIdByName(jobName);
     }
 
-    @ConfigureInstanceMode(readEnabled = true, writeEnabled = false, batchEnabled = false)
+    @ConfigureInstanceMode(readEnabled = true, writeEnabled = false, batchWorkerEnabled = false, batchManagerEnabled = false)
     @Test
     public void testGetHeadOfficeWorks_WhenInstanceModeIsReadOnly() {
         // given
@@ -70,7 +70,7 @@ public class InstanceModeIntegrationTest {
         assertNotNull(result);
     }
 
-    @ConfigureInstanceMode(readEnabled = false, writeEnabled = true, batchEnabled = false)
+    @ConfigureInstanceMode(readEnabled = false, writeEnabled = true, batchWorkerEnabled = false, batchManagerEnabled = false)
     @Test
     public void testGetHeadOfficeWorks_WhenInstanceModeIsWriteOnly() {
         // given
@@ -80,7 +80,7 @@ public class InstanceModeIntegrationTest {
         assertNotNull(result);
     }
 
-    @ConfigureInstanceMode(readEnabled = false, writeEnabled = false, batchEnabled = true)
+    @ConfigureInstanceMode(readEnabled = false, writeEnabled = false, batchWorkerEnabled = true, batchManagerEnabled = true)
     @Test
     public void testGetHeadOfficeDoesntWork_WhenInstanceModeIsBatchOnly() {
         // given
@@ -89,7 +89,7 @@ public class InstanceModeIntegrationTest {
         // then no exception is thrown
     }
 
-    @ConfigureInstanceMode(readEnabled = true, writeEnabled = false, batchEnabled = false)
+    @ConfigureInstanceMode(readEnabled = true, writeEnabled = false, batchWorkerEnabled = false, batchManagerEnabled = false)
     @Test
     public void testCreateClientDoesntWork_WhenReadOnly() {
         // given
@@ -99,7 +99,7 @@ public class InstanceModeIntegrationTest {
         // then no exception thrown
     }
 
-    @ConfigureInstanceMode(readEnabled = false, writeEnabled = true, batchEnabled = false)
+    @ConfigureInstanceMode(readEnabled = false, writeEnabled = true, batchWorkerEnabled = false, batchManagerEnabled = false)
     @Test
     public void testCreateClientWorks_WhenWriteOnly() {
         // given
@@ -110,7 +110,7 @@ public class InstanceModeIntegrationTest {
         assertNotNull(result);
     }
 
-    @ConfigureInstanceMode(readEnabled = false, writeEnabled = false, batchEnabled = true)
+    @ConfigureInstanceMode(readEnabled = false, writeEnabled = false, batchWorkerEnabled = true, batchManagerEnabled = true)
     @Test
     public void testCreateClientDoesntWork_WhenBatchOnly() {
         // given
@@ -120,7 +120,7 @@ public class InstanceModeIntegrationTest {
         // then no exception thrown
     }
 
-    @ConfigureInstanceMode(readEnabled = true, writeEnabled = false, batchEnabled = false)
+    @ConfigureInstanceMode(readEnabled = true, writeEnabled = false, batchWorkerEnabled = false, batchManagerEnabled = false)
     @Test
     public void testRunSchedulerJobDoesntWork_WhenReadOnly() {
         // given
@@ -129,7 +129,7 @@ public class InstanceModeIntegrationTest {
         // then no exception thrown
     }
 
-    @ConfigureInstanceMode(readEnabled = false, writeEnabled = true, batchEnabled = false)
+    @ConfigureInstanceMode(readEnabled = false, writeEnabled = true, batchWorkerEnabled = false, batchManagerEnabled = false)
     @Test
     public void testRunSchedulerJobDoesntWork_WhenWriteOnly() {
         // given
@@ -138,7 +138,7 @@ public class InstanceModeIntegrationTest {
         // then no exception thrown
     }
 
-    @ConfigureInstanceMode(readEnabled = false, writeEnabled = false, batchEnabled = true)
+    @ConfigureInstanceMode(readEnabled = false, writeEnabled = false, batchWorkerEnabled = true, batchManagerEnabled = true)
     @Test
     public void testRunSchedulerJobWorks_WhenBatchOnly() {
         // given

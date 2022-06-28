@@ -31,9 +31,9 @@ public class InstanceModeHelper {
     private static final Gson GSON = new JSON().getGson();
 
     public static void changeMode(RequestSpecification requestSpec, ResponseSpecification responseSpec, boolean readEnabled,
-            boolean writeEnabled, boolean batchEnabled) {
+            boolean writeEnabled, boolean batchWorkerEnabled, boolean batchManagerEnabled) {
         ChangeInstanceModeRequest request = new ChangeInstanceModeRequest().readEnabled(readEnabled).writeEnabled(writeEnabled)
-                .batchEnabled(batchEnabled);
+                .batchWorkerEnabled(batchWorkerEnabled).batchManagerEnabled(batchManagerEnabled);
         String requestStr = GSON.toJson(request);
         Utils.performServerPut(requestSpec, responseSpec, "/fineract-provider/api/v1/instance-mode?" + Utils.TENANT_IDENTIFIER, requestStr);
     }

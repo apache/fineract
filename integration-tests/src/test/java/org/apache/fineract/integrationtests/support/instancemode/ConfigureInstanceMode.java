@@ -32,5 +32,7 @@ public @interface ConfigureInstanceMode {
 
     boolean writeEnabled();
 
-    boolean batchEnabled();
+    boolean batchWorkerEnabled();
+
+    boolean batchManagerEnabled();
 }
