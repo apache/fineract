@@ -19,12 +19,10 @@
 
 package org.apache.fineract.infrastructure.core.filters;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.slf4j.MDC;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -34,14 +32,11 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.UUID;
 
 @RequiredArgsConstructor
+@Slf4j
 public class CorrelationHeaderFilter implements Filter {
 	
-    private static final Logger LOGGER = LoggerFactory.getLogger(CorrelationHeaderFilter.class);
-    
-   
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         //TODO        
@@ -51,21 +46,17 @@ public class CorrelationHeaderFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
             throws IOException, ServletException {
                 
-        LOGGER.info("CORRELATION_ID_HEADER : " + RequestCorrelation.CORRELATION_ID_HEADER);
+        log.trace("CORRELATION_ID_HEADER : " + RequestCorrelation.CORRELATION_ID_HEADER);
 
         final HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
         
         String currentCorrId = httpServletRequest.getHeader( RequestCorrelation.CORRELATION_ID_HEADER);
 
-        if (currentCorrId == null) {
-            currentCorrId = UUID.randomUUID().toString();
-            LOGGER.info("No correlationId found in Header. Generated : " + currentCorrId);
-        } else {
-            LOGGER.info("Found correlationId in Header : " + currentCorrId.replaceAll("[\r\n]","") );
-        }
+        log.debug("Found correlationId in Header : {}", currentCorrId.replaceAll("[\r\n]","") );
+        
         MDC.put("correlationId", currentCorrId);
-        RequestCorrelation.setId(currentCorrId);
-        RequestCorrelation.setCorrelationid(currentCorrId);
+        //RequestCorrelation.setId(currentCorrId);
+        //RequestCorrelation.setCorrelationid(currentCorrId);
 
         filterChain.doFilter(httpServletRequest, servletResponse);
     }
