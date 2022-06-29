@@ -27,12 +27,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.servlet.Filter;
 import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -51,8 +47,8 @@ public class CorrelationHeaderFilter extends OncePerRequestFilter  {
    
     @Override
     protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain)
-        throws java.io.IOException, ServletException  {
-        String currentCorrId;
+        throws IOException, ServletException  {        
+        String currentCorrId="";
         try {
                 
             log.debug("CORRELATION_ID_HEADER : " + CORRELATION_ID_HEADER);
@@ -70,6 +66,16 @@ public class CorrelationHeaderFilter extends OncePerRequestFilter  {
         finally {
             MDC.remove(currentCorrId);
         }
+    }
+
+    @Override
+    protected boolean isAsyncDispatch(final HttpServletRequest request) {
+        return false;
+    }
+
+    @Override
+    protected boolean shouldNotFilterErrorDispatch() {
+        return false;
     }
 
 }
