@@ -20,6 +20,8 @@
 package org.apache.fineract.infrastructure.core.filters;
 
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +38,13 @@ import java.io.IOException;
 @RequiredArgsConstructor
 @Slf4j
 public class CorrelationHeaderFilter implements Filter {
+
+    private String CORRELATION_ID_HEADER;
+
+    @Autowired
+    public CorrelationHeaderFilter(Environment env) {
+        CORRELATION_ID_HEADER = env.getRequiredProperty("fineract.logging.http.correlation-id.header-name");        
+    }
 	
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -46,17 +55,15 @@ public class CorrelationHeaderFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
             throws IOException, ServletException {
                 
-        log.trace("CORRELATION_ID_HEADER : " + RequestCorrelation.CORRELATION_ID_HEADER);
+        log.debug("CORRELATION_ID_HEADER : " + CORRELATION_ID_HEADER);
 
         final HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
         
-        String currentCorrId = httpServletRequest.getHeader( RequestCorrelation.CORRELATION_ID_HEADER);
+        String currentCorrId = httpServletRequest.getHeader( CORRELATION_ID_HEADER);
 
         log.debug("Found correlationId in Header : {}", currentCorrId.replaceAll("[\r\n]","") );
         
         MDC.put("correlationId", currentCorrId);
-        //RequestCorrelation.setId(currentCorrId);
-        //RequestCorrelation.setCorrelationid(currentCorrId);
 
         filterChain.doFilter(httpServletRequest, servletResponse);
     }
