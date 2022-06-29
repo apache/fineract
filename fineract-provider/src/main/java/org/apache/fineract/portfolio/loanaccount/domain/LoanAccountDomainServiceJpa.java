@@ -546,7 +546,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
 
         boolean isOrganisationDateEnabled = this.configurationDomainService.isOrganisationstartDateEnabled();
-        Date organisationStartDate = new Date();
+        Date organisationStartDate = DateUtils.getBusinessDate();
         if (isOrganisationDateEnabled) {
             organisationStartDate = this.configurationDomainService.retrieveOrganisationStartDate();
         }
@@ -566,7 +566,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         for (LoanRepaymentScheduleInstallment installment : installments) {
             if (installment.getDueDate().isAfter(loan.getMaturityDate())) {
-                accruedTill = DateUtils.getLocalDateOfTenant();
+                accruedTill = DateUtils.getBusinessLocalDate();
             }
             if (!isOrganisationDateEnabled || LocalDate.ofInstant(organisationStartDate.toInstant(), DateUtils.getDateTimeZoneOfTenant())
                     .isBefore(installment.getDueDate())) {

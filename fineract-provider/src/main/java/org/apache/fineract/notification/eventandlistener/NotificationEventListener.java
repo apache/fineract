@@ -23,9 +23,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.infrastructure.security.service.BasicAuthTenantDetailsService;
 import org.apache.fineract.notification.data.NotificationData;
 import org.apache.fineract.notification.service.NotificationWritePlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -36,15 +33,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class NotificationEventListener {
 
-    private final BasicAuthTenantDetailsService basicAuthTenantDetailsService;
     private final NotificationWritePlatformService notificationWritePlatformService;
     private final AppUserRepository appUserRepository;
 
     public void receive(NotificationData notificationData) {
-        final FineractPlatformTenant tenant = this.basicAuthTenantDetailsService.loadTenantById(notificationData.getTenantIdentifier(),
-                false);
-        ThreadLocalContextUtil.setTenant(tenant);
-
         Long appUserId = notificationData.getActorId();
 
         Set<Long> userIds = notificationData.getUserIds();

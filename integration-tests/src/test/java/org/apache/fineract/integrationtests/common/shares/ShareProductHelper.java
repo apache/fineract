@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
@@ -106,7 +105,7 @@ public class ShareProductHelper {
 
     public ShareProductHelper withMarketPrice() {
         this.marketPrices = new ArrayList<>();
-        LocalDate currentDate = DateUtils.getLocalDateOfTenant();
+        LocalDate currentDate = Utils.getLocalDateOfTenant();
         String[] prices = { "3.0", "4.0", "5.0", "6.0", "7.0" };
         DateFormat simple = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         for (int i = 0; i < prices.length; i++) {

@@ -142,5 +142,6 @@ public class SchedulerJobsTest {
         for (String jobName : schedulerJobHelper.getAllSchedulerJobNames()) {
             schedulerJobHelper.executeAndAwaitJob(jobName);
         }
+        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
     }
 }

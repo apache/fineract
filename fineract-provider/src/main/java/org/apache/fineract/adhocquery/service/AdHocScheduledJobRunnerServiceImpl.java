@@ -22,33 +22,27 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
-import java.util.Date;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.adhocquery.data.AdHocData;
 import org.apache.fineract.adhocquery.domain.ReportRunFrequency;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service(value = "adHocScheduledJobRunnerService")
+@RequiredArgsConstructor
+@Slf4j
 public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunnerService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AdHocScheduledJobRunnerServiceImpl.class);
     private final AdHocReadPlatformService adHocReadPlatformService;
     private final JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    public AdHocScheduledJobRunnerServiceImpl(final JdbcTemplate jdbcTemplate, final AdHocReadPlatformService adHocReadPlatformService) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.adHocReadPlatformService = adHocReadPlatformService;
-
-    }
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     @Transactional
     @Override
@@ -99,18 +93,19 @@ public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunn
                             .append(adhoc.getQuery());
                     if (insertSqlBuilder.length() > 0) {
                         final int result = this.jdbcTemplate.update(insertSqlBuilder.toString());
-                        LOG.info("{}: Records affected by generateClientSchedule: {}", ThreadLocalContextUtil.getTenant().getName(),
+                        log.info("{}: Records affected by generateClientSchedule: {}", ThreadLocalContextUtil.getTenant().getName(),
                                 result);
 
-                        this.jdbcTemplate.update("UPDATE m_adhoc SET last_run=? WHERE id=?", new Date(), adhoc.getId());
+                        this.jdbcTemplate.update("UPDATE m_adhoc SET last_run=? WHERE id=?", DateUtils.getLocalDateTimeOfTenant(),
+                                adhoc.getId());
                     }
                 } else {
-                    LOG.info("{}: Skipping execution of {}, scheduled for execution on {}",
+                    log.info("{}: Skipping execution of {}, scheduled for execution on {}",
                             new Object[] { ThreadLocalContextUtil.getTenant().getName(), adhoc.getName(), next });
                 }
             });
         } else {
-            LOG.info("{}: Nothing to update by generateClientSchedule", ThreadLocalContextUtil.getTenant().getName());
+            log.info("{}: Nothing to update by generateClientSchedule", ThreadLocalContextUtil.getTenant().getName());
         }
 
     }

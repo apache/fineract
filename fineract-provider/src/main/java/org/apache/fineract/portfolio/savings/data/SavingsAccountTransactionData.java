@@ -934,7 +934,7 @@ public final class SavingsAccountTransactionData implements Serializable {
     public static SavingsAccountTransactionData withWithDrawalTransactionDetails(
             final SavingsAccountTransactionData savingsAccountTransactionData) {
 
-        final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
+        final LocalDate currentDate = DateUtils.getBusinessLocalDate();
         final SavingsAccountTransactionEnumData transactionType = SavingsEnumerations
                 .transactionType(SavingsAccountTransactionType.WITHDRAWAL.getValue());
 

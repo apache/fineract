@@ -519,7 +519,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
     @Override
     public Collection<Map<String, Object>> retriveDataForRDScheduleCreation() {
-        String today = formatter.format(DateUtils.getLocalDateOfTenant());
+        String today = formatter.format(DateUtils.getBusinessLocalDate());
         final StringBuilder sb = new StringBuilder(300);
         sb.append(" select rd.savings_account_id savingsId, rd.mandatory_recommended_deposit_amount as amount,");
         sb.append(" mc.recurrence as recurrence ,");
@@ -1387,7 +1387,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         public String schema() {
-            LocalDate today = DateUtils.getLocalDateOfTenant();
+            LocalDate today = DateUtils.getBusinessLocalDate();
             String formattedToday = formatter.format(today);
             final StringBuilder sqlBuilder = new StringBuilder(200);
             sqlBuilder.append("da.id as id, ");

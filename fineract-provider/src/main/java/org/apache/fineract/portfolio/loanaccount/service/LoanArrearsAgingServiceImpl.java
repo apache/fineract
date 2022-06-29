@@ -124,7 +124,8 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         updateSqlBuilder.append(" WHERE ml.loan_status_id = 300 "); // active
         updateSqlBuilder.append(" and mr.completed_derived is false ");
         updateSqlBuilder.append(" and mr.duedate < ")
-                .append(sqlGenerator.subDate(sqlGenerator.currentDate(), "COALESCE(ml.grace_on_arrears_ageing, 0)", "day")).append(" ");
+                .append(sqlGenerator.subDate(sqlGenerator.currentBusinessDate(), "COALESCE(ml.grace_on_arrears_ageing, 0)", "day"))
+                .append(" ");
         updateSqlBuilder.append(" and (prd.arrears_based_on_original_schedule = false or prd.arrears_based_on_original_schedule is null) ");
         updateSqlBuilder.append(" GROUP BY ml.id");
 
@@ -180,9 +181,10 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         BigDecimal interestOverdue = BigDecimal.ZERO;
         BigDecimal feeOverdue = BigDecimal.ZERO;
         BigDecimal penaltyOverdue = BigDecimal.ZERO;
-        LocalDate overDueSince = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        LocalDate businessDate = DateUtils.getBusinessLocalDate();
+        LocalDate overDueSince = businessDate;
         for (LoanRepaymentScheduleInstallment installment : installments) {
-            if (installment.getDueDate().isBefore(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()))) {
+            if (installment.getDueDate().isBefore(businessDate)) {
                 principalOverdue = principalOverdue.add(installment.getPrincipalOutstanding(loan.getCurrency()).getAmount());
                 interestOverdue = interestOverdue.add(installment.getInterestOutstanding(loan.getCurrency()).getAmount());
                 feeOverdue = feeOverdue.add(installment.getFeeChargesOutstanding(loan.getCurrency()).getAmount());
@@ -215,7 +217,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         loanIdentifier.append(
                 "inner join m_product_loan_recalculation_details prd on prd.product_id = ml.product_id and prd.arrears_based_on_original_schedule = true  ");
         loanIdentifier.append("WHERE ml.loan_status_id = 300  and mr.completed_derived is false  and mr.duedate < ")
-                .append(sqlGenerator.subDate(sqlGenerator.currentDate(), "COALESCE(ml.grace_on_arrears_ageing, 0)", "day"))
+                .append(sqlGenerator.subDate(sqlGenerator.currentBusinessDate(), "COALESCE(ml.grace_on_arrears_ageing, 0)", "day"))
                 .append(" group by ml.id");
         List<Long> loanIds = this.jdbcTemplate.queryForList(loanIdentifier.toString(), Long.class);
         if (!loanIds.isEmpty()) {
@@ -276,7 +278,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
             BigDecimal interestOverdue = BigDecimal.ZERO;
             BigDecimal feeOverdue = BigDecimal.ZERO;
             BigDecimal penaltyOverdue = BigDecimal.ZERO;
-            LocalDate overDueSince = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+            LocalDate overDueSince = DateUtils.getBusinessLocalDate();
 
             for (LoanSchedulePeriodData loanSchedulePeriodData : entry.getValue()) {
                 if (!loanSchedulePeriodData.getComplete()) {
@@ -437,7 +439,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
                     "mr.interest_amount as interestAmount, mr.fee_charges_amount as feeAmount, mr.penalty_charges_amount as penaltyAmount  ");
             scheduleDetail.append("from m_loan ml  INNER JOIN m_loan_repayment_schedule_history mr on mr.loan_id = ml.id ");
             scheduleDetail.append("where mr.duedate  < "
-                    + sqlGenerator.subDate(sqlGenerator.currentDate(), "COALESCE(ml.grace_on_arrears_ageing, 0)", "day") + " and ");
+                    + sqlGenerator.subDate(sqlGenerator.currentBusinessDate(), "COALESCE(ml.grace_on_arrears_ageing, 0)", "day") + " and ");
             scheduleDetail.append("ml.id IN(").append(loanIdsAsString).append(") and  mr.version = (");
             scheduleDetail.append("select max(lrs.version) from m_loan_repayment_schedule_history lrs where mr.loan_id = lrs.loan_id");
             scheduleDetail.append(") order by ml.id,mr.duedate");

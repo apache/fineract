@@ -244,9 +244,9 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                 loan.updateGroup(destinationGroup);
                 if (inheritDestinationGroupLoanOfficer != null && inheritDestinationGroupLoanOfficer == true
                         && destinationGroupLoanOfficer != null) {
-                    loan.reassignLoanOfficer(destinationGroupLoanOfficer, DateUtils.getLocalDateOfTenant());
+                    loan.reassignLoanOfficer(destinationGroupLoanOfficer, DateUtils.getBusinessLocalDate());
                 } else if (newLoanOfficer != null) {
-                    loan.reassignLoanOfficer(newLoanOfficer, DateUtils.getLocalDateOfTenant());
+                    loan.reassignLoanOfficer(newLoanOfficer, DateUtils.getBusinessLocalDate());
                 }
                 this.loanRepositoryWrapper.saveAndFlush(loan);
             }
@@ -489,10 +489,9 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
 
         this.noteWritePlatformService.createAndPersistClientNote(client, jsonCommand);
         Date proposedTransferDate = transferDate != null ? Date.from(transferDate.atStartOfDay(ZoneId.systemDefault()).toInstant()) : null;
-        this.clientTransferDetailsRepositoryWrapper.save(ClientTransferDetails.instance(client.getId(), client.getOffice().getId(),
-                destinationOffice.getId(), proposedTransferDate, transferEventType.getValue(),
-                Date.from(DateUtils.getLocalDateTimeOfTenant().atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
-                this.context.authenticatedUser().getId()));
+        this.clientTransferDetailsRepositoryWrapper.save(
+                ClientTransferDetails.instance(client.getId(), client.getOffice().getId(), destinationOffice.getId(), proposedTransferDate,
+                        transferEventType.getValue(), DateUtils.getBusinessDate(), this.context.authenticatedUser().getId()));
     }
 
     private List<Client> assembleListOfClients(final JsonCommand command) {

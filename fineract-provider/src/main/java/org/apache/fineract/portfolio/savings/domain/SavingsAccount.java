@@ -1309,23 +1309,16 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
         Integer restartPeriod = charge.getRestartFrequency();
         if (charge.getRestartFrequencyEnum() == 2) { // calculation for months
-            Date currentDate = new Date();
-            LocalDate localDate = currentDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-            Integer currentMonth = localDate.getMonthValue();
+            LocalDate localDate = DateUtils.getBusinessLocalDate();
 
-            LocalDate resetLocalDate = null;
+            LocalDate resetLocalDate;
             if (resetDate == null) {
                 resetLocalDate = this.activatedOnDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             } else {
                 resetLocalDate = resetDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             }
-            Integer resetMonth = resetLocalDate.getMonthValue();
 
             LocalDate gapIntervalMonth = resetLocalDate.plusMonths(restartPeriod);
-            Integer gapMonth = gapIntervalMonth.getMonthValue();
-
-            Integer resetYear = resetLocalDate.getYear();
-            Integer currentYear = localDate.getYear();
 
             YearMonth gapYearMonth = YearMonth.from(gapIntervalMonth);
             YearMonth localYearMonth = YearMonth.from(localDate);
@@ -1335,18 +1328,18 @@ public class SavingsAccount extends AbstractPersistableCustom {
                 discountCharge(1, charge);
             }
         } else { // calculation for days
-            Long completedDays = null;
-            Long days = null;
+            Long completedDays;
+            Long days;
 
             if (resetDate == null) {
-                completedDays = DateUtils.getDateOfTenant().getTime() - this.activatedOnDate.getTime();
+                completedDays = DateUtils.getBusinessDate().getTime() - this.activatedOnDate.getTime();
                 days = TimeUnit.DAYS.convert(completedDays, TimeUnit.MILLISECONDS);
             } else {
-                completedDays = DateUtils.getDateOfTenant().getTime() - resetDate.getTime();
+                completedDays = DateUtils.getBusinessDate().getTime() - resetDate.getTime();
                 days = TimeUnit.DAYS.convert(completedDays, TimeUnit.MILLISECONDS);
             }
 
-            Integer totalDays = days.intValue();
+            int totalDays = days.intValue();
 
             if (totalDays < restartPeriod) {
                 countValidation(charge, transactionAmount, transactionDate, user, refNo);
@@ -1371,7 +1364,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     private void discountCharge(Integer freeWithdrawalCount, SavingsAccountCharge charge) {
         charge.setFreeWithdrawalCount(freeWithdrawalCount);
-        charge.setDiscountDueDate(DateUtils.getDateOfTenant());
+        charge.setDiscountDueDate(DateUtils.getBusinessDate());
         charge.updateNoWithdrawalFee();
     }
 
@@ -1572,7 +1565,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     private boolean isDateInTheFuture(final LocalDate transactionDate) {
-        return transactionDate.isAfter(DateUtils.getLocalDateOfTenant());
+        return transactionDate.isAfter(DateUtils.getBusinessLocalDate());
     }
 
     public BigDecimal getAccountBalance() {
@@ -2067,7 +2060,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
             throw new SavingsOfficerAssignmentDateException("cannot.be.before.previous.unassignement.date", errorMessage, assignmentDate,
                     lastAssignmentRecord.getEndDate());
 
-        } else if (DateUtils.getLocalDateOfTenant().isBefore(assignmentDate)) {
+        } else if (DateUtils.getBusinessLocalDate().isBefore(assignmentDate)) {
 
             final String errorMessage = "The Savings Officer assignment date (" + assignmentDate + ") cannot be in the future.";
 
@@ -2164,7 +2157,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     private void validateUnassignDate(final SavingsOfficerAssignmentHistory latestHistoryRecord, final LocalDate unassignDate) {
 
-        final LocalDate today = DateUtils.getLocalDateOfTenant();
+        final LocalDate today = DateUtils.getBusinessLocalDate();
 
         if (latestHistoryRecord.getStartDate().isAfter(unassignDate)) {
 
@@ -2768,12 +2761,12 @@ public class SavingsAccount extends AbstractPersistableCustom {
             boolean isInterestTransfer = false;
             LocalDate postInterestAsOnDate = null;
             if (this.isBeforeLastPostingPeriod(getActivationLocalDate(), backdatedTxnsAllowedTill)) {
-                final LocalDate today = DateUtils.getLocalDateOfTenant();
+                final LocalDate today = DateUtils.getBusinessLocalDate();
                 boolean postReversals = false;
                 this.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
                         postInterestAsOnDate, backdatedTxnsAllowedTill, postReversals);
             } else {
-                final LocalDate today = DateUtils.getLocalDateOfTenant();
+                final LocalDate today = DateUtils.getBusinessLocalDate();
                 this.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
                         financialYearBeginningMonth, postInterestAsOnDate, backdatedTxnsAllowedTill);
             }
@@ -3236,7 +3229,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
     private void handleWaiverChargeTransactions(SavingsAccountCharge savingsAccountCharge, Money transactionAmount, AppUser user,
             boolean backdatedTxnsAllowedTill) {
         final SavingsAccountTransaction chargeTransaction = SavingsAccountTransaction.waiver(this, office(),
-                DateUtils.getLocalDateOfTenant(), transactionAmount, user);
+                DateUtils.getBusinessLocalDate(), transactionAmount, user);
         handleChargeTransactions(savingsAccountCharge, chargeTransaction, backdatedTxnsAllowedTill);
     }
 
@@ -3511,7 +3504,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     public void setSubStatusInactive(AppUser appUser, final boolean backdatedTxnsAllowedTill) {
         this.sub_status = SavingsAccountSubStatusEnum.INACTIVE.getValue();
-        LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
+        LocalDate transactionDate = DateUtils.getBusinessLocalDate();
         for (SavingsAccountCharge charge : this.charges()) {
             if (charge.isSavingsNoActivity() && charge.isActive()) {
                 charge.updateWithdralFeeAmount(this.getAccountBalance());
@@ -3531,10 +3524,10 @@ public class SavingsAccount extends AbstractPersistableCustom {
     public void escheat(AppUser appUser) {
         this.status = SavingsAccountStatusType.CLOSED.getValue();
         this.sub_status = SavingsAccountSubStatusEnum.ESCHEAT.getValue();
-        this.closedOnDate = DateUtils.getDateOfTenant();
+        this.closedOnDate = DateUtils.getBusinessDate();
         this.closedBy = appUser;
         boolean postInterestAsOnDate = false;
-        LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
+        LocalDate transactionDate = DateUtils.getBusinessLocalDate();
         if (this.getSummary().getAccountBalance(this.getCurrency()).isGreaterThanZero()) {
             SavingsAccountTransaction transaction = SavingsAccountTransaction.escheat(this, transactionDate, appUser, postInterestAsOnDate);
             this.transactions.add(transaction);

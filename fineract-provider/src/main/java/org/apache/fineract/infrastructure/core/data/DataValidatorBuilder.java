@@ -1092,7 +1092,7 @@ public class DataValidatorBuilder {
                 final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                         .append(this.parameter).append(".is.greater.than.date");
                 final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter `").append(this.parameter)
-                        .append("` must be less than or equal to the provided date").append(date);
+                        .append("` must be less than or equal to the provided date: ").append(date);
                 final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
                         defaultEnglishMessage.toString(), this.parameter, dateVal, date);
                 this.dataValidationErrors.add(error);

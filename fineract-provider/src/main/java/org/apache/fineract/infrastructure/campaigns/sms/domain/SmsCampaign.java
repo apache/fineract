@@ -170,7 +170,7 @@ public class SmsCampaign extends AbstractPersistableCustom {
         final String paramValue = command.jsonFragment(SmsCampaignValidator.paramValue);
 
         final String message = command.stringValueOfParameterNamed(SmsCampaignValidator.message);
-        LocalDate submittedOnDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        LocalDate submittedOnDate = DateUtils.getBusinessLocalDate();
         if (command.hasParameter(SmsCampaignValidator.submittedOnDateParamName)) {
             submittedOnDate = command.localDateValueOfParameterNamed(SmsCampaignValidator.submittedOnDateParamName);
         }
@@ -484,7 +484,7 @@ public class SmsCampaign extends AbstractPersistableCustom {
     }
 
     private boolean isDateInTheFuture(final LocalDate localDate) {
-        return localDate.isAfter(DateUtils.getLocalDateOfTenant());
+        return localDate.isAfter(DateUtils.getBusinessLocalDate());
     }
 
     public Report getBusinessRuleId() {

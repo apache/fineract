@@ -418,7 +418,7 @@ public class LoanScheduleAssembler {
                     baseLendingRatePeriods);
             Collection<FloatingRatePeriodData> applicableRates = loanProduct.fetchInterestRates(floatingRateDTO);
 
-            LocalDate interestRateStartDate = DateUtils.getLocalDateOfTenant();
+            LocalDate interestRateStartDate = DateUtils.getBusinessLocalDate();
             final LocalDate dateValue = null;
             final boolean isSpecificToInstallment = false;
             for (FloatingRatePeriodData periodData : applicableRates) {

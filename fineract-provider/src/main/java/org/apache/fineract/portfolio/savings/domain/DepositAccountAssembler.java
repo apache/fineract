@@ -355,7 +355,7 @@ public class DepositAccountAssembler {
 
         if (account != null) {
             account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
-            account.validateNewApplicationState(DateUtils.getLocalDateOfTenant(), depositAccountType.resourceName());
+            account.validateNewApplicationState(DateUtils.getBusinessLocalDate(), depositAccountType.resourceName());
         }
 
         return account;

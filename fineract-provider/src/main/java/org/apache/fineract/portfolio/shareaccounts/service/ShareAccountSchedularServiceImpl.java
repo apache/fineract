@@ -53,7 +53,7 @@ public class ShareAccountSchedularServiceImpl implements ShareAccountSchedularSe
                 .orElseThrow();
         final SavingsAccount savingsAccount = this.savingsAccountAssembler.assembleFrom(savingsId, false);
         SavingsAccountTransaction savingsAccountTransaction = this.savingsAccountDomainService.handleDividendPayout(savingsAccount,
-                DateUtils.getLocalDateOfTenant(), shareAccountDividendDetails.getAmount(), false);
+                DateUtils.getBusinessLocalDate(), shareAccountDividendDetails.getAmount(), false);
         shareAccountDividendDetails.update(ShareAccountDividendStatusType.POSTED.getValue(), savingsAccountTransaction.getId());
         this.shareAccountDividendRepository.saveAndFlush(shareAccountDividendDetails);
     }

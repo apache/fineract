@@ -22,9 +22,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
@@ -82,7 +82,7 @@ public class LoanTest {
      */
     private LoanCharge buildLoanCharge() {
         return new LoanCharge(mock(Loan.class), mock(Charge.class), new BigDecimal(100), new BigDecimal(100),
-                ChargeTimeType.TRANCHE_DISBURSEMENT, ChargeCalculationType.FLAT, DateUtils.getLocalDateOfTenant(),
-                ChargePaymentMode.REGULAR, 1, new BigDecimal(100));
+                ChargeTimeType.TRANCHE_DISBURSEMENT, ChargeCalculationType.FLAT, LocalDate.of(2022, 6, 27), ChargePaymentMode.REGULAR, 1,
+                new BigDecimal(100));
     }
 }

@@ -114,13 +114,12 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
                 backdatedTxnsAllowedTill, refNo.toString());
         final MathContext mc = MathContext.DECIMAL64;
 
+        final LocalDate today = DateUtils.getBusinessLocalDate();
         if (account.isBeforeLastPostingPeriod(transactionDate, backdatedTxnsAllowedTill)) {
-            final LocalDate today = DateUtils.getLocalDateOfTenant();
             boolean postReversals = false;
             account.postInterest(mc, today, transactionBooleanValues.isInterestTransfer(), isSavingsInterestPostingAtCurrentPeriodEnd,
                     financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill, postReversals);
         } else {
-            final LocalDate today = DateUtils.getLocalDateOfTenant();
             account.calculateInterestUsing(mc, today, transactionBooleanValues.isInterestTransfer(),
                     isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill);
         }
@@ -196,13 +195,12 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         final LocalDate postInterestOnDate = null;
         final MathContext mc = MathContext.DECIMAL64;
 
+        final LocalDate today = DateUtils.getBusinessLocalDate();
         if (account.isBeforeLastPostingPeriod(transactionDate, backdatedTxnsAllowedTill)) {
-            final LocalDate today = DateUtils.getLocalDateOfTenant();
             boolean postReversals = false;
             account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
                     postInterestOnDate, backdatedTxnsAllowedTill, postReversals);
         } else {
-            final LocalDate today = DateUtils.getLocalDateOfTenant();
             account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
                     financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill);
         }
@@ -315,7 +313,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
 
         boolean isInterestTransfer = false;
         LocalDate postInterestOnDate = null;
-        final LocalDate today = DateUtils.getLocalDateOfTenant();
+        final LocalDate today = DateUtils.getBusinessLocalDate();
         final MathContext mc = new MathContext(15, MoneyHelper.getRoundingMode());
         for (SavingsAccountTransaction savingsAccountTransaction : savingsAccountTransactions) {
             if (savingsAccountTransaction.isPostInterestCalculationRequired()

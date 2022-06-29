@@ -161,7 +161,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         }
 
         // defaults
-        final LocalDate transferDate = DateUtils.getLocalDateOfTenant();
+        final LocalDate transferDate = DateUtils.getBusinessLocalDate();
         Collection<OfficeData> toOfficeOptions = fromOfficeOptions;
         Collection<ClientData> toClientOptions = null;
 
@@ -516,7 +516,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         }
 
         // defaults
-        final LocalDate transferDate = DateUtils.getLocalDateOfTenant();
+        final LocalDate transferDate = DateUtils.getBusinessLocalDate();
         Collection<OfficeData> toOfficeOptions = fromOfficeOptions;
         Collection<ClientData> toClientOptions = null;
 

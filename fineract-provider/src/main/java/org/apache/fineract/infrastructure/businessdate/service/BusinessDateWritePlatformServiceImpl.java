@@ -95,6 +95,7 @@ public class BusinessDateWritePlatformServiceImpl implements BusinessDateWritePl
         List<Throwable> exceptions = new ArrayList<>();
         Map<String, Object> changes = new HashMap<>();
         Optional<BusinessDate> businessDateEntity = repository.findByType(businessDateType);
+
         LocalDate businessDate = businessDateEntity.map(BusinessDate::getDate).orElse(DateUtils.getLocalDateOfTenant());
         businessDate = businessDate.plusDays(1);
         try {

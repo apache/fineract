@@ -239,7 +239,7 @@ public class ShareAccountDataSerializer {
     private void createChargeTransaction(ShareAccount account) {
         BigDecimal totalChargeAmount = BigDecimal.ZERO;
         Set<ShareAccountCharge> charges = account.getCharges();
-        Date currentDate = Date.from(DateUtils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date currentDate = Date.from(DateUtils.getBusinessLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
         for (ShareAccountCharge charge : charges) {
             if (charge.isActive() && charge.isShareAccountActivation()) {
                 charge.deriveChargeAmount(totalChargeAmount, account.getCurrency());
@@ -593,7 +593,7 @@ public class ShareAccountDataSerializer {
     public Map<String, Object> validateAndReject(JsonCommand jsonCommand, ShareAccount account) {
         Map<String, Object> actualChanges = new HashMap<>();
         AppUser rejectedUser = this.platformSecurityContext.authenticatedUser();
-        Date rejectedDate = DateUtils.getDateOfTenant();
+        Date rejectedDate = DateUtils.getBusinessDate();
         account.reject(rejectedDate, rejectedUser);
         actualChanges.put(ShareAccountApiConstants.charges_paramname, Boolean.TRUE);
         return actualChanges;
@@ -1053,7 +1053,7 @@ public class ShareAccountDataSerializer {
         }
 
         AppUser approvedUser = this.platformSecurityContext.authenticatedUser();
-        final BigDecimal unitPrice = account.getShareProduct().deriveMarketPrice(DateUtils.getDateOfTenant());
+        final BigDecimal unitPrice = account.getShareProduct().deriveMarketPrice(DateUtils.getBusinessDate());
         ShareAccountTransaction transaction = ShareAccountTransaction.createRedeemTransaction(
                 Date.from(closedDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), account.getTotalApprovedShares(), unitPrice);
         account.addAdditionalPurchasedShares(transaction);

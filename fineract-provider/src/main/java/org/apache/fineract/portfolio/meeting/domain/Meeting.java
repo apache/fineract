@@ -89,7 +89,7 @@ public class Meeting extends AbstractPersistableCustom {
 
     public void associateClientsAttendance(final Collection<ClientAttendance> clientsAttendance) {
         // do not allow to capture attendance in advance.
-        if (isMeetingDateAfter(DateUtils.getLocalDateOfTenant())) {
+        if (isMeetingDateAfter(DateUtils.getBusinessLocalDate())) {
             final String errorMessage = "Attendance cannot be in the future.";
             throw new MeetingDateException("cannot.be.a.future.date", errorMessage, getMeetingDateLocalDate());
         }

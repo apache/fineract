@@ -22,7 +22,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -68,9 +67,6 @@ import org.springframework.util.CollectionUtils;
 public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ScheduledJobRunnerServiceImpl.class);
-
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private final DateTimeFormatter formatterWithTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final RoutingDataSourceServiceFactory dataSourceServiceFactory;
     private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
@@ -194,7 +190,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         fromPart = " (select loan.id " + " FROM m_loan_arrears_aging laa" + " INNER JOIN  m_loan loan on laa.loan_id = loan.id "
                 + " INNER JOIN m_product_loan mpl on mpl.id = loan.product_id AND mpl.overdue_days_for_npa is not null "
                 + "WHERE loan.loan_status_id = 300 and " + "laa.overdue_since_date_derived < "
-                + sqlGenerator.subDate(sqlGenerator.currentDate(), "COALESCE(mpl.overdue_days_for_npa, 0)", "day")
+                + sqlGenerator.subDate(sqlGenerator.currentBusinessDate(), "COALESCE(mpl.overdue_days_for_npa, 0)", "day")
                 + " group by loan.id) as sl ";
         wherePart = " where ml.id=sl.id ";
         updateSqlBuilder.append("UPDATE m_loan as ml ");
@@ -241,7 +237,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         final Collection<Map<String, Object>> scheduleDetails = this.depositAccountReadPlatformService.retriveDataForRDScheduleCreation();
         String insertSql = "INSERT INTO m_mandatory_savings_schedule (savings_account_id, duedate, installment, deposit_amount, completed_derived, created_date, lastmodified_date) VALUES ";
         StringBuilder sb = new StringBuilder();
-        String currentDate = formatterWithTime.format(DateUtils.getLocalDateTimeOfTenant());
+        String currentDate = DateUtils.getLocalDateTimeOfTenant().format(DateUtils.DEFAULT_DATETIME_FORMATER);
         int iterations = 0;
         for (Map<String, Object> details : scheduleDetails) {
             Long count = (Long) details.get("futureInstallemts");
@@ -265,7 +261,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
                 sb.append("(");
                 sb.append(savingsId);
                 sb.append(",'");
-                sb.append(formatter.format(lastDepositDate));
+                sb.append(lastDepositDate.format(DateUtils.DEFAULT_DATE_FORMATER));
                 sb.append("',");
                 sb.append(installmentNumber);
                 sb.append(",");
@@ -339,7 +335,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
         for (Date tbGap : tbGaps) {
             LocalDate convDate = ZonedDateTime.ofInstant(tbGap.toInstant(), DateUtils.getDateTimeZoneOfTenant()).toLocalDate();
-            int days = Math.toIntExact(ChronoUnit.DAYS.between(convDate, DateUtils.getLocalDateOfTenant()));
+            int days = Math.toIntExact(ChronoUnit.DAYS.between(convDate, DateUtils.getBusinessLocalDate()));
             if (days < 1) {
                 continue;
             }

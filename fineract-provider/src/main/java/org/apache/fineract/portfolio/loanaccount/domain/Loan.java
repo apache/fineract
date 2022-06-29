@@ -704,7 +704,7 @@ public class Loan extends AbstractPersistableCustom {
             transactionDate = suppliedTransactionDate;
         } else {
             transactionDate = loanCharge.getDueLocalDate();
-            final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
+            final LocalDate currentDate = DateUtils.getBusinessLocalDate();
 
             // if loan charge is to be applied on a future date, the loan
             // transaction would show todays date as applied date
@@ -1045,8 +1045,8 @@ public class Loan extends AbstractPersistableCustom {
 
         LocalDate transactionDate = getDisbursementDate();
         if (loanCharge.isDueDateCharge()) {
-            if (loanCharge.getDueLocalDate().isAfter(DateUtils.getLocalDateOfTenant())) {
-                transactionDate = DateUtils.getLocalDateOfTenant();
+            if (loanCharge.getDueLocalDate().isAfter(DateUtils.getBusinessLocalDate())) {
+                transactionDate = DateUtils.getBusinessLocalDate();
             } else {
                 transactionDate = loanCharge.getDueLocalDate();
             }
@@ -1067,8 +1067,8 @@ public class Loan extends AbstractPersistableCustom {
                 waiveLoanChargeTransaction.getAmount(getCurrency()).getAmount(), loanInstallmentNumber);
         waiveLoanChargeTransaction.getLoanChargesPaid().add(loanChargePaidBy);
         addLoanTransaction(waiveLoanChargeTransaction);
-        if (this.repaymentScheduleDetail().isInterestRecalculationEnabled() && (loanCharge.getDueLocalDate() == null
-                || LocalDate.now(DateUtils.getDateTimeZoneOfTenant()).isAfter(loanCharge.getDueLocalDate()))) {
+        if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()
+                && (loanCharge.getDueLocalDate() == null || DateUtils.getBusinessLocalDate().isAfter(loanCharge.getDueLocalDate()))) {
             regenerateRepaymentScheduleWithInterestRecalculation(scheduleGeneratorDTO, currentUser);
         }
         // Waive of charges whose due date falls after latest 'repayment'
@@ -1562,9 +1562,9 @@ public class Loan extends AbstractPersistableCustom {
         }
 
         // the comparison should be done with the tenant date
-        // (DateUtils.getLocalDateOfTenant()) and not the server date (new
+        // (DateUtils.getBusinessDate()) and not the server date (new
         // LocalDate())
-        if (getSubmittedOnDate().isAfter(DateUtils.getLocalDateOfTenant())) {
+        if (getSubmittedOnDate().isAfter(DateUtils.getBusinessLocalDate())) {
             final String errorMessage = "The date on which a loan is submitted cannot be in the future.";
             throw new InvalidLoanStateTransitionException("submittal", "cannot.be.a.future.date", errorMessage, getSubmittedOnDate());
         }
@@ -1774,7 +1774,7 @@ public class Loan extends AbstractPersistableCustom {
 
     private BigDecimal calculateOverdueAmountPercentageAppliedTo(final LoanCharge loanCharge, final int penaltyWaitPeriod) {
         LoanRepaymentScheduleInstallment installment = loanCharge.getOverdueInstallmentCharge().getInstallment();
-        LocalDate graceDate = DateUtils.getLocalDateOfTenant().minusDays(penaltyWaitPeriod);
+        LocalDate graceDate = DateUtils.getBusinessLocalDate().minusDays(penaltyWaitPeriod);
         Money amount = Money.zero(getCurrency());
         if (graceDate.isAfter(installment.getDueDate())) {
             amount = calculateOverdueAmountPercentageAppliedTo(installment, loanCharge.getChargeCalculation());
@@ -2090,7 +2090,7 @@ public class Loan extends AbstractPersistableCustom {
 
         updateLoanScheduleDependentDerivedFields();
 
-        if (submittedOn.isAfter(DateUtils.getLocalDateOfTenant())) {
+        if (submittedOn.isAfter(DateUtils.getBusinessLocalDate())) {
             final String errorMessage = "The date on which a loan is submitted cannot be in the future.";
             throw new InvalidLoanStateTransitionException("submittal", "cannot.be.a.future.date", errorMessage, submittedOn);
         }
@@ -2190,7 +2190,7 @@ public class Loan extends AbstractPersistableCustom {
 
             validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_REJECTED, rejectedOn);
 
-            if (rejectedOn.isAfter(DateUtils.getLocalDateOfTenant())) {
+            if (rejectedOn.isAfter(DateUtils.getBusinessLocalDate())) {
                 final String errorMessage = "The date on which a loan is rejected cannot be in the future.";
                 throw new InvalidLoanStateTransitionException("reject", "cannot.be.a.future.date", errorMessage, rejectedOn);
             }
@@ -2239,7 +2239,7 @@ public class Loan extends AbstractPersistableCustom {
 
             validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_WITHDRAWN, withdrawnOn);
 
-            if (withdrawnOn.isAfter(DateUtils.getLocalDateOfTenant())) {
+            if (withdrawnOn.isAfter(DateUtils.getBusinessLocalDate())) {
                 final String errorMessage = "The date on which a loan is withdrawn cannot be in the future.";
                 throw new InvalidLoanStateTransitionException("withdraw", "cannot.be.a.future.date", errorMessage, command);
             }
@@ -2355,7 +2355,7 @@ public class Loan extends AbstractPersistableCustom {
 
             validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_APPROVED, approvedOn);
 
-            if (approvedOn.isAfter(DateUtils.getLocalDateOfTenant())) {
+            if (approvedOn.isAfter(DateUtils.getBusinessLocalDate())) {
                 final String errorMessage = "The date on which a loan is approved cannot be in the future.";
                 throw new InvalidLoanStateTransitionException("approval", "cannot.be.a.future.date", errorMessage, getApprovedOnDate());
             }
@@ -2513,7 +2513,7 @@ public class Loan extends AbstractPersistableCustom {
 
         LocalDate firstInstallmentDueDate = fetchRepaymentScheduleInstallment(1).getDueDate();
         if (interestRecalculationEnabledParam
-                && (firstInstallmentDueDate.isBefore(LocalDate.now(DateUtils.getDateTimeZoneOfTenant())) || disbursementMissedParam)) {
+                && (firstInstallmentDueDate.isBefore(DateUtils.getBusinessLocalDate()) || disbursementMissedParam)) {
             regenerateRepaymentScheduleWithInterestRecalculation(scheduleGeneratorDTO, currentUser);
         }
 
@@ -2729,8 +2729,8 @@ public class Loan extends AbstractPersistableCustom {
     private boolean isDisbursementMissed() {
         boolean isDisbursementMissed = false;
         for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
-            if (disbursementDetail.actualDisbursementDate() == null && LocalDate.now(DateUtils.getDateTimeZoneOfTenant())
-                    .isAfter(disbursementDetail.expectedDisbursementDateAsLocalDate())) {
+            if (disbursementDetail.actualDisbursementDate() == null
+                    && DateUtils.getBusinessLocalDate().isAfter(disbursementDetail.expectedDisbursementDateAsLocalDate())) {
                 isDisbursementMissed = true;
                 break;
             }
@@ -2840,7 +2840,7 @@ public class Loan extends AbstractPersistableCustom {
         if (loanProduct.isLinkedToFloatingInterestRate()) {
             floatingRateDTO.resetInterestRateDiff();
             Collection<FloatingRatePeriodData> applicableRates = loanProduct.fetchInterestRates(floatingRateDTO);
-            LocalDate interestRateStartDate = DateUtils.getLocalDateOfTenant();
+            LocalDate interestRateStartDate = DateUtils.getBusinessLocalDate();
             for (FloatingRatePeriodData periodData : applicableRates) {
                 LoanTermVariationsData loanTermVariation = new LoanTermVariationsData(
                         LoanEnumerations.loanvariationType(LoanTermVariationType.INTEREST_RATE), periodData.getFromDateAsLocalDate(),
@@ -2932,7 +2932,7 @@ public class Loan extends AbstractPersistableCustom {
 
         validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_DISBURSED, disbursedOn);
 
-        if (disbursedOn.isAfter(DateUtils.getLocalDateOfTenant())) {
+        if (disbursedOn.isAfter(DateUtils.getBusinessLocalDate())) {
             final String errorMessage = "The date on which a loan with identifier : " + this.accountNumber
                     + " is disbursed cannot be in the future.";
             throw new InvalidLoanStateTransitionException("disbursal", "cannot.be.a.future.date", errorMessage, disbursedOn);
@@ -3132,7 +3132,7 @@ public class Loan extends AbstractPersistableCustom {
         validateRepaymentDateIsOnNonWorkingDay(paymentTransaction.getTransactionDate(), holidayDetailDTO.getWorkingDays(),
                 holidayDetailDTO.isAllowTransactionsOnNonWorkingDay());
 
-        if (paymentTransaction.getTransactionDate().isAfter(DateUtils.getLocalDateOfTenant())) {
+        if (paymentTransaction.getTransactionDate().isAfter(DateUtils.getBusinessLocalDate())) {
             final String errorMessage = "The date on which a loan charge paid cannot be in the future.";
             throw new InvalidLoanStateTransitionException("charge.payment", "cannot.be.a.future.date", errorMessage,
                     paymentTransaction.getTransactionDate());
@@ -3231,7 +3231,7 @@ public class Loan extends AbstractPersistableCustom {
                     loanTransactionDate, getDisbursementDate());
         }
 
-        if (loanTransactionDate.isAfter(DateUtils.getLocalDateOfTenant())) {
+        if (loanTransactionDate.isAfter(DateUtils.getBusinessLocalDate())) {
             final String errorMessage = "The transaction date cannot be in the future.";
             throw new InvalidLoanStateTransitionException("transaction", "cannot.be.a.future.date", errorMessage, loanTransactionDate);
         }
@@ -3265,7 +3265,7 @@ public class Loan extends AbstractPersistableCustom {
         boolean reprocess = true;
 
         if (!isForeclosure() && isTransactionChronologicallyLatest && adjustedTransaction == null
-                && loanTransaction.getTransactionDate().isEqual(DateUtils.getLocalDateOfTenant()) && currentInstallment != null
+                && loanTransaction.getTransactionDate().isEqual(DateUtils.getBusinessLocalDate()) && currentInstallment != null
                 && currentInstallment.getTotalOutstanding(getCurrency()).isEqualTo(loanTransaction.getAmount(getCurrency()))) {
             reprocess = false;
         }
@@ -3570,7 +3570,7 @@ public class Loan extends AbstractPersistableCustom {
     }
 
     public LocalDate possibleNextRepaymentDate() {
-        LocalDate earliestUnpaidInstallmentDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        LocalDate earliestUnpaidInstallmentDate = DateUtils.getBusinessLocalDate();
         List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
         for (final LoanRepaymentScheduleInstallment installment : installments) {
             if (installment.isNotFullyPaidOff()) {
@@ -3611,7 +3611,7 @@ public class Loan extends AbstractPersistableCustom {
 
         final Money totalInterestOutstanding = getTotalInterestOutstandingOnLoan();
         Money possibleInterestToWaive = totalInterestOutstanding.copy();
-        LocalDate transactionDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        LocalDate transactionDate = DateUtils.getBusinessLocalDate();
 
         if (totalInterestOutstanding.isGreaterThanZero()) {
             // find earliest known instance of overdue interest and default to
@@ -3620,8 +3620,8 @@ public class Loan extends AbstractPersistableCustom {
             for (final LoanRepaymentScheduleInstallment scheduledRepayment : installments) {
 
                 final Money outstandingForPeriod = scheduledRepayment.getInterestOutstanding(loanCurrency());
-                if (scheduledRepayment.isOverdueOn(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()))
-                        && scheduledRepayment.isNotFullyPaidOff() && outstandingForPeriod.isGreaterThanZero()) {
+                if (scheduledRepayment.isOverdueOn(DateUtils.getBusinessLocalDate()) && scheduledRepayment.isNotFullyPaidOff()
+                        && outstandingForPeriod.isGreaterThanZero()) {
                     transactionDate = scheduledRepayment.getDueDate();
                     possibleInterestToWaive = outstandingForPeriod;
                     break;
@@ -3799,7 +3799,7 @@ public class Loan extends AbstractPersistableCustom {
 
             validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.WRITE_OFF_OUTSTANDING, writtenOffOnLocalDate);
 
-            if (writtenOffOnLocalDate.isAfter(DateUtils.getLocalDateOfTenant())) {
+            if (writtenOffOnLocalDate.isAfter(DateUtils.getBusinessLocalDate())) {
                 final String errorMessage = "The date on which a loan is written off cannot be in the future.";
                 throw new InvalidLoanStateTransitionException("writeoff", "cannot.be.a.future.date", errorMessage, writtenOffOnLocalDate);
             }
@@ -3883,7 +3883,7 @@ public class Loan extends AbstractPersistableCustom {
                     getDisbursementDate());
         }
 
-        if (closureDate.isAfter(DateUtils.getLocalDateOfTenant())) {
+        if (closureDate.isAfter(DateUtils.getBusinessLocalDate())) {
             final String errorMessage = "The date on which a loan is closed cannot be in the future.";
             throw new InvalidLoanStateTransitionException("close", "cannot.be.a.future.date", errorMessage, closureDate);
         }
@@ -3980,7 +3980,7 @@ public class Loan extends AbstractPersistableCustom {
                     rescheduledOnLocalDate, getDisbursementDate());
         }
 
-        if (rescheduledOnLocalDate.isAfter(DateUtils.getLocalDateOfTenant())) {
+        if (rescheduledOnLocalDate.isAfter(DateUtils.getBusinessLocalDate())) {
             final String errorMessage = "The date on which a loan is rescheduled cannot be in the future.";
             throw new InvalidLoanStateTransitionException("close.reschedule", "cannot.be.a.future.date", errorMessage,
                     rescheduledOnLocalDate);
@@ -4214,7 +4214,7 @@ public class Loan extends AbstractPersistableCustom {
         for (final LoanRepaymentScheduleInstallment scheduledRepayment : installments) {
 
             final Money interestOutstandingForPeriod = scheduledRepayment.getInterestOutstanding(loanCurrency());
-            if (scheduledRepayment.isOverdueOn(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()))) {
+            if (scheduledRepayment.isOverdueOn(DateUtils.getBusinessLocalDate())) {
                 cumulativeInterestOverdue = cumulativeInterestOverdue.plus(interestOutstandingForPeriod);
             }
         }
@@ -4288,7 +4288,7 @@ public class Loan extends AbstractPersistableCustom {
             throw new LoanOfficerAssignmentDateException("cannot.be.before.previous.unassignement.date", errorMessage, assignmentDate,
                     lastAssignmentRecord.getEndDate());
 
-        } else if (DateUtils.getLocalDateOfTenant().isBefore(assignmentDate)) {
+        } else if (DateUtils.getBusinessLocalDate().isBefore(assignmentDate)) {
 
             final String errorMessage = "The Loan Officer assignment date (" + assignmentDate + ") cannot be in the future.";
 
@@ -4332,7 +4332,7 @@ public class Loan extends AbstractPersistableCustom {
 
     private void validateUnassignDate(final LoanOfficerAssignmentHistory latestHistoryRecord, final LocalDate unassignDate) {
 
-        final LocalDate today = DateUtils.getLocalDateOfTenant();
+        final LocalDate today = DateUtils.getBusinessLocalDate();
 
         if (latestHistoryRecord.getStartDate().isAfter(unassignDate)) {
 
@@ -4616,7 +4616,7 @@ public class Loan extends AbstractPersistableCustom {
 
             // FIXME: AA this won't update repayment dates before current date.
 
-            if (oldDueDate.isAfter(seedDate) && oldDueDate.isAfter(DateUtils.getLocalDateOfTenant())) {
+            if (oldDueDate.isAfter(seedDate) && oldDueDate.isAfter(DateUtils.getBusinessLocalDate())) {
 
                 newRepaymentDate = CalendarUtils.getNewRepaymentMeetingDate(recuringRule, seedDate, oldDueDate, loanRepaymentInterval,
                         frequency, workingDays, isSkipRepaymentonfirstdayofmonth, numberofDays);
@@ -5421,7 +5421,7 @@ public class Loan extends AbstractPersistableCustom {
             return;
         }
         updateLoanSchedule(loanSchedule.getInstallments(), currentUser);
-        this.interestRecalculatedOn = DateUtils.getDateOfTenant();
+        this.interestRecalculatedOn = DateUtils.getBusinessDate();
         LocalDate lastRepaymentDate = this.getLastRepaymentPeriodDueDate(true);
         Set<LoanCharge> charges = this.charges();
         for (final LoanCharge loanCharge : charges) {
@@ -5475,7 +5475,7 @@ public class Loan extends AbstractPersistableCustom {
             List<LoanTransaction> incomeTransactions = retreiveListOfIncomePostingTransactions();
             List<LoanTransaction> accrualTransactions = retreiveListOfAccrualTransactions();
             for (LoanInterestRecalcualtionAdditionalDetails compoundingDetail : compoundingDetails) {
-                if (!compoundingDetail.getEffectiveDate().isBefore(DateUtils.getLocalDateOfTenant())) {
+                if (!compoundingDetail.getEffectiveDate().isBefore(DateUtils.getBusinessLocalDate())) {
                     break;
                 }
                 LoanTransaction incomeTransaction = getTransactionForDate(incomeTransactions, compoundingDetail.getEffectiveDate());
@@ -5775,9 +5775,9 @@ public class Loan extends AbstractPersistableCustom {
             feeCharges = feeCharges.plus(scheduledRepayment.getFeeChargesOutstanding(loanCurrency()));
             penaltyCharges = penaltyCharges.plus(scheduledRepayment.getPenaltyChargesOutstanding(loanCurrency()));
         }
-        return new LoanRepaymentScheduleInstallment(null, 0, LocalDate.now(DateUtils.getDateTimeZoneOfTenant()),
-                LocalDate.now(DateUtils.getDateTimeZoneOfTenant()), totalPrincipal.getAmount(), totalInterest.getAmount(),
-                feeCharges.getAmount(), penaltyCharges.getAmount(), false, compoundingDetails);
+        LocalDate businessDate = DateUtils.getBusinessLocalDate();
+        return new LoanRepaymentScheduleInstallment(null, 0, businessDate, businessDate, totalPrincipal.getAmount(),
+                totalInterest.getAmount(), feeCharges.getAmount(), penaltyCharges.getAmount(), false, compoundingDetails);
     }
 
     public LocalDate getAccruedTill() {
@@ -6217,7 +6217,7 @@ public class Loan extends AbstractPersistableCustom {
                     loanTransactionDate, getDisbursementDate());
         }
 
-        if (loanTransactionDate.isAfter(DateUtils.getLocalDateOfTenant())) {
+        if (loanTransactionDate.isAfter(DateUtils.getBusinessLocalDate())) {
             final String errorMessage = "The transaction date cannot be in the future.";
             throw new InvalidLoanStateTransitionException("transaction", "cannot.be.a.future.date", errorMessage, loanTransactionDate);
         }
@@ -6257,7 +6257,7 @@ public class Loan extends AbstractPersistableCustom {
 
     public LocalDate possibleNextRefundDate() {
 
-        final LocalDate now = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        final LocalDate now = DateUtils.getBusinessLocalDate();
 
         LocalDate lastTransactionDate = null;
         for (final LoanTransaction transaction : this.loanTransactions) {
@@ -6435,7 +6435,7 @@ public class Loan extends AbstractPersistableCustom {
      */
     public LocalDate getNextPossibleRepaymentDateForRescheduling() {
         List<LoanDisbursementDetails> loanDisbursementDetails = this.disbursementDetails;
-        LocalDate nextRepaymentDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        LocalDate nextRepaymentDate = DateUtils.getBusinessLocalDate();
         for (LoanDisbursementDetails loanDisbursementDetail : loanDisbursementDetails) {
             if (loanDisbursementDetail.actualDisbursementDate() == null) {
                 List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
@@ -6500,7 +6500,7 @@ public class Loan extends AbstractPersistableCustom {
         Money totalPrincipal = Money.of(getCurrency(), this.getSummary().getTotalPrincipalOutstanding());
         totalPrincipal = totalPrincipal.minus(receivables[3]);
         final Set<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails = null;
-        final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
+        final LocalDate currentDate = DateUtils.getBusinessLocalDate();
         return new LoanRepaymentScheduleInstallment(null, 0, currentDate, currentDate, totalPrincipal.getAmount(),
                 receivables[0].getAmount(), receivables[1].getAmount(), receivables[2].getAmount(), false, compoundingDetails);
     }

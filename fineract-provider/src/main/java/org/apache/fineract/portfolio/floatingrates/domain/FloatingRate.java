@@ -49,6 +49,7 @@ import org.apache.fineract.portfolio.floatingrates.data.FloatingRateDTO;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRatePeriodData;
 import org.apache.fineract.useradministration.domain.AppUser;
 
+//TODO: refactor to use AbstractAuditableCustom!
 @Entity
 @Table(name = "m_floating_rates", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unq_name") })
 public class FloatingRate extends AbstractPersistableCustom {
@@ -109,11 +110,9 @@ public class FloatingRate extends AbstractPersistableCustom {
                 : false;
         final boolean isActive = command.parameterExists("isActive") ? command.booleanPrimitiveValueOfParameterNamed("isActive") : true;
         final List<FloatingRatePeriod> floatingRatePeriods = getRatePeriods(currentUser, command);
-        final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
+        final Date currentDate = DateUtils.getBusinessDate();
 
-        return new FloatingRate(name, isBaseLendingRate, isActive, floatingRatePeriods, currentUser, currentUser,
-                Date.from(currentDate.atStartOfDay(ZoneId.systemDefault()).toInstant()),
-                Date.from(currentDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        return new FloatingRate(name, isBaseLendingRate, isActive, floatingRatePeriods, currentUser, currentUser, currentDate, currentDate);
     }
 
     private static List<FloatingRatePeriod> getRatePeriods(final AppUser currentUser, final JsonCommand command) {
@@ -132,7 +131,7 @@ public class FloatingRate extends AbstractPersistableCustom {
                     ? ratePeriodObject.get("isDifferentialToBaseLendingRate").getAsBoolean()
                     : false;
             final boolean isActive = true;
-            final Date currentDate = DateUtils.getDateOfTenant();
+            final Date currentDate = DateUtils.getBusinessDate();
             ratePeriods.add(new FloatingRatePeriod(fromDate, interestRate, isDifferentialToBaseLendingRate, isActive, currentUser,
                     currentUser, currentDate, currentDate));
         }
@@ -204,7 +203,7 @@ public class FloatingRate extends AbstractPersistableCustom {
     }
 
     private void updateRatePeriods(final List<FloatingRatePeriod> newRatePeriods, final AppUser appUser) {
-        final LocalDate today = DateUtils.getLocalDateOfTenant();
+        final LocalDate today = DateUtils.getBusinessLocalDate();
         if (this.floatingRatePeriods != null) {
             for (FloatingRatePeriod ratePeriod : this.floatingRatePeriods) {
                 LocalDate fromDate = LocalDate.ofInstant(ratePeriod.getFromDate().toInstant(), DateUtils.getDateTimeZoneOfTenant());

@@ -273,7 +273,7 @@ public final class Client extends AbstractPersistableCustom {
             officeJoiningDate = activationDate;
         }
 
-        LocalDate submittedOnDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        LocalDate submittedOnDate = DateUtils.getBusinessLocalDate();
         if (active && submittedOnDate.isAfter(activationDate)) {
             submittedOnDate = activationDate;
         }
@@ -486,7 +486,7 @@ public final class Client extends AbstractPersistableCustom {
     }
 
     private boolean isDateInTheFuture(final LocalDate localDate) {
-        return localDate.isAfter(DateUtils.getLocalDateOfTenant());
+        return localDate.isAfter(DateUtils.getBusinessLocalDate());
     }
 
     public boolean isRejected() {

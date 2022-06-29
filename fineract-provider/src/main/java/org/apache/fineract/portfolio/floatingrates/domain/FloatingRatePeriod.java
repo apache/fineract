@@ -34,6 +34,7 @@ import org.apache.fineract.portfolio.floatingrates.data.FloatingRateDTO;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRatePeriodData;
 import org.apache.fineract.useradministration.domain.AppUser;
 
+//TODO: refactor to use AbstractAuditableCustom!
 @Entity
 @Table(name = "m_floating_rates_periods")
 public class FloatingRatePeriod extends AbstractPersistableCustom {

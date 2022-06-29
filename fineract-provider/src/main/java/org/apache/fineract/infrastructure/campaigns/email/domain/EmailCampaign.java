@@ -185,7 +185,7 @@ public class EmailCampaign extends AbstractPersistableCustom {
         } else {
             emailAttachmentFileFormat = ScheduledEmailAttachmentFileFormat.instance(2);
         }
-        LocalDate submittedOnDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        LocalDate submittedOnDate = DateUtils.getBusinessLocalDate();
         if (command.hasParameter(EmailCampaignValidator.submittedOnDateParamName)) {
             submittedOnDate = command.localDateValueOfParameterNamed(EmailCampaignValidator.submittedOnDateParamName);
         }
@@ -474,7 +474,7 @@ public class EmailCampaign extends AbstractPersistableCustom {
     }
 
     private boolean isDateInTheFuture(final LocalDate localDate) {
-        return localDate.isAfter(DateUtils.getLocalDateOfTenant());
+        return localDate.isAfter(DateUtils.getBusinessLocalDate());
     }
 
     public Report getBusinessRuleId() {

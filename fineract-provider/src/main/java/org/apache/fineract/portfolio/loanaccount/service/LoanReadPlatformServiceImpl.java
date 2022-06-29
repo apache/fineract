@@ -25,7 +25,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -152,7 +151,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private final PaginationHelper paginationHelper;
     private final LoanMapper loaanLoanMapper;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
     private final FloatingRatesReadPlatformService floatingRatesReadPlatformService;
@@ -374,7 +372,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         this.context.authenticatedUser();
 
         final ClientData clientAccount = this.clientReadPlatformService.retrieveOne(clientId);
-        final LocalDate expectedDisbursementDate = DateUtils.getLocalDateOfTenant();
+        final LocalDate expectedDisbursementDate = DateUtils.getBusinessLocalDate();
         LoanAccountData loanTemplateDetails = LoanAccountData.clientDefaults(clientAccount.id(), clientAccount.accountNo(),
                 clientAccount.displayName(), clientAccount.officeId(), expectedDisbursementDate);
 
@@ -392,7 +390,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         this.context.authenticatedUser();
 
         final GroupGeneralData groupAccount = this.groupReadPlatformService.retrieveOne(groupId);
-        final LocalDate expectedDisbursementDate = DateUtils.getLocalDateOfTenant();
+        final LocalDate expectedDisbursementDate = DateUtils.getBusinessLocalDate();
         LoanAccountData loanDetails = LoanAccountData.groupDefaults(groupAccount, expectedDisbursementDate);
 
         if (productId != null) {
@@ -420,7 +418,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     collectionMeetingCalendar);
         }
 
-        final LocalDate expectedDisbursementDate = DateUtils.getLocalDateOfTenant();
+        final LocalDate expectedDisbursementDate = DateUtils.getBusinessLocalDate();
         LoanAccountData loanDetails = LoanAccountData.groupDefaults(groupAccount, expectedDisbursementDate);
 
         if (productId != null) {
@@ -459,7 +457,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         final CurrencyData currencyData = applicationCurrency.toData();
 
-        final LocalDate earliestUnpaidInstallmentDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        final LocalDate earliestUnpaidInstallmentDate = DateUtils.getBusinessLocalDate();
         final LocalDate recalculateFrom = null;
         final ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
         final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loan.fetchPrepaymentDetail(scheduleGeneratorDTO, onDate);
@@ -525,7 +523,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final BigDecimal outstandingLoanBalance = null;
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.WRITEOFF);
         final BigDecimal unrecognizedIncomePortion = null;
-        return new LoanTransactionData(null, null, null, transactionType, null, null, DateUtils.getLocalDateOfTenant(), null, null, null,
+        return new LoanTransactionData(null, null, null, transactionType, null, null, DateUtils.getBusinessLocalDate(), null, null, null,
                 null, null, null, null, null, null, null, outstandingLoanBalance, unrecognizedIncomePortion, false);
 
     }
@@ -533,7 +531,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     @Override
     public LoanApprovalData retrieveApprovalTemplate(final Long loanId) {
         final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
-        return new LoanApprovalData(loan.getProposedPrincipal(), DateUtils.getLocalDateOfTenant(), loan.getNetDisbursalAmount());
+        return new LoanApprovalData(loan.getProposedPrincipal(), DateUtils.getBusinessLocalDate(), loan.getNetDisbursalAmount());
     }
 
     @Override
@@ -1173,8 +1171,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                             }
                             this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(data.amount());
                         } else if (data.isDueForDisbursement(fromDate, dueDate)) {
-                            if (!excludePastUndisbursed || (excludePastUndisbursed && (data.isDisbursed()
-                                    || !data.disbursementDate().isBefore(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()))))) {
+                            if (!excludePastUndisbursed || (excludePastUndisbursed
+                                    && (data.isDisbursed() || !data.disbursementDate().isBefore(DateUtils.getBusinessLocalDate())))) {
                                 principal = principal.add(data.amount());
                                 LoanSchedulePeriodData periodData = null;
                                 if (data.getChargeAmount() == null) {
@@ -1472,7 +1470,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         this.context.authenticatedUser();
 
         final ClientData clientAccount = this.clientReadPlatformService.retrieveOne(clientId);
-        final LocalDate expectedDisbursementDate = DateUtils.getLocalDateOfTenant();
+        final LocalDate expectedDisbursementDate = DateUtils.getBusinessLocalDate();
 
         return LoanAccountData.clientDefaults(clientAccount.id(), clientAccount.accountNo(), clientAccount.displayName(),
                 clientAccount.officeId(), expectedDisbursementDate);
@@ -1482,14 +1480,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     public LoanAccountData retrieveGroupDetailsTemplate(final Long groupId) {
         this.context.authenticatedUser();
         final GroupGeneralData groupAccount = this.groupReadPlatformService.retrieveOne(groupId);
-        final LocalDate expectedDisbursementDate = DateUtils.getLocalDateOfTenant();
+        final LocalDate expectedDisbursementDate = DateUtils.getBusinessLocalDate();
         return LoanAccountData.groupDefaults(groupAccount, expectedDisbursementDate);
     }
 
     @Override
     public LoanAccountData retrieveGroupAndMembersDetailsTemplate(final Long groupId) {
         GroupGeneralData groupAccount = this.groupReadPlatformService.retrieveOne(groupId);
-        final LocalDate expectedDisbursementDate = DateUtils.getLocalDateOfTenant();
+        final LocalDate expectedDisbursementDate = DateUtils.getBusinessLocalDate();
 
         // get group associations
         final Collection<ClientData> membersOfGroup = this.clientReadPlatformService.retrieveActiveClientMembersOfGroup(groupId);
@@ -1546,7 +1544,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         final StringBuilder sqlBuilder = new StringBuilder(400);
         sqlBuilder.append("select ").append(rm.schema())
-                .append(" where " + sqlGenerator.subDate(sqlGenerator.currentDate(), "?", "day") + " > ls.duedate ")
+                .append(" where " + sqlGenerator.subDate(sqlGenerator.currentBusinessDate(), "?", "day") + " > ls.duedate ")
                 .append(" and ls.completed_derived <> true and mc.charge_applies_to_enum =1 ")
                 .append(" and ls.recalculated_interest_component <> true ")
                 .append(" and mc.charge_time_enum = 9 and ml.loan_status_id = 300 ");
@@ -1556,7 +1554,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         }
         // Only apply for duedate = yesterday (so that we don't apply
         // penalties on the duedate itself)
-        sqlBuilder.append(" and ls.duedate >= " + sqlGenerator.subDate(sqlGenerator.currentDate(), "(? + 1)", "day"));
+        sqlBuilder.append(" and ls.duedate >= " + sqlGenerator.subDate(sqlGenerator.currentBusinessDate(), "(? + 1)", "day"));
 
         return this.jdbcTemplate.query(sqlBuilder.toString(), rm, new Object[] { penaltyWaitPeriod, penaltyWaitPeriod });
     }
@@ -1666,18 +1664,17 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 .append(" and (((ls.fee_charges_amount <> COALESCE(ls.accrual_fee_charges_derived, 0))")
                 .append(" or ( ls.penalty_charges_amount <> COALESCE(ls.accrual_penalty_charges_derived, 0))")
                 .append(" or ( ls.interest_amount <> COALESCE(ls.accrual_interest_derived, 0)))")
-                .append(" and loan.loan_status_id=:active and mpl.accounting_type=:type and loan.is_npa=false and ls.duedate <= "
-                        + sqlGenerator.currentDate() + ") ");
+                .append(" and loan.loan_status_id=:active and mpl.accounting_type=:type and loan.is_npa=false and ls.duedate <= :currentDate) ");
         if (organisationStartDate != null) {
-            sqlBuilder.append(" and ls.duedate > :organisationstartdate ");
+            sqlBuilder.append(" and ls.duedate > :organisationStartDate ");
         }
         sqlBuilder.append(" order by loan.id,ls.duedate ");
         Map<String, Object> paramMap = new HashMap<>(3);
         paramMap.put("active", LoanStatus.ACTIVE.getValue());
         paramMap.put("type", AccountingRuleType.ACCRUAL_PERIODIC.getValue());
-        paramMap.put("organisationstartdate",
-                (organisationStartDate == null) ? formatter.format(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()))
-                        : formatter.format(LocalDate.ofInstant(organisationStartDate.toInstant(), DateUtils.getDateTimeZoneOfTenant())));
+        paramMap.put("organisationStartDate", (organisationStartDate == null) ? DateUtils.getBusinessLocalDate()
+                : LocalDate.ofInstant(organisationStartDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()));
+        paramMap.put("currentDate", DateUtils.getBusinessLocalDate());
 
         return this.namedParameterJdbcTemplate.query(sqlBuilder.toString(), paramMap, mapper);
     }
@@ -1687,26 +1684,24 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         LoanSchedulePeriodicAccrualMapper mapper = new LoanSchedulePeriodicAccrualMapper();
         Date organisationStartDate = this.configurationDomainService.retrieveOrganisationStartDate();
-        String formattedTillDate = formatter.format(tillDate);
         final StringBuilder sqlBuilder = new StringBuilder(400);
         sqlBuilder.append("select ").append(mapper.schema()).append(
                 " where  (recaldet.is_compounding_to_be_posted_as_transaction is null or recaldet.is_compounding_to_be_posted_as_transaction = false) ")
                 .append(" and (((ls.fee_charges_amount <> COALESCE(ls.accrual_fee_charges_derived, 0))")
                 .append(" or (ls.penalty_charges_amount <> COALESCE(ls.accrual_penalty_charges_derived, 0))")
                 .append(" or (ls.interest_amount <> COALESCE(ls.accrual_interest_derived, 0)))")
-                .append(" and loan.loan_status_id=:active and mpl.accounting_type=:type and (loan.closedon_date <= '" + formattedTillDate
-                        + "' or loan.closedon_date is null)")
-                .append(" and loan.is_npa=false and (ls.duedate <= '" + formattedTillDate + "' or (ls.duedate > '" + formattedTillDate
-                        + "' and ls.fromdate < '" + formattedTillDate + "'))) ");
+                .append(" and loan.loan_status_id=:active and mpl.accounting_type=:type and (loan.closedon_date <= :tillDate or loan.closedon_date is null)")
+                .append(" and loan.is_npa=false and (ls.duedate <= :tillDate or (ls.duedate > :tillDate and ls.fromdate < :tillDate))) ");
+        Map<String, Object> paramMap = new HashMap<>(4);
         if (organisationStartDate != null) {
-            String formattedOrganizationStartDate = formatter
-                    .format(LocalDate.ofInstant(organisationStartDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()));
-            sqlBuilder.append(" and ls.duedate > '" + formattedOrganizationStartDate + "' ");
+            sqlBuilder.append(" and ls.duedate > :organisationStartDate ");
+            paramMap.put("organisationStartDate",
+                    LocalDate.ofInstant(organisationStartDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()));
         }
         sqlBuilder.append(" order by loan.id,ls.duedate ");
-        Map<String, Object> paramMap = new HashMap<>(4);
         paramMap.put("active", LoanStatus.ACTIVE.getValue());
         paramMap.put("type", AccountingRuleType.ACCRUAL_PERIODIC.getValue());
+        paramMap.put("tillDate", tillDate);
 
         return this.namedParameterJdbcTemplate.query(sqlBuilder.toString(), paramMap, mapper);
     }
@@ -1852,7 +1847,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final List<CodeValueData> writeOffReasonOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(LoanApiConstants.WRITEOFFREASONS));
         LoanTransactionData loanTransactionData = new LoanTransactionData(null, null, null, transactionType, null, loan.currency(),
-                DateUtils.getLocalDateOfTenant(), loan.getTotalOutstandingAmount(), loan.getNetDisbursalAmount(), null, null, null, null,
+                DateUtils.getBusinessLocalDate(), loan.getTotalOutstandingAmount(), loan.getNetDisbursalAmount(), null, null, null, null,
                 null, null, null, null, outstandingLoanBalance, unrecognizedIncomePortion, false);
         loanTransactionData.setWriteOffReasonOptions(writeOffReasonOptions);
         return loanTransactionData;
@@ -1891,9 +1886,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         sqlBuilder.append(" ))");
         sqlBuilder.append(" group by ml.id");
         try {
-            String currentdate = formatter.format(DateUtils.getLocalDateOfTenant());
+            LocalDate currentdate = DateUtils.getBusinessLocalDate();
             // will look only for yesterday modified rates
-            String yesterday = formatter.format(DateUtils.getLocalDateOfTenant().minusDays(1));
+            LocalDate yesterday = DateUtils.getBusinessLocalDate().minusDays(1);
             return this.jdbcTemplate.queryForList(sqlBuilder.toString(), Long.class,
                     new Object[] { yesterday, LoanStatus.ACTIVE.getValue(), currentdate, currentdate, currentdate, yesterday });
         } catch (final EmptyResultDataAccessException e) {
@@ -1903,9 +1898,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
     @Override
     public List<Long> fetchLoansForInterestRecalculation(Integer pageSize, Long maxLoanIdInList, String officeHierarchy) {
-        String currentdate = formatter.format(DateUtils.getLocalDateOfTenant());
+        LocalDate currentdate = DateUtils.getBusinessLocalDate();
         // will look only for yesterday modified rates
-        String yesterday = formatter.format(DateUtils.getLocalDateOfTenant().minusDays(1));
+        LocalDate yesterday = DateUtils.getBusinessLocalDate().minusDays(1);
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT ml.id FROM m_loan ml ");
         sqlBuilder.append(" left join m_client mc on mc.id = ml.client_id ");
@@ -1920,20 +1915,19 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         sqlBuilder.append(" left join m_loan_reschedule_request lrr on lrr.loan_id = ml.id");
         // this is to identify the applicable rates when base rate is changed
         sqlBuilder.append(" left join  m_floating_rates bfr on  bfr.is_base_lending_rate = true");
-        sqlBuilder.append(" left join  m_floating_rates_periods bfrp on  bfr.id = bfrp.floating_rates_id and bfrp.created_date >= '"
-                + yesterday + "'");
+        sqlBuilder.append(" left join  m_floating_rates_periods bfrp on  bfr.id = bfrp.floating_rates_id and bfrp.created_date >= ?");
         sqlBuilder.append(" WHERE ml.loan_status_id = ? ");
         sqlBuilder.append(" and ml.is_npa = false ");
         sqlBuilder.append(" and ((");
         sqlBuilder.append("ml.interest_recalculation_enabled = true ");
-        sqlBuilder.append(" and (ml.interest_recalcualated_on is null or ml.interest_recalcualated_on <> '" + currentdate + "')");
+        sqlBuilder.append(" and (ml.interest_recalcualated_on is null or ml.interest_recalcualated_on <> ? )");
         sqlBuilder.append(" and ((");
         sqlBuilder.append(" mr.completed_derived is false ");
-        sqlBuilder.append(" and mr.duedate < '" + currentdate + "' )");
-        sqlBuilder.append(" or dd.expected_disburse_date < '" + currentdate + "' )) ");
+        sqlBuilder.append(" and mr.duedate < ? )");
+        sqlBuilder.append(" or dd.expected_disburse_date < ? )) ");
         sqlBuilder.append(" or (");
         sqlBuilder.append(" fr.is_active = true and  frp.is_active = true");
-        sqlBuilder.append(" and (frp.created_date >= '" + yesterday + "'  or ");
+        sqlBuilder.append(" and (frp.created_date >=  ?  or ");
         sqlBuilder
                 .append("(bfrp.id is not null and frp.is_differential_to_base_lending_rate = true and frp.from_date >= bfrp.from_date)) ");
         sqlBuilder.append("and lrr.loan_id is null");
@@ -1943,7 +1937,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         sqlBuilder.append(" limit ? ");
         try {
             return Collections.synchronizedList(this.jdbcTemplate.queryForList(sqlBuilder.toString(), Long.class,
-                    new Object[] { LoanStatus.ACTIVE.getValue(), maxLoanIdInList, officeHierarchy, pageSize }));
+                    new Object[] { yesterday, LoanStatus.ACTIVE.getValue(), currentdate, currentdate, currentdate, yesterday,
+                            maxLoanIdInList, officeHierarchy, pageSize }));
         } catch (final EmptyResultDataAccessException e) {
             return null;
         }
@@ -2105,7 +2100,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " + SUM(COALESCE(mr.interest_completed_derived, 0)) " + " + SUM(COALESCE(mr.fee_charges_completed_derived, 0)) "
                     + " + SUM(COALESCE(mr.penalty_charges_completed_derived, 0))) as total_in_advance_derived "
                     + " from m_loan ml INNER JOIN m_loan_repayment_schedule mr on mr.loan_id = ml.id "
-                    + " where ml.id=? and  mr.duedate >= " + sqlGenerator.currentDate() + " group by ml.id having "
+                    + " where ml.id=? and  mr.duedate >= " + sqlGenerator.currentBusinessDate() + " group by ml.id having "
                     + " (SUM(COALESCE(mr.principal_completed_derived, 0))  " + " + SUM(COALESCE(mr.interest_completed_derived, 0)) "
                     + " + SUM(COALESCE(mr.fee_charges_completed_derived, 0)) "
                     + "+  SUM(COALESCE(mr.penalty_charges_completed_derived, 0))) > 0";
@@ -2200,7 +2195,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
     @Override
     public Collection<Long> retrieveLoanIdsWithPendingIncomePostingTransactions() {
-        String currentdate = formatter.format(DateUtils.getLocalDateOfTenant());
+        LocalDate currentdate = DateUtils.getBusinessLocalDate();
         StringBuilder sqlBuilder = new StringBuilder().append(" select distinct loan.id ").append(" from m_loan as loan ").append(
                 " inner join m_loan_recalculation_details as recdet on (recdet.loan_id = loan.id and recdet.is_compounding_to_be_posted_as_transaction is not null and recdet.is_compounding_to_be_posted_as_transaction = true) ")
                 .append(" inner join m_loan_repayment_schedule as repsch on repsch.loan_id = loan.id ")
@@ -2208,9 +2203,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 .append(" left join m_loan_transaction as trans on (trans.is_reversed <> true and trans.transaction_type_enum = 19 and trans.loan_id = loan.id and trans.transaction_date = adddet.effective_date) ")
                 .append(" where loan.loan_status_id = 300 ").append(" and loan.is_npa = false ")
                 .append(" and adddet.effective_date is not null ").append(" and trans.transaction_date is null ")
-                .append(" and adddet.effective_date < '" + currentdate + "' ");
+                .append(" and adddet.effective_date < ? ");
         try {
-            return this.jdbcTemplate.queryForList(sqlBuilder.toString(), Long.class);
+            return this.jdbcTemplate.queryForList(sqlBuilder.toString(), new Object[] { currentdate }, Long.class);
         } catch (final EmptyResultDataAccessException e) {
             return null;
         }
@@ -2227,7 +2222,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         final CurrencyData currencyData = applicationCurrency.toData();
 
-        final LocalDate earliestUnpaidInstallmentDate = DateUtils.getLocalDateOfTenant();
+        final LocalDate earliestUnpaidInstallmentDate = DateUtils.getBusinessLocalDate();
 
         final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loan.fetchLoanForeclosureDetail(transactionDate);
         BigDecimal unrecognizedIncomePortion = null;
@@ -2377,13 +2372,15 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
             sqlBuilder.append(
                     "l.id as loanId, coalesce((l.approved_principal - l.principal_disbursed_derived), 0) as availableDisbursementAmount, ");
-            sqlBuilder.append(sqlGenerator.dateDiff(sqlGenerator.currentDate(), "laa.overdue_since_date_derived") + " as pastDueDays, ");
+            sqlBuilder.append(
+                    sqlGenerator.dateDiff(sqlGenerator.currentBusinessDate(), "laa.overdue_since_date_derived") + " as pastDueDays, ");
             sqlBuilder.append(
                     "(select coalesce(min(lrs.duedate), null) as duedate from m_loan_repayment_schedule lrs where lrs.loan_id=l.id and lrs.completed_derived is false and lrs.duedate >= "
-                            + sqlGenerator.currentDate() + ") as nextPaymentDueDate, ");
-            sqlBuilder.append(sqlGenerator.dateDiff(sqlGenerator.currentDate(), "laa.overdue_since_date_derived") + " as delinquentDays, ");
+                            + sqlGenerator.currentBusinessDate() + ") as nextPaymentDueDate, ");
             sqlBuilder.append(
-                    sqlGenerator.currentDate() + " as delinquentDate, coalesce(laa.total_overdue_derived, 0) as delinquentAmount, ");
+                    sqlGenerator.dateDiff(sqlGenerator.currentBusinessDate(), "laa.overdue_since_date_derived") + " as delinquentDays, ");
+            sqlBuilder.append(sqlGenerator.currentBusinessDate()
+                    + " as delinquentDate, coalesce(laa.total_overdue_derived, 0) as delinquentAmount, ");
             sqlBuilder.append("lre.transactionDate as lastPaymentDate, coalesce(lre.amount, 0) as lastPaymentAmount ");
             sqlBuilder.append("from m_loan l left join m_loan_arrears_aging laa on laa.loan_id = l.id ");
             sqlBuilder.append(
