@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.businessdate.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.time.LocalDate;
 
 final class BusinessDateApiResourceSwagger {
 
@@ -37,7 +36,7 @@ final class BusinessDateApiResourceSwagger {
         @Schema(example = "COB_DATE")
         public String type;
         @Schema(example = "2015-02-15")
-        public LocalDate date;
+        public String date;
 
         private BusinessDateResponse() {
 
@@ -52,7 +51,7 @@ final class BusinessDateApiResourceSwagger {
         @Schema(example = "COB_DATE")
         public String type;
         @Schema(example = "2015-02-15")
-        public LocalDate date;
+        public String date;
         @Schema(example = "en")
         public String locale;
 
