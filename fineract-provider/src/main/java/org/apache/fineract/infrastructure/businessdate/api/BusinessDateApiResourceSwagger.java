@@ -33,11 +33,11 @@ final class BusinessDateApiResourceSwagger {
         @Schema(example = "yyyy-MM-dd")
         public String dateFormat;
         @Schema(example = "COB date")
-        private String description;
+        public String description;
         @Schema(example = "COB_DATE")
-        private String type;
+        public String type;
         @Schema(example = "2015-02-15")
-        private LocalDate date;
+        public LocalDate date;
 
         private BusinessDateResponse() {
 
@@ -50,11 +50,11 @@ final class BusinessDateApiResourceSwagger {
         @Schema(example = "yyyy-MM-dd")
         public String dateFormat;
         @Schema(example = "COB_DATE")
-        private String type;
+        public String type;
         @Schema(example = "2015-02-15")
-        private LocalDate date;
+        public LocalDate date;
         @Schema(example = "en")
-        private String locale;
+        public String locale;
 
         private BusinessDateRequest() {}
 
