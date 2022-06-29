@@ -38,7 +38,7 @@ public class SpringNotificationEventPublisher implements NotificationEventPublis
     public void broadcastNotification(final NotificationData notificationData) {
         log.debug("Sending Spring notification event: {}", notificationData);
         NotificationEvent event = new NotificationEvent(SpringNotificationEventPublisher.class, notificationData,
-                ThreadLocalContextUtil.syncDown());
+                ThreadLocalContextUtil.getContext());
         applicationEventPublisher.publishEvent(event);
     }
 }

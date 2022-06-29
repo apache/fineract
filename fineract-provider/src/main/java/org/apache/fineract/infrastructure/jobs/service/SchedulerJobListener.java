@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.jobs.service;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -33,7 +34,6 @@ import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
 import org.quartz.JobListener;
 import org.quartz.Trigger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
@@ -45,6 +45,7 @@ import org.springframework.stereotype.Component;
  * job status to database after the execution
  */
 @Component
+@RequiredArgsConstructor
 public class SchedulerJobListener implements JobListener {
 
     private final String name = SchedulerServiceConstants.DEFAULT_LISTENER_NAME;
@@ -53,14 +54,6 @@ public class SchedulerJobListener implements JobListener {
     private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
     private final BusinessDateReadPlatformService businessDateReadPlatformService;
     private int stackTraceLevel = 0;
-
-    @Autowired
-    public SchedulerJobListener(final SchedularWritePlatformService schedularService, final AppUserRepositoryWrapper userRepository,
-            BusinessDateReadPlatformService businessDateReadPlatformService) {
-        this.schedularService = schedularService;
-        this.userRepository = userRepository;
-        this.businessDateReadPlatformService = businessDateReadPlatformService;
-    }
 
     @Override
     public String getName() {

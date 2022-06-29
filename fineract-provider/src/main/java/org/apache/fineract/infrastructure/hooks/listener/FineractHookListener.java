@@ -42,7 +42,7 @@ public class FineractHookListener implements HookListener {
 
     @Override
     public void onApplicationEvent(final HookEvent event) {
-        ThreadLocalContextUtil.syncUp(event.getContext());
+        ThreadLocalContextUtil.init(event.getContext());
 
         final AppUser appUser = event.getAppUser();
 

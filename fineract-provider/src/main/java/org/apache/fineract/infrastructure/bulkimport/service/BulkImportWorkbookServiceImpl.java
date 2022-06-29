@@ -196,7 +196,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                 this.securityContext.authenticatedUser(), ImportHandlerUtils.getNumberOfRows(workbook.getSheetAt(0), primaryColumn));
         this.importDocumentRepository.saveAndFlush(importDocument);
         BulkImportEvent event = BulkImportEvent.instance(this, workbook, importDocument.getId(), locale, dateFormat,
-                ThreadLocalContextUtil.syncDown());
+                ThreadLocalContextUtil.getContext());
         applicationContext.publishEvent(event);
         return importDocument.getId();
     }

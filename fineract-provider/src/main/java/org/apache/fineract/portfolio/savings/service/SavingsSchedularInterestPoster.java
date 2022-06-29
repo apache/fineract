@@ -86,7 +86,7 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
     @SuppressFBWarnings(value = {
             "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public Void call() throws org.apache.fineract.infrastructure.jobs.exception.JobExecutionException {
-        ThreadLocalContextUtil.syncUp(this.context);
+        ThreadLocalContextUtil.init(this.context);
         Integer maxNumberOfRetries = this.context.getTenantContext().getConnection().getMaxRetriesOnDeadlock();
         Integer maxIntervalBetweenRetries = this.context.getTenantContext().getConnection().getMaxIntervalBetweenRetries();
 

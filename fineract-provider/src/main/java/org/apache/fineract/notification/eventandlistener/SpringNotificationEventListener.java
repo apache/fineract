@@ -37,7 +37,7 @@ public class SpringNotificationEventListener implements ApplicationListener<Noti
     @Override
     public void onApplicationEvent(NotificationEvent event) {
         log.debug("Processing Spring notification event {}", event);
-        ThreadLocalContextUtil.syncUp(event.getContext());
+        ThreadLocalContextUtil.init(event.getContext());
         NotificationData notificationData = event.getNotificationData();
         notificationEventListener.receive(notificationData);
     }

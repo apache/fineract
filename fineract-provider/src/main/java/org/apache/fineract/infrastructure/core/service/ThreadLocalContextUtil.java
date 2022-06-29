@@ -72,6 +72,7 @@ public final class ThreadLocalContextUtil {
         authTokenContext.set(authToken);
     }
 
+    // Map is not serializable, but Hashmap is
     public static HashMap<BusinessDateType, LocalDate> getBusinessDates() {
         Assert.notNull(businessDateContext.get(), "Business dates cannot be null!");
         return businessDateContext.get();
@@ -103,11 +104,11 @@ public final class ThreadLocalContextUtil {
         actionContext.set(context);
     }
 
-    public static FineractContext syncDown() {
+    public static FineractContext getContext() {
         return new FineractContext(getDataSourceContext(), getTenant(), getAuthToken(), getBusinessDates(), getActionContext());
     }
 
-    public static void syncUp(final FineractContext fineractContext) {
+    public static void init(final FineractContext fineractContext) {
         Assert.notNull(fineractContext, "FineractContext cannot be null during synchronisation!");
         setDataSourceContext(fineractContext.getContextHolder());
         setTenant(fineractContext.getTenantContext());

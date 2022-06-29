@@ -127,11 +127,11 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
         boolean lastBatch = false;
         int loopCount = size / batchSize + 1;
 
-        FineractContext context = ThreadLocalContextUtil.syncDown();
+        FineractContext context = ThreadLocalContextUtil.getContext();
         Long finalMaxSavingsIdInList = maxSavingsIdInList;
 
         Callable<Void> fetchData = () -> {
-            ThreadLocalContextUtil.syncUp(context);
+            ThreadLocalContextUtil.init(context);
             Long maxId = finalMaxSavingsIdInList;
             if (!queue.isEmpty()) {
                 maxId = Math.max(finalMaxSavingsIdInList, queue.element().get(queue.element().size() - 1).getId());
@@ -156,7 +156,7 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
             SavingsSchedularInterestPoster poster = (SavingsSchedularInterestPoster) this.applicationContext
                     .getBean("savingsSchedularInterestPoster");
             poster.setSavingAccounts(subList);
-            poster.setContext(ThreadLocalContextUtil.syncDown());
+            poster.setContext(ThreadLocalContextUtil.getContext());
             poster.setSavingsAccountWritePlatformService(savingsAccountWritePlatformService);
             poster.setSavingsAccountReadPlatformService(savingAccountReadPlatformService);
             poster.setSavingsAccountRepository(savingsAccountRepository);

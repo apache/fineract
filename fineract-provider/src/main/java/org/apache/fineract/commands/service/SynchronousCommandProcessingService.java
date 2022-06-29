@@ -265,7 +265,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 final String serializedResult = this.toApiResultJsonSerializer.serialize(reqmap);
 
                 final HookEvent applicationEvent = new HookEvent(hookEventSource, serializedResult, appUser,
-                        ThreadLocalContextUtil.syncDown());
+                        ThreadLocalContextUtil.getContext());
 
                 applicationContext.publishEvent(applicationEvent);
             }

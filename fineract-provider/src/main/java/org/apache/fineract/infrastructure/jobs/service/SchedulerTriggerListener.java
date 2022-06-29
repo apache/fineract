@@ -22,6 +22,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.HashMap;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
@@ -34,10 +35,10 @@ import org.quartz.Trigger.CompletedExecutionInstruction;
 import org.quartz.TriggerListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class SchedulerTriggerListener implements TriggerListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(SchedulerTriggerListener.class);
@@ -47,14 +48,6 @@ public class SchedulerTriggerListener implements TriggerListener {
     private final TenantDetailsService tenantDetailsService;
 
     private final BusinessDateReadPlatformService businessDateReadPlatformService;
-
-    @Autowired
-    public SchedulerTriggerListener(final SchedularWritePlatformService schedularService, final TenantDetailsService tenantDetailsService,
-            BusinessDateReadPlatformService businessDateReadPlatformService) {
-        this.schedularService = schedularService;
-        this.tenantDetailsService = tenantDetailsService;
-        this.businessDateReadPlatformService = businessDateReadPlatformService;
-    }
 
     @Override
     public String getName() {
