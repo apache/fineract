@@ -98,7 +98,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     @PostConstruct
     public void loadAllJobs() {
         // If the instance is not Batch Enabled will not load the Jobs
-        if (!fineractProperties.getMode().isBatchEnabled()) {
+        if (!fineractProperties.getMode().isBatchManagerEnabled()) {
             return;
         }
         final List<FineractPlatformTenant> allTenants = this.tenantDetailsService.findAllTenants();

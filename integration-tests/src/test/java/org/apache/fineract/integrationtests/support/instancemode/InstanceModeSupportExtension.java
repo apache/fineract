@@ -42,8 +42,9 @@ public class InstanceModeSupportExtension implements BeforeTestExecutionCallback
             if (annotation != null) {
                 boolean readEnabled = annotation.readEnabled();
                 boolean writeEnabled = annotation.writeEnabled();
-                boolean batchEnabled = annotation.batchEnabled();
-                changeInstanceMode(context, readEnabled, writeEnabled, batchEnabled);
+                boolean batchWorkerEnabled = annotation.batchWorkerEnabled();
+                boolean batchManagerEnabled = annotation.batchWorkerEnabled();
+                changeInstanceMode(context, readEnabled, writeEnabled, batchWorkerEnabled, batchManagerEnabled);
             }
         });
     }
@@ -53,12 +54,13 @@ public class InstanceModeSupportExtension implements BeforeTestExecutionCallback
         context.getTestMethod().ifPresent(m -> {
             ConfigureInstanceMode annotation = m.getAnnotation(ConfigureInstanceMode.class);
             if (annotation != null) {
-                changeInstanceMode(context, true, true, true);
+                changeInstanceMode(context, true, true, true, true);
             }
         });
     }
 
-    private void changeInstanceMode(ExtensionContext extensionContext, boolean readEnabled, boolean writeEnabled, boolean batchEnabled) {
+    private void changeInstanceMode(ExtensionContext extensionContext, boolean readEnabled, boolean writeEnabled,
+            boolean batchWorkerEnabled, boolean batchManagerEnabled) {
         Store store = extensionContext.getStore(INSTANCE_MODE_NAMESPACE);
         String authKey = store.getOrComputeIfAbsent(AUTH_KEY, k -> Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(),
                 String.class);
@@ -66,6 +68,6 @@ public class InstanceModeSupportExtension implements BeforeTestExecutionCallback
         ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         requestSpec.header("Authorization", "Basic " + authKey);
 
-        InstanceModeHelper.changeMode(requestSpec, responseSpec, readEnabled, writeEnabled, batchEnabled);
+        InstanceModeHelper.changeMode(requestSpec, responseSpec, readEnabled, writeEnabled, batchWorkerEnabled, batchManagerEnabled);
     }
 }

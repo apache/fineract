@@ -34,6 +34,8 @@ public class InstanceModeApiResourceSwagger {
         @Schema(required = true, example = "true")
         public boolean writeEnabled;
         @Schema(required = true, example = "true")
-        public boolean batchEnabled;
+        public boolean batchWorkerEnabled;
+        @Schema(required = true, example = "true")
+        public boolean batchManagerEnabled;
     }
 }

@@ -71,7 +71,8 @@ public class InstanceModeApiResource implements InitializingBean {
         log.warn("------------------------------------------------------------");
         fineractProperties.getMode().setReadEnabled(request.isReadEnabled());
         fineractProperties.getMode().setWriteEnabled(request.isWriteEnabled());
-        fineractProperties.getMode().setBatchEnabled(request.isBatchEnabled());
+        fineractProperties.getMode().setBatchWorkerEnabled(request.isBatchWorkerEnabled());
+        fineractProperties.getMode().setBatchManagerEnabled(request.isBatchManagerEnabled());
         return Response.ok().build();
     }
 }
