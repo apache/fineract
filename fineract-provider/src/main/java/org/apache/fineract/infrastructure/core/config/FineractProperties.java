@@ -34,6 +34,8 @@ public class FineractProperties {
 
     private FineractModeProperties mode;
 
+    private FineractCorrelationProperties correlation;
+
     @Getter
     @Setter
     public static class FineractTenantProperties {
@@ -61,5 +63,13 @@ public class FineractProperties {
         public boolean isReadOnlyMode() {
             return readEnabled && !writeEnabled && !batchWorkerEnabled && !batchManagerEnabled;
         }
+    }
+
+    @Getter
+    @Setter
+    public static class FineractCorrelationProperties {
+
+        private boolean enabled;
+        private String headerName;
     }
 }
