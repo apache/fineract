@@ -25,13 +25,13 @@ import org.springframework.dao.EmptyResultDataAccessException;
  *
  *
  */
-public class InvalidTenantIdentiferException extends RuntimeException {
+public class InvalidTenantIdentifierException extends RuntimeException {
 
-    public InvalidTenantIdentiferException(final String message) {
+    public InvalidTenantIdentifierException(final String message) {
         super(message);
     }
 
-    public InvalidTenantIdentiferException(String message, EmptyResultDataAccessException e) {
+    public InvalidTenantIdentifierException(String message, EmptyResultDataAccessException e) {
         super(message, e);
     }
 }

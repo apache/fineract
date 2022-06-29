@@ -40,7 +40,7 @@ import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.data.PlatformRequestLog;
-import org.apache.fineract.infrastructure.security.exception.InvalidTenantIdentiferException;
+import org.apache.fineract.infrastructure.security.exception.InvalidTenantIdentifierException;
 import org.apache.fineract.infrastructure.security.service.BasicAuthTenantDetailsService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -107,7 +107,7 @@ public class TenantAwareTenantIdentifierFilter extends GenericFilterBean {
                 }
 
                 if (tenantIdentifier == null && this.exceptionIfHeaderMissing) {
-                    throw new InvalidTenantIdentiferException("No tenant identifier found: Add request header of '"
+                    throw new InvalidTenantIdentifierException("No tenant identifier found: Add request header of '"
                             + this.tenantRequestHeader + "' or add the parameter 'tenantIdentifier' to query string of request URL.");
                 }
 
@@ -141,7 +141,7 @@ public class TenantAwareTenantIdentifierFilter extends GenericFilterBean {
                 }
                 chain.doFilter(request, response);
             }
-        } catch (final InvalidTenantIdentiferException e) {
+        } catch (final InvalidTenantIdentifierException e) {
             // deal with exception at low level
             SecurityContextHolder.getContext().setAuthentication(null);
 
