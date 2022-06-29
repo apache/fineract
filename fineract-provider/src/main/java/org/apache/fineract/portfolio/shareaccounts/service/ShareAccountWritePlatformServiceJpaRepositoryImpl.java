@@ -190,7 +190,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
     @Override
     public CommandProcessingResult updateShareAccount(Long accountId, JsonCommand jsonCommand) {
         try {
-            Date transactionDate = DateUtils.getDateOfTenant();
+            Date transactionDate = DateUtils.getBusinessDate();
             ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
             Map<String, Object> changes = this.accountDataSerializer.validateAndUpdate(jsonCommand, account);
             if (!changes.isEmpty()) {
@@ -350,7 +350,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                     journalEntryTransactions.add(transaction.getId());
                 }
             }
-            Date transactionDate = DateUtils.getDateOfTenant();
+            Date transactionDate = DateUtils.getBusinessDate();
             this.journalEntryWritePlatformService.revertShareAccountJournalEntries(journalEntryTransactions, transactionDate);
             journalEntryWritePlatformService.createJournalEntriesForShares(
                     populateJournalEntries(account, account.getPendingForApprovalSharePurchaseTransactions()));

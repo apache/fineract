@@ -52,7 +52,7 @@ public final class ScorecardMapper {
                 ScorecardMapper.setQuestionAndResponse(scorecardValue, scorecard, survey);
                 scorecard.setAppUser(appUser);
                 scorecard.setClient(client);
-                scorecard.setCreatedOn(Date.from(DateUtils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                scorecard.setCreatedOn(Date.from(DateUtils.getBusinessLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
                 scorecard.setValue(scorecardValue.getValue());
             }
         } else {

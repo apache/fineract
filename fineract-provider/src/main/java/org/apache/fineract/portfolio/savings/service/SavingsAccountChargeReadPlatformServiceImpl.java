@@ -30,6 +30,7 @@ import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
@@ -55,6 +56,7 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
     private final PlatformSecurityContext context;
     private final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService;
     private final DropdownReadPlatformService dropdownReadPlatformService;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     // mappers
     private final SavingsAccountChargeDueMapper chargeDueMapper;
@@ -62,10 +64,11 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
     @Autowired
     public SavingsAccountChargeReadPlatformServiceImpl(final PlatformSecurityContext context,
             final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService, final JdbcTemplate jdbcTemplate,
-            final DropdownReadPlatformService dropdownReadPlatformService) {
+            final DropdownReadPlatformService dropdownReadPlatformService, DatabaseSpecificSQLGenerator sqlGenerator) {
         this.context = context;
         this.chargeDropdownReadPlatformService = chargeDropdownReadPlatformService;
         this.jdbcTemplate = jdbcTemplate;
+        this.sqlGenerator = sqlGenerator;
         this.chargeDueMapper = new SavingsAccountChargeDueMapper();
         this.dropdownReadPlatformService = dropdownReadPlatformService;
     }
@@ -248,8 +251,8 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
     @Override
     public Collection<SavingsAccountAnnualFeeData> retrieveChargesWithAnnualFeeDue() {
         final String sql = "select " + this.chargeDueMapper.schema()
-                + " where sac.charge_due_date is not null and sac.charge_time_enum = ? "
-                + " and sac.charge_due_date <= NOW() and sa.status_enum = ? ";
+                + " where sac.charge_due_date is not null and sac.charge_time_enum = ? " + " and sac.charge_due_date <= "
+                + sqlGenerator.currentBusinessDate() + " and sa.status_enum = ? ";
 
         return this.jdbcTemplate.query(sql, this.chargeDueMapper, // NOSONAR
                 new Object[] { ChargeTimeType.ANNUAL_FEE.getValue(), SavingsAccountStatusType.ACTIVE.getValue() });
@@ -258,10 +261,11 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
     @Override
     public Collection<SavingsAccountAnnualFeeData> retrieveChargesWithDue() {
         final String sql = "select " + this.chargeDueMapper.schema()
-                + " where sac.charge_due_date is not null and sac.charge_due_date <= NOW() and sac.waived = false and sac.is_paid_derived=false and sac.is_active=true and sa.status_enum = ? "
+                + " where sac.charge_due_date is not null and sac.charge_due_date <= ? and sac.waived = false and sac.is_paid_derived=false and sac.is_active=true and sa.status_enum = ? "
                 + " order by sac.charge_due_date ";
 
-        return this.jdbcTemplate.query(sql, this.chargeDueMapper, new Object[] { SavingsAccountStatusType.ACTIVE.getValue() }); // NOSONAR
+        return this.jdbcTemplate.query(sql, this.chargeDueMapper,
+                new Object[] { DateUtils.getBusinessLocalDate(), SavingsAccountStatusType.ACTIVE.getValue() }); // NOSONAR
     }
 
 }

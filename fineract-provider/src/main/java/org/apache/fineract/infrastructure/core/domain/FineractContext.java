@@ -16,19 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.businessdate.service;
+package org.apache.fineract.infrastructure.core.domain;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.List;
-import org.apache.fineract.infrastructure.businessdate.data.BusinessDateData;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 
-public interface BusinessDateReadPlatformService {
+@AllArgsConstructor
+@Getter
+public class FineractContext implements Serializable {
 
-    List<BusinessDateData> findAll();
-
-    BusinessDateData findByType(String type);
-
-    HashMap<BusinessDateType, LocalDate> getBusinessDates();
+    private final String contextHolder;
+    private final FineractPlatformTenant tenantContext;
+    private final String authTokenContext;
+    private final HashMap<BusinessDateType, LocalDate> businessDateContext;
+    private final ActionContext actionContext;
 }

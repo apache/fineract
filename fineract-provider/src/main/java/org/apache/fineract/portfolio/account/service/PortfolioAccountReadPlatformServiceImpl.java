@@ -294,10 +294,14 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
 
     private static final class PortfolioLoanAccountRefundByTransferMapper implements RowMapper<PortfolioAccountData> {
 
-        private final String schemaSql;
+        private String schemaSql;
+        private final DatabaseSpecificSQLGenerator sqlGenerator;
 
         PortfolioLoanAccountRefundByTransferMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
+            this.sqlGenerator = sqlGenerator;
+        }
 
+        public String schema() {
             final StringBuilder amountQueryString = new StringBuilder(400);
             amountQueryString.append("(select (SUM(COALESCE(mr.principal_completed_derived, 0)) +");
             amountQueryString.append("SUM(COALESCE(mr.interest_completed_derived, 0)) + ");
@@ -305,7 +309,7 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
             amountQueryString.append(" SUM(COALESCE(mr.penalty_charges_completed_derived, 0))) as total_in_advance_derived");
             amountQueryString.append(" from m_loan ml INNER JOIN m_loan_repayment_schedule mr on mr.loan_id = ml.id");
             amountQueryString.append(" where ml.id=? and ml.loan_status_id = 300");
-            amountQueryString.append("  and  mr.duedate >= " + sqlGenerator.currentDate() + " group by ml.id having");
+            amountQueryString.append("  and  mr.duedate >= " + sqlGenerator.currentBusinessDate() + " group by ml.id having");
             amountQueryString.append(" (SUM(COALESCE(mr.principal_completed_derived, 0)) + ");
             amountQueryString.append(" SUM(COALESCE(mr.interest_completed_derived, 0)) + ");
             amountQueryString.append("SUM(COALESCE(mr.fee_charges_completed_derived, 0)) + ");
@@ -331,9 +335,7 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
             sqlBuilder.append("left join m_staff s ON s.id = la.loan_officer_id ");
 
             this.schemaSql = sqlBuilder.toString();
-        }
 
-        public String schema() {
             return this.schemaSql;
         }
 

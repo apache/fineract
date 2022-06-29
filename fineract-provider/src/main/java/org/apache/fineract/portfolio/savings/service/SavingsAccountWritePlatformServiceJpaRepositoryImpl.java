@@ -262,7 +262,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
 
-        final Map<String, Object> changes = account.activate(user, command, DateUtils.getLocalDateOfTenant());
+        final Map<String, Object> changes = account.activate(user, command, DateUtils.getBusinessLocalDate());
 
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVING.getName(),
                 StatusEnum.ACTIVATE.getCode().longValue(), EntityTables.SAVING.getForeignKeyColumnNameOnDatatable(), account.productId());
@@ -483,7 +483,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final SavingsAccountCharge savingsAccountCharge = this.savingsAccountChargeRepository
                 .findOneWithNotFoundDetection(savingsAccountChargeId, accountId);
 
-        final LocalDate todaysDate = DateUtils.getLocalDateOfTenant();
+        final LocalDate todaysDate = DateUtils.getBusinessLocalDate();
         final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd MM yyyy").withZone(DateUtils.getDateTimeZoneOfTenant());
 
         while (todaysDate.isAfter(savingsAccountCharge.getDueLocalDate())) {
@@ -511,7 +511,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, backdatedTxnsAllowedTill);
         checkClientOrGroupActive(account);
 
-        final LocalDate today = DateUtils.getLocalDateOfTenant();
+        final LocalDate today = DateUtils.getBusinessLocalDate();
         final MathContext mc = new MathContext(15, MoneyHelper.getRoundingMode());
         boolean isInterestTransfer = false;
         final LocalDate postInterestOnDate = null;
@@ -571,7 +571,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 }
             }
 
-            LocalDate today = DateUtils.getLocalDateOfTenant();
+            LocalDate today = DateUtils.getBusinessLocalDate();
             if (transactionDate.isAfter(today)) {
                 throw new PostInterestAsOnDateException(PostInterestAsOnExceptionType.FUTURE_DATE);
             }
@@ -609,7 +609,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
             }
 
-            final LocalDate today = DateUtils.getLocalDateOfTenant();
+            final LocalDate today = DateUtils.getBusinessLocalDate();
             final MathContext mc = new MathContext(10, MoneyHelper.getRoundingMode());
             boolean isInterestTransfer = false;
             LocalDate postInterestOnDate = null;
@@ -654,7 +654,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final Set<Long> existingReversedTransactionIds = new HashSet<>();
             updateExistingTransactionsDetails(savingsAccountData, existingTransactionIds, existingReversedTransactionIds);
 
-            final LocalDate today = DateUtils.getLocalDateOfTenant();
+            final LocalDate today = DateUtils.getBusinessLocalDate();
             final MathContext mc = new MathContext(10, MoneyHelper.getRoundingMode());
             boolean isInterestTransfer = false;
             LocalDate postInterestOnDate = null;
@@ -768,7 +768,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                     "Savings account transaction:" + transactionId + " update not allowed for this savings type", transactionId);
         }
 
-        final LocalDate today = DateUtils.getLocalDateOfTenant();
+        final LocalDate today = DateUtils.getBusinessLocalDate();
         final MathContext mc = new MathContext(15, MoneyHelper.getRoundingMode());
 
         if (account.isNotActive()) {
@@ -844,7 +844,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         this.savingsAccountTransactionDataValidator.validate(command);
 
-        final LocalDate today = DateUtils.getLocalDateOfTenant();
+        final LocalDate today = DateUtils.getBusinessLocalDate();
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
 
@@ -1030,7 +1030,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         }
 
-        final Map<String, Object> accountChanges = account.close(user, command, DateUtils.getLocalDateOfTenant());
+        final Map<String, Object> accountChanges = account.close(user, command, DateUtils.getBusinessLocalDate());
         changes.putAll(accountChanges);
         if (!changes.isEmpty()) {
             this.savingAccountRepositoryWrapper.save(account);
@@ -1323,12 +1323,12 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         LocalDate postInterestOnDate = null;
         final MathContext mc = MathContext.DECIMAL64;
         if (account.isBeforeLastPostingPeriod(savingsAccountCharge.getDueLocalDate(), backdatedTxnsAllowedTill)) {
-            final LocalDate today = DateUtils.getLocalDateOfTenant();
+            final LocalDate today = DateUtils.getBusinessLocalDate();
             boolean postReversals = false;
             account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
                     postInterestOnDate, backdatedTxnsAllowedTill, postReversals);
         } else {
-            final LocalDate today = DateUtils.getLocalDateOfTenant();
+            final LocalDate today = DateUtils.getBusinessLocalDate();
             account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
                     financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill);
         }
@@ -1445,7 +1445,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         // always use current date as transaction date for batch job
         AppUser user = null;
 
-        final LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
+        final LocalDate transactionDate = DateUtils.getBusinessLocalDate();
         final SavingsAccountCharge savingsAccountCharge = this.savingsAccountChargeRepository
                 .findOneWithNotFoundDetection(savingsAccountChargeId, accountId);
 
@@ -1476,12 +1476,12 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         LocalDate postInterestOnDate = null;
         final MathContext mc = MathContext.DECIMAL64;
         if (account.isBeforeLastPostingPeriod(transactionDate, backdatedTxnsAllowedTill)) {
-            final LocalDate today = DateUtils.getLocalDateOfTenant();
+            final LocalDate today = DateUtils.getBusinessLocalDate();
             boolean postReversals = false;
             account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
                     postInterestOnDate, isInterestTransfer, postReversals);
         } else {
-            final LocalDate today = DateUtils.getLocalDateOfTenant();
+            final LocalDate today = DateUtils.getBusinessLocalDate();
             account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
                     financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill);
         }
@@ -1550,7 +1550,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final SavingsAccount account = savingsAccountCharge.savingsAccount();
         this.savingAccountAssembler.assignSavingAccountHelpers(account);
 
-        final LocalDate inactivationOnDate = DateUtils.getLocalDateOfTenant();
+        final LocalDate inactivationOnDate = DateUtils.getBusinessLocalDate();
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)

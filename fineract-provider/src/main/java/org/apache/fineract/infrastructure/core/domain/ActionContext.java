@@ -16,19 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.businessdate.service;
+package org.apache.fineract.infrastructure.core.domain;
 
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import org.apache.fineract.infrastructure.businessdate.data.BusinessDateData;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 
-public interface BusinessDateReadPlatformService {
+@Getter
+@AllArgsConstructor
+public enum ActionContext {
 
-    List<BusinessDateData> findAll();
+    DEFAULT(0, "Default context", BusinessDateType.BUSINESS_DATE), COB(1, "Close of Business context", BusinessDateType.COB_DATE);
 
-    BusinessDateData findByType(String type);
-
-    HashMap<BusinessDateType, LocalDate> getBusinessDates();
+    private final int order;
+    private final String description;
+    private final BusinessDateType businessDateType;
 }

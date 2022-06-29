@@ -144,7 +144,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
 
-        LocalDate today = DateUtils.getLocalDateOfTenant();
+        LocalDate today = DateUtils.getBusinessLocalDate();
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
                 .determineProcessor(loan.transactionProcessingStrategy());
 

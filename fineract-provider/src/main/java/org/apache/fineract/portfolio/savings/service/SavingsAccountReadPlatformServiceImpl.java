@@ -22,7 +22,6 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -103,7 +102,6 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     private final SavingsDropdownReadPlatformService dropdownReadPlatformService;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final ChargeReadPlatformService chargeReadPlatformService;
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     // mappers
     private final SavingsAccountTransactionTemplateMapper transactionTemplateMapper;
@@ -265,7 +263,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     @Override
     public List<SavingsAccountData> retrieveAllSavingsDataForInterestPosting(final boolean backdatedTxnsAllowedTill, final int pageSize,
             final Integer status, final Long maxSavingsId) {
-        LocalDate currentDate = DateUtils.getLocalDateOfTenant().minusDays(1);
+        LocalDate yesterday = DateUtils.getBusinessLocalDate().minusDays(1);
 
         String sql = "select " + this.savingAccountMapperForInterestPosting.schema()
                 + "join (select a.id from m_savings_account a where a.id > ? and a.status_enum = ? limit ?) b on b.id = sa.id ";
@@ -274,12 +272,11 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     + "where (CASE WHEN sa.interest_posted_till_date is not null THEN tr.transaction_date >= sa.interest_posted_till_date ELSE tr.transaction_date >= sa.activatedon_date END) ";
         }
 
-        sql = sql + " and (sa.interest_posted_till_date is null or sa.interest_posted_till_date < '" + java.sql.Date.valueOf(currentDate)
-                + "') ";
+        sql = sql + " and (sa.interest_posted_till_date is null or sa.interest_posted_till_date < ? ) ";
         sql = sql + " order by sa.id, tr.transaction_date, tr.created_date, tr.id";
 
         List<SavingsAccountData> savingsAccountDataList = this.jdbcTemplate.query(sql, this.savingAccountMapperForInterestPosting, // NOSONAR
-                new Object[] { maxSavingsId, status, pageSize });
+                new Object[] { maxSavingsId, status, pageSize, yesterday });
         for (SavingsAccountData savingsAccountData : savingsAccountDataList) {
             this.savingAccountAssembler.assembleSavings(savingsAccountData);
         }
@@ -457,7 +454,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     Integer daysToDormancy = null;
                     Integer daysToEscheat = null;
 
-                    LocalDate localTenantDate = DateUtils.getLocalDateOfTenant();
+                    LocalDate localTenantDate = DateUtils.getBusinessLocalDate();
                     if (isDormancyTrackingActive && statusEnum.equals(SavingsAccountStatusType.ACTIVE.getValue())) {
                         if (subStatusEnum < SavingsAccountSubStatusEnum.ESCHEAT.getValue()) {
                             daysToEscheat = Math.toIntExact(
@@ -893,7 +890,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             Integer daysToDormancy = null;
             Integer daysToEscheat = null;
 
-            LocalDate localTenantDate = DateUtils.getLocalDateOfTenant();
+            LocalDate localTenantDate = DateUtils.getBusinessLocalDate();
             if (isDormancyTrackingActive && statusEnum.equals(SavingsAccountStatusType.ACTIVE.getValue())) {
                 if (subStatusEnum < SavingsAccountSubStatusEnum.ESCHEAT.getValue()) {
                     daysToEscheat = Math
@@ -1475,7 +1472,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol,
                     currencyNameCode);
 
-            return SavingsAccountTransactionData.template(savingsId, accountNo, DateUtils.getLocalDateOfTenant(), currency);
+            return SavingsAccountTransactionData.template(savingsId, accountNo, DateUtils.getBusinessLocalDate(), currency);
         }
     }
 
@@ -1680,7 +1677,6 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
     @Override
     public List<Long> retrieveSavingsIdsPendingInactive(LocalDate tenantLocalDate) {
-        String formattedTenantLocalDate = formatter.format(tenantLocalDate);
         List<Long> ret = null;
         StringBuilder sql = new StringBuilder("select sa.id ");
         sql.append(" from m_savings_account as sa ");
@@ -1690,11 +1686,10 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         String compareDate = "(select COALESCE(max(sat.transaction_date), sa.activatedon_date) "
                 + "from m_savings_account_transaction as sat where sat.is_reversed = false"
                 + " and sat.transaction_type_enum in (1,2) and sat.savings_account_id = sa.id)";
-        sql.append(" and ").append(sqlGenerator.dateDiff("'" + formattedTenantLocalDate + "'", compareDate))
-                .append(" >= sp.days_to_inactive ");
+        sql.append(" and ").append(sqlGenerator.dateDiff("?", compareDate)).append(" >= sp.days_to_inactive ");
 
         try {
-            ret = this.jdbcTemplate.queryForList(sql.toString(), Long.class);
+            ret = this.jdbcTemplate.queryForList(sql.toString(), new Object[] { tenantLocalDate }, Long.class);
         } catch (EmptyResultDataAccessException e) {
             // ignore empty result scenario
         } catch (DataAccessException e) {
@@ -1706,20 +1701,19 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
     @Override
     public List<Long> retrieveSavingsIdsPendingDormant(LocalDate tenantLocalDate) {
-        String currentDate = formatter.format(tenantLocalDate);
         List<Long> ret = null;
         StringBuilder sql = new StringBuilder("select sa.id ");
         sql.append(" from m_savings_account as sa ");
         sql.append(" inner join m_savings_product as sp on (sa.product_id = sp.id and sp.is_dormancy_tracking_active = true) ");
         sql.append(" where sa.status_enum = 300 ");
         sql.append(" and sa.sub_status_enum = 100 ");
-        sql.append(" and " + sqlGenerator.dateDiff("'" + currentDate + "'",
+        sql.append(" and " + sqlGenerator.dateDiff("?",
                 "(select COALESCE(max(sat.transaction_date),sa.activatedon_date) from m_savings_account_transaction as sat where sat.is_reversed = false and sat.transaction_type_enum in (1,2) and sat.savings_account_id = sa.id)")
                 + " ");
         sql.append(" >= sp.days_to_dormancy ");
 
         try {
-            ret = this.jdbcTemplate.queryForList(sql.toString(), Long.class);
+            ret = this.jdbcTemplate.queryForList(sql.toString(), new Object[] { tenantLocalDate }, Long.class);
         } catch (EmptyResultDataAccessException e) {
             // ignore empty result scenario
         } catch (DataAccessException e) {
@@ -1743,7 +1737,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         sql.append(" >= sp.days_to_escheat ");
 
         try {
-            ret = this.jdbcTemplate.queryForList(sql.toString(), Long.class, new Object[] { formatter.format(tenantLocalDate) });
+            ret = this.jdbcTemplate.queryForList(sql.toString(), Long.class, new Object[] { tenantLocalDate });
         } catch (EmptyResultDataAccessException e) {
             // ignore empty result scenario
         } catch (DataAccessException e) {

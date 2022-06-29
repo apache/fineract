@@ -28,7 +28,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 
@@ -48,8 +47,7 @@ public final class ProvisioningHelper {
         map.put("loanProducts", addLoanProducts(loanProducts));
         map.put("definitions", addProvisioningCategories(categories, liability, expense));
         DateFormat simple = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        String formattedString = simple
-                .format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+        String formattedString = simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(Utils.getZoneIdOfTenant()).toInstant()));
 
         String criteriaName = "General Provisioning Criteria" + formattedString + rand.nextLong();
         map.put("criteriaName", criteriaName);
@@ -63,8 +61,7 @@ public final class ProvisioningHelper {
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");
         DateFormat simple = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        map.put("date",
-                simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant())));
+        map.put("date", simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(Utils.getZoneIdOfTenant()).toInstant())));
         String provisioningEntryCreateJson = new Gson().toJson(map);
         return provisioningEntryCreateJson;
     }
@@ -75,8 +72,7 @@ public final class ProvisioningHelper {
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");
         DateFormat simple = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        map.put("date",
-                simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant())));
+        map.put("date", simple.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(Utils.getZoneIdOfTenant()).toInstant())));
         String provisioningEntryCreateJson = new Gson().toJson(map);
         return provisioningEntryCreateJson;
     }

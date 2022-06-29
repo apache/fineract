@@ -20,6 +20,11 @@ package org.apache.fineract.infrastructure.jobs.service;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.security.SecureRandom;
+import java.time.LocalDate;
+import java.util.HashMap;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.TenantDetailsService;
@@ -30,10 +35,10 @@ import org.quartz.Trigger.CompletedExecutionInstruction;
 import org.quartz.TriggerListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class SchedulerTriggerListener implements TriggerListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(SchedulerTriggerListener.class);
@@ -42,12 +47,7 @@ public class SchedulerTriggerListener implements TriggerListener {
     private final SchedularWritePlatformService schedularService;
     private final TenantDetailsService tenantDetailsService;
 
-    @Autowired
-    public SchedulerTriggerListener(final SchedularWritePlatformService schedularService, final TenantDetailsService tenantDetailsService) {
-        this.schedularService = schedularService;
-        this.tenantDetailsService = tenantDetailsService;
-
-    }
+    private final BusinessDateReadPlatformService businessDateReadPlatformService;
 
     @Override
     public String getName() {
@@ -66,6 +66,8 @@ public class SchedulerTriggerListener implements TriggerListener {
         final String tenantIdentifier = trigger.getJobDataMap().getString(SchedulerServiceConstants.TENANT_IDENTIFIER);
         final FineractPlatformTenant tenant = this.tenantDetailsService.loadTenantById(tenantIdentifier);
         ThreadLocalContextUtil.setTenant(tenant);
+        HashMap<BusinessDateType, LocalDate> businessDates = businessDateReadPlatformService.getBusinessDates();
+        ThreadLocalContextUtil.setBusinessDates(businessDates);
         final JobKey key = trigger.getJobKey();
         final String jobKey = key.getName() + SchedulerServiceConstants.JOB_KEY_SEPERATOR + key.getGroup();
         String triggerType = SchedulerServiceConstants.TRIGGER_TYPE_CRON;

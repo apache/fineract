@@ -102,7 +102,7 @@ public class TaxAssembler {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
         LocalDate startDate = this.fromApiJsonHelper.extractLocalDateNamed(TaxApiConstants.startDateParamName, element);
         if (startDate == null) {
-            startDate = DateUtils.getLocalDateOfTenant();
+            startDate = DateUtils.getBusinessLocalDate();
         }
 
         return TaxComponent.createTaxComponent(name, percentage, debitGlAccountType, debitGlAccount, creditGlAccountType, creditGlAccount,
@@ -141,7 +141,7 @@ public class TaxAssembler {
                 final LocalDate endDate = this.fromApiJsonHelper.extractLocalDateNamed(TaxApiConstants.endDateParamName, taxComponent,
                         dateFormat, locale);
                 if (endDate == null && startDate == null) {
-                    startDate = DateUtils.getLocalDateOfTenant();
+                    startDate = DateUtils.getBusinessLocalDate();
                 }
                 TaxGroupMappings mappings = null;
                 if (isUpdate && mappingId != null) {

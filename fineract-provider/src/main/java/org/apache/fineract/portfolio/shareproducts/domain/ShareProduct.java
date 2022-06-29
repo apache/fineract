@@ -19,8 +19,6 @@
 package org.apache.fineract.portfolio.shareproducts.domain;
 
 import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -46,7 +44,6 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.shareproducts.data.ShareProductMarketPriceData;
-import org.apache.fineract.useradministration.domain.AppUser;
 
 @SuppressWarnings("serial")
 @Entity
@@ -137,8 +134,7 @@ public class ShareProduct extends AbstractAuditableCustom {
             final BigDecimal shareCapital, final Long minimumShares, final Long nominalShares, final Long maximumShares,
             Set<ShareProductMarketPrice> marketPrice, Set<Charge> charges, final Boolean allowDividendCalculationForInactiveClients,
             final Integer lockinPeriod, final PeriodFrequencyType lockPeriodType, final Integer minimumActivePeriod,
-            final PeriodFrequencyType minimumActivePeriodForDividendsType, AppUser createdBy, ZonedDateTime createdDate,
-            AppUser lastModifiedBy, ZonedDateTime lastModifiedDate, final AccountingRuleType accountingRuleType) {
+            final PeriodFrequencyType minimumActivePeriodForDividendsType, final AccountingRuleType accountingRuleType) {
 
         this.name = name;
         this.shortName = shortName;
@@ -159,12 +155,9 @@ public class ShareProduct extends AbstractAuditableCustom {
         this.lockPeriodType = lockPeriodType;
         this.minimumActivePeriod = minimumActivePeriod;
         this.minimumActivePeriodType = minimumActivePeriodForDividendsType;
-        setCreatedBy(createdBy);
-        setCreatedDate(Instant.ofEpochMilli(createdDate.toInstant().toEpochMilli()));
-        setLastModifiedBy(lastModifiedBy);
-        setLastModifiedDate(Instant.ofEpochMilli(lastModifiedDate.toInstant().toEpochMilli()));
-        startDate = DateUtils.getDateOfTenant();
-        endDate = DateUtils.getDateOfTenant();
+        // TODO: is this used at all?
+        this.startDate = DateUtils.getBusinessDate();
+        this.endDate = DateUtils.getBusinessDate();
         if (accountingRuleType != null) {
             this.accountingRule = accountingRuleType.getValue();
         }

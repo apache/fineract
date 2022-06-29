@@ -52,6 +52,7 @@ public class InstanceModeIntegrationTest {
 
         requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        requestSpec.header("Fineract-Platform-TenantId", "default");
         responseSpec200 = new ResponseSpecBuilder().expectStatusCode(200).build();
         responseSpec405 = new ResponseSpecBuilder().expectStatusCode(405).build();
 

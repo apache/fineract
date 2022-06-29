@@ -20,6 +20,7 @@ package org.apache.fineract.notification.eventandlistener;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.notification.data.NotificationData;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Profile;
@@ -36,7 +37,8 @@ public class SpringNotificationEventPublisher implements NotificationEventPublis
     @Override
     public void broadcastNotification(final NotificationData notificationData) {
         log.debug("Sending Spring notification event: {}", notificationData);
-        SpringEvent event = new SpringEvent(this, notificationData);
+        NotificationEvent event = new NotificationEvent(SpringNotificationEventPublisher.class, notificationData,
+                ThreadLocalContextUtil.getContext());
         applicationEventPublisher.publishEvent(event);
     }
 }

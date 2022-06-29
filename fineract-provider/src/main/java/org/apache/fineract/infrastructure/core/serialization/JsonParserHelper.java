@@ -18,10 +18,6 @@
  */
 package org.apache.fineract.infrastructure.core.serialization;
 
-import static java.time.temporal.ChronoField.DAY_OF_MONTH;
-import static java.time.temporal.ChronoField.MONTH_OF_YEAR;
-import static java.time.temporal.ChronoField.YEAR_OF_ERA;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -46,7 +42,6 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.springframework.format.number.NumberStyleFormatter;
 
 /**
@@ -301,19 +296,14 @@ public class JsonParserHelper {
             final JsonObject object = element.getAsJsonObject();
 
             if (object.has(parameterName) && object.get(parameterName).isJsonArray()) {
-
                 parametersPassedInCommand.add(parameterName);
-
                 final JsonArray dateArray = object.get(parameterName).getAsJsonArray();
+                final int year = dateArray.get(0).getAsInt();
+                final int month = dateArray.get(1).getAsInt();
+                final int day = dateArray.get(2).getAsInt();
 
-                final Integer year = dateArray.get(0).getAsInt();
-                final Integer month = dateArray.get(1).getAsInt();
-                final Integer day = dateArray.get(2).getAsInt();
-
-                value = LocalDate.now(DateUtils.getDateTimeZoneOfTenant()).with(YEAR_OF_ERA, year).with(MONTH_OF_YEAR, month)
-                        .with(DAY_OF_MONTH, day);
+                value = LocalDate.of(year, month, day);
             }
-
         }
         return value;
     }

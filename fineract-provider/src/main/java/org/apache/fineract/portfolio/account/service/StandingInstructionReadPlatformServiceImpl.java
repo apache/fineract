@@ -186,7 +186,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
         }
 
         // defaults
-        final LocalDate transferDate = DateUtils.getLocalDateOfTenant();
+        final LocalDate transferDate = DateUtils.getBusinessLocalDate();
         Collection<OfficeData> toOfficeOptions = fromOfficeOptions;
         Collection<ClientData> toClientOptions = null;
 
@@ -334,12 +334,13 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
     @Override
     public Collection<StandingInstructionData> retrieveAll(final Integer status) {
         final StringBuilder sqlBuilder = new StringBuilder(200);
+        String businessDate = sqlGenerator.currentBusinessDate();
         sqlBuilder.append("select ");
         sqlBuilder.append(this.standingInstructionMapper.schema());
         sqlBuilder
-                .append(" where atsi.status=? and " + sqlGenerator.currentDate() + " >= atsi.valid_from and (atsi.valid_till IS NULL or "
-                        + sqlGenerator.currentDate() + " < atsi.valid_till) ")
-                .append(" and  (atsi.last_run_date <> " + sqlGenerator.currentDate() + " or atsi.last_run_date IS NULL)")
+                .append(" where atsi.status=? and " + businessDate + " >= atsi.valid_from and (atsi.valid_till IS NULL or " + businessDate
+                        + " < atsi.valid_till) ")
+                .append(" and  (atsi.last_run_date <> " + businessDate + " or atsi.last_run_date IS NULL)")
                 .append(" ORDER BY atsi.priority DESC");
         return this.jdbcTemplate.query(sqlBuilder.toString(), this.standingInstructionMapper, status);
     }
@@ -359,7 +360,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
     @Override
     public StandingInstructionDuesData retriveLoanDuesData(final Long loanId) {
         final StandingInstructionLoanDuesMapper rm = new StandingInstructionLoanDuesMapper();
-        final String sql = "select " + rm.schema() + " where ml.id= ? and ls.duedate <= " + sqlGenerator.currentDate()
+        final String sql = "select " + rm.schema() + " where ml.id= ? and ls.duedate <= " + sqlGenerator.currentBusinessDate()
                 + " and ls.completed_derived <> 1";
         return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId }); // NOSONAR
     }

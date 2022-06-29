@@ -16,23 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.notification.eventandlistener;
+package org.apache.fineract.infrastructure.core.domain;
 
-import org.apache.fineract.notification.data.NotificationData;
-import org.springframework.context.ApplicationEvent;
+public interface ContextHolder {
 
-@SuppressWarnings("serial")
-public class SpringEvent extends ApplicationEvent {
-
-    private NotificationData notificationData;
-
-    public SpringEvent(Object source, NotificationData notificationData) {
-        super(source);
-        this.notificationData = notificationData;
-    }
-
-    public NotificationData getNotificationData() {
-        return notificationData;
-    }
-
+    FineractContext getContext();
 }

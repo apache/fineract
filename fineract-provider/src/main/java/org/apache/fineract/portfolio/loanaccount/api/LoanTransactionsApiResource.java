@@ -135,15 +135,15 @@ public class LoanTransactionsApiResource {
         if (is(commandParam, "repayment")) {
             transactionData = this.loanReadPlatformService.retrieveLoanTransactionTemplate(loanId);
         } else if (is(commandParam, "merchantIssuedRefund")) {
-            LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
+            LocalDate transactionDate = DateUtils.getBusinessLocalDate();
             transactionData = this.loanReadPlatformService.retrieveLoanPrePaymentTemplate(LoanTransactionType.MERCHANT_ISSUED_REFUND,
                     loanId, transactionDate);
         } else if (is(commandParam, "payoutRefund")) {
-            LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
+            LocalDate transactionDate = DateUtils.getBusinessLocalDate();
             transactionData = this.loanReadPlatformService.retrieveLoanPrePaymentTemplate(LoanTransactionType.PAYOUT_REFUND, loanId,
                     transactionDate);
         } else if (is(commandParam, "goodwillCredit")) {
-            LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
+            LocalDate transactionDate = DateUtils.getBusinessLocalDate();
             transactionData = this.loanReadPlatformService.retrieveLoanPrePaymentTemplate(LoanTransactionType.GOODWILL_CREDIT, loanId,
                     transactionDate);
         } else if (is(commandParam, "waiveinterest")) {
@@ -167,7 +167,7 @@ public class LoanTransactionsApiResource {
         } else if (is(commandParam, "prepayLoan")) {
             LocalDate transactionDate = null;
             if (transactionDateParam == null) {
-                transactionDate = DateUtils.getLocalDateOfTenant();
+                transactionDate = DateUtils.getBusinessLocalDate();
             } else {
                 transactionDate = LocalDate.ofInstant(transactionDateParam.getDate("transactionDate", dateFormat, locale).toInstant(),
                         DateUtils.getDateTimeZoneOfTenant());
@@ -181,7 +181,7 @@ public class LoanTransactionsApiResource {
         } else if (is(commandParam, "foreclosure")) {
             LocalDate transactionDate = null;
             if (transactionDateParam == null) {
-                transactionDate = DateUtils.getLocalDateOfTenant();
+                transactionDate = DateUtils.getBusinessLocalDate();
             } else {
                 transactionDate = LocalDate.ofInstant(transactionDateParam.getDate("transactionDate", dateFormat, locale).toInstant(),
                         DateUtils.getDateTimeZoneOfTenant());

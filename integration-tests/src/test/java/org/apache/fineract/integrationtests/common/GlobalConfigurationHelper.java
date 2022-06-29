@@ -444,7 +444,7 @@ public class GlobalConfigurationHelper {
         isBusinessDateEnabled.put("id", 44);
         isBusinessDateEnabled.put("name", "enable_business_date");
         isBusinessDateEnabled.put("value", 0);
-        isBusinessDateEnabled.put("enabled", true);
+        isBusinessDateEnabled.put("enabled", false);
         isBusinessDateEnabled.put("trapDoor", false);
         defaults.add(isBusinessDateEnabled);
 

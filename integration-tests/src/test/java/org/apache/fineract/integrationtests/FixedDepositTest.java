@@ -39,7 +39,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
@@ -1569,10 +1568,10 @@ public class FixedDepositTest {
         Calendar activationDate = Calendar.getInstance();
         activationDate.add(Calendar.MONTH, -1);
         activationDate.add(Calendar.DAY_OF_MONTH, -1);
-        ZonedDateTime startDate = ZonedDateTime.ofInstant(activationDate.getTime().toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        ZonedDateTime startDate = ZonedDateTime.ofInstant(activationDate.getTime().toInstant(), Utils.getZoneIdOfTenant());
 
         Calendar prematureClosureDate = Calendar.getInstance();
-        ZonedDateTime endDate = ZonedDateTime.ofInstant(prematureClosureDate.getTime().toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        ZonedDateTime endDate = ZonedDateTime.ofInstant(prematureClosureDate.getTime().toInstant(), Utils.getZoneIdOfTenant());
 
         Integer depositedPeriod = Math.toIntExact(ChronoUnit.MONTHS.between(startDate.toLocalDate(), endDate.toLocalDate()));
 
@@ -1683,10 +1682,10 @@ public class FixedDepositTest {
         Calendar activationDate = Calendar.getInstance();
         activationDate.add(Calendar.MONTH, -1);
         activationDate.add(Calendar.DAY_OF_MONTH, -1);
-        ZonedDateTime startDate = ZonedDateTime.ofInstant(activationDate.getTime().toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        ZonedDateTime startDate = ZonedDateTime.ofInstant(activationDate.getTime().toInstant(), Utils.getZoneIdOfTenant());
 
         Calendar prematureClosureDate = Calendar.getInstance();
-        ZonedDateTime endDate = ZonedDateTime.ofInstant(prematureClosureDate.getTime().toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        ZonedDateTime endDate = ZonedDateTime.ofInstant(prematureClosureDate.getTime().toInstant(), Utils.getZoneIdOfTenant());
 
         Integer depositedPeriod = Math.toIntExact(ChronoUnit.MONTHS.between(startDate.toLocalDate(), endDate.toLocalDate()));
 

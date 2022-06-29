@@ -251,7 +251,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
     }
 
     private Response buildResponse(final Workbook workbook, final String entity) {
-        String filename = entity + DateUtils.getLocalDateOfTenant().toString() + ".xls";
+        String filename = entity + DateUtils.getBusinessLocalDate().toString() + ".xls";
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             workbook.write(baos);

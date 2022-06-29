@@ -283,7 +283,7 @@ public final class Group extends AbstractPersistableCustom {
     }
 
     private boolean isDateInTheFuture(final LocalDate localDate) {
-        return localDate.isAfter(DateUtils.getLocalDateOfTenant());
+        return localDate.isAfter(DateUtils.getBusinessLocalDate());
     }
 
     public boolean isNotPending() {
@@ -446,7 +446,7 @@ public final class Group extends AbstractPersistableCustom {
 
     public void updateStaff(final Staff staff) {
         if (this.isCenter() && this.isActive()) {
-            LocalDate updatedDate = DateUtils.getLocalDateOfTenant();
+            LocalDate updatedDate = DateUtils.getBusinessLocalDate();
             reassignStaff(staff, updatedDate);
         }
         this.staff = staff;
@@ -454,7 +454,7 @@ public final class Group extends AbstractPersistableCustom {
 
     public void unassignStaff() {
         if (this.isCenter() && this.isActive()) {
-            LocalDate dateOfStaffUnassigned = DateUtils.getLocalDateOfTenant();
+            LocalDate dateOfStaffUnassigned = DateUtils.getBusinessLocalDate();
             removeStaff(dateOfStaffUnassigned);
         }
         this.staff = null;

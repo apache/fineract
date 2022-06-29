@@ -40,6 +40,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -48,7 +50,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.http.conn.HttpHostConnectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,6 +77,11 @@ public final class Utils {
 
     private static final String HEALTH_URL = "/fineract-provider/actuator/health";
     private static final String LOGIN_URL = "/fineract-provider/api/v1/authentication?" + TENANT_IDENTIFIER;
+
+    public static final String DATE_FORMAT = "dd MMMM yyyy";
+    public static final String DATE_TIME_FORMAT = "dd MMMM yyyy HH:mm";
+    public static final DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern(DATE_FORMAT).toFormatter();
+    public static final DateTimeFormatter dateTimeFormatter = new DateTimeFormatterBuilder().appendPattern(DATE_TIME_FORMAT).toFormatter();
 
     public static void initializeRESTAssured() {
         RestAssured.baseURI = "https://localhost";
@@ -287,17 +293,16 @@ public final class Utils {
         return dateFormat.format(dateToBeConvert.getTime());
     }
 
-    public static LocalDate getLocalDateOfTenant() {
-        LocalDate today = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
-        final ZoneId zone = ZoneId.of(TENANT_TIME_ZONE);
-        if (zone != null) {
-            today = LocalDate.now(zone);
-        }
-        return today;
-    }
-
     public static TimeZone getTimeZoneOfTenant() {
         return TimeZone.getTimeZone(TENANT_TIME_ZONE);
+    }
+
+    public static ZoneId getZoneIdOfTenant() {
+        return ZoneId.of(TENANT_TIME_ZONE);
+    }
+
+    public static LocalDate getLocalDateOfTenant() {
+        return LocalDate.now(getZoneIdOfTenant());
     }
 
     public static Date convertJsonElementAsDate(JsonElement jsonElement) {

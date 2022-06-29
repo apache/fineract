@@ -79,7 +79,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -671,29 +670,15 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
             registerDatatable(datatableName, apptableName, entitySubType);
             registerColumnCodeMapping(codeMappings);
-        } catch (final JpaSystemException | DataIntegrityViolationException e) {
+        } catch (final PersistenceException | DataAccessException e) {
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("datatable");
 
             if (realCause.getMessage().toLowerCase().contains("duplicate column name")) {
                 baseDataValidator.reset().parameter("name").failWithCode("duplicate.column.name");
-            } else if (realCause.getMessage().contains("Table") && realCause.getMessage().contains("already exists")) {
-                baseDataValidator.reset().parameter("datatableName").value(datatableName).failWithCode("datatable.already.exists");
-            } else if (realCause.getMessage().contains("Column") && realCause.getMessage().contains("big")) {
-                baseDataValidator.reset().parameter("column").failWithCode("length.too.big");
-            } else if (realCause.getMessage().contains("Row") && realCause.getMessage().contains("large")) {
-                baseDataValidator.reset().parameter("row").failWithCode("size.too.large");
-            }
-
-            throwExceptionIfValidationWarningsExist(dataValidationErrors);
-        } catch (final PersistenceException | BadSqlGrammarException ee) {
-            Throwable realCause = ExceptionUtils.getRootCause(ee.getCause());
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("datatable");
-            if (realCause.getMessage().toLowerCase().contains("duplicate column name")) {
-                baseDataValidator.reset().parameter("name").failWithCode("duplicate.column.name");
-            } else if (realCause.getMessage().contains("Table") && realCause.getMessage().contains("already exists")) {
+            } else if ((realCause.getMessage().contains("Table") || realCause.getMessage().contains("relation"))
+                    && realCause.getMessage().contains("already exists")) {
                 baseDataValidator.reset().parameter("datatableName").value(datatableName).failWithCode("datatable.already.exists");
             } else if (realCause.getMessage().contains("Column") && realCause.getMessage().contains("big")) {
                 baseDataValidator.reset().parameter("column").failWithCode("length.too.big");
@@ -1132,7 +1117,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("datatable");
             if (realCause.getMessage().toLowerCase().contains("duplicate column name")) {
                 baseDataValidator.reset().parameter("name").failWithCode("duplicate.column.name");
-            } else if (realCause.getMessage().contains("Table") && realCause.getMessage().contains("already exists")) {
+            } else if ((realCause.getMessage().contains("Table") || realCause.getMessage().contains("relation"))
+                    && realCause.getMessage().contains("already exists")) {
                 baseDataValidator.reset().parameter("datatableName").value(datatableName).failWithCode("datatable.already.exists");
             } else if (realCause.getMessage().contains("Column") && realCause.getMessage().contains("big")) {
                 baseDataValidator.reset().parameter("column").failWithCode("length.too.big");
@@ -1569,7 +1555,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                         || key.equalsIgnoreCase(DataTableApiConstant.UPDATEDAT_FIELD_NAME)) {
                     columnName = sqlGenerator.escape(key);
                     insertColumns += ", " + columnName;
-                    selectColumns += "," + sqlGenerator.currentDateTime() + " as " + columnName;
+                    selectColumns += "," + sqlGenerator.currentTenantDateTime() + " as " + columnName;
                 }
             }
         }
@@ -1675,7 +1661,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 sql += sqlGenerator.escape(key) + " = " + pValueWrite;
             } else {
                 if (key.equalsIgnoreCase(DataTableApiConstant.UPDATEDAT_FIELD_NAME)) {
-                    sql += ", " + sqlGenerator.escape(key) + " = " + sqlGenerator.currentDateTime();
+                    sql += ", " + sqlGenerator.escape(key) + " = " + sqlGenerator.currentTenantDateTime();
                 }
             }
         }

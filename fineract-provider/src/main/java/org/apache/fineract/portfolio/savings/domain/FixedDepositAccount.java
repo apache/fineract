@@ -231,7 +231,7 @@ public class FixedDepositAccount extends SavingsAccount {
                 isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
 
         // reset end of day balance back to today's date
-        this.resetAccountTransactionsEndOfDayBalances(transactions, DateUtils.getLocalDateOfTenant());
+        this.resetAccountTransactionsEndOfDayBalances(transactions, DateUtils.getBusinessLocalDate());
 
         Money totalInterestPayable = Money.zero(getCurrency());
         for (PostingPeriod postingPeriod : postingPeriods) {
@@ -256,7 +256,7 @@ public class FixedDepositAccount extends SavingsAccount {
             }
         }
 
-        final LocalDate todayDate = DateUtils.getLocalDateOfTenant();
+        final LocalDate todayDate = DateUtils.getBusinessLocalDate();
         if (!this.maturityDate().isAfter(todayDate)) {
             // update account status
             this.status = SavingsAccountStatusType.MATURED.getValue();
@@ -763,7 +763,7 @@ public class FixedDepositAccount extends SavingsAccount {
         if (this.chart != null) {
             final LocalDate chartFromDate = this.chart.getFromDateAsLocalDate();
             LocalDate chartEndDate = this.chart.getEndDateAsLocalDate();
-            chartEndDate = chartEndDate == null ? DateUtils.getLocalDateOfTenant() : chartEndDate;
+            chartEndDate = chartEndDate == null ? DateUtils.getBusinessLocalDate() : chartEndDate;
 
             final LocalDateInterval chartInterval = LocalDateInterval.create(chartFromDate, chartEndDate);
             if (!chartInterval.contains(accountSubmittedOrActivationDate())) {

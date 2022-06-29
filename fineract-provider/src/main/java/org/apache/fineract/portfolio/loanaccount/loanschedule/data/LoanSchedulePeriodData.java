@@ -193,7 +193,7 @@ public final class LoanSchedulePeriodData {
         this.totalOutstandingForPeriod = this.feeChargesOutstanding;
         this.totalActualCostOfLoanForPeriod = this.feeChargesDue;
         this.totalInstallmentAmountForPeriod = null;
-        if (dueDate.isBefore(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()))) {
+        if (dueDate.isBefore(DateUtils.getBusinessLocalDate())) {
             this.totalOverdue = this.totalOutstandingForPeriod;
         } else {
             this.totalOverdue = null;
@@ -255,7 +255,7 @@ public final class LoanSchedulePeriodData {
         this.totalActualCostOfLoanForPeriod = interestDueOnPrincipalOutstanding.add(feeChargesDueForPeriod);
         this.totalInstallmentAmountForPeriod = totalInstallmentAmountForPeriod;
 
-        if (dueDate.isBefore(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()))) {
+        if (dueDate.isBefore(DateUtils.getBusinessLocalDate())) {
             this.totalOverdue = this.totalOutstandingForPeriod;
         } else {
             this.totalOverdue = null;
@@ -326,7 +326,7 @@ public final class LoanSchedulePeriodData {
         this.totalActualCostOfLoanForPeriod = totalActualCostOfLoanForPeriod;
         this.totalInstallmentAmountForPeriod = totalInstallmentAmountForPeriod;
 
-        if (dueDate.isBefore(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()))) {
+        if (dueDate.isBefore(DateUtils.getBusinessLocalDate())) {
             this.totalOverdue = this.totalOutstandingForPeriod;
         } else {
             this.totalOverdue = null;

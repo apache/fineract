@@ -125,6 +125,7 @@ public class AccountingScenarioIntegrationTest {
         Utils.initializeRESTAssured();
         requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        requestSpec.header("Fineract-Platform-TenantId", "default");
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
 
         this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
@@ -844,13 +845,13 @@ public class AccountingScenarioIntegrationTest {
         final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
         // MAKE 1
         List fromDateList = (List) loanSchedule.get(1).get("fromDate");
-        LocalDate fromDateLocal = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        LocalDate fromDateLocal = LocalDate.now(Utils.getZoneIdOfTenant());
         fromDateLocal = fromDateLocal.withYear((int) fromDateList.get(0));
         fromDateLocal = fromDateLocal.withMonth((int) fromDateList.get(1));
         fromDateLocal = fromDateLocal.withDayOfMonth((int) fromDateList.get(2));
 
         List dueDateList = (List) loanSchedule.get(1).get("dueDate");
-        LocalDate dueDateLocal = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        LocalDate dueDateLocal = LocalDate.now(Utils.getZoneIdOfTenant());
         dueDateLocal = dueDateLocal.withYear((int) dueDateList.get(0));
         dueDateLocal = dueDateLocal.withMonth((int) dueDateList.get(1));
         dueDateLocal = dueDateLocal.withDayOfMonth((int) dueDateList.get(2));
@@ -957,13 +958,13 @@ public class AccountingScenarioIntegrationTest {
         final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
         // MAKE 1
         List fromDateList = (List) loanSchedule.get(1).get("fromDate");
-        LocalDate fromDateLocal = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        LocalDate fromDateLocal = LocalDate.now(Utils.getZoneIdOfTenant());
         fromDateLocal = fromDateLocal.withYear((int) fromDateList.get(0));
         fromDateLocal = fromDateLocal.withMonth((int) fromDateList.get(1));
         fromDateLocal = fromDateLocal.withDayOfMonth((int) fromDateList.get(2));
 
         List dueDateList = (List) loanSchedule.get(1).get("dueDate");
-        LocalDate dueDateLocal = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        LocalDate dueDateLocal = LocalDate.now(Utils.getZoneIdOfTenant());
         dueDateLocal = dueDateLocal.withYear((int) dueDateList.get(0));
         dueDateLocal = dueDateLocal.withMonth((int) dueDateList.get(1));
         dueDateLocal = dueDateLocal.withDayOfMonth((int) dueDateList.get(2));

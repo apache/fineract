@@ -35,7 +35,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
@@ -69,6 +68,7 @@ public class ProvisioningIntegrationTest {
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.requestSpec.header("Fineract-Platform-TenantId", "default");
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
         Assumptions.assumeTrue(!isAlreadyProvisioningEntriesCreated());
@@ -261,7 +261,7 @@ public class ProvisioningIntegrationTest {
                 Date date1 = formatter.parse(date);
                 DateFormat simple = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
                 String formattedString = simple
-                        .format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+                        .format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(Utils.getZoneIdOfTenant()).toInstant()));
                 Date currentDate = simple.parse(formattedString);
                 if (date1.getTime() == currentDate.getTime()) {
                     provisioningetryAlreadyCreated = true;

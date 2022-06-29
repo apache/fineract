@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.hooks.domain.Hook;
 import org.apache.fineract.infrastructure.hooks.domain.HookConfiguration;
@@ -41,7 +42,6 @@ import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.template.domain.Template;
 import org.apache.fineract.template.domain.TemplateRepository;
 import org.apache.fineract.template.service.TemplateMergeService;
-import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -57,8 +57,8 @@ public class MessageGatewayHookProcessor implements HookProcessor {
     private final SmsMessageScheduledJobService smsMessageScheduledJobService;
 
     @Override
-    public void process(final Hook hook, @SuppressWarnings("unused") final AppUser appUser, final String payload, final String entityName,
-            final String actionName, final String tenantIdentifier, final String authToken) throws IOException {
+    public void process(final Hook hook, final String payload, final String entityName, final String actionName,
+            final FineractContext context) throws IOException {
 
         final Set<HookConfiguration> config = hook.getHookConfig();
 
@@ -89,7 +89,9 @@ public class MessageGatewayHookProcessor implements HookProcessor {
 
         // 2.1 : get customer details for basic template mapping
         // 2.2 : cook up scope map
-        Type type = new TypeToken<Map<String, String>>() {}.getType();
+        Type type = new TypeToken<Map<String, String>>() {
+
+        }.getType();
         Map<String, Object> reqMap = new Gson().fromJson(payload, type);
         if (reqMap.get("clientId") != null) {
             Long clientId = (Long) reqMap.get("clientId");

@@ -19,11 +19,15 @@
 package org.apache.fineract.infrastructure.security.filter;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.HashMap;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.time.StopWatch;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
 import org.apache.fineract.infrastructure.cache.domain.CacheType;
 import org.apache.fineract.infrastructure.cache.service.CacheWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -80,6 +84,9 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
     @Autowired
     private BasicAuthTenantDetailsService basicAuthTenantDetailsService;
 
+    @Autowired
+    private BusinessDateReadPlatformService businessDateReadPlatformService;
+
     private final String tenantRequestHeader = "Fineract-Platform-TenantId";
     private final boolean exceptionIfHeaderMissing = true;
 
@@ -119,8 +126,9 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                     isReportRequest = true;
                 }
                 final FineractPlatformTenant tenant = this.basicAuthTenantDetailsService.loadTenantById(tenantIdentifier, isReportRequest);
-
                 ThreadLocalContextUtil.setTenant(tenant);
+                HashMap<BusinessDateType, LocalDate> businessDates = this.businessDateReadPlatformService.getBusinessDates();
+                ThreadLocalContextUtil.setBusinessDates(businessDates);
                 String authToken = request.getHeader("Authorization");
 
                 if (authToken != null && authToken.startsWith("Basic ")) {

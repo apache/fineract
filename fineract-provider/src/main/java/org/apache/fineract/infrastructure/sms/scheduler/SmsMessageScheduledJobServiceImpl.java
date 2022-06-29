@@ -28,11 +28,12 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.campaigns.helper.SmsConfigUtils;
 import org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignConstants;
 import org.apache.fineract.infrastructure.campaigns.sms.domain.SmsCampaign;
 import org.apache.fineract.infrastructure.campaigns.sms.exception.ConnectionFailureException;
-import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.gcm.service.NotificationSenderService;
@@ -44,8 +45,6 @@ import org.apache.fineract.infrastructure.sms.domain.SmsMessage;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessageRepository;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessageStatusType;
 import org.apache.fineract.infrastructure.sms.service.SmsReadPlatformService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
@@ -63,16 +62,16 @@ import org.springframework.web.client.RestTemplate;
  * Scheduled job services that send SMS messages and get delivery reports for the sent SMS messages
  **/
 @Service
+@Slf4j
 public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJobService {
 
     private final SmsMessageRepository smsMessageRepository;
     private final SmsReadPlatformService smsReadPlatformService;
-    private static final Logger LOG = LoggerFactory.getLogger(SmsMessageScheduledJobServiceImpl.class);
     private final RestTemplate restTemplate = new RestTemplate();
-    private ExecutorService genericExecutorService;
-    private ExecutorService triggeredExecutorService;
     private final SmsConfigUtils smsConfigUtils;
     private final NotificationSenderService notificationSenderService;
+    private ExecutorService genericExecutorService;
+    private ExecutorService triggeredExecutorService;
 
     /**
      * SmsMessageScheduledJobServiceImpl constructor
@@ -131,7 +130,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
                     if (toSaveMessages.size() > 0) {
                         this.smsMessageRepository.saveAll(toSaveMessages);
                         this.smsMessageRepository.flush();
-                        this.genericExecutorService.execute(new SmsTask(ThreadLocalContextUtil.getTenant(), apiQueueResourceDatas));
+                        this.genericExecutorService.execute(new SmsTask(apiQueueResourceDatas, ThreadLocalContextUtil.getContext()));
                     }
                     if (!toSendNotificationMessages.isEmpty()) {
                         this.notificationSenderService.sendNotification(toSendNotificationMessages);
@@ -147,40 +146,18 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
         } while (page < totalRecords);
     }
 
-    class SmsTask implements Runnable, ApplicationListener<ContextClosedEvent> {
-
-        private final FineractPlatformTenant tenant;
-        private final Collection<SmsMessageApiQueueResourceData> apiQueueResourceDatas;
-
-        SmsTask(final FineractPlatformTenant tenant, final Collection<SmsMessageApiQueueResourceData> apiQueueResourceDatas) {
-            this.tenant = tenant;
-            this.apiQueueResourceDatas = apiQueueResourceDatas;
-        }
-
-        @Override
-        public void run() {
-            ThreadLocalContextUtil.setTenant(tenant);
-            connectAndSendToIntermediateServer(apiQueueResourceDatas);
-        }
-
-        @Override
-        public void onApplicationEvent(ContextClosedEvent event) {
-            genericExecutorService.shutdown();
-            LOG.info("Shutting down the ExecutorService");
-        }
-    }
-
     private void connectAndSendToIntermediateServer(Collection<SmsMessageApiQueueResourceData> apiQueueResourceDatas) {
         Map<String, Object> hostConfig = this.smsConfigUtils.getMessageGateWayRequestURI("sms",
                 SmsMessageApiQueueResourceData.toJsonString(apiQueueResourceDatas));
         URI uri = (URI) hostConfig.get("uri");
         HttpEntity<?> entity = (HttpEntity<?>) hostConfig.get("entity");
-        ResponseEntity<String> responseOne = restTemplate.exchange(uri, HttpMethod.POST, entity,
-                new ParameterizedTypeReference<String>() {});
+        ResponseEntity<String> responseOne = restTemplate.exchange(uri, HttpMethod.POST, entity, new ParameterizedTypeReference<String>() {
+
+        });
         if (responseOne != null) {
             // String smsResponse = responseOne.getBody();
             if (!responseOne.getStatusCode().equals(HttpStatus.ACCEPTED)) {
-                LOG.debug("{}", responseOne.getStatusCode().name());
+                log.debug("{}", responseOne.getStatusCode().name());
                 throw new ConnectionFailureException(SmsCampaignConstants.SMS);
             }
         }
@@ -213,7 +190,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
                     if (toSaveMessages.size() > 0) {
                         this.smsMessageRepository.saveAll(toSaveMessages);
                         this.smsMessageRepository.flush();
-                        this.triggeredExecutorService.execute(new SmsTask(ThreadLocalContextUtil.getTenant(), apiQueueResourceDatas));
+                        this.triggeredExecutorService.execute(new SmsTask(apiQueueResourceDatas, ThreadLocalContextUtil.getContext()));
                     }
                     if (!toSendNotificationMessages.isEmpty()) {
                         this.notificationSenderService.sendNotification(toSendNotificationMessages);
@@ -222,7 +199,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
                 }
             }
         } catch (Exception e) {
-            LOG.error("Error occured.", e);
+            log.error("Error occured.", e);
         }
     }
 
@@ -239,10 +216,10 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
             }
             this.smsMessageRepository.saveAll(smsMessages);
             request.append(SmsMessageApiQueueResourceData.toJsonString(apiQueueResourceDatas));
-            LOG.info("Sending triggered SMS to specific provider with request - {}", request);
-            this.triggeredExecutorService.execute(new SmsTask(ThreadLocalContextUtil.getTenant(), apiQueueResourceDatas));
+            log.info("Sending triggered SMS to specific provider with request - {}", request);
+            this.triggeredExecutorService.execute(new SmsTask(apiQueueResourceDatas, ThreadLocalContextUtil.getContext()));
         } catch (Exception e) {
-            LOG.error("Error occured.", e);
+            log.error("Error occured.", e);
         }
     }
 
@@ -268,7 +245,9 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
                     URI uri = (URI) hostConfig.get("uri");
                     HttpEntity<?> entity = (HttpEntity<?>) hostConfig.get("entity");
                     ResponseEntity<Collection<SmsMessageDeliveryReportData>> responseOne = restTemplate.exchange(uri, HttpMethod.POST,
-                            entity, new ParameterizedTypeReference<Collection<SmsMessageDeliveryReportData>>() {});
+                            entity, new ParameterizedTypeReference<Collection<SmsMessageDeliveryReportData>>() {
+
+                            });
 
                     Collection<SmsMessageDeliveryReportData> smsMessageDeliveryReportDatas = responseOne.getBody();
                     Iterator<SmsMessageDeliveryReportData> responseReportIterator = smsMessageDeliveryReportDatas.iterator();
@@ -315,23 +294,44 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
                             this.smsMessageRepository.save(smsMessage);
 
                             if (statusChanged) {
-                                LOG.info("Status of SMS message id: {} successfully changed to {}", smsMessage.getId(), statusType);
+                                log.info("Status of SMS message id: {} successfully changed to {}", smsMessage.getId(), statusType);
                             }
                         }
                     }
 
                     if (smsMessageDeliveryReportDatas.size() > 0) {
-                        LOG.info("{} delivery report(s) successfully received from the intermediate gateway - sms",
+                        log.info("{} delivery report(s) successfully received from the intermediate gateway - sms",
                                 smsMessageDeliveryReportDatas.size());
                     }
                 }
-            }
-
-            catch (Exception e) {
-                LOG.error("Error occured.", e);
+            } catch (Exception e) {
+                log.error("Error occured.", e);
             }
             page++;
             totalRecords = smsMessageInternalIds.getTotalFilteredRecords();
         } while (page < totalRecords);
+    }
+
+    class SmsTask implements Runnable, ApplicationListener<ContextClosedEvent> {
+
+        private final FineractContext context;
+        private final Collection<SmsMessageApiQueueResourceData> apiQueueResourceDatas;
+
+        SmsTask(final Collection<SmsMessageApiQueueResourceData> apiQueueResourceDatas, final FineractContext context) {
+            this.context = context;
+            this.apiQueueResourceDatas = apiQueueResourceDatas;
+        }
+
+        @Override
+        public void run() {
+            ThreadLocalContextUtil.init(context);
+            connectAndSendToIntermediateServer(apiQueueResourceDatas);
+        }
+
+        @Override
+        public void onApplicationEvent(ContextClosedEvent event) {
+            genericExecutorService.shutdown();
+            log.info("Shutting down the ExecutorService");
+        }
     }
 }

@@ -587,7 +587,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 final Integer instructionType = StandingInstructionType.DUES.getValue();
                 final Integer status = StandingInstructionStatus.ACTIVE.getValue();
                 final Integer recurrenceType = AccountTransferRecurrenceType.AS_PER_DUES.getValue();
-                final LocalDate validFrom = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+                final LocalDate validFrom = DateUtils.getBusinessLocalDate();
 
                 AccountTransferDetails accountTransferDetails = AccountTransferDetails.savingsToLoanTransfer(fromOffice, fromClient,
                         linkedSavingsAccount, toOffice, toClient, loan, transferType);
@@ -1619,7 +1619,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             this.loanTransactionRepository.saveAndFlush(applyLoanChargeTransaction);
         }
         boolean isAppliedOnBackDate = false;
-        if (loanCharge.getDueLocalDate() == null || DateUtils.getLocalDateOfTenant().isAfter(loanCharge.getDueLocalDate())) {
+        if (loanCharge.getDueLocalDate() == null || DateUtils.getBusinessLocalDate().isAfter(loanCharge.getDueLocalDate())) {
             isAppliedOnBackDate = true;
         }
         return isAppliedOnBackDate;
@@ -2053,29 +2053,28 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                             .retrieveInstallmentLoanCharges(chargeData.getId(), true);
                     PortfolioAccountData portfolioAccountData = null;
                     for (final LoanInstallmentChargeData installmentChargeData : chargePerInstallments) {
-                        if (!installmentChargeData.getDueDate().isAfter(DateUtils.getLocalDateOfTenant())) {
+                        if (!installmentChargeData.getDueDate().isAfter(DateUtils.getBusinessLocalDate())) {
                             if (portfolioAccountData == null) {
                                 portfolioAccountData = this.accountAssociationsReadPlatformService
                                         .retriveLoanLinkedAssociation(chargeData.getLoanId());
                             }
                             final SavingsAccount fromSavingsAccount = null;
                             final boolean isExceptionForBalanceCheck = false;
-                            final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(
-                                    LocalDate.now(DateUtils.getDateTimeZoneOfTenant()), installmentChargeData.getAmountOutstanding(),
-                                    PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN, portfolioAccountData.accountId(),
-                                    chargeData.getLoanId(), "Loan Charge Payment", null, null, null, null,
+                            final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(DateUtils.getBusinessLocalDate(),
+                                    installmentChargeData.getAmountOutstanding(), PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN,
+                                    portfolioAccountData.accountId(), chargeData.getLoanId(), "Loan Charge Payment", null, null, null, null,
                                     LoanTransactionType.CHARGE_PAYMENT.getValue(), chargeData.getId(),
                                     installmentChargeData.getInstallmentNumber(), AccountTransferType.CHARGE_PAYMENT.getValue(), null, null,
                                     null, null, null, fromSavingsAccount, isRegularTransaction, isExceptionForBalanceCheck);
                             transferFeeCharge(accountTransferDTO, errors);
                         }
                     }
-                } else if (chargeData.getDueDate() != null && !chargeData.getDueDate().isAfter(DateUtils.getLocalDateOfTenant())) {
+                } else if (chargeData.getDueDate() != null && !chargeData.getDueDate().isAfter(DateUtils.getBusinessLocalDate())) {
                     final PortfolioAccountData portfolioAccountData = this.accountAssociationsReadPlatformService
                             .retriveLoanLinkedAssociation(chargeData.getLoanId());
                     final SavingsAccount fromSavingsAccount = null;
                     final boolean isExceptionForBalanceCheck = false;
-                    final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()),
+                    final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(DateUtils.getBusinessLocalDate(),
                             chargeData.getAmountOutstanding(), PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN,
                             portfolioAccountData.accountId(), chargeData.getLoanId(), "Loan Charge Payment", null, null, null, null,
                             LoanTransactionType.CHARGE_PAYMENT.getValue(), chargeData.getId(), null,
@@ -2607,7 +2606,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final List<Long> existingTransactionIds = new ArrayList<>();
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
         boolean runInterestRecalculation = false;
-        LocalDate recalculateFrom = DateUtils.getLocalDateOfTenant();
+        LocalDate recalculateFrom = DateUtils.getBusinessLocalDate();
         LocalDate lastChargeDate = null;
         for (final OverdueLoanScheduleData overdueInstallment : overdueLoanScheduleDatas) {
 
@@ -2714,7 +2713,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (feeFrequency == null) {
             scheduleDates.put(frequencyNunber++, startDate.minusDays(diff));
         } else {
-            while (!startDate.isAfter(DateUtils.getLocalDateOfTenant())) {
+            while (!startDate.isAfter(DateUtils.getBusinessLocalDate())) {
                 scheduleDates.put(frequencyNunber++, startDate.minusDays(diff));
                 LocalDate scheduleDate = scheduledDateGenerator.getRepaymentPeriodDate(PeriodFrequencyType.fromInt(feeFrequency),
                         chargeDefinition.feeInterval(), startDate);
@@ -2739,7 +2738,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             installment = loan.fetchRepaymentScheduleInstallment(periodNumber);
             lastChargeAppliedDate = installment.getDueDate();
         }
-        LocalDate recalculateFrom = DateUtils.getLocalDateOfTenant();
+        LocalDate recalculateFrom = DateUtils.getBusinessLocalDate();
 
         if (loan != null) {
             businessEventNotifierService.notifyPreBusinessEvent(new LoanApplyOverdueChargeBusinessEvent(loan));

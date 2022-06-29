@@ -134,7 +134,7 @@ public class CollectionSheetTransactionDataValidator {
         final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(CollectionSheetConstants.transactionDateParamName,
                 element);
         baseDataValidator.reset().parameter(CollectionSheetConstants.transactionDateParamName).value(transactionDate).notNull()
-                .validateDateBeforeOrEqual(DateUtils.getLocalDateOfTenant());
+                .validateDateBeforeOrEqual(DateUtils.getBusinessLocalDate());
 
         final String note = this.fromApiJsonHelper.extractStringNamed(CollectionSheetConstants.noteParamName, element);
         if (StringUtils.isNotBlank(note)) {

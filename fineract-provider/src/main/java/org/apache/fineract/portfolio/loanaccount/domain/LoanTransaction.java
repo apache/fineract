@@ -348,7 +348,7 @@ public class LoanTransaction extends AbstractPersistableCustom {
         this.paymentDetail = paymentDetail;
         this.office = office;
         this.externalId = externalId;
-        this.submittedOnDate = DateUtils.getDateOfTenant();
+        this.submittedOnDate = DateUtils.getBusinessDate();
         this.createdDate = Date.from(createdDate.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         this.appUser = appUser;
     }
@@ -376,7 +376,7 @@ public class LoanTransaction extends AbstractPersistableCustom {
         this.dateOf = Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.externalId = externalId;
         this.office = office;
-        this.submittedOnDate = DateUtils.getDateOfTenant();
+        this.submittedOnDate = DateUtils.getBusinessDate();
         this.createdDate = Date.from(createdDate.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         this.appUser = appUser;
     }
@@ -391,7 +391,7 @@ public class LoanTransaction extends AbstractPersistableCustom {
         this.dateOf = Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
         this.externalId = externalId;
         this.office = office;
-        this.submittedOnDate = DateUtils.getDateOfTenant();
+        this.submittedOnDate = DateUtils.getBusinessDate();
         this.createdDate = Date.from(createdDate.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant());
         this.appUser = appUser;
     }

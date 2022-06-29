@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -38,8 +39,12 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 
 public final class DateUtils {
 
-    public static final String DEFAULT_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    public static final DateTimeFormatter DEFAULT_DATETIME_FORMATER = DateTimeFormatter.ofPattern(DEFAULT_DATETIME_FORMAT);
+    public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
+    public static final String DEFAULT_DATETIME_FORMAT = DEFAULT_DATE_FORMAT + " HH:mm:ss";
+    public static final DateTimeFormatter DEFAULT_DATETIME_FORMATER = new DateTimeFormatterBuilder().appendPattern(DEFAULT_DATETIME_FORMAT)
+            .toFormatter();
+    public static final DateTimeFormatter DEFAULT_DATE_FORMATER = new DateTimeFormatterBuilder().appendPattern(DEFAULT_DATE_FORMAT)
+            .toFormatter();
 
     private DateUtils() {
 
@@ -51,11 +56,7 @@ public final class DateUtils {
 
     public static ZoneId getDateTimeZoneOfTenant() {
         final FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
-        ZoneId zone = ZoneId.systemDefault();
-        if (tenant != null) {
-            zone = ZoneId.of(tenant.getTimezoneId());
-        }
-        return zone;
+        return ZoneId.of(tenant.getTimezoneId());
     }
 
     public static TimeZone getTimeZoneOfTenant() {
@@ -71,7 +72,7 @@ public final class DateUtils {
         return convertLocalDateToDate(getLocalDateOfTenant());
     }
 
-    public static Date convertLocalDateToDate(LocalDate localDate) {
+    private static Date convertLocalDateToDate(LocalDate localDate) {
         return createDate(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
     }
 
@@ -92,14 +93,9 @@ public final class DateUtils {
         return LocalDate.now(zone);
     }
 
-    public static LocalDate getLocalDateOfTenant(final ZoneId zone) {
-        return LocalDate.now(zone);
-    }
-
     public static LocalDateTime getLocalDateTimeOfTenant() {
         final ZoneId zone = getDateTimeZoneOfTenant();
-        LocalDateTime today = LocalDateTime.now(zone).truncatedTo(ChronoUnit.SECONDS);
-        return today;
+        return LocalDateTime.now(zone).truncatedTo(ChronoUnit.SECONDS);
     }
 
     public static Date parseDate(final String stringDate, final String pattern, final ZoneId zoneId) {
@@ -128,7 +124,8 @@ public final class DateUtils {
         } catch (final IllegalArgumentException e) {
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.date.pattern",
-                    "The parameter date (" + stringDate + ") is invalid w.r.t. pattern " + pattern, "date", stringDate, pattern);
+                    "The parameter `date` (value: " + stringDate + ") is invalid w.r.t. pattern `" + pattern + "`", "date", stringDate,
+                    pattern);
             dataValidationErrors.add(error);
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
                     dataValidationErrors, e);
@@ -142,11 +139,19 @@ public final class DateUtils {
     public static String formatToSqlDate(final Date date) {
         final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         df.setTimeZone(getTimeZoneOfTenant());
-        final String formattedSqlDate = df.format(date);
-        return formattedSqlDate;
+        return df.format(date);
     }
 
     public static boolean isDateInTheFuture(final LocalDate localDate) {
         return localDate.isAfter(getLocalDateOfTenant());
     }
+
+    public static LocalDate getBusinessLocalDate() {
+        return ThreadLocalContextUtil.getBusinessDate();
+    }
+
+    public static Date getBusinessDate() {
+        return Date.from(ThreadLocalContextUtil.getBusinessDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+    }
+
 }

@@ -16,19 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.businessdate.service;
+package org.apache.fineract.infrastructure.core.domain;
 
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import org.apache.fineract.infrastructure.businessdate.data.BusinessDateData;
-import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import java.io.Serializable;
+import org.springframework.context.ApplicationEvent;
 
-public interface BusinessDateReadPlatformService {
+public abstract class FineractEvent extends ApplicationEvent implements ContextHolder, Serializable {
 
-    List<BusinessDateData> findAll();
+    private final FineractContext context;
 
-    BusinessDateData findByType(String type);
+    public FineractEvent(Object source, FineractContext context) {
+        super(source);
+        this.context = context;
+    }
 
-    HashMap<BusinessDateType, LocalDate> getBusinessDates();
+    @Override
+    public FineractContext getContext() {
+        return context;
+    }
 }

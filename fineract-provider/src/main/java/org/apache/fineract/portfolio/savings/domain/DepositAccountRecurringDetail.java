@@ -127,7 +127,7 @@ public class DepositAccountRecurringDetail extends AbstractPersistableCustom {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
         depositAccount.updateScheduleInstallmentsWithNewRecommendedDepositAmount(newMandatoryRecommendedDepositAmount, effectiveDate);
-        depositAccount.updateOverduePayments(DateUtils.getLocalDateOfTenant());
+        depositAccount.updateOverduePayments(DateUtils.getBusinessLocalDate());
         MathContext mc = MathContext.DECIMAL64;
         Boolean isPreMatureClosure = false;
         depositAccount.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
