@@ -16,17 +16,42 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.security.utils;
 
-public final class LogParameterEscapeUtil {
+package org.apache.fineract.infrastructure.core.service;
 
-    private LogParameterEscapeUtil() {}
+import java.util.Map;
+import org.slf4j.MDC;
+import org.slf4j.spi.MDCAdapter;
 
-    public static String escapeLogParameter(String logParameter) {
-        return logParameter.replaceAll("[\n\r\t]", "_");
+public class MdcAdapter implements MDCAdapter {
+
+    @Override
+    public void put(String key, String val) {
+        MDC.put(key, val);
     }
 
-    public static String escapeLogMDCParameter(String logParameter) {
-        return logParameter.replaceAll("[\r\n]", "");
+    @Override
+    public String get(String key) {
+        return MDC.get(key);
+    }
+
+    @Override
+    public void remove(String key) {
+        MDC.remove(key);
+    }
+
+    @Override
+    public void clear() {
+        MDC.clear();
+    }
+
+    @Override
+    public Map<String, String> getCopyOfContextMap() {
+        return MDC.getCopyOfContextMap();
+    }
+
+    @Override
+    public void setContextMap(Map<String, String> map) {
+        MDC.setContextMap(map);
     }
 }
