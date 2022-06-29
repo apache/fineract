@@ -90,4 +90,8 @@ services:
       - FINERACT_DEFAULT_TENANTDB_IDENTIFIER=default
       - FINERACT_DEFAULT_TENANTDB_NAME=fineract_default
       - FINERACT_DEFAULT_TENANTDB_DESCRIPTION=Default Demo Tenant
+      - FINERACT_LOGGING_HTTP_CORRELATION_ID_ENABLED=false
+      - FINERACT_LOGGING_HTTP_CORRELATION_ID_HEADER_NAME=X-Correlation-ID
+      - CONSOLE_LOG_PATTERN=%d{yyyy-MM-dd HH:mm:ss.SSS} %thread %replace([%X{correlationId}]){'\[\]', ''} [%-5level] %class{0} - %msg%n
+      - FINERACT_LOGGING_LEVEL=warn
       - JAVA_TOOL_OPTIONS="-Xmx1G"

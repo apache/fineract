@@ -39,5 +39,6 @@
     <!-- But these three INFO are still handy ;-) just to see when it's up and running -->
     <logger name="org.springframework.boot.web.embedded.tomcat.TomcatWebServer" level="info" />
     <logger name="org.apache.fineract.ServerApplication" level="info" />
+    <logger name="org.apache.fineract" level="${FINERACT_LOGGING_LEVEL:-INFO}" />
     <logger name="liquibase" level="info" />
 </configuration>
