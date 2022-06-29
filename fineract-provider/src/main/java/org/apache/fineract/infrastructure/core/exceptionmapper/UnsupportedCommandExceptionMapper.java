@@ -25,6 +25,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.commands.exception.UnsupportedCommandException;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -38,16 +39,17 @@ import org.springframework.stereotype.Component;
 @Provider
 @Component
 @Scope("singleton")
+@Slf4j
 public class UnsupportedCommandExceptionMapper implements ExceptionMapper<UnsupportedCommandException> {
 
     @Override
     public Response toResponse(final UnsupportedCommandException exception) {
-
         final List<ApiParameterError> errors = new ArrayList<>();
 
         final StringBuilder validationErrorCode = new StringBuilder("error.msg.command.unsupported");
         final StringBuilder defaultEnglishMessage = new StringBuilder("The command ").append(exception.getUnsupportedCommandName())
                 .append(" is not supported.");
+        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), defaultEnglishMessage);
         final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(),
                 exception.getUnsupportedCommandName(), exception.getUnsupportedCommandName());
 

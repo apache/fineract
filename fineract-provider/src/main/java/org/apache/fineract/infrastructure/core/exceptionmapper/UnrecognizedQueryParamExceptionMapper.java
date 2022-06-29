@@ -25,6 +25,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
@@ -41,11 +42,11 @@ import org.springframework.stereotype.Component;
 @Provider
 @Component
 @Scope("singleton")
+@Slf4j
 public class UnrecognizedQueryParamExceptionMapper implements ExceptionMapper<UnrecognizedQueryParamException> {
 
     @Override
     public Response toResponse(final UnrecognizedQueryParamException exception) {
-
         final String parameterName = exception.getQueryParamKey();
         final String parameterValue = exception.getQueryParamValue();
 
@@ -54,6 +55,7 @@ public class UnrecognizedQueryParamExceptionMapper implements ExceptionMapper<Un
                 .append(parameterName) //
                 .append(" has an unsupported value of: ") //
                 .append(parameterValue);
+        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), defaultEnglishMessage);
 
         final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(),
                 parameterName, parameterName, parameterValue, exception.getSupportedParams());
