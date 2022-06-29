@@ -21,22 +21,8 @@
 version: '3.7'
 services:
   # Backend service
-  fineractmysql:
-    image: mariadb:10.8
-    volumes:
-      - ./fineract-db/server_collation.cnf:/etc/mysql/conf.d/server_collation.cnf
-      - ./fineract-db/docker:/docker-entrypoint-initdb.d:Z,ro
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: skdcnwauicn2ucnaecasdsajdnizucawencascdca
-    healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "--password=skdcnwauicn2ucnaecasdsajdnizucawencascdca" ]
-      timeout: 10s
-      retries: 10
-    ports:
-      - "3306:3306"
   fineract-server:
-    image: fineract:latest
+    image: fineract:1.6.1-62689eb6
     volumes:
       - ./fineract-provider/build/data:/data
     healthcheck:
@@ -45,9 +31,8 @@ services:
       retries: 10
     ports:
       - 8443:8443
-    depends_on:
-      fineractmysql:
-        condition: service_healthy
+    extra_hosts:
+      - "fineractmysql:192.168.80.135"
     environment:
       # TODO: env vars prefixed with "fineract_tenants_*" will be removed with one of the next releases
       #- fineract_tenants_driver=org.mariadb.jdbc.Driver
@@ -58,9 +43,9 @@ services:
       - FINERACT_NODE_ID=1
       # NOTE: env vars prefixed "FINERACT_HIKARI_*" are used to configure the database connection pool
       - FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME=org.mariadb.jdbc.Driver
-      - FINERACT_HIKARI_JDBC_URL=jdbc:mariadb://fineractmysql:3306/fineract_tenants
+      - FINERACT_HIKARI_JDBC_URL=jdbc:mariadb://fineractmysql:3306/fineract_tenants?allowPublicKeyRetrieval=true&useSSL=false
       - FINERACT_HIKARI_USERNAME=root
-      - FINERACT_HIKARI_PASSWORD=skdcnwauicn2ucnaecasdsajdnizucawencascdca
+      - FINERACT_HIKARI_PASSWORD=mysql
       # ... following variables are optional; "application.properties" contains reasonable defaults (same as here)
       - FINERACT_HIKARI_MINIMUM_IDLE=3
       - FINERACT_HIKARI_MAXIMUM_POOL_SIZE=10
@@ -84,10 +69,14 @@ services:
       - FINERACT_DEFAULT_TENANTDB_HOSTNAME=fineractmysql
       - FINERACT_DEFAULT_TENANTDB_PORT=3306
       - FINERACT_DEFAULT_TENANTDB_UID=root
-      - FINERACT_DEFAULT_TENANTDB_PWD=skdcnwauicn2ucnaecasdsajdnizucawencascdca
+      - FINERACT_DEFAULT_TENANTDB_PWD=mysql
       - FINERACT_DEFAULT_TENANTDB_CONN_PARAMS=
       - FINERACT_DEFAULT_TENANTDB_TIMEZONE=Asia/Kolkata
       - FINERACT_DEFAULT_TENANTDB_IDENTIFIER=default
       - FINERACT_DEFAULT_TENANTDB_NAME=fineract_default
       - FINERACT_DEFAULT_TENANTDB_DESCRIPTION=Default Demo Tenant
+      - FINERACT_LOGGING_HTTP_CORRELATION_ID_ENABLED=true
+      - FINERACT_LOGGING_HTTP_CORRELATION_ID_HEADER_NAME=X-Correlation-ID
       - JAVA_TOOL_OPTIONS="-Xmx1G"
+      - CONSOLE_LOG_PATTERN=%d{yyyy-MM-dd HH:mm:ss.SSS} %thread correlationId:%X{correlationId} [%-5level] %class{0} - %msg%n
+
