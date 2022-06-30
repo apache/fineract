@@ -50,17 +50,11 @@ public class CorrelationHeaderFilter extends OncePerRequestFilter  {
         throws IOException, ServletException  {        
         String currentCorrId="";
         try {
-                
-            log.debug("CORRELATION_ID_HEADER : " + CORRELATION_ID_HEADER);
-
-            final HttpServletRequest httpServletRequest = (HttpServletRequest) request;
             
+            final HttpServletRequest httpServletRequest = (HttpServletRequest) request;            
             currentCorrId = httpServletRequest.getHeader( CORRELATION_ID_HEADER);
-
-            log.debug("Found correlationId in Header : {}", currentCorrId.replaceAll("[\r\n]","") );
-            
-            MDC.put("correlationId", currentCorrId);
-            
+            log.debug("Found correlationId in Header : {}", currentCorrId.replaceAll("[\r\n]","") );            
+            MDC.put("correlationId", currentCorrId);            
             filterChain.doFilter(request, response);
         } 
         finally {
