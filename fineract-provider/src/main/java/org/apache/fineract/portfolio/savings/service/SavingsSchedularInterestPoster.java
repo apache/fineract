@@ -253,14 +253,20 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
         List<String> transRefNo = new ArrayList<>();
         for (SavingsAccountData savingsAccountData : savingsAccountDataList) {
             SavingsAccountSummaryData savingsAccountSummaryData = savingsAccountData.getSummary();
-            paramsForSavingsSummary
-                    .add(new Object[] { savingsAccountSummaryData.getTotalDeposits(), savingsAccountSummaryData.getTotalWithdrawals(),
-                            savingsAccountSummaryData.getTotalInterestEarned(), savingsAccountSummaryData.getTotalInterestPosted(),
-                            savingsAccountSummaryData.getTotalWithdrawalFees(), savingsAccountSummaryData.getTotalFeeCharge(),
-                            savingsAccountSummaryData.getTotalPenaltyCharge(), savingsAccountSummaryData.getTotalAnnualFees(),
-                            savingsAccountSummaryData.getAccountBalance(), savingsAccountSummaryData.getTotalOverdraftInterestDerived(),
-                            savingsAccountSummaryData.getTotalWithholdTax(), savingsAccountSummaryData.getLastInterestCalculationDate(),
-                            savingsAccountSummaryData.getInterestPostedTillDate(), savingsAccountData.getId() });
+            paramsForSavingsSummary.add(new Object[] { savingsAccountSummaryData.getTotalDeposits(),
+                    savingsAccountSummaryData.getTotalWithdrawals(), savingsAccountSummaryData.getTotalInterestEarned(),
+                    savingsAccountSummaryData.getTotalInterestPosted(), savingsAccountSummaryData.getTotalWithdrawalFees(),
+                    savingsAccountSummaryData.getTotalFeeCharge(), savingsAccountSummaryData.getTotalPenaltyCharge(),
+                    savingsAccountSummaryData.getTotalAnnualFees(), savingsAccountSummaryData.getAccountBalance(),
+                    savingsAccountSummaryData.getTotalOverdraftInterestDerived(), savingsAccountSummaryData.getTotalWithholdTax(),
+                    Date.from(savingsAccountSummaryData.getLastInterestCalculationDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant())
+                            .toInstant()),
+                    savingsAccountSummaryData.getInterestPostedTillDate() != null
+                            ? Date.from(savingsAccountSummaryData.getInterestPostedTillDate()
+                                    .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant())
+                            : Date.from(savingsAccountSummaryData.getLastInterestCalculationDate()
+                                    .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
+                    savingsAccountData.getId() });
             List<SavingsAccountTransactionData> savingsAccountTransactionDataList = savingsAccountData.getSavingsAccountTransactionData();
             for (SavingsAccountTransactionData savingsAccountTransactionData : savingsAccountTransactionDataList) {
                 if (savingsAccountTransactionData.getId() == null) {
@@ -287,7 +293,7 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
         if (transRefNo.size() > 0) {
             this.jdbcTemplate.batchUpdate(queryForSavingsUpdate, paramsForSavingsSummary);
             this.jdbcTemplate.batchUpdate(queryForTransactionInsertion, paramsForTransactionInsertion);
-
+            LOG.info("`Total No Of Interest Posting:` {}", transRefNo.size());
             List<SavingsAccountTransactionData> savingsAccountTransactionDataList = fetchTransactionsFromIds(transRefNo);
             if (savingsAccountDataList != null) {
                 LOG.info("Fetched Transactions from DB: {}", savingsAccountTransactionDataList.size());

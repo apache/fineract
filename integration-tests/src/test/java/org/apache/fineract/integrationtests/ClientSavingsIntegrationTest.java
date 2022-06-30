@@ -52,6 +52,7 @@ import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -2814,5 +2815,60 @@ public class ClientSavingsIntegrationTest {
         summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
         balance = Float.parseFloat("900.0");
         assertEquals(balance, summary.get("accountBalance"), "Verifying account balance is 900");
+    }
+
+    @Test
+    public void testAccountBalanceAndTransactionRunningBalanceWithConfigOn() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "38", false);
+        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "39", true);
+        GlobalConfigurationHelper.updateValueForGlobalConfiguration(requestSpec, responseSpec, "39", "5");
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final String minBalanceForInterestCalculation = null;
+        final String minRequiredBalance = "0";
+        final String enforceMinRequiredBalance = "false";
+        final boolean allowOverdraft = true;
+
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, "0", minBalanceForInterestCalculation,
+                minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
+        Assertions.assertNotNull(savingsProductID);
+
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assertions.assertNotNull(savingsId);
+
+        HashMap savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        // withdrawal transaction 1
+        Integer withdrawalTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "500",
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        Float balance = Float.parseFloat("-500.0");
+        assertEquals(balance, summary.get("accountBalance"), "Verifying account balance is -500");
+
+        // withdrawal transaction 2
+        withdrawalTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "500",
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        balance = Float.parseFloat("-1000.0");
+        assertEquals(balance, summary.get("accountBalance"), "Verifying account balance is -1000");
+
+        // Check for last transactions running balance
+        Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
+        ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
+        HashMap<String, Object> requestedTransaction = transactions.get(transactions.size() - 2);
+        balance = Float.parseFloat("-1000.0");
+        assertEquals(balance.toString(), requestedTransaction.get("runningBalance").toString(), "Equality check for Balance");
+    }
+
+    @AfterEach
+    public void tearDown() {
+        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
     }
 }

@@ -115,13 +115,14 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         final MathContext mc = MathContext.DECIMAL64;
 
         final LocalDate today = DateUtils.getBusinessLocalDate();
+        boolean postReversals = false;
         if (account.isBeforeLastPostingPeriod(transactionDate, backdatedTxnsAllowedTill)) {
-            boolean postReversals = false;
             account.postInterest(mc, today, transactionBooleanValues.isInterestTransfer(), isSavingsInterestPostingAtCurrentPeriodEnd,
                     financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill, postReversals);
         } else {
             account.calculateInterestUsing(mc, today, transactionBooleanValues.isInterestTransfer(),
-                    isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill);
+                    isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill,
+                    postReversals);
         }
 
         List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions = null;
@@ -191,18 +192,20 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         Integer accountType = null;
         final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
                 paymentDetail, new Date(), user, accountType);
-        final SavingsAccountTransaction deposit = account.deposit(transactionDTO, savingsAccountTransactionType, backdatedTxnsAllowedTill);
+        UUID refNo = UUID.randomUUID();
+        final SavingsAccountTransaction deposit = account.deposit(transactionDTO, savingsAccountTransactionType, backdatedTxnsAllowedTill,
+                refNo.toString());
         final LocalDate postInterestOnDate = null;
         final MathContext mc = MathContext.DECIMAL64;
 
         final LocalDate today = DateUtils.getBusinessLocalDate();
+        boolean postReversals = false;
         if (account.isBeforeLastPostingPeriod(transactionDate, backdatedTxnsAllowedTill)) {
-            boolean postReversals = false;
             account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
                     postInterestOnDate, backdatedTxnsAllowedTill, postReversals);
         } else {
             account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                    financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill);
+                    financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill, postReversals);
         }
 
         saveTransactionToGenerateTransactionId(deposit);
@@ -316,20 +319,22 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         final LocalDate today = DateUtils.getBusinessLocalDate();
         final MathContext mc = new MathContext(15, MoneyHelper.getRoundingMode());
         for (SavingsAccountTransaction savingsAccountTransaction : savingsAccountTransactions) {
+            boolean postReversals = true;
             if (savingsAccountTransaction.isPostInterestCalculationRequired()
                     && account.isBeforeLastPostingPeriod(savingsAccountTransaction.transactionLocalDate(), backdatedTxnsAllowedTill)) {
-                boolean postReversals = true;
+
                 account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
                         postInterestOnDate, backdatedTxnsAllowedTill, postReversals);
             } else {
                 account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                        financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill);
+                        financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill, postReversals);
             }
 
             account.validateAccountBalanceDoesNotBecomeNegativeMinimal(savingsAccountTransaction.getAmount(), false);
             account.activateAccountBasedOnBalance();
         }
         this.savingsAccountRepository.save(account);
+        newTransactions.addAll(account.getSavingsAccountTransactionsWithPivotConfig());
         this.savingsAccountTransactionRepository.saveAll(newTransactions);
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, false, backdatedTxnsAllowedTill);
 

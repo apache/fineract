@@ -153,22 +153,21 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     }
 
     public static SavingsAccountTransaction deposit(final SavingsAccount savingsAccount, final Office office,
-            final PaymentDetail paymentDetail, final LocalDate date, final Money amount, Date createdDate, final AppUser appUser) {
+            final PaymentDetail paymentDetail, final LocalDate date, final Money amount, Date createdDate, final AppUser appUser,
+            final String refNo) {
         final boolean isReversed = false;
         final boolean isManualTransaction = false;
         final Boolean lienTransaction = false;
-        final String refNo = null;
         return new SavingsAccountTransaction(savingsAccount, office, paymentDetail, SavingsAccountTransactionType.DEPOSIT.getValue(), date,
                 createdDate, amount, isReversed, appUser, isManualTransaction, lienTransaction, refNo);
     }
 
     public static SavingsAccountTransaction deposit(final SavingsAccount savingsAccount, final Office office,
             final PaymentDetail paymentDetail, final LocalDate date, final Money amount, Date createdDate, final AppUser appUser,
-            final SavingsAccountTransactionType savingsAccountTransactionType) {
+            final SavingsAccountTransactionType savingsAccountTransactionType, final String refNo) {
         final boolean isReversed = false;
         final boolean isManualTransaction = false;
         final Boolean lienTransaction = false;
-        final String refNo = null;
         return new SavingsAccountTransaction(savingsAccount, office, paymentDetail, savingsAccountTransactionType.getValue(), date,
                 createdDate, amount, isReversed, appUser, isManualTransaction, lienTransaction, refNo);
     }

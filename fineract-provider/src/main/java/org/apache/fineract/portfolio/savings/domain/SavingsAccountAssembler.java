@@ -361,6 +361,11 @@ public class SavingsAccountAssembler {
                     // Update transient variable
                     account.setSavingsAccountTransactions(savingsAccountTransactions);
                 }
+                // Update last running balance on account level
+                if (savingsAccountTransactions != null && !savingsAccountTransactions.isEmpty()) {
+                    account.getSummary().setRunningBalanceOnPivotDate(savingsAccountTransactions.get(savingsAccountTransactions.size() - 1)
+                            .getRunningBalance(account.getCurrency()).getAmount());
+                }
             } else {
                 savingsAccountTransactions = this.savingsAccountRepository.findAllTransactions(account);
                 account.setSavingsAccountTransactions(savingsAccountTransactions);
@@ -368,10 +373,11 @@ public class SavingsAccountAssembler {
         }
 
         // Update last running balance on account level
-        if (savingsAccountTransactions != null) {
-            account.getSummary().setRunningBalanceOnPivotDate(savingsAccountTransactions.get(savingsAccountTransactions.size() - 1)
-                    .getRunningBalance(account.getCurrency()).getAmount());
-        }
+        // if (savingsAccountTransactions != null && !savingsAccountTransactions.isEmpty()) {
+        // account.getSummary().setRunningBalanceOnPivotDate(savingsAccountTransactions.get(savingsAccountTransactions.size()
+        // - 1)
+        // .getRunningBalance(account.getCurrency()).getAmount());
+        // }
 
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
         return account;
@@ -380,7 +386,8 @@ public class SavingsAccountAssembler {
     public SavingsAccountData assembleSavings(final SavingsAccountData account) {
 
         // Update last running balance on account level
-        if (account.getTransactions() != null && account.getTransactions().size() != 0) {
+        if (account.getTransactions() != null && account.getTransactions().size() != 0
+                && account.getSummary().getInterestPostedTillDate() != null) {
             account.getSummary().setRunningBalanceOnPivotDate(account.getTransactions().get(account.getTransactions().size() - 1)
                     .getRunningBalance(account.getCurrency()).getAmount());
         }
