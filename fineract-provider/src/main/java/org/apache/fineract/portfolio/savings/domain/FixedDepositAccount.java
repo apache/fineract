@@ -191,19 +191,20 @@ public class FixedDepositAccount extends SavingsAccount {
     public void updateMaturityDateAndAmountBeforeAccountActivation(final MathContext mc, final boolean isPreMatureClosure,
             final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth) {
         List<SavingsAccountTransaction> allTransactions = new ArrayList<>();
+        String refNo = null;
         final Money transactionAmountMoney = Money.of(getCurrency(), this.accountTermAndPreClosure.depositAmount());
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(null, office(), null,
-                this.accountSubmittedOrActivationDate(), transactionAmountMoney, new Date(), null); // TODO:
-                                                                                                    // verify
-                                                                                                    // if
-                                                                                                    // it
-                                                                                                    // is
-                                                                                                    // ok
-                                                                                                    // to
-                                                                                                    // pass
-                                                                                                    // null
-                                                                                                    // for
-                                                                                                    // AppUser
+                this.accountSubmittedOrActivationDate(), transactionAmountMoney, new Date(), null, refNo); // TODO:
+        // verify
+        // if
+        // it
+        // is
+        // ok
+        // to
+        // pass
+        // null
+        // for
+        // AppUser
         transaction.updateRunningBalance(transactionAmountMoney);
         transaction.updateCumulativeBalanceAndDates(this.getCurrency(), interestCalculatedUpto());
         allTransactions.add(transaction);
@@ -528,8 +529,10 @@ public class FixedDepositAccount extends SavingsAccount {
         final boolean isInterestTransfer = false;
         final LocalDate postInterestOnDate = null;
         final boolean backdatedTxnsAllowedTill = false;
+        boolean postReversals = false;
         final List<PostingPeriod> postingPeriods = calculateInterestUsing(mc, interestPostingUpToDate, isInterestTransfer,
-                isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill);
+                isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill,
+                postReversals);
 
         Money interestPostedToDate = Money.zero(this.currency);
 
@@ -568,7 +571,7 @@ public class FixedDepositAccount extends SavingsAccount {
         if (recalucateDailyBalanceDetails) {
             // update existing transactions so derived balance fields are
             // correct.
-            recalculateDailyBalances(Money.zero(this.currency), interestPostingUpToDate, backdatedTxnsAllowedTill);
+            recalculateDailyBalances(Money.zero(this.currency), interestPostingUpToDate, backdatedTxnsAllowedTill, postReversals);
         }
 
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
@@ -597,11 +600,11 @@ public class FixedDepositAccount extends SavingsAccount {
         }
 
         recalucateDailyBalance = applyWithholdTaxForDepositAccounts(accountCloseDate, recalucateDailyBalance, backdatedTxnsAllowedTill);
-
+        boolean postReversals = false;
         if (recalucateDailyBalance) {
             // update existing transactions so derived balance fields are
             // correct.
-            recalculateDailyBalances(Money.zero(this.currency), accountCloseDate, backdatedTxnsAllowedTill);
+            recalculateDailyBalances(Money.zero(this.currency), accountCloseDate, backdatedTxnsAllowedTill, postReversals);
         }
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
         this.accountTermAndPreClosure.updateMaturityDetails(this.getAccountBalance(), accountCloseDate);
@@ -651,10 +654,10 @@ public class FixedDepositAccount extends SavingsAccount {
     @Override
     public List<PostingPeriod> calculateInterestUsing(final MathContext mc, final LocalDate postingDate, boolean isInterestTransfer,
             final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
-            final LocalDate postAsInterestOn, final boolean backdatedTxnsAllowedTill) {
+            final LocalDate postAsInterestOn, final boolean backdatedTxnsAllowedTill, final boolean postReversals) {
         final LocalDate interestPostingUpToDate = interestPostingUpToDate(postingDate);
         return super.calculateInterestUsing(mc, interestPostingUpToDate, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                financialYearBeginningMonth, postAsInterestOn, backdatedTxnsAllowedTill);
+                financialYearBeginningMonth, postAsInterestOn, backdatedTxnsAllowedTill, postReversals);
     }
 
     private LocalDate interestPostingUpToDate(final LocalDate interestPostingDate) {

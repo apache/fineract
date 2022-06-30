@@ -382,6 +382,7 @@ public class RecurringDepositAccount extends SavingsAccount {
                 latestTransactionDate = installment.getTransactionLocalDate();
             }
         }
+        String refNo = null;
         if (generateFutureTransactions) {
             for (RecurringDepositScheduleInstallment installment : depositScheduleInstallments()) {
                 if (installment.isPrincipalNotCompleted(getCurrency())) {
@@ -391,7 +392,7 @@ public class RecurringDepositAccount extends SavingsAccount {
                     }
                     final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(null, office(), null, dueDate,
                             installment.getDepositAmountOutstanding(getCurrency()),
-                            Date.from(installment.dueDate().atStartOfDay(ZoneId.systemDefault()).toInstant()), null);
+                            Date.from(installment.dueDate().atStartOfDay(ZoneId.systemDefault()).toInstant()), null, refNo);
                     allTransactions.add(transaction);
                 }
             }
@@ -542,14 +543,16 @@ public class RecurringDepositAccount extends SavingsAccount {
     protected void processAccountUponActivation(final DateTimeFormatter fmt, final AppUser user) {
         final Money minRequiredOpeningBalance = Money.of(this.currency, this.minRequiredOpeningBalance);
         final boolean backdatedTxnsAllowedTill = false;
+        String refNo = null;
         if (minRequiredOpeningBalance.isGreaterThanZero()) {
             final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, getActivationLocalDate(),
                     minRequiredOpeningBalance.getAmount(), null, new Date(), user, accountType);
-            deposit(transactionDTO, backdatedTxnsAllowedTill);
+            deposit(transactionDTO, backdatedTxnsAllowedTill, refNo);
 
             // update existing transactions so derived balance fields are
             // correct.
-            recalculateDailyBalances(Money.zero(this.currency), DateUtils.getBusinessLocalDate(), backdatedTxnsAllowedTill);
+            boolean postReversals = false;
+            recalculateDailyBalances(Money.zero(this.currency), DateUtils.getBusinessLocalDate(), backdatedTxnsAllowedTill, postReversals);
         }
     }
 
@@ -644,8 +647,10 @@ public class RecurringDepositAccount extends SavingsAccount {
         boolean isInterestTransfer = false;
         LocalDate postInterestOnDate = null;
         final boolean backdatedTxnsAllowedTill = false;
+        boolean postReversals = false;
         final List<PostingPeriod> postingPeriods = calculateInterestUsing(mc, interestPostingUpToDate.minusDays(1), isInterestTransfer,
-                isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill);
+                isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill,
+                postReversals);
 
         Money interestPostedToDate = Money.zero(this.currency);
 
@@ -681,7 +686,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         if (recalucateDailyBalanceDetails) {
             // update existing transactions so derived balance fields are
             // correct.
-            recalculateDailyBalances(Money.zero(this.currency), interestPostingUpToDate, backdatedTxnsAllowedTill);
+            recalculateDailyBalances(Money.zero(this.currency), interestPostingUpToDate, backdatedTxnsAllowedTill, postReversals);
         }
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
     }
@@ -710,11 +715,11 @@ public class RecurringDepositAccount extends SavingsAccount {
         }
 
         applyWithholdTaxForDepositAccounts(accountCloseDate, recalucateDailyBalance, backdatedTxnsAllowedTill);
-
+        boolean postReversals = false;
         if (recalucateDailyBalance) {
             // update existing transactions so derived balance fields are
             // correct.
-            recalculateDailyBalances(Money.zero(this.currency), accountCloseDate, backdatedTxnsAllowedTill);
+            recalculateDailyBalances(Money.zero(this.currency), accountCloseDate, backdatedTxnsAllowedTill, postReversals);
         }
 
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
@@ -764,10 +769,10 @@ public class RecurringDepositAccount extends SavingsAccount {
     @Override
     public List<PostingPeriod> calculateInterestUsing(final MathContext mc, final LocalDate postingDate, boolean isInterestTransfer,
             final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
-            final LocalDate postAsInterestOn, final boolean backdatedTxnsAllowedTill) {
+            final LocalDate postAsInterestOn, final boolean backdatedTxnsAllowedTill, final boolean postReversals) {
         final LocalDate interestPostingUpToDate = interestPostingUpToDate(postingDate);
         return super.calculateInterestUsing(mc, interestPostingUpToDate, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                financialYearBeginningMonth, postAsInterestOn, backdatedTxnsAllowedTill);
+                financialYearBeginningMonth, postAsInterestOn, backdatedTxnsAllowedTill, postReversals);
     }
 
     private LocalDate interestPostingUpToDate(final LocalDate interestPostingDate) {
@@ -839,7 +844,8 @@ public class RecurringDepositAccount extends SavingsAccount {
     }
 
     @Override
-    public SavingsAccountTransaction deposit(final SavingsAccountTransactionDTO transactionDTO, final boolean backdatedTxnsAllowedTill) {
+    public SavingsAccountTransaction deposit(final SavingsAccountTransactionDTO transactionDTO, final boolean backdatedTxnsAllowedTill,
+            final String refNo) {
 
         if (isAccountMatured()) {
             final String defaultUserMessage = "Transaction is not allowed. Account is matured.";
@@ -877,7 +883,7 @@ public class RecurringDepositAccount extends SavingsAccount {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
 
-        final SavingsAccountTransaction transaction = super.deposit(transactionDTO, backdatedTxnsAllowedTill);
+        final SavingsAccountTransaction transaction = super.deposit(transactionDTO, backdatedTxnsAllowedTill, refNo);
 
         return transaction;
     }

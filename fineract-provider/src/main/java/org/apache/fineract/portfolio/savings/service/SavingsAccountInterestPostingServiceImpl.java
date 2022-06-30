@@ -422,11 +422,10 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
         Money runningBalance = openingAccountBalance.copy();
 
         List<SavingsAccountTransactionData> accountTransactionsSorted = retreiveListOfTransactions(savingsAccountData);
-
         boolean isTransactionsModified = false;
 
         for (final SavingsAccountTransactionData transaction : accountTransactionsSorted) {
-            if (transaction.isReversed()) {
+            if (transaction.isReversed() || transaction.isReversalTransaction()) {
                 transaction.zeroBalanceFields();
             } else {
                 Money overdraftAmount = Money.zero(savingsAccountData.currency());
