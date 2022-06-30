@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.CascadeType;
@@ -145,7 +146,8 @@ public class LoanCharge extends AbstractPersistableCustom {
 
     public static LoanCharge createNewFromJson(final Loan loan, final Charge chargeDefinition, final JsonCommand command,
             final LocalDate dueDate) {
-        final BigDecimal amount = command.bigDecimalValueOfParameterNamed("amount");
+        final Locale locale = command.extractLocale();
+        final BigDecimal amount = command.bigDecimalValueOfParameterNamed("amount", locale);
 
         final ChargeTimeType chargeTime = null;
         final ChargeCalculationType chargeCalculation = null;

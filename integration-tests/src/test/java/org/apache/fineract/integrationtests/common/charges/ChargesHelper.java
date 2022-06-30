@@ -415,7 +415,7 @@ public final class ChargesHelper {
     public static String getModifyChargeJSON() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", CommonConstants.LOCALE);
-        map.put("amount", "200.0");
+        map.put("amount", 200.0);
         String json = new Gson().toJson(map);
         LOG.info("{}", json);
         return json;
