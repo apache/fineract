@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -191,6 +191,36 @@ final class LoanProductsApiResourceSwagger {
         public AllowAttributeOverrides allowAttributeOverrides;
         public List<ChargeId> charges;
         public List<RateData> rates;
+        @Schema(example = "3")
+        public Long fundId;
+        @Schema(example = "10 July 2022")
+        public String startDate;
+        @Schema(example = "10 July 2022")
+        public String closeDate;
+        @Schema(example = "1")
+        public Integer minNumberOfRepayments;
+        @Schema(example = "1")
+        public Integer maxNumberOfRepayments;
+        @Schema(example = "0")
+        public Double minInterestRatePerPeriod;
+        @Schema(example = "0")
+        public Double maxInterestRatePerPeriod;
+        @Schema(example = "false")
+        public Boolean isEqualAmortization;
+        @Schema(example = "3")
+        public Integer graceOnArrearsAgeing;
+        @Schema(example = "179")
+        public Integer overdueDaysForNPA;
+        @Schema(example = "false")
+        public Boolean accountMovesOutOfNPAOnlyOnArrearsCompletion;
+        @Schema(example = "false")
+        public Boolean canUseForTopup;
+        @Schema(example = "false")
+        public Boolean holdGuaranteeFunds;
+        @Schema(example = "5")
+        public Long transfersInSuspenseAccountId;
+        @Schema(example = "15")
+        public Long incomeFromRecoveryAccountId;
     }
 
     @Schema(description = "PostLoanProductsResponse")
