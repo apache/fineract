@@ -214,7 +214,7 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "false")
         public Boolean accountMovesOutOfNPAOnlyOnArrearsCompletion;
         @Schema(example = "false")
-        public boolean canUseForTopup;
+        public Boolean canUseForTopup;
         @Schema(example = "false")
         public Boolean holdGuaranteeFunds;
         @Schema(example = "5")
