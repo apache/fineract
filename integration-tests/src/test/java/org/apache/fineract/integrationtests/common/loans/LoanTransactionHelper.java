@@ -81,7 +81,11 @@ public class LoanTransactionHelper {
     }
 
     public Integer getLoanId(final String loanApplicationJSON) {
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, APPLY_LOAN_URL, loanApplicationJSON, "loanId");
+        return this.getLoanId(loanApplicationJSON, this.requestSpec, this.responseSpec);
+    }
+
+    public Integer getLoanId(final String loanApplicationJSON, RequestSpecification requestSpec, ResponseSpecification responseSpec) {
+        return Utils.performServerPost(requestSpec, responseSpec, APPLY_LOAN_URL, loanApplicationJSON, "loanId");
     }
 
     public HashMap<String, Integer> getGlimId(final String loanApplicationJSON) {

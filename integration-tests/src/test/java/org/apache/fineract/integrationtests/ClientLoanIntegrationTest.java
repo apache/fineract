@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -123,6 +124,26 @@ public class ClientLoanIntegrationTest {
         final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec,
                 loanID);
         verifyLoanRepaymentSchedule(loanSchedule);
+    }
+
+    @Test
+    public void validateClientLoanWithUniqueExternalId() {
+        // Given
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        final ResponseSpecification responseSpec403 = new ResponseSpecBuilder().expectStatusCode(403).build();
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        final Integer loanProductID = createLoanProduct(false, NONE);
+
+        final String externalId = Utils.randomStringGenerator("qwerty", 10);
+
+        // When
+        final Integer loanID = applyForLoanApplicationWithExternalId(this.requestSpec, this.responseSpec, clientID, loanProductID,
+                "12,000.00", externalId);
+
+        // Then
+        assertNotNull(loanID);
+        applyForLoanApplicationWithExternalId(this.requestSpec, responseSpec403, clientID, loanProductID, "12,000.00", externalId);
     }
 
     @Test
@@ -1153,6 +1174,27 @@ public class ClientLoanIntegrationTest {
                 .withSubmittedOnDate("20 September 2011") //
                 .withCollaterals(collaterals).withCharges(charges).build(clientID.toString(), loanProductID.toString(), savingsId);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+    }
+
+    private Integer applyForLoanApplicationWithExternalId(RequestSpecification requestSpec, ResponseSpecification responseSpec,
+            final Integer clientID, final Integer loanProductID, String principal, final String externalId) {
+        LOG.info("------------------------APPLYING FOR LOAN APPLICATION WITH EXTERNALID------------------------");
+        final String loanApplicationJSON = new LoanApplicationTestBuilder() //
+                .withPrincipal(principal) //
+                .withExternalId(externalId) //
+                .withLoanTermFrequency("4") //
+                .withLoanTermFrequencyAsMonths() //
+                .withNumberOfRepayments("4") //
+                .withRepaymentEveryAfter("1") //
+                .withRepaymentFrequencyTypeAsMonths() //
+                .withInterestRatePerPeriod("2") //
+                .withAmortizationTypeAsEqualInstallments() //
+                .withInterestTypeAsDecliningBalance() //
+                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
+                .withExpectedDisbursementDate("20 September 2011") //
+                .withSubmittedOnDate("20 September 2011") //
+                .build(clientID.toString(), loanProductID.toString(), null);
+        return this.loanTransactionHelper.getLoanId(loanApplicationJSON, requestSpec, responseSpec);
     }
 
     private Integer applyForLoanApplicationWithTranches(final Integer clientID, final Integer loanProductID, List<HashMap> charges,

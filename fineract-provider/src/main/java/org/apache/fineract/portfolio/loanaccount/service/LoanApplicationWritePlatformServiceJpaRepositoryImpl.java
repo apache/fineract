@@ -303,6 +303,16 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             this.fromApiJsonDeserializer.validateForCreate(command.json(), isMeetingMandatoryForJLGLoans, loanProduct);
 
+            // Validate If the externalId is already registered
+            final String externalId = this.fromJsonHelper.extractStringNamed("externalId", command.parsedJson());
+            if (StringUtils.isNotBlank(externalId)) {
+                final boolean existByExternalId = this.loanRepositoryWrapper.existLoanByExternalId(externalId);
+                if (existByExternalId) {
+                    throw new GeneralPlatformDomainRuleException("error.msg.loan.with.externalId.already.used",
+                            "Loan with externalId is already registered.");
+                }
+            }
+
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
 
