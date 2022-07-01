@@ -240,6 +240,10 @@ public class LoanRepositoryWrapper {
         return this.repository.findNonClosedLoanByAccountNumber(accountNumber);
     }
 
+    public boolean existLoanByExternalId(final String externalId) {
+        return this.repository.existsByExternalId(externalId);
+    }
+
     // Looks like we need complete entity
     @Transactional(readOnly = true)
     public Loan findNonClosedLoanThatBelongsToClient(@Param("loanId") Long loanId, @Param("clientId") Long clientId) {
