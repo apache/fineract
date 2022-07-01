@@ -38,27 +38,27 @@ import java.io.IOException;
 @Slf4j
 public class CorrelationHeaderFilter extends OncePerRequestFilter  {
 
-    private String CORRELATION_ID_HEADER;
+    private String correlationIdHeader;
 
     @Autowired
     public CorrelationHeaderFilter(Environment env) {
-        CORRELATION_ID_HEADER = env.getRequiredProperty("fineract.logging.http.correlation-id.header-name");        
+        correlationIdHeader = env.getRequiredProperty("fineract.logging.http.correlation-id.header-name");        
     }	
    
     @Override
     protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain)
-        throws IOException, ServletException  {        
-        String currentCorrId="";
+        throws IOException, ServletException  {
+
         try {
-            
+            String currentCorrId="";
             final HttpServletRequest httpServletRequest = (HttpServletRequest) request;            
-            currentCorrId = httpServletRequest.getHeader( CORRELATION_ID_HEADER);
+            currentCorrId = httpServletRequest.getHeader( correlationIdHeader);
             log.debug("Found correlationId in Header : {}", currentCorrId.replaceAll("[\r\n]","") );            
             MDC.put("correlationId", currentCorrId);            
             filterChain.doFilter(request, response);
         } 
         finally {
-            MDC.remove(currentCorrId);
+            MDC.remove("correlationId");
         }
     }
 
