@@ -161,4 +161,6 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     @Query(FIND_BY_ACCOUNT_NUMBER)
     Loan findLoanAccountByAccountNumber(@Param("accountNumber") String accountNumber);
 
+    boolean existsByExternalId(@Param("externalId") String externalId);
+
 }
