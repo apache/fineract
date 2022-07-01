@@ -19,6 +19,7 @@
 
 package org.apache.fineract.infrastructure.core.filters;
 
+import org.apache.fineract.infrastructure.security.utils.LogParameterEscapeUtil;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -53,7 +54,8 @@ public class CorrelationHeaderFilter extends OncePerRequestFilter  {
             String currentCorrId="";
             final HttpServletRequest httpServletRequest = (HttpServletRequest) request;            
             currentCorrId = httpServletRequest.getHeader( correlationIdHeader);
-            log.debug("Found correlationId in Header : {}", currentCorrId.replaceAll("[\r\n]","") );            
+            log.debug("Found correlationId in Header : {}", LogParameterEscapeUtil.escapeLogMDCParameter(currentCorrId) );  
+                      
             MDC.put("correlationId", currentCorrId);            
             filterChain.doFilter(request, response);
         } 

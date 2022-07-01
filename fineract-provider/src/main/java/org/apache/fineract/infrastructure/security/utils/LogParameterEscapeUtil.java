@@ -25,4 +25,8 @@ public final class LogParameterEscapeUtil {
     public static String escapeLogParameter(String logParameter) {
         return logParameter.replaceAll("[\n\r\t]", "_");
     }
+
+    public static String escapeLogMDCParameter(String logParameter) {
+        return logParameter.replaceAll("[\r\n]","");
+    }
 }
