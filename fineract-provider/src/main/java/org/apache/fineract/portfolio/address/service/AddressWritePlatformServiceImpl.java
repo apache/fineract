@@ -59,7 +59,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
         context.authenticatedUser();
         fromApiJsonDeserializer.validateForCreate(jsonObject.toString(), false);
 
-        final CodeValue addressTypeIdCodeValue = codeValueRepository.getById(addressTypeId);
+        final CodeValue addressTypeIdCodeValue = codeValueRepository.getReferenceById(addressTypeId);
         final Client client = clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
 
         final Address address = createAddress(jsonObject);
@@ -83,7 +83,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
                 fromApiJsonDeserializer.validateForCreate(jsonObject.toString(), true);
 
                 final long addressTypeId = jsonObject.get("addressTypeId").getAsLong();
-                final CodeValue addressTypeIdCodeValue = codeValueRepository.getById(addressTypeId);
+                final CodeValue addressTypeIdCodeValue = codeValueRepository.getReferenceById(addressTypeId);
 
                 final Address address = createAddress(jsonObject);
                 addressRepository.save(address);
@@ -111,13 +111,13 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
         CodeValue stateIdCodeValue = null;
         if (jsonObject.get("stateProvinceId") != null) {
             long stateId = jsonObject.get("stateProvinceId").getAsLong();
-            stateIdCodeValue = codeValueRepository.getById(stateId);
+            stateIdCodeValue = codeValueRepository.getReferenceById(stateId);
         }
 
         CodeValue countryIdCodeValue = null;
         if (jsonObject.get("countryId") != null) {
             long countryId = jsonObject.get("countryId").getAsLong();
-            countryIdCodeValue = codeValueRepository.getById(countryId);
+            countryIdCodeValue = codeValueRepository.getReferenceById(countryId);
         }
 
         final Address address = Address.fromJsonObject(jsonObject, stateIdCodeValue, countryIdCodeValue);
@@ -150,7 +150,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
             throw new AddressNotFoundException(clientId);
         }
 
-        final Address addobj = this.addressRepository.getById(addressId);
+        final Address addobj = this.addressRepository.getReferenceById(addressId);
 
         if (!command.stringValueOfParameterNamed("addressLine1").isEmpty()) {
 
@@ -198,7 +198,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
             if (command.longValueOfParameterNamed("stateProvinceId") != 0) {
                 is_address_update = true;
                 stateId = command.longValueOfParameterNamed("stateProvinceId");
-                stateIdobj = this.codeValueRepository.getById(stateId);
+                stateIdobj = this.codeValueRepository.getReferenceById(stateId);
                 addobj.setStateProvince(stateIdobj);
             }
 
@@ -207,7 +207,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
             if (command.longValueOfParameterNamed("countryId") != 0) {
                 is_address_update = true;
                 countryId = command.longValueOfParameterNamed("countryId");
-                countryIdObj = this.codeValueRepository.getById(countryId);
+                countryIdObj = this.codeValueRepository.getReferenceById(countryId);
                 addobj.setCountry(countryIdObj);
             }
 
