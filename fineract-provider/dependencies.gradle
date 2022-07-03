@@ -33,7 +33,7 @@ dependencies {
             'org.springframework.boot:spring-boot-starter-oauth2-resource-server',
             'org.springframework.boot:spring-boot-starter-actuator',
 
-            'org.glassfish.jersey.media:jersey-media-multipart:2.35',
+            'org.glassfish.jersey.media:jersey-media-multipart:2.36',
 
             'org.springframework:spring-jms',
             'org.springframework:spring-context-support',
