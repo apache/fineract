@@ -58,15 +58,15 @@ buildscript {
 plugins {
     id "org.barfuin.gradle.taskinfo" version "1.4.0"
     id 'com.adarshr.test-logger' version '3.2.0'
-    id 'com.diffplug.spotless' version '6.5.2' apply false
+    id 'com.diffplug.spotless' version '6.8.0' apply false
     id 'org.nosphere.apache.rat' version '0.7.1' apply false
     id 'com.github.hierynomus.license' version '0.16.1' apply false
     id 'com.github.jk1.dependency-license-report' version '2.1' apply false
-    id 'org.openapi.generator' version '6.0.0' apply false
+    id 'org.openapi.generator' version '6.0.1' apply false
     id 'org.zeroturnaround.gradle.jrebel' version '1.1.11' apply false
-    id 'org.springframework.boot' version '2.6.7' apply false
+    id 'org.springframework.boot' version '2.7.1' apply false
     id 'net.ltgt.errorprone' version '2.0.2' apply false
-    id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.0' apply false
+    id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.1' apply false
     id 'com.gorylenko.gradle-git-properties' version '2.4.1' apply false
     id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.pdf' version '3.3.2' apply false
@@ -76,9 +76,9 @@ plugins {
     id 'org.asciidoctor.kindlegen.base' version '3.2.0' apply false
     id 'com.google.cloud.tools.jib' version '3.2.1' apply false
     id 'fr.brouillard.oss.gradle.jgitver' version '0.10.0-rc03'
-    id 'org.sonarqube' version '3.3'
+    id 'org.sonarqube' version '3.4.0.2513'
     id 'com.github.andygoossens.modernizer' version '1.6.2' apply false
-    id 'com.github.spotbugs' version '5.0.6' apply false
+    id 'com.github.spotbugs' version '5.0.9' apply false
     id 'se.thinkcode.cucumber-runner' version '0.0.11' apply false
 }
 
@@ -375,7 +375,7 @@ configure(project.fineractJavaProjects) {
     // Configuration for the Checkstyle plugin
     // https://docs.gradle.org/current/userguide/checkstyle_plugin.html
     dependencies {
-        checkstyle 'com.puppycrawl.tools:checkstyle:10.2'
+        checkstyle 'com.puppycrawl.tools:checkstyle:10.3.1'
         checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.42.0'
     }
 
@@ -397,7 +397,7 @@ configure(project.fineractJavaProjects) {
     // Configuration for the errorprone plugin
     // https://github.com/tbroyer/gradle-errorprone-plugin
     dependencies {
-        errorprone "com.google.errorprone:error_prone_core:2.13.1"
+        errorprone "com.google.errorprone:error_prone_core:2.14.0"
     }
 
     tasks.withType(JavaCompile) {
