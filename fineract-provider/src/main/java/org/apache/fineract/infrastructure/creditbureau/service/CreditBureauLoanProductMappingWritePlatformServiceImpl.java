@@ -68,9 +68,9 @@ public class CreditBureauLoanProductMappingWritePlatformServiceImpl implements C
 
         final long lpid = command.longValueOfParameterNamed("loanProductId");
 
-        final OrganisationCreditBureau orgcb = this.organisationCreditBureauRepository.getById(organisationCreditBureauId);
+        final OrganisationCreditBureau orgcb = this.organisationCreditBureauRepository.getReferenceById(organisationCreditBureauId);
 
-        final LoanProduct lp = this.loanProductRepository.getById(lpid);
+        final LoanProduct lp = this.loanProductRepository.getReferenceById(lpid);
 
         final CreditBureauLoanProductMapping cb_lp = CreditBureauLoanProductMapping.fromJson(command, orgcb, lp);
 
@@ -88,7 +88,7 @@ public class CreditBureauLoanProductMappingWritePlatformServiceImpl implements C
 
         final Long mappingid = command.longValueOfParameterNamed("creditbureauLoanProductMappingId");
         final boolean isActive = command.booleanPrimitiveValueOfParameterNamed("isActive");
-        final CreditBureauLoanProductMapping cblpmapping = this.creditBureauLoanProductMappingRepository.getById(mappingid);
+        final CreditBureauLoanProductMapping cblpmapping = this.creditBureauLoanProductMappingRepository.getReferenceById(mappingid);
         cblpmapping.setIs_active(isActive);
         this.creditBureauLoanProductMappingRepository.saveAndFlush(cblpmapping);
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(cblpmapping.getId()).build();

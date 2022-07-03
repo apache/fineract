@@ -65,7 +65,7 @@ public class CreditBureauConfigurationWritePlatformServiceImpl implements Credit
 
         this.fromApiJsonDeserializer.validateForCreate(command.json(), creditBureauId);
 
-        final OrganisationCreditBureau orgcb = this.organisationCreditBureauRepository.getById(creditBureauId);
+        final OrganisationCreditBureau orgcb = this.organisationCreditBureauRepository.getReferenceById(creditBureauId);
 
         final CreditBureauConfiguration cb_config = CreditBureauConfiguration.fromJson(command, orgcb);
 
