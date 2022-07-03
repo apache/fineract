@@ -41,6 +41,8 @@ public class CorrelationHeaderFilter extends OncePerRequestFilter  {
 
     private String correlationIdHeader;
 
+    public static final String correlationIdKey = "correlationId";
+
     @Autowired
     public CorrelationHeaderFilter(Environment env) {
         correlationIdHeader = env.getRequiredProperty("fineract.logging.http.correlation-id.header-name");        
@@ -50,17 +52,16 @@ public class CorrelationHeaderFilter extends OncePerRequestFilter  {
     protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain)
         throws IOException, ServletException  {
 
-        try {
-            String currentCorrId="";
+        try {            
             final HttpServletRequest httpServletRequest = (HttpServletRequest) request;            
-            currentCorrId = httpServletRequest.getHeader( correlationIdHeader);
+            String currentCorrId = httpServletRequest.getHeader( correlationIdHeader);
             log.debug("Found correlationId in Header : {}", LogParameterEscapeUtil.escapeLogMDCParameter(currentCorrId) );  
                       
-            MDC.put("correlationId", currentCorrId);            
+            MDC.put(correlationIdKey, currentCorrId);            
             filterChain.doFilter(request, response);
         } 
         finally {
-            MDC.remove("correlationId");
+            MDC.remove(correlationIdKey);
         }
     }
 
