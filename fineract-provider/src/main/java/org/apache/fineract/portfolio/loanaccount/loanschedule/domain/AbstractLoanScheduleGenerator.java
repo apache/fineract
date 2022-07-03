@@ -1906,27 +1906,40 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
     private BigDecimal getDisbursementAmount(final LoanApplicationTerms loanApplicationTerms, LocalDate disbursementDate,
             final Collection<LoanScheduleModelPeriod> periods, final BigDecimal chargesDueAtTimeOfDisbursement,
             final Map<LocalDate, Money> disurseDetail, final boolean excludePastUndisbursed) {
+
+        // this method relates to multi-disbursement loans
         BigDecimal principal = BigDecimal.ZERO;
-        MonetaryCurrency currency = loanApplicationTerms.getPrincipal().getCurrency();
-        for (DisbursementData disbursementData : loanApplicationTerms.getDisbursementDatas()) {
-            if (disbursementData.disbursementDate().equals(disbursementDate)) {
-                final LoanScheduleModelDisbursementPeriod disbursementPeriod = LoanScheduleModelDisbursementPeriod.disbursement(
-                        disbursementData.disbursementDate(), Money.of(currency, disbursementData.amount()), chargesDueAtTimeOfDisbursement);
-                periods.add(disbursementPeriod);
-                principal = principal.add(disbursementData.amount());
-            } else if (!excludePastUndisbursed || disbursementData.isDisbursed()
-                    || !disbursementData.disbursementDate().isBefore(DateUtils.getBusinessLocalDate())) {
-                /*
-                 * JW: sums up amounts by disbursal date in case of side-effect issues. Original assumed that there were
-                 * no duplicate disbursal dates and 'put' each amount into the map keyed by date
-                 */
-                Money prevsum = disurseDetail.get(disbursementData.disbursementDate());
-                BigDecimal sumToNow = BigDecimal.ZERO;
-                if (prevsum != null) {
-                    sumToNow = prevsum.getAmount();
+        if (loanApplicationTerms.getDisbursementDatas().size() == 0) {
+            // non tranche loans have no disbursement data entries in submitted and approved status
+            // the appropriate approved amount or applied for amount is used to show a proposed schedule
+            if (loanApplicationTerms.getApprovedPrincipal().getAmount().compareTo(BigDecimal.ZERO) > 0) {
+                principal = loanApplicationTerms.getApprovedPrincipal().getAmount();
+            } else {
+                principal = loanApplicationTerms.getPrincipal().getAmount();
+            }
+        } else {
+            MonetaryCurrency currency = loanApplicationTerms.getPrincipal().getCurrency();
+            for (DisbursementData disbursementData : loanApplicationTerms.getDisbursementDatas()) {
+                if (disbursementData.disbursementDate().equals(disbursementDate)) {
+                    final LoanScheduleModelDisbursementPeriod disbursementPeriod = LoanScheduleModelDisbursementPeriod.disbursement(
+                            disbursementData.disbursementDate(), Money.of(currency, disbursementData.amount()),
+                            chargesDueAtTimeOfDisbursement);
+                    periods.add(disbursementPeriod);
+                    principal = principal.add(disbursementData.amount());
+                } else if (!excludePastUndisbursed || disbursementData.isDisbursed()
+                        || !disbursementData.disbursementDate().isBefore(DateUtils.getLocalDateOfTenant())) {
+                    /*
+                     * JW: sums up amounts by disbursal date in case of side-effect issues. Original assumed that there
+                     * were no duplicate disbursal dates and 'put' each amount into the map keyed by date
+                     */
+                    Money prevsum = disurseDetail.get(disbursementData.disbursementDate());
+                    BigDecimal sumToNow = BigDecimal.ZERO;
+                    if (prevsum != null) {
+                        sumToNow = prevsum.getAmount();
+                    }
+                    sumToNow = sumToNow.add(disbursementData.amount());
+                    disurseDetail.put(disbursementData.disbursementDate(), Money.of(currency, sumToNow));
                 }
-                sumToNow = sumToNow.add(disbursementData.amount());
-                disurseDetail.put(disbursementData.disbursementDate(), Money.of(currency, sumToNow));
             }
         }
         return principal;
@@ -1937,7 +1950,12 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
         Collection<LoanScheduleModelPeriod> periods = null;
         if (loanApplicationTerms.isMultiDisburseLoan()) {
-            periods = new ArrayList<>(numberOfRepayments + loanApplicationTerms.getDisbursementDatas().size());
+            int multiDisbursalTrancheEntries = loanApplicationTerms.getDisbursementDatas().size();
+            if (multiDisbursalTrancheEntries == 0) {
+                // will be zero for non-tranche multi-disbursal loan when submitted or approved
+                multiDisbursalTrancheEntries = 1;
+            }
+            periods = new ArrayList<>(numberOfRepayments + multiDisbursalTrancheEntries);
         } else {
             periods = new ArrayList<>(numberOfRepayments + 1);
             final LoanScheduleModelDisbursementPeriod disbursementPeriod = LoanScheduleModelDisbursementPeriod
