@@ -203,4 +203,43 @@ public class ClientLoanNonTrancheMultipleDisbursementsIntegrationTest {
 
     }
 
+    @Test
+    public void checkThatNonTrancheMultiDisbursalsCreateAScheduleOnSubmitAndApprovalTest() {
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+
+        /***
+         * Create loan product allowing non-tranche multiple disbursals with interest recalculation
+         */
+        boolean isInterestRecalculationEnabled = true;
+        final Integer loanProductID = createLoanProduct(isInterestRecalculationEnabled);
+        Assertions.assertNotNull(loanProductID);
+
+        /***
+         * Apply for loan application and verify loan status
+         */
+        final String savingsId = null;
+        String submitDate = "01 January 2022";
+        Integer repaymentsNo = 3;
+        final Integer loanID = applyForLoanApplication(clientID, loanProductID, savingsId, APPLIED_FOR_PRINCIPAL, submitDate,
+                repaymentsNo.toString());
+        Assertions.assertNotNull(loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+        ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+        Integer loanScheduleLineCount = loanSchedule.size() - 1; // exclude disbursement line
+        Assertions.assertEquals(repaymentsNo, loanScheduleLineCount);
+
+        LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
+        final Float approved = 9000.00f;
+        loanStatusHashMap = this.loanTransactionHelper.approveLoanWithApproveAmount(submitDate, null, approved.toString(), loanID, null);
+        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+        loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+        loanScheduleLineCount = loanSchedule.size() - 1;
+        Assertions.assertEquals(repaymentsNo, loanScheduleLineCount);
+
+    }
 }
