@@ -22,13 +22,11 @@ package org.apache.fineract.infrastructure.core.filters;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
-import org.apache.fineract.infrastructure.core.filters.CorrelationHeaderFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -80,14 +78,13 @@ class FineractCorrelationIdApiFilterTest {
         // given
         FineractProperties.FineractCorrelationProperties correlationProperties = createCorrelationProps(true, "X-Correlation-ID");
         request.addHeader(correlationProperties.getHeaderName(), "123456ABCDEF");
-        given(fineractProperties.getCorrelation()).willReturn(correlationProperties);        
+        given(fineractProperties.getCorrelation()).willReturn(correlationProperties);
         given(request.getMethod()).willReturn(HttpMethod.GET.name());
-        given(request.getPathInfo()).willReturn("/loans");        
+        given(request.getPathInfo()).willReturn("/loans");
         // when
         underTest.doFilterInternal(request, response, filterChain);
         // then
         verify(filterChain).doFilter(request, response);
     }
 
-   
 }

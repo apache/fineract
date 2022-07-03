@@ -27,6 +27,6 @@ public final class LogParameterEscapeUtil {
     }
 
     public static String escapeLogMDCParameter(String logParameter) {
-        return logParameter.replaceAll("[\r\n]","");
+        return logParameter.replaceAll("[\r\n]", "");
     }
 }

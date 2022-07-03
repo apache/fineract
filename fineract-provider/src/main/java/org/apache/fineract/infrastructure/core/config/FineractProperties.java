@@ -69,7 +69,7 @@ public class FineractProperties {
     @Setter
     public static class FineractCorrelationProperties {
 
-        private boolean enabled;        
+        private boolean enabled;
         private String headerName;
     }
 }

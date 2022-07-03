@@ -20,7 +20,6 @@
 package org.apache.fineract.infrastructure.core.config;
 
 import java.util.Arrays;
-
 import org.apache.fineract.infrastructure.core.filters.CorrelationHeaderFilter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -42,7 +41,7 @@ public class CorrelationIdConfig implements EnvironmentAware {
 
     @Bean
     public FilterRegistrationBean<CorrelationHeaderFilter> correlationHeaderFilter() {
-		FilterRegistrationBean<CorrelationHeaderFilter> filterRegBean = new FilterRegistrationBean<CorrelationHeaderFilter>();
+        FilterRegistrationBean<CorrelationHeaderFilter> filterRegBean = new FilterRegistrationBean<CorrelationHeaderFilter>();
         filterRegBean.setFilter(new CorrelationHeaderFilter(environment));
         filterRegBean.setUrlPatterns(Arrays.asList("/*"));
         return filterRegBean;

@@ -19,25 +19,22 @@
 
 package org.apache.fineract.infrastructure.core.filters;
 
+import java.io.IOException;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.security.utils.LogParameterEscapeUtil;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import java.io.IOException;
-
 @RequiredArgsConstructor
 @Slf4j
-public class CorrelationHeaderFilter extends OncePerRequestFilter  {
+public class CorrelationHeaderFilter extends OncePerRequestFilter {
 
     private String correlationIdHeader;
 
@@ -45,21 +42,20 @@ public class CorrelationHeaderFilter extends OncePerRequestFilter  {
 
     @Autowired
     public CorrelationHeaderFilter(Environment env) {
-        correlationIdHeader = env.getRequiredProperty("fineract.logging.http.correlation-id.header-name");        
-    }	
-   
+        correlationIdHeader = env.getRequiredProperty("fineract.logging.http.correlation-id.header-name");
+    }
+
     @Override
     protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain)
-        throws IOException, ServletException  {
+            throws IOException, ServletException {
 
-        try {            
-            final HttpServletRequest httpServletRequest = (HttpServletRequest) request;            
-            String currentCorrId = httpServletRequest.getHeader( correlationIdHeader);
-            log.debug("Found correlationId in Header : {}", LogParameterEscapeUtil.escapeLogMDCParameter(currentCorrId) );  
-            MDC.put(correlationIdKey, currentCorrId);            
+        try {
+            final HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+            String currentCorrId = httpServletRequest.getHeader(correlationIdHeader);
+            log.debug("Found correlationId in Header : {}", LogParameterEscapeUtil.escapeLogMDCParameter(currentCorrId));
+            MDC.put(correlationIdKey, currentCorrId);
             filterChain.doFilter(request, response);
-        } 
-        finally {
+        } finally {
             MDC.remove(correlationIdKey);
         }
     }
