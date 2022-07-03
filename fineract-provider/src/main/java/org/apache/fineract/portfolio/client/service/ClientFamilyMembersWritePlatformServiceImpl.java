@@ -119,22 +119,22 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
 
         if (command.longValueOfParameterNamed("relationshipId") != null) {
             relationshipId = command.longValueOfParameterNamed("relationshipId");
-            relationship = this.codeValueRepository.getById(relationshipId);
+            relationship = this.codeValueRepository.getReferenceById(relationshipId);
         }
 
         if (command.longValueOfParameterNamed("maritalStatusId") != null) {
             maritalStatusId = command.longValueOfParameterNamed("maritalStatusId");
-            maritalStatus = this.codeValueRepository.getById(maritalStatusId);
+            maritalStatus = this.codeValueRepository.getReferenceById(maritalStatusId);
         }
 
         if (command.longValueOfParameterNamed("genderId") != null) {
             genderId = command.longValueOfParameterNamed("genderId");
-            gender = this.codeValueRepository.getById(genderId);
+            gender = this.codeValueRepository.getReferenceById(genderId);
         }
 
         if (command.longValueOfParameterNamed("professionId") != null) {
             professionId = command.longValueOfParameterNamed("professionId");
-            profession = this.codeValueRepository.getById(professionId);
+            profession = this.codeValueRepository.getReferenceById(professionId);
         }
 
         if (command.dateValueOfParameterNamed("dateOfBirth") != null) {
@@ -218,22 +218,22 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
 
             if (member.get("relationshipId") != null) {
                 relationshipId = member.get("relationshipId").getAsLong();
-                relationship = this.codeValueRepository.getById(relationshipId);
+                relationship = this.codeValueRepository.getReferenceById(relationshipId);
             }
 
             if (member.get("maritalStatusId") != null) {
                 maritalStatusId = member.get("maritalStatusId").getAsLong();
-                maritalStatus = this.codeValueRepository.getById(maritalStatusId);
+                maritalStatus = this.codeValueRepository.getReferenceById(maritalStatusId);
             }
 
             if (member.get("genderId") != null) {
                 genderId = member.get("genderId").getAsLong();
-                gender = this.codeValueRepository.getById(genderId);
+                gender = this.codeValueRepository.getReferenceById(genderId);
             }
 
             if (member.get("professionId") != null) {
                 professionId = member.get("professionId").getAsLong();
-                profession = this.codeValueRepository.getById(professionId);
+                profession = this.codeValueRepository.getReferenceById(professionId);
             }
 
             if (member.get("dateOfBirth") != null) {
@@ -295,7 +295,7 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
          * command.longValueOfParameterNamed("clientFamilyMemberId"); }
          */
 
-        ClientFamilyMembers clientFamilyMember = clientFamilyRepository.getById(familyMemberId);
+        ClientFamilyMembers clientFamilyMember = clientFamilyRepository.getReferenceById(familyMemberId);
 
         // Client
         // client=clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
@@ -337,25 +337,25 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
 
         if (command.longValueOfParameterNamed("relationShipId") != null) {
             relationshipId = command.longValueOfParameterNamed("relationShipId");
-            relationship = this.codeValueRepository.getById(relationshipId);
+            relationship = this.codeValueRepository.getReferenceById(relationshipId);
             clientFamilyMember.setRelationship(relationship);
         }
 
         if (command.longValueOfParameterNamed("maritalStatusId") != 0) {
             maritalStatusId = command.longValueOfParameterNamed("maritalStatusId");
-            maritalStatus = this.codeValueRepository.getById(maritalStatusId);
+            maritalStatus = this.codeValueRepository.getReferenceById(maritalStatusId);
             clientFamilyMember.setMaritalStatus(maritalStatus);
         }
 
         if (command.longValueOfParameterNamed("genderId") != 0) {
             genderId = command.longValueOfParameterNamed("genderId");
-            gender = this.codeValueRepository.getById(genderId);
+            gender = this.codeValueRepository.getReferenceById(genderId);
             clientFamilyMember.setGender(gender);
         }
 
         if (command.longValueOfParameterNamed("professionId") != 0) {
             professionId = command.longValueOfParameterNamed("professionId");
-            profession = this.codeValueRepository.getById(professionId);
+            profession = this.codeValueRepository.getReferenceById(professionId);
             clientFamilyMember.setProfession(profession);
         }
 
@@ -386,7 +386,7 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
         ClientFamilyMembers clientFamilyMember = null;
 
         if (clientFamilyMemberId != null) {
-            clientFamilyMember = clientFamilyRepository.getById(clientFamilyMemberId);
+            clientFamilyMember = clientFamilyRepository.getReferenceById(clientFamilyMemberId);
             clientFamilyRepository.delete(clientFamilyMember);
 
         }

@@ -1788,7 +1788,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanWaiveChargeUndoBusinessEvent(loanCharge));
 
-        LoanTransaction loanTransactionData = this.loanTransactionRepository.getById(command.entityId());
+        LoanTransaction loanTransactionData = this.loanTransactionRepository.getReferenceById(command.entityId());
         changes.put("principalPortion", loanTransactionData.getPrincipalPortion());
         changes.put("interestPortion", loanTransactionData.getInterestPortion(loan.getCurrency()));
         changes.put("feeChargesPortion", loanTransactionData.getFeeChargesPortion(loan.getCurrency()));
