@@ -27,8 +27,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.filters.CorrelationHeaderFilter;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,6 +38,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.http.HttpMethod;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -49,10 +49,10 @@ class FineractCorrelationIdApiFilterTest {
     private FineractProperties fineractProperties;
 
     @Mock
-    private HttpServletRequest request;
+    private MockHttpServletRequest request;
 
     @Mock
-    private HttpServletResponse response;
+    private MockHttpServletResponse response;
 
     @Mock
     private FilterChain filterChain;
@@ -63,6 +63,13 @@ class FineractCorrelationIdApiFilterTest {
     @InjectMocks
     private CorrelationHeaderFilter underTest;
 
+    public static FineractProperties.FineractCorrelationProperties createCorrelationProps(boolean enabled, String headerName) {
+        FineractProperties.FineractCorrelationProperties correlationProperties = new FineractProperties.FineractCorrelationProperties();
+        correlationProperties.setEnabled(enabled);
+        correlationProperties.setHeaderName(headerName);
+        return correlationProperties;
+    }
+
     @BeforeEach
     void setUp() throws IOException {
         given(response.getWriter()).willReturn(outputWriter);
@@ -71,31 +78,15 @@ class FineractCorrelationIdApiFilterTest {
     @Test
     void testDoFilterInternal_ShouldLetReadApisThrough_WhenFineractIsInCorrelationAndIsGetApi() throws ServletException, IOException {
         // given
-        FineractProperties.FineractCorrelationProperties correlationProperties = CorrelationMock.createCorrelationProps(true, "X-Correlation-ID");
+        FineractProperties.FineractCorrelationProperties correlationProperties = createCorrelationProps(true, "X-Correlation-ID");
+        request.addHeader(correlationProperties.getHeaderName(), "123456ABCDEF");
         given(fineractProperties.getCorrelation()).willReturn(correlationProperties);        
         given(request.getMethod()).willReturn(HttpMethod.GET.name());
-        given(request.getPathInfo()).willReturn("/loans");
-        MutableHttpServletRequest mutableRequest = new MutableHttpServletRequest(request);        
-        mutableRequest.putHeader(correlationProperties.getHeaderName(), "123456ABCDEF");
+        given(request.getPathInfo()).willReturn("/loans");        
         // when
-        underTest.doFilterInternal(mutableRequest, response, filterChain);
+        underTest.doFilterInternal(request, response, filterChain);
         // then
-        verify(filterChain).doFilter(mutableRequest, response);
-    }
-
-    @Test
-    void testDoFilterInternal_ShouldLetReadApisThrough_WhenFineractIsNotInCorrelationAndIsGetApi() throws ServletException, IOException {
-        // given
-        FineractProperties.FineractCorrelationProperties correlationProperties = CorrelationMock.createCorrelationProps(false, "X-Correlation-ID");
-        given(fineractProperties.getCorrelation()).willReturn(correlationProperties);        
-        given(request.getMethod()).willReturn(HttpMethod.GET.name());
-        given(request.getPathInfo()).willReturn("/loans");
-        MutableHttpServletRequest mutableRequest = new MutableHttpServletRequest(request);        
-        mutableRequest.putHeader(correlationProperties.getHeaderName(), "123456ABCDEF");
-        // when
-        underTest.doFilterInternal(mutableRequest, response, filterChain);
-        // then
-        verify(filterChain).doFilter(mutableRequest, response);
+        verify(filterChain).doFilter(request, response);
     }
 
    
