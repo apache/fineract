@@ -56,7 +56,6 @@ public class CorrelationHeaderFilter extends OncePerRequestFilter  {
             final HttpServletRequest httpServletRequest = (HttpServletRequest) request;            
             String currentCorrId = httpServletRequest.getHeader( correlationIdHeader);
             log.debug("Found correlationId in Header : {}", LogParameterEscapeUtil.escapeLogMDCParameter(currentCorrId) );  
-                      
             MDC.put(correlationIdKey, currentCorrId);            
             filterChain.doFilter(request, response);
         } 
