@@ -36,4 +36,6 @@
     <include file="parts/0014_remove_unused_jobs.xml" relativeToChangelogFile="true"/>
     <include file="parts/0015_add_business_date.xml" relativeToChangelogFile="true"/>
     <include file="parts/0016_changed_unique_constraint_of_ref_no.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0017_fix_stretchy_reports.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0018_pentaho_reports_to_table.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
