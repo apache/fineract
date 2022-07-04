@@ -179,7 +179,8 @@ public final class ResultsetColumnHeaderData implements Serializable {
     }
 
     private boolean isChar() {
-        return "char".equalsIgnoreCase(this.columnType) || "CHARACTER VARYING".equalsIgnoreCase(this.columnType);
+        return "char".equalsIgnoreCase(this.columnType) || "CHARACTER VARYING".equalsIgnoreCase(this.columnType)
+                || "bpchar".equalsIgnoreCase(this.columnType);
     }
 
     private boolean isVarchar() {
@@ -201,7 +202,8 @@ public final class ResultsetColumnHeaderData implements Serializable {
     }
 
     private boolean isInteger() {
-        return "integer".equalsIgnoreCase(this.columnType) || "int4".equalsIgnoreCase(this.columnType);
+        return "integer".equalsIgnoreCase(this.columnType) || "int2".equalsIgnoreCase(this.columnType)
+                || "int4".equalsIgnoreCase(this.columnType);
     }
 
     private boolean isSmallInt() {

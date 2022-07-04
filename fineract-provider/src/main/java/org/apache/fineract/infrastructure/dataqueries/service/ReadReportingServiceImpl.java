@@ -39,8 +39,10 @@ import java.util.Set;
 import javax.ws.rs.core.StreamingOutput;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportData;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportParameterData;
@@ -69,6 +71,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     private final PlatformSecurityContext context;
     private final GenericDataService genericDataService;
     private final SqlInjectionPreventerService sqlInjectionPreventerService;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     @Override
     public StreamingOutput retrieveReportCSV(final String name, final String type, final Map<String, String> queryParams,
@@ -187,9 +190,11 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         // (typically used to return report lists containing only reports
         // permitted to be run by the user
         sql = this.genericDataService.replace(sql, "${currentUserId}", currentUser.getId().toString());
-
-        sql = this.genericDataService.replace(sql, "${isSelfServiceUser}", Integer.toString(isSelfServiceUserReport ? 1 : 0));
-
+        sql = this.genericDataService.replace(sql, "${isSelfServiceUser}", Boolean.toString(isSelfServiceUserReport));
+        sql = this.genericDataService.replace(sql, "${currentDate}", sqlGenerator.currentBusinessDate());
+        sql = StringUtils.replaceIgnoreCase(sql, "NOW()", sqlGenerator.currentTenantDateTime());
+        sql = StringUtils.replaceIgnoreCase(sql, "curdate()", sqlGenerator.currentBusinessDate());
+        sql = StringUtils.replaceIgnoreCase(sql, "CURRENT_DATE", sqlGenerator.currentBusinessDate());
         sql = this.genericDataService.wrapSQL(sql);
 
         return sql;
