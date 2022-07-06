@@ -60,6 +60,10 @@ public class CorrelationHeaderFilter extends OncePerRequestFilter {
         }
     }
 
+    public static String getCurrentValue() {
+        return MDC.get(correlationIdKey);
+    }
+
     @Override
     protected boolean isAsyncDispatch(final HttpServletRequest request) {
         return false;

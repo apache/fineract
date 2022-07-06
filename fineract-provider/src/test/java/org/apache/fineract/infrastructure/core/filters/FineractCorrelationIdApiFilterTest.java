@@ -19,6 +19,7 @@
 
 package org.apache.fineract.infrastructure.core.filters;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -26,12 +27,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.UUID;
 import org.apache.fineract.infrastructure.core.service.MdcAdapter;
+import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -63,6 +66,12 @@ class FineractCorrelationIdApiFilterTest {
     void shouldGet400IfXCorrelationIdHeaderIsNotPresentAndRequestIsForV1Path(String url) throws Exception {
         mockMvc.perform(get(url)).andExpect(status().isBadRequest())
                 .andExpect(header().doesNotExist(CorrelationHeaderFilter.correlationIdKey));
+    }
+
+    @Test
+    void shouldReturnCurrentCorrelationIdFromMDC() {
+        MDC.put(CorrelationHeaderFilter.correlationIdKey, "1");
+        assertThat(CorrelationHeaderFilter.getCurrentValue()).isEqualTo("1");
     }
 
 }
