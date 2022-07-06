@@ -44,7 +44,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-@ContextConfiguration(classes = {Configuration.class})
+@ContextConfiguration(classes = { Configuration.class })
 @WebMvcTest
 class FineractCorrelationIdApiFilterTest {
 
