@@ -95,7 +95,7 @@ public class BusinessDateApiResource {
     @Operation(summary = "Update Business Date", description = "")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = BusinessDateApiResourceSwagger.BusinessDateRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "", content = @Content(schema = @Schema(implementation = BusinessDateApiResourceSwagger.BusinessDateRequest.class))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = BusinessDateApiResourceSwagger.BusinessDateRequest.class))) })
     public String updateBusinessDate(final String jsonRequestBody, @Context UriInfo uriInfo) {
         securityContext.authenticatedUser().validateHasUpdatePermission("BUSINESS_DATE");
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateBusinessDate().withJson(jsonRequestBody).build();

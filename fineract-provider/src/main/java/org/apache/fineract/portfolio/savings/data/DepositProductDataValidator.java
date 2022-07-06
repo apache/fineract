@@ -395,18 +395,18 @@ public class DepositProductDataValidator {
 
     private void validateChartsData(JsonElement element, DataValidatorBuilder baseDataValidator) {
         if (element.isJsonObject()) {
-            final JsonObject topLevelJsonElement = element.getAsJsonObject();
-            if (topLevelJsonElement.has(chartsParamName) && topLevelJsonElement.get(chartsParamName).isJsonArray()) {
-                final JsonArray array = topLevelJsonElement.get(chartsParamName).getAsJsonArray();
-                for (int i = 0; i < array.size(); i++) {
-                    final JsonObject interestRateChartElement = array.get(i).getAsJsonObject();
-                    final String json = this.fromApiJsonHelper.toJson(interestRateChartElement);
-                    // chart for create
-                    if (!this.fromApiJsonHelper.parameterExists(idParamName, interestRateChartElement)) {
-                        this.chartDataValidator.validateForCreate(json, baseDataValidator);
-                    } else { // chart for update
-                        this.chartDataValidator.validateForUpdate(json, baseDataValidator);
-                    }
+
+            final JsonArray array = this.fromApiJsonHelper.extractJsonArrayNamed(chartsParamName, element);
+            baseDataValidator.reset().parameter(chartsParamName).value(array).notNull().jsonArrayNotEmpty();
+
+            for (int i = 0; i < array.size(); i++) {
+                final JsonObject interestRateChartElement = array.get(i).getAsJsonObject();
+                final String json = this.fromApiJsonHelper.toJson(interestRateChartElement);
+                // chart for create
+                if (!this.fromApiJsonHelper.parameterExists(idParamName, interestRateChartElement)) {
+                    this.chartDataValidator.validateForCreate(json, baseDataValidator);
+                } else { // chart for update
+                    this.chartDataValidator.validateForUpdate(json, baseDataValidator);
                 }
             }
         }
