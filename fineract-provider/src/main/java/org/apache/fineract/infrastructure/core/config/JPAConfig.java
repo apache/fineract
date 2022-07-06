@@ -25,7 +25,6 @@ import org.apache.fineract.infrastructure.core.persistence.DatabaseSelectingPers
 import org.apache.fineract.infrastructure.core.persistence.ExtendedJpaTransactionManager;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
-import org.apache.fineract.useradministration.domain.AppUser;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.orm.jpa.EntityManagerFactoryBuilderCustomizer;
@@ -96,7 +95,7 @@ public class JPAConfig extends JpaBaseConfiguration {
     }
 
     @Bean
-    public AuditorAware<AppUser> auditorAware() {
+    public AuditorAware<Long> auditorAware() {
         return new AuditorAwareImpl();
     }
 
