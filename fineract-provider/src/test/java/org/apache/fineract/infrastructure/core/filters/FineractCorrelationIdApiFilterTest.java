@@ -1,5 +1,3 @@
-package org.apache.fineract.infrastructure.core.filters;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -19,72 +17,52 @@ package org.apache.fineract.infrastructure.core.filters;
  * under the License.
  */
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
+package org.apache.fineract.infrastructure.core.filters;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import org.apache.fineract.infrastructure.core.config.FineractProperties;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.UUID;
+import org.apache.fineract.infrastructure.core.service.MdcAdapter;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.http.HttpMethod;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.web.servlet.MockMvc;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+@WebMvcTest
 class FineractCorrelationIdApiFilterTest {
 
-    @Mock
-    private FineractProperties fineractProperties;
+    @SpyBean
+    private MdcAdapter mdc;
 
-    @Mock
-    private MockHttpServletRequest request;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @Mock
-    private MockHttpServletResponse response;
+    @ParameterizedTest
+    @ValueSource(strings = { "/fineract-provider/api/v1/loans", "/fineract-provider/api/v1/loans" })
+    void shouldGet200IfXCorrelationIdHeaderIsPresentAndRequestIsForV1Path(String url) throws Exception {
+        String correlationId = UUID.randomUUID().toString();
+        mockMvc.perform(get(url).header(CorrelationHeaderFilter.correlationIdKey, correlationId)).andExpect(status().isOk())
+                .andExpect(header().string(CorrelationHeaderFilter.correlationIdKey, correlationId));
 
-    @Mock
-    private FilterChain filterChain;
-
-    @Mock
-    private PrintWriter outputWriter;
-
-    @InjectMocks
-    private CorrelationHeaderFilter underTest;
-
-    public static FineractProperties.FineractCorrelationProperties createCorrelationProps(boolean enabled, String headerName) {
-        FineractProperties.FineractCorrelationProperties correlationProperties = new FineractProperties.FineractCorrelationProperties();
-        correlationProperties.setEnabled(enabled);
-        correlationProperties.setHeaderName(headerName);
-        return correlationProperties;
+        verify(mdc).remove(CorrelationHeaderFilter.correlationIdKey);
     }
 
-    @BeforeEach
-    void setUp() throws IOException {
-        given(response.getWriter()).willReturn(outputWriter);
-    }
-
-    @Test
-    void testDoFilterInternal_ShouldLetReadApisThrough_WhenFineractIsInCorrelationAndIsGetApi() throws ServletException, IOException {
-        // given
-        FineractProperties.FineractCorrelationProperties correlationProperties = createCorrelationProps(true, "X-Correlation-ID");
-        request.addHeader(correlationProperties.getHeaderName(), "123456ABCDEF");
-        given(fineractProperties.getCorrelation()).willReturn(correlationProperties);
-        given(request.getMethod()).willReturn(HttpMethod.GET.name());
-        given(request.getPathInfo()).willReturn("/loans");
-        // when
-        underTest.doFilterInternal(request, response, filterChain);
-        // then
-        verify(filterChain).doFilter(request, response);
+    @ParameterizedTest
+    @ValueSource(strings = { "/fineract-provider/api/v1/loans", "/fineract-provider/api/v1/loans" })
+    void shouldGet400IfXCorrelationIdHeaderIsNotPresentAndRequestIsForV1Path(String url) throws Exception {
+        mockMvc.perform(get(url)).andExpect(status().isBadRequest())
+                .andExpect(header().doesNotExist(CorrelationHeaderFilter.correlationIdKey));
     }
 
 }
