@@ -129,6 +129,45 @@ public class FixedDepositTest {
     }
 
     /***
+     * Test case for Fixed Deposit Product with default attributes
+     */
+    @Test
+    public void testFixedDepositProductCreation() {
+        this.fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
+        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
+
+        /***
+         * Create GL Accounts for product account mapping
+         */
+        final Account assetAccount = this.accountHelper.createAssetAccount();
+        final Account incomeAccount = this.accountHelper.createIncomeAccount();
+        final Account expenseAccount = this.accountHelper.createExpenseAccount();
+        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
+
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        Calendar todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.MONTH, -3);
+        final String VALID_FROM = dateFormat.format(todaysDate.getTime());
+        todaysDate.add(Calendar.YEAR, 10);
+        final String VALID_TO = dateFormat.format(todaysDate.getTime());
+
+        final String accountingRule = CASH_BASED;
+        /***
+         * Create FD product with charts (must be 200 OK)
+         */
+        Integer fixedDepositProductId = createFixedDepositProduct(VALID_FROM, VALID_TO, accountingRule, assetAccount, liabilityAccount,
+                incomeAccount, expenseAccount);
+        Assertions.assertNotNull(fixedDepositProductId);
+
+        /***
+         * Create FD product without charts (must be 400 Bad Request)
+         */
+        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(400).build();
+        createFixedDepositProductWithoutCharts(VALID_FROM, VALID_TO, accountingRule, assetAccount, liabilityAccount, incomeAccount,
+                expenseAccount);
+    }
+
+    /***
      * Test case for Fixed Deposit Account premature closure with transaction type withdrawal and Cash Based accounting
      * enabled
      */
@@ -2543,7 +2582,21 @@ public class FixedDepositTest {
             fixedDepositProductHelper = fixedDepositProductHelper.withAccountingRuleAsNone();
         }
         final String fixedDepositProductJSON = fixedDepositProductHelper.withPeriodRangeChart() //
-                .build(validFrom, validTo);
+                .build(validFrom, validTo, true);
+        return FixedDepositProductHelper.createFixedDepositProduct(fixedDepositProductJSON, requestSpec, responseSpec);
+    }
+
+    private Integer createFixedDepositProductWithoutCharts(final String validFrom, final String validTo, final String accountingRule,
+            Account... accounts) {
+        LOG.info("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
+        FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
+        if (accountingRule.equals(CASH_BASED)) {
+            fixedDepositProductHelper = fixedDepositProductHelper.withAccountingRuleAsCashBased(accounts);
+        } else if (accountingRule.equals(NONE)) {
+            fixedDepositProductHelper = fixedDepositProductHelper.withAccountingRuleAsNone();
+        }
+        final String fixedDepositProductJSON = fixedDepositProductHelper.withPeriodRangeChart() //
+                .build(validFrom, validTo, false);
         return FixedDepositProductHelper.createFixedDepositProduct(fixedDepositProductJSON, requestSpec, responseSpec);
     }
 
@@ -2706,6 +2759,7 @@ public class FixedDepositTest {
      */
     @AfterEach
     public void tearDown() {
+        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         List<HashMap> financialActivities = this.financialActivityAccountHelper.getAllFinancialActivityAccounts(this.responseSpec);
         for (HashMap financialActivity : financialActivities) {
             Integer financialActivityAccountId = (Integer) financialActivity.get("id");
