@@ -22,13 +22,9 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
 import javax.persistence.Column;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.data.domain.Auditable;
 import org.springframework.data.jpa.domain.AbstractAuditable;
 
@@ -44,33 +40,31 @@ import org.springframework.data.jpa.domain.AbstractAuditable;
  *            the type of the auditing type's identifier
  */
 @MappedSuperclass
-public abstract class AbstractAuditableCustom extends AbstractPersistableCustom implements Auditable<AppUser, Long, Instant> {
+public abstract class AbstractAuditableCustom extends AbstractPersistableCustom implements Auditable<Long, Long, Instant> {
 
     private static final long serialVersionUID = 141481953116476081L;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "createdby_id")
-    private AppUser createdBy;
+    @Column(name = "createdby_id")
+    private Long createdBy;
 
     @Column(name = "created_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "lastmodifiedby_id")
-    private AppUser lastModifiedBy;
+    @Column(name = "lastmodifiedby_id")
+    private Long lastModifiedBy;
 
     @Column(name = "lastmodified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastModifiedDate;
 
     @Override
-    public Optional<AppUser> getCreatedBy() {
+    public Optional<Long> getCreatedBy() {
         return Optional.ofNullable(this.createdBy);
     }
 
     @Override
-    public void setCreatedBy(final AppUser createdBy) {
+    public void setCreatedBy(final Long createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -85,12 +79,12 @@ public abstract class AbstractAuditableCustom extends AbstractPersistableCustom 
     }
 
     @Override
-    public Optional<AppUser> getLastModifiedBy() {
+    public Optional<Long> getLastModifiedBy() {
         return Optional.ofNullable(this.lastModifiedBy);
     }
 
     @Override
-    public void setLastModifiedBy(final AppUser lastModifiedBy) {
+    public void setLastModifiedBy(final Long lastModifiedBy) {
         this.lastModifiedBy = lastModifiedBy;
     }
 

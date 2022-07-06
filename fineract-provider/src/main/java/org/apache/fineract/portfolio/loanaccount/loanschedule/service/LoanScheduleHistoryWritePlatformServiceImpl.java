@@ -29,7 +29,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleIns
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanRepaymentScheduleHistory;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanRepaymentScheduleHistoryRepository;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
-import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,8 +78,8 @@ public class LoanScheduleHistoryWritePlatformServiceImpl implements LoanSchedule
                 createdOnDate = Date.from(repaymentScheduleInstallment.getCreatedDate().get()); // NOSONAR
             }
 
-            final AppUser createdByUser = repaymentScheduleInstallment.getCreatedBy().orElse(null);
-            final AppUser lastModifiedByUser = repaymentScheduleInstallment.getLastModifiedBy().orElse(null);
+            final Long createdByUser = repaymentScheduleInstallment.getCreatedBy().orElse(null);
+            final Long lastModifiedByUser = repaymentScheduleInstallment.getLastModifiedBy().orElse(null);
 
             Date lastModifiedOnDate = null;
 

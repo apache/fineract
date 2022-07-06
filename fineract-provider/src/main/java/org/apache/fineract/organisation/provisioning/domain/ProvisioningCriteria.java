@@ -69,9 +69,9 @@ public class ProvisioningCriteria extends AbstractAuditableCustom {
     public ProvisioningCriteria(String criteriaName, AppUser createdBy, ZonedDateTime createdDate, AppUser lastModifiedBy,
             ZonedDateTime lastModifiedDate) {
         this.criteriaName = criteriaName;
-        setCreatedBy(createdBy);
+        setCreatedBy(createdBy.getId());
         setCreatedDate(Instant.ofEpochMilli(createdDate.toInstant().toEpochMilli()));
-        setLastModifiedBy(lastModifiedBy);
+        setLastModifiedBy(lastModifiedBy.getId());
         setLastModifiedDate(Instant.ofEpochMilli(lastModifiedDate.toInstant().toEpochMilli()));
     }
 
