@@ -68,7 +68,7 @@ import org.springframework.stereotype.Component;
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
 @RequiredArgsConstructor
-@Tag(name = "SCHEDULER JOBS", description = "Batch jobs (also known as cron jobs on Unix-based systems) are a series of back-end jobs executed on a computer at a particular time defined in job's cron expression.\n\n At any point, you can view the list of batch jobs scheduled to run along with other details specific to each job. Manually you can execute the jobs at any point of time.\n\n The scheduler status can be either \"Active\" or \"Standby\". If the scheduler status is Active, it indicates that all batch jobs are running/ will run as per the specified schedule.If the scheduler status is Standby, it will ensure all scheduled batch runs are suspended.")
+@Tag(name = "SCHEDULER JOB", description = "Batch jobs (also known as cron jobs on Unix-based systems) are a series of back-end jobs executed on a computer at a particular time defined in job's cron expression.\n\n At any point, you can view the list of batch jobs scheduled to run along with other details specific to each job. Manually you can execute the jobs at any point of time.\n\n The scheduler status can be either \"Active\" or \"Standby\". If the scheduler status is Active, it indicates that all batch jobs are running/ will run as per the specified schedule.If the scheduler status is Standby, it will ensure all scheduled batch runs are suspended.")
 public class SchedulerJobApiResource {
 
     private final SchedulerJobRunnerReadService schedulerJobRunnerReadService;
