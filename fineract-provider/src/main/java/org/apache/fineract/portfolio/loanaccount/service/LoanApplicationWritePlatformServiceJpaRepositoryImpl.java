@@ -1050,7 +1050,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 final JsonQuery query = JsonQuery.from(command.json(), parsedQuery, this.fromJsonHelper);
 
                 final LoanScheduleModel loanSchedule = this.calculationPlatformService.calculateLoanSchedule(query, false);
-                existingLoanApplication.updateLoanSchedule(loanSchedule, currentUser);
+                existingLoanApplication.updateLoanSchedule(loanSchedule);
                 existingLoanApplication.recalculateAllCharges();
             }
 
@@ -1449,7 +1449,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     || changes.containsKey("expectedDisbursementDate")) {
                 LocalDate recalculateFrom = null;
                 ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
-                loan.regenerateRepaymentSchedule(scheduleGeneratorDTO, currentUser);
+                loan.regenerateRepaymentSchedule(scheduleGeneratorDTO);
             }
 
             if (loan.isTopup() && loan.getClientId() != null) {
@@ -1553,7 +1553,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     || changes.containsKey(LoanApiConstants.disbursementPrincipalParameterName)) {
                 LocalDate recalculateFrom = null;
                 ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
-                loan.regenerateRepaymentSchedule(scheduleGeneratorDTO, currentUser);
+                loan.regenerateRepaymentSchedule(scheduleGeneratorDTO);
             }
 
             loan.adjustNetDisbursalAmount(loan.getProposedPrincipal());
