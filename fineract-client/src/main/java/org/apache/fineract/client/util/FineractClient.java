@@ -213,8 +213,6 @@ public final class FineractClient {
     public final LoanTransactionsApi loanTransactions;
     public final MakerCheckerOr4EyeFunctionalityApi makerCheckers;
     public final MappingFinancialActivitiesToAccountsApi financialActivyAccountMappings;
-    // public final MifosxBatchJobsApi jobs;
-    public final SchedulerJobApi jobs;
     public final MixMappingApi mixMappings;
     public final MixReportApi mixReports;
     public final MixTaxonomyApi mixTaxonomies;
@@ -241,6 +239,7 @@ public final class FineractClient {
     public final SavingsProductApi savingsProducts;
     public final SavingsAccountTransactionsApi savingsTransactions;
     public final SchedulerApi jobsScheduler;
+    public final SchedulerJobApi jobs;
     public final ScoreCardApi surveyScorecards;
     public final SearchApiApi search;
     public final SelfAccountTransferApi selfAccountTransfers;
