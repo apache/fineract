@@ -116,7 +116,6 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProductVariableInsta
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
-import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -878,8 +877,7 @@ public class LoanScheduleAssembler {
         }
         final LocalDate recalculateFrom = null;
         ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
-        AppUser currentUser = this.context.getAuthenticatedUserIfPresent();
-        loan.regenerateRepaymentSchedule(scheduleGeneratorDTO, currentUser);
+        loan.regenerateRepaymentSchedule(scheduleGeneratorDTO);
     }
 
     private List<LoanTermVariations> adjustExistingVariations(List<LoanTermVariations> variations, List<LoanTermVariations> newVariations,
