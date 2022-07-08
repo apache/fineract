@@ -349,10 +349,10 @@ public class LoanTransactionHelper {
                 getCreditBalanceRefundBodyAsJSON(date, amountToBePaid, externalId), jsonAttributeToGetback);
     }
 
-    public HashMap makeRepaymentTypePayment(final String repaymentTypeCommand, final String date, final Float amountToBePaid,
-            final Integer loanID) {
-        return (HashMap) performLoanTransaction(createLoanTransactionURL(repaymentTypeCommand, loanID),
-                getRepaymentBodyAsJSON(date, amountToBePaid), "");
+    public Object makeRepaymentTypePayment(final String repaymentTypeCommand, final String date, final Float amountToBePaid,
+            final Integer loanID, String jsonAttributeToGetback) {
+        return performLoanTransaction(createLoanTransactionURL(repaymentTypeCommand, loanID), getRepaymentBodyAsJSON(date, amountToBePaid),
+                jsonAttributeToGetback);
     }
 
     public HashMap makeRepayment(final String date, final Float amountToBePaid, final Integer loanID) {

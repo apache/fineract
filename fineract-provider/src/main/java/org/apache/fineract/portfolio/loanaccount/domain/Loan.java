@@ -3098,7 +3098,7 @@ public class Loan extends AbstractPersistableCustom {
         if (!isHolidayValidationDone) {
             holidayDetailDTO = scheduleGeneratorDTO.getHolidayDetailDTO();
         }
-        validateAccountStatus(event);
+        validateRepaymentTypeAccountStatus(repaymentTransaction, event);
         validateActivityNotBeforeClientOrGroupTransferDate(event, repaymentTransaction.getTransactionDate());
         validateActivityNotBeforeLastTransactionDate(event, repaymentTransaction.getTransactionDate());
         if (!isHolidayValidationDone) {
@@ -3114,6 +3114,24 @@ public class Loan extends AbstractPersistableCustom {
                 loanLifecycleStateMachine, null, scheduleGeneratorDTO);
 
         return changedTransactionDetail;
+    }
+
+    private void validateRepaymentTypeAccountStatus(LoanTransaction repaymentTransaction, LoanEvent event) {
+        if (repaymentTransaction.isGoodwillCredit() || repaymentTransaction.isMerchantIssuedRefund()
+                || repaymentTransaction.isPayoutRefund()) {
+
+            if (!(isOpen() || isClosedObligationsMet() || isOverPaid())) {
+                final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+                final String defaultUserMessage = "Loan must be Active, Fully Paid or Overpaid";
+                final ApiParameterError error = ApiParameterError.generalError("error.msg.loan.must.be.active.fully.paid.or.overpaid",
+                        defaultUserMessage);
+                dataValidationErrors.add(error);
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
+        } else {
+            validateAccountStatus(event);
+        }
+
     }
 
     public void makeChargePayment(final Long chargeId, final LoanLifecycleStateMachine loanLifecycleStateMachine,

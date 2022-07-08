@@ -62,6 +62,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
     private Account incomeAccount;
     private Account expenseAccount;
     private Account overpaymentAccount;
+    private static final String REPAYMENT = "repayment";
     private static final String MERCHANT_ISSUED_REFUND = "merchantIssuedRefund";
     private static final String PAYOUT_REFUND = "payoutRefund";
     private static final String GOODWILL_CREDIT = "goodwillCredit";
@@ -343,14 +344,44 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
     }
 
     private void verifyRepaymentTransactionTypeMatches(final String repaymentTransactionType) {
-        HashMap loanStatusHashMap = this.loanTransactionHelper.makeRepaymentTypePayment(repaymentTransactionType, "06 January 2022",
-                200.00f, this.disbursedLoanID);
+        HashMap loanStatusHashMap = (HashMap) this.loanTransactionHelper.makeRepaymentTypePayment(repaymentTransactionType,
+                "06 January 2022", 200.00f, this.disbursedLoanID, "");
         Integer newTransactionId = (Integer) loanStatusHashMap.get("resourceId");
         loanStatusHashMap = this.loanTransactionHelper.getLoanTransactionDetails(this.disbursedLoanID, newTransactionId);
 
         HashMap typeMap = (HashMap) loanStatusHashMap.get("type");
         Boolean isTypeCorrect = (Boolean) typeMap.get(repaymentTransactionType);
         Assertions.assertTrue(Boolean.TRUE.equals(isTypeCorrect), "Not " + repaymentTransactionType);
+    }
+
+    @Test
+    public void repaymentTransactionTypeWhenPaidTest() {
+        verifyRepaymentTransactionTypeWhenPaid(MERCHANT_ISSUED_REFUND);
+        verifyRepaymentTransactionTypeWhenPaid(PAYOUT_REFUND);
+        verifyRepaymentTransactionTypeWhenPaid(GOODWILL_CREDIT);
+        verifyRepaymentTransactionTypeWhenPaid(REPAYMENT);
+
+    }
+
+    private void verifyRepaymentTransactionTypeWhenPaid(final String repaymentTransactionType) {
+
+        disburseLoanOfAccountingRule(ACCRUAL_PERIODIC);
+        // Overpay loan
+        Integer resourceId = (Integer) this.loanTransactionHelper.makeRepaymentTypePayment(REPAYMENT, "06 January 2022", 13000.00f,
+                this.disbursedLoanID, "resourceId");
+        Assertions.assertNotNull(resourceId);
+
+        if (repaymentTransactionType.equalsIgnoreCase(REPAYMENT)) {
+            ArrayList<HashMap> errors = (ArrayList<HashMap>) this.loanTransactionHelperValidationError.makeRepaymentTypePayment(
+                    repaymentTransactionType, "06 January 2022", 1.00f, this.disbursedLoanID, CommonConstants.RESPONSE_ERROR);
+
+            assertEquals("error.msg.loan.repayment.or.waiver.account.is.not.active",
+                    errors.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+        } else {
+            resourceId = (Integer) this.loanTransactionHelper.makeRepaymentTypePayment(repaymentTransactionType, "06 January 2022", 1.00f,
+                    this.disbursedLoanID, "resourceId");
+            Assertions.assertNotNull(resourceId);
+        }
     }
 
     @Test
@@ -366,8 +397,8 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
         final Float overpaidAmount = 159.00f;
         final Float goodwillAmount = totalOutstanding + overpaidAmount;
         final String goodwillDate = "09 January 2022";
-        HashMap loanStatusHashMap = this.loanTransactionHelper.makeRepaymentTypePayment(GOODWILL_CREDIT, goodwillDate, goodwillAmount,
-                this.disbursedLoanID);
+        HashMap loanStatusHashMap = (HashMap) this.loanTransactionHelper.makeRepaymentTypePayment(GOODWILL_CREDIT, goodwillDate,
+                goodwillAmount, this.disbursedLoanID, "");
 
         // only a single credit for principal and interest as test sets up same GL account for both (summed up)
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, goodwillDate,
@@ -392,8 +423,8 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
         final Float overpaidAmount = 159.00f;
         final Float goodwillAmount = totalOutstanding + overpaidAmount;
         final String goodwillDate = "09 January 2022";
-        HashMap loanStatusHashMap = this.loanTransactionHelper.makeRepaymentTypePayment(GOODWILL_CREDIT, goodwillDate, goodwillAmount,
-                this.disbursedLoanID);
+        HashMap loanStatusHashMap = (HashMap) this.loanTransactionHelper.makeRepaymentTypePayment(GOODWILL_CREDIT, goodwillDate,
+                goodwillAmount, this.disbursedLoanID, "");
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, goodwillDate,
                 new JournalEntry(principalOutstanding, JournalEntry.TransactionType.CREDIT));
