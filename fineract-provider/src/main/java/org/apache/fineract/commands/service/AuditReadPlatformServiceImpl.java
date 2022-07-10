@@ -201,7 +201,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
     @Override
     public Collection<AuditData> retrieveAllEntriesToBeChecked(final SQLBuilder extraCriteria, final boolean includeJson) {
         extraCriteria.addCriteria("aud.processing_result_enum = ", 2);
-        return retrieveEntries("makerchecker", extraCriteria, " group by aud.id order by aud.id", includeJson);
+        return retrieveEntries("makerchecker", extraCriteria, " order by aud.id, mk.username", includeJson);
     }
 
     private Collection<AuditData> retrieveEntries(final String useType, final SQLBuilder extraCriteria, final String groupAndOrderBySQL,
