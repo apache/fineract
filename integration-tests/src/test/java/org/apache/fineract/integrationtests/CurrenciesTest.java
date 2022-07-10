@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-@SuppressWarnings({ "unused", "rawtypes" })
+@SuppressWarnings({ "unused" })
 public class CurrenciesTest {
 
     private ResponseSpecification responseSpec;
