@@ -25,7 +25,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -845,11 +844,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     }
 
     @Override
-    public Date retrieveClientTransferProposalDate(Long clientId) {
+    public LocalDate retrieveClientTransferProposalDate(Long clientId) {
         validateClient(clientId);
         final String sql = "SELECT cl.proposed_transfer_date FROM m_client cl WHERE cl.id =? ";
         try {
-            return this.jdbcTemplate.queryForObject(sql, Date.class, clientId);
+            return this.jdbcTemplate.queryForObject(sql, LocalDate.class, clientId);
         } catch (final EmptyResultDataAccessException e) {
             return null;
         }

@@ -19,14 +19,12 @@
 
 package org.apache.fineract.portfolio.client.domain;
 
-import java.util.Date;
+import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
@@ -76,12 +74,11 @@ public class ClientFamilyMembers extends AbstractPersistableCustom {
     private CodeValue profession;
 
     @Column(name = "date_of_birth", nullable = true)
-    @Temporal(TemporalType.DATE)
-    private Date dateOfBirth;
+    private LocalDate dateOfBirth;
 
     private ClientFamilyMembers(final Client client, final String firstName, final String middleName, final String lastName,
             final String qualification, final String mobileNumber, final Long age, final Boolean isDependent, final CodeValue relationship,
-            final CodeValue maritalStatus, final CodeValue gender, final Date dateOfBirth, final CodeValue profession) {
+            final CodeValue maritalStatus, final CodeValue gender, final LocalDate dateOfBirth, final CodeValue profession) {
 
         this.client = client;
         this.firstName = firstName;
@@ -104,7 +101,7 @@ public class ClientFamilyMembers extends AbstractPersistableCustom {
 
     public static ClientFamilyMembers fromJson(final Client client, final String firstName, final String middleName, final String lastName,
             final String qualification, final String mobileNumber, final Long age, final Boolean isDependent, final CodeValue relationship,
-            final CodeValue maritalStatus, final CodeValue gender, final Date dateOfBirth, final CodeValue profession) {
+            final CodeValue maritalStatus, final CodeValue gender, final LocalDate dateOfBirth, final CodeValue profession) {
         return new ClientFamilyMembers(client, firstName, middleName, lastName, qualification, mobileNumber, age, isDependent, relationship,
                 maritalStatus, gender, dateOfBirth, profession);
     }
@@ -181,11 +178,11 @@ public class ClientFamilyMembers extends AbstractPersistableCustom {
         this.profession = profession;
     }
 
-    public Date getDateOfBirth() {
+    public LocalDate getDateOfBirth() {
         return this.dateOfBirth;
     }
 
-    public void setDateOfBirth(Date dateOfBirth) {
+    public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 
