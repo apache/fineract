@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.entityaccess.domain;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.persistence.Column;
@@ -26,8 +26,6 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -49,15 +47,13 @@ public class FineractEntityToEntityMapping extends AbstractPersistableCustom {
     private Long toId;
 
     @Column(name = "start_date", nullable = true)
-    @Temporal(TemporalType.DATE)
-    private Date startDate;
+    private LocalDate startDate;
 
     @Column(name = "end_date", nullable = true)
-    @Temporal(TemporalType.DATE)
-    private Date endDate;
+    private LocalDate endDate;
 
-    private FineractEntityToEntityMapping(final FineractEntityRelation relationId, final Long fromId, final Long toId, final Date startDate,
-            final Date endDate) {
+    private FineractEntityToEntityMapping(final FineractEntityRelation relationId, final Long fromId, final Long toId,
+            final LocalDate startDate, final LocalDate endDate) {
         this.relationId = relationId;
         this.fromId = fromId;
         this.toId = toId;
@@ -70,8 +66,8 @@ public class FineractEntityToEntityMapping extends AbstractPersistableCustom {
         //
     }
 
-    public static FineractEntityToEntityMapping newMap(FineractEntityRelation relationId, Long fromId, Long toId, Date startDate,
-            Date endDate) {
+    public static FineractEntityToEntityMapping newMap(FineractEntityRelation relationId, Long fromId, Long toId, LocalDate startDate,
+            LocalDate endDate) {
 
         return new FineractEntityToEntityMapping(relationId, fromId, toId, startDate, endDate);
 
@@ -96,18 +92,16 @@ public class FineractEntityToEntityMapping extends AbstractPersistableCustom {
         if (command.isChangeInDateParameterNamed(FineractEntityApiResourceConstants.startDate, this.startDate)) {
             final String valueAsInput = command.stringValueOfParameterNamed(FineractEntityApiResourceConstants.startDate);
             actualChanges.put(FineractEntityApiResourceConstants.startDate, valueAsInput);
-            final Date startDate = command.dateValueOfParameterNamed(FineractEntityApiResourceConstants.startDate);
-            this.startDate = startDate;
+            this.startDate = command.localDateValueOfParameterNamed(FineractEntityApiResourceConstants.startDate);
         }
 
         if (command.isChangeInDateParameterNamed(FineractEntityApiResourceConstants.endDate, this.endDate)) {
             final String valueAsInput = command.stringValueOfParameterNamed(FineractEntityApiResourceConstants.endDate);
             actualChanges.put(FineractEntityApiResourceConstants.endDate, valueAsInput);
-            final Date endDate = command.dateValueOfParameterNamed(FineractEntityApiResourceConstants.endDate);
-            this.endDate = endDate;
+            this.endDate = command.localDateValueOfParameterNamed(FineractEntityApiResourceConstants.endDate);
         }
         if (startDate != null && endDate != null) {
-            if (endDate.before(startDate)) {
+            if (endDate.isBefore(startDate)) {
                 throw new FineractEntityToEntityMappingDateException(startDate.toString(), endDate.toString());
             }
         }

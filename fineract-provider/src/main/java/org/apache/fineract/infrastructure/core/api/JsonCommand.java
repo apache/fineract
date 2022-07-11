@@ -36,7 +36,6 @@ import java.util.Set;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.domain.BasicPasswordEncodablePlatformUser;
 import org.apache.fineract.infrastructure.security.domain.PlatformUser;
 import org.apache.fineract.infrastructure.security.service.PlatformPasswordEncoder;
@@ -371,12 +370,8 @@ public final class JsonCommand {
         return this.fromApiJsonHelper.extractLongNamed(parameterName, this.parsedCommand);
     }
 
-    public boolean isChangeInDateParameterNamed(final String parameterName, final Date existingValue) {
-        LocalDate localDate = null;
-        if (existingValue != null) {
-            localDate = LocalDate.ofInstant(existingValue.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-        return isChangeInLocalDateParameterNamed(parameterName, localDate);
+    public boolean isChangeInDateParameterNamed(final String parameterName, final LocalDate existingValue) {
+        return isChangeInLocalDateParameterNamed(parameterName, existingValue);
     }
 
     public boolean isChangeInTimeParameterNamed(final String parameterName, final Date existingValue, final String timeFormat) {

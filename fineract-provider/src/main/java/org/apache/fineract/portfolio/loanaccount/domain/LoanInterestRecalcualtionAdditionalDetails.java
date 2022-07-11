@@ -20,17 +20,12 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 @Entity
 @Table(name = "m_loan_interest_recalculation_additional_details")
@@ -40,9 +35,8 @@ public class LoanInterestRecalcualtionAdditionalDetails extends AbstractPersista
     @JoinColumn(name = "loan_repayment_schedule_id", nullable = false)
     private LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "effective_date")
-    private Date effectiveDate;
+    private LocalDate effectiveDate;
 
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
@@ -53,13 +47,13 @@ public class LoanInterestRecalcualtionAdditionalDetails extends AbstractPersista
 
     public LoanInterestRecalcualtionAdditionalDetails(final LocalDate effectiveDate, final BigDecimal amount) {
         if (effectiveDate != null) {
-            this.effectiveDate = Date.from(effectiveDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.effectiveDate = effectiveDate;
         }
         this.amount = amount;
     }
 
     public LocalDate getEffectiveDate() {
-        return LocalDate.ofInstant(this.effectiveDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        return this.effectiveDate;
     }
 
     public BigDecimal getAmount() {

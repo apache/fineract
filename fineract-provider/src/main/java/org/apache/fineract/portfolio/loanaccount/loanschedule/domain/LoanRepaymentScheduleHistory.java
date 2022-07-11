@@ -19,15 +19,13 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
@@ -47,13 +45,11 @@ public class LoanRepaymentScheduleHistory extends AbstractPersistableCustom {
     @Column(name = "installment", nullable = false)
     private Integer installmentNumber;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "fromdate", nullable = true)
-    private Date fromDate;
+    private LocalDate fromDate;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "duedate", nullable = false)
-    private Date dueDate;
+    private LocalDate dueDate;
 
     @Column(name = "principal_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal principal;
@@ -67,9 +63,8 @@ public class LoanRepaymentScheduleHistory extends AbstractPersistableCustom {
     @Column(name = "penalty_charges_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal penaltyCharges;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "created_date")
-    private Date createdOnDate;
+    private LocalDate createdOnDate;
 
     @Column(name = "createdby_id")
     private Long createdByUser;
@@ -77,9 +72,8 @@ public class LoanRepaymentScheduleHistory extends AbstractPersistableCustom {
     @Column(name = "lastmodifiedby_id")
     private Long lastModifiedByUser;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "lastmodified_date")
-    private Date lastModifiedOnDate;
+    private LocalDate lastModifiedOnDate;
 
     @Column(name = "version")
     private Integer version;
@@ -93,9 +87,10 @@ public class LoanRepaymentScheduleHistory extends AbstractPersistableCustom {
      * LoanRepaymentScheduleHistory constructor
      **/
     private LoanRepaymentScheduleHistory(final Loan loan, final LoanRescheduleRequest loanRescheduleRequest,
-            final Integer installmentNumber, final Date fromDate, final Date dueDate, final BigDecimal principal,
-            final BigDecimal interestCharged, final BigDecimal feeChargesCharged, final BigDecimal penaltyCharges, final Date createdOnDate,
-            final Long createdByUser, final Long lastModifiedByUser, final Date lastModifiedOnDate, final Integer version) {
+            final Integer installmentNumber, final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal,
+            final BigDecimal interestCharged, final BigDecimal feeChargesCharged, final BigDecimal penaltyCharges,
+            final LocalDate createdOnDate, final Long createdByUser, final Long lastModifiedByUser, final LocalDate lastModifiedOnDate,
+            final Integer version) {
 
         this.loan = loan;
         this.loanRescheduleRequest = loanRescheduleRequest;
@@ -117,9 +112,10 @@ public class LoanRepaymentScheduleHistory extends AbstractPersistableCustom {
      * @return an instance of the LoanRepaymentScheduleHistory class
      **/
     public static LoanRepaymentScheduleHistory instance(final Loan loan, final LoanRescheduleRequest loanRescheduleRequest,
-            final Integer installmentNumber, final Date fromDate, final Date dueDate, final BigDecimal principal,
-            final BigDecimal interestCharged, final BigDecimal feeChargesCharged, final BigDecimal penaltyCharges, final Date createdOnDate,
-            final Long createdByUser, final Long lastModifiedByUser, final Date lastModifiedOnDate, final Integer version) {
+            final Integer installmentNumber, final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal,
+            final BigDecimal interestCharged, final BigDecimal feeChargesCharged, final BigDecimal penaltyCharges,
+            final LocalDate createdOnDate, final Long createdByUser, final Long lastModifiedByUser, final LocalDate lastModifiedOnDate,
+            final Integer version) {
 
         return new LoanRepaymentScheduleHistory(loan, loanRescheduleRequest, installmentNumber, fromDate, dueDate, principal,
                 interestCharged, feeChargesCharged, penaltyCharges, createdOnDate, createdByUser, lastModifiedByUser, lastModifiedOnDate,

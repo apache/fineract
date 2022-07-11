@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.configuration.domain;
 
-import java.util.Date;
+import java.time.LocalDate;
 import org.apache.fineract.infrastructure.cache.domain.CacheType;
 
 public interface ConfigurationDomainService {
@@ -67,7 +67,7 @@ public interface ConfigurationDomainService {
 
     boolean isOrganisationstartDateEnabled();
 
-    Date retrieveOrganisationStartDate();
+    LocalDate retrieveOrganisationStartDate();
 
     boolean isPaymnetypeApplicableforDisbursementCharge();
 
