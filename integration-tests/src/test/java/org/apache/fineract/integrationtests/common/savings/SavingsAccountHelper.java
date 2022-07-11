@@ -88,6 +88,7 @@ public class SavingsAccountHelper {
     public static final String TRANSACTION_DATE_PLUS_ONE = "02 March 2013";
     public static final String LAST_TRANSACTION_DATE = "01 March 2013";
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
+    public static final Integer PAYMENT_TYPE_ID = 1;
 
     public static final String DATE_TIME_FORMAT = "dd MMMM yyyy HH:mm";
     private static final Boolean IS_BLOCK = false;
@@ -456,11 +457,12 @@ public class SavingsAccountHelper {
     }
 
     private String getSavingsTransactionJSON(final String amount, final String transactionDate) {
-        final HashMap<String, String> map = new HashMap<>();
+        final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", CommonConstants.LOCALE);
         map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("transactionDate", transactionDate);
         map.put("transactionAmount", amount);
+        map.put("paymentTypeId", PAYMENT_TYPE_ID);
         String savingsAccountWithdrawalJson = new Gson().toJson(map);
         LOG.info(savingsAccountWithdrawalJson);
         return savingsAccountWithdrawalJson;
