@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -758,7 +757,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         if (payPrincipal.plus(interestPayable).plus(feePayable).plus(penaltyPayable).isGreaterThanZero()) {
             final PaymentDetail paymentDetail = null;
             String externalId = null;
-            final LocalDateTime currentDateTime = DateUtils.getLocalDateTimeOfTenant();
             payment = LoanTransaction.repayment(loan.getOffice(), payPrincipal.plus(interestPayable).plus(feePayable).plus(penaltyPayable),
                     paymentDetail, foreClosureDate, externalId);
             payment.updateLoan(loan);

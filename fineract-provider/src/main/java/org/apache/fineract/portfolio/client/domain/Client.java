@@ -44,7 +44,7 @@ import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.documentmanagement.domain.Image;
@@ -59,7 +59,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 @Entity
 @Table(name = "m_client", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "account_no_UNIQUE"), //
         @UniqueConstraint(columnNames = { "mobile_no" }, name = "mobile_no_UNIQUE") })
-public final class Client extends AbstractPersistableCustom {
+public class Client extends AbstractAuditableCustom {
 
     @Column(name = "account_no", length = 20, unique = true, nullable = false)
     private String accountNumber;
@@ -184,13 +184,6 @@ public final class Client extends AbstractPersistableCustom {
     @JoinColumn(name = "submittedon_userid", nullable = true)
     private AppUser submittedBy;
 
-    @Column(name = "updated_on", nullable = true)
-    private LocalDate updatedOnDate;
-
-    @ManyToOne(optional = true, fetch = FetchType.LAZY)
-    @JoinColumn(name = "updated_by", nullable = true)
-    private AppUser updatedBy;
-
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "activatedon_userid", nullable = true)
     private AppUser activatedBy;
@@ -270,9 +263,7 @@ public final class Client extends AbstractPersistableCustom {
                 savingsAccountId, dataOfBirth, gender, clientType, clientClassification, legalForm, isStaff);
     }
 
-    Client() {
-        this.setLegalForm(null);
-    }
+    protected Client() {}
 
     private Client(final AppUser currentUser, final ClientStatus status, final Office office, final Group clientParentGroup,
             final String accountNo, final String firstname, final String middlename, final String lastname, final String fullname,
@@ -969,8 +960,6 @@ public final class Client extends AbstractPersistableCustom {
         this.rejectionReason = rejectionReason;
         this.rejectionDate = rejectionDate;
         this.rejectedBy = currentUser;
-        this.updatedBy = currentUser;
-        this.updatedOnDate = rejectionDate;
         this.status = ClientStatus.REJECTED.getValue();
 
     }
@@ -979,8 +968,6 @@ public final class Client extends AbstractPersistableCustom {
         this.withdrawalReason = withdrawalReason;
         this.withdrawalDate = withdrawalDate;
         this.withdrawnBy = currentUser;
-        this.updatedBy = currentUser;
-        this.updatedOnDate = withdrawalDate;
         this.status = ClientStatus.WITHDRAWN.getValue();
 
     }
@@ -990,8 +977,6 @@ public final class Client extends AbstractPersistableCustom {
         this.closureReason = null;
         this.reactivateDate = reactivateDate;
         this.reactivatedBy = currentUser;
-        this.updatedBy = currentUser;
-        this.updatedOnDate = reactivateDate;
         this.status = ClientStatus.PENDING.getValue();
 
     }
@@ -999,10 +984,7 @@ public final class Client extends AbstractPersistableCustom {
     public void reOpened(AppUser currentUser, LocalDate reopenedDate) {
         this.reopenedDate = reopenedDate;
         this.reopenedBy = currentUser;
-        this.updatedBy = currentUser;
-        this.updatedOnDate = reopenedDate;
         this.status = ClientStatus.PENDING.getValue();
-
     }
 
     public Integer getLegalForm() {

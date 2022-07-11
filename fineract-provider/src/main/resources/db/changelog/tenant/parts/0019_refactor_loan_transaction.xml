@@ -56,4 +56,16 @@
             <where>id='175' AND report_name='Loan payments received (Overdue Loans)'</where>
         </update>
     </changeSet>
+    <changeSet id="5" author="fineract">
+        <update tableName="m_loan_transaction">
+            <column name="created_date" valueComputed="submitted_on_date"/>
+            <where>created_date is NULL</where>
+        </update>
+    </changeSet>
+    <changeSet id="6" author="fineract" failOnError="false">
+        <addNotNullConstraint tableName="m_loan_transaction" columnName="createdby_id"/>
+        <addNotNullConstraint tableName="m_loan_transaction" columnName="lastmodifiedby_id"/>
+        <addNotNullConstraint tableName="m_loan_transaction" columnName="lastmodified_date"/>
+        <addNotNullConstraint tableName="m_loan_transaction" columnName="created_date"/>
+    </changeSet>
 </databaseChangeLog>

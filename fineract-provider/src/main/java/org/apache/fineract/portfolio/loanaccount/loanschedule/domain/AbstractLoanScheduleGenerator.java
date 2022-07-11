@@ -1927,7 +1927,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     periods.add(disbursementPeriod);
                     principal = principal.add(disbursementData.amount());
                 } else if (!excludePastUndisbursed || disbursementData.isDisbursed()
-                        || !disbursementData.disbursementDate().isBefore(DateUtils.getLocalDateOfTenant())) {
+                        || !disbursementData.disbursementDate().isBefore(DateUtils.getBusinessLocalDate())) {
                     /*
                      * JW: sums up amounts by disbursal date in case of side-effect issues. Original assumed that there
                      * were no duplicate disbursal dates and 'put' each amount into the map keyed by date
