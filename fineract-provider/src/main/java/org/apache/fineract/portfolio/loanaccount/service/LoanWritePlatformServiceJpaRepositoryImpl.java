@@ -29,7 +29,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -318,8 +317,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (loan.loanProduct().isDisallowExpectedDisbursements()) {
             // create artificial 'tranche/expected disbursal' as current disburse code expects it for multi-disbursal
             // products
-            final Date artificialExpectedDate = Date
-                    .from(loan.getExpectedDisbursedOnLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+            final LocalDate artificialExpectedDate = loan.getExpectedDisbursedOnLocalDate();
             LoanDisbursementDetails disbursementDetail = new LoanDisbursementDetails(artificialExpectedDate, null,
                     loan.getDisbursedAmount(), null);
             disbursementDetail.updateLoan(loan);
@@ -359,14 +357,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         checkClientOrGroupActive(loan);
 
         final LocalDate nextPossibleRepaymentDate = loan.getNextPossibleRepaymentDateForRescheduling();
-        final Date rescheduledRepaymentDate = command.dateValueOfParameterNamed("adjustRepaymentDate");
+        final LocalDate rescheduledRepaymentDate = command.localDateValueOfParameterNamed("adjustRepaymentDate");
 
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(loanId, EntityTables.LOAN.getName(),
                 StatusEnum.DISBURSE.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
 
         LocalDate recalculateFrom = null;
         if (!loan.isMultiDisburmentLoan()) {
-            loan.setActualDisbursementDate(Date.from(actualDisbursementDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+            loan.setActualDisbursementDate(actualDisbursementDate);
         }
         ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
 
@@ -669,7 +667,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         final LocalDate nextPossibleRepaymentDate = null;
-        final Date rescheduledRepaymentDate = null;
+        final LocalDate rescheduledRepaymentDate = null;
 
         for (final SingleDisbursalCommand singleLoanDisbursalCommand : disbursalCommand) {
             final Loan loan = this.loanAssembler.assembleFrom(singleLoanDisbursalCommand.getLoanId());
@@ -970,7 +968,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             if (singleLoanRepaymentCommand != null) {
                 Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(singleLoanRepaymentCommand.getLoanId());
                 final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
-                        Date.from(singleLoanRepaymentCommand.getTransactionDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                        singleLoanRepaymentCommand.getTransactionDate());
                 final WorkingDays workingDays = this.workingDaysRepository.findOne();
                 final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
                 boolean isHolidayEnabled = false;
@@ -2360,8 +2358,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     }
                 }
 
-                holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
-                        Date.from(loan.getDisbursementDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), loan.getDisbursementDate());
                 if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
                     ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
                     loan.setHelpers(null, this.loanSummaryWrapper, this.transactionProcessingStrategy);
@@ -2414,15 +2411,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private void updateLoanCounters(final Loan loan, final LocalDate actualDisbursementDate) {
 
         if (loan.isGroupLoan()) {
-            final List<Loan> loansToUpdateForLoanCounter = this.loanRepositoryWrapper.getGroupLoansDisbursedAfter(
-                    Date.from(actualDisbursementDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), loan.getGroupId(),
-                    AccountType.GROUP.getValue());
+            final List<Loan> loansToUpdateForLoanCounter = this.loanRepositoryWrapper.getGroupLoansDisbursedAfter(actualDisbursementDate,
+                    loan.getGroupId(), AccountType.GROUP.getValue());
             final Integer newLoanCounter = getNewGroupLoanCounter(loan);
             final Integer newLoanProductCounter = getNewGroupLoanProductCounter(loan);
             updateLoanCounter(loan, loansToUpdateForLoanCounter, newLoanCounter, newLoanProductCounter);
         } else {
-            final List<Loan> loansToUpdateForLoanCounter = this.loanRepositoryWrapper.getClientOrJLGLoansDisbursedAfter(
-                    Date.from(actualDisbursementDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), loan.getClientId());
+            final List<Loan> loansToUpdateForLoanCounter = this.loanRepositoryWrapper
+                    .getClientOrJLGLoansDisbursedAfter(actualDisbursementDate, loan.getClientId());
             final Integer newLoanCounter = getNewClientOrJLGLoanCounter(loan);
             final Integer newLoanProductCounter = getNewClientOrJLGLoanProductCounter(loan);
             updateLoanCounter(loan, loansToUpdateForLoanCounter, newLoanCounter, newLoanProductCounter);
@@ -3087,8 +3083,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     private void regenerateScheduleOnDisbursement(final JsonCommand command, final Loan loan, final boolean recalculateSchedule,
             final ScheduleGeneratorDTO scheduleGeneratorDTO, final LocalDate nextPossibleRepaymentDate,
-            final Date rescheduledRepaymentDate) {
-        AppUser currentUser = getAppUserIfPresent();
+            final LocalDate rescheduledRepaymentDate) {
         final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
         BigDecimal emiAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.emiAmountParameterName);
         loan.regenerateScheduleOnDisbursement(scheduleGeneratorDTO, recalculateSchedule, actualDisbursementDate, emiAmount,

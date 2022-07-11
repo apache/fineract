@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.configuration.domain;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
@@ -238,7 +238,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     }
 
     @Override
-    public Date retrieveOrganisationStartDate() {
+    public LocalDate retrieveOrganisationStartDate() {
         final String propertyName = "organisation-start-date";
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
         return property.getDateValue();

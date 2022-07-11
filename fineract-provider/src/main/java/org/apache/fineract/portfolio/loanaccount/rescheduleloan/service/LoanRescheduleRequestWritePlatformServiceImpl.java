@@ -22,11 +22,9 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -213,32 +211,27 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             final Boolean recalculateInterest = jsonCommand
                     .booleanObjectValueOfParameterNamed(RescheduleLoansApiConstants.recalculateInterestParamName);
 
-            final Date endDate = jsonCommand.dateValueOfParameterNamed(RescheduleLoansApiConstants.endDateParamName);
+            final LocalDate endDate = jsonCommand.localDateValueOfParameterNamed(RescheduleLoansApiConstants.endDateParamName);
             final BigDecimal emi = jsonCommand.bigDecimalValueOfParameterNamed(RescheduleLoansApiConstants.emiParamName);
 
             // initialize set the value to null
-            Date submittedOnDate = null;
+            LocalDate submittedOnDate = null;
 
             // check if the parameter is in the JsonCommand object
             if (jsonCommand.hasParameter(RescheduleLoansApiConstants.submittedOnDateParamName)) {
                 // create a LocalDate object from the "submittedOnDate" Date
                 // string
-                LocalDate localDate = jsonCommand.localDateValueOfParameterNamed(RescheduleLoansApiConstants.submittedOnDateParamName);
-
-                if (localDate != null) {
-                    // update the value of the "submittedOnDate" variable
-                    submittedOnDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-                }
+                submittedOnDate = jsonCommand.localDateValueOfParameterNamed(RescheduleLoansApiConstants.submittedOnDateParamName);
             }
 
             // initially set the value to null
-            Date rescheduleFromDate = null;
+            LocalDate rescheduleFromDate = null;
 
             // start point of the rescheduling exercise
             Integer rescheduleFromInstallment = null;
 
             // initially set the value to null
-            Date adjustedDueDate = null;
+            LocalDate adjustedDueDate = null;
 
             // check if the parameter is in the JsonCommand object
             if (jsonCommand.hasParameter(RescheduleLoansApiConstants.rescheduleFromDateParamName)) {
@@ -252,19 +245,14 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                     rescheduleFromInstallment = installment.getInstallmentNumber();
 
                     // update the value of the "rescheduleFromDate" variable
-                    rescheduleFromDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                    rescheduleFromDate = localDate;
                 }
             }
 
             if (jsonCommand.hasParameter(RescheduleLoansApiConstants.adjustedDueDateParamName)) {
                 // create a LocalDate object from the "adjustedDueDate" Date
                 // string
-                LocalDate localDate = jsonCommand.localDateValueOfParameterNamed(RescheduleLoansApiConstants.adjustedDueDateParamName);
-
-                if (localDate != null) {
-                    // update the value of the "adjustedDueDate"variable
-                    adjustedDueDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-                }
+                adjustedDueDate = jsonCommand.localDateValueOfParameterNamed(RescheduleLoansApiConstants.adjustedDueDateParamName);
             }
 
             final LoanRescheduleRequest loanRescheduleRequest = LoanRescheduleRequest.instance(loan,
@@ -277,7 +265,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             final Boolean isActive = false;
             final boolean isSpecificToInstallment = false;
             BigDecimal decimalValue = null;
-            Date dueDate = null;
+            LocalDate dueDate = null;
             // create term variations for flat and declining balance loans
             createLoanTermVariationsForRegularLoans(loan, graceOnPrincipal, graceOnInterest, extraTerms, interestRate, rescheduleFromDate,
                     adjustedDueDate, loanRescheduleRequest, loanRescheduleRequestToTermVariationMappings, isActive, isSpecificToInstallment,
@@ -302,23 +290,21 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
     }
 
     private void createLoanTermVariationsForRegularLoans(final Loan loan, final Integer graceOnPrincipal, final Integer graceOnInterest,
-            final Integer extraTerms, final BigDecimal interestRate, Date rescheduleFromDate, Date adjustedDueDate,
+            final Integer extraTerms, final BigDecimal interestRate, LocalDate rescheduleFromDate, LocalDate adjustedDueDate,
             final LoanRescheduleRequest loanRescheduleRequest,
             List<LoanRescheduleRequestToTermVariationMapping> loanRescheduleRequestToTermVariationMappings, final Boolean isActive,
-            final boolean isSpecificToInstallment, BigDecimal decimalValue, Date dueDate, Date endDate, BigDecimal emi) {
+            final boolean isSpecificToInstallment, BigDecimal decimalValue, LocalDate dueDate, LocalDate endDate, BigDecimal emi) {
 
         if (rescheduleFromDate != null && endDate != null && emi != null) {
             LoanTermVariations parent = null;
-            LocalDate rescheduleFromLocDate = LocalDate.ofInstant(rescheduleFromDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-            LocalDate endDateLocDate = LocalDate.ofInstant(endDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            LocalDate rescheduleFromLocDate = rescheduleFromDate;
+            LocalDate endDateLocDate = endDate;
             final Integer termType = LoanTermVariationType.EMI_AMOUNT.getValue();
             List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
             for (LoanRepaymentScheduleInstallment installment : installments) {
                 if (installment.getDueDate().isEqual(rescheduleFromLocDate) || installment.getDueDate().isEqual(endDateLocDate)
                         || (installment.getDueDate().isAfter(rescheduleFromLocDate) && installment.getDueDate().isBefore(endDateLocDate))) {
-                    createLoanTermVariations(loanRescheduleRequest, termType, loan,
-                            Date.from(installment.getDueDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
-                            Date.from(installment.getDueDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
+                    createLoanTermVariations(loanRescheduleRequest, termType, loan, installment.getDueDate(), installment.getDueDate(),
                             loanRescheduleRequestToTermVariationMappings, isActive, true, emi, parent);
                 }
                 if (installment.getDueDate().isAfter(endDateLocDate)) {
@@ -374,7 +360,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
     }
 
     private LoanTermVariations createLoanTermVariations(LoanRescheduleRequest loanRescheduleRequest, final Integer termType,
-            final Loan loan, Date rescheduleFromDate, Date adjustedDueDate,
+            final Loan loan, LocalDate rescheduleFromDate, LocalDate adjustedDueDate,
             List<LoanRescheduleRequestToTermVariationMapping> loanRescheduleRequestToTermVariationMappings, final Boolean isActive,
             final boolean isSpecificToInstallment, final BigDecimal decimalValue, LoanTermVariations parent) {
         LoanTermVariations loanTermVariation = new LoanTermVariations(termType, rescheduleFromDate, decimalValue, adjustedDueDate,
@@ -436,8 +422,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                             && activeLoanTermVariation.fetchDateValue().equals(dueDateVariationInCurrentRequest.fetchTermApplicaDate())) {
                         activeLoanTermVariation.markAsInactive();
                         rescheduleFromDate = activeLoanTermVariation.fetchTermApplicaDate();
-                        dueDateVariationInCurrentRequest
-                                .setTermApplicableFrom(Date.from(rescheduleFromDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                        dueDateVariationInCurrentRequest.setTermApplicableFrom(rescheduleFromDate);
                     } else if (!activeLoanTermVariation.fetchTermApplicaDate().isBefore(fromScheduleDate)) {
                         while (currentScheduleDate.isBefore(activeLoanTermVariation.fetchTermApplicaDate())) {
                             currentScheduleDate = this.scheduledDateGenerator.generateNextRepaymentDate(currentScheduleDate,
@@ -447,8 +432,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                             changeMap.put(currentScheduleDate, modifiedScheduleDate);
                         }
                         if (changeMap.containsKey(activeLoanTermVariation.fetchTermApplicaDate())) {
-                            activeLoanTermVariation.setTermApplicableFrom(Date.from(changeMap
-                                    .get(activeLoanTermVariation.fetchTermApplicaDate()).atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                            activeLoanTermVariation.setTermApplicableFrom(changeMap.get(activeLoanTermVariation.fetchTermApplicaDate()));
                         }
                     }
                 }

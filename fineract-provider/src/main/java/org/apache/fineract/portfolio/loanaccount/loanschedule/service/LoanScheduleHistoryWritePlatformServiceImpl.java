@@ -19,10 +19,10 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.service;
 
 import java.math.BigDecimal;
-import java.time.ZoneId;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -57,15 +57,15 @@ public class LoanScheduleHistoryWritePlatformServiceImpl implements LoanSchedule
 
         for (LoanRepaymentScheduleInstallment repaymentScheduleInstallment : repaymentScheduleInstallments) {
             final Integer installmentNumber = repaymentScheduleInstallment.getInstallmentNumber();
-            Date fromDate = null;
-            Date dueDate = null;
+            LocalDate fromDate = null;
+            LocalDate dueDate = null;
 
             if (repaymentScheduleInstallment.getFromDate() != null) {
-                fromDate = Date.from(repaymentScheduleInstallment.getFromDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+                fromDate = repaymentScheduleInstallment.getFromDate();
             }
 
             if (repaymentScheduleInstallment.getDueDate() != null) {
-                dueDate = Date.from(repaymentScheduleInstallment.getDueDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+                dueDate = repaymentScheduleInstallment.getDueDate();
             }
 
             final BigDecimal principal = repaymentScheduleInstallment.getPrincipal(currency).getAmount();
@@ -73,18 +73,20 @@ public class LoanScheduleHistoryWritePlatformServiceImpl implements LoanSchedule
             final BigDecimal feeChargesCharged = repaymentScheduleInstallment.getFeeChargesCharged(currency).getAmount();
             final BigDecimal penaltyCharges = repaymentScheduleInstallment.getPenaltyChargesCharged(currency).getAmount();
 
-            Date createdOnDate = null;
+            LocalDate createdOnDate = null;
             if (repaymentScheduleInstallment.getCreatedDate().isPresent()) {
-                createdOnDate = Date.from(repaymentScheduleInstallment.getCreatedDate().get()); // NOSONAR
+                createdOnDate = LocalDate.ofInstant(repaymentScheduleInstallment.getCreatedDate().get(),
+                        DateUtils.getDateTimeZoneOfTenant()); // NOSONAR
             }
 
             final Long createdByUser = repaymentScheduleInstallment.getCreatedBy().orElse(null);
             final Long lastModifiedByUser = repaymentScheduleInstallment.getLastModifiedBy().orElse(null);
 
-            Date lastModifiedOnDate = null;
+            LocalDate lastModifiedOnDate = null;
 
             if (repaymentScheduleInstallment.getLastModifiedDate().isPresent()) {
-                lastModifiedOnDate = Date.from(repaymentScheduleInstallment.getLastModifiedDate().get()); // NOSONAR
+                lastModifiedOnDate = LocalDate.ofInstant(repaymentScheduleInstallment.getLastModifiedDate().get(),
+                        DateUtils.getDateTimeZoneOfTenant()); // NOSONAR
             }
 
             LoanRepaymentScheduleHistory loanRepaymentScheduleHistory = LoanRepaymentScheduleHistory.instance(loan, loanRescheduleRequest,

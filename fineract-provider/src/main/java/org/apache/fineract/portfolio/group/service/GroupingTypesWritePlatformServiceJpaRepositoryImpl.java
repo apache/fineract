@@ -19,9 +19,7 @@
 package org.apache.fineract.portfolio.group.service;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -618,8 +616,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                 final String errorMessage = groupOrCenter.getGroupLevel().getLevelName() + " cannot be closed because of non-closed loans.";
                 throw new InvalidGroupStateTransitionException(groupOrCenter.getGroupLevel().getLevelName(), "close", "loan.not.closed",
                         errorMessage);
-            } else if (loanStatus.isClosed()
-                    && loan.getClosedOnDate().after(Date.from(closureDate.atStartOfDay(ZoneId.systemDefault()).toInstant()))) {
+            } else if (loanStatus.isClosed() && loan.getClosedOnDate().isAfter(closureDate)) {
                 final String errorMessage = groupOrCenter.getGroupLevel().getLevelName()
                         + "closureDate cannot be before the loan closedOnDate.";
                 throw new InvalidGroupStateTransitionException(groupOrCenter.getGroupLevel().getLevelName(), "close",
