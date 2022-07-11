@@ -19,12 +19,10 @@
 
 package org.apache.fineract.portfolio.client.domain;
 
-import java.util.Date;
+import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @SuppressWarnings("serial")
@@ -42,23 +40,21 @@ public class ClientTransferDetails extends AbstractPersistableCustom {
     private Long toOfficeId;
 
     @Column(name = "proposed_transfer_date", nullable = true)
-    @Temporal(TemporalType.DATE)
-    private Date proposedTransferDate;
+    private LocalDate proposedTransferDate;
 
     @Column(name = "transfer_type", nullable = false)
     private Integer transferEventType;
 
     @Column(name = "submitted_on", nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date submittedOn;
+    private LocalDate submittedOn;
 
     @Column(name = "submitted_by", nullable = false)
     private Long submittedBy;
 
     protected ClientTransferDetails() {}
 
-    private ClientTransferDetails(final Long clientId, final Long fromOfficeId, final Long toOfficeId, final Date proposedTransferDate,
-            final Integer transferEventType, final Date submittedOn, final Long submittedBy) {
+    private ClientTransferDetails(final Long clientId, final Long fromOfficeId, final Long toOfficeId, final LocalDate proposedTransferDate,
+            final Integer transferEventType, final LocalDate submittedOn, final Long submittedBy) {
         this.clientId = clientId;
         this.fromOfficeId = fromOfficeId;
         this.toOfficeId = toOfficeId;
@@ -69,7 +65,7 @@ public class ClientTransferDetails extends AbstractPersistableCustom {
     }
 
     public static ClientTransferDetails instance(final Long clientId, final Long fromOfficeId, final Long toOfficeId,
-            final Date proposedTransferDate, final Integer transferEventType, final Date submittedOn, final Long submittedBy) {
+            final LocalDate proposedTransferDate, final Integer transferEventType, final LocalDate submittedOn, final Long submittedBy) {
         return new ClientTransferDetails(clientId, fromOfficeId, toOfficeId, proposedTransferDate, transferEventType, submittedOn,
                 submittedBy);
 

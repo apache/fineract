@@ -20,19 +20,14 @@ package org.apache.fineract.portfolio.client.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.office.domain.OrganisationCurrency;
@@ -56,9 +51,8 @@ public class ClientCharge extends AbstractPersistableCustom {
     @Column(name = "charge_time_enum", nullable = false)
     private Integer chargeTime;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "charge_due_date")
-    private Date dueDate;
+    private LocalDate dueDate;
 
     @Column(name = "charge_calculation_enum")
     private Integer chargeCalculation;
@@ -90,9 +84,8 @@ public class ClientCharge extends AbstractPersistableCustom {
     @Column(name = "is_active", nullable = false)
     private boolean status = true;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "inactivated_on_date")
-    private Date inactivationDate;
+    private LocalDate inactivationDate;
 
     @Transient
     private OrganisationCurrency currency;
@@ -116,7 +109,7 @@ public class ClientCharge extends AbstractPersistableCustom {
         this.charge = charge;
         this.penaltyCharge = charge.isPenalty();
         this.chargeTime = charge.getChargeTimeType();
-        this.dueDate = (dueDate == null) ? null : Date.from(dueDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.dueDate = dueDate;
         this.chargeCalculation = charge.getChargeCalculation();
 
         BigDecimal chargeAmount = charge.getAmount();
@@ -220,11 +213,7 @@ public class ClientCharge extends AbstractPersistableCustom {
     }
 
     public LocalDate getDueLocalDate() {
-        LocalDate dueDate = null;
-        if (this.dueDate != null) {
-            dueDate = LocalDate.ofInstant(this.dueDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-        return dueDate;
+        return this.dueDate;
     }
 
     public Client getClient() {
@@ -239,7 +228,7 @@ public class ClientCharge extends AbstractPersistableCustom {
         return this.chargeTime;
     }
 
-    public Date getDueDate() {
+    public LocalDate getDueDate() {
         return this.dueDate;
     }
 
@@ -267,7 +256,7 @@ public class ClientCharge extends AbstractPersistableCustom {
         return !this.status;
     }
 
-    public Date getInactivationDate() {
+    public LocalDate getInactivationDate() {
         return this.inactivationDate;
     }
 

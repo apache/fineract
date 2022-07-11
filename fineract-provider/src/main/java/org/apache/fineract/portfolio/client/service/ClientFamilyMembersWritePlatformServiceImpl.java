@@ -22,10 +22,10 @@ package org.apache.fineract.portfolio.client.service;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -82,40 +82,19 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
         String mobileNumber = "";
         Long age = null;
         Boolean isDependent = false;
-        Date dateOfBirth = null;
+        LocalDate dateOfBirth = null;
 
         this.context.authenticatedUser();
         apiJsonDeserializer.validateForCreate(clientId, command.json());
 
         Client client = clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
-
-        if (command.stringValueOfParameterNamed("firstName") != null) {
-            firstName = command.stringValueOfParameterNamed("firstName");
-        }
-
-        if (command.stringValueOfParameterNamed("middleName") != null) {
-            middleName = command.stringValueOfParameterNamed("middleName");
-        }
-
-        if (command.stringValueOfParameterNamed("lastName") != null) {
-            lastName = command.stringValueOfParameterNamed("lastName");
-        }
-
-        if (command.stringValueOfParameterNamed("qualification") != null) {
-            qualification = command.stringValueOfParameterNamed("qualification");
-        }
-
-        if (command.stringValueOfParameterNamed("mobileNumber") != null) {
-            mobileNumber = command.stringValueOfParameterNamed("mobileNumber");
-        }
-
-        if (command.longValueOfParameterNamed("age") != null) {
-            age = command.longValueOfParameterNamed("age");
-        }
-
-        if (command.booleanObjectValueOfParameterNamed("isDependent") != null) {
-            isDependent = command.booleanObjectValueOfParameterNamed("isDependent");
-        }
+        firstName = command.stringValueOfParameterNamed("firstName");
+        middleName = command.stringValueOfParameterNamed("middleName");
+        lastName = command.stringValueOfParameterNamed("lastName");
+        qualification = command.stringValueOfParameterNamed("qualification");
+        mobileNumber = command.stringValueOfParameterNamed("mobileNumber");
+        age = command.longValueOfParameterNamed("age");
+        isDependent = command.booleanObjectValueOfParameterNamed("isDependent");
 
         if (command.longValueOfParameterNamed("relationshipId") != null) {
             relationshipId = command.longValueOfParameterNamed("relationshipId");
@@ -137,10 +116,7 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
             profession = this.codeValueRepository.getReferenceById(professionId);
         }
 
-        if (command.dateValueOfParameterNamed("dateOfBirth") != null) {
-            dateOfBirth = command.dateValueOfParameterNamed("dateOfBirth");
-
-        }
+        dateOfBirth = command.localDateValueOfParameterNamed("dateOfBirth");
 
         ClientFamilyMembers clientFamilyMembers = ClientFamilyMembers.fromJson(client, firstName, middleName, lastName, qualification,
                 mobileNumber, age, isDependent, relationship, maritalStatus, gender, dateOfBirth, profession);
@@ -166,7 +142,7 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
         String middleName = "";
         String lastName = "";
         String qualification = "";
-        Date dateOfBirth = null;
+        LocalDate dateOfBirth = null;
         String mobileNumber = "";
         Long age = null;
         Boolean isDependent = false;
@@ -238,12 +214,13 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
 
             if (member.get("dateOfBirth") != null) {
 
-                DateFormat format = new SimpleDateFormat(member.get("dateFormat").getAsString());
-                Date date;
+                DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendPattern(member.get("dateFormat").getAsString())
+                        .toFormatter();
+                LocalDate date;
                 try {
-                    date = format.parse(member.get("dateOfBirth").getAsString());
+                    date = LocalDate.parse(member.get("dateOfBirth").getAsString(), formatter);
                     dateOfBirth = date;
-                } catch (ParseException e) {
+                } catch (DateTimeParseException e) {
                     // TODO Auto-generated catch block
                     LOG.error("Problem occurred in addClientFamilyMember function", e);
                 }
@@ -280,7 +257,7 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
         String middleName = "";
         String lastName = "";
         String qualification = "";
-        Date dateOfBirth = null;
+        LocalDate dateOfBirth = null;
         String mobileNumber = "";
         Long age = null;
         Boolean isDependent = false;
@@ -359,8 +336,8 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
             clientFamilyMember.setProfession(profession);
         }
 
-        if (command.dateValueOfParameterNamed("dateOfBirth") != null) {
-            dateOfBirth = command.dateValueOfParameterNamed("dateOfBirth");
+        if (command.localDateValueOfParameterNamed("dateOfBirth") != null) {
+            dateOfBirth = command.localDateValueOfParameterNamed("dateOfBirth");
             clientFamilyMember.setDateOfBirth(dateOfBirth);
 
         }
