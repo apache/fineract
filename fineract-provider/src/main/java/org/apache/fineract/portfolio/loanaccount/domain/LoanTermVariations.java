@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -28,11 +27,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 
@@ -47,16 +43,14 @@ public class LoanTermVariations extends AbstractPersistableCustom {
     @Column(name = "term_type", nullable = false)
     private Integer termType;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "applicable_date", nullable = false)
-    private Date termApplicableFrom;
+    private LocalDate termApplicableFrom;
 
     @Column(name = "decimal_value", scale = 6, precision = 19)
     private BigDecimal decimalValue;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "date_value")
-    private Date dateValue;
+    private LocalDate dateValue;
 
     @Column(name = "is_specific_to_installment", nullable = false)
     private boolean isSpecificToInstallment;
@@ -71,8 +65,8 @@ public class LoanTermVariations extends AbstractPersistableCustom {
     @JoinColumn(name = "parent_id")
     private LoanTermVariations parent;
 
-    public LoanTermVariations(final Integer termType, final Date termApplicableFrom, final BigDecimal decimalValue, final Date dateValue,
-            final boolean isSpecificToInstallment, final Loan loan) {
+    public LoanTermVariations(final Integer termType, final LocalDate termApplicableFrom, final BigDecimal decimalValue,
+            final LocalDate dateValue, final boolean isSpecificToInstallment, final Loan loan) {
         this.loan = loan;
         this.termApplicableFrom = termApplicableFrom;
         this.termType = termType;
@@ -84,8 +78,8 @@ public class LoanTermVariations extends AbstractPersistableCustom {
         this.parent = null;
     }
 
-    public LoanTermVariations(final Integer termType, final Date termApplicableFrom, final BigDecimal decimalValue, final Date dateValue,
-            final boolean isSpecificToInstallment, final Loan loan, final Integer loanStatus) {
+    public LoanTermVariations(final Integer termType, final LocalDate termApplicableFrom, final BigDecimal decimalValue,
+            final LocalDate dateValue, final boolean isSpecificToInstallment, final Loan loan, final Integer loanStatus) {
         this.loan = loan;
         this.termApplicableFrom = termApplicableFrom;
         this.termType = termType;
@@ -97,9 +91,9 @@ public class LoanTermVariations extends AbstractPersistableCustom {
         this.parent = null;
     }
 
-    public LoanTermVariations(final Integer termType, final Date termApplicableFrom, final BigDecimal decimalValue, final Date dateValue,
-            final boolean isSpecificToInstallment, final Loan loan, final Integer loanStatus, final Boolean isActive,
-            final LoanTermVariations parent) {
+    public LoanTermVariations(final Integer termType, final LocalDate termApplicableFrom, final BigDecimal decimalValue,
+            final LocalDate dateValue, final boolean isSpecificToInstallment, final Loan loan, final Integer loanStatus,
+            final Boolean isActive, final LoanTermVariations parent) {
         this.loan = loan;
         this.termApplicableFrom = termApplicableFrom;
         this.termType = termType;
@@ -120,36 +114,32 @@ public class LoanTermVariations extends AbstractPersistableCustom {
     }
 
     public LoanTermVariationsData toData() {
-        LocalDate termStartDate = LocalDate.ofInstant(this.termApplicableFrom.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        LocalDate dateValue = null;
-        if (this.dateValue != null) {
-            dateValue = LocalDate.ofInstant(this.dateValue.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
         EnumOptionData type = LoanEnumerations.loanvariationType(this.termType);
-        return new LoanTermVariationsData(getId(), type, termStartDate, this.decimalValue, dateValue, this.isSpecificToInstallment);
+        return new LoanTermVariationsData(getId(), type, this.termApplicableFrom, this.decimalValue, this.dateValue,
+                this.isSpecificToInstallment);
     }
 
-    public Date getTermApplicableFrom() {
+    public LocalDate getTermApplicableFrom() {
         return this.termApplicableFrom;
     }
 
     public LocalDate fetchTermApplicaDate() {
-        return LocalDate.ofInstant(this.termApplicableFrom.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        return this.termApplicableFrom;
     }
 
     public BigDecimal getTermValue() {
         return this.decimalValue;
     }
 
-    public Date getDateValue() {
+    public LocalDate getDateValue() {
         return this.dateValue;
     }
 
     public LocalDate fetchDateValue() {
-        return this.dateValue == null ? null : LocalDate.ofInstant(this.dateValue.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        return this.dateValue;
     }
 
-    public void setTermApplicableFrom(Date termApplicableFrom) {
+    public void setTermApplicableFrom(LocalDate termApplicableFrom) {
         this.termApplicableFrom = termApplicableFrom;
     }
 

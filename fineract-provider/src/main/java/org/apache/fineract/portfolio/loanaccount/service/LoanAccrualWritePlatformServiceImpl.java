@@ -20,11 +20,9 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -271,8 +269,8 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
         String transactionSql = "INSERT INTO m_loan_transaction  (loan_id,office_id,is_reversed,transaction_type_enum,transaction_date,amount,interest_portion_derived,"
                 + "fee_charges_portion_derived,penalty_charges_portion_derived, submitted_on_date) VALUES (?, ?, false, ?, ?, ?, ?, ?, ?, ?)";
         this.jdbcTemplate.update(transactionSql, scheduleAccrualData.getLoanId(), scheduleAccrualData.getOfficeId(),
-                LoanTransactionType.ACCRUAL.getValue(), Date.from(accruedTill.atStartOfDay(ZoneId.systemDefault()).toInstant()), amount,
-                interestportion, feeportion, penaltyportion, DateUtils.getBusinessDate());
+                LoanTransactionType.ACCRUAL.getValue(), accruedTill, amount, interestportion, feeportion, penaltyportion,
+                DateUtils.getBusinessDate());
         @SuppressWarnings("deprecation")
         final Long transactonId = this.jdbcTemplate.queryForObject("SELECT " + sqlGenerator.lastInsertId(), Long.class); // NOSONAR
 
@@ -293,8 +291,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
                 scheduleAccrualData.getRepaymentScheduleId());
 
         String updateLoan = "UPDATE m_loan  SET accrued_till=?  WHERE  id=?";
-        this.jdbcTemplate.update(updateLoan, Date.from(accruedTill.atStartOfDay(ZoneId.systemDefault()).toInstant()),
-                scheduleAccrualData.getLoanId());
+        this.jdbcTemplate.update(updateLoan, accruedTill, scheduleAccrualData.getLoanId());
         final Map<String, Object> accountingBridgeData = deriveAccountingBridgeData(scheduleAccrualData, transactionMap);
         this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
     }

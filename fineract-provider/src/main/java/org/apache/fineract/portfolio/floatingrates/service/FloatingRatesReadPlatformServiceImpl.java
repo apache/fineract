@@ -19,10 +19,10 @@
 package org.apache.fineract.portfolio.floatingrates.service;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateData;
@@ -221,8 +221,9 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
             final boolean isDifferentialToBLR = rs.getBoolean("linkedrateperiods_is_differential_to_base_lending_rate");
             final Date blrFromDate = rs.getDate("baserate_from_date");
             final BigDecimal blrInterestRate = rs.getBigDecimal("baserate_interest_rate");
-
-            return new InterestRatePeriodData(fromDate, interestRate, isDifferentialToBLR, blrFromDate, blrInterestRate);
+            final LocalDate fromLocalDate = fromDate != null ? fromDate.toLocalDate() : null;
+            final LocalDate blrFromLocalDate = blrFromDate != null ? blrFromDate.toLocalDate() : null;
+            return new InterestRatePeriodData(fromLocalDate, interestRate, isDifferentialToBLR, blrFromLocalDate, blrInterestRate);
         }
 
         public String schema() {

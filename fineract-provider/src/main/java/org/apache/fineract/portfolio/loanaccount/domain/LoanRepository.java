@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -74,11 +74,11 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     String FIND_BY_ACCOUNT_NUMBER = "select loan from Loan loan where loan.accountNumber = :accountNumber";
 
     @Query(FIND_GROUP_LOANS_DISBURSED_AFTER)
-    List<Loan> getGroupLoansDisbursedAfter(@Param("disbursementDate") Date disbursementDate, @Param("groupId") Long groupId,
+    List<Loan> getGroupLoansDisbursedAfter(@Param("disbursementDate") LocalDate disbursementDate, @Param("groupId") Long groupId,
             @Param("loanType") Integer loanType);
 
     @Query(FIND_CLIENT_OR_JLG_LOANS_DISBURSED_AFTER)
-    List<Loan> getClientOrJLGLoansDisbursedAfter(@Param("disbursementDate") Date disbursementDate, @Param("clientId") Long clientId);
+    List<Loan> getClientOrJLGLoansDisbursedAfter(@Param("disbursementDate") LocalDate disbursementDate, @Param("clientId") Long clientId);
 
     @Query(FIND_MAX_GROUP_LOAN_COUNTER_QUERY)
     Integer getMaxGroupLoanCounter(@Param("groupId") Long groupId, @Param("loanType") Integer loanType);
@@ -129,7 +129,7 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
             @Param("loanStatuses") Collection<Integer> loanStatuses, @Param("loanTypes") Collection<Integer> loanTypes);
 
     @Query("select loan.id from Loan loan where loan.actualDisbursementDate > :disbursalDate order by loan.actualDisbursementDate")
-    List<Long> getLoansDisbursedAfter(@Param("disbursalDate") Date disbursalDate);
+    List<Long> getLoansDisbursedAfter(@Param("disbursalDate") LocalDate disbursalDate);
 
     @Query("select loan from Loan loan where loan.client.office.id IN :officeIds and loan.loanStatus IN :loanStatuses")
     List<Loan> findByClientOfficeIdsAndLoanStatus(@Param("officeIds") Collection<Long> officeIds,

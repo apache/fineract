@@ -22,9 +22,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -194,8 +192,7 @@ public class LoanUtilService {
     private HolidayDetailDTO constructHolidayDTO(final Loan loan) {
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
-                Date.from(loan.getDisbursementDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
-                HolidayStatusType.ACTIVE.getValue());
+                loan.getDisbursementDate(), HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
         final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
@@ -319,17 +316,14 @@ public class LoanUtilService {
                 int i = 0;
                 do {
                     final JsonObject jsonObject = disbursementDataArray.get(i).getAsJsonObject();
-                    Date expectedDisbursementDate = null;
-                    Date actualDisbursementDate = null;
+                    LocalDate expectedDisbursementDate = null;
+                    LocalDate actualDisbursementDate = null;
                     BigDecimal principal = null;
                     BigDecimal netDisbursalAmount = null;
 
                     if (jsonObject.has(LoanApiConstants.disbursementDateParameterName)) {
-                        LocalDate date = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.disbursementDateParameterName,
-                                jsonObject, dateFormat, locale);
-                        if (date != null) {
-                            expectedDisbursementDate = Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
-                        }
+                        expectedDisbursementDate = this.fromApiJsonHelper
+                                .extractLocalDateNamed(LoanApiConstants.disbursementDateParameterName, jsonObject, dateFormat, locale);
                     }
                     if (jsonObject.has(LoanApiConstants.disbursementPrincipalParameterName)
                             && jsonObject.get(LoanApiConstants.disbursementPrincipalParameterName).isJsonPrimitive()

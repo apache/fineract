@@ -24,13 +24,11 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1656,7 +1654,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     public Collection<LoanScheduleAccrualData> retriveScheduleAccrualData() {
 
         LoanScheduleAccrualMapper mapper = new LoanScheduleAccrualMapper();
-        Date organisationStartDate = this.configurationDomainService.retrieveOrganisationStartDate();
+        LocalDate organisationStartDate = this.configurationDomainService.retrieveOrganisationStartDate();
         final StringBuilder sqlBuilder = new StringBuilder(400);
         sqlBuilder.append("select ").append(mapper.schema()).append(
                 " where (recaldet.is_compounding_to_be_posted_as_transaction is null or recaldet.is_compounding_to_be_posted_as_transaction = false) ")
@@ -1671,8 +1669,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         Map<String, Object> paramMap = new HashMap<>(3);
         paramMap.put("active", LoanStatus.ACTIVE.getValue());
         paramMap.put("type", AccountingRuleType.ACCRUAL_PERIODIC.getValue());
-        paramMap.put("organisationStartDate", (organisationStartDate == null) ? DateUtils.getBusinessLocalDate()
-                : LocalDate.ofInstant(organisationStartDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()));
+        paramMap.put("organisationStartDate", (organisationStartDate == null) ? DateUtils.getBusinessLocalDate() : organisationStartDate);
         paramMap.put("currentDate", DateUtils.getBusinessLocalDate());
 
         return this.namedParameterJdbcTemplate.query(sqlBuilder.toString(), paramMap, mapper);
@@ -1682,7 +1679,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     public Collection<LoanScheduleAccrualData> retrivePeriodicAccrualData(final LocalDate tillDate) {
 
         LoanSchedulePeriodicAccrualMapper mapper = new LoanSchedulePeriodicAccrualMapper();
-        Date organisationStartDate = this.configurationDomainService.retrieveOrganisationStartDate();
+        LocalDate organisationStartDate = this.configurationDomainService.retrieveOrganisationStartDate();
         final StringBuilder sqlBuilder = new StringBuilder(400);
         sqlBuilder.append("select ").append(mapper.schema()).append(
                 " where  (recaldet.is_compounding_to_be_posted_as_transaction is null or recaldet.is_compounding_to_be_posted_as_transaction = false) ")
@@ -1694,8 +1691,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         Map<String, Object> paramMap = new HashMap<>(4);
         if (organisationStartDate != null) {
             sqlBuilder.append(" and ls.duedate > :organisationStartDate ");
-            paramMap.put("organisationStartDate",
-                    LocalDate.ofInstant(organisationStartDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()));
+            paramMap.put("organisationStartDate", organisationStartDate);
         }
         sqlBuilder.append(" order by loan.id,ls.duedate ");
         paramMap.put("active", LoanStatus.ACTIVE.getValue());
@@ -2084,10 +2080,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     @Override
-    public Date retrieveMinimumDateOfRepaymentTransaction(Long loanId) {
+    public LocalDate retrieveMinimumDateOfRepaymentTransaction(Long loanId) {
         // TODO Auto-generated method stub
-        Date date = this.jdbcTemplate.queryForObject(
-                "select min(transaction_date) from m_loan_transaction where loan_id=? and transaction_type_enum=2", Date.class, loanId);
+        LocalDate date = this.jdbcTemplate.queryForObject(
+                "select min(transaction_date) from m_loan_transaction where loan_id=? and transaction_type_enum=2", LocalDate.class,
+                loanId);
 
         return date;
     }
@@ -2155,13 +2152,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final Collection<InterestRatePeriodData> intRates = this.floatingRatesReadPlatformService
                     .retrieveInterestRatePeriods(loanData.loanProductId());
             for (final InterestRatePeriodData rate : intRates) {
-                if (rate.getFromDate()
-                        .compareTo(Date.from(loanData.getDisbursementDate().atStartOfDay(ZoneId.systemDefault()).toInstant())) > 0
-                        && loanData.isFloatingInterestRate()) {
+                if (rate.getFromDate().compareTo(loanData.getDisbursementDate()) > 0 && loanData.isFloatingInterestRate()) {
                     updateInterestRatePeriodData(rate, loanData);
                     intRatePeriodData.add(rate);
-                } else if (rate.getFromDate()
-                        .compareTo(Date.from(loanData.getDisbursementDate().atStartOfDay(ZoneId.systemDefault()).toInstant())) <= 0) {
+                } else if (rate.getFromDate().compareTo(loanData.getDisbursementDate()) <= 0) {
                     updateInterestRatePeriodData(rate, loanData);
                     intRatePeriodData.add(rate);
                     break;
@@ -2187,8 +2181,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         }
         rate.setEffectiveInterestRate(effectiveInterestRate);
 
-        if (rate.getFromDate().compareTo(Date.from(loan.getDisbursementDate().atStartOfDay(ZoneId.systemDefault()).toInstant())) < 0) {
-            rate.setFromDate(Date.from(loan.getDisbursementDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        if (rate.getFromDate().compareTo(loan.getDisbursementDate()) < 0) {
+            rate.setFromDate(loan.getDisbursementDate());
         }
     }
 

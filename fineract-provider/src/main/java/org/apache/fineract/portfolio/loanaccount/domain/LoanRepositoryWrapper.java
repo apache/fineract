@@ -18,10 +18,10 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,13 +88,13 @@ public class LoanRepositoryWrapper {
     }
 
     // Only root entities is enough
-    public List<Loan> getGroupLoansDisbursedAfter(@Param("disbursementDate") Date disbursementDate, @Param("groupId") Long groupId,
+    public List<Loan> getGroupLoansDisbursedAfter(@Param("disbursementDate") LocalDate disbursementDate, @Param("groupId") Long groupId,
             @Param("loanType") Integer loanType) {
         return this.repository.getGroupLoansDisbursedAfter(disbursementDate, groupId, loanType);
     }
 
     // Only root entities enough
-    public List<Loan> getClientOrJLGLoansDisbursedAfter(@Param("disbursementDate") Date disbursementDate,
+    public List<Loan> getClientOrJLGLoansDisbursedAfter(@Param("disbursementDate") LocalDate disbursementDate,
             @Param("clientId") Long clientId) {
         return this.repository.getClientOrJLGLoansDisbursedAfter(disbursementDate, clientId);
     }
@@ -192,7 +192,7 @@ public class LoanRepositoryWrapper {
     }
 
     // This method is not used
-    public List<Long> getLoansDisbursedAfter(@Param("disbursalDate") Date disbursalDate) {
+    public List<Long> getLoansDisbursedAfter(@Param("disbursalDate") LocalDate disbursalDate) {
         return this.repository.getLoansDisbursedAfter(disbursalDate);
     }
 

@@ -19,20 +19,20 @@
 package org.apache.fineract.portfolio.floatingrates.data;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 
 public class InterestRatePeriodData {
 
-    private Date fromDate;
+    private LocalDate fromDate;
     private final BigDecimal interestRate;
     private final boolean isDifferentialToBLR;
-    private final Date blrFromDate;
+    private final LocalDate blrFromDate;
     private final BigDecimal blrInterestRate;
     private BigDecimal loanDifferentialInterestRate;
     private BigDecimal loanProductDifferentialInterestRate;
     private BigDecimal effectiveInterestRate;
 
-    public InterestRatePeriodData(Date fromDate, BigDecimal interestRate, boolean isDifferentialToBLR, Date blrFromDate,
+    public InterestRatePeriodData(LocalDate fromDate, BigDecimal interestRate, boolean isDifferentialToBLR, LocalDate blrFromDate,
             BigDecimal blrInterestRate) {
         this.fromDate = fromDate;
         this.interestRate = interestRate;
@@ -41,11 +41,11 @@ public class InterestRatePeriodData {
         this.blrInterestRate = blrInterestRate;
     }
 
-    public Date getFromDate() {
+    public LocalDate getFromDate() {
         return this.fromDate;
     }
 
-    public void setFromDate(Date fromDate) {
+    public void setFromDate(LocalDate fromDate) {
         this.fromDate = fromDate;
     }
 
@@ -57,7 +57,7 @@ public class InterestRatePeriodData {
         return this.isDifferentialToBLR;
     }
 
-    public Date getBlrFromDate() {
+    public LocalDate getBlrFromDate() {
         return this.blrFromDate;
     }
 

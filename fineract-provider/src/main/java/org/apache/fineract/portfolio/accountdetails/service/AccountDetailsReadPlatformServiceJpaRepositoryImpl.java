@@ -593,9 +593,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
                     .append(" join m_client as c on c.id = g.entity_id ").append(" LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id")
                     .append(" left join m_loan_arrears_aging la on la.loan_id = l.id")
                     .append(" left join m_code_value cv ON cv.id = g.client_reln_cv_id")
-                    .append(" left join m_savings_account sa on sa.client_id = c.id")
-
-            ;
+                    .append(" left join m_savings_account sa on sa.client_id = c.id");
 
             return accountsSummary.toString();
         }
