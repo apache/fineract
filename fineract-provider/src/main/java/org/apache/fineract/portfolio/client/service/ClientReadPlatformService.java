@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.portfolio.client.service;
 
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.portfolio.client.data.ClientData;
@@ -57,7 +57,7 @@ public interface ClientReadPlatformService {
      */
     Collection<Long> retrieveUserClients(Long aUserID);
 
-    Date retrieveClientTransferProposalDate(Long clientId);
+    LocalDate retrieveClientTransferProposalDate(Long clientId);
 
     void validateClient(Long clientId);
 }

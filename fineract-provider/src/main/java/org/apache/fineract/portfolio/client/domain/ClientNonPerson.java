@@ -19,9 +19,7 @@
 package org.apache.fineract.portfolio.client.domain;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,15 +30,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 
 @Entity
@@ -59,8 +54,7 @@ public class ClientNonPerson extends AbstractPersistableCustom {
     private String incorpNumber;
 
     @Column(name = "incorp_validity_till", nullable = true)
-    @Temporal(TemporalType.DATE)
-    private Date incorpValidityTill;
+    private LocalDate incorpValidityTill;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "main_business_line_cv_id", nullable = true)
@@ -94,18 +88,12 @@ public class ClientNonPerson extends AbstractPersistableCustom {
 
         if (StringUtils.isNotBlank(incorpNumber)) {
             this.incorpNumber = incorpNumber.trim();
-        } else {
-            this.incorpNumber = null;
         }
 
-        if (incorpValidityTill != null) {
-            this.incorpValidityTill = Date.from(incorpValidityTill.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        }
+        this.incorpValidityTill = incorpValidityTill;
 
         if (StringUtils.isNotBlank(remarks)) {
             this.remarks = remarks.trim();
-        } else {
-            this.remarks = null;
         }
 
         validate(client);
@@ -139,11 +127,7 @@ public class ClientNonPerson extends AbstractPersistableCustom {
     }
 
     public LocalDate getIncorpValidityTillLocalDate() {
-        LocalDate incorpValidityTillLocalDate = null;
-        if (this.incorpValidityTill != null) {
-            incorpValidityTillLocalDate = LocalDate.ofInstant(this.incorpValidityTill.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-        return incorpValidityTillLocalDate;
+        return this.incorpValidityTill;
     }
 
     public Long constitutionId() {
@@ -195,8 +179,7 @@ public class ClientNonPerson extends AbstractPersistableCustom {
             actualChanges.put(ClientApiConstants.dateFormatParamName, dateFormatAsInput);
             actualChanges.put(ClientApiConstants.localeParamName, localeAsInput);
 
-            final LocalDate newValue = command.localDateValueOfParameterNamed(ClientApiConstants.incorpValidityTillParamName);
-            this.incorpValidityTill = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.incorpValidityTill = command.localDateValueOfParameterNamed(ClientApiConstants.incorpValidityTillParamName);
         }
 
         if (command.isChangeInLongParameterNamed(ClientApiConstants.constitutionIdParamName, constitutionId())) {
