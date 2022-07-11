@@ -20,17 +20,13 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 
 @Entity
@@ -41,13 +37,11 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom {
     @JoinColumn(name = "loan_id", nullable = false)
     private Loan loan;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "expected_disburse_date")
-    private Date expectedDisbursementDate;
+    private LocalDate expectedDisbursementDate;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "disbursedon_date")
-    private Date actualDisbursementDate;
+    private LocalDate actualDisbursementDate;
 
     @Column(name = "principal", scale = 6, precision = 19, nullable = false)
     private BigDecimal principal;
@@ -59,8 +53,8 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom {
 
     }
 
-    public LoanDisbursementDetails(final Date expectedDisbursementDate, final Date actualDisbursementDate, final BigDecimal principal,
-            final BigDecimal netDisbursalAmount) {
+    public LoanDisbursementDetails(final LocalDate expectedDisbursementDate, final LocalDate actualDisbursementDate,
+            final BigDecimal principal, final BigDecimal netDisbursalAmount) {
         this.expectedDisbursementDate = expectedDisbursementDate;
         this.actualDisbursementDate = actualDisbursementDate;
         this.principal = principal;
@@ -96,19 +90,19 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom {
         this.actualDisbursementDate = disbursementDetails.actualDisbursementDate;
     }
 
-    public Date expectedDisbursementDate() {
+    public LocalDate expectedDisbursementDate() {
         return this.expectedDisbursementDate;
     }
 
     public LocalDate expectedDisbursementDateAsLocalDate() {
         LocalDate expectedDisburseDate = null;
         if (this.expectedDisbursementDate != null) {
-            expectedDisburseDate = LocalDate.ofInstant(this.expectedDisbursementDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            expectedDisburseDate = this.expectedDisbursementDate;
         }
         return expectedDisburseDate;
     }
 
-    public Date actualDisbursementDate() {
+    public LocalDate actualDisbursementDate() {
         return this.actualDisbursementDate;
     }
 
@@ -120,26 +114,18 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom {
         this.principal = principal;
     }
 
-    public Date getDisbursementDate() {
-        Date disbursementDate = this.expectedDisbursementDate;
-        if (this.actualDisbursementDate != null) {
-            disbursementDate = this.actualDisbursementDate;
-        }
-        return disbursementDate;
+    public LocalDate getDisbursementDate() {
+        return this.actualDisbursementDate;
     }
 
     public DisbursementData toData() {
         LocalDate expectedDisburseDate = expectedDisbursementDateAsLocalDate();
-        LocalDate actualDisburseDate = null;
-        if (this.actualDisbursementDate != null) {
-            actualDisburseDate = LocalDate.ofInstant(this.actualDisbursementDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
         BigDecimal waivedChargeAmount = null;
-        return new DisbursementData(getId(), expectedDisburseDate, actualDisburseDate, this.principal, this.netDisbursalAmount, null, null,
-                waivedChargeAmount);
+        return new DisbursementData(getId(), expectedDisburseDate, this.actualDisbursementDate, this.principal, this.netDisbursalAmount,
+                null, null, waivedChargeAmount);
     }
 
-    public void updateActualDisbursementDate(Date actualDisbursementDate) {
+    public void updateActualDisbursementDate(LocalDate actualDisbursementDate) {
         this.actualDisbursementDate = actualDisbursementDate;
     }
 
@@ -151,7 +137,7 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom {
         this.netDisbursalAmount = netDisbursalAmount;
     }
 
-    public void updateExpectedDisbursementDateAndAmount(Date expectedDisbursementDate, BigDecimal principal) {
+    public void updateExpectedDisbursementDateAndAmount(LocalDate expectedDisbursementDate, BigDecimal principal) {
         this.expectedDisbursementDate = expectedDisbursementDate;
         this.principal = principal;
     }

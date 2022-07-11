@@ -25,12 +25,10 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -443,8 +441,8 @@ public class LoanScheduleAssembler {
             officeId = group.getOffice().getId();
         }
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
-        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId,
-                Date.from(expectedDisbursementDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), HolidayStatusType.ACTIVE.getValue());
+        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId, expectedDisbursementDate,
+                HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         HolidayDetailDTO detailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
         final boolean isInterestToBeRecoveredFirstWhenGreaterThanEMI = this.configurationDomainService
@@ -622,8 +620,8 @@ public class LoanScheduleAssembler {
         }
 
         final LocalDate expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed("expectedDisbursementDate", element);
-        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId,
-                Date.from(expectedDisbursementDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), HolidayStatusType.ACTIVE.getValue());
+        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId, expectedDisbursementDate,
+                HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
 
         validateDisbursementDateIsOnNonWorkingDay(loanApplicationTerms.getExpectedDisbursementDate(), workingDays);
@@ -671,8 +669,7 @@ public class LoanScheduleAssembler {
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
 
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId,
-                Date.from(loanApplicationTerms.getExpectedDisbursementDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
-                HolidayStatusType.ACTIVE.getValue());
+                loanApplicationTerms.getExpectedDisbursementDate(), HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
 
         final LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getInterestMethod());
@@ -690,8 +687,7 @@ public class LoanScheduleAssembler {
 
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId,
-                Date.from(loanApplicationTerms.getExpectedDisbursementDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
-                HolidayStatusType.ACTIVE.getValue());
+                loanApplicationTerms.getExpectedDisbursementDate(), HolidayStatusType.ACTIVE.getValue());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         HolidayDetailDTO holidayDetailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
 
@@ -872,8 +868,7 @@ public class LoanScheduleAssembler {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
         if (loan.getExpectedFirstRepaymentOnDate() == null) {
-            loan.setExpectedFirstRepaymentOnDate(
-                    Date.from(loan.fetchRepaymentScheduleInstallment(1).getDueDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+            loan.setExpectedFirstRepaymentOnDate(loan.fetchRepaymentScheduleInstallment(1).getDueDate());
         }
         final LocalDate recalculateFrom = null;
         ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
@@ -1007,15 +1002,14 @@ public class LoanScheduleAssembler {
                 decimalValueVariationType = LoanTermVariationType.PRINCIPAL_AMOUNT;
             }
 
-            LocalDate duedateLocalDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.dueDateParamName, arrayElement,
-                    dateFormat, locale);
-            Date dueDate = Date.from(duedateLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            LocalDate dueDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.dueDateParamName, arrayElement, dateFormat,
+                    locale);
 
             LocalDate modifiedDuedateLocalDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.modifiedDueDateParamName,
                     arrayElement, dateFormat, locale);
-            Date modifiedDuedate = null;
+            LocalDate modifiedDuedate = null;
             if (modifiedDuedateLocalDate != null) {
-                modifiedDuedate = Date.from(modifiedDuedateLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                modifiedDuedate = modifiedDuedateLocalDate;
             }
             boolean isSpecificToInstallment = true;
             if (isInsertInstallment) {
@@ -1037,7 +1031,7 @@ public class LoanScheduleAssembler {
                     if (modifiedDuedate == null) {
                         modifiedDuedate = dueDate;
                     }
-                    Date date = null;
+                    LocalDate date = null;
                     LoanTermVariations data = new LoanTermVariations(decimalValueVariationType.getValue(), modifiedDuedate, decimalValue,
                             date, isSpecificToInstallment, loan);
                     loanTermVariations.add(data);
