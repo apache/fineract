@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.accounting.rule.exception;
 
-import java.util.Date;
+import java.time.LocalDate;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
@@ -50,7 +50,7 @@ public class AccountingRuleInvalidException extends AbstractPlatformDomainRuleEx
         }
     }
 
-    public AccountingRuleInvalidException(final GlClosureInvalidReason reason, final Date date) {
+    public AccountingRuleInvalidException(final GlClosureInvalidReason reason, final LocalDate date) {
         super(reason.errorCode(), reason.errorMessage(), date);
     }
 }

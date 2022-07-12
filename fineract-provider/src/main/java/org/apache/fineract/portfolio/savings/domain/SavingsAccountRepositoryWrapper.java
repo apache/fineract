@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.domain;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountNotFoundException;
@@ -130,8 +130,8 @@ public class SavingsAccountRepositoryWrapper {
 
     @Transactional
     public List<SavingsAccountTransaction> findTransactionsAfterPivotDate(@Param("savingsAccount") SavingsAccount savingsAccount,
-            @Param("date") Date date) {
-        return this.savingsAccountTransactionRepository.findTransactionsAfterPivotDate(savingsAccount, date);
+            @Param("date") LocalDate transactionDate) {
+        return this.savingsAccountTransactionRepository.findTransactionsAfterPivotDate(savingsAccount, transactionDate);
     }
 
     @Transactional

@@ -18,10 +18,10 @@
  */
 package org.apache.fineract.useradministration.domain;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -37,8 +37,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -110,8 +108,7 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
     private Set<Role> roles;
 
     @Column(name = "last_time_password_updated")
-    @Temporal(TemporalType.DATE)
-    private Date lastTimePasswordUpdated;
+    private LocalDate lastTimePasswordUpdated;
 
     @Column(name = "password_never_expires", nullable = false)
     private boolean passwordNeverExpires;
@@ -185,7 +182,7 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
         this.enabled = user.isEnabled();
         this.roles = roles;
         this.firstTimeLoginRemaining = true;
-        this.lastTimePasswordUpdated = DateUtils.getDateOfTenant();
+        this.lastTimePasswordUpdated = DateUtils.getLocalDateOfTenant();
         this.staff = staff;
         this.passwordNeverExpires = passwordNeverExpire;
         this.isSelfServiceUser = isSelfServiceUser;
@@ -208,7 +205,7 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
 
         this.password = encodePassword;
         this.firstTimeLoginRemaining = false;
-        this.lastTimePasswordUpdated = DateUtils.getDateOfTenant();
+        this.lastTimePasswordUpdated = DateUtils.getBusinessLocalDate();
 
     }
 
@@ -468,7 +465,7 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
         return this.passwordNeverExpires;
     }
 
-    public Date getLastTimePasswordUpdated() {
+    public LocalDate getLastTimePasswordUpdated() {
         return this.lastTimePasswordUpdated;
     }
 

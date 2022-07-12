@@ -26,13 +26,11 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.onAccou
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -391,8 +389,7 @@ public class RecurringDepositAccount extends SavingsAccount {
                         dueDate = latestTransactionDate;
                     }
                     final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(null, office(), null, dueDate,
-                            installment.getDepositAmountOutstanding(getCurrency()),
-                            Date.from(installment.dueDate().atStartOfDay(ZoneId.systemDefault()).toInstant()), null, refNo);
+                            installment.getDepositAmountOutstanding(getCurrency()), DateUtils.getLocalDateTimeOfSystem(), null, refNo);
                     allTransactions.add(transaction);
                 }
             }
@@ -529,7 +526,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         this.rejectedBy = null;
         this.withdrawnOnDate = null;
         this.withdrawnBy = null;
-        this.closedOnDate = Date.from(closedDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.closedOnDate = closedDate;
         this.closedBy = currentUser;
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
 
@@ -546,7 +543,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         String refNo = null;
         if (minRequiredOpeningBalance.isGreaterThanZero()) {
             final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, getActivationLocalDate(),
-                    minRequiredOpeningBalance.getAmount(), null, new Date(), user, accountType);
+                    minRequiredOpeningBalance.getAmount(), null, DateUtils.getLocalDateTimeOfSystem(), user, accountType);
             deposit(transactionDTO, backdatedTxnsAllowedTill, refNo);
 
             // update existing transactions so derived balance fields are
@@ -631,7 +628,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         this.rejectedBy = null;
         this.withdrawnOnDate = null;
         this.withdrawnBy = null;
-        this.closedOnDate = Date.from(closedDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.closedOnDate = closedDate;
         this.closedBy = currentUser;
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
     }
@@ -1168,11 +1165,11 @@ public class RecurringDepositAccount extends SavingsAccount {
         this.activatedBy = null;
         this.lockedInUntilDate = null;
 
-        this.activatedOnDate = Date.from(now.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.activatedOnDate = now;
     }
 
     public void setClosedOnDate(final LocalDate closedOnDate) {
-        this.closedOnDate = Date.from(closedOnDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.closedOnDate = closedOnDate;
     }
 
     @Override
@@ -1194,7 +1191,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         final BigDecimal depositAmount = this.recurringDetail.mandatoryRecommendedDepositAmount();
         while (maturityDate.isAfter(installmentDate)) {
             final RecurringDepositScheduleInstallment installment = RecurringDepositScheduleInstallment.installment(this, installmentNumber,
-                    Date.from(installmentDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), depositAmount);
+                    installmentDate, depositAmount);
             addDepositScheduleInstallment(installment);
             installmentDate = DepositAccountUtils.calculateNextDepositDate(installmentDate, frequency, recurringEvery);
             installmentNumber += 1;
@@ -1264,8 +1261,7 @@ public class RecurringDepositAccount extends SavingsAccount {
 
         @Override
         public int compare(final RecurringDepositScheduleInstallment o1, final RecurringDepositScheduleInstallment o2) {
-            final int comparsion = o1.installmentNumber().compareTo(o2.installmentNumber());
-            return comparsion;
+            return o1.installmentNumber().compareTo(o2.installmentNumber());
         }
     }
 

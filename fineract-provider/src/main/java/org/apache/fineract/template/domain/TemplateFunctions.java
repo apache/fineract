@@ -18,16 +18,17 @@
  */
 package org.apache.fineract.template.domain;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 @SuppressWarnings({ "HideUtilityClassConstructor" })
 public class TemplateFunctions {
 
     public static String now() {
-        final DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-        final Date date = new Date();
+        final DateTimeFormatter dateFormat = new DateTimeFormatterBuilder().appendPattern("yyyy/MM/dd HH:mm").toFormatter();
+        final LocalDateTime date = DateUtils.getLocalDateTimeOfSystem();
 
         return dateFormat.format(date);
     }

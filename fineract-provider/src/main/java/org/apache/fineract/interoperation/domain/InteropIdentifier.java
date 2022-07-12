@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.interoperation.domain;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -27,8 +27,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -57,21 +55,19 @@ public class InteropIdentifier extends AbstractPersistableCustom {
     @Column(name = "created_by", nullable = false, length = 32)
     private String createdBy;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_on", nullable = false)
-    private Date createdOn;
+    private LocalDateTime createdOn;
 
     @Column(name = "modified_by", length = 32)
     private String modifiedBy;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "modified_on")
-    private Date modifiedOn;
+    private LocalDateTime modifiedOn;
 
     protected InteropIdentifier() {}
 
     public InteropIdentifier(@NotNull SavingsAccount account, @NotNull InteropIdentifierType type, @NotNull String value, String subType,
-            @NotNull String createdBy, @NotNull Date createdOn) {
+            @NotNull String createdBy, @NotNull LocalDateTime createdOn) {
         this.account = account;
         this.type = type;
         this.value = value;
@@ -81,7 +77,7 @@ public class InteropIdentifier extends AbstractPersistableCustom {
     }
 
     public InteropIdentifier(@NotNull SavingsAccount account, @NotNull InteropIdentifierType type, @NotNull String createdBy,
-            @NotNull Date createdOn) {
+            @NotNull LocalDateTime createdOn) {
         this(account, type, null, null, createdBy, createdOn);
     }
 
@@ -113,7 +109,7 @@ public class InteropIdentifier extends AbstractPersistableCustom {
         return createdBy;
     }
 
-    public Date getCreatedOn() {
+    public LocalDateTime getCreatedOn() {
         return createdOn;
     }
 
@@ -125,11 +121,11 @@ public class InteropIdentifier extends AbstractPersistableCustom {
         this.modifiedBy = modifiedBy;
     }
 
-    public Date getModifiedOn() {
+    public LocalDateTime getModifiedOn() {
         return modifiedOn;
     }
 
-    public void setModifiedOn(Date modifiedOn) {
+    public void setModifiedOn(LocalDateTime modifiedOn) {
         this.modifiedOn = modifiedOn;
     }
 

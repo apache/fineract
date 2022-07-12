@@ -44,10 +44,10 @@ import org.junit.jupiter.api.Test;
 @Order(1)
 public class SchedulerJobsTest {
 
+    private final Map<Integer, Boolean> originalJobStatus = new HashMap<>();
     private RequestSpecification requestSpec;
     private SchedulerJobHelper schedulerJobHelper;
     private Boolean originalSchedulerStatus;
-    private final Map<Integer, Boolean> originalJobStatus = new HashMap<>();
 
     @BeforeEach
     public void setup() {
@@ -138,10 +138,13 @@ public class SchedulerJobsTest {
     @Test
     public void testTriggeringManualExecutionOfAllSchedulerJobs() {
         ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
-        for (String jobName : schedulerJobHelper.getAllSchedulerJobNames()) {
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+        try {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            for (String jobName : schedulerJobHelper.getAllSchedulerJobNames()) {
+                schedulerJobHelper.executeAndAwaitJob(jobName);
+            }
+        } finally {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
         }
-        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
     }
 }

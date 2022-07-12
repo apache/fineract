@@ -20,9 +20,7 @@ package org.apache.fineract.organisation.office.domain;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,13 +31,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.office.exception.CannotUpdateOfficeWithParentOfficeSameAsSelf;
 import org.apache.fineract.organisation.office.exception.RootOfficeParentCannotBeUpdated;
 
@@ -63,8 +58,7 @@ public class Office extends AbstractPersistableCustom implements Serializable {
     private String hierarchy;
 
     @Column(name = "opening_date", nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date openingDate;
+    private LocalDate openingDate;
 
     @Column(name = "external_id", length = 100)
     private String externalId;
@@ -90,7 +84,7 @@ public class Office extends AbstractPersistableCustom implements Serializable {
 
     private Office(final Office parent, final String name, final LocalDate openingDate, final String externalId) {
         this.parent = parent;
-        this.openingDate = Date.from(openingDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.openingDate = openingDate;
         if (parent != null) {
             this.parent.addChild(this);
         }
@@ -136,8 +130,7 @@ public class Office extends AbstractPersistableCustom implements Serializable {
             actualChanges.put("dateFormat", dateFormatAsInput);
             actualChanges.put("locale", localeAsInput);
 
-            final LocalDate newValue = command.localDateValueOfParameterNamed(openingDateParamName);
-            this.openingDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.openingDate = command.localDateValueOfParameterNamed(openingDateParamName);
         }
 
         final String nameParamName = "name";
@@ -166,11 +159,7 @@ public class Office extends AbstractPersistableCustom implements Serializable {
     }
 
     public LocalDate getOpeningLocalDate() {
-        LocalDate openingLocalDate = null;
-        if (this.openingDate != null) {
-            openingLocalDate = LocalDate.ofInstant(this.openingDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-        return openingLocalDate;
+        return this.openingDate;
     }
 
     public void update(final Office newParent) {

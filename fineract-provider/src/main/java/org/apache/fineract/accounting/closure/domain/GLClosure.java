@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.accounting.closure.domain;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.persistence.Column;
@@ -26,8 +26,6 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.closure.api.GLClosureJsonInputParams;
@@ -48,8 +46,7 @@ public class GLClosure extends AbstractAuditableCustom {
     private boolean deleted = true;
 
     @Column(name = "closing_date")
-    @Temporal(TemporalType.DATE)
-    private Date closingDate;
+    private LocalDate closingDate;
 
     @Column(name = "comments", nullable = true, length = 500)
     private String comments;
@@ -58,7 +55,7 @@ public class GLClosure extends AbstractAuditableCustom {
         //
     }
 
-    public GLClosure(final Office office, final Date closingDate, final String comments) {
+    public GLClosure(final Office office, final LocalDate closingDate, final String comments) {
         this.office = office;
         this.deleted = false;
         this.closingDate = closingDate;
@@ -69,7 +66,7 @@ public class GLClosure extends AbstractAuditableCustom {
     }
 
     public static GLClosure fromJson(final Office office, final JsonCommand command) {
-        final Date closingDate = command.dateValueOfParameterNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue());
+        final LocalDate closingDate = command.localDateValueOfParameterNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue());
         final String comments = command.stringValueOfParameterNamed(GLClosureJsonInputParams.COMMENTS.getValue());
         return new GLClosure(office, closingDate, comments);
     }
@@ -92,7 +89,7 @@ public class GLClosure extends AbstractAuditableCustom {
         }
     }
 
-    public Date getClosingDate() {
+    public LocalDate getClosingDate() {
         return this.closingDate;
     }
 

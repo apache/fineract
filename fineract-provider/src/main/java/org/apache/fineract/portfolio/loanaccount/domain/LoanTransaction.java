@@ -727,9 +727,7 @@ public class LoanTransaction extends AbstractAuditableCustom {
     }
 
     public LocalDateTime getCreatedDateTime() {
-        return (this.getCreatedDate().isPresent()
-                ? LocalDateTime.ofInstant(this.getCreatedDate().get(), DateUtils.getDateTimeZoneOfTenant())
-                : DateUtils.getLocalDateTimeOfTenant());
+        return (this.getCreatedDate().isPresent() ? this.getCreatedDate().get() : DateUtils.getLocalDateTimeOfTenant());
     }
 
     public boolean isLastTransaction(final LoanTransaction loanTransaction) {

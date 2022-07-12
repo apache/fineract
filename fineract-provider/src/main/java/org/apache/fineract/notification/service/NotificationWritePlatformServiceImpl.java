@@ -54,7 +54,7 @@ public class NotificationWritePlatformServiceImpl implements NotificationWritePl
         AppUser appUser = this.appUserRepository.findById(userId).orElse(null);
         NotificationMapper notificationMapper = new NotificationMapper(
                 this.notificationGeneratorReadRepositoryWrapper.findById(generatedNotificationId), appUser, false,
-                DateUtils.getDateOfTenant());
+                DateUtils.getLocalDateTimeOfSystem());
 
         this.notificationMapperWritePlatformService.create(notificationMapper);
         return notificationMapper.getId();
@@ -64,7 +64,7 @@ public class NotificationWritePlatformServiceImpl implements NotificationWritePl
             String notificationContent, boolean isSystemGenerated) {
 
         Notification notification = new Notification(objectType, objectIdentifier, action, actorId, isSystemGenerated, notificationContent,
-                DateUtils.getDateOfTenant());
+                DateUtils.getLocalDateTimeOfSystem());
 
         return this.notificationGeneratorWritePlatformService.create(notification);
     }
@@ -86,7 +86,7 @@ public class NotificationWritePlatformServiceImpl implements NotificationWritePl
             AppUser appUser = this.appUserRepository.findById(userId).orElseThrow();
             NotificationMapper notificationMapper = new NotificationMapper(
                     this.notificationGeneratorReadRepositoryWrapper.findById(generatedNotificationId), appUser, false,
-                    DateUtils.getDateOfTenant());
+                    DateUtils.getLocalDateTimeOfSystem());
             this.notificationMapperWritePlatformService.create(notificationMapper);
             mappedIds.add(notificationMapper.getId());
         }

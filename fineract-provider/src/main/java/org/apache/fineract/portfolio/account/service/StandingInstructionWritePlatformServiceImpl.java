@@ -25,10 +25,8 @@ import static org.apache.fineract.portfolio.account.api.StandingInstructionApiCo
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -249,8 +247,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
 
                 if (transferCompleted) {
                     final String updateQuery = "UPDATE m_account_transfer_standing_instructions SET last_run_date = ? where id = ?";
-                    this.jdbcTemplate.update(updateQuery, Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant()),
-                            data.getId());
+                    this.jdbcTemplate.update(updateQuery, transactionDate, data.getId());
                 }
 
             }

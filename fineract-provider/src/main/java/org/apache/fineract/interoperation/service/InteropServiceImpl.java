@@ -33,7 +33,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Predicate;
@@ -285,7 +284,7 @@ public class InteropServiceImpl implements InteropService {
             AppUser createdBy = getLoginUser();
 
             InteropIdentifier identifier = new InteropIdentifier(savingsAccount, request.getIdType(), request.getIdValue(),
-                    request.getSubIdOrType(), createdBy.getUsername(), DateUtils.getDateOfTenant());
+                    request.getSubIdOrType(), createdBy.getUsername(), DateUtils.getLocalDateTimeOfTenant());
 
             identifierRepository.saveAndFlush(identifier);
 
@@ -401,7 +400,8 @@ public class InteropServiceImpl implements InteropService {
             PaymentDetail paymentDetail = instance(findPaymentType(), savingsAccount.getExternalId(), null, getRoutingCode(), transferCode,
                     null);
             SavingsAccountTransaction holdTransaction = SavingsAccountTransaction.holdAmount(savingsAccount, savingsAccount.office(),
-                    paymentDetail, transactionDate, Money.of(savingsAccount.getCurrency(), total), new Date(), getLoginUser(), false);
+                    paymentDetail, transactionDate, Money.of(savingsAccount.getCurrency(), total), DateUtils.getLocalDateTimeOfTenant(),
+                    getLoginUser(), false);
             MonetaryCurrency accountCurrency = savingsAccount.getCurrency().copy();
             holdTransaction.updateRunningBalance(
                     Money.of(accountCurrency, savingsAccount.getWithdrawableBalance().subtract(holdTransaction.getAmount())));
@@ -453,8 +453,8 @@ public class InteropServiceImpl implements InteropService {
             }
 
             if (holdTransaction.getReleaseIdOfHoldAmountTransaction() == null) {
-                SavingsAccountTransaction releaseTransaction = savingsAccountTransactionRepository
-                        .saveAndFlush(releaseAmount(holdTransaction, transactionDate, new Date(), getLoginUser()));
+                SavingsAccountTransaction releaseTransaction = savingsAccountTransactionRepository.saveAndFlush(
+                        releaseAmount(holdTransaction, transactionDate, DateUtils.getLocalDateTimeOfSystem(), getLoginUser()));
                 holdTransaction.updateReleaseId(releaseTransaction.getId());
                 savingsAccount.releaseOnHoldAmount(holdTransaction.getAmount());
                 savingsAccount.addTransaction(releaseTransaction);
@@ -492,7 +492,8 @@ public class InteropServiceImpl implements InteropService {
         SavingsAccountTransaction holdTransaction = findTransaction(savingsAccount, request.getTransferCode(), AMOUNT_HOLD.getValue());
 
         if (holdTransaction != null && holdTransaction.getReleaseIdOfHoldAmountTransaction() == null) {
-            SavingsAccountTransaction releaseTransaction = releaseAmount(holdTransaction, transactionDate, new Date(), getLoginUser());
+            SavingsAccountTransaction releaseTransaction = releaseAmount(holdTransaction, transactionDate,
+                    DateUtils.getLocalDateTimeOfSystem(), getLoginUser());
             MonetaryCurrency accountCurrency = savingsAccount.getCurrency().copy();
             releaseTransaction.updateRunningBalance(
                     Money.of(accountCurrency, savingsAccount.getWithdrawableBalance().add(holdTransaction.getAmount())));

@@ -20,8 +20,6 @@ package org.apache.fineract.organisation.office.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -29,8 +27,6 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -49,8 +45,7 @@ public class OfficeTransaction extends AbstractPersistableCustom {
     private Office to;
 
     @Column(name = "transaction_date", nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date transactionDate;
+    private LocalDate transactionDate;
 
     @Embedded
     private MonetaryCurrency currency;
@@ -79,7 +74,7 @@ public class OfficeTransaction extends AbstractPersistableCustom {
         this.from = fromOffice;
         this.to = toOffice;
         if (transactionLocalDate != null) {
-            this.transactionDate = Date.from(transactionLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.transactionDate = transactionLocalDate;
         }
         this.currency = amount.getCurrency();
         this.transactionAmount = amount.getAmount();

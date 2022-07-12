@@ -18,13 +18,10 @@
  */
 package org.apache.fineract.infrastructure.core.domain;
 
-import java.time.Instant;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.springframework.data.domain.Auditable;
 import org.springframework.data.jpa.domain.AbstractAuditable;
 
@@ -40,7 +37,7 @@ import org.springframework.data.jpa.domain.AbstractAuditable;
  *            the type of the auditing type's identifier
  */
 @MappedSuperclass
-public abstract class AbstractAuditableCustom extends AbstractPersistableCustom implements Auditable<Long, Long, Instant> {
+public abstract class AbstractAuditableCustom extends AbstractPersistableCustom implements Auditable<Long, Long, LocalDateTime> {
 
     private static final long serialVersionUID = 141481953116476081L;
 
@@ -48,15 +45,13 @@ public abstract class AbstractAuditableCustom extends AbstractPersistableCustom 
     private Long createdBy;
 
     @Column(name = "created_date")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdDate;
+    private LocalDateTime createdDate;
 
     @Column(name = "lastmodifiedby_id")
     private Long lastModifiedBy;
 
     @Column(name = "lastmodified_date")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date lastModifiedDate;
+    private LocalDateTime lastModifiedDate;
 
     @Override
     public Optional<Long> getCreatedBy() {
@@ -69,13 +64,13 @@ public abstract class AbstractAuditableCustom extends AbstractPersistableCustom 
     }
 
     @Override
-    public Optional<Instant> getCreatedDate() {
-        return null == this.createdDate ? Optional.empty() : Optional.of(this.createdDate.toInstant());
+    public Optional<LocalDateTime> getCreatedDate() {
+        return null == this.createdDate ? Optional.empty() : Optional.of(this.createdDate);
     }
 
     @Override
-    public void setCreatedDate(final Instant createdDate) {
-        this.createdDate = null == createdDate ? null : Date.from(createdDate);
+    public void setCreatedDate(final LocalDateTime createdDate) {
+        this.createdDate = createdDate;
     }
 
     @Override
@@ -89,12 +84,12 @@ public abstract class AbstractAuditableCustom extends AbstractPersistableCustom 
     }
 
     @Override
-    public Optional<Instant> getLastModifiedDate() {
-        return null == this.lastModifiedDate ? Optional.empty() : Optional.of(this.lastModifiedDate.toInstant());
+    public Optional<LocalDateTime> getLastModifiedDate() {
+        return null == this.lastModifiedDate ? Optional.empty() : Optional.of(this.lastModifiedDate);
     }
 
     @Override
-    public void setLastModifiedDate(final Instant lastModifiedDate) {
-        this.lastModifiedDate = null == lastModifiedDate ? null : Date.from(lastModifiedDate);
+    public void setLastModifiedDate(final LocalDateTime lastModifiedDate) {
+        this.lastModifiedDate = lastModifiedDate;
     }
 }

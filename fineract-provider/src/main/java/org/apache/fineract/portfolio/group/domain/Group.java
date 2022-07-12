@@ -19,9 +19,7 @@
 package org.apache.fineract.portfolio.group.domain;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -37,10 +35,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.Transient;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -76,8 +71,7 @@ public final class Group extends AbstractPersistableCustom {
     private Integer status;
 
     @Column(name = "activation_date", nullable = true)
-    @Temporal(TemporalType.DATE)
-    private Date activationDate;
+    private LocalDate activationDate;
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "activatedon_userid", nullable = true)
@@ -118,16 +112,14 @@ public final class Group extends AbstractPersistableCustom {
     private CodeValue closureReason;
 
     @Column(name = "closedon_date", nullable = true)
-    @Temporal(TemporalType.DATE)
-    private Date closureDate;
+    private LocalDate closureDate;
 
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "closedon_userid", nullable = true)
     private AppUser closedBy;
 
     @Column(name = "submittedon_date", nullable = true)
-    @Temporal(TemporalType.DATE)
-    private Date submittedOnDate;
+    private LocalDate submittedOnDate;
 
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "submittedon_userid", nullable = true)
@@ -209,7 +201,7 @@ public final class Group extends AbstractPersistableCustom {
             this.groupMembers.addAll(groupMembers);
         }
 
-        this.submittedOnDate = Date.from(submittedOnDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.submittedOnDate = submittedOnDate;
         this.submittedBy = currentUser;
         this.staffHistory = null;
 
@@ -241,8 +233,7 @@ public final class Group extends AbstractPersistableCustom {
         validateStatusNotEqualToActiveAndLogError(dataValidationErrors);
         if (dataValidationErrors.isEmpty()) {
             this.status = GroupingTypeStatus.ACTIVE.getValue();
-            setActivationDate(Date.from(activationLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), currentUser,
-                    dataValidationErrors);
+            setActivationDate(activationLocalDate, currentUser, dataValidationErrors);
         }
 
     }
@@ -259,7 +250,8 @@ public final class Group extends AbstractPersistableCustom {
 
     }
 
-    private void setActivationDate(final Date activationDate, final AppUser loginUser, final List<ApiParameterError> dataValidationErrors) {
+    private void setActivationDate(final LocalDate activationDate, final AppUser loginUser,
+            final List<ApiParameterError> dataValidationErrors) {
 
         if (activationDate != null) {
             this.activationDate = activationDate;
@@ -334,10 +326,7 @@ public final class Group extends AbstractPersistableCustom {
             actualChanges.put(GroupingTypesApiConstants.dateFormatParamName, dateFormatAsInput);
             actualChanges.put(GroupingTypesApiConstants.localeParamName, localeAsInput);
 
-            final LocalDate newValue = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.activationDateParamName);
-            if (newValue != null) {
-                this.activationDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
-            }
+            this.activationDate = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.activationDateParamName);
         }
 
         if (command.isChangeInStringParameterNamed(GroupingTypesApiConstants.accountNoParamName, this.accountNumber)) {
@@ -352,25 +341,18 @@ public final class Group extends AbstractPersistableCustom {
             actualChanges.put(GroupingTypesApiConstants.dateFormatParamName, dateFormatAsInput);
             actualChanges.put(GroupingTypesApiConstants.localeParamName, localeAsInput);
 
-            final LocalDate newValue = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.submittedOnDateParamName);
-            if (newValue != null) {
-                this.submittedOnDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
-            }
+            this.submittedOnDate = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.submittedOnDateParamName);
         }
 
         return actualChanges;
     }
 
     public LocalDate getSubmittedOnDate() {
-        return ObjectUtils.defaultIfNull(LocalDate.ofInstant(this.submittedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()), null);
+        return this.submittedOnDate;
     }
 
     public LocalDate getActivationLocalDate() {
-        LocalDate activationLocalDate = null;
-        if (this.activationDate != null) {
-            activationLocalDate = LocalDate.ofInstant(this.activationDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-        return activationLocalDate;
+        return this.activationDate;
     }
 
     public List<String> associateClients(final Set<Client> clientMembersSet) {
@@ -540,7 +522,7 @@ public final class Group extends AbstractPersistableCustom {
         }
 
         this.closureReason = closureReason;
-        this.closureDate = Date.from(closureDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.closureDate = closureDate;
         this.status = GroupingTypeStatus.CLOSED.getValue();
         this.closedBy = currentUser;
     }

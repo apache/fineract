@@ -18,14 +18,12 @@
  */
 package org.apache.fineract.infrastructure.gcm.domain;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -42,15 +40,14 @@ public final class DeviceRegistration extends AbstractPersistableCustom {
     private String registrationId;
 
     @Column(name = "updatedon_date", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedOnDate;
+    private LocalDateTime updatedOnDate;
 
     private DeviceRegistration() {}
 
     private DeviceRegistration(final Client client, final String registrationId) {
         this.client = client;
         this.registrationId = registrationId;
-        this.updatedOnDate = Date.from(DateUtils.getLocalDateTimeOfTenant().atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.updatedOnDate = DateUtils.getLocalDateTimeOfTenant();
     }
 
     public static DeviceRegistration instance(final Client client, final String registrationId) {
@@ -73,11 +70,11 @@ public final class DeviceRegistration extends AbstractPersistableCustom {
         this.registrationId = registrationId;
     }
 
-    public Date getUpdatedOnDate() {
+    public LocalDateTime getUpdatedOnDate() {
         return this.updatedOnDate;
     }
 
-    public void setUpdatedOnDate(Date updatedOnDate) {
+    public void setUpdatedOnDate(LocalDateTime updatedOnDate) {
         this.updatedOnDate = updatedOnDate;
     }
 

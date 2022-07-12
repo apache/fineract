@@ -32,10 +32,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -146,7 +144,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
         Report report = this.reportRepository.findById(runReportId).orElseThrow(() -> new ReportNotFoundException(runReportId));
         SmsCampaign smsCampaign = SmsCampaign.instance(currentUser, report, command);
         if (smsCampaign.getRecurrenceStartDate() != null
-                && smsCampaign.getRecurrenceStartDate().isBefore(DateUtils.getLocalDateOfTenant())) {
+                && smsCampaign.getRecurrenceStartDate().isBefore(DateUtils.getLocalDateTimeOfTenant())) {
             throw new GeneralPlatformDomainRuleException("error.msg.campaign.recurrenceStartDate.in.the.past",
                     "Recurrence start date cannot be the past date.", smsCampaign.getRecurrenceStartDate());
         }
@@ -409,34 +407,29 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
         final SmsCampaign smsCampaign = this.smsCampaignRepository.findById(campaignId)
                 .orElseThrow(() -> new SmsCampaignNotFound(campaignId));
         LocalDateTime nextTriggerDate = smsCampaign.getNextTriggerDate();
-        smsCampaign.setLastTriggerDate(Date.from(nextTriggerDate.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+        smsCampaign.setLastTriggerDate(nextTriggerDate);
         // calculate new trigger date and insert into next trigger date
 
         /**
          * next run time has to be in the future if not calculate a new future date
          */
-        LocalDate nextRuntime = CalendarUtils.getNextRecurringDate(smsCampaign.getRecurrence(),
-                smsCampaign.getNextTriggerDate().toLocalDate(), nextTriggerDate.toLocalDate());
-        if (nextRuntime.isBefore(DateUtils.getLocalDateOfTenant())) { // means
-                                                                      // next
-                                                                      // run
-                                                                      // time is
-                                                                      // in the
-                                                                      // past
-                                                                      // calculate
-                                                                      // a new
-                                                                      // future
-                                                                      // date
-            nextRuntime = CalendarUtils.getNextRecurringDate(smsCampaign.getRecurrence(), smsCampaign.getNextTriggerDate().toLocalDate(),
-                    DateUtils.getLocalDateOfTenant());
+        LocalDateTime nextRuntime = CalendarUtils.getNextRecurringDate(smsCampaign.getRecurrence(), smsCampaign.getNextTriggerDate(),
+                nextTriggerDate);
+        if (nextRuntime.isBefore(DateUtils.getLocalDateTimeOfTenant())) { // means
+            // next
+            // run
+            // time is
+            // in the
+            // past
+            // calculate
+            // a new
+            // future
+            // date
+            nextRuntime = CalendarUtils.getNextRecurringDate(smsCampaign.getRecurrence(), smsCampaign.getNextTriggerDate(),
+                    DateUtils.getLocalDateTimeOfTenant());
         }
-        final LocalDateTime getTime = smsCampaign.getRecurrenceStartDateTime();
-        final String dateString = nextRuntime.toString() + " " + getTime.getHour() + ":" + getTime.getMinute() + ":" + getTime.getSecond();
-        final DateTimeFormatter simpleDateFormat = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient()
-                .appendPattern("yyyy-MM-dd HH:mm:ss").toFormatter();
-        final LocalDateTime newTriggerDateWithTime = LocalDateTime.parse(dateString, simpleDateFormat);
 
-        smsCampaign.setNextTriggerDate(Date.from(newTriggerDateWithTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+        smsCampaign.setNextTriggerDate(nextRuntime);
         this.smsCampaignRepository.saveAndFlush(smsCampaign);
     }
 
@@ -466,23 +459,15 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
              * if recurrence start date is in the future calculate next trigger date if not use recurrence start date us
              * next trigger date when activating
              */
-            LocalDate nextTriggerDate = null;
+            LocalDateTime nextTriggerDate = null;
             if (smsCampaign.getRecurrenceStartDateTime().isBefore(tenantDateTime())) {
                 nextTriggerDate = CalendarUtils.getNextRecurringDate(smsCampaign.getRecurrence(), smsCampaign.getRecurrenceStartDate(),
-                        DateUtils.getLocalDateOfTenant());
+                        DateUtils.getLocalDateTimeOfTenant());
             } else {
                 nextTriggerDate = smsCampaign.getRecurrenceStartDate();
             }
-            // to get time of tenant
-            final LocalDateTime getTime = smsCampaign.getRecurrenceStartDateTime();
 
-            final String dateString = nextTriggerDate.toString() + " " + getTime.getHour() + ":" + getTime.getMinute() + ":"
-                    + getTime.getSecond();
-            final DateTimeFormatter simpleDateFormat = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient()
-                    .appendPattern("yyyy-MM-dd HH:mm:ss").toFormatter();
-            final LocalDateTime nextTriggerDateWithTime = LocalDateTime.parse(dateString, simpleDateFormat);
-
-            smsCampaign.setNextTriggerDate(Date.from(nextTriggerDateWithTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+            smsCampaign.setNextTriggerDate(nextTriggerDate);
             this.smsCampaignRepository.saveAndFlush(smsCampaign);
         }
 
@@ -629,23 +614,17 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
              * if recurrence start date is in the future calculate next trigger date if not use recurrence start date us
              * next trigger date when activating
              */
-            LocalDate nextTriggerDate = null;
+            LocalDateTime nextTriggerDate = null;
             if (smsCampaign.getRecurrenceStartDateTime().isBefore(tenantDateTime())) {
                 nextTriggerDate = CalendarUtils.getNextRecurringDate(smsCampaign.getRecurrence(), smsCampaign.getRecurrenceStartDate(),
-                        DateUtils.getLocalDateOfTenant());
+                        DateUtils.getLocalDateTimeOfTenant());
             } else {
                 nextTriggerDate = smsCampaign.getRecurrenceStartDate();
             }
             // to get time of tenant
             final LocalDateTime getTime = smsCampaign.getRecurrenceStartDateTime();
 
-            final String dateString = nextTriggerDate.toString() + " " + getTime.getHour() + ":" + getTime.getMinute() + ":"
-                    + getTime.getSecond();
-            final DateTimeFormatter simpleDateFormat = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient()
-                    .appendPattern("yyyy-MM-dd HH:mm:ss").toFormatter();
-            final LocalDateTime nextTriggerDateWithTime = LocalDateTime.parse(dateString, simpleDateFormat);
-
-            smsCampaign.setNextTriggerDate(Date.from(nextTriggerDateWithTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+            smsCampaign.setNextTriggerDate(nextTriggerDate);
         }
         this.smsCampaignRepository.saveAndFlush(smsCampaign);
 
@@ -665,8 +644,8 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                 LocalDateTime tenantDateNow = tenantDateTime();
                 LocalDateTime nextTriggerDate = smsCampaign.getNextTriggerDate();
 
-                LOG.info("tenant time {} trigger time {} {}",
-                        new Object[] { tenantDateNow, nextTriggerDate, JobName.UPDATE_SMS_OUTBOUND_WITH_CAMPAIGN_MESSAGE.name() });
+                LOG.info("tenant time {} trigger time {} {}", tenantDateNow, nextTriggerDate,
+                        JobName.UPDATE_SMS_OUTBOUND_WITH_CAMPAIGN_MESSAGE.name());
                 if (nextTriggerDate.isBefore(tenantDateNow)) {
                     insertDirectCampaignIntoSmsOutboundTable(smsCampaign);
                     this.updateTriggerDates(smsCampaign.getId());

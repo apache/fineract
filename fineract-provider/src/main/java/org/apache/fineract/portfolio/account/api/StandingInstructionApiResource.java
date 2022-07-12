@@ -26,8 +26,8 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Set;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -202,8 +202,8 @@ public class StandingInstructionApiResource {
         final SearchParameters searchParameters = SearchParameters.forAccountTransfer(sqlSearch, externalId, offset, limit, orderBy,
                 sortOrder);
 
-        final Date startDateRange = null;
-        final Date endDateRange = null;
+        final LocalDate startDateRange = null;
+        final LocalDate endDateRange = null;
         StandingInstructionDTO standingInstructionDTO = new StandingInstructionDTO(searchParameters, transferType, clientName, clientId,
                 fromAccount, fromAccountType, startDateRange, endDateRange);
 

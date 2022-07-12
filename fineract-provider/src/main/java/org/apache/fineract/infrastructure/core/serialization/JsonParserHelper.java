@@ -29,6 +29,7 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.MonthDay;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -370,10 +371,10 @@ public class JsonParserHelper {
         return value;
     }
 
-    public LocalDateTime extractLocalTimeNamed(final String parameterName, final JsonElement element,
+    public LocalTime extractLocalTimeNamed(final String parameterName, final JsonElement element,
             final Set<String> parametersPassedInCommand) {
 
-        LocalDateTime value = null;
+        LocalTime value = null;
 
         if (element.isJsonObject()) {
             final JsonObject object = element.getAsJsonObject();
@@ -382,10 +383,22 @@ public class JsonParserHelper {
         return value;
     }
 
-    public LocalDateTime extractLocalTimeNamed(final String parameterName, final JsonElement element, String timeFormat,
+    public LocalDateTime extractLocalDateTimeNamed(final String parameterName, final JsonElement element,
             final Set<String> parametersPassedInCommand) {
 
         LocalDateTime value = null;
+
+        if (element.isJsonObject()) {
+            final JsonObject object = element.getAsJsonObject();
+            value = extractLocalDateTimeNamed(parameterName, element, extractTimeFormatParameter(object), parametersPassedInCommand);
+        }
+        return value;
+    }
+
+    public LocalTime extractLocalTimeNamed(final String parameterName, final JsonElement element, String timeFormat,
+            final Set<String> parametersPassedInCommand) {
+
+        LocalTime value = null;
 
         if (element.isJsonObject()) {
             final JsonObject object = element.getAsJsonObject();
@@ -395,7 +408,52 @@ public class JsonParserHelper {
         return value;
     }
 
-    public LocalDateTime extractLocalTimeNamed(final String parameterName, final JsonElement element, final String timeFormat,
+    public LocalDateTime extractLocalDateTimeNamed(final String parameterName, final JsonElement element, String timeFormat,
+            final Set<String> parametersPassedInCommand) {
+
+        LocalDateTime value = null;
+
+        if (element.isJsonObject()) {
+            final JsonObject object = element.getAsJsonObject();
+            final Locale clientApplicationLocale = extractLocaleParameter(object);
+            value = extractLocalDateTimeNamed(parameterName, object, timeFormat, clientApplicationLocale, parametersPassedInCommand);
+        }
+        return value;
+    }
+
+    public LocalTime extractLocalTimeNamed(final String parameterName, final JsonElement element, final String timeFormat,
+            final Locale clientApplicationLocale, final Set<String> parametersPassedInCommand) {
+        LocalTime value = null;
+        String timeValueAsString = null;
+        if (element.isJsonObject()) {
+            final JsonObject object = element.getAsJsonObject();
+            if (object.has(parameterName) && object.get(parameterName).isJsonPrimitive()) {
+                parametersPassedInCommand.add(parameterName);
+
+                try {
+                    DateTimeFormatter timeFormtter = DateTimeFormatter.ofPattern(timeFormat);
+                    final JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
+                    timeValueAsString = primitive.getAsString();
+                    if (StringUtils.isNotBlank(timeValueAsString)) {
+                        value = LocalTime.parse(timeValueAsString, timeFormtter);
+                    }
+                } catch (IllegalArgumentException e) {
+                    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+                    final String defaultMessage = new StringBuilder("The parameter `" + timeValueAsString + "` is not in correct format.")
+                            .toString();
+                    final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.TimeFormat", defaultMessage,
+                            parameterName);
+                    dataValidationErrors.add(error);
+                    throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                            dataValidationErrors, e);
+                }
+
+            }
+        }
+        return value;
+    }
+
+    public LocalDateTime extractLocalDateTimeNamed(final String parameterName, final JsonElement element, final String timeFormat,
             final Locale clientApplicationLocale, final Set<String> parametersPassedInCommand) {
         LocalDateTime value = null;
         String timeValueAsString = null;

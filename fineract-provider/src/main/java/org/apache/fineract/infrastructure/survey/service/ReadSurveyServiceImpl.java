@@ -18,11 +18,8 @@
  */
 package org.apache.fineract.infrastructure.survey.service;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
@@ -137,9 +134,7 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
 
         while (rs.next()) {
             scoresOverviews.add(new ClientScoresOverview(rs.getString("code"), rs.getString("name"), rs.getLong("score"),
-                    rs.getDouble("poverty_line"),
-                    LocalDate.ofInstant(new Date(rs.getTimestamp("date").getTime()).toInstant(), DateUtils.getDateTimeZoneOfTenant()),
-                    rs.getLong("id"), surveyName));
+                    rs.getDouble("poverty_line"), rs.getDate("date").toLocalDate(), rs.getLong("id"), surveyName));
         }
 
         return scoresOverviews;
@@ -168,9 +163,7 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
 
             while (rs.next()) {
                 scoresOverviews.add(new ClientScoresOverview(rs.getString("code"), rs.getString("name"), rs.getLong("score"),
-                        rs.getDouble("poverty_line"),
-                        LocalDate.ofInstant(new Date(rs.getTimestamp("date").getTime()).toInstant(), DateUtils.getDateTimeZoneOfTenant()),
-                        rs.getLong("id"), rs.getString("surveyName")));
+                        rs.getDouble("poverty_line"), rs.getDate("date").toLocalDate(), rs.getLong("id"), rs.getString("surveyName")));
             }
 
         }

@@ -19,8 +19,6 @@
 package org.apache.fineract.organisation.teller.domain;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -31,14 +29,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.office.domain.Office;
 
 @Entity
@@ -63,13 +57,11 @@ public class Teller extends AbstractPersistableCustom {
     @Column(name = "description", nullable = true, length = 500)
     private String description;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "valid_from", nullable = true)
-    private Date startDate;
+    private LocalDate startDate;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "valid_to", nullable = true)
-    private Date endDate;
+    private LocalDate endDate;
 
     @Column(name = "state", nullable = false)
     private Integer status;
@@ -84,14 +76,11 @@ public class Teller extends AbstractPersistableCustom {
     private Teller(final Office staffOffice, final String name, final String description, final LocalDate startDate,
             final LocalDate endDate, final TellerStatus status) {
 
-        this.name = StringUtils.defaultIfEmpty(name, null);
-        this.description = StringUtils.defaultIfEmpty(description, null);
-        if (startDate != null) {
-            this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        }
-        if (endDate != null) {
-            this.endDate = Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        }
+        this.name = name;
+        this.description = description;
+        this.startDate = startDate;
+        this.endDate = endDate;
+
         if (status != null) {
             this.status = status.getValue();
         }
@@ -152,8 +141,7 @@ public class Teller extends AbstractPersistableCustom {
             actualChanges.put("dateFormat", dateFormatAsInput);
             actualChanges.put("locale", localeAsInput);
 
-            final LocalDate newValue = command.localDateValueOfParameterNamed(startDateParamName);
-            this.startDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.startDate = command.localDateValueOfParameterNamed(startDateParamName);
         }
 
         final String endDateParamName = "endDate";
@@ -163,8 +151,7 @@ public class Teller extends AbstractPersistableCustom {
             actualChanges.put("dateFormat", dateFormatAsInput);
             actualChanges.put("locale", localeAsInput);
 
-            final LocalDate newValue = command.localDateValueOfParameterNamed(endDateParamName);
-            this.endDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.endDate = command.localDateValueOfParameterNamed(endDateParamName);
         }
 
         final String statusParamName = "status";
@@ -221,35 +208,27 @@ public class Teller extends AbstractPersistableCustom {
         this.description = description;
     }
 
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
     public LocalDate getStartLocalDate() {
-        LocalDate startLocalDate = null;
-        if (this.startDate != null) {
-            startLocalDate = LocalDate.ofInstant(this.startDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-        return startLocalDate;
+        return this.startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
 
-    public Date getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
     public LocalDate getEndLocalDate() {
-        LocalDate endLocalDate = null;
-        if (this.endDate != null) {
-            endLocalDate = LocalDate.ofInstant(this.endDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-        return endLocalDate;
+        return this.endDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
 

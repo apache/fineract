@@ -19,8 +19,6 @@
 package org.apache.fineract.accounting.journalentry.api;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.Locale;
 import javax.ws.rs.WebApplicationException;
 import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
@@ -38,9 +36,8 @@ public class DateParam {
         this.dateAsString = dateStr;
     }
 
-    public Date getDate(final String parameterName, final String dateFormat, final String localeAsString) {
+    public LocalDate getDate(final String parameterName, final String dateFormat, final String localeAsString) {
         final Locale locale = JsonParserHelper.localeFromString(localeAsString);
-        final LocalDate localDate = JsonParserHelper.convertFrom(this.dateAsString, parameterName, dateFormat, locale);
-        return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        return JsonParserHelper.convertFrom(this.dateAsString, parameterName, dateFormat, locale);
     }
 }
