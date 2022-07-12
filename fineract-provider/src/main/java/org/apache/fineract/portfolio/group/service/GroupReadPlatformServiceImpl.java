@@ -185,6 +185,12 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
         sqlBuilder.append(" ").append(extraCriteria.getSQLTemplate());
 
+        if (searchParameters != null) {
+            if (searchParameters.isOrphansOnly()) {
+                sqlBuilder.append(" and g.parent_id is NULL");
+            }
+        }
+
         if (parameters != null) {
             if (parameters.isOrderByRequested()) {
                 sqlBuilder.append(parameters.orderBySql());
@@ -226,9 +232,6 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         }
         extraCriteria.addNonNullCriteria("g.staff_id =", searchCriteria.getStaffId());
 
-        if (searchCriteria.isOrphansOnly()) {
-            extraCriteria.addNonNullCriteria("g.parent_id IS", "NULL");
-        }
         return extraCriteria;
     }
 
