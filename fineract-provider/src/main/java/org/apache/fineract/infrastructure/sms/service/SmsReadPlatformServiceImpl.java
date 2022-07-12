@@ -20,14 +20,13 @@ package org.apache.fineract.infrastructure.sms.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
@@ -203,7 +202,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
 
     @Override
     public Page<SmsData> retrieveSmsByStatus(final Long campaignId, final SearchParameters searchParameters, final Integer status,
-            final Date dateFrom, final Date dateTo) {
+            final LocalDate dateFrom, final LocalDate dateTo) {
         final StringBuilder sqlBuilder = new StringBuilder(200);
         final Object[] objectArray = new Object[10];
         int arrayPos = 0;
@@ -219,9 +218,8 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
         String fromDateString = null;
         String toDateString = null;
         if (dateFrom != null && dateTo != null) {
-            final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-            fromDateString = df.format(dateFrom);
-            toDateString = df.format(dateTo);
+            fromDateString = DateUtils.DEFAULT_DATE_FORMATER.format(dateFrom);
+            toDateString = DateUtils.DEFAULT_DATE_FORMATER.format(dateTo);
             sqlBuilder.append(" and smo.submittedon_date >= ? and smo.submittedon_date <= ? ");
             objectArray[arrayPos] = fromDateString;
             arrayPos = arrayPos + 1;

@@ -19,8 +19,8 @@
 package org.apache.fineract.infrastructure.bulkimport.populator;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,10 +99,10 @@ public class SharedProductsSheetPopulator extends AbstractWorkbookPopulator {
         BigDecimal marketValue = shareProductData.getUnitPrice();
         Collection<ShareProductMarketPriceData> marketDataSet = shareProductData.getMarketPrice();
         if (marketDataSet != null && !marketDataSet.isEmpty()) {
-            Date currentDate = DateUtils.getBusinessDate();
+            LocalDate currentDate = DateUtils.getBusinessLocalDate();
             for (ShareProductMarketPriceData data : marketDataSet) {
-                Date futureDate = data.getStartDate();
-                if (currentDate.after(futureDate)) {
+                LocalDate futureDate = data.getStartDate();
+                if (currentDate.isAfter(futureDate)) {
                     marketValue = data.getShareValue();
                 }
             }

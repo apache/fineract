@@ -23,6 +23,7 @@ import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateData;
@@ -158,9 +159,9 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
             final boolean isDifferentialToBaseLendingRate = rs.getBoolean("isDifferentialToBaseLendingRate");
             final boolean isActive = rs.getBoolean("isActive");
             final String createdBy = rs.getString("createdBy");
-            final LocalDate createdOn = JdbcSupport.getLocalDate(rs, "createdOn");
+            final LocalDateTime createdOn = JdbcSupport.getLocalDateTime(rs, "createdOn");
             final String modifiedBy = rs.getString("modifiedBy");
-            final LocalDate modifiedOn = JdbcSupport.getLocalDate(rs, "modifiedOn");
+            final LocalDateTime modifiedOn = JdbcSupport.getLocalDateTime(rs, "modifiedOn");
             return new FloatingRatePeriodData(id, fromDate, interestRate, isDifferentialToBaseLendingRate, isActive, createdBy, createdOn,
                     modifiedBy, modifiedOn);
         }

@@ -21,12 +21,11 @@ package org.apache.fineract.accounting.journalentry.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -235,8 +234,8 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
     @Override
     public Page<JournalEntryData> retrieveAll(final SearchParameters searchParameters, final Long glAccountId,
-            final Boolean onlyManualEntries, final Date fromDate, final Date toDate, final String transactionId, final Integer entityType,
-            final JournalEntryAssociationParametersData associationParametersData) {
+            final Boolean onlyManualEntries, final LocalDate fromDate, final LocalDate toDate, final String transactionId,
+            final Integer entityType, final JournalEntryAssociationParametersData associationParametersData) {
 
         GLJournalEntryMapper rm = new GLJournalEntryMapper(associationParametersData);
         final StringBuilder sqlBuilder = new StringBuilder(200);
@@ -290,7 +289,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         }
 
         if (fromDate != null || toDate != null) {
-            final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+            final DateTimeFormatter df = new DateTimeFormatterBuilder().appendPattern("yyyy-MM-dd").toFormatter();
             String fromDateString = null;
             String toDateString = null;
             if (fromDate != null && toDate != null) {
@@ -492,8 +491,8 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         final String sortOrder = "ASC";
         final Integer entityType = null;
         final Boolean onlyManualEntries = null;
-        final Date fromDate = null;
-        final Date toDate = null;
+        final LocalDate fromDate = null;
+        final LocalDate toDate = null;
         final JournalEntryAssociationParametersData associationParametersData = null;
         final Long loanId = null;
         final Long savingsId = null;

@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.shareaccounts.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -148,8 +147,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
             final Map<String, Object> transactionDto = new HashMap<>();
             transactionDto.put("officeId", account.getOfficeId());
             transactionDto.put("id", transaction.getId());
-            transactionDto.put("date",
-                    LocalDate.ofInstant(transaction.getPurchasedDate().toInstant(), DateUtils.getDateTimeZoneOfTenant()));
+            transactionDto.put("date", transaction.getPurchasedDate());
             final Integer status = transaction.getTransactionStatus();
             final ShareAccountTransactionEnumData statusEnum = new ShareAccountTransactionEnumData(status.longValue(), null, null);
             final Integer type = transaction.getTransactionType();
@@ -190,7 +188,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
     @Override
     public CommandProcessingResult updateShareAccount(Long accountId, JsonCommand jsonCommand) {
         try {
-            Date transactionDate = DateUtils.getBusinessDate();
+            LocalDate transactionDate = DateUtils.getBusinessLocalDate();
             ShareAccount account = this.shareAccountRepository.findOneWithNotFoundDetection(accountId);
             Map<String, Object> changes = this.accountDataSerializer.validateAndUpdate(jsonCommand, account);
             if (!changes.isEmpty()) {
@@ -350,7 +348,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                     journalEntryTransactions.add(transaction.getId());
                 }
             }
-            Date transactionDate = DateUtils.getBusinessDate();
+            LocalDate transactionDate = DateUtils.getBusinessLocalDate();
             this.journalEntryWritePlatformService.revertShareAccountJournalEntries(journalEntryTransactions, transactionDate);
             journalEntryWritePlatformService.createJournalEntriesForShares(
                     populateJournalEntries(account, account.getPendingForApprovalSharePurchaseTransactions()));

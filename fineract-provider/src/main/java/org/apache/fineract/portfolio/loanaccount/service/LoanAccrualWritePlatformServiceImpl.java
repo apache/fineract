@@ -270,7 +270,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
                 + "fee_charges_portion_derived,penalty_charges_portion_derived, submitted_on_date) VALUES (?, ?, false, ?, ?, ?, ?, ?, ?, ?)";
         this.jdbcTemplate.update(transactionSql, scheduleAccrualData.getLoanId(), scheduleAccrualData.getOfficeId(),
                 LoanTransactionType.ACCRUAL.getValue(), accruedTill, amount, interestportion, feeportion, penaltyportion,
-                DateUtils.getBusinessDate());
+                DateUtils.getBusinessLocalDate());
         @SuppressWarnings("deprecation")
         final Long transactonId = this.jdbcTemplate.queryForObject("SELECT " + sqlGenerator.lastInsertId(), Long.class); // NOSONAR
 

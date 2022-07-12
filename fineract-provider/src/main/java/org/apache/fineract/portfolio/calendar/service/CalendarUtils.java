@@ -19,13 +19,14 @@
 package org.apache.fineract.portfolio.calendar.service;
 
 import com.google.gson.JsonElement;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.chrono.IsoChronology;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -67,33 +68,44 @@ public final class CalendarUtils {
         System.setProperty("net.fortuna.ical4j.timezone.date.floating", "true");
     }
 
+    public static LocalDateTime getNextRecurringDate(final String recurringRule, final LocalDateTime seedDate,
+            final LocalDateTime startDate) {
+        final Recur recur = CalendarUtils.getICalRecur(recurringRule);
+        if (recur == null) {
+            return null;
+        }
+        LocalDateTime nextDate = getNextRecurringDate(recur, seedDate, startDate);
+        nextDate = (LocalDateTime) adjustDate(nextDate, seedDate, getMeetingPeriodFrequencyType(recurringRule));
+        return nextDate;
+    }
+
     public static LocalDate getNextRecurringDate(final String recurringRule, final LocalDate seedDate, final LocalDate startDate) {
         final Recur recur = CalendarUtils.getICalRecur(recurringRule);
         if (recur == null) {
             return null;
         }
         LocalDate nextDate = getNextRecurringDate(recur, seedDate, startDate);
-        nextDate = adjustDate(nextDate, seedDate, getMeetingPeriodFrequencyType(recurringRule));
+        nextDate = (LocalDate) adjustDate(nextDate, seedDate, getMeetingPeriodFrequencyType(recurringRule));
         return nextDate;
     }
 
-    public static LocalDate adjustDate(final LocalDate date, final LocalDate seedDate, final PeriodFrequencyType frequencyType) {
-        LocalDate adjustedVal = date;
-        if (frequencyType.isMonthly() && seedDate.getDayOfMonth() > 28 && date.getDayOfMonth() > 28) {
-            switch (date.getMonthValue()) {
+    public static Temporal adjustDate(final Temporal date, final Temporal seedDate, final PeriodFrequencyType frequencyType) {
+        Temporal adjustedVal = date;
+        if (frequencyType.isMonthly() && seedDate.get(ChronoField.DAY_OF_MONTH) > 28 && date.get(ChronoField.DAY_OF_MONTH) > 28) {
+            switch (date.get(ChronoField.MONTH_OF_YEAR)) {
                 case 2:
-                    if (date.isLeapYear()) {
-                        adjustedVal = date.withDayOfMonth(29);
+                    if (IsoChronology.INSTANCE.isLeapYear(date.get(ChronoField.YEAR))) {
+                        adjustedVal = date.with(ChronoField.DAY_OF_MONTH, 29);
                     }
                 break;
                 case 4:
                 case 6:
                 case 9:
                 case 11:
-                    if (seedDate.getDayOfMonth() > 30) {
-                        adjustedVal = date.withDayOfMonth(30);
+                    if (seedDate.get(ChronoField.DAY_OF_MONTH) > 30) {
+                        adjustedVal = date.with(ChronoField.DAY_OF_MONTH, 30);
                     } else {
-                        adjustedVal = date.withDayOfMonth(seedDate.getDayOfMonth());
+                        adjustedVal = date.with(ChronoField.DAY_OF_MONTH, seedDate.get(ChronoField.DAY_OF_MONTH));
                     }
                 break;
                 case 1:
@@ -103,28 +115,32 @@ public final class CalendarUtils {
                 case 8:
                 case 10:
                 case 12:
-                    adjustedVal = date.withDayOfMonth(seedDate.getDayOfMonth());
+                    adjustedVal = date.with(ChronoField.DAY_OF_MONTH, seedDate.get(ChronoField.DAY_OF_MONTH));
                 break;
             }
         }
         return adjustedVal;
     }
 
-    private static LocalDate getNextRecurringDate(final Recur recur, final LocalDate seedDate, final LocalDate startDate) {
-        final DateTime periodStart = new DateTime(java.util.Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+    private static LocalDateTime getNextRecurringDate(final Recur recur, final LocalDateTime seedDate, final LocalDateTime startDate) {
+        final DateTime periodStart = new DateTime(java.util.Date.from(startDate.atZone(ZoneId.systemDefault()).toInstant()));
         final Date seed = convertToiCal4JCompatibleDate(seedDate);
         final Date nextRecDate = recur.getNextDate(seed, periodStart);
-        return nextRecDate == null ? null
-                : ZonedDateTime.ofInstant(nextRecDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()).toLocalDate();
+        return nextRecDate == null ? null : LocalDateTime.ofInstant(nextRecDate.toInstant(), DateUtils.getSystemZoneId());
     }
 
-    private static Date convertToiCal4JCompatibleDate(final LocalDate inputDate) {
-        // Date format in iCal4J is hard coded
+    private static LocalDate getNextRecurringDate(final Recur recur, final LocalDate seedDate, final LocalDate startDate) {
+        final DateTime periodStart = new DateTime(java.util.Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        final Date seed = convertToiCal4JCompatibleDate(seedDate.atStartOfDay());
+        final Date nextRecDate = recur.getNextDate(seed, periodStart);
+        return nextRecDate == null ? null : LocalDate.ofInstant(nextRecDate.toInstant(), DateUtils.getSystemZoneId());
+    }
+
+    private static Date convertToiCal4JCompatibleDate(final LocalDateTime inputDate) {
         Date formattedDate = null;
-        final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        final String seedDateStr = df.format(java.util.Date.from(inputDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        final String seedDateStr = DateUtils.DEFAULT_DATETIME_FORMATER.format(inputDate);
         try {
-            formattedDate = new Date(seedDateStr, "yyyy-MM-dd");
+            formattedDate = new Date(seedDateStr, DateUtils.DEFAULT_DATETIME_FORMAT);
         } catch (final ParseException e) {
             LOG.error("Invalid date: {}", seedDateStr, e);
         }
@@ -168,7 +184,7 @@ public final class CalendarUtils {
         if (recur == null) {
             return null;
         }
-        final Date seed = convertToiCal4JCompatibleDate(seedDate);
+        final Date seed = convertToiCal4JCompatibleDate(seedDate.atStartOfDay());
         final DateTime periodStart = new DateTime(java.util.Date.from(periodStartDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         final DateTime periodEnd = new DateTime(java.util.Date.from(periodEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
@@ -186,8 +202,8 @@ public final class CalendarUtils {
         for (@SuppressWarnings("rawtypes")
         final Iterator iterator = dates.iterator(); iterator.hasNext();) {
             final Date date = (Date) iterator.next();
-            recurringDates
-                    .add(adjustDate(LocalDate.ofInstant(date.toInstant(), DateUtils.getDateTimeZoneOfTenant()), seedDate, frequencyType));
+            recurringDates.add((LocalDate) adjustDate(LocalDate.ofInstant(date.toInstant(), DateUtils.getDateTimeZoneOfTenant()), seedDate,
+                    frequencyType));
         }
 
         if (isSkippMeetingOnFirstDay) {

@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.accounting.journalentry.exception;
 
-import java.util.Date;
+import java.time.LocalDate;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
@@ -76,7 +76,7 @@ public class JournalEntryInvalidException extends AbstractPlatformDomainRuleExce
         }
     }
 
-    public JournalEntryInvalidException(final GlJournalEntryInvalidReason reason, final Date date, final String accountName,
+    public JournalEntryInvalidException(final GlJournalEntryInvalidReason reason, final LocalDate date, final String accountName,
             final String accountGLCode) {
         super(reason.errorCode(), reason.errorMessage(), date, accountName, accountGLCode);
     }

@@ -21,9 +21,7 @@ package org.apache.fineract.portfolio.address.domain;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -91,13 +89,13 @@ public class Address extends AbstractPersistableCustom {
     private String createdBy;
 
     @Column(name = "created_on")
-    private Date createdOn;
+    private LocalDate createdOn;
 
     @Column(name = "updated_by")
     private String updatedBy;
 
     @Column(name = "updated_on")
-    private Date updatedOn;
+    private LocalDate updatedOn;
 
     private Address(final String street, final String addressLine1, final String addressLine2, final String addressLine3,
             final String townVillage, final String city, final String countyDistrict, final CodeValue stateProvince,
@@ -121,12 +119,12 @@ public class Address extends AbstractPersistableCustom {
         // this.updatedOn = updatedOn;
 
         if (createdOn != null) {
-            this.createdOn = Date.from(createdOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.createdOn = createdOn;
 
         }
 
         if (updatedOn != null) {
-            this.updatedOn = Date.from(updatedOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.updatedOn = updatedOn;
         }
 
     }
@@ -355,12 +353,12 @@ public class Address extends AbstractPersistableCustom {
         this.createdBy = createdBy;
     }
 
-    public Date getCreatedOn() {
+    public LocalDate getCreatedOn() {
         return this.createdOn;
     }
 
     public void setCreatedOn(LocalDate createdOn) {
-        this.createdOn = Date.from(createdOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.createdOn = createdOn;
     }
 
     public String getUpdatedBy() {
@@ -371,12 +369,12 @@ public class Address extends AbstractPersistableCustom {
         this.updatedBy = updatedBy;
     }
 
-    public Date getUpdatedOn() {
+    public LocalDate getUpdatedOn() {
         return this.updatedOn;
     }
 
     public void setUpdatedOn(LocalDate updatedOn) {
-        this.updatedOn = Date.from(updatedOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.updatedOn = updatedOn;
     }
 
 }

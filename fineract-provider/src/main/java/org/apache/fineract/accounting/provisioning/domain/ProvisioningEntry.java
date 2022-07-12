@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.accounting.provisioning.domain;
 
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
@@ -30,8 +30,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.useradministration.domain.AppUser;
 
@@ -50,22 +48,20 @@ public class ProvisioningEntry extends AbstractPersistableCustom {
     private AppUser createdBy;
 
     @Column(name = "created_date")
-    @Temporal(TemporalType.DATE)
-    private Date createdDate;
+    private LocalDate createdDate;
 
     @OneToOne
     @JoinColumn(name = "lastmodifiedby_id")
     private AppUser lastModifiedBy;
 
     @Column(name = "lastmodified_date")
-    @Temporal(TemporalType.DATE)
-    private Date lastModifiedDate;
+    private LocalDate lastModifiedDate;
 
     protected ProvisioningEntry() {
 
     }
 
-    public ProvisioningEntry(AppUser createdBy, Date createdDate, AppUser lastModifiedBy, Date lastModifiedDate,
+    public ProvisioningEntry(AppUser createdBy, LocalDate createdDate, AppUser lastModifiedBy, LocalDate lastModifiedDate,
             Set<LoanProductProvisioningEntry> provisioningEntries) {
         this.provisioningEntries = provisioningEntries;
         this.createdBy = createdBy;
@@ -89,7 +85,7 @@ public class ProvisioningEntry extends AbstractPersistableCustom {
         this.isJournalEntryCreated = bool;
     }
 
-    public Date getCreatedDate() {
+    public LocalDate getCreatedDate() {
         return this.createdDate;
     }
 

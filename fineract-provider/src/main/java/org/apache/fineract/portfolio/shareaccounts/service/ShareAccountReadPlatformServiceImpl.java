@@ -23,11 +23,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -139,10 +137,10 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         BigDecimal marketValue = shareProductData.getUnitPrice();
         Collection<ShareProductMarketPriceData> marketDataSet = shareProductData.getMarketPrice();
         if (marketDataSet != null && !marketDataSet.isEmpty()) {
-            Date currentDate = DateUtils.getBusinessDate();
+            LocalDate currentDate = DateUtils.getBusinessLocalDate();
             for (ShareProductMarketPriceData data : marketDataSet) {
-                Date futureDate = data.getStartDate();
-                if (currentDate.after(futureDate)) {
+                LocalDate futureDate = data.getStartDate();
+                if (currentDate.isAfter(futureDate)) {
                     marketValue = data.getShareValue();
                 }
             }
@@ -501,8 +499,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         @Override
         public ShareAccountDividendData mapRow(ResultSet rs, int rowNum) throws SQLException {
             final Long id = rs.getLong("id");
-            final Date postedDate = Date
-                    .from(JdbcSupport.getLocalDate(rs, "created_date").atStartOfDay(ZoneId.systemDefault()).toInstant());
+            final LocalDate postedDate = JdbcSupport.getLocalDate(rs, "created_date");
             final BigDecimal postedAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "amount");
             final Long savingTransactionId = rs.getLong("savings_transaction_id");
             final Integer status = rs.getInt("status");

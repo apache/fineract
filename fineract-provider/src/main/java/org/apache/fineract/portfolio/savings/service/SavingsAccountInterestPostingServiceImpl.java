@@ -24,7 +24,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +32,6 @@ import java.util.stream.Collectors;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
@@ -73,12 +71,10 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
         if (backdatedTxnsAllowedTill && savingsAccountData.getSummary().getInterestPostedTillDate() != null) {
             interestPostedToDate = Money.of(savingsAccountData.currency(), savingsAccountData.getSummary().getTotalInterestPosted());
             SavingsAccountTransactionData savingsAccountTransactionData = retrieveLastTransactions(savingsAccountData);
-            Date lastTransactionDate = Date.from(
-                    savingsAccountTransactionData.getLastTransactionDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            LocalDate lastTransactionDate = savingsAccountTransactionData.getLastTransactionDate();
             savingsAccountData.setStartInterestCalculationDate(lastTransactionDate);
         } else {
-            savingsAccountData.setStartInterestCalculationDate(
-                    Date.from(startInterestDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+            savingsAccountData.setStartInterestCalculationDate(startInterestDate);
         }
 
         final List<PostingPeriod> postingPeriods = calculateInterestUsing(mc, interestPostingUpToDate, isInterestTransfer,

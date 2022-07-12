@@ -22,7 +22,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -1759,7 +1758,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 chargePerInstallment.getInstallment().setFeeChargesWaived(feeChargesWaivedAmount.subtract(amountWaived));
 
                 // Set the last modification date.
-                chargePerInstallment.getInstallment().setLastModifiedDate(Instant.now());
+                chargePerInstallment.getInstallment().setLastModifiedDate(DateUtils.getLocalDateTimeOfSystem());
 
                 // Update loan charge.
                 loanCharge.setInstallmentLoanCharge(chargePerInstallment, chargePerInstallment.getInstallment().getInstallmentNumber());

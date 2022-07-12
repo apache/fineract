@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.shareproducts.domain;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -29,10 +28,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountDividendDetails;
 
 @Entity
@@ -46,12 +42,10 @@ public class ShareProductDividendPayOutDetails extends AbstractAuditableCustom {
     private BigDecimal amount;
 
     @Column(name = "dividend_period_start_date")
-    @Temporal(TemporalType.DATE)
-    private Date dividendPeriodStartDate;
+    private LocalDate dividendPeriodStartDate;
 
     @Column(name = "dividend_period_end_date")
-    @Temporal(TemporalType.DATE)
-    private Date dividendPeriodEndDate;
+    private LocalDate dividendPeriodEndDate;
 
     @Column(name = "status", nullable = false)
     private Integer status;
@@ -63,8 +57,8 @@ public class ShareProductDividendPayOutDetails extends AbstractAuditableCustom {
 
     }
 
-    public ShareProductDividendPayOutDetails(final Long shareProductId, final BigDecimal amount, final Date dividendPeriodStartDate,
-            final Date dividendPeriodEndDate) {
+    public ShareProductDividendPayOutDetails(final Long shareProductId, final BigDecimal amount, final LocalDate dividendPeriodStartDate,
+            final LocalDate dividendPeriodEndDate) {
         this.shareProductId = shareProductId;
         this.amount = amount;
         this.dividendPeriodStartDate = dividendPeriodStartDate;
@@ -73,11 +67,7 @@ public class ShareProductDividendPayOutDetails extends AbstractAuditableCustom {
     }
 
     public LocalDate getDividendPeriodEndDateAsLocalDate() {
-        LocalDate dividendPeriodEndDate = null;
-        if (this.dividendPeriodEndDate != null) {
-            dividendPeriodEndDate = LocalDate.ofInstant(this.dividendPeriodEndDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-        return dividendPeriodEndDate;
+        return this.dividendPeriodEndDate;
     }
 
     public List<ShareAccountDividendDetails> getAccountDividendDetails() {

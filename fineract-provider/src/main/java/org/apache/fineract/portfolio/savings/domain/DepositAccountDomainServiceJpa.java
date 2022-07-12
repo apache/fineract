@@ -25,9 +25,7 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transfe
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -311,7 +309,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                 account.updateOnAccountClosureStatus(onClosureType);
             }
             changes.put("reinvestedDepositId", reinvestedDeposit.getId());
-            reinvestedDeposit.approveAndActivateApplication(Date.from(closedDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), user);
+            reinvestedDeposit.approveAndActivateApplication(closedDate, user);
             this.savingsAccountRepository.save(reinvestedDeposit);
 
         } else if (onClosureType.isTransferToSavings()) {

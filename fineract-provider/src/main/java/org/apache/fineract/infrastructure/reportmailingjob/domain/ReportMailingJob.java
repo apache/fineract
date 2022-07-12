@@ -19,9 +19,7 @@
 package org.apache.fineract.infrastructure.reportmailingjob.domain;
 
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.persistence.Column;
@@ -29,8 +27,6 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -55,8 +51,7 @@ public class ReportMailingJob extends AbstractAuditableCustom {
     private String description;
 
     @Column(name = "start_datetime", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date startDateTime;
+    private LocalDateTime startDateTime;
 
     @Column(name = "recurrence", nullable = true)
     private String recurrence;
@@ -81,12 +76,10 @@ public class ReportMailingJob extends AbstractAuditableCustom {
     private String stretchyReportParamMap;
 
     @Column(name = "previous_run_datetime", nullable = true)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date previousRunDateTime;
+    private LocalDateTime previousRunDateTime;
 
     @Column(name = "next_run_datetime", nullable = true)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date nextRunDateTime;
+    private LocalDateTime nextRunDateTime;
 
     @Column(name = "previous_run_status", nullable = true)
     private String previousRunStatus;
@@ -129,7 +122,7 @@ public class ReportMailingJob extends AbstractAuditableCustom {
         this.startDateTime = null;
 
         if (startDateTime != null) {
-            this.startDateTime = Date.from(startDateTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.startDateTime = startDateTime;
         }
 
         this.recurrence = recurrence;
@@ -142,13 +135,13 @@ public class ReportMailingJob extends AbstractAuditableCustom {
         this.previousRunDateTime = null;
 
         if (previousRunDateTime != null) {
-            this.previousRunDateTime = Date.from(previousRunDateTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.previousRunDateTime = previousRunDateTime;
         }
 
         this.nextRunDateTime = null;
 
         if (nextRunDateTime != null) {
-            this.nextRunDateTime = Date.from(nextRunDateTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+            this.nextRunDateTime = nextRunDateTime;
         }
 
         this.previousRunStatus = null;
@@ -307,14 +300,12 @@ public class ReportMailingJob extends AbstractAuditableCustom {
             final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(jsonCommand.dateFormat())
                     .withLocale(jsonCommand.extractLocale());
             final LocalDateTime newStartDateTime = LocalDateTime.parse(newStartDateTimeString, dateTimeFormatter);
-            final LocalDateTime oldStartDateTime = (this.startDateTime != null)
-                    ? ZonedDateTime.ofInstant(this.startDateTime.toInstant(), DateUtils.getDateTimeZoneOfTenant()).toLocalDateTime()
-                    : null;
+            final LocalDateTime oldStartDateTime = this.startDateTime;
 
             if ((oldStartDateTime != null) && !newStartDateTime.equals(oldStartDateTime)) {
                 actualChanges.put(ReportMailingJobConstants.START_DATE_TIME_PARAM_NAME, newStartDateTimeString);
 
-                this.startDateTime = Date.from(newStartDateTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                this.startDateTime = newStartDateTime;
             }
         }
 
@@ -374,9 +365,8 @@ public class ReportMailingJob extends AbstractAuditableCustom {
     /**
      * @return the value of the startDateTime property
      **/
-    public ZonedDateTime getStartDateTime() {
-        return (this.startDateTime != null) ? ZonedDateTime.ofInstant(this.startDateTime.toInstant(), DateUtils.getDateTimeZoneOfTenant())
-                : null;
+    public LocalDateTime getStartDateTime() {
+        return this.startDateTime;
     }
 
     /**
@@ -459,19 +449,15 @@ public class ReportMailingJob extends AbstractAuditableCustom {
     /**
      * @return the previousRunDateTime
      */
-    public ZonedDateTime getPreviousRunDateTime() {
-        return (this.previousRunDateTime != null)
-                ? ZonedDateTime.ofInstant(this.previousRunDateTime.toInstant(), DateUtils.getDateTimeZoneOfTenant())
-                : null;
+    public LocalDateTime getPreviousRunDateTime() {
+        return this.previousRunDateTime;
     }
 
     /**
      * @return the nextRunDateTime
      */
-    public ZonedDateTime getNextRunDateTime() {
-        return (this.nextRunDateTime != null)
-                ? ZonedDateTime.ofInstant(this.nextRunDateTime.toInstant(), DateUtils.getDateTimeZoneOfTenant())
-                : null;
+    public LocalDateTime getNextRunDateTime() {
+        return this.nextRunDateTime;
     }
 
     /**
@@ -538,9 +524,9 @@ public class ReportMailingJob extends AbstractAuditableCustom {
      *            -- previous run date
      *
      **/
-    public void updatePreviousRunDateTime(final ZonedDateTime previousRunDateTime) {
+    public void updatePreviousRunDateTime(final LocalDateTime previousRunDateTime) {
         if (previousRunDateTime != null) {
-            this.previousRunDateTime = Date.from(previousRunDateTime.toInstant());
+            this.previousRunDateTime = previousRunDateTime;
         }
     }
 
@@ -551,9 +537,9 @@ public class ReportMailingJob extends AbstractAuditableCustom {
      *            -- the next run DateTime
      *
      **/
-    public void updateNextRunDateTime(final ZonedDateTime nextRunDateTime) {
+    public void updateNextRunDateTime(final LocalDateTime nextRunDateTime) {
         if (nextRunDateTime != null) {
-            this.nextRunDateTime = Date.from(nextRunDateTime.toInstant());
+            this.nextRunDateTime = nextRunDateTime;
         }
 
         else {

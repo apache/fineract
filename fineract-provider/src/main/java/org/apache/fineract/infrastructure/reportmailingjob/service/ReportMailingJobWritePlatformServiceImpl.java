@@ -23,9 +23,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.Duration;
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -152,8 +150,8 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
             // get the recurrence rule string
             final String recurrence = reportMailingJob.getRecurrence();
 
-            // get the next run ZonedDateTime from the ReportMailingJob entity
-            ZonedDateTime nextRunDateTime = reportMailingJob.getNextRunDateTime();
+            // get the next run LocalDateTime from the ReportMailingJob entity
+            LocalDateTime nextRunDateTime = reportMailingJob.getNextRunDateTime();
 
             // check if the stretchy report id was updated
             if (changes.containsKey(ReportMailingJobConstants.STRETCHY_REPORT_ID_PARAM_NAME)) {
@@ -169,10 +167,10 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
 
                 // go ahead if the recurrence is not null
                 if (StringUtils.isNotBlank(recurrence)) {
-                    // set the start ZonedDateTime to the current tenant date time
-                    ZonedDateTime startDateTime = DateUtils.getLocalDateTimeOfTenant().atZone(DateUtils.getDateTimeZoneOfTenant());
+                    // set the start LocalDateTime to the current tenant date time
+                    LocalDateTime startDateTime = DateUtils.getLocalDateTimeOfTenant();
 
-                    // check if the start ZonedDateTime was updated
+                    // check if the start LocalDateTime was updated
                     if (changes.containsKey(ReportMailingJobConstants.START_DATE_TIME_PARAM_NAME)) {
                         // get the updated start DateTime
                         startDateTime = reportMailingJob.getStartDateTime();
@@ -181,25 +179,25 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
                     startDateTime = reportMailingJob.getStartDateTime();
 
                     // get the next recurring DateTime
-                    final ZonedDateTime nextRecurringDateTime = this.createNextRecurringDateTime(recurrence, startDateTime);
+                    final LocalDateTime nextRecurringDateTime = this.createNextRecurringDateTime(recurrence, startDateTime);
 
                     // update the next run time property
                     reportMailingJob.updateNextRunDateTime(nextRecurringDateTime);
 
-                    // check if the next run ZonedDateTime is not empty and the
+                    // check if the next run LocalDateTime is not empty and the
                     // recurrence is empty
                 } else if (StringUtils.isBlank(recurrence) && (nextRunDateTime != null)) {
-                    // the next run ZonedDateTime should be set to null
+                    // the next run LocalDateTime should be set to null
                     reportMailingJob.updateNextRunDateTime(null);
                 }
             }
 
             if (changes.containsKey(ReportMailingJobConstants.START_DATE_TIME_PARAM_NAME)) {
-                final ZonedDateTime startDateTime = reportMailingJob.getStartDateTime();
+                final LocalDateTime startDateTime = reportMailingJob.getStartDateTime();
 
                 // initially set the next recurring date time to the new start
                 // date time
-                ZonedDateTime nextRecurringDateTime = startDateTime;
+                LocalDateTime nextRecurringDateTime = startDateTime;
 
                 // ensure that the recurrence pattern string is not empty
                 if (StringUtils.isNotBlank(recurrence)) {
@@ -251,9 +249,8 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
                 .findByIsActiveTrueAndIsDeletedFalse();
 
         for (ReportMailingJob reportMailingJob : reportMailingJobCollection) {
-            // get the tenant's date as a ZonedDateTime object
-            final ZonedDateTime localDateTimeOftenant = DateUtils.getLocalDateTimeOfTenant().atZone(DateUtils.getDateTimeZoneOfTenant());
-            final ZonedDateTime nextRunDateTime = reportMailingJob.getNextRunDateTime();
+            final LocalDateTime localDateTimeOftenant = DateUtils.getLocalDateTimeOfTenant();
+            final LocalDateTime nextRunDateTime = reportMailingJob.getNextRunDateTime();
 
             if (nextRunDateTime != null && nextRunDateTime.isBefore(localDateTimeOftenant)) {
                 // get the emailAttachmentFileFormat enum object
@@ -310,13 +307,13 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
      * @param errorLog
      *            -- StringBuilder object containing the error log if any
      * @param jobStartDateTime
-     *            -- the start ZonedDateTime of the job
+     *            -- the start LocalDateTime of the job
      *
      **/
     private void updateReportMailingJobAfterJobExecution(final ReportMailingJob reportMailingJob, final StringBuilder errorLog,
-            final ZonedDateTime jobStartDateTime) {
+            final LocalDateTime jobStartDateTime) {
         final String recurrence = reportMailingJob.getRecurrence();
-        final ZonedDateTime nextRunDateTime = reportMailingJob.getNextRunDateTime();
+        final LocalDateTime nextRunDateTime = reportMailingJob.getNextRunDateTime();
         ReportMailingJobPreviousRunStatus reportMailingJobPreviousRunStatus = ReportMailingJobPreviousRunStatus.SUCCESS;
 
         reportMailingJob.updatePreviousRunErrorLog(null);
@@ -339,7 +336,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
             // job will only run once, no next run time
             reportMailingJob.updateNextRunDateTime(null);
         } else if (nextRunDateTime != null) {
-            final ZonedDateTime nextRecurringDateTime = this.createNextRecurringDateTime(recurrence, nextRunDateTime);
+            final LocalDateTime nextRecurringDateTime = this.createNextRecurringDateTime(recurrence, nextRunDateTime);
 
             // finally update the next run date time property
             reportMailingJob.updateNextRunDateTime(nextRecurringDateTime);
@@ -354,25 +351,19 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
     }
 
     /**
-     * create the next recurring ZonedDateTime from recurrence pattern, start ZonedDateTime and current DateTime
+     * create the next recurring LocalDateTime from recurrence pattern, start LocalDateTime and current DateTime
      *
      * @param recurrencePattern
      * @param startDateTime
-     * @return ZonedDateTime object
+     * @return LocalDateTime object
      */
-    private ZonedDateTime createNextRecurringDateTime(final String recurrencePattern, final ZonedDateTime startDateTime) {
-        ZonedDateTime nextRecurringDateTime = null;
+    private LocalDateTime createNextRecurringDateTime(final String recurrencePattern, final LocalDateTime startDateTime) {
+        LocalDateTime nextRecurringDateTime = null;
 
         // the recurrence pattern/rule cannot be empty
         if (StringUtils.isNotBlank(recurrencePattern) && startDateTime != null) {
-            final LocalDate nextDayLocalDate = startDateTime.plus(Duration.ofDays(1)).toLocalDate();
-            final LocalDate nextRecurringLocalDate = CalendarUtils.getNextRecurringDate(recurrencePattern, startDateTime.toLocalDate(),
-                    nextDayLocalDate);
-            final String nextDateTimeString = nextRecurringLocalDate + " " + startDateTime.getHour() + ":" + startDateTime.getMinute() + ":"
-                    + startDateTime.getSecond();
-            final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATETIME_FORMAT);
-
-            nextRecurringDateTime = ZonedDateTime.parse(nextDateTimeString, dateTimeFormatter);
+            final LocalDateTime nextDayLocalDate = startDateTime.plus(Duration.ofDays(1));
+            nextRecurringDateTime = CalendarUtils.getNextRecurringDate(recurrencePattern, startDateTime, nextDayLocalDate);
         }
 
         return nextRecurringDateTime;
@@ -386,14 +377,14 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
      * @param errorLog
      *            -- StringBuilder object containing the error log if any
      * @param jobStartDateTime
-     *            -- the start ZonedDateTime of the job
+     *            -- the start LocalDateTime of the job
      * @param jobRunStatus
      *            -- the status of the job (success/error)
      *
      **/
     private void createReportMailingJobRunHistroryAfterJobExecution(final ReportMailingJob reportMailingJob, final StringBuilder errorLog,
-            final ZonedDateTime jobStartDateTime, final String jobRunStatus) {
-        final ZonedDateTime jobEndDateTime = DateUtils.getLocalDateTimeOfTenant().atZone(DateUtils.getDateTimeZoneOfTenant());
+            final LocalDateTime jobStartDateTime, final String jobRunStatus) {
+        final LocalDateTime jobEndDateTime = DateUtils.getLocalDateTimeOfTenant();
         final String errorLogToString = (errorLog != null) ? errorLog.toString() : null;
         final ReportMailingJobRunHistory reportMailingJobRunHistory = ReportMailingJobRunHistory.newInstance(reportMailingJob,
                 jobStartDateTime, jobEndDateTime, jobRunStatus, null, errorLogToString);

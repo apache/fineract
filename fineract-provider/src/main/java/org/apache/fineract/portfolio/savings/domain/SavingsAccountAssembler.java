@@ -49,7 +49,6 @@ import com.google.gson.JsonElement;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -341,17 +340,15 @@ public class SavingsAccountAssembler {
     public SavingsAccount loadTransactionsToSavingsAccount(final SavingsAccount account, final boolean backdatedTxnsAllowedTill) {
         List<SavingsAccountTransaction> savingsAccountTransactions = null;
         if (backdatedTxnsAllowedTill) {
-            Date pivotDate = account.getSummary().getInterestPostedTillDate();
+            LocalDate pivotDate = account.getSummary().getInterestPostedTillDate();
             boolean isNotPresent = pivotDate == null ? true : false;
             if (!isNotPresent) {
                 // Get savings account transactions
                 if (isRelaxingDaysConfigForPivotDateEnabled()) {
                     final Long relaxingDaysForPivotDate = this.configurationDomainService.retrieveRelaxingDaysConfigForPivotDate();
-                    LocalDate interestPostedTillDate = LocalDate.ofInstant(account.getSummary().getInterestPostedTillDate().toInstant(),
-                            DateUtils.getDateTimeZoneOfTenant());
+                    LocalDate interestPostedTillDate = account.getSummary().getInterestPostedTillDate();
                     savingsAccountTransactions = this.savingsAccountRepository.findTransactionsAfterPivotDate(account,
-                            Date.from(interestPostedTillDate.minusDays(relaxingDaysForPivotDate)
-                                    .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+                            interestPostedTillDate.minusDays(relaxingDaysForPivotDate));
                 } else {
                     savingsAccountTransactions = this.savingsAccountRepository.findTransactionsAfterPivotDate(account,
                             account.getSummary().getInterestPostedTillDate());

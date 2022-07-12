@@ -20,10 +20,8 @@ package org.apache.fineract.infrastructure.gcm.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Date;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.gcm.domain.DeviceRegistrationData;
 import org.apache.fineract.infrastructure.gcm.exception.DeviceRegistrationNotFoundException;
@@ -68,13 +66,12 @@ public class DeviceRegistrationReadPlatformServiceImpl implements DeviceRegistra
         public DeviceRegistrationData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
             final Long id = JdbcSupport.getLong(rs, "id");
-            final LocalDate updatedOnDate = JdbcSupport.getLocalDate(rs, "updatedOnDate");
+            final LocalDateTime updatedOnDate = JdbcSupport.getLocalDateTime(rs, "updatedOnDate");
             final String registrationId = rs.getString("registrationId");
             final Long clientId = rs.getLong("clientId");
             final String clientName = rs.getString("clientName");
             ClientData clientData = ClientData.instance(clientId, clientName);
-            return DeviceRegistrationData.instance(id, clientData, registrationId,
-                    Date.from(updatedOnDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+            return DeviceRegistrationData.instance(id, clientData, registrationId, updatedOnDate);
         }
     }
 

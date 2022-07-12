@@ -19,8 +19,8 @@
 package org.apache.fineract.accounting.provisioning.data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 
 @SuppressWarnings("unused")
 public class ProvisioningEntryData {
@@ -33,7 +33,7 @@ public class ProvisioningEntryData {
 
     private String createdUser;
 
-    Date createdDate;
+    LocalDate createdDate;
 
     Long modifiedById;
 
@@ -48,8 +48,8 @@ public class ProvisioningEntryData {
         this.id = id;
     }
 
-    public ProvisioningEntryData(Long id, Boolean journalEntry, Long createdById, String createdUser, Date createdDate, Long modifiedById,
-            String modifiedUser, BigDecimal totalReservedAmount) {
+    public ProvisioningEntryData(Long id, Boolean journalEntry, Long createdById, String createdUser, LocalDate createdDate,
+            Long modifiedById, String modifiedUser, BigDecimal totalReservedAmount) {
         this.id = id;
         this.journalEntry = journalEntry;
         this.createdById = createdById;
@@ -68,7 +68,7 @@ public class ProvisioningEntryData {
         return this.id;
     }
 
-    public Date getCreatedDate() {
+    public LocalDate getCreatedDate() {
         return this.createdDate;
     }
 }

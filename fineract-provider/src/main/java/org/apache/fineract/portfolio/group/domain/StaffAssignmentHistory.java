@@ -19,17 +19,12 @@
 package org.apache.fineract.portfolio.group.domain;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.staff.domain.Staff;
 
 @Entity
@@ -44,23 +39,21 @@ public class StaffAssignmentHistory extends AbstractAuditableCustom {
     @JoinColumn(name = "staff_id", nullable = true)
     private Staff staff;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "start_date")
-    private Date startDate;
+    private LocalDate startDate;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "end_date")
-    private Date endDate;
+    private LocalDate endDate;
 
     public static StaffAssignmentHistory createNew(final Group center, final Staff staff, final LocalDate startDate) {
-        return new StaffAssignmentHistory(center, staff, Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), null);
+        return new StaffAssignmentHistory(center, staff, startDate, null);
     }
 
     protected StaffAssignmentHistory() {
         //
     }
 
-    private StaffAssignmentHistory(final Group center, final Staff staff, final Date startDate, final Date endDate) {
+    private StaffAssignmentHistory(final Group center, final Staff staff, final LocalDate startDate, final LocalDate endDate) {
         this.center = center;
         this.staff = staff;
         this.startDate = startDate;
@@ -72,11 +65,11 @@ public class StaffAssignmentHistory extends AbstractAuditableCustom {
     }
 
     public void updateStartDate(final LocalDate startDate) {
-        this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.startDate = startDate;
     }
 
     public void updateEndDate(final LocalDate endDate) {
-        this.endDate = Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.endDate = endDate;
     }
 
     public boolean matchesStartDateOf(final LocalDate matchingDate) {
@@ -84,7 +77,7 @@ public class StaffAssignmentHistory extends AbstractAuditableCustom {
     }
 
     public LocalDate getStartDate() {
-        return LocalDate.ofInstant(this.startDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        return this.startDate;
     }
 
     public boolean isCurrentRecord() {

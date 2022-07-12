@@ -20,8 +20,8 @@ package org.apache.fineract.portfolio.address.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 
 @SuppressWarnings("unused")
@@ -67,11 +67,11 @@ public class AddressData implements Serializable {
 
     private final String createdBy;
 
-    private final Date createdOn;
+    private final LocalDate createdOn;
 
     private final String updatedBy;
 
-    private final Date updatedOn;
+    private final LocalDate updatedOn;
 
     // template holder
     private final Collection<CodeValueData> countryIdOptions;
@@ -113,9 +113,9 @@ public class AddressData implements Serializable {
             final Boolean is_active, final String street, final String addressLine1, final String addressLine2, final String addressLine3,
             final String townVillage, final String city, final String countyDistrict, final Long stateProvinceId, final Long countryId,
             final String stateName, final String countryName, final String postalCode, final BigDecimal latitude,
-            final BigDecimal longitude, final String createdBy, final Date createdOn, final String updatedBy, final Date updatedOn,
-            final Collection<CodeValueData> countryIdOptions, final Collection<CodeValueData> stateProvinceIdOptions,
-            final Collection<CodeValueData> addressTypeIdOptions) {
+            final BigDecimal longitude, final String createdBy, final LocalDate createdOn, final String updatedBy,
+            final LocalDate updatedOn, final Collection<CodeValueData> countryIdOptions,
+            final Collection<CodeValueData> stateProvinceIdOptions, final Collection<CodeValueData> addressTypeIdOptions) {
         this.addressType = addressType;
         this.clientID = clientID;
         this.addressId = addressId;
@@ -148,7 +148,8 @@ public class AddressData implements Serializable {
             final Boolean is_active, final String street, final String addressLine1, final String addressLine2, final String addressLine3,
             final String townVillage, final String city, final String countyDistrict, final Long stateProvinceId, final Long countryId,
             final String stateName, final String countryName, final String postalCode, final BigDecimal latitude,
-            final BigDecimal longitude, final String createdBy, final Date createdOn, final String updatedBy, final Date updatedOn) {
+            final BigDecimal longitude, final String createdBy, final LocalDate createdOn, final String updatedBy,
+            final LocalDate updatedOn) {
 
         return new AddressData(addressType, clientID, addressId, addressTypeId, is_active, street, addressLine1, addressLine2, addressLine3,
                 townVillage, city, countyDistrict, stateProvinceId, countryId, stateName, countryName, postalCode, latitude, longitude,
@@ -158,7 +159,7 @@ public class AddressData implements Serializable {
     public static AddressData instance1(final Long addressId, final String street, final String addressLine1, final String addressLine2,
             final String addressLine3, final String townVillage, final String city, final String countyDistrict, final Long stateProvinceId,
             final Long countryId, final String postalCode, final BigDecimal latitude, final BigDecimal longitude, final String createdBy,
-            final Date createdOn, final String updatedBy, final Date updatedOn) {
+            final LocalDate createdOn, final String updatedBy, final LocalDate updatedOn) {
         return new AddressData(null, null, addressId, null, false, street, addressLine1, addressLine2, addressLine3, townVillage, city,
                 countyDistrict, stateProvinceId, countryId, null, null, postalCode, latitude, longitude, createdBy, createdOn, updatedBy,
                 updatedOn, null, null, null);
@@ -200,11 +201,11 @@ public class AddressData implements Serializable {
 
         final String createdBytemp = null;
 
-        final Date createdOntemp = null;
+        final LocalDate createdOntemp = null;
 
         final String updatedBytemp = null;
 
-        final Date updatedOntemp = null;
+        final LocalDate updatedOntemp = null;
 
         return new AddressData(null, client_idtemp, addressIdtemp, addressTypeIdtemp, is_activetemp, streettemp, addressLine1temp,
                 addressLine2temp, addressLine3temp, townVillagetemp, citytemp, countyDistricttemp, stateProvinceIdtemp, countryIdtemp, null,

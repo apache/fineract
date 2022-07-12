@@ -20,10 +20,8 @@ package org.apache.fineract.accounting.journalentry.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -130,7 +128,8 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
             /** Set a transaction Id and save these Journal entries **/
-            final Date transactionDate = command.dateValueOfParameterNamed(JournalEntryJsonInputParams.TRANSACTION_DATE.getValue());
+            final LocalDate transactionDate = command
+                    .localDateValueOfParameterNamed(JournalEntryJsonInputParams.TRANSACTION_DATE.getValue());
             final String transactionId = generateTransactionId(officeId);
             final String referenceNumber = command.stringValueOfParameterNamed(JournalEntryJsonInputParams.REFERENCE_NUMBER.getValue());
 
@@ -315,10 +314,10 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
         // Before reversal validate accounting closure is done for that branch
         // or not.
-        final Date journalEntriesTransactionDate = journalEntries.get(0).getTransactionDate();
+        final LocalDate journalEntriesTransactionDate = journalEntries.get(0).getTransactionDate();
         final GLClosure latestGLClosureByBranch = this.glClosureRepository.getLatestGLClosureByBranch(officeId);
         if (latestGLClosureByBranch != null) {
-            if (latestGLClosureByBranch.getClosingDate().after(journalEntriesTransactionDate)
+            if (latestGLClosureByBranch.getClosingDate().isAfter(journalEntriesTransactionDate)
                     || latestGLClosureByBranch.getClosingDate().compareTo(journalEntriesTransactionDate) == 0 ? Boolean.TRUE
                             : Boolean.FALSE) {
                 final String accountName = null;
@@ -358,7 +357,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     }
 
     @Override
-    public String revertProvisioningJournalEntries(final Date reversalTransactionDate, final Long entityId, final Integer entityType) {
+    public String revertProvisioningJournalEntries(final LocalDate reversalTransactionDate, final Long entityId, final Integer entityType) {
         List<JournalEntry> journalEntries = this.glJournalEntryRepository.findProvisioningJournalEntriesByEntityId(entityId, entityType);
         final String reversalTransactionId = journalEntries.get(0).getTransactionId();
         for (final JournalEntry journalEntry : journalEntries) {
@@ -435,13 +434,13 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                     expenseMap.put(entry.getExpenseAccount(), amount);
                 }
             }
-            createJournalEnry(provisioningEntry.getCreatedDate(), provisioningEntry.getId(), key.office, key.currency, liabilityMap,
+            createJournalEntry(provisioningEntry.getCreatedDate(), provisioningEntry.getId(), key.office, key.currency, liabilityMap,
                     expenseMap);
         }
         return "P" + provisioningEntry.getId();
     }
 
-    private void createJournalEnry(Date transactionDate, Long entryId, Office office, String currencyCode,
+    private void createJournalEntry(LocalDate transactionDate, Long entryId, Office office, String currencyCode,
             Map<GLAccount, BigDecimal> liabilityMap, Map<GLAccount, BigDecimal> expenseMap) {
         Set<GLAccount> liabilityAccounts = liabilityMap.keySet();
         for (GLAccount account : liabilityAccounts) {
@@ -519,7 +518,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     }
 
     @Override
-    public void revertShareAccountJournalEntries(final ArrayList<Long> transactionIds, final Date transactionDate) {
+    public void revertShareAccountJournalEntries(final ArrayList<Long> transactionIds, final LocalDate transactionDate) {
         for (Long shareTransactionId : transactionIds) {
             String transactionId = AccountingProcessorHelper.SHARE_TRANSACTION_IDENTIFIER + shareTransactionId.longValue();
             List<JournalEntry> journalEntries = this.glJournalEntryRepository.findJournalEntries(transactionId,
@@ -561,18 +560,17 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     private void validateBusinessRulesForJournalEntries(final JournalEntryCommand command) {
         /** check if date of Journal entry is valid ***/
         final LocalDate entryLocalDate = command.getTransactionDate();
-        final Date transactionDate = Date.from(entryLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        final LocalDate transactionDate = entryLocalDate;
         // shouldn't be in the future
-        final Date todaysDate = DateUtils.getBusinessDate();
-        if (transactionDate.after(todaysDate)) {
+        final LocalDate todaysDate = DateUtils.getBusinessLocalDate();
+        if (transactionDate.isAfter(todaysDate)) {
             throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.FUTURE_DATE, transactionDate, null, null);
         }
         // shouldn't be before an accounting closure
         final GLClosure latestGLClosure = this.glClosureRepository.getLatestGLClosureByBranch(command.getOfficeId());
         if (latestGLClosure != null) {
-            if (latestGLClosure.getClosingDate().after(transactionDate) || latestGLClosure.getClosingDate().compareTo(transactionDate) == 0
-                    ? Boolean.TRUE
-                    : Boolean.FALSE) {
+            if (latestGLClosure.getClosingDate().isAfter(transactionDate)
+                    || latestGLClosure.getClosingDate().compareTo(transactionDate) == 0 ? Boolean.TRUE : Boolean.FALSE) {
                 throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.ACCOUNTING_CLOSED, latestGLClosure.getClosingDate(),
                         null, null);
             }
@@ -591,8 +589,9 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     }
 
     private void saveAllDebitOrCreditEntries(final JournalEntryCommand command, final Office office, final PaymentDetail paymentDetail,
-            final String currencyCode, final Date transactionDate, final SingleDebitOrCreditEntryCommand[] singleDebitOrCreditEntryCommands,
-            final String transactionId, final JournalEntryType type, final String referenceNumber) {
+            final String currencyCode, final LocalDate transactionDate,
+            final SingleDebitOrCreditEntryCommand[] singleDebitOrCreditEntryCommands, final String transactionId,
+            final JournalEntryType type, final String referenceNumber) {
         final boolean manualEntry = true;
         for (final SingleDebitOrCreditEntryCommand singleDebitOrCreditEntryCommand : singleDebitOrCreditEntryCommands) {
             final GLAccount glAccount = this.glAccountRepository.findById(singleDebitOrCreditEntryCommand.getGlAccountId())
@@ -673,7 +672,8 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             }
 
             /** Set a transaction Id and save these Journal entries **/
-            final Date transactionDate = command.dateValueOfParameterNamed(JournalEntryJsonInputParams.TRANSACTION_DATE.getValue());
+            final LocalDate transactionDate = command
+                    .localDateValueOfParameterNamed(JournalEntryJsonInputParams.TRANSACTION_DATE.getValue());
             final String transactionId = generateTransactionId(officeId);
 
             saveAllDebitOrCreditOpeningBalanceEntries(journalEntryCommand, office, currencyCode, transactionDate,
@@ -691,8 +691,9 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     }
 
     private void saveAllDebitOrCreditOpeningBalanceEntries(final JournalEntryCommand command, final Office office,
-            final String currencyCode, final Date transactionDate, final SingleDebitOrCreditEntryCommand[] singleDebitOrCreditEntryCommands,
-            final String transactionId, final JournalEntryType type, final Long contraAccountId) {
+            final String currencyCode, final LocalDate transactionDate,
+            final SingleDebitOrCreditEntryCommand[] singleDebitOrCreditEntryCommands, final String transactionId,
+            final JournalEntryType type, final Long contraAccountId) {
 
         final boolean manualEntry = true;
         final GLAccount contraAccount = this.glAccountRepository.findById(contraAccountId)

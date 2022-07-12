@@ -62,7 +62,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Locale;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -475,7 +474,7 @@ public class DepositAccountAssembler {
                         detail = this.paymentDetailAssembler.fetchPaymentDetail(savingsTransactionElement);
                     }
                     final SavingsAccountTransactionDTO savingsAccountTransactionDTO = new SavingsAccountTransactionDTO(formatter,
-                            transactionDate, dueAmount, detail, new Date(), savingsId, user, depositAccountType);
+                            transactionDate, dueAmount, detail, DateUtils.getLocalDateTimeOfSystem(), savingsId, user, depositAccountType);
                     savingsAccountTransactions.add(savingsAccountTransactionDTO);
                 }
             }

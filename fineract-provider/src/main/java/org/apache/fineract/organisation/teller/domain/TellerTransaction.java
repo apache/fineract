@@ -18,15 +18,13 @@
  */
 package org.apache.fineract.organisation.teller.domain;
 
-import java.util.Date;
+import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -57,9 +55,8 @@ public class TellerTransaction extends AbstractPersistableCustom {
     @Column(name = "amount", nullable = false)
     private Double amount;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "posting_date", nullable = false)
-    private Date postingDate;
+    private LocalDate postingDate;
 
     public TellerTransaction() {
 
@@ -113,11 +110,11 @@ public class TellerTransaction extends AbstractPersistableCustom {
         this.amount = amount;
     }
 
-    public Date getPostingDate() {
+    public LocalDate getPostingDate() {
         return postingDate;
     }
 
-    public void setPostingDate(Date postingDate) {
+    public void setPostingDate(LocalDate postingDate) {
         this.postingDate = postingDate;
     }
 }

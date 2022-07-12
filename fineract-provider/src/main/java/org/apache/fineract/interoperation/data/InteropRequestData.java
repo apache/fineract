@@ -193,12 +193,12 @@ public class InteropRequestData {
 
         String locale = jsonHelper.extractStringNamed(PARAM_LOCALE, element);
         LocalDateTime expiration = locale == null
-                ? jsonHelper.extractLocalTimeNamed(PARAM_EXPIRATION, element, ISO8601_DATE_TIME_FORMAT, DEFAULT_LOCALE)
-                : jsonHelper.extractLocalTimeNamed(PARAM_EXPIRATION, element); // PARAM_DATE_FORMAT
-                                                                               // also
-                                                                               // must
-                                                                               // be
-                                                                               // set
+                ? jsonHelper.extractLocalDateTimeNamed(PARAM_EXPIRATION, element, ISO8601_DATE_TIME_FORMAT, DEFAULT_LOCALE)
+                : jsonHelper.extractLocalDateTimeNamed(PARAM_EXPIRATION, element); // PARAM_DATE_FORMAT
+        // also
+        // must
+        // be
+        // set
 
         JsonArray extensionArray = jsonHelper.extractJsonArrayNamed(PARAM_EXTENSION_LIST, element);
         ArrayList<ExtensionData> extensionList = null;

@@ -20,9 +20,8 @@ package org.apache.fineract.portfolio.savings.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -37,8 +36,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -78,9 +75,8 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     @Column(name = "transaction_type_enum", nullable = false)
     private Integer typeOf;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "transaction_date", nullable = false)
-    private Date dateOf;
+    private LocalDate dateOf;
 
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
@@ -94,9 +90,8 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     @Column(name = "cumulative_balance_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal cumulativeBalance;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "balance_end_date_derived", nullable = true)
-    private Date balanceEndDate;
+    private LocalDate balanceEndDate;
 
     @Column(name = "balance_number_of_days_derived", nullable = true)
     private Integer balanceNumberOfDays;
@@ -107,9 +102,8 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     @Column(name = "overdraft_amount_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal overdraftAmount;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_date", nullable = false)
-    private Date createdDate;
+    private LocalDateTime createdDate;
 
     @ManyToOne
     @JoinColumn(name = "appuser_id", nullable = true)
@@ -153,7 +147,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     }
 
     public static SavingsAccountTransaction deposit(final SavingsAccount savingsAccount, final Office office,
-            final PaymentDetail paymentDetail, final LocalDate date, final Money amount, Date createdDate, final AppUser appUser,
+            final PaymentDetail paymentDetail, final LocalDate date, final Money amount, LocalDateTime createdDate, final AppUser appUser,
             final String refNo) {
         final boolean isReversed = false;
         final boolean isManualTransaction = false;
@@ -163,7 +157,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     }
 
     public static SavingsAccountTransaction deposit(final SavingsAccount savingsAccount, final Office office,
-            final PaymentDetail paymentDetail, final LocalDate date, final Money amount, Date createdDate, final AppUser appUser,
+            final PaymentDetail paymentDetail, final LocalDate date, final Money amount, LocalDateTime createdDate, final AppUser appUser,
             final SavingsAccountTransactionType savingsAccountTransactionType, final String refNo) {
         final boolean isReversed = false;
         final boolean isManualTransaction = false;
@@ -173,7 +167,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     }
 
     public static SavingsAccountTransaction withdrawal(final SavingsAccount savingsAccount, final Office office,
-            final PaymentDetail paymentDetail, final LocalDate date, final Money amount, Date createdDate, final AppUser appUser,
+            final PaymentDetail paymentDetail, final LocalDate date, final Money amount, LocalDateTime createdDate, final AppUser appUser,
             final String refNo) {
         final boolean isReversed = false;
         final boolean isManualTransaction = false;
@@ -232,7 +226,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     public static SavingsAccountTransaction from(final Integer transactionTypeEnum, final LocalDate transactionDate,
             final BigDecimal amount, final boolean isReversed, final BigDecimal runningBalance, final BigDecimal cumulativeBalance,
             final LocalDate balanceEndDate, final Integer balanceNumberOfDays, final BigDecimal overdraftAmount,
-            final LocalDate createdDate, final boolean isManualTransaction, final Long releaseIdOfHoldAmountTransaction) {
+            final LocalDateTime createdDate, final boolean isManualTransaction, final Long releaseIdOfHoldAmountTransaction) {
         return new SavingsAccountTransaction(transactionTypeEnum, transactionDate, amount, isReversed, runningBalance, cumulativeBalance,
                 balanceEndDate, balanceNumberOfDays, overdraftAmount, createdDate, isManualTransaction, releaseIdOfHoldAmountTransaction);
     }
@@ -255,7 +249,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
         final Boolean lienTransaction = false;
         final String refNo = null;
         return new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
-                SavingsAccountTransactionType.INITIATE_TRANSFER.getValue(), date, new Date(),
+                SavingsAccountTransactionType.INITIATE_TRANSFER.getValue(), date, DateUtils.getLocalDateTimeOfSystem(),
                 savingsAccount.getSummary().getAccountBalance(), isReversed, appUser, isManualTransaction, lienTransaction, refNo);
     }
 
@@ -267,7 +261,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
         final Boolean lienTransaction = false;
         final String refNo = null;
         return new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
-                SavingsAccountTransactionType.APPROVE_TRANSFER.getValue(), date, new Date(),
+                SavingsAccountTransactionType.APPROVE_TRANSFER.getValue(), date, DateUtils.getLocalDateTimeOfSystem(),
                 savingsAccount.getSummary().getAccountBalance(), isReversed, appUser, isManualTransaction, lienTransaction, refNo);
     }
 
@@ -279,7 +273,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
         final Boolean lienTransaction = false;
         final String refNo = null;
         return new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
-                SavingsAccountTransactionType.WITHDRAW_TRANSFER.getValue(), date, new Date(),
+                SavingsAccountTransactionType.WITHDRAW_TRANSFER.getValue(), date, DateUtils.getLocalDateTimeOfSystem(),
                 savingsAccount.getSummary().getAccountBalance(), isReversed, appUser, isManualTransaction, lienTransaction, refNo);
     }
 
@@ -303,8 +297,8 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
         final Boolean lienTransaction = false;
         final String refNo = null;
         return new SavingsAccountTransaction(savingsAccount, savingsAccount.office(), paymentDetail,
-                SavingsAccountTransactionType.ESCHEAT.getValue(), date, new Date(), savingsAccount.getSummary().getAccountBalance(),
-                isReversed, appUser, accountTransaction, lienTransaction, refNo);
+                SavingsAccountTransactionType.ESCHEAT.getValue(), date, DateUtils.getLocalDateTimeOfSystem(),
+                savingsAccount.getSummary().getAccountBalance(), isReversed, appUser, accountTransaction, lienTransaction, refNo);
     }
 
     public static void updateTaxDetails(final Map<TaxComponent, BigDecimal> taxDetails,
@@ -319,7 +313,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
 
     public static SavingsAccountTransaction copyTransaction(SavingsAccountTransaction accountTransaction) {
         return new SavingsAccountTransaction(accountTransaction.savingsAccount, accountTransaction.office, accountTransaction.paymentDetail,
-                accountTransaction.typeOf, accountTransaction.transactionLocalDate(), DateUtils.getDateOfTenant(),
+                accountTransaction.typeOf, accountTransaction.transactionLocalDate(), DateUtils.getLocalDateTimeOfSystem(),
                 accountTransaction.amount, accountTransaction.reversed, accountTransaction.appUser, accountTransaction.isManualTransaction,
                 accountTransaction.lienTransaction, accountTransaction.refNo);
     }
@@ -327,12 +321,12 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Office office, final Integer typeOf,
             final LocalDate transactionLocalDate, final Money amount, final boolean isReversed, final AppUser appUser,
             final boolean isManualTransaction, final Boolean lienTransaction, final String refNo) {
-        this(savingsAccount, office, null, typeOf, transactionLocalDate, new Date(), amount, isReversed, appUser, isManualTransaction,
-                lienTransaction, refNo);
+        this(savingsAccount, office, null, typeOf, transactionLocalDate, DateUtils.getLocalDateTimeOfSystem(), amount, isReversed, appUser,
+                isManualTransaction, lienTransaction, refNo);
     }
 
     private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Office office, final PaymentDetail paymentDetail,
-            final Integer typeOf, final LocalDate transactionLocalDate, final Date createdDate, final Money amount,
+            final Integer typeOf, final LocalDate transactionLocalDate, final LocalDateTime createdDate, final Money amount,
             final boolean isReversed, final AppUser appUser, final boolean isManualTransaction, final Boolean lienTransaction,
             final String refNo) {
         this(savingsAccount, office, paymentDetail, typeOf, transactionLocalDate, createdDate, amount.getAmount(), isReversed, appUser,
@@ -340,13 +334,13 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     }
 
     private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Office office, final PaymentDetail paymentDetail,
-            final Integer typeOf, final LocalDate transactionLocalDate, final Date createdDate, final BigDecimal amount,
+            final Integer typeOf, final LocalDate transactionLocalDate, final LocalDateTime createdDate, final BigDecimal amount,
             final boolean isReversed, final AppUser appUser, final boolean isManualTransaction, final Boolean lienTransaction,
             final String refNo) {
         this.savingsAccount = savingsAccount;
         this.office = office;
         this.typeOf = typeOf;
-        this.dateOf = Date.from(transactionLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.dateOf = transactionLocalDate;
         this.amount = amount;
         this.reversed = isReversed;
         this.paymentDetail = paymentDetail;
@@ -359,24 +353,24 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
 
     private SavingsAccountTransaction(final Integer transactionTypeEnum, final LocalDate transactionDate, final BigDecimal amount,
             final boolean isReversed, final BigDecimal runningBalance, final BigDecimal cumulativeBalance, final LocalDate balanceEndDate,
-            final Integer balanceNumberOfDays, final BigDecimal overdraftAmount, final LocalDate createdDate,
+            final Integer balanceNumberOfDays, final BigDecimal overdraftAmount, final LocalDateTime createdDate,
             final boolean isManualTransaction, final Long releaseIdOfHoldAmountTransaction) {
         this.typeOf = transactionTypeEnum;
-        this.dateOf = Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.dateOf = transactionDate;
         this.amount = amount;
         this.reversed = isReversed;
         this.runningBalance = runningBalance;
         this.cumulativeBalance = cumulativeBalance;
-        this.balanceEndDate = Date.from(balanceEndDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.balanceEndDate = balanceEndDate;
         this.balanceNumberOfDays = balanceNumberOfDays;
         this.overdraftAmount = overdraftAmount;
-        this.createdDate = Date.from(createdDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.createdDate = createdDate;
         this.isManualTransaction = isManualTransaction;
         this.releaseIdOfHoldAmountTransaction = releaseIdOfHoldAmountTransaction;
     }
 
     public static SavingsAccountTransaction holdAmount(final SavingsAccount savingsAccount, final Office office,
-            final PaymentDetail paymentDetail, final LocalDate date, final Money amount, Date createdDate, final AppUser appUser,
+            final PaymentDetail paymentDetail, final LocalDate date, final Money amount, LocalDateTime createdDate, final AppUser appUser,
             final Boolean lienTransaction) {
         final boolean isReversed = false;
         final boolean isManualTransaction = false;
@@ -386,7 +380,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     }
 
     public static SavingsAccountTransaction releaseAmount(SavingsAccountTransaction accountTransaction, LocalDate transactionDate,
-            Date createdDate, final AppUser appUser) {
+            LocalDateTime createdDate, final AppUser appUser) {
         return new SavingsAccountTransaction(accountTransaction.savingsAccount, accountTransaction.office, accountTransaction.paymentDetail,
                 SavingsAccountTransactionType.AMOUNT_RELEASE.getValue(), transactionDate, createdDate, accountTransaction.amount,
                 accountTransaction.reversed, appUser, accountTransaction.isManualTransaction, accountTransaction.lienTransaction,
@@ -403,7 +397,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     }
 
     public LocalDate transactionLocalDate() {
-        return LocalDate.ofInstant(this.dateOf.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        return this.dateOf;
     }
 
     public void reverse() {
@@ -517,26 +511,24 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     public void updateCumulativeBalanceAndDates(final MonetaryCurrency currency, final LocalDate endOfBalanceDate) {
         // balance end date should not be before transaction date
         if (endOfBalanceDate != null && endOfBalanceDate.isBefore(this.transactionLocalDate())) {
-            this.balanceEndDate = Date.from(this.transactionLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
-        } else if (endOfBalanceDate != null) {
-            this.balanceEndDate = Date.from(endOfBalanceDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.balanceEndDate = this.transactionLocalDate();
         } else {
-            this.balanceEndDate = null;
+            this.balanceEndDate = endOfBalanceDate;
         }
         this.balanceNumberOfDays = LocalDateInterval.create(getTransactionLocalDate(), endOfBalanceDate).daysInPeriodInclusiveOfEndDate();
         this.cumulativeBalance = Money.of(currency, this.runningBalance).multipliedBy(this.balanceNumberOfDays).getAmount();
     }
 
     public LocalDate getTransactionLocalDate() {
-        return LocalDate.ofInstant(this.dateOf.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        return this.dateOf;
     }
 
-    public Date getLastTransactionDate() {
+    public LocalDate getLastTransactionDate() {
         return this.dateOf;
     }
 
     public LocalDate getEndOfBalanceLocalDate() {
-        return balanceEndDate == null ? null : LocalDate.ofInstant(balanceEndDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        return balanceEndDate;
     }
 
     public boolean isAcceptableForDailyBalance(final LocalDateInterval interestPeriodInterval) {
@@ -829,10 +821,6 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
         return Money.of(currency, this.overdraftAmount);
     }
 
-    public Date createdDate() {
-        return this.createdDate;
-    }
-
     public boolean isPaymentForCurrentCharge(final SavingsAccountCharge savingsAccountCharge) {
 
         final SavingsAccountChargePaidBy chargePaidBy = getSavingsAccountChargePaidBy();
@@ -876,7 +864,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
         this.savingsAccount = savingsAccount;
     }
 
-    public Date getDateOf() {
+    public LocalDate getDateOf() {
         return this.dateOf;
     }
 
@@ -908,7 +896,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
         return this.office.getId();
     }
 
-    public Date getBalanceEndDate() {
+    public LocalDate getBalanceEndDate() {
         return this.balanceEndDate;
     }
 
@@ -924,7 +912,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
         return this.appUser.getId();
     }
 
-    public Date getCreatedDate() {
+    public LocalDateTime getCreatedDate() {
         return this.createdDate;
     }
 

@@ -20,15 +20,10 @@ package org.apache.fineract.portfolio.tax.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 @Entity
 @Table(name = "m_tax_component_history")
@@ -38,12 +33,10 @@ public class TaxComponentHistory extends AbstractAuditableCustom {
     private BigDecimal percentage;
 
     @Column(name = "start_date", nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date startDate;
+    private LocalDate startDate;
 
     @Column(name = "end_date", nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date endDate;
+    private LocalDate endDate;
 
     protected TaxComponentHistory() {
 
@@ -51,8 +44,8 @@ public class TaxComponentHistory extends AbstractAuditableCustom {
 
     private TaxComponentHistory(final BigDecimal percentage, final LocalDate startDate, final LocalDate endDate) {
         this.percentage = percentage;
-        this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        this.endDate = Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 
     public static TaxComponentHistory createTaxComponentHistory(final BigDecimal percentage, final LocalDate startDate,
@@ -61,19 +54,11 @@ public class TaxComponentHistory extends AbstractAuditableCustom {
     }
 
     public LocalDate startDate() {
-        LocalDate startDate = null;
-        if (this.startDate != null) {
-            startDate = LocalDate.ofInstant(this.startDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-        return startDate;
+        return this.startDate;
     }
 
     public LocalDate endDate() {
-        LocalDate endDate = null;
-        if (this.endDate != null) {
-            endDate = LocalDate.ofInstant(this.endDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-        return endDate;
+        return this.endDate;
     }
 
     public boolean occursOnDayFromAndUpToAndIncluding(final LocalDate target) {

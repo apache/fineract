@@ -19,14 +19,12 @@
 package org.apache.fineract.portfolio.shareproducts.domain;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
@@ -38,8 +36,7 @@ public class ShareProductMarketPrice extends AbstractPersistableCustom {
     private ShareProduct product;
 
     @Column(name = "from_date")
-    @Temporal(TemporalType.DATE)
-    private Date fromDate;
+    private LocalDate fromDate;
 
     @Column(name = "share_value", nullable = false)
     private BigDecimal shareValue;
@@ -48,7 +45,7 @@ public class ShareProductMarketPrice extends AbstractPersistableCustom {
 
     }
 
-    public ShareProductMarketPrice(final Date fromDate, final BigDecimal shareValue) {
+    public ShareProductMarketPrice(final LocalDate fromDate, final BigDecimal shareValue) {
         this.fromDate = fromDate;
         this.shareValue = shareValue;
     }
@@ -57,7 +54,7 @@ public class ShareProductMarketPrice extends AbstractPersistableCustom {
         this.product = product;
     }
 
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return this.fromDate;
     }
 
@@ -65,7 +62,7 @@ public class ShareProductMarketPrice extends AbstractPersistableCustom {
         return this.shareValue;
     }
 
-    public void setStartDate(Date date) {
+    public void setStartDate(LocalDate date) {
         this.fromDate = date;
     }
 

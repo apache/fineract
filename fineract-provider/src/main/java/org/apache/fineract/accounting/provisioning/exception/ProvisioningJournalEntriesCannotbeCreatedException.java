@@ -18,12 +18,12 @@
  */
 package org.apache.fineract.accounting.provisioning.exception;
 
-import java.util.Date;
+import java.time.LocalDate;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 public class ProvisioningJournalEntriesCannotbeCreatedException extends AbstractPlatformResourceNotFoundException {
 
-    public ProvisioningJournalEntriesCannotbeCreatedException(Date existingEntriesDate, Date requestedDate) {
+    public ProvisioningJournalEntriesCannotbeCreatedException(LocalDate existingEntriesDate, LocalDate requestedDate) {
         super("error.msg.provisioning.journalentries.cannot.be.created", "Provisioning Journal Entries already created on later date "
                 + existingEntriesDate + " than requested date " + requestedDate);
     }

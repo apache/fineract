@@ -26,14 +26,11 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
@@ -256,14 +253,10 @@ public class ProvisioningIntegrationTest {
         boolean provisioningetryAlreadyCreated = false;
         if (pageItems != null) {
             for (Map item : pageItems) {
-                String date = (String) item.get("createdDate");
-                DateFormat formatter = new SimpleDateFormat("MMM dd, yyyy");
-                Date date1 = formatter.parse(date);
-                DateFormat simple = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-                String formattedString = simple
-                        .format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(Utils.getZoneIdOfTenant()).toInstant()));
-                Date currentDate = simple.parse(formattedString);
-                if (date1.getTime() == currentDate.getTime()) {
+                List<Integer> date = (ArrayList) item.get("createdDate");
+                LocalDate localDate = LocalDate.of(date.get(0), date.get(1), date.get(2));
+
+                if (localDate.equals(Utils.getLocalDateOfTenant())) {
                     provisioningetryAlreadyCreated = true;
                     break;
                 }

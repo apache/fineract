@@ -25,11 +25,11 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.MonthDay;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -255,19 +255,7 @@ public final class JsonCommand {
         return this.productId;
     }
 
-    private boolean differenceExistsTime(final LocalDateTime baseValue, final LocalDateTime workingCopyValue) {
-        boolean differenceExists = false;
-
-        if (baseValue != null) {
-            differenceExists = !baseValue.equals(workingCopyValue);
-        } else {
-            differenceExists = workingCopyValue != null;
-        }
-
-        return differenceExists;
-    }
-
-    private boolean differenceExists(final LocalDate baseValue, final LocalDate workingCopyValue) {
+    private boolean differenceExists(final TemporalAccessor baseValue, final TemporalAccessor workingCopyValue) {
         boolean differenceExists = false;
 
         if (baseValue != null) {
@@ -374,20 +362,29 @@ public final class JsonCommand {
         return isChangeInLocalDateParameterNamed(parameterName, existingValue);
     }
 
-    public boolean isChangeInTimeParameterNamed(final String parameterName, final Date existingValue, final String timeFormat) {
-        LocalDateTime time = null;
+    public boolean isChangeInTimeParameterNamed(final String parameterName, final LocalTime existingValue, final String timeFormat) {
+        LocalTime time = null;
         if (existingValue != null) {
             DateTimeFormatter timeFormtter = DateTimeFormatter.ofPattern(timeFormat);
-            time = LocalDateTime.parse(existingValue.toString(), timeFormtter);
+            time = LocalTime.parse(existingValue.toString(), timeFormtter);
         }
         return isChangeInLocalTimeParameterNamed(parameterName, time);
     }
 
-    public boolean isChangeInLocalTimeParameterNamed(final String parameterName, final LocalDateTime existingValue) {
+    public boolean isChangeInLocalTimeParameterNamed(final String parameterName, final LocalTime existingValue) {
         boolean isChanged = false;
         if (parameterExists(parameterName)) {
-            final LocalDateTime workingValue = localTimeValueOfParameterNamed(parameterName);
-            isChanged = differenceExistsTime(existingValue, workingValue);
+            final LocalTime workingValue = localTimeValueOfParameterNamed(parameterName);
+            isChanged = differenceExists(existingValue, workingValue);
+        }
+        return isChanged;
+    }
+
+    public boolean isChangeInLocalDateTimeParameterNamed(final String parameterName, final LocalDateTime existingValue) {
+        boolean isChanged = false;
+        if (parameterExists(parameterName)) {
+            final LocalTime workingValue = localTimeValueOfParameterNamed(parameterName);
+            isChanged = differenceExists(existingValue, workingValue);
         }
         return isChanged;
     }
@@ -405,20 +402,20 @@ public final class JsonCommand {
         return this.fromApiJsonHelper.extractLocalDateNamed(parameterName, this.parsedCommand);
     }
 
-    public LocalDateTime localTimeValueOfParameterNamed(final String parameterName) {
+    public LocalTime localTimeValueOfParameterNamed(final String parameterName) {
         return this.fromApiJsonHelper.extractLocalTimeNamed(parameterName, this.parsedCommand);
+    }
+
+    public LocalDateTime localDateTimeValueOfParameterNamed(final String parameterName) {
+        return this.fromApiJsonHelper.extractLocalDateTimeNamed(parameterName, this.parsedCommand);
     }
 
     public MonthDay extractMonthDayNamed(final String parameterName) {
         return this.fromApiJsonHelper.extractMonthDayNamed(parameterName, this.parsedCommand);
     }
 
-    public Date dateValueOfParameterNamed(final String parameterName) {
-        final LocalDate localDate = this.fromApiJsonHelper.extractLocalDateNamed(parameterName, this.parsedCommand);
-        if (localDate == null) {
-            return null;
-        }
-        return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    public LocalDate dateValueOfParameterNamed(final String parameterName) {
+        return this.fromApiJsonHelper.extractLocalDateNamed(parameterName, this.parsedCommand);
     }
 
     public boolean isChangeInStringParameterNamed(final String parameterName, final String existingValue) {

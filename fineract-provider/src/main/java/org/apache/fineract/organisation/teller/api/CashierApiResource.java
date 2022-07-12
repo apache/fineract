@@ -19,10 +19,9 @@
 package org.apache.fineract.organisation.teller.api;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-import java.util.Date;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -30,6 +29,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.teller.data.CashierData;
 import org.apache.fineract.organisation.teller.service.TellerManagementReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +60,7 @@ public class CashierApiResource {
             @QueryParam("staffId") final Long staffId, @QueryParam("date") final String date) {
         final DateTimeFormatter dateFormatter = DateTimeFormatter.BASIC_ISO_DATE;
 
-        final Date dateRestriction = (date != null ? Date.from(ZonedDateTime.parse(date, dateFormatter).toInstant()) : new Date());
+        final LocalDate dateRestriction = (date != null ? LocalDate.parse(date, dateFormatter) : DateUtils.getBusinessLocalDate());
 
         final Collection<CashierData> allCashiers = this.readPlatformService.getCashierData(officeId, tellerId, staffId, dateRestriction);
 

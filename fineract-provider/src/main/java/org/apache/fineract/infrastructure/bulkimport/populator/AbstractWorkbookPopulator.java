@@ -19,10 +19,10 @@
 package org.apache.fineract.infrastructure.bulkimport.populator;
 
 import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.regex.Pattern;
 import org.apache.fineract.organisation.office.data.OfficeData;
@@ -67,27 +67,21 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
 
     protected void writeDate(int colIndex, Row row, String value, CellStyle dateCellStyle, String dateFormat) {
         try {
-            SimpleDateFormat formatinDB = null;
+            DateTimeFormatter formatinDB;
             if (value.matches("\\d{4}-\\d{1,2}-\\d{1,2}")) {
-                formatinDB = new SimpleDateFormat("yyyy-MM-dd");
+                formatinDB = new DateTimeFormatterBuilder().appendPattern("yyyy-M-d").toFormatter();
             } else if (value.matches("\\d{1,2}/\\d{1,2}/\\d{4}")) {
-                formatinDB = new SimpleDateFormat("dd/MM/yyyy");
+                formatinDB = new DateTimeFormatterBuilder().appendPattern("d/M/yyyy").toFormatter();
             } else if (value.matches("\\d{1,2} \\w{3,12} \\d{4}")) {
-                formatinDB = new SimpleDateFormat("dd MMMM yyyy");
+                formatinDB = new DateTimeFormatterBuilder().appendPattern("d MMMM yyyy").toFormatter();
+            } else {
+                throw new IllegalArgumentException("Unrecognised format of date value: " + value);
             }
-            Date date1 = formatinDB.parse(value);
-            SimpleDateFormat expectedFormat = new SimpleDateFormat(dateFormat);
-            Date date2 = expectedFormat.parse(expectedFormat.format(date1));
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(date2);
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-            Date dateWithoutTime = cal.getTime();
-            row.createCell(colIndex).setCellValue(dateWithoutTime);
+            LocalDate date1 = LocalDate.parse(value, formatinDB);
+            DateTimeFormatter expectedFormat = new DateTimeFormatterBuilder().appendPattern(dateFormat).toFormatter();
+            row.createCell(colIndex).setCellValue(expectedFormat.format(date1));
             row.getCell(colIndex).setCellStyle(dateCellStyle);
-        } catch (ParseException pe) {
+        } catch (DateTimeParseException pe) {
             throw new IllegalArgumentException(pe);
         }
     }
@@ -121,9 +115,7 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
         short df = workbook.createDataFormat().getFormat(dateFormat);
         dateCellStyle.setDataFormat(df);
         int rowIndex = 0;
-        SimpleDateFormat outputFormat = new SimpleDateFormat(dateFormat);
-        SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date date = null;
+        DateTimeFormatter outputFormat = new DateTimeFormatterBuilder().appendPattern(dateFormat).toFormatter();
         try {
             if (clients != null) {
                 for (ClientData client : clients) {
@@ -134,8 +126,7 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
                     writeString(nameCol, row, client.displayName().replaceAll("[ )(] ", "_") + "(" + client.id() + ")");
 
                     if (client.getActivationDate() != null) {
-                        date = inputFormat.parse(client.getActivationDate().toString());
-                        writeDate(activationDateCol, row, outputFormat.format(date), dateCellStyle, dateFormat);
+                        writeDate(activationDateCol, row, outputFormat.format(client.getActivationDate()), dateCellStyle, dateFormat);
                     }
                     if (containsClientExtId) {
                         if (client.getExternalId() != null) {
@@ -154,13 +145,12 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
                     writeString(nameCol, row, group.getName().replaceAll("[ )(] ", "_"));
 
                     if (group.getActivationDate() != null) {
-                        date = inputFormat.parse(group.getActivationDate().toString());
-                        writeDate(activationDateCol, row, outputFormat.format(date), dateCellStyle, dateFormat);
+                        writeDate(activationDateCol, row, outputFormat.format(group.getActivationDate()), dateCellStyle, dateFormat);
                     }
 
                 }
             }
-        } catch (ParseException e) {
+        } catch (DateTimeParseException e) {
             LOG.error("Problem occurred in setClientAndGroupDateLookupTable function", e);
         }
     }

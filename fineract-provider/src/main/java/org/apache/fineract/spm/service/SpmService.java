@@ -19,12 +19,6 @@
 package org.apache.fineract.spm.service;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoField;
-import java.time.temporal.ChronoUnit;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import javax.persistence.EntityExistsException;
 import javax.persistence.PersistenceException;
@@ -59,7 +53,7 @@ public class SpmService {
     public List<Survey> fetchValidSurveys() {
         this.securityContext.authenticatedUser();
 
-        return this.surveyRepository.fetchActiveSurveys(new Date());
+        return this.surveyRepository.fetchActiveSurveys(DateUtils.getLocalDateTimeOfSystem());
     }
 
     public List<Survey> fetchAllSurveys() {
@@ -76,19 +70,15 @@ public class SpmService {
     public Survey createSurvey(final Survey survey) {
         this.securityContext.authenticatedUser();
         this.surveyValidator.validate(survey);
-        final Survey previousSurvey = this.surveyRepository.findByKey(survey.getKey(), new Date());
+        final Survey previousSurvey = this.surveyRepository.findByKey(survey.getKey(), DateUtils.getLocalDateTimeOfSystem());
 
         if (previousSurvey != null) {
             this.deactivateSurvey(previousSurvey.getId());
         }
         // set valid from to start of today
-        LocalDate validFrom = DateUtils.getBusinessLocalDate();
-        // set valid to for 100 years
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(Date.from(validFrom.atStartOfDay(ZoneId.systemDefault()).toInstant()));
-        cal.add(Calendar.YEAR, 100);
-        survey.setValidFrom(Date.from(validFrom.atStartOfDay(ZoneId.systemDefault()).toInstant()));
-        survey.setValidTo(cal.getTime());
+        LocalDate validFrom = getStartOfToday();
+        survey.setValidFrom(validFrom);
+        survey.setValidTo(validFrom.plusYears(100));
         try {
             this.surveyRepository.saveAndFlush(survey);
         } catch (final EntityExistsException dve) {
@@ -123,8 +113,8 @@ public class SpmService {
         this.securityContext.authenticatedUser();
 
         final Survey survey = findById(id);
-        final ZonedDateTime dateTime = getStartOfToday().minus(1, ChronoUnit.MILLIS);
-        survey.setValidTo(Date.from(dateTime.toInstant()));
+        final LocalDate dateTime = getStartOfToday().minusDays(1);
+        survey.setValidTo(dateTime);
 
         this.surveyRepository.saveAndFlush(survey);
     }
@@ -133,19 +123,15 @@ public class SpmService {
         this.securityContext.authenticatedUser();
 
         final Survey survey = findById(id);
-        LocalDate validFrom = DateUtils.getBusinessLocalDate();
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(Date.from(validFrom.atStartOfDay(ZoneId.systemDefault()).toInstant()));
-        cal.add(Calendar.YEAR, 100);
-        survey.setValidFrom(Date.from(validFrom.atStartOfDay(ZoneId.systemDefault()).toInstant()));
-        survey.setValidTo(cal.getTime());
+        LocalDate validFrom = getStartOfToday();
+        survey.setValidFrom(validFrom);
+        survey.setValidTo(validFrom.plusYears(100));
 
         this.surveyRepository.saveAndFlush(survey);
     }
 
-    public static ZonedDateTime getStartOfToday() {
-        return ZonedDateTime.now(DateUtils.getDateTimeZoneOfTenant()).withHour(0).withMinute(0).withSecond(0)
-                .with(ChronoField.MILLI_OF_SECOND, 0);
+    public static LocalDate getStartOfToday() {
+        return DateUtils.getLocalDateOfTenant();
     }
 
     private void handleDataIntegrityIssues(final Throwable realCause, final Exception dve, String key) {

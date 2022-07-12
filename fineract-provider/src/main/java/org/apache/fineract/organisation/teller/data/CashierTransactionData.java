@@ -20,8 +20,9 @@ package org.apache.fineract.organisation.teller.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Date;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.teller.domain.CashierTxnType;
 
@@ -31,11 +32,11 @@ public final class CashierTransactionData implements Serializable {
     private final Long cashierId;
     private final CashierTxnType txnType;
     private final BigDecimal txnAmount;
-    private final Date txnDate;
+    private final LocalDate txnDate;
     private final Long entityId;
     private final String entityType;
     private final String txnNote;
-    private final Date createdDate;
+    private final LocalDateTime createdDate;
 
     // Template fields
     private final Long officeId;
@@ -45,8 +46,8 @@ public final class CashierTransactionData implements Serializable {
     private final String cashierName;
 
     private final CashierData cashierData;
-    private final Date startDate;
-    private final Date endDate;
+    private final LocalDate startDate;
+    private final LocalDate endDate;
 
     private final Collection<CurrencyData> currencyOptions;
 
@@ -54,9 +55,9 @@ public final class CashierTransactionData implements Serializable {
      * Creates a new cashier.
      */
     private CashierTransactionData(final Long id, final Long cashierId, CashierTxnType txnType, final BigDecimal txnAmount,
-            final Date txnDate, String txnNote, String entityType, Long entityId, Date createdDate, Long officeId, String officeName,
-            Long tellerId, String tellerName, String cashierName, CashierData cashierData, Date startDate, Date endDate,
-            final Collection<CurrencyData> currencyOptions) {
+            final LocalDate txnDate, String txnNote, String entityType, Long entityId, LocalDateTime createdDate, Long officeId,
+            String officeName, Long tellerId, String tellerName, String cashierName, CashierData cashierData, LocalDate startDate,
+            LocalDate endDate, final Collection<CurrencyData> currencyOptions) {
         this.id = id;
         this.cashierId = cashierId;
         this.txnType = txnType;
@@ -81,15 +82,15 @@ public final class CashierTransactionData implements Serializable {
     }
 
     public static CashierTransactionData instance(final Long id, final Long cashierId, CashierTxnType txnType, final BigDecimal txnAmount,
-            final Date txnDate, final String txnNote, final String entityType, final Long entityId, final Date createdDate,
+            final LocalDate txnDate, final String txnNote, final String entityType, final Long entityId, final LocalDateTime createdDate,
             final Long officeId, final String officeName, final Long tellerId, final String tellerName, final String cashierName,
-            final CashierData cashierData, Date startDate, Date endDate) {
+            final CashierData cashierData, LocalDate startDate, LocalDate endDate) {
         return new CashierTransactionData(id, cashierId, txnType, txnAmount, txnDate, txnNote, entityType, entityId, createdDate, officeId,
                 officeName, tellerId, tellerName, cashierName, cashierData, startDate, endDate, null);
     }
 
     public static CashierTransactionData template(final Long cashierId, final Long tellerId, final String tellerName, final Long officeId,
-            final String officeName, final String cashierName, final CashierData cashierData, Date startDate, Date endDate,
+            final String officeName, final String cashierName, final CashierData cashierData, LocalDate startDate, LocalDate endDate,
             final Collection<CurrencyData> currencyOptions) {
         return new CashierTransactionData(null, cashierId, null, null, null, null, null, null, null, officeId, officeName, tellerId,
                 tellerName, cashierName, cashierData, startDate, endDate, currencyOptions);
@@ -111,7 +112,7 @@ public final class CashierTransactionData implements Serializable {
         return txnAmount;
     }
 
-    public Date getTxnDate() {
+    public LocalDate getTxnDate() {
         return txnDate;
     }
 
@@ -127,7 +128,7 @@ public final class CashierTransactionData implements Serializable {
         return entityId;
     }
 
-    public Date getCreatedDate() {
+    public LocalDateTime getCreatedDate() {
         return createdDate;
     }
 
@@ -151,11 +152,11 @@ public final class CashierTransactionData implements Serializable {
         return cashierName;
     }
 
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public Date getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 

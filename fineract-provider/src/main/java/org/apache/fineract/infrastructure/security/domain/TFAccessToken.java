@@ -19,15 +19,11 @@
 package org.apache.fineract.infrastructure.security.domain;
 
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
-import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -46,13 +42,11 @@ public class TFAccessToken extends AbstractPersistableCustom {
     @JoinColumn(name = "appuser_id", nullable = false)
     private AppUser user;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "valid_from", nullable = false)
-    private Date validFrom;
+    private LocalDateTime validFrom;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "valid_to", nullable = false)
-    private Date validTo;
+    private LocalDateTime validTo;
 
     @Column(name = "enabled", nullable = false)
     private boolean enabled;
@@ -60,13 +54,13 @@ public class TFAccessToken extends AbstractPersistableCustom {
     public TFAccessToken() {}
 
     public static TFAccessToken create(String token, AppUser user, int tokenLiveTimeInSec) {
-        ZonedDateTime validFrom = DateUtils.getLocalDateTimeOfTenant().atZone(DateUtils.getDateTimeZoneOfTenant());
-        ZonedDateTime validTo = validFrom.plusSeconds(tokenLiveTimeInSec);
+        LocalDateTime validFrom = DateUtils.getLocalDateTimeOfTenant();
+        LocalDateTime validTo = validFrom.plusSeconds(tokenLiveTimeInSec);
 
-        return new TFAccessToken(token, user, Date.from(validFrom.toInstant()), Date.from(validTo.toInstant()), true);
+        return new TFAccessToken(token, user, validFrom, validTo, true);
     }
 
-    public TFAccessToken(String token, AppUser user, Date validFrom, Date validTo, boolean enabled) {
+    public TFAccessToken(String token, AppUser user, LocalDateTime validFrom, LocalDateTime validTo, boolean enabled) {
         this.token = token;
         this.user = user;
         this.validFrom = validFrom;
@@ -96,11 +90,11 @@ public class TFAccessToken extends AbstractPersistableCustom {
     }
 
     public LocalDateTime getValidFromDate() {
-        return ZonedDateTime.ofInstant(validFrom.toInstant(), DateUtils.getDateTimeZoneOfTenant()).toLocalDateTime();
+        return validFrom;
     }
 
     public LocalDateTime getValidToDate() {
-        return ZonedDateTime.ofInstant(validTo.toInstant(), DateUtils.getDateTimeZoneOfTenant()).toLocalDateTime();
+        return validTo;
     }
 
     public void setToken(String token) {
@@ -111,11 +105,11 @@ public class TFAccessToken extends AbstractPersistableCustom {
         this.user = user;
     }
 
-    public void setValidFrom(Date validFrom) {
+    public void setValidFrom(LocalDateTime validFrom) {
         this.validFrom = validFrom;
     }
 
-    public void setValidTo(Date validTo) {
+    public void setValidTo(LocalDateTime validTo) {
         this.validTo = validTo;
     }
 

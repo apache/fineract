@@ -27,13 +27,9 @@ import static org.apache.fineract.portfolio.interestratechart.InterestRateChartA
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.nameParamName;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
@@ -48,13 +44,11 @@ public class InterestRateChartFields {
     @Column(name = "description", nullable = true)
     private String description;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "from_date", nullable = false)
-    private Date fromDate;
+    private LocalDate fromDate;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "end_date", nullable = true)
-    private Date endDate;
+    private LocalDate endDate;
 
     @Column(name = "is_primary_grouping_by_amount", nullable = false)
     private boolean isPrimaryGroupingByAmount;
@@ -72,8 +66,8 @@ public class InterestRateChartFields {
             boolean isPrimaryGroupingByAmount) {
         this.name = name;
         this.description = description;
-        this.fromDate = Date.from(fromDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        this.endDate = (toDate == null) ? null : Date.from(toDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.fromDate = fromDate;
+        this.endDate = toDate;
         this.isPrimaryGroupingByAmount = isPrimaryGroupingByAmount;
     }
 
@@ -95,21 +89,19 @@ public class InterestRateChartFields {
         final String dateFormat = command.dateFormat();
 
         if (command.isChangeInLocalDateParameterNamed(fromDateParamName, getFromDateAsLocalDate())) {
-            final LocalDate newValue = command.localDateValueOfParameterNamed(fromDateParamName);
             final String newValueAsString = command.stringValueOfParameterNamed(fromDateParamName);
             actualChanges.put(fromDateParamName, newValueAsString);
             actualChanges.put(localeParamName, localeAsInput);
             actualChanges.put(dateFormatParamName, dateFormat);
-            this.fromDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.fromDate = command.localDateValueOfParameterNamed(fromDateParamName);
         }
 
         if (command.isChangeInLocalDateParameterNamed(endDateParamName, getEndDateAsLocalDate())) {
-            final LocalDate newValue = command.localDateValueOfParameterNamed(endDateParamName);
             final String newValueAsString = command.stringValueOfParameterNamed(endDateParamName);
             actualChanges.put(endDateParamName, newValueAsString);
             actualChanges.put(localeParamName, localeAsInput);
             actualChanges.put(dateFormatParamName, dateFormat);
-            this.endDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.endDate = command.localDateValueOfParameterNamed(endDateParamName);
         }
 
         if (command.isChangeInBooleanParameterNamed(isPrimaryGroupingByAmountParamName, this.isPrimaryGroupingByAmount)) {
@@ -136,19 +128,11 @@ public class InterestRateChartFields {
     }
 
     public LocalDate getFromDateAsLocalDate() {
-        LocalDate fromDate = null;
-        if (this.fromDate != null) {
-            fromDate = LocalDate.ofInstant(this.fromDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-        return fromDate;
+        return this.fromDate;
     }
 
     public LocalDate getEndDateAsLocalDate() {
-        LocalDate endDate = null;
-        if (this.endDate != null) {
-            endDate = LocalDate.ofInstant(this.endDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-        return endDate;
+        return this.endDate;
     }
 
     public boolean isOverlapping(InterestRateChartFields that) {

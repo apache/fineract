@@ -20,8 +20,7 @@ package org.apache.fineract.portfolio.floatingrates.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.Date;
+import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -29,7 +28,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateDTO;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRatePeriodData;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -44,7 +42,7 @@ public class FloatingRatePeriod extends AbstractPersistableCustom {
     private FloatingRate floatingRate;
 
     @Column(name = "from_date", nullable = false)
-    private Date fromDate;
+    private LocalDate fromDate;
 
     @Column(name = "interest_rate", scale = 6, precision = 19, nullable = false)
     private BigDecimal interestRate;
@@ -64,17 +62,17 @@ public class FloatingRatePeriod extends AbstractPersistableCustom {
     private AppUser modifiedBy;
 
     @Column(name = "created_date", nullable = false)
-    private Date createdOn;
+    private LocalDateTime createdOn;
 
     @Column(name = "lastmodified_date", nullable = false)
-    private Date modifiedOn;
+    private LocalDateTime modifiedOn;
 
     public FloatingRatePeriod() {
 
     }
 
-    public FloatingRatePeriod(Date fromDate, BigDecimal interestRate, boolean isDifferentialToBaseLendingRate, boolean isActive,
-            AppUser createdBy, AppUser modifiedBy, Date createdOn, Date modifiedOn) {
+    public FloatingRatePeriod(LocalDate fromDate, BigDecimal interestRate, boolean isDifferentialToBaseLendingRate, boolean isActive,
+            AppUser createdBy, AppUser modifiedBy, LocalDateTime createdOn, LocalDateTime modifiedOn) {
         this.fromDate = fromDate;
         this.interestRate = interestRate;
         this.isDifferentialToBaseLendingRate = isDifferentialToBaseLendingRate;
@@ -93,7 +91,7 @@ public class FloatingRatePeriod extends AbstractPersistableCustom {
         return this.floatingRate;
     }
 
-    public Date getFromDate() {
+    public LocalDate getFromDate() {
         return this.fromDate;
     }
 
@@ -117,11 +115,11 @@ public class FloatingRatePeriod extends AbstractPersistableCustom {
         return this.modifiedBy;
     }
 
-    public Date getCreatedOn() {
+    public LocalDateTime getCreatedOn() {
         return this.createdOn;
     }
 
-    public Date getModifiedOn() {
+    public LocalDateTime getModifiedOn() {
         return this.modifiedOn;
     }
 
@@ -129,7 +127,7 @@ public class FloatingRatePeriod extends AbstractPersistableCustom {
         this.modifiedBy = modifiedBy;
     }
 
-    public void setModifiedOn(Date modifiedOn) {
+    public void setModifiedOn(LocalDateTime modifiedOn) {
         this.modifiedOn = modifiedOn;
     }
 
@@ -138,7 +136,7 @@ public class FloatingRatePeriod extends AbstractPersistableCustom {
     }
 
     public LocalDate fetchFromDate() {
-        return LocalDate.ofInstant(this.fromDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        return fromDate;
     }
 
     public FloatingRatePeriodData toData(final FloatingRateDTO floatingRateDTO) {
@@ -148,10 +146,9 @@ public class FloatingRatePeriod extends AbstractPersistableCustom {
             interest = interest.add(floatingRateDTO.fetchBaseRate(fetchFromDate()));
         }
 
-        final LocalDate fromDate = ZonedDateTime.ofInstant(getFromDate().toInstant(), DateUtils.getDateTimeZoneOfTenant()).toLocalDate();
-        final LocalDate createdOn = ZonedDateTime.ofInstant(getCreatedOn().toInstant(), DateUtils.getDateTimeZoneOfTenant()).toLocalDate();
-        final LocalDate modifiedOn = ZonedDateTime.ofInstant(getModifiedOn().toInstant(), DateUtils.getDateTimeZoneOfTenant())
-                .toLocalDate();
+        final LocalDate fromDate = getFromDate();
+        final LocalDateTime createdOn = getCreatedOn();
+        final LocalDateTime modifiedOn = getModifiedOn();
 
         String createdBy = getCreatedBy() != null ? getCreatedBy().getUsername() : null;
         String modifiedBy = getModifiedBy() != null ? getModifiedBy().getUsername() : null;

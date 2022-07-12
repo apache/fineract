@@ -19,7 +19,7 @@
 package org.apache.fineract.infrastructure.entityaccess.data;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
 
 public final class FineractEntityToEntityMappingData implements Serializable {
 
@@ -36,10 +36,10 @@ public final class FineractEntityToEntityMappingData implements Serializable {
     private Long toId;
 
     @SuppressWarnings("unused")
-    private Date startDate;
+    private LocalDate startDate;
 
     @SuppressWarnings("unused")
-    private Date endDate;
+    private LocalDate endDate;
 
     @SuppressWarnings("unused")
     private final String fromEntity;
@@ -48,7 +48,7 @@ public final class FineractEntityToEntityMappingData implements Serializable {
     private final String toEntity;
 
     private FineractEntityToEntityMappingData(final Long mapId, final Long relationId, final Long fromId, final Long toId,
-            final Date startDate, final Date endDate, final String fromEntity, final String toEntity) {
+            final LocalDate startDate, final LocalDate endDate, final String fromEntity, final String toEntity) {
         this.mapId = mapId;
         this.relationId = relationId;
         this.fromId = fromId;
@@ -60,14 +60,14 @@ public final class FineractEntityToEntityMappingData implements Serializable {
     }
 
     public static FineractEntityToEntityMappingData getRelatedEntities(final Long mapId, final Long relationId, final Long fromId,
-            final Long toId, final Date startDate, final Date endDate, final String fromEntity, final String toEntity) {
+            final Long toId, final LocalDate startDate, final LocalDate endDate, final String fromEntity, final String toEntity) {
 
         return new FineractEntityToEntityMappingData(mapId, relationId, fromId, toId, startDate, endDate, fromEntity, toEntity);
 
     }
 
     public static FineractEntityToEntityMappingData getRelatedEntities(final Long relationId, final Long fromId, final Long toId,
-            final Date startDate, final Date endDate) {
+            final LocalDate startDate, final LocalDate endDate) {
         final Long mapId = null;
         final String fromEntity = null;
         final String toEntity = null;

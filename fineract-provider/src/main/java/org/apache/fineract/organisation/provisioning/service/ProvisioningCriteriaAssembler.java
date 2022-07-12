@@ -22,7 +22,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -122,8 +121,7 @@ public class ProvisioningCriteriaAssembler {
                 jsonElement);
 
         ProvisioningCriteria criteria = new ProvisioningCriteria(criteriaName, platformSecurityContext.authenticatedUser(),
-                ZonedDateTime.now(DateUtils.getDateTimeZoneOfTenant()), platformSecurityContext.authenticatedUser(),
-                ZonedDateTime.now(DateUtils.getDateTimeZoneOfTenant()));
+                DateUtils.getLocalDateTimeOfSystem(), platformSecurityContext.authenticatedUser(), DateUtils.getLocalDateTimeOfSystem());
         return criteria;
     }
 

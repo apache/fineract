@@ -28,8 +28,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import javax.ws.rs.Consumes;
@@ -126,11 +126,11 @@ public class JournalEntriesApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
 
-        Date fromDate = null;
+        LocalDate fromDate = null;
         if (fromDateParam != null) {
             fromDate = fromDateParam.getDate("fromDate", dateFormat, locale);
         }
-        Date toDate = null;
+        LocalDate toDate = null;
         if (toDateParam != null) {
             toDate = toDateParam.getDate("toDate", dateFormat, locale);
         }

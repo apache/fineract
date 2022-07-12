@@ -18,9 +18,8 @@
  */
 package org.apache.fineract.infrastructure.security.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -149,15 +148,11 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
         if (this.configurationDomainService.isPasswordForcedResetEnable() && !currentUser.getPasswordNeverExpires()) {
 
             Long passwordDurationDays = this.configurationDomainService.retrievePasswordLiveTime();
-            final Date passWordLastUpdateDate = currentUser.getLastTimePasswordUpdated();
+            final LocalDate passWordLastUpdateDate = currentUser.getLastTimePasswordUpdated();
 
-            Calendar c = Calendar.getInstance();
-            c.setTime(passWordLastUpdateDate);
-            c.add(Calendar.DATE, passwordDurationDays.intValue());
+            final LocalDate passwordExpirationDate = passWordLastUpdateDate.plusDays(passwordDurationDays);
 
-            final Date passwordExpirationDate = c.getTime();
-
-            if (DateUtils.getDateOfTenant().after(passwordExpirationDate)) {
+            if (DateUtils.getLocalDateOfTenant().isAfter(passwordExpirationDate)) {
                 return true;
             }
         }

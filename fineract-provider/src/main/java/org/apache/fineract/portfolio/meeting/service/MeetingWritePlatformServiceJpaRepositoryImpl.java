@@ -32,7 +32,6 @@ import com.google.gson.JsonObject;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -40,7 +39,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
@@ -98,7 +96,7 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
 
         this.meetingDataValidator.validateForCreate(command);
 
-        final Date meetingDate = command.dateValueOfParameterNamed(meetingDateParamName);
+        final LocalDate meetingDate = command.dateValueOfParameterNamed(meetingDateParamName);
         final Boolean isTransactionDateOnNonMeetingDate = false;
         /*
          * Boolean isSkipRepaymentOnFirstMonth = false; Integer numberOfDays = 0; boolean
@@ -298,11 +296,10 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
                 .build();
     }
 
-    private void handleMeetingDataIntegrityIssues(final Date meetingDate, final Throwable realCause, final Exception dve) {
+    private void handleMeetingDataIntegrityIssues(final LocalDate meetingDate, final Throwable realCause, final Exception dve) {
         if (realCause.getMessage().contains("unique_calendar_instance_id_meeting_date")) {
-            final LocalDate meetingDateLocal = LocalDate.ofInstant(meetingDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
             throw new PlatformDataIntegrityException("error.msg.meeting.duplicate",
-                    "A meeting with date '" + meetingDateLocal + "' already exists", meetingDateParamName, meetingDateLocal);
+                    "A meeting with date '" + meetingDate + "' already exists", meetingDateParamName, meetingDate);
         }
 
         throw new PlatformDataIntegrityException("error.msg.meeting.unknown.data.integrity.issue",
@@ -311,7 +308,7 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
 
     @Override
     public void updateCollectionSheetAttendance(final JsonCommand command) {
-        final Date meetingDate = command.dateValueOfParameterNamed(transactionDateParamName);
+        final LocalDate meetingDate = command.dateValueOfParameterNamed(transactionDateParamName);
         final Boolean isTransactionDateOnNonMeetingDate = command
                 .booleanPrimitiveValueOfParameterNamed(isTransactionDateOnNonMeetingDateParamName);
 

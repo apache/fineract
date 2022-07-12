@@ -18,14 +18,12 @@
  */
 package org.apache.fineract.notification.domain;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.useradministration.domain.AppUser;
 
@@ -45,12 +43,11 @@ public class NotificationMapper extends AbstractPersistableCustom {
     private boolean isRead;
 
     @Column(name = "created_at")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
+    private LocalDateTime createdAt;
 
     public NotificationMapper() {}
 
-    public NotificationMapper(Notification notification, AppUser userId, boolean isRead, Date createdAt) {
+    public NotificationMapper(Notification notification, AppUser userId, boolean isRead, LocalDateTime createdAt) {
         this.notification = notification;
         this.userId = userId;
         this.isRead = isRead;

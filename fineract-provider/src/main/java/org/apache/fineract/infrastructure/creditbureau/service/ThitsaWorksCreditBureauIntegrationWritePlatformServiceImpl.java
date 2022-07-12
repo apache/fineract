@@ -27,8 +27,8 @@ import com.google.gson.JsonParser;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
@@ -45,6 +45,7 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauConfigurations;
 import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauReportData;
 import org.apache.fineract.infrastructure.creditbureau.domain.CreditBureauConfiguration;
@@ -412,10 +413,10 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
 
         // check the expiry date of the previous token.
         if (creditBureauToken != null) {
-            Date current = new Date();
-            Date getExpiryDate = creditBureauToken.getTokenExpiryDate();
+            LocalDate current = DateUtils.getLocalDateOfTenant();
+            LocalDate getExpiryDate = creditBureauToken.getTokenExpiryDate();
 
-            if (getExpiryDate.before(current)) {
+            if (getExpiryDate.isBefore(current)) {
                 this.tokenRepositoryWrapper.delete(creditBureauToken);
                 creditBureauToken = null;
             }

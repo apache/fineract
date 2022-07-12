@@ -39,12 +39,10 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -1118,9 +1116,8 @@ public class AccountingScenarioIntegrationTest {
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
-    private LocalDate getDateAsLocalDate(String dateAsString) throws ParseException {
-        final Date dateParsed = DateUtils.parseDate(dateAsString, "dd MMMM yyyy", null);
-        return DateUtils.convertToLocalDate(dateParsed, this.systemTimeZone.toZoneId());
+    private LocalDate getDateAsLocalDate(String dateAsString) {
+        return LocalDate.parse(dateAsString, Utils.dateFormatter);
     }
 
 }

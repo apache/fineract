@@ -22,9 +22,8 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -256,7 +255,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
     }
 
     @Override
-    public Collection<CashierData> getCashiersForTeller(Long tellerId, Date fromDate, Date toDate) {
+    public Collection<CashierData> getCashiersForTeller(Long tellerId, LocalDate fromDate, LocalDate toDate) {
         return retrieveCashiersForTellers(null, tellerId);
     }
 
@@ -312,13 +311,13 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
     }
 
     @Override
-    public Collection<CashierData> getCashierData(Long officeId, Long tellerId, Long staffId, Date date) {
+    public Collection<CashierData> getCashierData(Long officeId, Long tellerId, Long staffId, LocalDate date) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Collection<CashierData> getTellerCashiers(Long tellerId, Date date) {
+    public Collection<CashierData> getTellerCashiers(Long tellerId, LocalDate date) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -330,19 +329,19 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
     }
 
     @Override
-    public Collection<TellerTransactionData> fetchTellerTransactionsByTellerId(Long tellerId, Date fromDate, Date toDate) {
+    public Collection<TellerTransactionData> fetchTellerTransactionsByTellerId(Long tellerId, LocalDate fromDate, LocalDate toDate) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Collection<TellerJournalData> getJournals(Long officeId, Long tellerId, Long cashierId, Date dateFrom, Date dateTo) {
+    public Collection<TellerJournalData> getJournals(Long officeId, Long tellerId, Long cashierId, LocalDate dateFrom, LocalDate dateTo) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Collection<TellerJournalData> fetchTellerJournals(Long tellerId, Long cashierId, Date fromDate, Date toDate) {
+    public Collection<TellerJournalData> fetchTellerJournals(Long tellerId, Long cashierId, LocalDate fromDate, LocalDate toDate) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -404,8 +403,8 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         String cashierName = "";
         Long officeId = null;
         Long tellerId = null;
-        Date startDate = null;
-        Date endDate = null;
+        LocalDate startDate = null;
+        LocalDate endDate = null;
 
         CashierData cashierData = findCashier(cashierId);
         if (cashierData != null) {
@@ -430,7 +429,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
     @Override
     public CashierTransactionsWithSummaryData retrieveCashierTransactionsWithSummary(final Long cashierId, final boolean includeAllTellers,
-            final Date fromDate, final Date toDate, final String currencyCode, final SearchParameters searchParameters) {
+            final LocalDate fromDate, final LocalDate toDate, final String currencyCode, final SearchParameters searchParameters) {
         CashierData cashierData = findCashier(cashierId);
         Long staffId = cashierData.getStaffId();
         StaffData staffData = staffReadPlatformService.retrieveStaff(staffId);
@@ -483,7 +482,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
     @Override
     public Page<CashierTransactionData> retrieveCashierTransactions(final Long cashierId, final boolean includeAllTellers,
-            final Date fromDate, final Date toDate, final String currencyCode, final SearchParameters searchParameters) {
+            final LocalDate fromDate, final LocalDate toDate, final String currencyCode, final SearchParameters searchParameters) {
         CashierData cashierData = findCashier(cashierId);
         Long staffId = cashierData.getStaffId();
         StaffData staffData = staffReadPlatformService.retrieveStaff(staffId);
@@ -573,9 +572,8 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             final String startTime = rs.getString("start_time");
             final String endTime = rs.getString("end_time");
 
-            return CashierData.instance(id, null, null, staffId, staffName, tellerId, tellerName, description,
-                    Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant()),
-                    Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), fullDay, startTime, endTime);
+            return CashierData.instance(id, null, null, staffId, staffName, tellerId, tellerName, description, startDate, endDate, fullDay,
+                    startTime, endTime);
         }
     }
 
@@ -721,15 +719,15 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             final String txnNote = rs.getString("txn_note");
             final String entityType = rs.getString("entity_type");
             final Long entityId = rs.getLong("entity_id");
-            final LocalDate createdLocalDate = JdbcSupport.getLocalDate(rs, "created_date");
+            final LocalDateTime createdLocalDate = JdbcSupport.getLocalDateTime(rs, "created_date");
 
-            Date txnDate = null;
+            LocalDate txnDate = null;
             if (txnLocalDate != null) {
-                txnDate = Date.from(txnLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                txnDate = txnLocalDate;
             }
-            Date createdDate = null;
+            LocalDateTime createdDate = null;
             if (createdLocalDate != null) {
-                createdDate = Date.from(createdLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                createdDate = createdLocalDate;
             }
 
             final Long officeId = rs.getLong("office_id");

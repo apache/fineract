@@ -19,8 +19,6 @@
 package org.apache.fineract.portfolio.group.domain;
 
 import java.time.LocalDate;
-import java.util.Date;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.group.exception.GroupNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,10 +68,6 @@ public class GroupRepositoryWrapper {
     }
 
     public LocalDate retrieveSubmittedOndate(final Long groupId) {
-        Date submittedOnDate = this.repository.retrieveGroupTypeSubmitteOndDate(groupId);
-        if (submittedOnDate != null) {
-            return LocalDate.ofInstant(submittedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-        return null;
+        return this.repository.retrieveGroupTypeSubmitteOndDate(groupId);
     }
 }
