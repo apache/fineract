@@ -839,10 +839,10 @@ public final class LoanApplicationTerms {
                 int diffDays = 0;
                 if (this.loanCalendar == null) {
                     startDateAfterConsideringMonths = startDate.plusMonths(numberOfMonths);
-                    startDateAfterConsideringMonths = CalendarUtils.adjustDate(startDateAfterConsideringMonths, getSeedDate(),
+                    startDateAfterConsideringMonths = (LocalDate) CalendarUtils.adjustDate(startDateAfterConsideringMonths, getSeedDate(),
                             this.repaymentPeriodFrequencyType);
                     endDateAfterConsideringMonths = startDate.plusMonths(numberOfMonths + 1);
-                    endDateAfterConsideringMonths = CalendarUtils.adjustDate(endDateAfterConsideringMonths, getSeedDate(),
+                    endDateAfterConsideringMonths = (LocalDate) CalendarUtils.adjustDate(endDateAfterConsideringMonths, getSeedDate(),
                             this.repaymentPeriodFrequencyType);
                 } else {
                     LocalDate expectedStartDate = startDate;

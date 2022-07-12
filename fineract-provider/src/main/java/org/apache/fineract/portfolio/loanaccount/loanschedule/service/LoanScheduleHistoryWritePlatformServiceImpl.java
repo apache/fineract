@@ -20,9 +20,9 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -73,20 +73,18 @@ public class LoanScheduleHistoryWritePlatformServiceImpl implements LoanSchedule
             final BigDecimal feeChargesCharged = repaymentScheduleInstallment.getFeeChargesCharged(currency).getAmount();
             final BigDecimal penaltyCharges = repaymentScheduleInstallment.getPenaltyChargesCharged(currency).getAmount();
 
-            LocalDate createdOnDate = null;
+            LocalDateTime createdOnDate = null;
             if (repaymentScheduleInstallment.getCreatedDate().isPresent()) {
-                createdOnDate = LocalDate.ofInstant(repaymentScheduleInstallment.getCreatedDate().get(),
-                        DateUtils.getDateTimeZoneOfTenant()); // NOSONAR
+                createdOnDate = repaymentScheduleInstallment.getCreatedDate().get(); // NOSONAR
             }
 
             final Long createdByUser = repaymentScheduleInstallment.getCreatedBy().orElse(null);
             final Long lastModifiedByUser = repaymentScheduleInstallment.getLastModifiedBy().orElse(null);
 
-            LocalDate lastModifiedOnDate = null;
+            LocalDateTime lastModifiedOnDate = null;
 
             if (repaymentScheduleInstallment.getLastModifiedDate().isPresent()) {
-                lastModifiedOnDate = LocalDate.ofInstant(repaymentScheduleInstallment.getLastModifiedDate().get(),
-                        DateUtils.getDateTimeZoneOfTenant()); // NOSONAR
+                lastModifiedOnDate = repaymentScheduleInstallment.getLastModifiedDate().get(); // NOSONAR
             }
 
             LoanRepaymentScheduleHistory loanRepaymentScheduleHistory = LoanRepaymentScheduleHistory.instance(loan, loanRescheduleRequest,

@@ -19,15 +19,13 @@
 package org.apache.fineract.accounting.journalentry.domain;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
@@ -85,8 +83,7 @@ public class JournalEntry extends AbstractAuditableCustom {
     private boolean manualEntry = false;
 
     @Column(name = "entry_date")
-    @Temporal(TemporalType.DATE)
-    private Date transactionDate;
+    private LocalDate transactionDate;
 
     @Column(name = "type_enum", nullable = false)
     private Integer type;
@@ -107,7 +104,7 @@ public class JournalEntry extends AbstractAuditableCustom {
     private String referenceNumber;
 
     public static JournalEntry createNew(final Office office, final PaymentDetail paymentDetail, final GLAccount glAccount,
-            final String currencyCode, final String transactionId, final boolean manualEntry, final Date transactionDate,
+            final String currencyCode, final String transactionId, final boolean manualEntry, final LocalDate transactionDate,
             final JournalEntryType journalEntryType, final BigDecimal amount, final String description, final Integer entityType,
             final Long entityId, final String referenceNumber, final LoanTransaction loanTransaction,
             final SavingsAccountTransaction savingsTransaction, final ClientTransaction clientTransaction, Long shareTransactionId) {
@@ -121,8 +118,8 @@ public class JournalEntry extends AbstractAuditableCustom {
     }
 
     public JournalEntry(final Office office, final PaymentDetail paymentDetail, final GLAccount glAccount, final String currencyCode,
-            final String transactionId, final boolean manualEntry, final Date transactionDate, final Integer type, final BigDecimal amount,
-            final String description, final Integer entityType, final Long entityId, final String referenceNumber,
+            final String transactionId, final boolean manualEntry, final LocalDate transactionDate, final Integer type,
+            final BigDecimal amount, final String description, final Integer entityType, final Long entityId, final String referenceNumber,
             final LoanTransaction loanTransaction, final SavingsAccountTransaction savingsTransaction,
             final ClientTransaction clientTransaction, final Long shareTransactionId) {
         this.office = office;
@@ -162,7 +159,7 @@ public class JournalEntry extends AbstractAuditableCustom {
         return this.glAccount;
     }
 
-    public Date getTransactionDate() {
+    public LocalDate getTransactionDate() {
         return this.transactionDate;
     }
 

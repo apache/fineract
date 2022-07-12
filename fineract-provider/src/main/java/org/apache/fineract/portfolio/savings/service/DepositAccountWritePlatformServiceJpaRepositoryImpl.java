@@ -749,11 +749,11 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         UUID refNo = UUID.randomUUID();
         if (savingsAccountTransaction.isDeposit()) {
             final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
-                    paymentDetail, savingsAccountTransaction.createdDate(), user, accountType);
+                    paymentDetail, savingsAccountTransaction.getCreatedDate(), user, accountType);
             transaction = account.deposit(transactionDTO, false, refNo.toString());
         } else {
             final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
-                    paymentDetail, savingsAccountTransaction.createdDate(), user, accountType);
+                    paymentDetail, savingsAccountTransaction.getCreatedDate(), user, accountType);
             transaction = account.withdraw(transactionDTO, true, false, refNo.toString());
         }
         final Long newtransactionId = saveTransactionToGenerateTransactionId(transaction);

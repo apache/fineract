@@ -20,8 +20,7 @@ package org.apache.fineract.organisation.teller.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.persistence.Column;
@@ -30,8 +29,6 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -55,9 +52,8 @@ public class CashierTransaction extends AbstractPersistableCustom {
     @Column(name = "txn_type", nullable = false)
     private Integer txnType;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "txn_date", nullable = false)
-    private Date txnDate;
+    private LocalDate txnDate;
 
     @Column(name = "txn_amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal txnAmount;
@@ -71,9 +67,8 @@ public class CashierTransaction extends AbstractPersistableCustom {
     @Column(name = "entity_id", nullable = true)
     private Long entityId;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_date", nullable = false)
-    private Date createdDate;
+    private LocalDateTime createdDate;
 
     @Column(name = "currency_code", nullable = true)
     private String currencyCode;
@@ -104,13 +99,13 @@ public class CashierTransaction extends AbstractPersistableCustom {
         this.cashier = cashier;
         this.txnType = txnType;
         if (txnDate != null) {
-            this.txnDate = Date.from(txnDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.txnDate = txnDate;
         }
         this.txnAmount = txnAmount;
         this.entityType = entityType;
         this.entityId = entityId;
         this.txnNote = txnNote;
-        this.createdDate = new Date();
+        this.createdDate = DateUtils.getLocalDateTimeOfSystem();
         this.currencyCode = currencyCode;
     }
 
@@ -135,8 +130,7 @@ public class CashierTransaction extends AbstractPersistableCustom {
             actualChanges.put("dateFormat", dateFormatAsInput);
             actualChanges.put("locale", localeAsInput);
 
-            final LocalDate newValue = command.localDateValueOfParameterNamed(txnDateParamName);
-            this.txnDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.txnDate = command.localDateValueOfParameterNamed(txnDateParamName);
         }
 
         final String txnAmountParamName = "txnAmount";
@@ -229,16 +223,12 @@ public class CashierTransaction extends AbstractPersistableCustom {
      *
      * @return the transaction date of this cashier transaction
      */
-    public Date getTxnDate() {
+    public LocalDate getTxnDate() {
         return txnDate;
     }
 
     public LocalDate getTxnLocalDate() {
-        LocalDate txnLocalDate = null;
-        if (this.txnDate != null) {
-            txnLocalDate = LocalDate.ofInstant(this.txnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-        return txnLocalDate;
+        return this.txnDate;
     }
 
     /**
@@ -247,7 +237,7 @@ public class CashierTransaction extends AbstractPersistableCustom {
      * @param txnDate
      *            transaction date of this cashier transaction
      */
-    public void setTxnDate(Date txnDate) {
+    public void setTxnDate(LocalDate txnDate) {
         this.txnDate = txnDate;
     }
 

@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.domain;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import javax.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -35,9 +35,9 @@ public interface SavingsAccountTransactionRepository
             @Param("savingsId") Long savingsId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select st from SavingsAccountTransaction st where st.savingsAccount = :savingsAccount and st.dateOf >= :date order by st.dateOf,st.createdDate,st.id")
+    @Query("select st from SavingsAccountTransaction st where st.savingsAccount = :savingsAccount and st.dateOf >= :transactionDate order by st.dateOf,st.createdDate,st.id")
     List<SavingsAccountTransaction> findTransactionsAfterPivotDate(@Param("savingsAccount") SavingsAccount savingsAccount,
-            @Param("date") Date date);
+            @Param("transactionDate") LocalDate transactionDate);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<SavingsAccountTransaction> findBySavingsAccount(@Param("savingsAccount") SavingsAccount savingsAccount);

@@ -19,10 +19,9 @@
 
 package org.apache.fineract.infrastructure.creditbureau.domain;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -53,7 +52,7 @@ public class CreditBureauToken extends AbstractPersistableCustom {
     private String issued;
 
     @Column(name = "expiry_date")
-    private Date expires;
+    private LocalDate expires;
 
     public static CreditBureauToken fromJson(final JsonCommand command) {
         final String userName = command.stringValueOfParameterNamed("userName");
@@ -63,19 +62,14 @@ public class CreditBureauToken extends AbstractPersistableCustom {
         final String issued = command.stringValueOfParameterNamed(".issued");
         final String expiry = command.stringValueOfParameterNamed(".expires");
 
-        SimpleDateFormat dateformat = new SimpleDateFormat("EEE, dd MMM yyyy kk:mm:ss zzz", Locale.ENGLISH);
+        DateTimeFormatter dateformat = new DateTimeFormatterBuilder().appendPattern("EEE, dd MMM yyyy kk:mm:ss zzz").toFormatter();
 
-        Date expires = null;
-        try {
-            expires = dateformat.parse(expiry);
-        } catch (ParseException Ex) {
-            LOG.error("Error occured while converting Date(String) to SimpleDateFormat", Ex);
-        }
+        LocalDate expires = LocalDate.parse(expiry, dateformat);
 
         return new CreditBureauToken(userName, accessToken, tokenType, expiresIn, issued, expires);
     }
 
-    public CreditBureauToken(String userName, String accessToken, String tokenType, String expiresIn, String issued, Date expires) {
+    public CreditBureauToken(String userName, String accessToken, String tokenType, String expiresIn, String issued, LocalDate expires) {
         this.userName = userName;
         this.accessToken = accessToken;
         this.tokenType = tokenType;
@@ -109,7 +103,7 @@ public class CreditBureauToken extends AbstractPersistableCustom {
         this.accessToken = tokens;
     }
 
-    public Date getTokenExpiryDate() {
+    public LocalDate getTokenExpiryDate() {
         return this.expires;
     }
 

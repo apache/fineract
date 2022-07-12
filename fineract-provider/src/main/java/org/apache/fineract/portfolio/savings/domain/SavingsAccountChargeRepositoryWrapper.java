@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.domain;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.portfolio.charge.exception.SavingsAccountChargeNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +51,7 @@ public class SavingsAccountChargeRepositoryWrapper {
         return savingsAccountCharge;
     }
 
-    public List<SavingsAccountCharge> findPendingCharges(final Date transactionDate) {
+    public List<SavingsAccountCharge> findPendingCharges(final LocalDate transactionDate) {
         return this.repository.findPendingCharges(transactionDate);
     }
 

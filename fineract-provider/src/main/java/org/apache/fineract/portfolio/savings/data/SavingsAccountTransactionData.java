@@ -21,10 +21,8 @@ package org.apache.fineract.portfolio.savings.data;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -66,7 +64,7 @@ public final class SavingsAccountTransactionData implements Serializable {
     private BigDecimal runningBalance;
     private boolean reversed;
     private final AccountTransferData transfer;
-    private Date submittedOnDate;
+    private LocalDate submittedOnDate;
     private final boolean interestedPostedAsOn;
     private final String submittedByUsername;
     private final String note;
@@ -322,9 +320,9 @@ public final class SavingsAccountTransactionData implements Serializable {
     }
 
     private SavingsAccountTransactionData(final Long savingsId, final Long officeId, final PaymentDetailData paymentDetailData,
-            final SavingsAccountTransactionEnumData savingsAccountTransactionType, final LocalDate transactionDate, final Date createdDate,
-            final BigDecimal amount, final boolean isReversed, final Long userId, final boolean isManualTransaction,
-            final Boolean lienTransaction) {
+            final SavingsAccountTransactionEnumData savingsAccountTransactionType, final LocalDate transactionDate,
+            final LocalDate createdDate, final BigDecimal amount, final boolean isReversed, final Long userId,
+            final boolean isManualTransaction, final Boolean lienTransaction) {
         this.savingsAccountId = savingsId;
         this.paymentDetailData = paymentDetailData;
         this.transactionType = savingsAccountTransactionType;
@@ -539,7 +537,7 @@ public final class SavingsAccountTransactionData implements Serializable {
         this.runningBalance = null;
         this.reversed = isReversed;
         this.transfer = null;
-        this.submittedOnDate = Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.submittedOnDate = transactionDate;
         this.interestedPostedAsOn = false;
         this.rowIndex = null;
         this.savingsAccountId = savingsAccountId;
@@ -707,7 +705,7 @@ public final class SavingsAccountTransactionData implements Serializable {
         return this.balanceEndDate;
     }
 
-    public Date getSubmittedOnDate() {
+    public LocalDate getSubmittedOnDate() {
         return this.submittedOnDate;
     }
 
@@ -770,7 +768,7 @@ public final class SavingsAccountTransactionData implements Serializable {
         this.runningBalance = runningBalance;
         this.reversed = reversed;
         this.paymentTypeOptions = paymentTypeOptions;
-        this.submittedOnDate = Date.from(submittedOnDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.submittedOnDate = submittedOnDate;
         this.interestedPostedAsOn = interestedPostedAsOn;
         this.cumulativeBalance = cumulativeBalance;
         this.transfer = null;
@@ -877,11 +875,7 @@ public final class SavingsAccountTransactionData implements Serializable {
         this.reversed = reversed;
         this.transfer = transfer;
         this.paymentTypeOptions = paymentTypeOptions;
-        if (submittedOnDate != null) {
-            this.submittedOnDate = Date.from(submittedOnDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        } else {
-            this.submittedOnDate = null;
-        }
+        this.submittedOnDate = submittedOnDate;
 
         this.interestedPostedAsOn = interestedPostedAsOn;
         this.submittedByUsername = submittedByUsername;
@@ -913,11 +907,7 @@ public final class SavingsAccountTransactionData implements Serializable {
         this.reversed = reversed;
         this.transfer = transfer;
         this.paymentTypeOptions = paymentTypeOptions;
-        if (submittedOnDate != null) {
-            this.submittedOnDate = Date.from(submittedOnDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        } else {
-            this.submittedOnDate = null;
-        }
+        this.submittedOnDate = submittedOnDate;
 
         this.interestedPostedAsOn = interestedPostedAsOn;
         this.submittedByUsername = null;

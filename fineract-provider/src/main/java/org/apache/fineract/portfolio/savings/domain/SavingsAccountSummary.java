@@ -20,14 +20,10 @@ package org.apache.fineract.portfolio.savings.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -81,14 +77,12 @@ public final class SavingsAccountSummary {
     @Column(name = "total_withhold_tax_derived", scale = 6, precision = 19)
     private BigDecimal totalWithholdTax;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "last_interest_calculation_date")
-    private Date lastInterestCalculationDate;
+    private LocalDate lastInterestCalculationDate;
 
     // Currently this represents the last interest posting date
-    @Temporal(TemporalType.DATE)
     @Column(name = "interest_posted_till_date")
-    private Date interestPostedTillDate;
+    private LocalDate interestPostedTillDate;
 
     @Transient
     private BigDecimal runningBalanceOnInterestPostingTillDate = BigDecimal.ZERO;
@@ -265,15 +259,13 @@ public final class SavingsAccountSummary {
     }
 
     public void updateFromInterestPeriodSummaries(final MonetaryCurrency currency, final List<PostingPeriod> allPostingPeriods) {
-
         Money totalEarned = Money.zero(currency);
-        LocalDate interestCalculationDate = DateUtils.getBusinessLocalDate();
         for (final PostingPeriod period : allPostingPeriods) {
             Money interestEarned = period.interest();
             interestEarned = interestEarned == null ? Money.zero(currency) : interestEarned;
             totalEarned = totalEarned.plus(interestEarned);
         }
-        this.lastInterestCalculationDate = Date.from(interestCalculationDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.lastInterestCalculationDate = DateUtils.getBusinessLocalDate();
         this.totalInterestEarned = totalEarned.getAmount();
     }
 
@@ -298,15 +290,15 @@ public final class SavingsAccountSummary {
         return this.totalInterestPosted;
     }
 
-    public Date getLastInterestCalculationDate() {
+    public LocalDate getLastInterestCalculationDate() {
         return this.lastInterestCalculationDate;
     }
 
-    public void setInterestPostedTillDate(final Date date) {
+    public void setInterestPostedTillDate(final LocalDate date) {
         this.interestPostedTillDate = date;
     }
 
-    public Date getInterestPostedTillDate() {
+    public LocalDate getInterestPostedTillDate() {
         return this.interestPostedTillDate;
     }
 

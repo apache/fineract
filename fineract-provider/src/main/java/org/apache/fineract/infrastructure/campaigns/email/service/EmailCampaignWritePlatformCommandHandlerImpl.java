@@ -38,7 +38,6 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -344,33 +343,29 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
         final EmailCampaign emailCampaign = this.emailCampaignRepository.findById(campaignId)
                 .orElseThrow(() -> new EmailCampaignNotFound(campaignId));
         LocalDateTime nextTriggerDate = emailCampaign.getNextTriggerDate();
-        emailCampaign.setLastTriggerDate(Date.from(nextTriggerDate.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+        emailCampaign.setLastTriggerDate(nextTriggerDate);
         // calculate new trigger date and insert into next trigger date
 
         /**
          * next run time has to be in the future if not calculate a new future date
          */
-        LocalDate nextRuntime = CalendarUtils.getNextRecurringDate(emailCampaign.getRecurrence(),
-                emailCampaign.getNextTriggerDate().toLocalDate(), nextTriggerDate.toLocalDate());
-        if (nextRuntime.isBefore(DateUtils.getLocalDateOfTenant())) { // means
-                                                                      // next
-                                                                      // run
-                                                                      // time is
-                                                                      // in the
-                                                                      // past
-                                                                      // calculate
-                                                                      // a new
-                                                                      // future
-                                                                      // date
-            nextRuntime = CalendarUtils.getNextRecurringDate(emailCampaign.getRecurrence(),
-                    emailCampaign.getNextTriggerDate().toLocalDate(), DateUtils.getLocalDateOfTenant());
+        LocalDateTime newTriggerDateWithTime = CalendarUtils.getNextRecurringDate(emailCampaign.getRecurrence(),
+                emailCampaign.getNextTriggerDate(), nextTriggerDate);
+        if (newTriggerDateWithTime.isBefore(DateUtils.getLocalDateTimeOfTenant())) { // means
+            // next
+            // run
+            // time is
+            // in the
+            // past
+            // calculate
+            // a new
+            // future
+            // date
+            newTriggerDateWithTime = CalendarUtils.getNextRecurringDate(emailCampaign.getRecurrence(), emailCampaign.getNextTriggerDate(),
+                    DateUtils.getLocalDateTimeOfTenant());
         }
-        final LocalDateTime getTime = emailCampaign.getRecurrenceStartDateTime();
-        final String dateString = nextRuntime.toString() + " " + getTime.getHour() + ":" + getTime.getMinute() + ":" + getTime.getSecond();
-        final DateTimeFormatter simpleDateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        final LocalDateTime newTriggerDateWithTime = LocalDateTime.parse(dateString, simpleDateFormat);
 
-        emailCampaign.setNextTriggerDate(Date.from(newTriggerDateWithTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+        emailCampaign.setNextTriggerDate(newTriggerDateWithTime);
         this.emailCampaignRepository.saveAndFlush(emailCampaign);
     }
 
@@ -402,24 +397,15 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
                  * if recurrence start date is in the future calculate next trigger date if not use recurrence start
                  * date us next trigger date when activating
                  */
-                LocalDate nextTriggerDate = null;
+                LocalDateTime nextTriggerDateWithTime;
                 if (emailCampaign.getRecurrenceStartDateTime().isBefore(tenantDateTime())) {
-                    nextTriggerDate = CalendarUtils.getNextRecurringDate(emailCampaign.getRecurrence(),
-                            emailCampaign.getRecurrenceStartDate(), DateUtils.getLocalDateOfTenant());
+                    nextTriggerDateWithTime = CalendarUtils.getNextRecurringDate(emailCampaign.getRecurrence(),
+                            emailCampaign.getRecurrenceStartDateTime(), DateUtils.getLocalDateTimeOfTenant());
                 } else {
-                    nextTriggerDate = emailCampaign.getRecurrenceStartDate();
+                    nextTriggerDateWithTime = emailCampaign.getRecurrenceStartDateTime();
                 }
-                // to get time of tenant
-                final LocalDateTime getTime = emailCampaign.getRecurrenceStartDateTime();
 
-                final String dateString = nextTriggerDate.toString() + " " + getTime.getHour() + ":" + getTime.getMinute() + ":"
-                        + getTime.getSecond();
-                final DateTimeFormatter simpleDateFormat = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient()
-                        .appendPattern("yyyy-MM-dd HH:mm:ss").toFormatter();
-                final LocalDateTime nextTriggerDateWithTime = LocalDateTime.parse(dateString, simpleDateFormat);
-
-                emailCampaign
-                        .setNextTriggerDate(Date.from(nextTriggerDateWithTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+                emailCampaign.setNextTriggerDate(nextTriggerDateWithTime);
                 this.emailCampaignRepository.saveAndFlush(emailCampaign);
             }
         }
@@ -554,12 +540,12 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
              * if recurrence start date is in the future calculate next trigger date if not use recurrence start date us
              * next trigger date when activating
              */
-            LocalDate nextTriggerDate = null;
+            LocalDateTime nextTriggerDate = null;
             if (emailCampaign.getRecurrenceStartDateTime().isBefore(tenantDateTime())) {
-                nextTriggerDate = CalendarUtils.getNextRecurringDate(emailCampaign.getRecurrence(), emailCampaign.getRecurrenceStartDate(),
-                        DateUtils.getLocalDateOfTenant());
+                nextTriggerDate = CalendarUtils.getNextRecurringDate(emailCampaign.getRecurrence(),
+                        emailCampaign.getRecurrenceStartDateTime(), DateUtils.getLocalDateTimeOfTenant());
             } else {
-                nextTriggerDate = emailCampaign.getRecurrenceStartDate();
+                nextTriggerDate = emailCampaign.getRecurrenceStartDateTime();
             }
             // to get time of tenant
             final LocalDateTime getTime = emailCampaign.getRecurrenceStartDateTime();
@@ -570,7 +556,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
                     .appendPattern("yyyy-MM-dd HH:mm:ss").toFormatter();
             final LocalDateTime nextTriggerDateWithTime = LocalDateTime.parse(dateString, simpleDateFormat);
 
-            emailCampaign.setNextTriggerDate(Date.from(nextTriggerDateWithTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant()));
+            emailCampaign.setNextTriggerDate(nextTriggerDateWithTime);
             this.emailCampaignRepository.saveAndFlush(emailCampaign);
         }
 

@@ -27,7 +27,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -495,22 +494,21 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     }
 
     @Override
-    public Collection<StaffCenterData> retriveAllCentersByMeetingDate(final Long officeId, final Date meetingDate, final Long staffId) {
+    public Collection<StaffCenterData> retriveAllCentersByMeetingDate(final Long officeId, final LocalDate meetingDate,
+            final Long staffId) {
         validateForGenerateCollectionSheet(staffId);
-        LocalDate localDate = LocalDate.ofInstant(meetingDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         final CenterCalendarDataMapper centerCalendarMapper = new CenterCalendarDataMapper();
-        String passeddate = formatter.format(localDate);
         String sql = centerCalendarMapper.schema();
         Collection<CenterData> centerDataArray;
         if (staffId != null) {
             sql += " and g.staff_id=? ";
-            sql += "and lrs.duedate<='" + passeddate + "' and l.loan_type_enum=3";
+            sql += "and lrs.duedate<=? and l.loan_type_enum=3";
             sql += " group by c.id, ci.id, g.account_no, g.external_id, g.status_enum, g.activation_date, g.hierarchy";
             centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper, // NOSONAR
-                    new Object[] { passeddate, passeddate, passeddate, passeddate, passeddate, passeddate, officeId, staffId });
+                    meetingDate, meetingDate, meetingDate, meetingDate, meetingDate, meetingDate, officeId, staffId, meetingDate);
         } else {
             centerDataArray = this.jdbcTemplate.query(sql, centerCalendarMapper, // NOSONAR
-                    new Object[] { passeddate, passeddate, passeddate, passeddate, passeddate, passeddate, officeId });
+                    meetingDate, meetingDate, meetingDate, meetingDate, meetingDate, meetingDate, officeId);
         }
 
         Collection<StaffCenterData> staffCenterDataArray = new ArrayList<>();
@@ -521,8 +519,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             numberOfDays = this.configurationDomainService.retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue();
         }
         for (CenterData centerData : centerDataArray) {
-            if (centerData.getCollectionMeetingCalendar().isValidRecurringDate(
-                    LocalDate.ofInstant(meetingDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()), isSkipRepaymentOnFirstMonthEnabled,
+            if (centerData.getCollectionMeetingCalendar().isValidRecurringDate(meetingDate, isSkipRepaymentOnFirstMonthEnabled,
                     numberOfDays)) {
                 if (staffCenterDataArray.size() <= 0) {
                     Collection<CenterData> meetingFallCenter = new ArrayList<>();

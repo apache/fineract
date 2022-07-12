@@ -24,9 +24,7 @@ import static org.apache.fineract.portfolio.meeting.MeetingApiConstants.clientsA
 import static org.apache.fineract.portfolio.meeting.MeetingApiConstants.meetingDateParamName;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -39,8 +37,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -62,8 +58,7 @@ public class Meeting extends AbstractPersistableCustom {
     private CalendarInstance calendarInstance;
 
     @Column(name = "meeting_date", nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date meetingDate;
+    private LocalDate meetingDate;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "meeting", orphanRemoval = true)
     private Set<ClientAttendance> clientsAttendance;
@@ -72,12 +67,12 @@ public class Meeting extends AbstractPersistableCustom {
         //
     }
 
-    private Meeting(final CalendarInstance calendarInstance, final Date meetingDate) {
+    private Meeting(final CalendarInstance calendarInstance, final LocalDate meetingDate) {
         this.calendarInstance = calendarInstance;
         this.meetingDate = meetingDate;
     }
 
-    public static Meeting createNew(final CalendarInstance calendarInstance, final Date meetingDate,
+    public static Meeting createNew(final CalendarInstance calendarInstance, final LocalDate meetingDate,
             Boolean isTransactionDateOnNonMeetingDate, final boolean isSkipRepaymentOnFirstMonth, final int numberOfDays) {
 
         if (!isTransactionDateOnNonMeetingDate
@@ -102,12 +97,10 @@ public class Meeting extends AbstractPersistableCustom {
         final String localeAsInput = command.locale();
 
         if (command.isChangeInLocalDateParameterNamed(meetingDateParamName, getMeetingDateLocalDate())) {
-            final String valueAsInput = command.stringValueOfParameterNamed(meetingDateParamName);
-            final LocalDate newValue = command.localDateValueOfParameterNamed(meetingDateParamName);
-            actualChanges.put(meetingDateParamName, valueAsInput);
+            actualChanges.put(meetingDateParamName, command.stringValueOfParameterNamed(meetingDateParamName));
             actualChanges.put("dateFormat", dateFormatAsInput);
             actualChanges.put("locale", localeAsInput);
-            this.meetingDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.meetingDate = command.localDateValueOfParameterNamed(meetingDateParamName);
 
             if (!isValidMeetingDate(this.calendarInstance, this.meetingDate, isSkipRepaymentOnFirstMonth, numberOfDays)) {
                 throw new NotValidRecurringDateException("meeting", "Not a valid meeting date", this.meetingDate);
@@ -166,14 +159,10 @@ public class Meeting extends AbstractPersistableCustom {
     }
 
     public LocalDate getMeetingDateLocalDate() {
-        LocalDate meetingDateLocalDate = null;
-        if (this.meetingDate != null) {
-            meetingDateLocalDate = LocalDate.ofInstant(this.meetingDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-        return meetingDateLocalDate;
+        return this.meetingDate;
     }
 
-    public Date getMeetingDate() {
+    public LocalDate getMeetingDate() {
         return this.meetingDate;
     }
 
@@ -181,16 +170,11 @@ public class Meeting extends AbstractPersistableCustom {
         return this.meetingDate != null && newStartDate != null && getMeetingDateLocalDate().isBefore(newStartDate) ? true : false;
     }
 
-    private static boolean isValidMeetingDate(final CalendarInstance calendarInstance, final Date meetingDate,
+    private static boolean isValidMeetingDate(final CalendarInstance calendarInstance, final LocalDate meetingDate,
             final boolean isSkipRepaymentOnFirstMonth, final int numberOfDays) {
         final Calendar calendar = calendarInstance.getCalendar();
-        LocalDate meetingDateLocalDate = null;
-        if (meetingDate != null) {
-            meetingDateLocalDate = LocalDate.ofInstant(meetingDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
 
-        if (meetingDateLocalDate == null
-                || !calendar.isValidRecurringDate(meetingDateLocalDate, isSkipRepaymentOnFirstMonth, numberOfDays)) {
+        if (meetingDate == null || !calendar.isValidRecurringDate(meetingDate, isSkipRepaymentOnFirstMonth, numberOfDays)) {
             return false;
         }
         return true;

@@ -18,15 +18,14 @@
  */
 package org.apache.fineract.portfolio.self.registration.domain;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.client.domain.Client;
 
 @Entity
@@ -62,8 +61,7 @@ public class SelfServiceRegistration extends AbstractPersistableCustom {
     private String password;
 
     @Column(name = "created_date", nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date createdDate;
+    private LocalDateTime createdDate;
 
     public SelfServiceRegistration() {}
 
@@ -78,7 +76,7 @@ public class SelfServiceRegistration extends AbstractPersistableCustom {
         this.authenticationToken = authenticationToken;
         this.username = username;
         this.password = password;
-        this.createdDate = new Date();
+        this.createdDate = DateUtils.getLocalDateTimeOfSystem();
     }
 
     public static SelfServiceRegistration instance(final Client client, final String accountNumber, final String firstName,
@@ -112,7 +110,7 @@ public class SelfServiceRegistration extends AbstractPersistableCustom {
         return this.authenticationToken;
     }
 
-    public Date getCreatedDate() {
+    public LocalDateTime getCreatedDate() {
         return this.createdDate;
     }
 

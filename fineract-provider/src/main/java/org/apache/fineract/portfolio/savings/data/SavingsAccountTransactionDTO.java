@@ -20,8 +20,8 @@ package org.apache.fineract.portfolio.savings.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.useradministration.domain.AppUser;
 
@@ -31,13 +31,13 @@ public class SavingsAccountTransactionDTO {
     private final LocalDate transactionDate;
     private final BigDecimal transactionAmount;
     private final PaymentDetail paymentDetail;
-    private final Date createdDate;
+    private final LocalDateTime createdDate;
     private final Long savingsAccountId;
     private final AppUser appUser;
     private final Integer depositAccountType;
 
     public SavingsAccountTransactionDTO(final DateTimeFormatter formatter, final LocalDate transactionDate,
-            final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final Date createdDate, final AppUser appUser,
+            final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final LocalDateTime createdDate, final AppUser appUser,
             final Integer depositAccountType) {
         this.formatter = formatter;
         this.transactionDate = transactionDate;
@@ -60,7 +60,8 @@ public class SavingsAccountTransactionDTO {
      * @param savingsAccountId
      */
     public SavingsAccountTransactionDTO(DateTimeFormatter formatter, LocalDate transactionDate, BigDecimal transactionAmount,
-            PaymentDetail paymentDetail, Date createdDate, Long savingsAccountId, AppUser appUser, final Integer depositAccountType) {
+            PaymentDetail paymentDetail, LocalDateTime createdDate, Long savingsAccountId, AppUser appUser,
+            final Integer depositAccountType) {
         this.formatter = formatter;
         this.transactionDate = transactionDate;
         this.transactionAmount = transactionAmount;
@@ -87,7 +88,7 @@ public class SavingsAccountTransactionDTO {
         return this.paymentDetail;
     }
 
-    public Date getCreatedDate() {
+    public LocalDateTime getCreatedDate() {
         return this.createdDate;
     }
 

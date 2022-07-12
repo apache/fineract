@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.portfolio.account.data;
 
-import java.util.Date;
+import java.time.LocalDate;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 
 public class StandingInstructionDTO {
@@ -29,12 +29,12 @@ public class StandingInstructionDTO {
     final Integer transferType;
     final Integer fromAccountType;
     final Long fromAccount;
-    final Date startDateRange;
-    final Date endDateRange;
+    final LocalDate startDateRange;
+    final LocalDate endDateRange;
 
     public StandingInstructionDTO(final SearchParameters searchParameters, final Integer transferType, final String clientName,
-            final Long clientId, final Long fromAccount, final Integer fromAccountType, final Date startDateRange,
-            final Date endDateRange) {
+            final Long clientId, final Long fromAccount, final Integer fromAccountType, final LocalDate startDateRange,
+            final LocalDate endDateRange) {
         this.searchParameters = searchParameters;
         this.transferType = transferType;
         this.clientName = clientName;
@@ -73,11 +73,11 @@ public class StandingInstructionDTO {
         return this.transferType;
     }
 
-    public Date startDateRange() {
+    public LocalDate startDateRange() {
         return this.startDateRange;
     }
 
-    public Date endDateRange() {
+    public LocalDate endDateRange() {
         return this.endDateRange;
     }
 

@@ -19,8 +19,8 @@
 package org.apache.fineract.accounting.journalentry.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +47,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         final GLClosure latestGLClosure = this.helper.getLatestClosureByBranch(loanDTO.getOfficeId());
         final Office office = this.helper.getOfficeById(loanDTO.getOfficeId());
         for (final LoanTransactionDTO loanTransactionDTO : loanDTO.getNewLoanTransactions()) {
-            final Date transactionDate = loanTransactionDTO.getTransactionDate();
+            final LocalDate transactionDate = loanTransactionDTO.getTransactionDate();
             this.helper.checkForBranchClosures(latestGLClosure, transactionDate);
 
             /** Handle Disbursements **/
@@ -116,7 +116,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
         // transaction properties
         final String transactionId = loanTransactionDTO.getTransactionId();
-        final Date transactionDate = loanTransactionDTO.getTransactionDate();
+        final LocalDate transactionDate = loanTransactionDTO.getTransactionDate();
         final BigDecimal disbursalAmount = loanTransactionDTO.getAmount();
         final boolean isReversed = loanTransactionDTO.isReversed();
         final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
@@ -181,7 +181,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
         // transaction properties
         final String transactionId = loanTransactionDTO.getTransactionId();
-        final Date transactionDate = loanTransactionDTO.getTransactionDate();
+        final LocalDate transactionDate = loanTransactionDTO.getTransactionDate();
         final BigDecimal principalAmount = loanTransactionDTO.getPrincipal();
         final BigDecimal interestAmount = loanTransactionDTO.getInterest();
         final BigDecimal feesAmount = loanTransactionDTO.getFees();
@@ -323,7 +323,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
         // transaction properties
         final String transactionId = loanTransactionDTO.getTransactionId();
-        final Date transactionDate = loanTransactionDTO.getTransactionDate();
+        final LocalDate transactionDate = loanTransactionDTO.getTransactionDate();
         final BigDecimal amount = loanTransactionDTO.getAmount();
         final boolean isReversal = loanTransactionDTO.isReversed();
         final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
@@ -357,7 +357,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
         // transaction properties
         final String transactionId = loanTransactionDTO.getTransactionId();
-        final Date transactionDate = loanTransactionDTO.getTransactionDate();
+        final LocalDate transactionDate = loanTransactionDTO.getTransactionDate();
         final BigDecimal interestAmount = loanTransactionDTO.getInterest();
         final BigDecimal feesAmount = loanTransactionDTO.getFees();
         final BigDecimal penaltiesAmount = loanTransactionDTO.getPenalties();
@@ -394,7 +394,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
         // transaction properties
         final String transactionId = loanTransactionDTO.getTransactionId();
-        final Date transactionDate = loanTransactionDTO.getTransactionDate();
+        final LocalDate transactionDate = loanTransactionDTO.getTransactionDate();
         final BigDecimal refundAmount = loanTransactionDTO.getAmount();
         final boolean isReversal = loanTransactionDTO.isReversed();
         final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
@@ -419,7 +419,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
         // transaction properties
         final String transactionId = loanTransactionDTO.getTransactionId();
-        final Date transactionDate = loanTransactionDTO.getTransactionDate();
+        final LocalDate transactionDate = loanTransactionDTO.getTransactionDate();
         final BigDecimal refundAmount = loanTransactionDTO.getAmount();
         final boolean isReversal = loanTransactionDTO.isReversed();
         final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
@@ -438,7 +438,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
         // transaction properties
         final String transactionId = loanTransactionDTO.getTransactionId();
-        final Date transactionDate = loanTransactionDTO.getTransactionDate();
+        final LocalDate transactionDate = loanTransactionDTO.getTransactionDate();
         final BigDecimal principalAmount = loanTransactionDTO.getPrincipal();
         final BigDecimal interestAmount = loanTransactionDTO.getInterest();
         final BigDecimal feesAmount = loanTransactionDTO.getFees();

@@ -21,8 +21,8 @@ package org.apache.fineract.organisation.teller.api;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Date;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -343,16 +343,16 @@ final class TellerApiResourceSwagger {
         public CashierTxnType txnType;
         @Schema(example = "1000")
         public BigDecimal txnAmount;
-        @Schema(example = "Feb 25, 2015 12:00:00 AM")
-        public Date txnDate;
+        @Schema(example = "[2015, 02, 25]")
+        public LocalDate txnDate;
         @Schema(example = "2")
         public Long entityId;
         @Schema(example = "loans")
         public String entityType;
         @Schema(example = "Disbursement, Loan:2-000000002,Client:1-Test 1")
         public String txnNote;
-        @Schema(example = "Feb 25, 2015 12:00:00 AM")
-        public Date createdDate;
+        @Schema(example = "[2015, 02, 25, 12, 00, 00]")
+        public LocalDateTime createdDate;
         @Schema(example = "1")
         public Long officeId;
         @Schema(example = "Head Office")
@@ -380,8 +380,8 @@ final class TellerApiResourceSwagger {
         public String locale;
         @Schema(example = "dd-MM-yyyy")
         public String dateFormat;
-        @Schema(example = "01 February 2015")
-        public Date txnDate;
+        @Schema(example = "[2015, 02, 01]")
+        public LocalDate txnDate;
     }
 
     @Schema(description = "PostTellersTellerIdCashiersCashierIdAllocateResponse")
@@ -414,8 +414,8 @@ final class TellerApiResourceSwagger {
         public String locale;
         @Schema(example = "dd-MM-yyyy")
         public String dateFormat;
-        @Schema(example = "20 February 2015")
-        public Date txnDate;
+        @Schema(example = "[2015, 02, 20]")
+        public LocalDate txnDate;
 
     }
 

@@ -19,7 +19,7 @@
 package org.apache.fineract.accounting.journalentry.service;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
@@ -44,7 +44,7 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
         final Long savingsId = savingsDTO.getSavingsId();
         final String currencyCode = savingsDTO.getCurrencyCode();
         for (final SavingsTransactionDTO savingsTransactionDTO : savingsDTO.getNewSavingsTransactions()) {
-            final Date transactionDate = savingsTransactionDTO.getTransactionDate();
+            final LocalDate transactionDate = savingsTransactionDTO.getTransactionDate();
             final String transactionId = savingsTransactionDTO.getTransactionId();
             final Office office = this.helper.getOfficeById(savingsTransactionDTO.getOfficeId());
             final Long paymentTypeId = savingsTransactionDTO.getPaymentTypeId();

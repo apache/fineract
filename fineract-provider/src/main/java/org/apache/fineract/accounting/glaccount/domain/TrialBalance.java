@@ -20,13 +20,11 @@
 package org.apache.fineract.accounting.glaccount.domain;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
@@ -43,23 +41,21 @@ public class TrialBalance extends AbstractPersistableCustom {
     private BigDecimal amount;
 
     @Column(name = "entry_date", nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date entryDate;
+    private LocalDate entryDate;
 
     @Column(name = "created_date", nullable = true)
-    @Temporal(TemporalType.DATE)
-    private Date transactionDate;
+    private LocalDate transactionDate;
 
     @Column(name = "closing_balance", nullable = false)
     private BigDecimal closingBalance;
 
-    public static TrialBalance getInstance(final Long officeId, final Long glAccountId, final BigDecimal amount, final Date entryDate,
-            final Date transactionDate) {
+    public static TrialBalance getInstance(final Long officeId, final Long glAccountId, final BigDecimal amount, final LocalDate entryDate,
+            final LocalDate transactionDate) {
         return new TrialBalance(officeId, glAccountId, amount, entryDate, transactionDate);
     }
 
-    private TrialBalance(final Long officeId, final Long glAccountId, final BigDecimal amount, final Date entryDate,
-            final Date transactionDate) {
+    private TrialBalance(final Long officeId, final Long glAccountId, final BigDecimal amount, final LocalDate entryDate,
+            final LocalDate transactionDate) {
         this.officeId = officeId;
         this.glAccountId = glAccountId;
         this.amount = amount;
@@ -73,7 +69,7 @@ public class TrialBalance extends AbstractPersistableCustom {
         return officeId;
     }
 
-    public Date getTransactionDate() {
+    public LocalDate getTransactionDate() {
         return transactionDate;
     }
 
@@ -85,7 +81,7 @@ public class TrialBalance extends AbstractPersistableCustom {
         this.closingBalance = closingBalance;
     }
 
-    public Date getEntryDate() {
+    public LocalDate getEntryDate() {
         return entryDate;
     }
 

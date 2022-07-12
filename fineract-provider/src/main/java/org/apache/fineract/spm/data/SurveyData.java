@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.spm.data;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 public class SurveyData {
@@ -30,15 +30,15 @@ public class SurveyData {
     private String name;
     private String description;
     private String countryCode;
-    private Date validFrom;
-    private Date validTo;
+    private LocalDate validFrom;
+    private LocalDate validTo;
 
     public SurveyData() {
 
     }
 
     public SurveyData(final Long id, final List<ComponentData> componentDatas, final List<QuestionData> questionDatas, final String key,
-            final String name, final String description, final String countryCode, final Date validFrom, final Date validTo) {
+            final String name, final String description, final String countryCode, final LocalDate validFrom, final LocalDate validTo) {
 
         this.id = id;
         this.componentDatas = componentDatas;
@@ -107,19 +107,19 @@ public class SurveyData {
         this.countryCode = countryCode;
     }
 
-    public Date getValidFrom() {
+    public LocalDate getValidFrom() {
         return validFrom;
     }
 
-    public void setValidFrom(Date validFrom) {
+    public void setValidFrom(LocalDate validFrom) {
         this.validFrom = validFrom;
     }
 
-    public Date getValidTo() {
+    public LocalDate getValidTo() {
         return validTo;
     }
 
-    public void setValidTo(Date validTo) {
+    public void setValidTo(LocalDate validTo) {
         this.validTo = validTo;
     }
 }

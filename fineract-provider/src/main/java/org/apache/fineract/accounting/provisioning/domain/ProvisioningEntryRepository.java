@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.accounting.provisioning.domain;
 
-import java.util.Date;
+import java.time.LocalDate;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -28,7 +28,7 @@ public interface ProvisioningEntryRepository extends JpaRepository<ProvisioningE
 
     // OPENJPA throws error if we use entry
     @Query("select entry1 from ProvisioningEntry entry1 where entry1.createdDate = :createdDate")
-    ProvisioningEntry findByProvisioningEntryDate(@Param("createdDate") Date createdDate);
+    ProvisioningEntry findByProvisioningEntryDate(@Param("createdDate") LocalDate createdDate);
 
     @Query("select entry1 from ProvisioningEntry entry1 where entry1.createdDate = (select max(entry2.createdDate) from ProvisioningEntry entry2 where entry2.isJournalEntryCreated=true)")
     ProvisioningEntry findExistingProvisioningEntryWithJournalEntries();

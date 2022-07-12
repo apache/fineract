@@ -21,11 +21,9 @@ package org.apache.fineract.scheduledjobs.service;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.accounting.glaccount.domain.TrialBalance;
@@ -247,8 +245,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             final Long savingsId = (Long) details.get("savingsId");
             final BigDecimal amount = (BigDecimal) details.get("amount");
             final String recurrence = (String) details.get("recurrence");
-            Date date = (Date) details.get("dueDate");
-            LocalDate lastDepositDate = LocalDate.ofInstant(date.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            LocalDate lastDepositDate = (LocalDate) details.get("dueDate");
             Integer installmentNumber = (Integer) details.get("installment");
             while (count < DepositAccountUtils.GENERATE_MINIMUM_NUMBER_OF_FUTURE_INSTALMENTS) {
                 count++;
@@ -331,11 +328,10 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         tbGapSqlBuilder.append("select distinct(je.transaction_date) ").append("from acc_gl_journal_entry je ")
                 .append("where je.transaction_date > (select coalesce(MAX(created_date),'2010-01-01') from m_trial_balance)");
 
-        final List<Date> tbGaps = jdbcTemplate.queryForList(tbGapSqlBuilder.toString(), Date.class);
+        final List<LocalDate> tbGaps = jdbcTemplate.queryForList(tbGapSqlBuilder.toString(), LocalDate.class);
 
-        for (Date tbGap : tbGaps) {
-            LocalDate convDate = ZonedDateTime.ofInstant(tbGap.toInstant(), DateUtils.getDateTimeZoneOfTenant()).toLocalDate();
-            int days = Math.toIntExact(ChronoUnit.DAYS.between(convDate, DateUtils.getBusinessLocalDate()));
+        for (LocalDate tbGap : tbGaps) {
+            int days = Math.toIntExact(ChronoUnit.DAYS.between(tbGap, DateUtils.getBusinessLocalDate()));
             if (days < 1) {
                 continue;
             }

@@ -18,7 +18,8 @@
  */
 package org.apache.fineract.infrastructure.sms.domain;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.persistence.Column;
@@ -26,8 +27,6 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.campaigns.sms.domain.SmsCampaign;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -77,12 +76,10 @@ public class SmsMessage extends AbstractPersistableCustom {
     // private String campaignName;
 
     @Column(name = "submittedon_date", nullable = true)
-    @Temporal(TemporalType.DATE)
-    private Date submittedOnDate;
+    private LocalDate submittedOnDate;
 
     @Column(name = "delivered_on_date", nullable = true)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date deliveredOnDate;
+    private LocalDateTime deliveredOnDate;
 
     @Column(name = "is_notification", nullable = true)
     private boolean isNotification;
@@ -120,7 +117,7 @@ public class SmsMessage extends AbstractPersistableCustom {
         this.mobileNo = mobileNo;
         this.message = message;
         this.smsCampaign = smsCampaign;
-        this.submittedOnDate = DateUtils.getBusinessDate();
+        this.submittedOnDate = DateUtils.getBusinessLocalDate();
         this.isNotification = isNotification;
     }
 
@@ -177,15 +174,15 @@ public class SmsMessage extends AbstractPersistableCustom {
         this.statusType = statusType;
     }
 
-    public Date getSubmittedOnDate() {
+    public LocalDate getSubmittedOnDate() {
         return this.submittedOnDate;
     }
 
-    public Date getDeliveredOnDate() {
+    public LocalDateTime getDeliveredOnDate() {
         return this.deliveredOnDate;
     }
 
-    public void setDeliveredOnDate(final Date deliveredOnDate) {
+    public void setDeliveredOnDate(final LocalDateTime deliveredOnDate) {
         this.deliveredOnDate = deliveredOnDate;
     }
 

@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.domain;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.persistence.Column;
@@ -26,8 +26,6 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.campaigns.email.EmailApiConstants;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -73,8 +71,7 @@ public class EmailMessage extends AbstractPersistableCustom {
     private String campaignName;
 
     @Column(name = "submittedon_date", nullable = true)
-    @Temporal(TemporalType.DATE)
-    private Date submittedOnDate;
+    private LocalDate submittedOnDate;
 
     @Column(name = "error_message")
     private String errorMessage;
@@ -107,7 +104,7 @@ public class EmailMessage extends AbstractPersistableCustom {
         this.emailSubject = emailSubject;
         this.message = message;
         this.campaignName = campaignName;
-        this.submittedOnDate = DateUtils.getBusinessDate();
+        this.submittedOnDate = DateUtils.getBusinessLocalDate();
     }
 
     public Map<String, Object> update(final JsonCommand command) {
@@ -159,7 +156,7 @@ public class EmailMessage extends AbstractPersistableCustom {
         return this.campaignName;
     }
 
-    public Date getSubmittedOnDate() {
+    public LocalDate getSubmittedOnDate() {
         return this.submittedOnDate;
     }
 

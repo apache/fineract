@@ -18,9 +18,10 @@
  */
 package org.apache.fineract.infrastructure.core.data;
 
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public final class ApiParameterError {
@@ -91,9 +92,9 @@ public final class ApiParameterError {
         final List<ApiErrorMessageArg> messageArgs = new ArrayList<>();
         if (defaultUserMessageArgs != null) {
             for (final Object object : defaultUserMessageArgs) {
-                if (object instanceof Date) {
-                    final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-                    final String formattedDate = dateFormatter.format(object);
+                if (object instanceof LocalDate) {
+                    final DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("yyyy-MM-dd").toFormatter();
+                    final String formattedDate = dateFormatter.format((LocalDate) object);
                     messageArgs.add(ApiErrorMessageArg.from(formattedDate));
                 } else {
                     messageArgs.add(ApiErrorMessageArg.from(object));

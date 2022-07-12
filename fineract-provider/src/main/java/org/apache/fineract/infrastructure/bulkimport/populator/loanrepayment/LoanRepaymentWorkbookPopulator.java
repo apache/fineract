@@ -18,11 +18,10 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.populator.loanrepayment;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -229,9 +228,7 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
         CellStyle dateCellStyle = workbook.createCellStyle();
         short df = workbook.createDataFormat().getFormat(dateFormat);
         dateCellStyle.setDataFormat(df);
-        SimpleDateFormat outputFormat = new SimpleDateFormat(dateFormat);
-        SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date date = null;
+        DateTimeFormatter outputFormat = new DateTimeFormatterBuilder().appendPattern(dateFormat).toFormatter();
         Collections.sort(allloans, new LoanComparatorByStatusActive());
         for (LoanAccountData loan : allloans) {
             row = loanRepaymentSheet.createRow(rowIndex++);
@@ -244,13 +241,8 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
                 writeBigDecimal(LoanRepaymentConstants.LOOKUP_TOTAL_OUTSTANDING_AMOUNT_COL, row, loan.getTotalOutstandingAmount());
             }
             if (loan.getDisbursementDate() != null) {
-                try {
-                    date = inputFormat.parse(loan.getDisbursementDate().toString());
-                } catch (ParseException e) {
-                    LOG.error("Problem occurred in populateLoansTable function", e);
-                }
-                writeDate(LoanRepaymentConstants.LOOKUP_LOAN_DISBURSEMENT_DATE_COL, row, outputFormat.format(date), dateCellStyle,
-                        dateFormat);
+                writeDate(LoanRepaymentConstants.LOOKUP_LOAN_DISBURSEMENT_DATE_COL, row, outputFormat.format(loan.getDisbursementDate()),
+                        dateCellStyle, dateFormat);
             }
         }
     }

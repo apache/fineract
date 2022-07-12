@@ -25,10 +25,8 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -214,8 +212,7 @@ public class ShareProductDataSerializer {
                         arrayElement);
                 final BigDecimal shareValue = this.fromApiJsonHelper
                         .extractBigDecimalWithLocaleNamed(ShareProductApiConstants.sharevalue_paramname, arrayElement);
-                ShareProductMarketPriceData obj = new ShareProductMarketPriceData(id,
-                        Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), shareValue);
+                ShareProductMarketPriceData obj = new ShareProductMarketPriceData(id, localDate, shareValue);
                 set.add(obj);
             }
         }
@@ -232,8 +229,7 @@ public class ShareProductDataSerializer {
                         arrayElement);
                 final BigDecimal shareValue = this.fromApiJsonHelper
                         .extractBigDecimalWithLocaleNamed(ShareProductApiConstants.sharevalue_paramname, arrayElement);
-                ShareProductMarketPrice obj = new ShareProductMarketPrice(
-                        Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()), shareValue);
+                ShareProductMarketPrice obj = new ShareProductMarketPrice(localDate, shareValue);
                 set.add(obj);
             }
         }

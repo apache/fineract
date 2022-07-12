@@ -18,12 +18,10 @@
  */
 package org.apache.fineract.notification.domain;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
@@ -49,13 +47,12 @@ public class Notification extends AbstractPersistableCustom {
     private String notificationContent;
 
     @Column(name = "created_at")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
+    private LocalDateTime createdAt;
 
     public Notification() {}
 
     public Notification(String objectType, Long objectIdentifier, String action, Long actorId, boolean isSystemGenerated,
-            String notificationContent, Date createdAt) {
+            String notificationContent, LocalDateTime createdAt) {
         this.objectType = objectType;
         this.objectIdentifier = objectIdentifier;
         this.action = action;

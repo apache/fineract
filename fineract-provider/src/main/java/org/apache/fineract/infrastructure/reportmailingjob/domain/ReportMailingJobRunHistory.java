@@ -18,17 +18,13 @@
  */
 package org.apache.fineract.infrastructure.reportmailingjob.domain;
 
-import java.time.ZonedDateTime;
-import java.util.Date;
+import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 @Entity
 @Table(name = "m_report_mailing_job_run_history")
@@ -41,12 +37,10 @@ public class ReportMailingJobRunHistory extends AbstractPersistableCustom {
     private ReportMailingJob reportMailingJob;
 
     @Column(name = "start_datetime", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date startDateTime;
+    private LocalDateTime startDateTime;
 
     @Column(name = "end_datetime", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date endDateTime;
+    private LocalDateTime endDateTime;
 
     @Column(name = "status", nullable = false)
     private String status;
@@ -65,19 +59,19 @@ public class ReportMailingJobRunHistory extends AbstractPersistableCustom {
     /**
      * ReportMailingJobRunHistory private constructor
      **/
-    private ReportMailingJobRunHistory(final ReportMailingJob reportMailingJob, final ZonedDateTime startDateTime,
-            final ZonedDateTime endDateTime, final String status, final String errorMessage, final String errorLog) {
+    private ReportMailingJobRunHistory(final ReportMailingJob reportMailingJob, final LocalDateTime startDateTime,
+            final LocalDateTime endDateTime, final String status, final String errorMessage, final String errorLog) {
         this.reportMailingJob = reportMailingJob;
         this.startDateTime = null;
 
         if (startDateTime != null) {
-            this.startDateTime = Date.from(startDateTime.toInstant());
+            this.startDateTime = startDateTime;
         }
 
         this.endDateTime = null;
 
         if (endDateTime != null) {
-            this.endDateTime = Date.from(endDateTime.toInstant());
+            this.endDateTime = endDateTime;
         }
 
         this.status = status;
@@ -90,8 +84,8 @@ public class ReportMailingJobRunHistory extends AbstractPersistableCustom {
      *
      * @return ReportMailingJobRunHistory object
      **/
-    public static ReportMailingJobRunHistory newInstance(final ReportMailingJob reportMailingJob, final ZonedDateTime startDateTime,
-            final ZonedDateTime endDateTime, final String status, final String errorMessage, final String errorLog) {
+    public static ReportMailingJobRunHistory newInstance(final ReportMailingJob reportMailingJob, final LocalDateTime startDateTime,
+            final LocalDateTime endDateTime, final String status, final String errorMessage, final String errorLog) {
         return new ReportMailingJobRunHistory(reportMailingJob, startDateTime, endDateTime, status, errorMessage, errorLog);
     }
 
@@ -105,17 +99,15 @@ public class ReportMailingJobRunHistory extends AbstractPersistableCustom {
     /**
      * @return the startDateTime
      */
-    public ZonedDateTime getStartDateTime() {
-        return (this.startDateTime != null) ? ZonedDateTime.ofInstant(this.startDateTime.toInstant(), DateUtils.getDateTimeZoneOfTenant())
-                : null;
+    public LocalDateTime getStartDateTime() {
+        return this.startDateTime;
     }
 
     /**
      * @return the endDateTime
      */
-    public ZonedDateTime getEndDateTime() {
-        return (this.endDateTime != null) ? ZonedDateTime.ofInstant(this.endDateTime.toInstant(), DateUtils.getDateTimeZoneOfTenant())
-                : null;
+    public LocalDateTime getEndDateTime() {
+        return this.endDateTime;
     }
 
     /**

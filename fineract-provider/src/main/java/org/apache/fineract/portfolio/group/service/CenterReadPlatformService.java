@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.portfolio.group.service;
 
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
@@ -45,5 +45,5 @@ public interface CenterReadPlatformService {
 
     CenterData retrieveCenterWithClosureReasons();
 
-    Collection<StaffCenterData> retriveAllCentersByMeetingDate(Long officeId, Date meetingDate, Long staffId);
+    Collection<StaffCenterData> retriveAllCentersByMeetingDate(Long officeId, LocalDate meetingDate, Long staffId);
 }

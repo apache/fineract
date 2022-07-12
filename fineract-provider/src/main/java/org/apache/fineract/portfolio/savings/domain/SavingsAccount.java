@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.domain;
 
+import static java.time.temporal.ChronoUnit.DAYS;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
@@ -39,13 +40,11 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -54,7 +53,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
@@ -70,8 +68,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
@@ -175,49 +171,43 @@ public class SavingsAccount extends AbstractPersistableCustom {
     @Column(name = "account_type_enum", nullable = false)
     protected Integer accountType;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "submittedon_date", nullable = true)
-    protected Date submittedOnDate;
+    protected LocalDate submittedOnDate;
 
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "submittedon_userid", nullable = true)
     protected AppUser submittedBy;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "rejectedon_date")
-    protected Date rejectedOnDate;
+    protected LocalDate rejectedOnDate;
 
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "rejectedon_userid", nullable = true)
     protected AppUser rejectedBy;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "withdrawnon_date")
-    protected Date withdrawnOnDate;
+    protected LocalDate withdrawnOnDate;
 
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "withdrawnon_userid", nullable = true)
     protected AppUser withdrawnBy;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "approvedon_date")
-    protected Date approvedOnDate;
+    protected LocalDate approvedOnDate;
 
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "approvedon_userid", nullable = true)
     protected AppUser approvedBy;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "activatedon_date", nullable = true)
-    protected Date activatedOnDate;
+    protected LocalDate activatedOnDate;
 
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "activatedon_userid", nullable = true)
     protected AppUser activatedBy;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "closedon_date")
-    protected Date closedOnDate;
+    protected LocalDate closedOnDate;
 
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "closedon_userid", nullable = true)
@@ -271,9 +261,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
      * When account becomes <code>active</code> this field is derived if <code>lockinPeriodFrequency</code> and
      * <code>lockinPeriodFrequencyType</code> details are present.
      */
-    @Temporal(TemporalType.DATE)
     @Column(name = "lockedin_until_date_derived", nullable = true)
-    protected Date lockedInUntilDate;
+    protected LocalDate lockedInUntilDate;
 
     @Column(name = "withdrawal_fee_for_transfer", nullable = true)
     protected boolean withdrawalFeeApplicableForTransfer;
@@ -305,9 +294,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
     @Column(name = "on_hold_funds_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal onHoldFunds;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "start_interest_calculation_date")
-    protected Date startInterestCalculationDate;
+    protected LocalDate startInterestCalculationDate;
 
     @Embedded
     protected SavingsAccountSummary summary;
@@ -417,7 +405,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         this.externalId = externalId;
         this.status = status.getValue();
         this.accountType = accountType.getValue();
-        this.submittedOnDate = Date.from(submittedOnDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.submittedOnDate = submittedOnDate;
         this.submittedBy = submittedBy;
         this.nominalAnnualInterestRate = nominalAnnualInterestRate;
         this.interestCompoundingPeriodType = interestCompoundingPeriodType.getValue();
@@ -853,8 +841,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
         Money periodStartingBalance;
         if (this.startInterestCalculationDate != null) {
-            LocalDate startInterestCalculationDate = LocalDate.ofInstant(this.startInterestCalculationDate.toInstant(),
-                    DateUtils.getDateTimeZoneOfTenant());
+            LocalDate startInterestCalculationDate = this.startInterestCalculationDate;
             final SavingsAccountTransaction transaction = findLastTransaction(startInterestCalculationDate);
 
             if (transaction == null) {
@@ -1158,11 +1145,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     public LocalDate getActivationLocalDate() {
-        LocalDate activationLocalDate = null;
-        if (this.activatedOnDate != null) {
-            activationLocalDate = LocalDate.ofInstant(this.activatedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-        return activationLocalDate;
+        return this.activatedOnDate;
     }
 
     public AppUser getActivatedBy() {
@@ -1170,7 +1153,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     public LocalDate getWithdrawnOnDate() {
-        return withdrawnOnDate == null ? null : LocalDate.ofInstant(withdrawnOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        return this.withdrawnOnDate;
     }
 
     public AppUser getWithdrawnBy() {
@@ -1182,8 +1165,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
     public LocalDate getStartInterestCalculationDate() {
         LocalDate startInterestCalculationLocalDate = null;
         if (this.startInterestCalculationDate != null) {
-            startInterestCalculationLocalDate = LocalDate.ofInstant(this.startInterestCalculationDate.toInstant(),
-                    DateUtils.getDateTimeZoneOfTenant());
+            startInterestCalculationLocalDate = this.startInterestCalculationDate;
         } else {
             startInterestCalculationLocalDate = getActivationLocalDate();
         }
@@ -1323,7 +1305,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     private void resetFreeChargeDaysCount(SavingsAccountCharge charge, final BigDecimal transactionAmount, final LocalDate transactionDate,
             final AppUser user, final String refNo) {
-        Date resetDate = charge.getResetChargeDate();
+        LocalDate resetDate = charge.getResetChargeDate();
 
         Integer restartPeriod = charge.getRestartFrequency();
         if (charge.getRestartFrequencyEnum() == 2) { // calculation for months
@@ -1331,9 +1313,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
             LocalDate resetLocalDate;
             if (resetDate == null) {
-                resetLocalDate = this.activatedOnDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                resetLocalDate = this.activatedOnDate;
             } else {
-                resetLocalDate = resetDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                resetLocalDate = resetDate;
             }
 
             LocalDate gapIntervalMonth = resetLocalDate.plusMonths(restartPeriod);
@@ -1347,17 +1329,15 @@ public class SavingsAccount extends AbstractPersistableCustom {
             }
         } else { // calculation for days
             Long completedDays;
-            Long days;
 
             if (resetDate == null) {
-                completedDays = DateUtils.getBusinessDate().getTime() - this.activatedOnDate.getTime();
-                days = TimeUnit.DAYS.convert(completedDays, TimeUnit.MILLISECONDS);
+                completedDays = DAYS.between(DateUtils.getBusinessLocalDate(), this.activatedOnDate);
+
             } else {
-                completedDays = DateUtils.getBusinessDate().getTime() - resetDate.getTime();
-                days = TimeUnit.DAYS.convert(completedDays, TimeUnit.MILLISECONDS);
+                completedDays = DAYS.between(DateUtils.getBusinessLocalDate(), resetDate);
             }
 
-            int totalDays = days.intValue();
+            int totalDays = completedDays.intValue();
 
             if (totalDays < restartPeriod) {
                 countValidation(charge, transactionAmount, transactionDate, user, refNo);
@@ -1382,7 +1362,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     private void discountCharge(Integer freeWithdrawalCount, SavingsAccountCharge charge) {
         charge.setFreeWithdrawalCount(freeWithdrawalCount);
-        charge.setDiscountDueDate(DateUtils.getBusinessDate());
+        charge.setDiscountDueDate(DateUtils.getBusinessLocalDate());
         charge.updateNoWithdrawalFee();
     }
 
@@ -1403,9 +1383,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
                 return false;
             }
 
-            transactionBeforeLastInterestPosting = LocalDate
-                    .ofInstant(this.summary.getInterestPostedTillDate().toInstant(), DateUtils.getDateTimeZoneOfTenant())
-                    .isAfter(transactionDate) ? true : false;
+            transactionBeforeLastInterestPosting = this.summary.getInterestPostedTillDate().isAfter(transactionDate);
         }
 
         return transactionBeforeLastInterestPosting;
@@ -1575,11 +1553,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     protected LocalDate getLockedInUntilLocalDate() {
-        LocalDate lockedInUntilLocalDate = null;
-        if (this.lockedInUntilDate != null) {
-            lockedInUntilLocalDate = LocalDate.ofInstant(this.lockedInUntilDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-        return lockedInUntilLocalDate;
+        return this.lockedInUntilDate;
     }
 
     private boolean isDateInTheFuture(final LocalDate transactionDate) {
@@ -1614,12 +1588,11 @@ public class SavingsAccount extends AbstractPersistableCustom {
         final String dateFormat = command.dateFormat();
 
         if (command.isChangeInLocalDateParameterNamed(SavingsApiConstants.submittedOnDateParamName, getSubmittedOnLocalDate())) {
-            final LocalDate newValue = command.localDateValueOfParameterNamed(SavingsApiConstants.submittedOnDateParamName);
             final String newValueAsString = command.stringValueOfParameterNamed(SavingsApiConstants.submittedOnDateParamName);
             actualChanges.put(SavingsApiConstants.submittedOnDateParamName, newValueAsString);
             actualChanges.put(SavingsApiConstants.localeParamName, localeAsInput);
             actualChanges.put(SavingsApiConstants.dateFormatParamName, dateFormat);
-            this.submittedOnDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.submittedOnDate = command.localDateValueOfParameterNamed(SavingsApiConstants.submittedOnDateParamName);
         }
 
         if (command.isChangeInStringParameterNamed(SavingsApiConstants.accountNoParamName, this.accountNumber)) {
@@ -2130,20 +2103,19 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     public boolean isSubmittedOnDateAfter(final LocalDate compareDate) {
-        return this.submittedOnDate == null ? false
-                : LocalDate.ofInstant(this.submittedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()).isAfter(compareDate);
+        return this.submittedOnDate == null ? false : this.submittedOnDate.isAfter(compareDate);
     }
 
     public LocalDate getSubmittedOnDate() {
-        return submittedOnDate == null ? null : LocalDate.ofInstant(submittedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        return submittedOnDate;
     }
 
     public LocalDate getApprovedOnDate() {
-        return approvedOnDate == null ? null : LocalDate.ofInstant(approvedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        return approvedOnDate;
     }
 
     public LocalDate getRejectedOnDate() {
-        return rejectedOnDate == null ? null : LocalDate.ofInstant(rejectedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        return rejectedOnDate;
     }
 
     public AppUser getRejectedBy() {
@@ -2233,19 +2205,11 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     protected LocalDate getSubmittedOnLocalDate() {
-        LocalDate submittedOn = null;
-        if (this.submittedOnDate != null) {
-            submittedOn = LocalDate.ofInstant(this.submittedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-        return submittedOn;
+        return this.submittedOnDate;
     }
 
     private LocalDate getApprovedOnLocalDate() {
-        LocalDate approvedOnLocalDate = null;
-        if (this.approvedOnDate != null) {
-            approvedOnLocalDate = LocalDate.ofInstant(this.approvedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-        return approvedOnLocalDate;
+        return this.approvedOnDate;
     }
 
     public Client getClient() {
@@ -2297,7 +2261,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         final LocalDate approvedOn = command.localDateValueOfParameterNamed(SavingsApiConstants.approvedOnDateParamName);
         final String approvedOnDateChange = command.stringValueOfParameterNamed(SavingsApiConstants.approvedOnDateParamName);
 
-        this.approvedOnDate = Date.from(approvedOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.approvedOnDate = approvedOn;
         this.approvedBy = currentUser;
         actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
         actualChanges.put(SavingsApiConstants.dateFormatParamName, command.dateFormat());
@@ -2463,21 +2427,21 @@ public class SavingsAccount extends AbstractPersistableCustom {
         }
     }
 
-    private Date findLatestAnnualFeeTransactionDueDate() {
+    private LocalDate findLatestAnnualFeeTransactionDueDate() {
 
-        Date nextDueDate = null;
+        LocalDate nextDueDate = null;
 
         LocalDate lastAnnualFeeTransactionDate = null;
         for (final SavingsAccountTransaction transaction : retreiveOrderedNonInterestPostingTransactions()) {
             if (transaction.isAnnualFeeAndNotReversed()) {
                 if (lastAnnualFeeTransactionDate == null) {
                     lastAnnualFeeTransactionDate = transaction.transactionLocalDate();
-                    nextDueDate = Date.from(lastAnnualFeeTransactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                    nextDueDate = lastAnnualFeeTransactionDate;
                 }
 
                 if (transaction.transactionLocalDate().isAfter(lastAnnualFeeTransactionDate)) {
                     lastAnnualFeeTransactionDate = transaction.transactionLocalDate();
-                    nextDueDate = Date.from(lastAnnualFeeTransactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                    nextDueDate = lastAnnualFeeTransactionDate;
                 }
             }
         }
@@ -2534,11 +2498,11 @@ public class SavingsAccount extends AbstractPersistableCustom {
         final LocalDate rejectedOn = command.localDateValueOfParameterNamed(SavingsApiConstants.rejectedOnDateParamName);
         final String rejectedOnAsString = command.stringValueOfParameterNamed(SavingsApiConstants.rejectedOnDateParamName);
 
-        this.rejectedOnDate = Date.from(rejectedOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.rejectedOnDate = rejectedOn;
         this.rejectedBy = currentUser;
         this.withdrawnOnDate = null;
         this.withdrawnBy = null;
-        this.closedOnDate = Date.from(rejectedOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.closedOnDate = rejectedOn;
         this.closedBy = currentUser;
 
         actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
@@ -2602,9 +2566,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
         this.rejectedOnDate = null;
         this.rejectedBy = null;
-        this.withdrawnOnDate = Date.from(withdrawnOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.withdrawnOnDate = withdrawnOn;
         this.withdrawnBy = currentUser;
-        this.closedOnDate = Date.from(withdrawnOn.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.closedOnDate = withdrawnOn;
         this.closedBy = currentUser;
 
         actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
@@ -2675,7 +2639,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         this.withdrawnBy = null;
         this.closedOnDate = null;
         this.closedBy = null;
-        this.activatedOnDate = Date.from(activationDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.activatedOnDate = activationDate;
         this.activatedBy = currentUser;
         this.lockedInUntilDate = calculateDateAccountIsLockedUntil(getActivationLocalDate());
 
@@ -2747,7 +2711,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         return Money.of(this.currency, this.minRequiredOpeningBalance);
     }
 
-    public void approveAndActivateApplication(final Date appliedonDate, final AppUser appliedBy) {
+    public void approveAndActivateApplication(final LocalDate appliedonDate, final AppUser appliedBy) {
         this.status = SavingsAccountStatusType.ACTIVE.getValue();
         this.approvedOnDate = appliedonDate;
         this.approvedBy = appliedBy;
@@ -2853,7 +2817,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         this.rejectedBy = null;
         this.withdrawnOnDate = null;
         this.withdrawnBy = null;
-        this.closedOnDate = Date.from(closedDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.closedOnDate = closedDate;
         this.closedBy = currentUser;
 
         return actualChanges;
@@ -2874,28 +2838,24 @@ public class SavingsAccount extends AbstractPersistableCustom {
         }
     }
 
-    private Date calculateDateAccountIsLockedUntil(final LocalDate activationLocalDate) {
+    private LocalDate calculateDateAccountIsLockedUntil(final LocalDate activationLocalDate) {
 
-        Date lockedInUntilLocalDate = null;
+        LocalDate lockedInUntilLocalDate = null;
         final PeriodFrequencyType lockinPeriodFrequencyType = PeriodFrequencyType.fromInt(this.lockinPeriodFrequencyType);
         switch (lockinPeriodFrequencyType) {
             case INVALID:
             break;
             case DAYS:
-                lockedInUntilLocalDate = Date
-                        .from(activationLocalDate.plusDays(this.lockinPeriodFrequency).atStartOfDay(ZoneId.systemDefault()).toInstant());
+                lockedInUntilLocalDate = activationLocalDate.plusDays(this.lockinPeriodFrequency);
             break;
             case WEEKS:
-                lockedInUntilLocalDate = Date
-                        .from(activationLocalDate.plusWeeks(this.lockinPeriodFrequency).atStartOfDay(ZoneId.systemDefault()).toInstant());
+                lockedInUntilLocalDate = activationLocalDate.plusWeeks(this.lockinPeriodFrequency);
             break;
             case MONTHS:
-                lockedInUntilLocalDate = Date
-                        .from(activationLocalDate.plusMonths(this.lockinPeriodFrequency).atStartOfDay(ZoneId.systemDefault()).toInstant());
+                lockedInUntilLocalDate = activationLocalDate.plusMonths(this.lockinPeriodFrequency);
             break;
             case YEARS:
-                lockedInUntilLocalDate = Date
-                        .from(activationLocalDate.plusYears(this.lockinPeriodFrequency).atStartOfDay(ZoneId.systemDefault()).toInstant());
+                lockedInUntilLocalDate = activationLocalDate.plusYears(this.lockinPeriodFrequency);
             break;
             case WHOLE_TERM:
                 LOG.error("TODO Implement calculateDateAccountIsLockedUntil for WHOLE_TERM");
@@ -2920,7 +2880,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     public LocalDate getClosedOnDate() {
-        return this.closedOnDate == null ? null : LocalDate.ofInstant(this.closedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        return this.closedOnDate;
     }
 
     public AppUser getClosedBy() {
@@ -3188,9 +3148,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
                 throw new PlatformApiDataValidationException(dataValidationErrors);
             }
 
-            Date currentAnnualFeeNextDueDate = findLatestAnnualFeeTransactionDueDate();
-            if (currentAnnualFeeNextDueDate != null && LocalDate
-                    .ofInstant(currentAnnualFeeNextDueDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()).isEqual(transactionDate)) {
+            LocalDate currentAnnualFeeNextDueDate = findLatestAnnualFeeTransactionDueDate();
+            if (currentAnnualFeeNextDueDate != null && currentAnnualFeeNextDueDate.isEqual(transactionDate)) {
                 baseDataValidator.reset().parameter("dueDate").value(transactionDate.format(formatter))
                         .failWithCodeNoParameterAddedToErrorCode("transaction.exists.on.date");
 
@@ -3543,7 +3502,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
     public void escheat(AppUser appUser) {
         this.status = SavingsAccountStatusType.CLOSED.getValue();
         this.sub_status = SavingsAccountSubStatusEnum.ESCHEAT.getValue();
-        this.closedOnDate = DateUtils.getBusinessDate();
+        this.closedOnDate = DateUtils.getBusinessLocalDate();
         this.closedBy = appUser;
         boolean postInterestAsOnDate = false;
         LocalDate transactionDate = DateUtils.getBusinessLocalDate();
@@ -3879,7 +3838,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         return this.minOverdraftForInterestCalculation;
     }
 
-    public Date getLockedInUntilDate() {
+    public LocalDate getLockedInUntilDate() {
         return this.lockedInUntilDate;
     }
 

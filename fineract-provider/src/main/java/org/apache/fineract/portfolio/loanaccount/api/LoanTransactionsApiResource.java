@@ -169,8 +169,7 @@ public class LoanTransactionsApiResource {
             if (transactionDateParam == null) {
                 transactionDate = DateUtils.getBusinessLocalDate();
             } else {
-                transactionDate = LocalDate.ofInstant(transactionDateParam.getDate("transactionDate", dateFormat, locale).toInstant(),
-                        DateUtils.getDateTimeZoneOfTenant());
+                transactionDate = transactionDateParam.getDate("transactionDate", dateFormat, locale);
             }
             transactionData = this.loanReadPlatformService.retrieveLoanPrePaymentTemplate(LoanTransactionType.REPAYMENT, loanId,
                     transactionDate);
@@ -183,8 +182,7 @@ public class LoanTransactionsApiResource {
             if (transactionDateParam == null) {
                 transactionDate = DateUtils.getBusinessLocalDate();
             } else {
-                transactionDate = LocalDate.ofInstant(transactionDateParam.getDate("transactionDate", dateFormat, locale).toInstant(),
-                        DateUtils.getDateTimeZoneOfTenant());
+                transactionDate = transactionDateParam.getDate("transactionDate", dateFormat, locale);
             }
             transactionData = this.loanReadPlatformService.retrieveLoanForeclosureTemplate(loanId, transactionDate);
         } else if (is(commandParam, "creditBalanceRefund")) {

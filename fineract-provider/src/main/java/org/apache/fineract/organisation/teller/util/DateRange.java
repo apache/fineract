@@ -18,11 +18,10 @@
  */
 package org.apache.fineract.organisation.teller.util;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.StringTokenizer;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,38 +31,36 @@ public class DateRange {
     private static final String ISO_8601_DATE_PATTERN = "yyy-MM-dd";
     private static final String RANGE_DELIMITER = "..";
 
-    private Date startDate;
-    private Date endDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
 
     public DateRange() {
 
     }
 
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
 
-    public Date getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
 
     public static DateRange fromString(final String dateToParse) {
 
         final DateRange dateRange = new DateRange();
-        final SimpleDateFormat sdf = new SimpleDateFormat(DateRange.ISO_8601_DATE_PATTERN);
-        final Calendar cal = Calendar.getInstance();
 
         final String testee;
         if (dateToParse == null) {
-            testee = sdf.format(cal.getTime());
+            testee = DateUtils.DEFAULT_DATE_FORMATER.format(DateUtils.getBusinessLocalDate());
         } else {
             testee = dateToParse;
         }
@@ -71,31 +68,18 @@ public class DateRange {
         final StringTokenizer tokenizer = new StringTokenizer(testee, DateRange.RANGE_DELIMITER);
 
         try {
-            cal.setTime(sdf.parse(tokenizer.nextToken()));
-        } catch (ParseException ex) {
+            dateRange.setStartDate(LocalDate.parse(tokenizer.nextToken(), DateUtils.DEFAULT_DATE_FORMATER));
+        } catch (DateTimeParseException ex) {
             LOG.error("Problem occurred in DateRange function Could not parse the date recieved.", ex);
         }
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-
-        dateRange.setStartDate(cal.getTime());
 
         if (tokenizer.hasMoreTokens()) {
             try {
-                cal.setTime(sdf.parse(tokenizer.nextToken()));
-            } catch (ParseException ex) {
+                dateRange.setEndDate(LocalDate.parse(tokenizer.nextToken(), DateUtils.DEFAULT_DATE_FORMATER));
+            } catch (DateTimeParseException ex) {
                 LOG.error("Problem occurred in DateRange function Could not parse the date recieved.", ex);
             }
         }
-        cal.set(Calendar.HOUR_OF_DAY, 23);
-        cal.set(Calendar.MINUTE, 59);
-        cal.set(Calendar.SECOND, 59);
-        cal.set(Calendar.MILLISECOND, 999);
-
-        dateRange.setEndDate(cal.getTime());
-
         return dateRange;
     }
 }
