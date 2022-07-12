@@ -18,8 +18,6 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -45,6 +43,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SavingsInterestPostingJobIntegrationTest {
 
@@ -191,6 +190,33 @@ public class SavingsInterestPostingJobIntegrationTest {
             LOG.info("{} - {}", entry.getKey(), entry.getValue().toString());
         }
         assertEquals("800.4932", interestPostingTransaction.get("runningBalance").toString(), "Equality check for Balance");
+    }
+    @Test
+    public void testDuplicateOverdraftInterestPostingJob() {
+        // client activation, savings activation and 1st transaction date
+        final String startDate = "01 July 2022";
+        final String jobName = "Post Interest For Savings";
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        Assertions.assertNotNull(clientID);
+
+        final Integer savingsId = createSavingsAccountDailyPostingOverdraft(clientID, startDate);
+
+        this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "1000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+
+        /***
+         * Runs Post interest posting job and verify the new account created with Overdraft is posting negative interest
+         */
+        this.scheduleJobHelper.executeAndAwaitJob(jobName);
+        this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "1000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+        Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
+        ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
+        Integer dateCount = 0;
+        for(HashMap<String, Object> transaction : transactions) {
+            if(transaction.get("date").toString().equals("[2022, 7, 10]") && transaction.get("reversed").toString().equals("false")) {
+                dateCount++;
+            }
+        }
+        assertEquals(1, dateCount, "No Duplicate Overdraft Interest Posting");
     }
 
     private Integer createSavingsAccountDailyPosting(final Integer clientID, final String startDate) {
