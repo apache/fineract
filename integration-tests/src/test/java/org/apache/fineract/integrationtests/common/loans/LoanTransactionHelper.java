@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -70,6 +72,8 @@ public class LoanTransactionHelper {
     private static final String FORECLOSURE_COMMAND = "foreclosure";
 
     public static final String DATE_TIME_FORMAT = "dd MMMM yyyy HH:mm";
+
+    private static final Gson GSON = new JSON().getGson();
 
     public LoanTransactionHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
@@ -165,6 +169,13 @@ public class LoanTransactionHelper {
     public String getLoanDetails(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer loanID) {
         final String URL = "/fineract-provider/api/v1/loans/" + loanID + "?associations=all&" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, URL, null);
+    }
+
+    public GetLoansLoanIdResponse getLoanDetailsAsObject(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer loanID) {
+        final String URL = "/fineract-provider/api/v1/loans/" + loanID + "?associations=all&" + Utils.TENANT_IDENTIFIER;
+        String response = Utils.performServerGet(requestSpec, responseSpec, URL, null);
+        return GSON.fromJson(response, GetLoansLoanIdResponse.class);
     }
 
     public Object getLoanProductDetail(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
