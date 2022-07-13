@@ -25,7 +25,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
-import org.apache.fineract.portfolio.rate.data.RateData;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 /**
  * Created by Chirag Gupta on 12/27/17.
@@ -67,6 +67,26 @@ final class LoanProductsApiResourceSwagger {
 
             @Schema(example = "1")
             public Integer id;
+        }
+
+        static final class RateData {
+
+            private RateData() {}
+
+            @Schema(example = "1")
+            public Long id;
+
+            @Schema(example = "some name")
+            public String name;
+
+            @Schema(example = "20")
+            public BigDecimal percentage;
+
+            @Schema(description = "Apply specific product using its id, code, and value.")
+            public EnumOptionData productApply;
+
+            @Schema(example = "false")
+            public boolean active;
         }
 
         @Schema(example = "LP Accrual Accounting")

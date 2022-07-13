@@ -92,7 +92,10 @@ public class CommandStrategyProvider {
         this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/charges").method("GET").build(),
                 "collectChargesCommandStrategy");
         this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\?command=repayment").method("POST").build(),
-                "repayLoanCommandStrategy");
+                "createTransactionLoanCommandStrategy");
+        this.commandStrategies.put(
+                CommandContext.resource("loans\\/\\d+\\/transactions\\?command=creditBalanceRefund").method("POST").build(),
+                "createTransactionLoanCommandStrategy");
         this.commandStrategies.put(CommandContext.resource("clients\\/\\d+\\?command=activate").method("POST").build(),
                 "activateClientCommandStrategy");
         this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\?command=approve").method("POST").build(),
@@ -103,6 +106,11 @@ public class CommandStrategyProvider {
                 "approveLoanRescheduleCommandStrategy");
         this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\/\\d+").method("GET").build(),
                 "getTransactionByIdCommandStrategy");
+        this.commandStrategies.put(CommandContext.resource("datatables\\/[a-zA-Z0-9_]*\\/\\d+").method("GET").build(),
+                "getDatatableEntryByAppTableIdCommandStrategy");
+        this.commandStrategies.put(
+                CommandContext.resource("datatables\\/[a-zA-Z0-9_]*\\/\\d+(\\?(\\w+(?:\\=[\\w,]+|&)+)+)").method("GET").build(),
+                "getDatatableEntryByAppTableIdCommandStrategy");
     }
 
 }

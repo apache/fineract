@@ -23,8 +23,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
-import org.apache.fineract.batch.exception.ErrorHandler;
-import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.portfolio.client.api.ClientsApiResource;
 import org.springframework.stereotype.Component;
 
@@ -60,27 +58,14 @@ public class UpdateClientCommandStrategy implements CommandStrategy {
         final String relativeUrl = request.getRelativeUrl();
         final Long clientId = Long.parseLong(relativeUrl.substring(relativeUrl.indexOf('/') + 1));
 
-        // Try-catch blocks to map exceptions to appropriate status codes
-        try {
+        // Calls 'update' function from 'ClientsApiResource' to update a
+        // client
+        responseBody = clientsApiResource.update(clientId, request.getBody());
 
-            // Calls 'update' function from 'ClientsApiResource' to update a
-            // client
-            responseBody = clientsApiResource.update(clientId, request.getBody());
-
-            response.setStatusCode(200);
-            // Sets the body of the response after the successful update of
-            // client information
-            response.setBody(responseBody);
-
-        } catch (RuntimeException e) {
-
-            // Gets an object of type ErrorInfo, containing information about
-            // raised exception
-            ErrorInfo ex = ErrorHandler.handler(e);
-
-            response.setStatusCode(ex.getStatusCode());
-            response.setBody(ex.getMessage());
-        }
+        response.setStatusCode(200);
+        // Sets the body of the response after the successful update of
+        // client information
+        response.setBody(responseBody);
 
         return response;
     }
