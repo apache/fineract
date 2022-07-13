@@ -452,7 +452,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                 if (overdraftAmount.isZero() && runningBalance.isLessThanZero()) {
                     overdraftAmount = overdraftAmount.plus(runningBalance.getAmount().negate());
                 }
-                if (transaction.getId() == null && overdraftAmount.isGreaterThanZero()) {
+                if (overdraftAmount.isGreaterThanZero()) {
                     transaction.updateOverdraftAmount(overdraftAmount.getAmount());
                 } else if (overdraftAmount.isNotEqualTo(Money.of(savingsAccountData.currency(), transaction.getOverdraftAmount()))) {
                     SavingsAccountTransactionData accountTransaction = SavingsAccountTransactionData.copyTransaction(transaction);
