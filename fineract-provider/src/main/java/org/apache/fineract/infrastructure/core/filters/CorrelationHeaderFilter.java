@@ -26,42 +26,49 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.service.MDCWrapper;
 import org.apache.fineract.infrastructure.security.utils.LogParameterEscapeUtil;
-import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @RequiredArgsConstructor
 @Slf4j
+@Component
 public class CorrelationHeaderFilter extends OncePerRequestFilter {
 
-    private String correlationIdHeader;
+    public static final String CORRELATION_ID_KEY = "correlationId";
 
-    public static final String correlationIdKey = "correlationId";
-
-    @Autowired
-    public CorrelationHeaderFilter(Environment env) {
-        correlationIdHeader = env.getRequiredProperty("fineract.logging.http.correlation-id.header-name");
-    }
+    private final FineractProperties fineractProperties;
+    private final MDCWrapper mdcWrapper;
 
     @Override
     protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain)
             throws IOException, ServletException {
-
-        try {
-            final HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-            String currentCorrId = httpServletRequest.getHeader(correlationIdHeader);
-            log.debug("Found correlationId in Header : {}", LogParameterEscapeUtil.escapeLogMDCParameter(currentCorrId));
-            MDC.put(correlationIdKey, currentCorrId);
+        FineractProperties.FineractCorrelationProperties correlationProperties = fineractProperties.getCorrelation();
+        if (correlationProperties.isEnabled()) {
+            handleCorrelations(request, response, filterChain, correlationProperties);
+        } else {
             filterChain.doFilter(request, response);
-        } finally {
-            MDC.remove(correlationIdKey);
         }
+
     }
 
-    public static String getCurrentValue() {
-        return MDC.get(correlationIdKey);
+    private void handleCorrelations(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain,
+            FineractProperties.FineractCorrelationProperties correlationProperties) throws IOException, ServletException {
+        try {
+            String correlationHeaderName = correlationProperties.getHeaderName();
+            String correlationId = request.getHeader(correlationHeaderName);
+            if (StringUtils.isNotBlank(correlationId)) {
+                String escapedCorrelationId = LogParameterEscapeUtil.escapeLogMDCParameter(correlationId);
+                log.debug("Found correlationId in header : {}", escapedCorrelationId);
+                mdcWrapper.put(CORRELATION_ID_KEY, escapedCorrelationId);
+            }
+            filterChain.doFilter(request, response);
+        } finally {
+            mdcWrapper.remove(CORRELATION_ID_KEY);
+        }
     }
 
     @Override
