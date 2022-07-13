@@ -23,10 +23,14 @@ import com.google.gson.reflect.TypeToken;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.security.SecureRandom;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.HttpMethod;
+import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.junit.jupiter.api.Assertions;
@@ -223,12 +227,37 @@ public final class BatchHelper {
      * given requestId and reference.
      *
      * @param requestId
+     *            the request ID
      * @param reference
+     *            the reference ID
      * @param productId
-     * @return BatchRequest
+     *            the product ID
+     * @return BatchRequest the batch request
      */
     public static BatchRequest applyLoanRequest(final Long requestId, final Long reference, final Integer productId,
             final Integer clientCollateralId) {
+        return applyLoanRequest(requestId, reference, productId, clientCollateralId, LocalDate.now(ZoneId.systemDefault()).minusDays(10),
+                "10,000.00");
+    }
+
+    /**
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.ApplyLoanCommandStrategy} Request with
+     * given requestId and reference.
+     *
+     * @param requestId
+     *            the request ID
+     * @param reference
+     *            the reference ID
+     * @param productId
+     *            the product ID
+     * @param date
+     *            the loan submitted on date
+     * @param loanAmount
+     *            the loan amount
+     * @return BatchRequest the batch request
+     */
+    public static BatchRequest applyLoanRequest(final Long requestId, final Long reference, final Integer productId,
+            final Integer clientCollateralId, final LocalDate date, final String loanAmount) {
 
         final BatchRequest br = new BatchRequest();
 
@@ -236,19 +265,20 @@ public final class BatchHelper {
         br.setRelativeUrl("loans");
         br.setMethod("POST");
         br.setReference(reference);
+        String dateString = date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
 
         String body = "{\"dateFormat\": \"dd MMMM yyyy\", \"locale\": \"en_GB\", \"clientId\": \"$.clientId\"," + "\"productId\": "
-                + productId + ", \"principal\": \"10,000.00\", \"loanTermFrequency\": 10,"
+                + productId + ", \"principal\": \"" + loanAmount + "\", \"loanTermFrequency\": 10,"
                 + "\"loanTermFrequencyType\": 2, \"loanType\": \"individual\", \"numberOfRepayments\": 10,"
                 + "\"repaymentEvery\": 1, \"repaymentFrequencyType\": 2, \"interestRatePerPeriod\": 10,"
                 + "\"amortizationType\": 1, \"interestType\": 0, \"interestCalculationPeriodType\": 1,"
-                + "\"transactionProcessingStrategyId\": 1, \"expectedDisbursementDate\": \"10 Jun 2013\",";
+                + "\"transactionProcessingStrategyId\": 1, \"expectedDisbursementDate\": \"" + dateString + "\",";
 
         if (clientCollateralId != null) {
-            body = body + "\"collateral\": [{\"clientCollateralId\": \"" + clientCollateralId.toString() + "\", \"quantity\": \"1\"}],";
+            body = body + "\"collateral\": [{\"clientCollateralId\": \"" + clientCollateralId + "\", \"quantity\": \"1\"}],";
         }
 
-        body = body + "\"submittedOnDate\": \"10 Jun 2013\"}";
+        body = body + "\"submittedOnDate\": \"" + dateString + "\"}";
 
         br.setBody(body);
 
@@ -385,17 +415,37 @@ public final class BatchHelper {
      *
      *
      * @param requestId
+     *            the request ID
      * @param reference
-     * @return BatchRequest
+     *            the reference ID
+     * @return BatchRequest the batch request
      */
     public static BatchRequest approveLoanRequest(final Long requestId, final Long reference) {
+        return approveLoanRequest(requestId, reference, LocalDate.now(ZoneId.systemDefault()).minusDays(10));
+    }
+
+    /**
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.ApproveLoanCommandStrategy} Request with
+     * given requestId and reference.
+     *
+     *
+     * @param requestId
+     *            the request ID
+     * @param reference
+     *            the reference ID
+     * @param date
+     *            the approved on date
+     * @return BatchRequest the batch request
+     */
+    public static BatchRequest approveLoanRequest(final Long requestId, final Long reference, LocalDate date) {
         final BatchRequest br = new BatchRequest();
 
         br.setRequestId(requestId);
         br.setRelativeUrl("loans/$.loanId?command=approve");
         br.setReference(reference);
         br.setMethod("POST");
-        br.setBody("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", \"approvedOnDate\": \"12 September 2013\","
+        String dateString = date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+        br.setBody("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", \"approvedOnDate\": \"" + dateString + "\","
                 + "\"note\": \"Loan approval note\"}");
 
         return br;
@@ -407,39 +457,123 @@ public final class BatchHelper {
      *
      *
      * @param requestId
+     *            the request ID
      * @param reference
-     * @return BatchRequest
+     *            the reference ID
+     * @return BatchRequest the batch request
      */
     public static BatchRequest disburseLoanRequest(final Long requestId, final Long reference) {
+        return disburseLoanRequest(requestId, reference, LocalDate.now(ZoneId.systemDefault()).minusDays(8));
+    }
+
+    /**
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy} Request with
+     * given requestId and reference.
+     *
+     *
+     * @param requestId
+     *            the request ID
+     * @param reference
+     *            the reference ID
+     * @param date
+     *            the actual disbursement date
+     * @return BatchRequest the batch request
+     */
+    public static BatchRequest disburseLoanRequest(final Long requestId, final Long reference, final LocalDate date) {
         final BatchRequest br = new BatchRequest();
 
         br.setRequestId(requestId);
         br.setRelativeUrl("loans/$.loanId?command=disburse");
         br.setReference(reference);
         br.setMethod("POST");
-        br.setBody("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", \"actualDisbursementDate\": \"15 September 2013\"}");
+        String dateString = date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+        br.setBody("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", \"actualDisbursementDate\": \"" + dateString + "\"}");
 
         return br;
     }
 
     /**
-     * Creates and returns a {@link org.apache.fineract.batch.command.internal.RepayLoanCommandStrategy} Request with
-     * given requestId.
-     *
+     * Creates and returns a {@link CreateTransactionLoanCommandStrategy} Request with given requestId.
      *
      * @param requestId
+     *            the request ID
      * @param reference
-     * @return BatchRequest
+     *            the reference ID
+     * @param amount
+     *            the amount
+     * @param date
+     *            the transaction date
+     * @return BatchRequest the batch request
      */
-    public static BatchRequest repayLoanRequest(final Long requestId, final Long reference) {
+    public static BatchRequest repayLoanRequest(final Long requestId, final Long reference, final String amount) {
+        return repayLoanRequest(requestId, reference, amount, LocalDate.now(ZoneId.systemDefault()));
+    }
+
+    /**
+     * Creates and returns a {@link CreateTransactionLoanCommandStrategy} Request with given requestId.
+     *
+     * @param requestId
+     *            the request ID
+     * @param reference
+     *            the reference ID
+     * @param amount
+     *            the amount
+     * @param date
+     *            the transaction date
+     * @return BatchRequest the batch request
+     */
+    public static BatchRequest repayLoanRequest(final Long requestId, final Long reference, final String amount, final LocalDate date) {
         final BatchRequest br = new BatchRequest();
 
         br.setRequestId(requestId);
         br.setReference(reference);
         br.setRelativeUrl("loans/$.loanId/transactions?command=repayment");
         br.setMethod("POST");
-        br.setBody("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", "
-                + "\"transactionDate\": \"15 September 2013\",  \"transactionAmount\": 500}");
+        String dateString = date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+        br.setBody(String.format(
+                "{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", " + "\"transactionDate\": \"%s\",  \"transactionAmount\": %s}",
+                dateString, amount));
+
+        return br;
+    }
+
+    /**
+     * Creates and returns a {@link CreateTransactionLoanCommandStrategy} request with given request ID.
+     *
+     *
+     * @param requestId
+     *            the request ID
+     * @param reference
+     *            teh reference
+     * @return BatchRequest the created {@link BatchRequest}
+     */
+    public static BatchRequest creditBalanceRefundRequest(final Long requestId, final Long reference, final String amount) {
+        return creditBalanceRefundRequest(requestId, reference, amount, LocalDate.now(ZoneId.systemDefault()));
+    }
+
+    /**
+     * Creates and returns a {@link CreateTransactionLoanCommandStrategy} request with given request ID.
+     *
+     *
+     * @param requestId
+     *            the request ID
+     * @param reference
+     *            teh reference
+     * @param date
+     *            the transaction date
+     * @return BatchRequest the created {@link BatchRequest}
+     */
+    public static BatchRequest creditBalanceRefundRequest(final Long requestId, final Long reference, final String amount, LocalDate date) {
+        final BatchRequest br = new BatchRequest();
+
+        br.setRequestId(requestId);
+        br.setReference(reference);
+        br.setRelativeUrl("loans/$.loanId/transactions?command=creditBalanceRefund");
+        br.setMethod("POST");
+        String dateString = date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+        br.setBody(String.format(
+                "{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", " + "\"transactionDate\": \"%s\",  \"transactionAmount\": %s}",
+                dateString, amount));
 
         return br;
     }
@@ -507,6 +641,57 @@ public final class BatchHelper {
         br.setRelativeUrl(relativeUrl);
         br.setMethod(HttpMethod.GET);
         br.setReference(reference);
+        br.setBody("{}");
+
+        return br;
+    }
+
+    /**
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.GetLoanByIdCommandStrategy} request with
+     * given loan id and query param.
+     *
+     * @param loanId
+     *            the loan id
+     * @param queryParameter
+     *            the query parameters
+     * @return the {@link BatchRequest}
+     */
+    public static BatchRequest getLoanByIdRequest(final Long loanId, final String queryParameter) {
+        final BatchRequest br = new BatchRequest();
+        String relativeUrl = String.format("loans/%s", loanId);
+        if (queryParameter != null) {
+            relativeUrl = relativeUrl + "?" + queryParameter;
+        }
+
+        br.setRequestId(4567L);
+        br.setRelativeUrl(relativeUrl);
+        br.setMethod(HttpMethod.GET);
+        br.setBody("{}");
+
+        return br;
+    }
+
+    /**
+     * Creates and returns a batch request to get datatable entry.
+     *
+     * @param loanId
+     *            the loan id
+     * @param datatableName
+     *            the name of datatable
+     * @param queryParameter
+     *            the query parameters
+     * @return the {@link BatchRequest}
+     */
+    public static BatchRequest getDatatableByIdRequest(final Long loanId, final String datatableName, final String queryParameter) {
+        final BatchRequest br = new BatchRequest();
+        String relativeUrl = String.format("datatables/%s/%s", datatableName, loanId);
+        if (queryParameter != null) {
+            relativeUrl = relativeUrl + "?" + queryParameter;
+        }
+
+        br.setRequestId(4568L);
+        br.setRelativeUrl(relativeUrl);
+        br.setMethod(HttpMethod.GET);
         br.setBody("{}");
 
         return br;

@@ -19,11 +19,9 @@
 package org.apache.fineract.batch.command.internal;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
 
 import java.util.stream.Stream;
 import javax.ws.rs.HttpMethod;
@@ -32,10 +30,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.portfolio.loanaccount.api.LoanTransactionsApiResource;
-import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
-import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
 import org.apache.http.HttpStatus;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -85,75 +80,6 @@ public class GetTransactionByIdCommandStrategyTest {
     }
 
     /**
-     * Test {@link GetTransactionByIdCommandStrategy#execute} for internal server error.
-     */
-    @Test
-    public void testExecuteForInternalServerError() {
-        // given
-        final TestContext testContext = new TestContext();
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final Long transactionId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final BatchRequest request = getBatchRequest(loanId, transactionId, null);
-
-        given(testContext.loanTransactionsApiResource.retrieveTransaction(loanId, transactionId, null, testContext.uriInfo))
-                .willThrow(new RuntimeException("Some error"));
-
-        // when
-        final BatchResponse response = testContext.subjectToTest.execute(request, testContext.uriInfo);
-
-        // then
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-        assertThat(response.getRequestId()).isEqualTo(request.getRequestId());
-        assertThat(response.getHeaders()).isEqualTo(request.getHeaders());
-        assertThat(response.getBody()).isEqualTo("{\"Exception\": java.lang.RuntimeException: Some error}");
-    }
-
-    /**
-     * Test {@link GetTransactionByIdCommandStrategy#execute} for loan not found exception.
-     */
-    @Test
-    public void testExecuteForLoanNotFoundException() {
-        // given
-        final TestContext testContext = new TestContext();
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final Long transactionId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final BatchRequest request = getBatchRequest(loanId, transactionId, null);
-
-        given(testContext.loanTransactionsApiResource.retrieveTransaction(loanId, transactionId, null, testContext.uriInfo))
-                .willThrow(new LoanNotFoundException(loanId));
-
-        // when
-        final BatchResponse response = testContext.subjectToTest.execute(request, testContext.uriInfo);
-
-        // then
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SC_NOT_FOUND);
-        assertThat(response.getRequestId()).isEqualTo(request.getRequestId());
-        assertThat(response.getHeaders()).isEqualTo(request.getHeaders());
-        assertThat(response.getBody()).isEqualTo(build404NotFoundError("Loan", loanId));
-    }
-
-    /**
-     * Test {@link GetTransactionByIdCommandStrategy#execute} for transaction not found exception.
-     */
-    @Test
-    public void testExecuteForTransactionNotFoundException() {
-        final TestContext testContext = new TestContext();
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final Long transactionId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final BatchRequest request = getBatchRequest(loanId, transactionId, null);
-
-        when(testContext.loanTransactionsApiResource.retrieveTransaction(loanId, transactionId, null, testContext.uriInfo))
-                .thenThrow(new LoanTransactionNotFoundException(transactionId));
-
-        final BatchResponse response = testContext.subjectToTest.execute(request, testContext.uriInfo);
-
-        assertEquals(HttpStatus.SC_NOT_FOUND, response.getStatusCode());
-        assertEquals(build404NotFoundError("Transaction", transactionId), response.getBody());
-        assertEquals(request.getRequestId(), response.getRequestId());
-        assertEquals(request.getHeaders(), response.getHeaders());
-    }
-
-    /**
      * Creates and returns a request with the given loan id and transaction id.
      *
      * @param loanId
@@ -177,25 +103,6 @@ public class GetTransactionByIdCommandStrategyTest {
         br.setBody("{}");
 
         return br;
-    }
-
-    /**
-     * Builds the 404 not found error.
-     *
-     * @param field
-     *            the field name
-     * @param id
-     *            the id
-     */
-    private String build404NotFoundError(final String field, final Long id) {
-        return String.format("{\n" + "  \"developerMessage\": \"The requested resource is not available.\",\n"
-                + "  \"httpStatusCode\": \"404\",\n" + "  \"defaultUserMessage\": \"The requested resource is not available.\",\n"
-                + "  \"userMessageGlobalisationCode\": \"error.msg.resource.not.found\",\n" + "  \"errors\": [\n" + "    {\n"
-                + "      \"developerMessage\": \"%s with identifier %s does not exist\",\n"
-                + "      \"defaultUserMessage\": \"%s with identifier %s does not exist\",\n"
-                + "      \"userMessageGlobalisationCode\": \"error.msg.loan.id.invalid\",\n" + "      \"parameterName\": \"id\",\n"
-                + "      \"args\": [\n" + "        {\n" + "          \"value\": %s\n" + "        }\n" + "      ]\n" + "    }\n" + "  ]\n"
-                + "}", field, id, field, id, id);
     }
 
     /**

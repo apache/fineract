@@ -1652,7 +1652,13 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                     pValueWrite = "null";
                 } else {
                     if ("bit".equalsIgnoreCase(pColumnHeader.getColumnType())) {
-                        pValueWrite = BooleanUtils.toString(BooleanUtils.toBooleanObject(pValue), "1", "0", "null");
+                        if (databaseTypeResolver.isMySQL()) {
+                            pValueWrite = BooleanUtils.toString(BooleanUtils.toBooleanObject(pValue), "1", "0", "null");
+                        } else if (databaseTypeResolver.isPostgreSQL()) {
+                            pValueWrite = BooleanUtils.toString(BooleanUtils.toBooleanObject(pValue), "B'1'", "B'0'", "null");
+                        } else {
+                            throw new IllegalStateException("Current database is not supported");
+                        }
                     } else {
                         pValueWrite = singleQuote + this.genericDataService.replace(pValue, singleQuote, singleQuote + singleQuote)
                                 + singleQuote;

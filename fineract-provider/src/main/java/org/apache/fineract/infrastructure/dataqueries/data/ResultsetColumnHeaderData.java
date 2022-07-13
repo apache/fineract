@@ -326,4 +326,8 @@ public final class ResultsetColumnHeaderData implements Serializable {
     public String getColumnCode() {
         return this.columnCode;
     }
+
+    public List<ResultsetColumnValueData> getColumnValues() {
+        return this.columnValues;
+    }
 }
