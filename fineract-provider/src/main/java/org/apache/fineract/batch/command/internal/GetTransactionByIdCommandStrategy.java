@@ -29,8 +29,6 @@ import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.command.CommandStrategyUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
-import org.apache.fineract.batch.exception.ErrorHandler;
-import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.infrastructure.core.api.MutableUriInfo;
 import org.apache.fineract.portfolio.loanaccount.api.LoanTransactionsApiResource;
 import org.apache.http.HttpStatus;
@@ -88,25 +86,13 @@ public class GetTransactionByIdCommandStrategy implements CommandStrategy {
             }
         }
 
-        // Try-catch blocks to map exceptions to appropriate status codes
-        try {
-            // Calls 'retrieveTransaction' function from 'loanTransactionsApiResource'
-            responseBody = loanTransactionsApiResource.retrieveTransaction(loanId, transactionId, fields, uriInfo);
+        // Calls 'retrieveTransaction' function from 'loanTransactionsApiResource'
+        responseBody = loanTransactionsApiResource.retrieveTransaction(loanId, transactionId, fields, uriInfo);
 
-            response.setStatusCode(HttpStatus.SC_OK);
+        response.setStatusCode(HttpStatus.SC_OK);
 
-            // Sets the body of the response after retrieving the transaction
-            response.setBody(responseBody);
-
-        } catch (RuntimeException e) {
-
-            // Gets an object of type ErrorInfo, containing information about
-            // raised exception
-            ErrorInfo ex = ErrorHandler.handler(e);
-
-            response.setStatusCode(ex.getStatusCode());
-            response.setBody(ex.getMessage());
-        }
+        // Sets the body of the response after retrieving the transaction
+        response.setBody(responseBody);
 
         return response;
     }

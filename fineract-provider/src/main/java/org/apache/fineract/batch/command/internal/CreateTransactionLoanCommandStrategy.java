@@ -20,20 +20,22 @@ package org.apache.fineract.batch.command.internal;
 
 import com.google.common.base.Splitter;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
-import org.apache.fineract.batch.exception.ErrorHandler;
-import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.portfolio.loanaccount.api.LoanTransactionsApiResource;
+import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 /**
- * Implements {@link CommandStrategy} and handles repayment for a Loan. It passes the contents of the body from the
- * BatchRequest to {@link LoanTransactionsApiResource} and gets back the response. This class will also catch any errors
- * raised by {@link LoanTransactionsApiResource} and map those errors to appropriate status codes in BatchResponse.
+ * Implements {@link CommandStrategy} and handles the creation of a transaction for a Loan. It passes the contents of
+ * the body from the BatchRequest to {@link LoanTransactionsApiResource} and gets back the response. This class will
+ * also catch any errors raised by {@link LoanTransactionsApiResource} and map those errors to appropriate status codes
+ * in BatchResponse.
  *
  * @author Mohit Sinha
  *
@@ -43,7 +45,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class RepayLoanCommandStrategy implements CommandStrategy {
+public class CreateTransactionLoanCommandStrategy implements CommandStrategy {
 
     private final LoanTransactionsApiResource loanTransactionsApiResource;
 
@@ -59,25 +61,26 @@ public class RepayLoanCommandStrategy implements CommandStrategy {
         final List<String> pathParameters = Splitter.on('/').splitToList(request.getRelativeUrl());
         Long loanId = Long.parseLong(pathParameters.get(1));
 
-        // Try-catch blocks to map exceptions to appropriate status codes
-        try {
+        Pattern commandPattern = Pattern.compile("^?command=[a-zA-Z]+");
+        Matcher commandMatcher = commandPattern.matcher(pathParameters.get(2));
 
-            responseBody = loanTransactionsApiResource.executeLoanTransaction(loanId, "repayment", request.getBody());
-
-            response.setStatusCode(200);
-            // Sets the body of the response after Charge has been successfully
-            // created
-            response.setBody(responseBody);
-
-        } catch (RuntimeException e) {
-
-            // Gets an object of type ErrorInfo, containing information about
-            // raised exception
-            ErrorInfo ex = ErrorHandler.handler(e);
-
-            response.setStatusCode(ex.getStatusCode());
-            response.setBody(ex.getMessage());
+        if (!commandMatcher.find()) {
+            // This would only occur if the CommandStrategyProvider is incorrectly configured.
+            response.setRequestId(request.getRequestId());
+            response.setStatusCode(HttpStatus.SC_NOT_IMPLEMENTED);
+            response.setBody(
+                    "Resource with method " + request.getMethod() + " and relativeUrl " + request.getRelativeUrl() + " doesn't exist");
+            return response;
         }
+        String commandQueryParam = commandMatcher.group(0);
+        String command = commandQueryParam.substring(commandQueryParam.indexOf("=") + 1);
+
+        responseBody = loanTransactionsApiResource.executeLoanTransaction(loanId, command, request.getBody());
+
+        response.setStatusCode(200);
+        // Sets the body of the response after Charge has been successfully
+        // created
+        response.setBody(responseBody);
 
         return response;
     }

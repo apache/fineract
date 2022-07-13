@@ -32,10 +32,11 @@ import org.apache.fineract.batch.command.internal.ApproveLoanRescheduleCommandSt
 import org.apache.fineract.batch.command.internal.CollectChargesCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateChargeCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateClientCommandStrategy;
+import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy;
 import org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy;
+import org.apache.fineract.batch.command.internal.GetDatatableEntryByAppTableIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetLoanByIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetTransactionByIdCommandStrategy;
-import org.apache.fineract.batch.command.internal.RepayLoanCommandStrategy;
 import org.apache.fineract.batch.command.internal.UnknownCommandStrategy;
 import org.apache.fineract.batch.command.internal.UpdateClientCommandStrategy;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -66,8 +67,10 @@ public class CommandStrategyProviderTest {
                 Arguments.of("loans/123/charges", HttpMethod.POST, "createChargeCommandStrategy", mock(CreateChargeCommandStrategy.class)),
                 Arguments.of("loans/123/charges", HttpMethod.GET, "collectChargesCommandStrategy",
                         mock(CollectChargesCommandStrategy.class)),
-                Arguments.of("loans/123/transactions?command=repayment", HttpMethod.POST, "repayLoanCommandStrategy",
-                        mock(RepayLoanCommandStrategy.class)),
+                Arguments.of("loans/123/transactions?command=repayment", HttpMethod.POST, "createTransactionLoanCommandStrategy",
+                        mock(CreateTransactionLoanCommandStrategy.class)),
+                Arguments.of("loans/123/transactions?command=creditBalanceRefund", HttpMethod.POST, "createTransactionLoanCommandStrategy",
+                        mock(CreateTransactionLoanCommandStrategy.class)),
                 Arguments.of("clients/456?command=activate", HttpMethod.POST, "activateClientCommandStrategy",
                         mock(ActivateClientCommandStrategy.class)),
                 Arguments.of("loans/123?command=approve", HttpMethod.POST, "approveLoanCommandStrategy",
@@ -77,7 +80,11 @@ public class CommandStrategyProviderTest {
                 Arguments.of("rescheduleloans/123?command=approve", HttpMethod.POST, "approveLoanRescheduleCommandStrategy",
                         mock(ApproveLoanRescheduleCommandStrategy.class)),
                 Arguments.of("loans/123/transactions/123", HttpMethod.GET, "getTransactionByIdCommandStrategy",
-                        mock(GetTransactionByIdCommandStrategy.class)));
+                        mock(GetTransactionByIdCommandStrategy.class)),
+                Arguments.of("datatables/test_dt_table/123", HttpMethod.GET, "getDatatableEntryByAppTableIdCommandStrategy",
+                        mock(GetDatatableEntryByAppTableIdCommandStrategy.class)),
+                Arguments.of("datatables/test_dt_table/123?genericResultSet=true", HttpMethod.GET,
+                        "getDatatableEntryByAppTableIdCommandStrategy", mock(GetDatatableEntryByAppTableIdCommandStrategy.class)));
     }
 
     /**
@@ -99,7 +106,6 @@ public class CommandStrategyProviderTest {
         final ApplicationContext applicationContext = mock(ApplicationContext.class);
         final CommandStrategyProvider commandStrategyProvider = new CommandStrategyProvider(applicationContext);
         when(applicationContext.getBean(beanName)).thenReturn(commandStrategy);
-
         final CommandStrategy result = commandStrategyProvider.getCommandStrategy(CommandContext.resource(url).method(httpMethod).build());
         assertEquals(commandStrategy, result);
     }
@@ -111,7 +117,9 @@ public class CommandStrategyProviderTest {
      */
     private static Stream<Arguments> provideCommandStrategyResourceDetailsForErrors() {
         return Stream.of(Arguments.of("loans/123?command=reject", HttpMethod.POST),
-                Arguments.of("loans/glimAccount/746?command=approve", HttpMethod.POST), Arguments.of("loans/123", HttpMethod.PUT));
+                Arguments.of("loans/glimAccount/746?command=approve", HttpMethod.POST), Arguments.of("loans/123", HttpMethod.PUT),
+                Arguments.of("datatables/test_dt_table", HttpMethod.GET), Arguments.of("datatables", HttpMethod.GET));
+
     }
 
     /**

@@ -34,9 +34,7 @@ import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.infrastructure.core.api.MutableUriInfo;
 import org.apache.fineract.portfolio.loanaccount.api.LoansApiResource;
-import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.http.HttpStatus;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -85,64 +83,6 @@ public class GetLoanByIdCommandStrategyTest {
                 testContext.uriInfoCaptor.capture());
         MutableUriInfo mutableUriInfo = testContext.uriInfoCaptor.getValue();
         assertThat(mutableUriInfo.getAdditionalQueryParameters()).hasSize(noOfQueryParams);
-    }
-
-    /**
-     * Test {@link GetLoanByIdCommandStrategy#execute} for internal server error.
-     */
-    @Test
-    public void testExecuteForInternalServerError() {
-        // given
-        final TestContext testContext = new TestContext();
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final BatchRequest request = getBatchRequest(loanId, null, null, null);
-
-        given(testContext.loansApiResource.retrieveLoan(eq(loanId), eq(false), eq(null), eq(null), eq(null), any(UriInfo.class)))
-                .willThrow(new RuntimeException("Some error"));
-
-        // when
-        final BatchResponse response = testContext.underTest.execute(request, testContext.uriInfo);
-
-        // then
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-        assertThat(response.getBody()).isEqualTo("{\"Exception\": java.lang.RuntimeException: Some error}");
-        assertThat(response.getRequestId()).isEqualTo(request.getRequestId());
-        assertThat(response.getHeaders()).isEqualTo(request.getHeaders());
-    }
-
-    /**
-     * Test {@link GetLoanByIdCommandStrategy#execute} for loan not found exception.
-     */
-    @Test
-    public void testExecuteForLoanNotFoundException() {
-        // given
-        final TestContext testContext = new TestContext();
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final BatchRequest request = getBatchRequest(loanId, null, null, null);
-
-        given(testContext.loansApiResource.retrieveLoan(eq(loanId), eq(false), eq(null), eq(null), eq(null), any(UriInfo.class)))
-                .willThrow(new LoanNotFoundException(loanId));
-
-        // when
-        final BatchResponse response = testContext.underTest.execute(request, testContext.uriInfo);
-
-        // then
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SC_NOT_FOUND);
-        assertThat(response.getBody()).isEqualTo(buildLoanNotFoundError(loanId));
-        assertThat(response.getRequestId()).isEqualTo(request.getRequestId());
-        assertThat(response.getHeaders()).isEqualTo(request.getHeaders());
-    }
-
-    private String buildLoanNotFoundError(final Long loanId) {
-        return String.format(
-                "{\n  \"developerMessage\": \"The requested resource is not available.\",\n"
-                        + "  \"httpStatusCode\": \"404\",\n  \"defaultUserMessage\": \"The requested resource is not available.\",\n"
-                        + "  \"userMessageGlobalisationCode\": \"error.msg.resource.not.found\",\n  \"errors\": [\n    {\n"
-                        + "      \"developerMessage\": \"Loan with identifier %s does not exist\",\n"
-                        + "      \"defaultUserMessage\": \"Loan with identifier %s does not exist\",\n"
-                        + "      \"userMessageGlobalisationCode\": \"error.msg.loan.id.invalid\",\n      \"parameterName\": \"id\",\n"
-                        + "      \"args\": [\n        {\n          \"value\": %s\n        }\n      ]\n    }\n  ]\n" + "}",
-                loanId, loanId, loanId);
     }
 
     /**

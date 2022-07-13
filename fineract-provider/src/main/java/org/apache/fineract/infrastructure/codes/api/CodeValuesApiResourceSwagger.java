@@ -55,6 +55,8 @@ final class CodeValuesApiResourceSwagger {
 
         @Schema(example = "Passport")
         public String name;
+        @Schema(example = "true")
+        public Boolean isActive;
         @Schema(example = "Passport information")
         public String description;
         @Schema(example = "0")

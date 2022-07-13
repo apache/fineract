@@ -25,8 +25,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
-import org.apache.fineract.batch.exception.ErrorHandler;
-import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource;
 import org.springframework.stereotype.Component;
 
@@ -63,28 +61,15 @@ public class CollectChargesCommandStrategy implements CommandStrategy {
         // Pluck out the loanId out of the relative path
         Long loanId = Long.parseLong(pathParameters.get(1));
 
-        // Try-catch blocks to map exceptions to appropriate status codes
-        try {
+        // Calls 'retrieveAllLoanCharges' function from
+        // 'LoanChargesApiResource' to Collect
+        // Charges for a loan
+        responseBody = loanChargesApiResource.retrieveAllLoanCharges(loanId, uriInfo);
 
-            // Calls 'retrieveAllLoanCharges' function from
-            // 'LoanChargesApiResource' to Collect
-            // Charges for a loan
-            responseBody = loanChargesApiResource.retrieveAllLoanCharges(loanId, uriInfo);
-
-            response.setStatusCode(200);
-            // Sets the body of the response after Charges have been
-            // successfully collected
-            response.setBody(responseBody);
-
-        } catch (RuntimeException e) {
-
-            // Gets an object of type ErrorInfo, containing information about
-            // raised exception
-            ErrorInfo ex = ErrorHandler.handler(e);
-
-            response.setStatusCode(ex.getStatusCode());
-            response.setBody(ex.getMessage());
-        }
+        response.setStatusCode(200);
+        // Sets the body of the response after Charges have been
+        // successfully collected
+        response.setBody(responseBody);
 
         return response;
     }

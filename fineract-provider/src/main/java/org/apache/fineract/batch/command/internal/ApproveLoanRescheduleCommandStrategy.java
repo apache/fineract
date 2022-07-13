@@ -25,8 +25,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
-import org.apache.fineract.batch.exception.ErrorHandler;
-import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.api.RescheduleLoansApiResource;
 import org.springframework.stereotype.Component;
 
@@ -47,28 +45,15 @@ public class ApproveLoanRescheduleCommandStrategy implements CommandStrategy {
         final List<String> pathParameters = Splitter.on('/').splitToList(request.getRelativeUrl());
         Long scheduleId = Long.parseLong(pathParameters.get(1).substring(0, pathParameters.get(1).indexOf("?")));
 
-        // Try-catch blocks to map exceptions to appropriate status codes
-        try {
+        // Calls 'approve' function from 'Loans reschedule Request' to
+        // approve a
+        // loan
+        responseBody = rescheduleLoansApiResource.updateLoanRescheduleRequest(scheduleId, "approve", request.getBody());
 
-            // Calls 'approve' function from 'Loans reschedule Request' to
-            // approve a
-            // loan
-            responseBody = rescheduleLoansApiResource.updateLoanRescheduleRequest(scheduleId, "approve", request.getBody());
-
-            response.setStatusCode(200);
-            // Sets the body of the response after the successful approval of a
-            // Loans reschedule Request
-            response.setBody(responseBody);
-
-        } catch (RuntimeException e) {
-
-            // Gets an object of type ErrorInfo, containing information about
-            // raised exception
-            ErrorInfo ex = ErrorHandler.handler(e);
-
-            response.setStatusCode(ex.getStatusCode());
-            response.setBody(ex.getMessage());
-        }
+        response.setStatusCode(200);
+        // Sets the body of the response after the successful approval of a
+        // Loans reschedule Request
+        response.setBody(responseBody);
 
         return response;
     }

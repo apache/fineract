@@ -120,6 +120,12 @@ public class JSON {
                 case NULL:
                     in.nextNull();
                     return null;
+                case STRING:
+                    String dateString = in.nextString();
+                    if (dateString != null && dateString.length() != 0) {
+                        return LocalDate.parse(dateString);
+                    }
+                    return null;
                 case BEGIN_ARRAY:
                     in.beginArray();
                     int year = in.nextInt();

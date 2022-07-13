@@ -27,6 +27,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.batch.command.CommandContext;
 import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.command.CommandStrategyProvider;
@@ -55,6 +56,7 @@ import org.springframework.transaction.support.TransactionTemplate;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BatchApiServiceImpl implements BatchApiService {
 
     private final CommandStrategyProvider strategyProvider;
@@ -86,22 +88,33 @@ public class BatchApiServiceImpl implements BatchApiService {
             final BatchRequest rootRequest = rootNode.getRequest();
             final CommandStrategy commandStrategy = this.strategyProvider
                     .getCommandStrategy(CommandContext.resource(rootRequest.getRelativeUrl()).method(rootRequest.getMethod()).build());
-            final BatchResponse rootResponse = commandStrategy.execute(rootRequest, uriInfo);
+            final BatchResponse rootResponse = safelyExecuteStrategy(commandStrategy, rootRequest, uriInfo);
 
             responseList.add(rootResponse);
             responseList.addAll(this.processChildRequests(rootNode, rootResponse, uriInfo));
         }
 
-        Collections.sort(responseList, new Comparator<BatchResponse>() {
-
-            @Override
-            public int compare(BatchResponse source, BatchResponse testee) {
-                return source.getRequestId().compareTo(testee.getRequestId());
-            }
-        });
+        Collections.sort(responseList, Comparator.comparing(BatchResponse::getRequestId));
 
         return responseList;
 
+    }
+
+    private BatchResponse safelyExecuteStrategy(CommandStrategy commandStrategy, BatchRequest request, UriInfo uriInfo) {
+        try {
+            return commandStrategy.execute(request, uriInfo);
+        } catch (RuntimeException e) {
+            log.warn("Exception while executing batch strategy {}", commandStrategy.getClass().getSimpleName(), e);
+
+            ErrorInfo ex = ErrorHandler.handler(e);
+
+            final BatchResponse response = new BatchResponse();
+            response.setRequestId(request.getRequestId());
+            response.setHeaders(request.getHeaders());
+            response.setStatusCode(ex.getStatusCode());
+            response.setBody(ex.getMessage());
+            return response;
+        }
     }
 
     private List<BatchResponse> processChildRequests(final BatchRequestNode rootRequest, BatchResponse rootResponse, UriInfo uriInfo) {
@@ -121,7 +134,7 @@ public class BatchApiServiceImpl implements BatchApiService {
                         final CommandStrategy commandStrategy = this.strategyProvider.getCommandStrategy(
                                 CommandContext.resource(childRequest.getRelativeUrl()).method(childRequest.getMethod()).build());
 
-                        childResponse = commandStrategy.execute(childRequest, uriInfo);
+                        childResponse = safelyExecuteStrategy(commandStrategy, childRequest, uriInfo);
 
                     } else {
                         // Something went wrong with the parent request, create

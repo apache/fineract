@@ -129,7 +129,7 @@ final class GLAccountsApiResourceSwagger {
         public Long parentId;
 
         @Schema(example = "1")
-        public EnumOptionData usage;
+        public String usage;
 
         @Schema(example = "Desc")
         public String description;
