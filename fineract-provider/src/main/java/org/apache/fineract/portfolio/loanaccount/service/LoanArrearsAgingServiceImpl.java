@@ -156,7 +156,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
                 this.jdbcTemplate.update(updateStatement.get(0));
             } else {
                 String deletestatement = "DELETE FROM m_loan_arrears_aging WHERE  loan_id=?";
-                this.jdbcTemplate.update(deletestatement, new Object[] { loan.getId() }); // NOSONAR
+                this.jdbcTemplate.update(deletestatement, loan.getId()); // NOSONAR
             }
         }
     }
@@ -168,7 +168,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
         String updateStatement = constructUpdateStatement(loan, count == 0);
         if (updateStatement == null) {
             String deletestatement = "DELETE FROM m_loan_arrears_aging WHERE  loan_id=?";
-            this.jdbcTemplate.update(deletestatement, new Object[] { loan.getId() }); // NOSONAR
+            this.jdbcTemplate.update(deletestatement, loan.getId()); // NOSONAR
         } else {
             this.jdbcTemplate.update(updateStatement);
         }
@@ -453,11 +453,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
             while (rs.next()) {
                 Long loanId = rs.getLong("loanId");
 
-                List<LoanSchedulePeriodData> periodDatas = scheduleDate.get(loanId);
-                if (periodDatas == null) {
-                    periodDatas = new ArrayList<>();
-                    scheduleDate.put(loanId, periodDatas);
-                }
+                List<LoanSchedulePeriodData> periodDatas = scheduleDate.computeIfAbsent(loanId, k -> new ArrayList<>());
 
                 periodDatas.add(fetchLoanSchedulePeriodData(rs));
             }

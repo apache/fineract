@@ -80,7 +80,7 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
             final String sql = "select " + fullResultsetExtractor.schema()
                     + " where ls.loan_id = ? and ls.version = ? order by ls.loan_id, ls.installment";
 
-            return this.jdbcTemplate.query(sql, fullResultsetExtractor, new Object[] { loanId, versionNumber }); // NOSONAR
+            return this.jdbcTemplate.query(sql, fullResultsetExtractor, loanId, versionNumber); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new LoanNotFoundException(loanId, e);
         }
@@ -142,7 +142,7 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
             totalFeeChargesCharged = totalFeeChargesCharged.plus(disbursementPeriod.feeChargesDue());
             totalRepaymentExpected = totalRepaymentExpected.plus(disbursementPeriod.feeChargesDue());
 
-            Integer loanTermInDays = Integer.valueOf(0);
+            Integer loanTermInDays = 0;
             while (rs.next()) {
                 final Integer period = JdbcSupport.getInteger(rs, "period");
                 LocalDate fromDate = JdbcSupport.getLocalDate(rs, "fromDate");
@@ -168,10 +168,10 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
                     totalPrincipalDisbursed = totalPrincipalDisbursed.add(principal);
                 }
 
-                Integer daysInPeriod = Integer.valueOf(0);
+                Integer daysInPeriod = 0;
                 if (fromDate != null) {
                     daysInPeriod = Math.toIntExact(ChronoUnit.DAYS.between(fromDate, dueDate));
-                    loanTermInDays = Integer.valueOf(loanTermInDays.intValue() + daysInPeriod.intValue());
+                    loanTermInDays = loanTermInDays + daysInPeriod;
                 }
 
                 final BigDecimal principalDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalDue");
