@@ -182,10 +182,8 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
             final boolean isSpecificToInstallment = rs.getBoolean("isSpecificToInstallment");
             final int termType = rs.getInt("termType");
 
-            final LoanTermVariationsData loanTermVariationsData = new LoanTermVariationsData(id,
-                    LoanEnumerations.loanvariationType(termType), variationApplicableFrom, decimalValue, dateValue,
-                    isSpecificToInstallment);
-            return loanTermVariationsData;
+            return new LoanTermVariationsData(id, LoanEnumerations.loanvariationType(termType), variationApplicableFrom, decimalValue,
+                    dateValue, isSpecificToInstallment);
         }
 
     }
@@ -229,7 +227,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
         this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
         final String sql = "select " + this.loanRescheduleRequestRowMapper.schema() + " where lr.loan_id = ?";
 
-        return this.jdbcTemplate.query(sql, this.loanRescheduleRequestRowMapper, new Object[] { loanId }); // NOSONAR
+        return this.jdbcTemplate.query(sql, this.loanRescheduleRequestRowMapper, loanId); // NOSONAR
     }
 
     @Override
@@ -238,7 +236,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
         try {
             final String sql = "select " + this.loanRescheduleRequestRowMapper.schema() + " where lr.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, this.loanRescheduleRequestRowMapper, new Object[] { requestId }); // NOSONAR
+            return this.jdbcTemplate.queryForObject(sql, this.loanRescheduleRequestRowMapper, requestId); // NOSONAR
         }
 
         catch (final EmptyResultDataAccessException e) {
@@ -250,7 +248,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
     public List<LoanRescheduleRequestData> readLoanRescheduleRequests(Long loanId, Integer statusEnum) {
         this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
         final String sql = "select " + this.loanRescheduleRequestRowMapper.schema() + " where lr.loan_id = ?" + " and lr.status_enum = ?";
-        return this.jdbcTemplate.query(sql, this.loanRescheduleRequestRowMapper, new Object[] { loanId, statusEnum }); // NOSONAR
+        return this.jdbcTemplate.query(sql, this.loanRescheduleRequestRowMapper, loanId, statusEnum); // NOSONAR
     }
 
     @Override
@@ -288,7 +286,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
             } else if (command.equalsIgnoreCase(RescheduleLoansApiConstants.rejectCommandParamName)) {
                 statusParam = 300;
             }
-            return this.jdbcTemplate.query(sql, loanRescheduleRequestRowMapperForBulkApproval, new Object[] { statusParam }); // NOSONAR
+            return this.jdbcTemplate.query(sql, loanRescheduleRequestRowMapperForBulkApproval, statusParam); // NOSONAR
         }
         return this.jdbcTemplate.query(sql, loanRescheduleRequestRowMapperForBulkApproval); // NOSONAR
     }

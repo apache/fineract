@@ -48,7 +48,7 @@ public class LoanChargePaidByReadPlatformServiceImpl implements LoanChargePaidBy
         this.context.authenticatedUser();
         final LoanChargePaidByMapper rm = new LoanChargePaidByMapper();
         final String sql = "select " + rm.loanChargePaidBySchema() + " where lcpd.loan_transaction_id = ?";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { transactionId }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, transactionId); // NOSONAR
     }
 
     private static final class LoanChargePaidByMapper implements RowMapper<LoanChargePaidByData> {
