@@ -141,6 +141,8 @@ import org.apache.fineract.client.services.UserGeneratedDocumentsApi;
 import org.apache.fineract.client.services.UsersApi;
 import org.apache.fineract.client.services.WorkingDaysApi;
 import org.apache.fineract.client.util.JSON.GsonCustomConverterFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import retrofit2.Retrofit;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
@@ -406,6 +408,8 @@ public final class FineractClient {
 
     public static final class Builder {
 
+        private static final Logger log = LoggerFactory.getLogger(Builder.class);
+
         private final JSON json = new JSON();
         private final OkHttpClient.Builder okBuilder = new OkHttpClient.Builder();
         private final Retrofit.Builder retrofitBuilder = new Retrofit.Builder().addConverterFactory(ScalarsConverterFactory.create())
@@ -488,14 +492,22 @@ public final class FineractClient {
             retrofitBuilder.baseUrl(has("baseURL", baseURL));
 
             // Tenant
-            ApiKeyAuth tenantAuth = new ApiKeyAuth("header", "fineract-platform-tenantid");
-            tenantAuth.setApiKey(has("tenant", tenant));
-            okBuilder.addInterceptor(tenantAuth);
+            if (tenant != null) {
+                ApiKeyAuth tenantAuth = new ApiKeyAuth("header", "fineract-platform-tenantid");
+                tenantAuth.setApiKey(has("tenant", tenant));
+                okBuilder.addInterceptor(tenantAuth);
+            } else {
+                log.warn("Tenant hasn't been configured for the client");
+            }
 
             // BASIC Auth
-            HttpBasicAuth basicAuth = new HttpBasicAuth();
-            basicAuth.setCredentials(has("username", username), has("password", password));
-            okBuilder.addInterceptor(basicAuth);
+            if (username != null && password != null) {
+                HttpBasicAuth basicAuth = new HttpBasicAuth();
+                basicAuth.setCredentials(has("username", username), has("password", password));
+                okBuilder.addInterceptor(basicAuth);
+            } else {
+                log.warn("Username and password haven't been configured for the client");
+            }
 
             OkHttpClient okHttpClient = okBuilder.build();
             retrofitBuilder.client(okHttpClient);
