@@ -263,6 +263,13 @@ public class SavingsAccountHelper {
                 getSavingsTransactionPaymentTypeJSON(amount, date, paymentType), jsonAttributeToGetback);
     }
 
+    public Object payChargeToSavingsAccount(final Integer savingsID, final Integer chargeId, final String amount, String date,
+            String jsonAttributeToGetback) {
+        LOG.info("--------------------------------- PAY SAVINGS CHARGE --------------------------------");
+        return performSavingActions(createChargesURL("paycharge", savingsID, chargeId), getSavingsPayChargeJSON(amount, date),
+                jsonAttributeToGetback);
+    }
+
     public Integer updateSavingsAccountTransaction(final Integer savingsId, final Integer transactionId, final String amount) {
         LOG.info("\n--------------------------------- MODIFY SAVINGS TRANSACTION  --------------------------------");
         return (Integer) performSavingActions(createAdjustTransactionURL(MODIFY_TRASACTION_COMMAND, savingsId, transactionId),

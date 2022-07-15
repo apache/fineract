@@ -130,6 +130,9 @@ import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -718,7 +721,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         List<SavingsAccountTransaction> savingsAccountTransactions = null;
         if (isBulk) {
             String transactionRefNo = savingsAccountTransaction.getRefNo();
-            savingsAccountTransactions = this.savingsAccountTransactionRepository.findAllTransactionByRefNo(transactionRefNo);
+            savingsAccountTransactions = this.savingsAccountTransactionRepository.findByRefNo(transactionRefNo);
             reversal = this.savingsAccountDomainService.handleReversal(account, savingsAccountTransactions, backdatedTxnsAllowedTill);
         } else {
             reversal = this.savingsAccountDomainService.handleReversal(account, Collections.singletonList(savingsAccountTransaction),
@@ -1471,6 +1474,13 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.savingAccountAssembler.assignSavingAccountHelpers(account);
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
+        Pageable sortedByDateAndIdDesc = PageRequest.of(0, 1, Sort.by("dateOf", "id").descending());
+
+        List<SavingsAccountTransaction> savingsAccountTransaction = this.savingsAccountTransactionRepository
+                .findBySavingsAccountIdAndLessThanDateOfAndReversedIsFalse(account.getId(), transactionDate, sortedByDateAndIdDesc);
+
+        account.validateAccountBalanceDoesNotViolateOverdraft(savingsAccountTransaction, amountPaid);
+
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         SavingsAccountTransaction chargeTransaction = account.payCharge(savingsAccountCharge, amountPaid, transactionDate, formatter, user,
                 backdatedTxnsAllowedTill, null);
@@ -1488,6 +1498,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                     financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill, postReversals);
         }
         List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions = null;
+
         if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) > 0) {
             depositAccountOnHoldTransactions = this.depositAccountOnHoldTransactionRepository
                     .findBySavingsAccountAndReversedFalseOrderByCreatedDateAsc(account);

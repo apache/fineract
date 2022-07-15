@@ -1521,6 +1521,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
             final List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions, final boolean backdatedTxnsAllowedTill) {
 
         List<SavingsAccountTransaction> transactionsSortedByDate = null;
+        BigDecimal transactionAmount = null;
         if (backdatedTxnsAllowedTill) {
             transactionsSortedByDate = retrieveSortedTransactions();
         } else {
@@ -1535,6 +1536,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
         Money minRequiredBalance = minRequiredBalanceDerived(getCurrency());
         LocalDate lastSavingsDate = null;
         for (final SavingsAccountTransaction transaction : transactionsSortedByDate) {
+
+            transactionAmount = transaction.getAmount();
+
             if (transaction.isNotReversed() && transaction.isCredit()) {
                 runningBalance = runningBalance.plus(transaction.getAmount(this.currency));
             } else if (transaction.isNotReversed() && transaction.isDebit()) {
@@ -1573,17 +1577,26 @@ public class SavingsAccount extends AbstractPersistableCustom {
                         throw new PlatformApiDataValidationException(dataValidationErrors);
                     }
                 }
-
             }
             lastSavingsDate = transaction.transactionLocalDate();
-
         }
 
         BigDecimal withdrawalFee = null;
-        BigDecimal transactionAmount = null;
         if (isOverdraft()) {
             if (runningBalance.minus(minRequiredBalance).isLessThanZero()) {
                 throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount);
+            }
+        }
+    }
+
+    public void validateAccountBalanceDoesNotViolateOverdraft(final List<SavingsAccountTransaction> savingsAccountTransaction,
+            final BigDecimal amountPaid) {
+        if (savingsAccountTransaction != null) {
+            SavingsAccountTransaction savingsAccountTransactionFirst = savingsAccountTransaction.get(0);
+            if (!this.allowOverdraft) {
+                if (savingsAccountTransactionFirst.getRunningBalance(this.currency).minus(amountPaid).isLessThanZero()) {
+                    throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), null, amountPaid);
+                }
             }
         }
     }
