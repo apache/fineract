@@ -44,11 +44,5 @@ public class FineractClientTechnicalTest {
         assertThrows(IllegalStateException.class, () -> {
             FineractClient.builder().build();
         });
-        assertThrows(IllegalStateException.class, () -> {
-            FineractClient.builder().baseURL("https://server/").build();
-        });
-        assertThrows(IllegalStateException.class, () -> {
-            FineractClient.builder().baseURL("https://server/").tenant("default").build();
-        });
     }
 }
