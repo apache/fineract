@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.savings.domain;
 import java.time.LocalDate;
 import java.util.List;
 import javax.persistence.LockModeType;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
@@ -47,6 +48,9 @@ public interface SavingsAccountTransactionRepository
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<SavingsAccountTransaction> findBySavingsAccount(@Param("savingsAccount") SavingsAccount savingsAccount);
 
-    @Query("select sat from SavingsAccountTransaction sat where sat.refNo = :refNo")
-    List<SavingsAccountTransaction> findAllTransactionByRefNo(@Param("refNo") String refNo);
+    List<SavingsAccountTransaction> findByRefNo(@Param("refNo") String refNo);
+
+    @Query("select sat from SavingsAccountTransaction sat where sat.savingsAccount.id = :savingsId and sat.dateOf <= :transactionDate and sat.reversed=false")
+    List<SavingsAccountTransaction> findBySavingsAccountIdAndLessThanDateOfAndReversedIsFalse(@Param("savingsId") Long savingsId,
+            @Param("transactionDate") LocalDate transactionDate, Pageable pageable);
 }
