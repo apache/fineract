@@ -263,11 +263,11 @@ public final class Client extends AbstractPersistableCustom {
         }
 
         LocalDate submittedOnDate = DateUtils.getBusinessLocalDate();
-        if (active && submittedOnDate.isAfter(activationDate)) {
-            submittedOnDate = activationDate;
-        }
         if (command.hasParameter(ClientApiConstants.submittedOnDateParamName)) {
             submittedOnDate = command.localDateValueOfParameterNamed(ClientApiConstants.submittedOnDateParamName);
+        }
+        if (active && submittedOnDate.isAfter(activationDate)) {
+            submittedOnDate = activationDate;
         }
         final Long savingsAccountId = null;
         return new Client(currentUser, status, clientOffice, clientParentGroup, accountNo, firstname, middlename,

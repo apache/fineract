@@ -214,7 +214,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
         public GuarantorFundingData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
             GuarantorFundingData guarantorFundingData = null;
             final Long id = rs.getLong("gfdId");
-            if (id != null && id > 0) {
+            if (id > 0) {
                 final BigDecimal amount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amount");
                 final BigDecimal amountReleased = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountReleased");
                 final BigDecimal amountRemaining = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountRemaining");
@@ -231,7 +231,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
                         guarantorTransactions.add(guarantorTransactionData);
                         while (rs.next()) {
                             final Long tempFundId = rs.getLong("gfdId");
-                            if (tempFundId != null && tempFundId.equals(id)) {
+                            if (tempFundId.equals(id)) {
                                 guarantorTransactionData = this.guarantorTransactionMapper.mapRow(rs, rowNum);
                                 guarantorTransactions.add(guarantorTransactionData);
                             } else {
@@ -276,11 +276,9 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
             EnumOptionData transactionType = SavingsEnumerations.onHoldTransactionType(transactionTypeEnum);
             final boolean reversed = rs.getBoolean("reversed");
             final boolean transactionReversed = rs.getBoolean("transactionReversed");
-            if (id != null) {
-                DepositAccountOnHoldTransactionData onHoldTransactionData = DepositAccountOnHoldTransactionData.instance(transactionId,
-                        amount, transactionType, date, transactionReversed);
-                guarantorTransactionData = GuarantorTransactionData.instance(id, onHoldTransactionData, null, reversed);
-            }
+            DepositAccountOnHoldTransactionData onHoldTransactionData = DepositAccountOnHoldTransactionData.instance(transactionId, amount,
+                    transactionType, date, transactionReversed);
+            guarantorTransactionData = GuarantorTransactionData.instance(id, onHoldTransactionData, null, reversed);
             return guarantorTransactionData;
         }
 
@@ -305,7 +303,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
         final ObligeeMapper rm = new ObligeeMapper();
         String sql = rm.schema();
         try {
-            return this.jdbcTemplate.query(sql, rm, new Object[] { clientId });
+            return this.jdbcTemplate.query(sql, rm, clientId);
         } catch (final EmptyResultDataAccessException e) {
             return null;
         }

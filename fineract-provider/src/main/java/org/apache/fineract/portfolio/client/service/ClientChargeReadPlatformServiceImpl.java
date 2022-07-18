@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Collection;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -128,7 +129,7 @@ public class ClientChargeReadPlatformServiceImpl implements ClientChargeReadPlat
 
             final String sql = "select " + rm.schema() + " where cc.client_id=? and cc.id=? ";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { clientId, clientChargeId }); // NOSONAR
+            return this.jdbcTemplate.queryForObject(sql, rm, clientId, clientChargeId); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new ClientChargeNotFoundException(clientChargeId, clientId, e);
         }
@@ -149,9 +150,9 @@ public class ClientChargeReadPlatformServiceImpl implements ClientChargeReadPlat
         }
 
         // filter for paid charges
-        if (pendingPayment != null && pendingPayment) {
+        if (BooleanUtils.isTrue(pendingPayment)) {
             sqlBuilder.append(" and ( cc.is_paid_derived = false and cc.waived = false) ");
-        } else if (pendingPayment != null && !pendingPayment) {
+        } else if (BooleanUtils.isFalse(pendingPayment)) {
             sqlBuilder.append(" and (cc.is_paid_derived = true or cc.waived = true) ");
         }
 

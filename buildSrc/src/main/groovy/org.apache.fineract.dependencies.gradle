@@ -22,13 +22,13 @@ apply plugin: 'io.spring.dependency-management'
 // https://github.com/spring-gradle-plugins/dependency-management-plugin
 dependencyManagement {
     imports {
-        mavenBom 'org.springframework:spring-framework-bom:5.3.21'
+        mavenBom 'org.springframework:spring-framework-bom:5.3.22'
         mavenBom 'org.springframework.boot:spring-boot-dependencies:2.7.1'
         mavenBom 'org.jetbrains.kotlin:kotlin-bom:1.7.10'
         mavenBom 'org.junit:junit-bom:5.8.2'
         mavenBom 'com.fasterxml.jackson:jackson-bom:2.13.3'
         mavenBom 'io.cucumber:cucumber-bom:7.4.1'
-        mavenBom 'io.netty:netty-bom:4.1.78.Final'
+        mavenBom 'io.netty:netty-bom:4.1.79.Final'
         mavenBom 'org.mockito:mockito-bom:4.6.1'
     }
 
@@ -61,7 +61,7 @@ dependencyManagement {
             exclude 'com.sun.mail:javax.mail'
         }
         dependency 'org.quartz-scheduler:quartz:2.3.2'
-        dependency 'com.amazonaws:aws-java-sdk-s3:1.12.257'
+        dependency 'com.amazonaws:aws-java-sdk-s3:1.12.262'
         dependency 'org.ehcache:ehcache:3.10.0'
         dependency 'com.github.spullara.mustache.java:compiler:0.9.10'
         dependency 'com.jayway.jsonpath:json-path:2.7.0'
@@ -130,7 +130,7 @@ dependencyManagement {
         dependency 'org.springdoc:springdoc-openapi-security:1.6.9'
         dependency 'org.springdoc:springdoc-openapi-javadoc:1.6.9'
 
-        dependency 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.6.1'
+        dependency 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.6.2'
 
         dependency ('org.apache.activemq:activemq-broker:5.17.1') {
             exclude 'javax.annotation:javax.annotation-api'
@@ -155,7 +155,7 @@ dependencyManagement {
             exclude 'jakarta.activation:jakarta.activation-api'
         }
 
-        dependency ('org.liquibase:liquibase-core:4.12.0') {
+        dependency ('org.liquibase:liquibase-core:4.13.0') {
             exclude 'javax.xml.bind:jaxb-api'
         }
 
