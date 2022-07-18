@@ -395,7 +395,7 @@ public class GlobalConfigurationHelper {
         isAllowedBackDatedTransactionsBeforeInterestPostingDate.put("id", 38);
         isAllowedBackDatedTransactionsBeforeInterestPostingDate.put("name", "allow-backdated-transaction-before-interest-posting");
         isAllowedBackDatedTransactionsBeforeInterestPostingDate.put("value", 0);
-        isAllowedBackDatedTransactionsBeforeInterestPostingDate.put("enabled", true);
+        isAllowedBackDatedTransactionsBeforeInterestPostingDate.put("enabled", false);
         isAllowedBackDatedTransactionsBeforeInterestPostingDate.put("trapDoor", false);
         defaults.add(isAllowedBackDatedTransactionsBeforeInterestPostingDate);
 
@@ -403,8 +403,8 @@ public class GlobalConfigurationHelper {
         isAllowedBackDatedTransactionsBeforeInterestPostingDateForDays.put("id", 39);
         isAllowedBackDatedTransactionsBeforeInterestPostingDateForDays.put("name",
                 "allow-backdated-transaction-before-interest-posting-date-for-days");
-        isAllowedBackDatedTransactionsBeforeInterestPostingDateForDays.put("value", 0);
-        isAllowedBackDatedTransactionsBeforeInterestPostingDateForDays.put("enabled", false);
+        isAllowedBackDatedTransactionsBeforeInterestPostingDateForDays.put("value", 7);
+        isAllowedBackDatedTransactionsBeforeInterestPostingDateForDays.put("enabled", true);
         isAllowedBackDatedTransactionsBeforeInterestPostingDateForDays.put("trapDoor", false);
         defaults.add(isAllowedBackDatedTransactionsBeforeInterestPostingDateForDays);
 
