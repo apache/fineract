@@ -16,19 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanproduct.domain;
+package org.apache.fineract.portfolio.delinquency.domain;
 
+import java.time.LocalDate;
 import java.util.List;
-import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
+import java.util.Optional;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
-public interface LoanProductRepository extends JpaRepository<LoanProduct, Long>, JpaSpecificationExecutor<LoanProduct> {
+public interface LoanDelinquencyTagHistoryRepository
+        extends JpaRepository<LoanDelinquencyTagHistory, Long>, JpaSpecificationExecutor<LoanDelinquencyTagHistory> {
 
-    @Query("select loanProduct from LoanProduct loanProduct, IN(loanProduct.charges) charge where charge.id = :chargeId")
-    List<LoanProduct> retrieveLoanProductsByChargeId(@Param("chargeId") Long chargeId);
+    List<LoanDelinquencyTagHistory> findByLoanOrderByAddedOnDateDesc(Loan loan);
 
-    Long countByDelinquencyBucket(DelinquencyBucket delinquencyBucket);
+    Optional<LoanDelinquencyTagHistory> findByLoanAndLiftedOnDate(Loan loan, LocalDate liftedOnDate);
+
+    Long countByDelinquencyRangeAndLiftedOnDate(DelinquencyRange delinquencyRange, LocalDate liftedOnDate);
+
+    Long countByDelinquencyRange(DelinquencyRange delinquencyRange);
+
 }

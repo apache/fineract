@@ -338,4 +338,9 @@ public final class Utils {
                 .spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
         return templateLocation.substring(1, templateLocation.length() - 1);
     }
+
+    public static String emptyJson() {
+        return "{}";
+    }
+
 }

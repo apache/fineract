@@ -65,6 +65,8 @@ import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformSer
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
+import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateData;
 import org.apache.fineract.portfolio.floatingrates.service.FloatingRatesReadPlatformService;
 import org.apache.fineract.portfolio.fund.data.FundData;
@@ -130,6 +132,7 @@ public class LoanProductsApiResource {
     private final FloatingRatesReadPlatformService floatingRateReadPlatformService;
     private final RateReadService rateReadService;
     private final ConfigurationDomainService configurationDomainService;
+    private final DelinquencyReadPlatformService delinquencyReadPlatformService;
 
     @Autowired
     public LoanProductsApiResource(final PlatformSecurityContext context, final LoanProductReadPlatformService readPlatformService,
@@ -145,7 +148,8 @@ public class LoanProductsApiResource {
             final DropdownReadPlatformService commonDropdownReadPlatformService,
             PaymentTypeReadPlatformService paymentTypeReadPlatformService,
             final FloatingRatesReadPlatformService floatingRateReadPlatformService, final RateReadService rateReadService,
-            final ConfigurationDomainService configurationDomainService) {
+            final ConfigurationDomainService configurationDomainService,
+            final DelinquencyReadPlatformService delinquencyReadPlatformService) {
         this.context = context;
         this.loanProductReadPlatformService = readPlatformService;
         this.chargeReadPlatformService = chargeReadPlatformService;
@@ -164,6 +168,7 @@ public class LoanProductsApiResource {
         this.floatingRateReadPlatformService = floatingRateReadPlatformService;
         this.rateReadService = rateReadService;
         this.configurationDomainService = configurationDomainService;
+        this.delinquencyReadPlatformService = delinquencyReadPlatformService;
     }
 
     @POST
@@ -339,6 +344,12 @@ public class LoanProductsApiResource {
         if (fundOptions.isEmpty()) {
             fundOptions = null;
         }
+
+        Collection<DelinquencyBucketData> delinquencyBucketOptions = this.delinquencyReadPlatformService.retrieveAllDelinquencyBuckets();
+        if (delinquencyBucketOptions.isEmpty()) {
+            delinquencyBucketOptions = null;
+        }
+
         final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions = this.dropdownReadPlatformService
                 .retreiveTransactionProcessingStrategies();
 
@@ -372,7 +383,7 @@ public class LoanProductsApiResource {
                 loanCycleValueConditionTypeOptions, daysInMonthTypeOptions, daysInYearTypeOptions,
                 interestRecalculationCompoundingTypeOptions, rescheduleStrategyTypeOptions, interestRecalculationFrequencyTypeOptions,
                 preCloseInterestCalculationStrategyOptions, floatingRateOptions, interestRecalculationNthDayTypeOptions,
-                interestRecalculationDayOfWeekTypeOptions, isRatesEnabled);
+                interestRecalculationDayOfWeekTypeOptions, isRatesEnabled, delinquencyBucketOptions);
     }
 
 }

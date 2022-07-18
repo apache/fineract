@@ -111,7 +111,7 @@ public final class LoanProductDataValidator {
             LoanProductConstants.CAN_USE_FOR_TOPUP, LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM, LoanProductConstants.RATES_PARAM_NAME,
             LoanProductConstants.fixedPrincipalPercentagePerInstallmentParamName, LoanProductConstants.DISALLOW_EXPECTED_DISBURSEMENTS,
             LoanProductConstants.ALLOW_APPROVED_DISBURSED_AMOUNTS_OVER_APPLIED, LoanProductConstants.OVER_APPLIED_CALCULATION_TYPE,
-            LoanProductConstants.OVER_APPLIED_NUMBER));
+            LoanProductConstants.OVER_APPLIED_NUMBER, LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME));
 
     private static final String[] supportedloanConfigurableAttributes = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyIdParamName,
@@ -273,6 +273,13 @@ public final class LoanProductDataValidator {
         final Long transactionProcessingStrategyId = this.fromApiJsonHelper.extractLongNamed("transactionProcessingStrategyId", element);
         baseDataValidator.reset().parameter("transactionProcessingStrategyId").value(transactionProcessingStrategyId).notNull()
                 .integerGreaterThanZero();
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME, element)) {
+            final Long delinquencyBucketId = this.fromApiJsonHelper.extractLongNamed(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME,
+                    element);
+            baseDataValidator.reset().parameter(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME).value(delinquencyBucketId)
+                    .ignoreIfNull().integerGreaterThanZero();
+        }
 
         // grace validation
         final Integer graceOnPrincipalPayment = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnPrincipalPayment", element);
@@ -1085,6 +1092,13 @@ public final class LoanProductDataValidator {
                     .extractIntegerWithLocaleNamed(LoanProductConstants.OVERDUE_DAYS_FOR_NPA_PARAMETER_NAME, element);
             baseDataValidator.reset().parameter(LoanProductConstants.OVERDUE_DAYS_FOR_NPA_PARAMETER_NAME).value(overdueDaysForNPA)
                     .integerZeroOrGreater();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME, element)) {
+            final Long delinquencyBucketId = this.fromApiJsonHelper.extractLongNamed(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME,
+                    element);
+            baseDataValidator.reset().parameter(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME).value(delinquencyBucketId)
+                    .ignoreIfNull().integerGreaterThanZero();
         }
 
         Integer amortizationType = null;

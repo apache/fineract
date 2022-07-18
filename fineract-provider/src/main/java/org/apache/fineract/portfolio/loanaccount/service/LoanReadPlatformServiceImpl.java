@@ -70,6 +70,8 @@ import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
+import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
 import org.apache.fineract.portfolio.floatingrates.data.InterestRatePeriodData;
 import org.apache.fineract.portfolio.floatingrates.service.FloatingRatesReadPlatformService;
 import org.apache.fineract.portfolio.fund.data.FundData;
@@ -157,6 +159,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private final AccountDetailsReadPlatformService accountDetailsReadPlatformService;
     private final ColumnValidator columnValidator;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
+    private final DelinquencyReadPlatformService delinquencyReadPlatformService;
 
     @Autowired
     public LoanReadPlatformServiceImpl(final PlatformSecurityContext context,
@@ -170,6 +173,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
             final FloatingRatesReadPlatformService floatingRatesReadPlatformService, final LoanUtilService loanUtilService,
             final ConfigurationDomainService configurationDomainService,
+            final DelinquencyReadPlatformService delinquencyReadPlatformService,
             final AccountDetailsReadPlatformService accountDetailsReadPlatformService, final LoanRepositoryWrapper loanRepositoryWrapper,
             final ColumnValidator columnValidator, DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
         this.context = context;
@@ -193,9 +197,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         this.configurationDomainService = configurationDomainService;
         this.accountDetailsReadPlatformService = accountDetailsReadPlatformService;
         this.columnValidator = columnValidator;
-        this.loaanLoanMapper = new LoanMapper(sqlGenerator);
+        this.loaanLoanMapper = new LoanMapper(sqlGenerator, delinquencyReadPlatformService);
         this.sqlGenerator = sqlGenerator;
         this.paginationHelper = paginationHelper;
+        this.delinquencyReadPlatformService = delinquencyReadPlatformService;
     }
 
     @Override
@@ -206,7 +211,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String hierarchy = currentUser.getOffice().getHierarchy();
             final String hierarchySearchString = hierarchy + "%";
 
-            final LoanMapper rm = new LoanMapper(sqlGenerator);
+            final LoanMapper rm = new LoanMapper(sqlGenerator, delinquencyReadPlatformService);
 
             final StringBuilder sqlBuilder = new StringBuilder();
             sqlBuilder.append("select ");
@@ -226,7 +231,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         // final AppUser currentUser = this.context.authenticatedUser();
         this.context.authenticatedUser();
-        final LoanMapper rm = new LoanMapper(sqlGenerator);
+        final LoanMapper rm = new LoanMapper(sqlGenerator, delinquencyReadPlatformService);
 
         final String sql = "select " + rm.loanSchema() + " where l.account_no=?";
 
@@ -237,7 +242,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     @Override
     public List<LoanAccountData> retrieveGLIMChildLoansByGLIMParentAccount(String parentloanAccountNumber) {
         this.context.authenticatedUser();
-        final LoanMapper rm = new LoanMapper(sqlGenerator);
+        final LoanMapper rm = new LoanMapper(sqlGenerator, delinquencyReadPlatformService);
 
         final String sql = "select " + rm.loanSchema()
                 + " left join glim_parent_child_mapping as glim on glim.glim_child_account_id=l.account_no "
@@ -490,8 +495,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     @Override
     public LoanTransactionData retrieveWaiveInterestDetails(final Long loanId) {
 
-        AppUser currentUser = this.context.authenticatedUser();
-
         // TODO - KW -OPTIMIZE - write simple sql query to fetch back overdue
         // interest that can be waived along with the date of repayment period
         // interest is overdue.
@@ -582,9 +585,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private static final class LoanMapper implements RowMapper<LoanAccountData> {
 
         private final DatabaseSpecificSQLGenerator sqlGenerator;
+        private final DelinquencyReadPlatformService delinquencyReadPlatformService;
 
-        LoanMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
+        LoanMapper(DatabaseSpecificSQLGenerator sqlGenerator, DelinquencyReadPlatformService delinquencyReadPlatformService) {
             this.sqlGenerator = sqlGenerator;
+            this.delinquencyReadPlatformService = delinquencyReadPlatformService;
         }
 
         public String loanSchema() {
@@ -989,6 +994,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final Long closureLoanId = rs.getLong("closureLoanId");
             final String closureLoanAccountNo = rs.getString("closureLoanAccountNo");
             final BigDecimal topupAmount = rs.getBigDecimal("topupAmount");
+            // Current Delinquency Range Data
+            DelinquencyRangeData delinquencyRange = this.delinquencyReadPlatformService.retrieveCurrentDelinquencyTag(id);
 
             return LoanAccountData.basicLoanDetails(id, accountNo, status, externalId, clientId, clientAccountNo, clientName,
                     clientOfficeId, groupData, loanType, loanProductId, loanProductName, loanProductDescription,
@@ -1004,7 +1011,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     isNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled, interestRecalculationData,
                     createStandingInstructionAtDisbursement, isvariableInstallmentsAllowed, minimumGap, maximumGap, loanSubStatus,
                     canUseForTopup, isTopup, closureLoanId, closureLoanAccountNo, topupAmount, isEqualAmortization,
-                    fixedPrincipalPercentagePerInstallment);
+                    fixedPrincipalPercentagePerInstallment, delinquencyRange);
         }
     }
 

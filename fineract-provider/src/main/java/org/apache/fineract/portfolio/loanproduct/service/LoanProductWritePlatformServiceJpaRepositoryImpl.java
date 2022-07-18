@@ -38,6 +38,8 @@ import org.apache.fineract.portfolio.businessevent.domain.loan.product.LoanProdu
 import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketRepository;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRate;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRateRepositoryWrapper;
 import org.apache.fineract.portfolio.fund.domain.Fund;
@@ -83,6 +85,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
     private final FloatingRateRepositoryWrapper floatingRateRepository;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final DelinquencyBucketRepository delinquencyBucketRepository;
 
     @Autowired
     public LoanProductWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -92,7 +95,8 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             final ChargeRepositoryWrapper chargeRepository, final RateRepositoryWrapper rateRepository,
             final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService,
             final FineractEntityAccessUtil fineractEntityAccessUtil, final FloatingRateRepositoryWrapper floatingRateRepository,
-            final LoanRepositoryWrapper loanRepositoryWrapper, final BusinessEventNotifierService businessEventNotifierService) {
+            final LoanRepositoryWrapper loanRepositoryWrapper, final BusinessEventNotifierService businessEventNotifierService,
+            final DelinquencyBucketRepository delinquencyBucketRepository) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.loanProductRepository = loanProductRepository;
@@ -106,6 +110,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         this.floatingRateRepository = floatingRateRepository;
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.businessEventNotifierService = businessEventNotifierService;
+        this.delinquencyBucketRepository = delinquencyBucketRepository;
     }
 
     @Transactional
@@ -213,6 +218,12 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                 final Long fundId = (Long) changes.get("fundId");
                 final Fund fund = findFundByIdIfProvided(fundId);
                 product.update(fund);
+            }
+
+            if (changes.containsKey("delinquencyBucketId")) {
+                final Long delinquencyBucketId = (Long) changes.get("delinquencyBucketId");
+                final DelinquencyBucket delinquencyBucket = this.delinquencyBucketRepository.getReferenceById(delinquencyBucketId);
+                product.setDelinquencyBucket(delinquencyBucket);
             }
 
             if (changes.containsKey("transactionProcessingStrategyId")) {
