@@ -74,6 +74,9 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
     @Column(name = "lastname", nullable = false, length = 100)
     private String lastname;
 
+    @Column(name = "gender", nullable = false, length = 100)
+    private Integer gender;
+
     @Column(name = "password", nullable = false)
     private String password;
 
@@ -154,10 +157,11 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
         final String email = command.stringValueOfParameterNamed("email");
         final String firstname = command.stringValueOfParameterNamed("firstname");
         final String lastname = command.stringValueOfParameterNamed("lastname");
+        final Integer gender = command.integerValueOfParameterNamed("gender");
 
         final boolean isSelfServiceUser = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER);
 
-        return new AppUser(userOffice, user, allRoles, email, firstname, lastname, linkedStaff, passwordNeverExpire, isSelfServiceUser,
+        return new AppUser(userOffice, user, allRoles, email, firstname, lastname,gender, linkedStaff, passwordNeverExpire, isSelfServiceUser,
                 clients, cannotChangePassword);
     }
 
@@ -168,13 +172,14 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
     }
 
     public AppUser(final Office office, final User user, final Set<Role> roles, final String email, final String firstname,
-            final String lastname, final Staff staff, final boolean passwordNeverExpire, final boolean isSelfServiceUser,
+            final String lastname,Integer gender, final Staff staff, final boolean passwordNeverExpire, final boolean isSelfServiceUser,
             final Collection<Client> clients, final Boolean cannotChangePassword) {
         this.office = office;
         this.email = email.trim();
         this.username = user.getUsername().trim();
         this.firstname = firstname.trim();
         this.lastname = lastname.trim();
+        this.gender = gender;
         this.password = user.getPassword().trim();
         this.accountNonExpired = user.isAccountNonExpired();
         this.accountNonLocked = user.isAccountNonLocked();
@@ -293,6 +298,13 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
             final String newValue = command.stringValueOfParameterNamed(lastnameParamName);
             actualChanges.put(lastnameParamName, newValue);
             this.lastname = newValue;
+        }
+
+        final String genderParamName = "gender";
+        if (command.isChangeInIntegerParameterNamed(genderParamName, this.gender)) {
+            final Integer newValue = command.integerValueOfParameterNamed(genderParamName);
+            actualChanges.put(genderParamName, newValue);
+            this.gender = newValue;
         }
 
         final String emailParamName = "email";

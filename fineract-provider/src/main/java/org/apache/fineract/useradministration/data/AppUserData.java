@@ -18,9 +18,12 @@
  */
 package org.apache.fineract.useradministration.data;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+
+import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.portfolio.client.data.ClientData;
@@ -53,8 +56,13 @@ public final class AppUserData {
     private final StaffData staff;
     private final Boolean isSelfServiceUser;
 
+    //new
+    ArrayList<CodeValueData> genderOptions;
+
     @SuppressWarnings("unused")
     private Set<ClientData> clients;
+
+
 
     public static AppUserData importInstance(Long officeId, Long staffId, String username, String firstname, String lastname, String email,
             Boolean sendPasswordToEmail, Boolean passwordNeverExpires, List<Long> roleIds, Integer rowIndex) {
@@ -96,8 +104,11 @@ public final class AppUserData {
     }
 
     public static AppUserData template(final Collection<OfficeData> offices, final Collection<RoleData> availableRoles,
-            final Collection<RoleData> selfServiceRoles) {
-        return new AppUserData(null, null, null, null, null, null, null, availableRoles, selfServiceRoles, null, offices, null, null, null);
+            final Collection<RoleData> selfServiceRoles,ArrayList<CodeValueData> genderOptions) {
+        return new AppUserData(null, null, null, null,
+                null, null, null, availableRoles,
+                selfServiceRoles, null, offices, null, null,
+                null, genderOptions);
     }
 
     public static AppUserData dropdown(final Long id, final String username) {
@@ -131,6 +142,47 @@ public final class AppUserData {
         this.staff = staff;
         this.passwordNeverExpires = passwordNeverExpire;
         this.isSelfServiceUser = isSelfServiceUser;
+    }
+
+    /**
+     * adding gender options to the returned template
+     *
+     * @param id
+     * @param username
+     * @param email
+     * @param officeId
+     * @param officeName
+     * @param firstname
+     * @param lastname
+     * @param availableRoles
+     * @param selfServiceRoles
+     * @param selectedRoles
+     * @param allowedOffices
+     * @param staff
+     * @param passwordNeverExpire
+     * @param isSelfServiceUser
+     * @param genderOptions
+     */
+    private AppUserData(final Long id, final String username, final String email, final Long officeId, final String officeName,
+            final String firstname, final String lastname, final Collection<RoleData> availableRoles,
+            final Collection<RoleData> selfServiceRoles, final Collection<RoleData> selectedRoles,
+            final Collection<OfficeData> allowedOffices, final StaffData staff, final Boolean passwordNeverExpire,
+            final Boolean isSelfServiceUser,ArrayList<CodeValueData> genderOptions) {
+        this.id = id;
+        this.username = username;
+        this.officeId = officeId;
+        this.officeName = officeName;
+        this.firstname = firstname;
+        this.lastname = lastname;
+        this.email = email;
+        this.allowedOffices = allowedOffices;
+        this.availableRoles = availableRoles;
+        this.selfServiceRoles = selfServiceRoles;
+        this.selectedRoles = selectedRoles;
+        this.staff = staff;
+        this.passwordNeverExpires = passwordNeverExpire;
+        this.isSelfServiceUser = isSelfServiceUser;
+        this.genderOptions = genderOptions;
     }
 
     public boolean hasIdentifyOf(final Long createdById) {

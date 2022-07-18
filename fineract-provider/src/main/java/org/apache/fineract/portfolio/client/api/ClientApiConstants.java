@@ -85,6 +85,7 @@ public class ClientApiConstants {
     public static final String firstnameParamName = "firstname";
     public static final String middlenameParamName = "middlename";
     public static final String lastnameParamName = "lastname";
+    public static final String surnameParamName = "surname";
     public static final String fullnameParamName = "fullname";
     public static final String displaynameParamName = "displayname";
     public static final String officeIdParamName = "officeId";

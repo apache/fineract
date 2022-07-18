@@ -24,14 +24,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.apache.fineract.infrastructure.codes.data.CodeValueData;
+import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
+import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.domain.Client;
+import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.useradministration.data.AppUserData;
 import org.apache.fineract.useradministration.data.RoleData;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -54,17 +59,41 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
     private final RoleReadPlatformService roleReadPlatformService;
     private final AppUserRepository appUserRepository;
     private final StaffReadPlatformService staffReadPlatformService;
+    private final CodeValueReadPlatformService codeValueReadPlatformService;
 
+//    @Autowired
+//    public AppUserReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
+//            final OfficeReadPlatformService officeReadPlatformService, final RoleReadPlatformService roleReadPlatformService,
+//            final AppUserRepository appUserRepository, final StaffReadPlatformService staffReadPlatformService) {
+//        this.context = context;
+//        this.officeReadPlatformService = officeReadPlatformService;
+//        this.roleReadPlatformService = roleReadPlatformService;
+//        this.appUserRepository = appUserRepository;
+//        this.jdbcTemplate = jdbcTemplate;
+//        this.staffReadPlatformService = staffReadPlatformService;
+//    }
+
+    /**
+     * modified for adding gender options
+     * @param context
+     * @param jdbcTemplate
+     * @param officeReadPlatformService
+     * @param roleReadPlatformService
+     * @param appUserRepository
+     * @param staffReadPlatformService
+     */
     @Autowired
     public AppUserReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             final OfficeReadPlatformService officeReadPlatformService, final RoleReadPlatformService roleReadPlatformService,
-            final AppUserRepository appUserRepository, final StaffReadPlatformService staffReadPlatformService) {
+            final AppUserRepository appUserRepository, final StaffReadPlatformService staffReadPlatformService,
+                                          final CodeValueReadPlatformService codeValueReadPlatformService) {
         this.context = context;
         this.officeReadPlatformService = officeReadPlatformService;
         this.roleReadPlatformService = roleReadPlatformService;
         this.appUserRepository = appUserRepository;
         this.jdbcTemplate = jdbcTemplate;
         this.staffReadPlatformService = staffReadPlatformService;
+        this.codeValueReadPlatformService = codeValueReadPlatformService;
     }
 
     /*
@@ -106,8 +135,10 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
         final Collection<OfficeData> offices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
         final Collection<RoleData> availableRoles = this.roleReadPlatformService.retrieveAllActiveRoles();
         final Collection<RoleData> selfServiceRoles = this.roleReadPlatformService.retrieveAllSelfServiceRoles();
+        ArrayList<CodeValueData> genderOptions = new ArrayList<>(
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.GENDER));
 
-        return AppUserData.template(offices, availableRoles, selfServiceRoles);
+        return AppUserData.template(offices, availableRoles, selfServiceRoles, genderOptions);
     }
 
     @Override
