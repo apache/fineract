@@ -79,6 +79,7 @@
         </insert>
     </changeSet>
     <changeSet id="4" author="fineract">
+        <validCheckSum>8:f7e5e697680e1e81eca6566f2481b879</validCheckSum>
         <insert tableName="job">
             <column name="name" value="Increase Business Date by 1 day"/>
             <column name="display_name" value="Increase Business Date by 1 day"/>
@@ -95,10 +96,11 @@
             <column name="scheduler_group" valueNumeric="0"/>
             <column name="is_misfired" valueBoolean="false"/>
             <column name="node_id" valueNumeric="1"/>
-            <column name="is_mismatched_job" valueBoolean="true"/>
+            <column name="is_mismatched_job" valueBoolean="false"/>
         </insert>
     </changeSet>
     <changeSet id="5" author="fineract">
+        <validCheckSum>8:cb7f67c27941deda1e83d317bd78dabd</validCheckSum>
         <insert tableName="job">
             <column name="name" value="Increase COB Date by 1 day"/>
             <column name="display_name" value="Increase COB Date by 1 day"/>
@@ -115,7 +117,7 @@
             <column name="scheduler_group" valueNumeric="0"/>
             <column name="is_misfired" valueBoolean="false"/>
             <column name="node_id" valueNumeric="1"/>
-            <column name="is_mismatched_job" valueBoolean="true"/>
+            <column name="is_mismatched_job" valueBoolean="false"/>
         </insert>
     </changeSet>
 </databaseChangeLog>
