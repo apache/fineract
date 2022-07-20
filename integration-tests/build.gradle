@@ -51,7 +51,7 @@ cargo {
 
     local {
         logLevel = 'low'
-        // outputFile = file('build/output.log')
+        outputFile = file("$buildDir/cargo/output.log")
         installer {
             installConfiguration = configurations.tomcat
             downloadDir = file("$buildDir/download")
