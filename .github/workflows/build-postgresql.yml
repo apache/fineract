@@ -72,4 +72,11 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: test-results
-          path: home/runner/work/fineract/fineract/integration-tests/build/reports/
+          path: integration-tests/build/reports/
+
+      - name: Archive server logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: integration-tests/build/cargo/
