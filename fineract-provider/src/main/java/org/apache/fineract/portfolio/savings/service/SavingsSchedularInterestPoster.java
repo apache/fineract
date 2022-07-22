@@ -21,10 +21,10 @@ package org.apache.fineract.portfolio.savings.service;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.math.BigDecimal;
 import java.security.SecureRandom;
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -248,8 +248,10 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
     private void batchUpdate(final List<SavingsAccountData> savingsAccountDataList) throws DataAccessException {
         String queryForSavingsUpdate = batchQueryForSavingsSummaryUpdate();
         String queryForTransactionInsertion = batchQueryForTransactionInsertion();
+        String queryForTransactionUpdate = batchQueryForTransactionsUpdate();
         List<Object[]> paramsForTransactionInsertion = new ArrayList<>();
         List<Object[]> paramsForSavingsSummary = new ArrayList<>();
+        List<Object[]> paramsForTransactionUpdate = new ArrayList<>();
         List<String> transRefNo = new ArrayList<>();
         for (SavingsAccountData savingsAccountData : savingsAccountDataList) {
             SavingsAccountSummaryData savingsAccountSummaryData = savingsAccountData.getSummary();
@@ -269,22 +271,29 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
                     savingsAccountData.getId() });
             List<SavingsAccountTransactionData> savingsAccountTransactionDataList = savingsAccountData.getSavingsAccountTransactionData();
             for (SavingsAccountTransactionData savingsAccountTransactionData : savingsAccountTransactionDataList) {
+                Date balanceEndDate = null;
+                if (savingsAccountTransactionData.getBalanceEndDate() != null) {
+                    balanceEndDate = Date.from(savingsAccountTransactionData.getBalanceEndDate()
+                            .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+                }
                 if (savingsAccountTransactionData.getId() == null) {
                     UUID uuid = UUID.randomUUID();
                     savingsAccountTransactionData.setRefNo(uuid.toString());
                     transRefNo.add(uuid.toString());
-                    java.util.Date balanceEndDate = null;
-                    if (savingsAccountTransactionData.getBalanceEndDate() != null) {
-                        balanceEndDate = Date.from(savingsAccountTransactionData.getBalanceEndDate()
-                                .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
-                    }
                     paramsForTransactionInsertion.add(new Object[] { savingsAccountData.getId(), savingsAccountData.getOfficeId(),
-                            savingsAccountTransactionData.getTransactionType().getId(), savingsAccountTransactionData.getTransactionDate(),
-                            savingsAccountTransactionData.getAmount(), balanceEndDate,
+                            savingsAccountTransactionData.isReversed(), savingsAccountTransactionData.getTransactionType().getId(),
+                            savingsAccountTransactionData.getTransactionDate(), savingsAccountTransactionData.getAmount(), balanceEndDate,
                             savingsAccountTransactionData.getBalanceNumberOfDays(), savingsAccountTransactionData.getRunningBalance(),
                             savingsAccountTransactionData.getCumulativeBalance(), savingsAccountTransactionData.getSubmittedOnDate(),
                             Integer.valueOf(1), savingsAccountTransactionData.isManualTransaction(),
-                            savingsAccountTransactionData.getRefNo() });
+                            savingsAccountTransactionData.getRefNo(), savingsAccountTransactionData.isReversalTransaction(),
+                            savingsAccountTransactionData.getOverdraftAmount(), });
+                } else {
+                    paramsForTransactionUpdate.add(new Object[] { savingsAccountTransactionData.isReversed(),
+                            savingsAccountTransactionData.getAmount(), savingsAccountTransactionData.getOverdraftAmount(), balanceEndDate,
+                            savingsAccountTransactionData.getBalanceNumberOfDays(), savingsAccountTransactionData.getRunningBalance(),
+                            savingsAccountTransactionData.getCumulativeBalance(), savingsAccountTransactionData.isReversalTransaction(),
+                            savingsAccountTransactionData.getId() });
                 }
             }
             savingsAccountData.setUpdatedTransactions(savingsAccountTransactionDataList);
@@ -293,6 +302,7 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
         if (transRefNo.size() > 0) {
             this.jdbcTemplate.batchUpdate(queryForSavingsUpdate, paramsForSavingsSummary);
             this.jdbcTemplate.batchUpdate(queryForTransactionInsertion, paramsForTransactionInsertion);
+            this.jdbcTemplate.batchUpdate(queryForTransactionUpdate, paramsForTransactionUpdate);
             LOG.info("`Total No Of Interest Posting:` {}", transRefNo.size());
             List<SavingsAccountTransactionData> savingsAccountTransactionDataList = fetchTransactionsFromIds(transRefNo);
             if (savingsAccountDataList != null) {
@@ -311,11 +321,12 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
 
     private String batchQueryForTransactionInsertion() {
         StringBuilder query = new StringBuilder(100);
-        query.append("INSERT INTO m_savings_account_transaction (savings_account_id, office_id, is_reversed,");
-        query.append("transaction_type_enum, transaction_date, amount, balance_end_date_derived,");
-        query.append("balance_number_of_days_derived, running_balance_derived, cumulative_balance_derived,");
-        query.append("created_date, appuser_id, is_manual, is_loan_disbursement, ref_no) VALUES ");
-        query.append("(?, ?, false, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, false, ?)");
+        query.append("INSERT INTO m_savings_account_transaction (savings_account_id, office_id, is_reversed, ");
+        query.append("transaction_type_enum, transaction_date, amount, balance_end_date_derived, ");
+        query.append("balance_number_of_days_derived, running_balance_derived, cumulative_balance_derived, ");
+        query.append("created_date, appuser_id, is_manual, ref_no, is_reversal, ");
+        query.append("overdraft_amount_derived) VALUES ");
+        query.append("(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         return query.toString();
 
     }
@@ -326,7 +337,18 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
         query.append("total_interest_earned_derived=?, total_interest_posted_derived=?, total_withdrawal_fees_derived=?, ");
         query.append("total_fees_charge_derived=?, total_penalty_charge_derived=?, total_annual_fees_derived=?, ");
         query.append("account_balance_derived=?, total_overdraft_interest_derived=?, total_withhold_tax_derived=?, ");
-        query.append("last_interest_calculation_date=?, interest_posted_till_date=? where id=?");
+        query.append("last_interest_calculation_date=?, interest_posted_till_date=? where id=? ");
+        return query.toString();
+    }
+
+    private String batchQueryForTransactionsUpdate() {
+        StringBuilder query = new StringBuilder(100);
+        query.append("UPDATE m_savings_account_transaction ");
+        query.append("SET is_reversed=?, ");
+        query.append("amount=?, overdraft_amount_derived=?, balance_end_date_derived=?, ");
+        query.append("balance_number_of_days_derived=?, running_balance_derived=?, cumulative_balance_derived=?, ");
+        query.append("is_reversal=? ");
+        query.append("WHERE id=?");
         return query.toString();
     }
 }
