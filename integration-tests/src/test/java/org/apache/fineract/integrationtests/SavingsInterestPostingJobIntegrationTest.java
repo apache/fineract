@@ -114,6 +114,31 @@ public class SavingsInterestPostingJobIntegrationTest {
     }
 
     @Test
+    public void testDuplicateOverdraftInterestPostingJob() {
+        // client activation, savings activation and 1st transaction date
+        final String startDate = "01 July 2022";
+        final String jobName = "Post Interest For Savings";
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        Assertions.assertNotNull(clientID);
+
+        final Integer savingsId = createSavingsAccountDailyPostingOverdraft(clientID, startDate);
+
+        this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "1000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+
+        this.scheduleJobHelper.executeAndAwaitJob(jobName);
+        this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "1000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+        Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
+        ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
+        Integer dateCount = 0;
+        for (HashMap<String, Object> transaction : transactions) {
+            if (transaction.get("date").toString().equals("[2022, 7, 10]") && transaction.get("reversed").toString().equals("false")) {
+                dateCount++;
+            }
+        }
+        assertEquals(1, dateCount, "No Duplicate Overdraft Interest Posting");
+    }
+
+    @Test
     public void testSavingsDailyInterestPostingJob() {
         // client activation, savings activation and 1st transaction date
         final String startDate = "10 April 2022";
