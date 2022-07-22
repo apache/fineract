@@ -115,6 +115,7 @@ public class ClientApiConstants {
     public static final String clientClassificationParamName = "clientClassification";
     public static final String legalFormIdParamName = "legalFormId";
     public static final String legalFormParamName = "legalForm";
+    public static final String surnameParamName = "surname";
     // request parameters for payment details
     public static final String paymentTypeIdParamName = "paymentTypeId";
     public static final String transactionAccountNumberParamName = "accountNumber";
@@ -195,7 +196,7 @@ public class ClientApiConstants {
             officeNameParamName, transferToOfficeIdParamName, transferToOfficeNameParamName, hierarchyParamName, imageIdParamName,
             imagePresentParamName, staffIdParamName, staffNameParamName, timelineParamName, groupsParamName, officeOptionsParamName,
             staffOptionsParamName, dateOfBirthParamName, genderParamName, clientTypeParamName, clientClassificationParamName,
-            legalFormParamName, clientNonPersonDetailsParamName, isStaffParamName));
+            legalFormParamName, clientNonPersonDetailsParamName, isStaffParamName,surnameParamName));
 
     protected static final Set<String> CLIENT_CHARGES_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(chargeIdParamName,
             clientIdParamName, chargeNameParamName, penaltyParamName, chargeTimeTypeParamName, dueAsOfDateParamName,

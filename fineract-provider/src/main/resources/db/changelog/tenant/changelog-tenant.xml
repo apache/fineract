@@ -39,4 +39,5 @@
     <include file="parts/0017_fix_stretchy_reports.xml" relativeToChangelogFile="true"/>
     <include file="parts/0018_pentaho_reports_to_table.xml" relativeToChangelogFile="true"/>
     <include file="parts/0019_refactor_loan_transaction.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0020_add_more_params_on_m_client.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
