@@ -256,7 +256,6 @@ public class SavingsAccountSummaryData implements Serializable {
             final SavingsAccountTransactionData savingsAccountTransaction = savingsAccountTransactions.get(i);
             if (savingsAccountTransaction.isInterestPostingAndNotReversed() && !savingsAccountTransaction.isReversalTransaction()
                     && !isUpdated) {
-                setRunningBalanceOnPivotDate(savingsAccountTransaction.getRunningBalance(currency).getAmount());
                 setInterestPostedTillDate(savingsAccountTransaction.getTransactionDate());
                 isUpdated = true;
                 if (!backdatedTxnsAllowedTill) {
@@ -265,7 +264,6 @@ public class SavingsAccountSummaryData implements Serializable {
             }
             if (savingsAccountTransaction.isOverdraftInterestAndNotReversed() && !savingsAccountTransaction.isReversalTransaction()
                     && !isUpdated) {
-                setRunningBalanceOnPivotDate(savingsAccountTransaction.getRunningBalance(currency).getAmount());
                 setInterestPostedTillDate(savingsAccountTransaction.getTransactionDate());
                 isUpdated = true;
                 if (!backdatedTxnsAllowedTill) {
@@ -273,13 +271,13 @@ public class SavingsAccountSummaryData implements Serializable {
                 }
             }
             if (backdatedTxnsAllowedTill) {
-                if (savingsAccountTransaction.isInterestPostingAndNotReversed()) {
+                if (savingsAccountTransaction.isInterestPostingAndNotReversed() && !savingsAccountTransaction.isReversalTransaction()) {
                     interestTotal = interestTotal.plus(savingsAccountTransaction.getAmount());
                 }
-                if (savingsAccountTransaction.isOverdraftInterestAndNotReversed()) {
+                if (savingsAccountTransaction.isOverdraftInterestAndNotReversed() && !savingsAccountTransaction.isReversalTransaction()) {
                     overdraftInterestTotal = overdraftInterestTotal.plus(savingsAccountTransaction.getAmount());
                 }
-                if (savingsAccountTransaction.isWithHoldTaxAndNotReversed()) {
+                if (savingsAccountTransaction.isWithHoldTaxAndNotReversed() && !savingsAccountTransaction.isReversalTransaction()) {
                     withHoldTaxTotal = withHoldTaxTotal.plus(savingsAccountTransaction.getAmount());
                 }
             }

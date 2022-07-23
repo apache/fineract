@@ -134,6 +134,11 @@ public class SavingsAccountRepositoryWrapper {
         return this.savingsAccountTransactionRepository.findTransactionsAfterPivotDate(savingsAccount, transactionDate);
     }
 
+    public List<SavingsAccountTransaction> findTransactionRunningBalanceBeforePivotDate(
+            @Param("savingsAccount") SavingsAccount savingsAccount, @Param("date") LocalDate date) {
+        return this.savingsAccountTransactionRepository.findTransactionRunningBalanceBeforePivotDate(savingsAccount, date);
+    }
+
     @Transactional
     public List<SavingsAccountTransaction> findAllTransactions(@Param("savingsAccount") SavingsAccount savingsAccount) {
         return this.savingsAccountTransactionRepository.findBySavingsAccount(savingsAccount);
