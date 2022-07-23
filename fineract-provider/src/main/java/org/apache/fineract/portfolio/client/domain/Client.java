@@ -571,6 +571,7 @@ public final class Client extends AbstractPersistableCustom {
                     if (legalForm.isPerson()) {
                         this.fullname = null;
                     } else if (legalForm.isEntity()) {
+                        this.surname = null;
                         this.firstname = null;
                         this.lastname = null;
                         this.displayName = null;
