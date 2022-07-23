@@ -225,7 +225,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
             Map<String, Object> changes = this.accountDataSerializer.validateAndApplyAddtionalShares(jsonCommand, account);
             ShareAccountTransaction transaction = null;
             if (!changes.isEmpty()) {
-                this.shareAccountRepository.save(account);
+                this.shareAccountRepository.saveAndFlush(account);
                 transaction = (ShareAccountTransaction) changes.get(ShareAccountApiConstants.additionalshares_paramname);
                 transaction = account.getShareAccountTransaction(transaction);
                 if (transaction != null) {
