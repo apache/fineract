@@ -117,7 +117,10 @@ public final class SavingsAccountSummary {
     public void updateSummaryWithPivotConfig(final MonetaryCurrency currency, final SavingsAccountTransactionSummaryWrapper wrapper,
             final SavingsAccountTransaction transaction, final List<SavingsAccountTransaction> savingsAccountTransactions) {
 
-        if (transaction != null && !transaction.isReversalTransaction()) {
+        if (transaction != null) {
+            if (transaction.isReversalTransaction()) {
+                return;
+            }
             Money transactionAmount = Money.of(currency, transaction.getAmount());
             switch (SavingsAccountTransactionType.fromInt(transaction.getTypeOf())) {
                 case DEPOSIT:
@@ -188,12 +191,7 @@ public final class SavingsAccountSummary {
             Money overdraftInterestTotal = Money.zero(currency);
             this.totalDeposits = wrapper.calculateTotalDeposits(currency, savingsAccountTransactions);
             this.totalWithdrawals = wrapper.calculateTotalWithdrawals(currency, savingsAccountTransactions);
-            this.totalWithdrawalFees = wrapper.calculateTotalWithdrawalFees(currency, savingsAccountTransactions);
-            this.totalAnnualFees = wrapper.calculateTotalAnnualFees(currency, savingsAccountTransactions);
-            this.totalFeeCharge = wrapper.calculateTotalFeesCharge(currency, savingsAccountTransactions);
-            this.totalPenaltyCharge = wrapper.calculateTotalPenaltyCharge(currency, savingsAccountTransactions);
-            this.totalFeeChargesWaived = wrapper.calculateTotalFeesChargeWaived(currency, savingsAccountTransactions);
-            this.totalPenaltyChargesWaived = wrapper.calculateTotalPenaltyChargeWaived(currency, savingsAccountTransactions);
+
             final HashMap<String, Money> map = updateRunningBalanceAndPivotDate(true, savingsAccountTransactions, interestTotal,
                     overdraftInterestTotal, withHoldTaxTotal, currency);
             interestTotal = map.get("interestTotal");
@@ -202,12 +200,11 @@ public final class SavingsAccountSummary {
             this.totalInterestPosted = interestTotal.getAmountDefaultedToNullIfZero();
             this.totalOverdraftInterestDerived = overdraftInterestTotal.getAmountDefaultedToNullIfZero();
             this.totalWithholdTax = withHoldTaxTotal.getAmountDefaultedToNullIfZero();
-            this.accountBalance = Money.of(currency, this.totalDeposits).plus(this.totalInterestPosted).minus(this.totalWithdrawals)
-                    .minus(this.totalWithdrawalFees).minus(this.totalAnnualFees).minus(this.totalFeeCharge).minus(this.totalPenaltyCharge)
-                    .minus(this.totalOverdraftInterestDerived).minus(totalWithholdTax).getAmount();
-            // this.accountBalance = Money.of(currency,
-            // this.accountBalance).plus(this.totalInterestPosted).minus(this.totalWithholdTax)
-            // .getAmount();
+
+            this.accountBalance = getRunningBalanceOnPivotDate();
+            this.accountBalance = Money.of(currency, this.accountBalance).plus(Money.of(currency, this.totalDeposits))
+                    .plus(this.totalInterestPosted).minus(this.totalWithdrawals).minus(this.totalWithholdTax)
+                    .minus(this.totalOverdraftInterestDerived).getAmount();
         }
     }
 
@@ -221,7 +218,6 @@ public final class SavingsAccountSummary {
             final SavingsAccountTransaction savingsAccountTransaction = savingsAccountTransactions.get(i);
             if (savingsAccountTransaction.isInterestPostingAndNotReversed() && !savingsAccountTransaction.isReversalTransaction()
                     && !isUpdated) {
-                setRunningBalanceOnPivotDate(savingsAccountTransaction.getRunningBalance(currency).getAmount());
                 setInterestPostedTillDate(savingsAccountTransaction.getLastTransactionDate());
                 isUpdated = true;
                 if (!backdatedTxnsAllowedTill) {
@@ -230,7 +226,6 @@ public final class SavingsAccountSummary {
             }
             if (savingsAccountTransaction.isOverdraftInterestAndNotReversed() && !savingsAccountTransaction.isReversalTransaction()
                     && !isUpdated) {
-                setRunningBalanceOnPivotDate(savingsAccountTransaction.getRunningBalance(currency).getAmount());
                 setInterestPostedTillDate(savingsAccountTransaction.getLastTransactionDate());
                 isUpdated = true;
                 if (!backdatedTxnsAllowedTill) {

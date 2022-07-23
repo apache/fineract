@@ -541,10 +541,11 @@ public class RecurringDepositAccount extends SavingsAccount {
         final Money minRequiredOpeningBalance = Money.of(this.currency, this.minRequiredOpeningBalance);
         final boolean backdatedTxnsAllowedTill = false;
         String refNo = null;
+        final Long relaxingDaysConfigForPivotDate = this.configurationDomainService.retrieveRelaxingDaysConfigForPivotDate();
         if (minRequiredOpeningBalance.isGreaterThanZero()) {
             final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, getActivationLocalDate(),
                     minRequiredOpeningBalance.getAmount(), null, DateUtils.getLocalDateTimeOfSystem(), user, accountType);
-            deposit(transactionDTO, backdatedTxnsAllowedTill, refNo);
+            deposit(transactionDTO, backdatedTxnsAllowedTill, relaxingDaysConfigForPivotDate, refNo);
 
             // update existing transactions so derived balance fields are
             // correct.
@@ -842,7 +843,7 @@ public class RecurringDepositAccount extends SavingsAccount {
 
     @Override
     public SavingsAccountTransaction deposit(final SavingsAccountTransactionDTO transactionDTO, final boolean backdatedTxnsAllowedTill,
-            final String refNo) {
+            final Long relaxingDaysConfigForPivotDate, final String refNo) {
 
         if (isAccountMatured()) {
             final String defaultUserMessage = "Transaction is not allowed. Account is matured.";
@@ -880,7 +881,8 @@ public class RecurringDepositAccount extends SavingsAccount {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
 
-        final SavingsAccountTransaction transaction = super.deposit(transactionDTO, backdatedTxnsAllowedTill, refNo);
+        final SavingsAccountTransaction transaction = super.deposit(transactionDTO, backdatedTxnsAllowedTill,
+                relaxingDaysConfigForPivotDate, refNo);
 
         return transaction;
     }
