@@ -349,6 +349,16 @@ public class SavingsAccountAssembler {
                     LocalDate interestPostedTillDate = account.getSummary().getInterestPostedTillDate();
                     savingsAccountTransactions = this.savingsAccountRepository.findTransactionsAfterPivotDate(account,
                             interestPostedTillDate.minusDays(relaxingDaysForPivotDate));
+
+                    savingsAccountTransactions.get(0).getSavingsAccount()
+                            .setStartInterestCalculationDate(interestPostedTillDate.minusDays(relaxingDaysForPivotDate));
+                    List<SavingsAccountTransaction> pivotDateTransaction = this.savingsAccountRepository
+                            .findTransactionRunningBalanceBeforePivotDate(account,
+                                    interestPostedTillDate.minusDays(relaxingDaysForPivotDate + 1));
+                    if (pivotDateTransaction != null && !pivotDateTransaction.isEmpty()) {
+                        account.getSummary().setRunningBalanceOnPivotDate(pivotDateTransaction.get(pivotDateTransaction.size() - 1)
+                                .getRunningBalance(account.getCurrency()).getAmount());
+                    }
                 } else {
                     savingsAccountTransactions = this.savingsAccountRepository.findTransactionsAfterPivotDate(account,
                             account.getSummary().getInterestPostedTillDate());
@@ -358,23 +368,11 @@ public class SavingsAccountAssembler {
                     // Update transient variable
                     account.setSavingsAccountTransactions(savingsAccountTransactions);
                 }
-                // Update last running balance on account level
-                if (savingsAccountTransactions != null && !savingsAccountTransactions.isEmpty()) {
-                    account.getSummary().setRunningBalanceOnPivotDate(savingsAccountTransactions.get(savingsAccountTransactions.size() - 1)
-                            .getRunningBalance(account.getCurrency()).getAmount());
-                }
             } else {
                 savingsAccountTransactions = this.savingsAccountRepository.findAllTransactions(account);
                 account.setSavingsAccountTransactions(savingsAccountTransactions);
             }
         }
-
-        // Update last running balance on account level
-        // if (savingsAccountTransactions != null && !savingsAccountTransactions.isEmpty()) {
-        // account.getSummary().setRunningBalanceOnPivotDate(savingsAccountTransactions.get(savingsAccountTransactions.size()
-        // - 1)
-        // .getRunningBalance(account.getCurrency()).getAmount());
-        // }
 
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
         return account;
