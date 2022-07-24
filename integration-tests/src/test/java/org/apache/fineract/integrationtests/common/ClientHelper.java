@@ -346,6 +346,13 @@ public class ClientHelper {
         return Utils.performServerGet(requestSpec, responseSpec, GET_CLIENT_URL, jsonReturn);
     }
 
+    public static HashMap<String, Object> getClientAuditFields(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer clientId, final String jsonReturn) {
+        final String GET_CLIENT_URL = "/fineract-provider/api/v1/internal/client/" + clientId + "/audit?" + Utils.TENANT_IDENTIFIER;
+        log.info("---------------------------------GET A CLIENT ENTITY AUDIT FIELDS---------------------------------------------");
+        return Utils.performServerGet(requestSpec, responseSpec, GET_CLIENT_URL, jsonReturn);
+    }
+
     /* Client status is a map.So adding SuppressWarnings */
     @SuppressWarnings("unchecked")
     public static HashMap<String, Object> getClientStatus(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -435,7 +442,7 @@ public class ClientHelper {
 
     }
 
-    private String getActivateClientAsJSON(String date) {
+    private static String getActivateClientAsJSON(String date) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", CommonConstants.LOCALE);
         map.put("dateFormat", CommonConstants.DATE_FORMAT);
