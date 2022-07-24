@@ -64,7 +64,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -151,7 +151,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Table(name = "m_loan", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "loan_account_no_UNIQUE"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "loan_externalid_UNIQUE") })
-public class Loan extends AbstractPersistableCustom {
+public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     private static final Logger LOG = LoggerFactory.getLogger(Loan.class);
 
@@ -219,9 +219,9 @@ public class Loan extends AbstractPersistableCustom {
     @Column(name = "submittedon_date")
     private LocalDate submittedOnDate;
 
-    @ManyToOne(optional = true, fetch = FetchType.LAZY)
-    @JoinColumn(name = "submittedon_userid", nullable = true)
-    private AppUser submittedBy;
+    // @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    // @JoinColumn(name = "submittedon_userid", nullable = true)
+    // private AppUser submittedBy;
 
     @Column(name = "rejectedon_date")
     private LocalDate rejectedOnDate;
@@ -2029,10 +2029,10 @@ public class Loan extends AbstractPersistableCustom {
         }
     }
 
-    public void loanApplicationSubmittal(final AppUser currentUser, final LoanScheduleModel loanSchedule,
-            final LoanApplicationTerms loanApplicationTerms, final LoanLifecycleStateMachine lifecycleStateMachine,
-            final LocalDate submittedOn, final String externalId, final boolean allowTransactionsOnHoliday, final List<Holiday> holidays,
-            final WorkingDays workingDays, final boolean allowTransactionsOnNonWorkingDay) {
+    public void loanApplicationSubmittal(final LoanScheduleModel loanSchedule, final LoanApplicationTerms loanApplicationTerms,
+            final LoanLifecycleStateMachine lifecycleStateMachine, final LocalDate submittedOn, final String externalId,
+            final boolean allowTransactionsOnHoliday, final List<Holiday> holidays, final WorkingDays workingDays,
+            final boolean allowTransactionsOnNonWorkingDay) {
 
         updateLoanSchedule(loanSchedule);
 
@@ -2048,7 +2048,6 @@ public class Loan extends AbstractPersistableCustom {
         this.termFrequency = loanApplicationTerms.getLoanTermFrequency();
         this.termPeriodFrequencyType = loanApplicationTerms.getLoanTermPeriodFrequencyType().getValue();
         this.submittedOnDate = submittedOn;
-        this.submittedBy = currentUser;
         this.expectedDisbursementDate = loanApplicationTerms.getExpectedDisbursementDate();
         this.expectedFirstRepaymentOnDate = loanApplicationTerms.getRepaymentStartFromDate();
         this.interestChargedFromDate = loanApplicationTerms.getInterestChargedFromDate();
