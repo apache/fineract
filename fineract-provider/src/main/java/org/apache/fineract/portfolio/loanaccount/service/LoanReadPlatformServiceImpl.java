@@ -676,8 +676,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " left join m_loan_arrears_aging la on la.loan_id = l.id" //
                     + " left join m_fund f on f.id = l.fund_id" //
                     + " left join m_staff s on s.id = l.loan_officer_id" //
-                    + " left join m_appuser sbu on sbu.id = l.submittedon_userid"
-                    + " left join m_appuser rbu on rbu.id = l.rejectedon_userid"
+                    + " left join m_appuser sbu on sbu.id = l.created_by" + " left join m_appuser rbu on rbu.id = l.rejectedon_userid"
                     + " left join m_appuser wbu on wbu.id = l.withdrawnon_userid"
                     + " left join m_appuser abu on abu.id = l.approvedon_userid"
                     + " left join m_appuser dbu on dbu.id = l.disbursedon_userid" + " left join m_appuser cbu on cbu.id = l.closedon_userid"
