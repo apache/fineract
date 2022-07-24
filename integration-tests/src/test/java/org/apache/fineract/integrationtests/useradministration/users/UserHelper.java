@@ -86,7 +86,7 @@ public final class UserHelper {
     private static String getTestCreateUserAsJSON(int roleId, int staffId, String username) {
         return "{ \"username\": \"" + username + "\", \"firstname\": \"Test\", \"lastname\": \"User\", \"email\": \"whatever@mifos.org\","
                 + " \"officeId\": \"1\", \"staffId\": " + "\"" + staffId + "\",\"roles\": [\"" + roleId
-                + "\"], \"sendPasswordToEmail\": false}";
+                + "\"], \"sendPasswordToEmail\": false,     \"password\": \"password\"," + "    \"repeatPassword\": \"password\"}";
     }
 
     private static String getTestUpdateUserAsJSON(String username) {
