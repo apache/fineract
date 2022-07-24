@@ -1310,7 +1310,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             sql = sql + " order by " + order;
         }
 
-        final List<ResultsetRowData> result = fillDatatableResultSetDataRows(sql);
+        final List<ResultsetRowData> result = fillDatatableResultSetDataRows(sql, columnHeaders);
 
         return new GenericResultsetData(columnHeaders, result);
     }
@@ -1331,7 +1331,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             sql = sql + " and id = " + id;
         }
 
-        final List<ResultsetRowData> result = fillDatatableResultSetDataRows(sql);
+        final List<ResultsetRowData> result = fillDatatableResultSetDataRows(sql, columnHeaders);
 
         return new GenericResultsetData(columnHeaders, result);
     }
@@ -1339,7 +1339,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private CommandProcessingResult checkMainResourceExistsWithinScope(final String appTable, final Long appTableId) {
 
         final String sql = dataScopedSQL(appTable, appTableId);
-        LOG.info("data scoped sql: {}", sql);
+        LOG.debug("data scoped sql: {}", sql);
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
 
         if (!rs.next()) {
@@ -1471,22 +1471,30 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         return appTable;
     }
 
-    private List<ResultsetRowData> fillDatatableResultSetDataRows(final String sql) {
+    private List<ResultsetRowData> fillDatatableResultSetDataRows(final String sql, final List<ResultsetColumnHeaderData> columnHeaders) {
         final List<ResultsetRowData> resultsetDataRows = new ArrayList<>();
+        final GenericResultsetData genericResultsetData = new GenericResultsetData(columnHeaders, null);
 
         final SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql); // NOSONAR
         final SqlRowSetMetaData rsmd = rowSet.getMetaData();
 
         while (rowSet.next()) {
-            final List<String> columnValues = new ArrayList<>();
+            final List<Object> columnValues = new ArrayList<>();
+
             for (int i = 0; i < rsmd.getColumnCount(); i++) {
                 final String columnName = rsmd.getColumnName(i + 1);
-                final String columnValue = rowSet.getString(columnName);
-                columnValues.add(columnValue);
+                final String colType = genericResultsetData.getColTypeOfColumnNamed(columnName);
+                if ("DECIMAL".equalsIgnoreCase(colType)) {
+                    columnValues.add(rowSet.getBigDecimal(columnName));
+                } else if ("DATE".equalsIgnoreCase(colType) || ("TIMESTAMP WITHOUT TIME ZONE".equalsIgnoreCase(colType) // PostgreSQL
+                        || "DATETIME".equalsIgnoreCase(colType) || "TIMESTAMP".equalsIgnoreCase(colType))) {
+                    columnValues.add(rowSet.getObject(columnName));
+                } else {
+                    columnValues.add(rowSet.getString(columnName));
+                }
             }
 
-            final ResultsetRowData resultsetDataRow = ResultsetRowData.create(columnValues);
-            resultsetDataRows.add(resultsetDataRow);
+            resultsetDataRows.add(ResultsetRowData.create(columnValues));
         }
 
         return resultsetDataRows;
@@ -1696,13 +1704,13 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     private boolean columnChanged(final String key, final String keyValue, final String colType, final GenericResultsetData grs) {
 
-        final List<String> columnValues = grs.getData().get(0).getRow();
+        final List<Object> columnValues = grs.getData().get(0).getRow();
 
         String columnValue = null;
         for (int i = 0; i < grs.getColumnHeaders().size(); i++) {
 
             if (key.equals(grs.getColumnHeaders().get(i).getColumnName())) {
-                columnValue = columnValues.get(i);
+                columnValue = (String) columnValues.get(i);
 
                 if (notTheSame(columnValue, keyValue, colType)) {
                     return true;
