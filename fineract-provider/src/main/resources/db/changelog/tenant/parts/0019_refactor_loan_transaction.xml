@@ -22,8 +22,8 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <changeSet author="fineract" id="1">
-        <validCheckSum>8:4500ffb68c695d72caba498deff75643</validCheckSum>
+    <changeSet author="fineract" id="1" onValidationFail="MARK_RAN">
+        <validCheckSum>8:177f2e2cbac12752ede2182bbbfde6ae</validCheckSum>
         <addColumn tableName="m_loan_transaction">
             <column name="createdby_id" type="BIGINT" valueComputed="appuser_id"/>
             <column name="lastmodifiedby_id" type="BIGINT"/>
