@@ -20,7 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -37,7 +37,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
+import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -56,7 +56,7 @@ import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
  */
 @Entity
 @Table(name = "m_loan_transaction", uniqueConstraints = { @UniqueConstraint(columnNames = { "external_id" }, name = "external_id_UNIQUE") })
-public class LoanTransaction extends AbstractAuditableCustom {
+public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id", nullable = false)
@@ -726,8 +726,8 @@ public class LoanTransaction extends AbstractAuditableCustom {
         this.manuallyAdjustedOrReversed = true;
     }
 
-    public LocalDateTime getCreatedDateTime() {
-        return (this.getCreatedDate().isPresent() ? this.getCreatedDate().get() : DateUtils.getLocalDateTimeOfTenant());
+    public OffsetDateTime getCreatedDateTime() {
+        return (this.getCreatedDate().isPresent() ? this.getCreatedDate().get() : DateUtils.getOffsetDateTimeOfTenant());
     }
 
     public boolean isLastTransaction(final LoanTransaction loanTransaction) {
@@ -806,6 +806,10 @@ public class LoanTransaction extends AbstractAuditableCustom {
 
     public Set<LoanCollateralManagement> getLoanCollateralManagementSet() {
         return this.loanCollateralManagementSet;
+    }
+
+    public LocalDate getSubmittedOnDate() {
+        return submittedOnDate;
     }
 
     // TODO missing hashCode(), equals(Object obj), but probably OK as long as
