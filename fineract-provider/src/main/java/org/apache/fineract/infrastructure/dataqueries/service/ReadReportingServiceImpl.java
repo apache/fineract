@@ -115,7 +115,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         writer.append('\n');
 
         final List<ResultsetRowData> data = result.getData();
-        List<String> row;
+        List<Object> row;
         Integer rSize;
         // String currCol;
         String currColType;
@@ -129,7 +129,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             for (int j = 0; j < rSize; j++) {
                 // currCol = columnHeaders.get(j).getColumnName();
                 currColType = columnHeaders.get(j).getColumnType();
-                currVal = row.get(j);
+                currVal = (String) row.get(j);
                 if (currVal != null) {
                     if (currColType.equals("DECIMAL") || currColType.equals("DOUBLE") || currColType.equals("BIGINT")
                             || currColType.equals("SMALLINT") || currColType.equals("INT")) {
@@ -252,7 +252,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
             final List<ResultsetColumnHeaderData> columnHeaders = result.getColumnHeaders();
             final List<ResultsetRowData> data = result.getData();
-            List<String> row;
+            List<Object> row;
 
             log.info("NO. of Columns: {}", columnHeaders.size());
             final Integer chSize = columnHeaders.size();
@@ -282,7 +282,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
                 rSize = row.size();
                 for (int j = 0; j < rSize; j++) {
                     currColType = columnHeaders.get(j).getColumnType();
-                    currVal = row.get(j);
+                    currVal = (String) row.get(j);
                     if (currVal != null) {
                         if (currColType.equals("DECIMAL") || currColType.equals("DOUBLE") || currColType.equals("BIGINT")
                                 || currColType.equals("SMALLINT") || currColType.equals("INT")) {

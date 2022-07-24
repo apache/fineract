@@ -18,15 +18,17 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
+import static java.lang.String.format;
+
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoField;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseIndependentQueryService;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
@@ -77,7 +79,7 @@ public class GenericDataServiceImpl implements GenericDataService {
             }
 
             while (rs.next()) {
-                final List<String> columnValues = new ArrayList<>();
+                final List<Object> columnValues = new ArrayList<>();
                 for (int i = 0; i < rsmd.getColumnCount(); i++) {
                     final String columnName = rsmd.getColumnName(i + 1);
                     final String columnValue = rs.getString(columnName);
@@ -134,12 +136,12 @@ public class GenericDataServiceImpl implements GenericDataService {
         final List<ResultsetColumnHeaderData> columnHeaders = grs.getColumnHeaders();
 
         final List<ResultsetRowData> data = grs.getData();
-        List<String> row;
+        List<Object> row;
         Integer rSize;
         final String doubleQuote = "\"";
         final String slashDoubleQuote = "\\\"";
         String currColType;
-        String currVal;
+        Object currVal;
 
         for (int i = 0; i < data.size(); i++) {
             writer.append("\n{");
@@ -160,23 +162,24 @@ public class GenericDataServiceImpl implements GenericDataService {
                 if (currColType == null && colType.equalsIgnoreCase("DATE")) {
                     currColType = "DATE";
                 }
+                if (currColType == null && colType.equalsIgnoreCase("DATETIME")) {
+                    currColType = "DATETIME";
+                }
                 currVal = row.get(j);
                 if (currVal != null && currColType != null) {
                     if (currColType.equals("DECIMAL") || currColType.equals("INTEGER")) {
                         writer.append(currVal);
                     } else {
                         if (currColType.equals("DATE")) {
-                            final LocalDate localDate = LocalDate.parse(currVal);
-                            writer.append(
-                                    "[" + localDate.getYear() + ", " + localDate.getMonthValue() + ", " + localDate.getDayOfMonth() + "]");
+                            final LocalDate localDate = new java.sql.Date(((Date) currVal).getTime()).toLocalDate();
+                            writer.append(format("[%d,%d,%d]", localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth()));
                         } else if (currColType.equals("DATETIME")) {
-                            final LocalDateTime localDateTime = LocalDateTime.parse(formatDateTimeValue(currVal),
-                                    DateUtils.DEFAULT_DATETIME_FORMATTER);
-                            writer.append("[" + localDateTime.getYear() + ", " + localDateTime.getMonthValue() + ", "
-                                    + localDateTime.getDayOfMonth() + ", " + localDateTime.getHour() + ", " + localDateTime.getMinute()
-                                    + ", " + localDateTime.getSecond() + ", " + localDateTime.get(ChronoField.MILLI_OF_SECOND) + "]");
+                            final LocalDateTime ldt = currVal instanceof Timestamp ? ((Timestamp) currVal).toLocalDateTime()
+                                    : (LocalDateTime) currVal;
+                            writer.append(format("[%d,%d,%d,%d,%d,%d,%d]", ldt.getYear(), ldt.getMonthValue(), ldt.getDayOfMonth(),
+                                    ldt.getHour(), ldt.getMinute(), ldt.getSecond(), ldt.getNano()));
                         } else {
-                            writer.append(doubleQuote + replace(currVal, doubleQuote, slashDoubleQuote) + doubleQuote);
+                            writer.append(doubleQuote + replace((String) currVal, doubleQuote, slashDoubleQuote) + doubleQuote);
                         }
                     }
                 } else {
@@ -263,15 +266,5 @@ public class GenericDataServiceImpl implements GenericDataService {
         } catch (IllegalArgumentException e) {
             throw new DatatableNotFoundException(datatable);
         }
-    }
-
-    private String formatDateTimeValue(String dateTimeValue) {
-        if (dateTimeValue.length() > 19) {
-            dateTimeValue = dateTimeValue.substring(0, 19);
-        }
-        if (dateTimeValue.contains("T")) {
-            dateTimeValue = dateTimeValue.replace("T", " ");
-        }
-        return dateTimeValue;
     }
 }
