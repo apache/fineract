@@ -19,7 +19,7 @@
 package org.apache.fineract.portfolio.collateralmanagement.data;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public final class LoanTransactionData {
 
@@ -29,9 +29,9 @@ public final class LoanTransactionData {
 
     private final Long loanId;
 
-    private final LocalDateTime lastRepaymentDate;
+    private final OffsetDateTime lastRepaymentDate;
 
-    private LoanTransactionData(final Long loanId, final LocalDateTime lastRepaymentDate, final BigDecimal remainingAmount,
+    private LoanTransactionData(final Long loanId, final OffsetDateTime lastRepaymentDate, final BigDecimal remainingAmount,
             final BigDecimal lastRepayment) {
         this.lastRepayment = lastRepayment;
         this.lastRepaymentDate = lastRepaymentDate;
@@ -39,7 +39,7 @@ public final class LoanTransactionData {
         this.loanId = loanId;
     }
 
-    public static LoanTransactionData instance(final Long loanId, final LocalDateTime lastRepaymentDate, final BigDecimal remainingAmount,
+    public static LoanTransactionData instance(final Long loanId, final OffsetDateTime lastRepaymentDate, final BigDecimal remainingAmount,
             final BigDecimal lastRepayment) {
         return new LoanTransactionData(loanId, lastRepaymentDate, remainingAmount, lastRepayment);
     }

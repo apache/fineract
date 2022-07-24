@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.core.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -71,6 +72,11 @@ public final class DateUtils {
     public static LocalDateTime getLocalDateTimeOfTenant() {
         final ZoneId zone = getDateTimeZoneOfTenant();
         return LocalDateTime.now(zone).truncatedTo(ChronoUnit.SECONDS);
+    }
+
+    public static OffsetDateTime getOffsetDateTimeOfTenant() {
+        final ZoneId zone = getDateTimeZoneOfTenant();
+        return OffsetDateTime.now(zone).truncatedTo(ChronoUnit.SECONDS);
     }
 
     public static LocalDateTime getLocalDateTimeOfSystem() {

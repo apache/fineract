@@ -63,6 +63,7 @@ public class LoanTransactionHelper {
     private static final String WRITE_OFF_LOAN_COMMAND = "writeoff";
     private static final String WAIVE_INTEREST_COMMAND = "waiveinterest";
     private static final String MAKE_REPAYMENT_COMMAND = "repayment";
+    private static final String UNDO = "undo";
     private static final String CREDIT_BALANCE_REFUND_COMMAND = "creditBalanceRefund";
     private static final String WITHDRAW_LOAN_APPLICATION_COMMAND = "withdrawnByApplicant";
     private static final String RECOVER_FROM_GUARANTORS_COMMAND = "recoverGuarantees";
@@ -360,6 +361,10 @@ public class LoanTransactionHelper {
                 getRepaymentBodyAsJSON(date, amountToBePaid), "");
     }
 
+    public HashMap reverseRepayment(final Integer loanId, final Integer transactionId, String date) {
+        return (HashMap) performLoanTransaction(createLoanTransactionURL(UNDO, loanId, transactionId), getUndoJsonBody(date), "");
+    }
+
     public HashMap makeRepaymentWithPDC(final String date, final Float amountToBePaid, final Integer loanID, final Integer paymentType) {
         return (HashMap) performLoanTransaction(createLoanTransactionURL(MAKE_REPAYMENT_COMMAND, loanID),
                 getRepaymentWithPDCBodyAsJSON(date, amountToBePaid, paymentType), "");
@@ -554,6 +559,15 @@ public class LoanTransactionHelper {
         return new Gson().toJson(map);
     }
 
+    private String getUndoJsonBody(String date) {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("transactionDate", date);
+        map.put("transactionAmount", "0");
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("locale", "en");
+        return new Gson().toJson(map);
+    }
+
     private String getRepaymentWithPDCBodyAsJSON(final String transactionDate, final Float transactionAmount, final Integer paymentTypeId) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
@@ -706,6 +720,11 @@ public class LoanTransactionHelper {
 
     private String createLoanTransactionURL(final String command, final Integer loanID) {
         return "/fineract-provider/api/v1/loans/" + loanID + "/transactions?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
+    }
+
+    private String createLoanTransactionURL(final String command, final Integer loanID, final Integer transactionId) {
+        return "/fineract-provider/api/v1/loans/" + loanID + "/transactions/" + transactionId + "?command=" + command + "&"
+                + Utils.TENANT_IDENTIFIER;
     }
 
     private String createGlimAccountURL(final String command, final Integer glimID) {
@@ -949,5 +968,21 @@ public class LoanTransactionHelper {
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN);
         return Utils.performServerOutputTemplateLocationGet(requestSpec, responseSpec,
                 "/fineract-provider/api/v1/imports/getOutputTemplateLocation" + "?" + Utils.TENANT_IDENTIFIER, importDocumentId);
+    }
+
+    public static HashMap<String, Object> getLoanAuditFields(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer loanId, final String jsonReturn) {
+        final String GET_LOAN_URL = "/fineract-provider/api/v1/internal/loan/" + loanId + "/audit?" + Utils.TENANT_IDENTIFIER;
+        LOG.info("---------------------------------GET A LOAN ENTITY AUDIT FIELDS---------------------------------------------");
+        return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_URL, jsonReturn);
+    }
+
+    public static HashMap<String, Object> getLoanTransactionAuditFields(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer loanId, final Integer transactionId, final String jsonReturn) {
+        final String GET_LOAN_TRANSACTION_URL = "/fineract-provider/api/v1/internal/loan/" + loanId + "/transaction/" + transactionId
+                + "/audit?" + Utils.TENANT_IDENTIFIER;
+        LOG.info(
+                "---------------------------------GET A LOAN TRANSACTION ENTITY AUDIT FIELDS---------------------------------------------");
+        return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_TRANSACTION_URL, jsonReturn);
     }
 }
