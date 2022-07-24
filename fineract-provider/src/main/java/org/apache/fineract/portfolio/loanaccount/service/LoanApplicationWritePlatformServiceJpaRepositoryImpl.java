@@ -284,7 +284,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     public CommandProcessingResult submitApplication(final JsonCommand command) {
 
         try {
-            final AppUser currentUser = getAppUserIfPresent();
             boolean isMeetingMandatoryForJLGLoans = configurationDomainService.isMeetingMandatoryForJLGLoans();
             final Long productId = this.fromJsonHelper.extractLongNamed("productId", command.parsedJson());
             final LoanProduct loanProduct = this.loanProductRepository.findById(productId)
@@ -334,7 +333,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 throw new PlatformApiDataValidationException(dataValidationErrors);
             }
 
-            final Loan newLoanApplication = this.loanAssembler.assembleFrom(command, currentUser);
+            final Loan newLoanApplication = this.loanAssembler.assembleFrom(command);
 
             checkForProductMixRestrictions(newLoanApplication);
 
