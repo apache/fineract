@@ -22,7 +22,7 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <changeSet id="1" author="fineract">
+    <changeSet id="alter-m_client-add_surname-column_1" author="fineract">
         <preConditions onFail="MARK_RAN">
             <not>
                 <columnExists tableName="m_client" columnName="surname"/>
@@ -30,6 +30,21 @@
         </preConditions>
         <addColumn tableName="m_client">
             <column name="surname" type="VARCHAR(50)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="alter-m_appuser-add_gender_cv_id-column_2" author="fineract">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_appuser" columnName="gender_cv_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_appuser">
+            <column name="gender_cv_id" type="int">
+                <constraints nullable="true"
+                             foreignKeyName="FK_m_appuser_gender_cv_id"
+                             references="m_code_value(id)"/>
+            </column>
         </addColumn>
     </changeSet>
 </databaseChangeLog>

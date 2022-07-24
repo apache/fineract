@@ -641,8 +641,9 @@ public final class Client extends AbstractPersistableCustom {
 
             baseDataValidator.reset().parameter(ClientApiConstants.lastnameParamName).value(this.lastname)
                     .mustBeBlankWhenParameterProvided(ClientApiConstants.fullnameParamName, this.fullname);
+
             baseDataValidator.reset().parameter(ClientApiConstants.surnameParamName).value(this.surname)
-                    .mustBeBlankWhenParameterProvided(ClientApiConstants.fullnameParamName, this.fullname);
+                    .mustBeBlankWhenParameterProvided(ClientApiConstants.surnameParamName, this.surname);
         } else {
 
             baseDataValidator.reset().parameter(ClientApiConstants.firstnameParamName).value(this.firstname).notBlank()
@@ -651,7 +652,7 @@ public final class Client extends AbstractPersistableCustom {
                     .notExceedingLengthOf(50);
             baseDataValidator.reset().parameter(ClientApiConstants.lastnameParamName).value(this.lastname).notBlank()
                     .notExceedingLengthOf(50);
-            baseDataValidator.reset().parameter(ClientApiConstants.surnameParamName).value(this.surname).notBlank()
+            baseDataValidator.reset().parameter(ClientApiConstants.surnameParamName).value(this.surname).ignoreIfNull()
                     .notExceedingLengthOf(50);
         }
     }

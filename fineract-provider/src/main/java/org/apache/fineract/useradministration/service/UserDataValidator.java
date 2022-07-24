@@ -47,7 +47,7 @@ public final class UserDataValidator {
      */
     private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("username", "firstname", "lastname", "password",
             "repeatPassword", "email", "officeId", "notSelectedRoles", "roles", "sendPasswordToEmail", "staffId", "passwordNeverExpires",
-            AppUserConstants.IS_SELF_SERVICE_USER, AppUserConstants.CLIENTS));
+            AppUserConstants.IS_SELF_SERVICE_USER, AppUserConstants.CLIENTS,AppUserConstants.GENDER,"locale"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -108,6 +108,10 @@ public final class UserDataValidator {
         if (this.fromApiJsonHelper.parameterExists("staffId", element)) {
             final Long staffId = this.fromApiJsonHelper.extractLongNamed("staffId", element);
             baseDataValidator.reset().parameter("staffId").value(staffId).notNull().integerGreaterThanZero();
+        }
+        if (this.fromApiJsonHelper.parameterExists("genderId", element)) {
+            final Long genderId = this.fromApiJsonHelper.extractLongNamed("genderId", element);
+            baseDataValidator.reset().parameter("genderId").value(genderId).notNull().integerGreaterThanZero();
         }
 
         if (this.fromApiJsonHelper.parameterExists(AppUserConstants.PASSWORD_NEVER_EXPIRES, element)) {

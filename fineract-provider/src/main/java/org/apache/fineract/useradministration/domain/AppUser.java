@@ -122,6 +122,9 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
     @Column(name = "cannot_change_password", nullable = true)
     private Boolean cannotChangePassword;
 
+    @Column(name = "gender_cv_id", nullable = true)
+    private Integer gender;
+
     public static AppUser fromJson(final Office userOffice, final Staff linkedStaff, final Set<Role> allRoles,
             final Collection<Client> clients, final JsonCommand command) {
 
@@ -154,11 +157,12 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
         final String email = command.stringValueOfParameterNamed("email");
         final String firstname = command.stringValueOfParameterNamed("firstname");
         final String lastname = command.stringValueOfParameterNamed("lastname");
+        final Integer gender = command.integerValueOfParameterNamed("genderId");
 
         final boolean isSelfServiceUser = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER);
 
         return new AppUser(userOffice, user, allRoles, email, firstname, lastname, linkedStaff, passwordNeverExpire, isSelfServiceUser,
-                clients, cannotChangePassword);
+                clients, cannotChangePassword,gender);
     }
 
     protected AppUser() {
@@ -169,7 +173,7 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
 
     public AppUser(final Office office, final User user, final Set<Role> roles, final String email, final String firstname,
             final String lastname, final Staff staff, final boolean passwordNeverExpire, final boolean isSelfServiceUser,
-            final Collection<Client> clients, final Boolean cannotChangePassword) {
+            final Collection<Client> clients, final Boolean cannotChangePassword,final Integer gender) {
         this.office = office;
         this.email = email.trim();
         this.username = user.getUsername().trim();
@@ -188,6 +192,7 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
         this.isSelfServiceUser = isSelfServiceUser;
         this.appUserClientMappings = createAppUserClientMappings(clients);
         this.cannotChangePassword = cannotChangePassword;
+        this.gender = gender;
     }
 
     public EnumOptionData organisationalRoleData() {
@@ -336,6 +341,13 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
             }
         }
 
+        final String genderParamName = "genderId";
+        if (command.isChangeInIntegerParameterNamed(genderParamName, this.gender)) {
+            final Integer newValue = command.integerValueOfParameterNamed(emailParamName);
+            actualChanges.put(emailParamName, newValue);
+            this.gender = newValue;
+        }
+
         return actualChanges;
     }
 
@@ -467,6 +479,10 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
 
     public LocalDate getLastTimePasswordUpdated() {
         return this.lastTimePasswordUpdated;
+    }
+
+    public Integer getGender() {
+        return gender;
     }
 
     public boolean canNotApproveLoanInPast() {
