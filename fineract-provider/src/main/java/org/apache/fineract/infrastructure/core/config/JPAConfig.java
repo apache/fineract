@@ -20,6 +20,7 @@
 package org.apache.fineract.infrastructure.core.config;
 
 import java.util.Map;
+import org.apache.fineract.infrastructure.core.auditing.JpaAuditingHandlerRegistrar;
 import org.apache.fineract.infrastructure.core.domain.AuditorAwareImpl;
 import org.apache.fineract.infrastructure.core.persistence.DatabaseSelectingPersistenceUnitPostProcessor;
 import org.apache.fineract.infrastructure.core.persistence.ExtendedJpaTransactionManager;
@@ -36,6 +37,7 @@ import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
@@ -53,6 +55,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 @EnableJpaAuditing
 @EnableJpaRepositories(basePackages = "org.apache.fineract.**.domain")
 @EnableConfigurationProperties(JpaProperties.class)
+@Import(JpaAuditingHandlerRegistrar.class)
 public class JPAConfig extends JpaBaseConfiguration {
 
     private final DatabaseTypeResolver databaseTypeResolver;

@@ -22,7 +22,9 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-     <include file="parts/0003_reset_postgresql_sequences.xml" relativeToChangelogFile="true"/>
-     <include file="parts/0004_readonly_database_connection.xml" relativeToChangelogFile="true"/>
-     <include file="parts/0005_jdbc_connection_string.xml" relativeToChangelogFile="true"/>
+    <changeSet author="fineract" id="1" context="tenant_store_db">
+        <update tableName="tenant_server_connections">
+            <column name="schema_connection_parameters" value="serverTimezone=UTC&amp;useLegacyDatetimeCode=false&amp;sessionVariables=time_zone='+00:00'"/>
+        </update>
+    </changeSet>
 </databaseChangeLog>
