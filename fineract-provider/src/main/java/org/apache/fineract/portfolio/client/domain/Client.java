@@ -643,7 +643,7 @@ public final class Client extends AbstractPersistableCustom {
                     .mustBeBlankWhenParameterProvided(ClientApiConstants.fullnameParamName, this.fullname);
 
             baseDataValidator.reset().parameter(ClientApiConstants.surnameParamName).value(this.surname)
-                    .mustBeBlankWhenParameterProvided(ClientApiConstants.surnameParamName, this.surname);
+                    .mustBeBlankWhenParameterProvided(ClientApiConstants.fullnameParamName, this.fullname);
         } else {
 
             baseDataValidator.reset().parameter(ClientApiConstants.firstnameParamName).value(this.firstname).notBlank()

@@ -300,6 +300,13 @@ public final class ClientDataValidator {
             baseDataValidator.reset().parameter(ClientApiConstants.fullnameParamName).value(fullnameParam)
                     .mustBeBlankWhenParameterProvided(ClientApiConstants.lastnameParamName, lastnameParamName);
         }
+
+        final String surnameParamName = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.surnameParamName, element);
+        if (StringUtils.isNotBlank(surnameParamName)) {
+            final String surnameParam = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.surnameParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.surnameParamName).value(surnameParam)
+                    .mustBeBlankWhenParameterProvided(ClientApiConstants.surnameParamName, surnameParam);
+        }
     }
 
     private void validateRequiredIndividualNamePartsExist(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
@@ -314,6 +321,10 @@ public final class ClientDataValidator {
         final String lastnameParamName = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.lastnameParamName, element);
         baseDataValidator.reset().parameter(ClientApiConstants.lastnameParamName).value(lastnameParamName).notBlank()
                 .notExceedingLengthOf(50);
+
+        final String surnameParam = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.surnameParamName, element);
+        baseDataValidator.reset().parameter(ClientApiConstants.surnameParamName).value(surnameParam).ignoreIfNull()
+                .notExceedingLengthOf(50);
     }
 
     private void fullnameCannotBeBlank(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
@@ -324,7 +335,8 @@ public final class ClientDataValidator {
     private boolean isIndividualNamePartParameterPassed(final JsonElement element) {
         return this.fromApiJsonHelper.parameterExists(ClientApiConstants.firstnameParamName, element)
                 || this.fromApiJsonHelper.parameterExists(ClientApiConstants.middlenameParamName, element)
-                || this.fromApiJsonHelper.parameterExists(ClientApiConstants.lastnameParamName, element);
+                || this.fromApiJsonHelper.parameterExists(ClientApiConstants.lastnameParamName, element)
+                || this.fromApiJsonHelper.parameterExists(ClientApiConstants.surnameParamName, element);
     }
 
     private boolean isFullnameParameterPassed(final JsonElement element) {
@@ -335,8 +347,9 @@ public final class ClientDataValidator {
         final String firstname = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.firstnameParamName, element);
         final String middlename = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.middlenameParamName, element);
         final String lastname = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.lastnameParamName, element);
+        final String surname = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.surnameParamName, element);
 
-        return StringUtils.isNotBlank(firstname) || StringUtils.isNotBlank(middlename) || StringUtils.isNotBlank(lastname);
+        return StringUtils.isNotBlank(firstname) || StringUtils.isNotBlank(middlename) || StringUtils.isNotBlank(lastname) || StringUtils.isNotBlank(surname);
     }
 
     private boolean isFullnameProvided(final JsonElement element) {

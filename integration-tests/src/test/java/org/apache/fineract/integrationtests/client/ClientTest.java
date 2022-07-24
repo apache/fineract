@@ -68,4 +68,14 @@ public class ClientTest extends IntegrationTest {
         }
         return Optional.empty();
     }
+
+    @Test
+    @Order(3)
+    void createClientWithSurname() {
+        assertThat(
+                ok(fineract().clients.create6(
+                        new PostClientsRequest().legalFormId(1).officeId(1).firstname("John").surname("Doe").lastname("mike").dateFormat(dateFormat()).locale("en_US")))
+                        .getClientId()
+        ).isGreaterThan(0);
+    }
 }
