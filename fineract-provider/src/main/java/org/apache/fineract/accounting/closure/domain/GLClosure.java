@@ -27,6 +27,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.closure.api.GLClosureJsonInputParams;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -36,6 +39,8 @@ import org.apache.fineract.organisation.office.domain.Office;
 @Entity
 @Table(name = "acc_gl_closure", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "office_id", "closing_date" }, name = "office_id_closing_date") })
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class GLClosure extends AbstractAuditableCustom {
 
     @ManyToOne
@@ -50,10 +55,6 @@ public class GLClosure extends AbstractAuditableCustom {
 
     @Column(name = "comments", nullable = true, length = 500)
     private String comments;
-
-    protected GLClosure() {
-        //
-    }
 
     public GLClosure(final Office office, final LocalDate closingDate, final String comments) {
         this.office = office;
@@ -89,12 +90,5 @@ public class GLClosure extends AbstractAuditableCustom {
         }
     }
 
-    public LocalDate getClosingDate() {
-        return this.closingDate;
-    }
-
-    public Office getOffice() {
-        return this.office;
-    }
 
 }
