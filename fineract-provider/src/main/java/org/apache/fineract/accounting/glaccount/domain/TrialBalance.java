@@ -25,10 +25,18 @@ import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_trial_balance")
+@NoArgsConstructor
+@Getter
+@Setter
+@Accessors(chain = true)
 public class TrialBalance extends AbstractPersistableCustom {
 
     @Column(name = "office_id", nullable = false)
@@ -51,42 +59,14 @@ public class TrialBalance extends AbstractPersistableCustom {
 
     public static TrialBalance getInstance(final Long officeId, final Long glAccountId, final BigDecimal amount, final LocalDate entryDate,
             final LocalDate transactionDate) {
-        return new TrialBalance(officeId, glAccountId, amount, entryDate, transactionDate);
-    }
-
-    private TrialBalance(final Long officeId, final Long glAccountId, final BigDecimal amount, final LocalDate entryDate,
-            final LocalDate transactionDate) {
-        this.officeId = officeId;
-        this.glAccountId = glAccountId;
-        this.amount = amount;
-        this.entryDate = entryDate;
-        this.transactionDate = transactionDate;
-    }
-
-    protected TrialBalance() {}
-
-    public Long getOfficeId() {
-        return officeId;
-    }
-
-    public LocalDate getTransactionDate() {
-        return transactionDate;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setClosingBalance(final BigDecimal closingBalance) {
-        this.closingBalance = closingBalance;
-    }
-
-    public LocalDate getEntryDate() {
-        return entryDate;
-    }
-
-    public Long getGlAccountId() {
-        return glAccountId;
+        //@formatter:off
+        return new TrialBalance()
+                .setOfficeId(officeId)
+                .setGlAccountId(glAccountId)
+                .setAmount(amount)
+                .setEntryDate(entryDate)
+                .setTransactionDate(transactionDate);
+        //@formatter:on
     }
 
     @Override

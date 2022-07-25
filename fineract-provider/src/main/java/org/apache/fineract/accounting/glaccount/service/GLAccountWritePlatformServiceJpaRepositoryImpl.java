@@ -129,7 +129,8 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
             // is the new parent valid
             if (changesOnly.containsKey(GLAccountJsonInputParams.PARENT_ID.getValue())) {
                 final GLAccount parentAccount = validateParentGLAccount(parentId);
-                glAccount.updateParentAccount(parentAccount);
+                glAccount.setParent(parentAccount);
+                glAccount.generateHierarchy();
             }
 
             if (changesOnly.containsKey(GLAccountJsonInputParams.TAGID.getValue())) {
@@ -139,7 +140,7 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
                 if (tagIdLongValue != null) {
                     tagID = retrieveTagId(tagIdLongValue, accountType);
                 }
-                glAccount.updateTagId(tagID);
+                glAccount.setTagId(tagID);
             }
 
             /**

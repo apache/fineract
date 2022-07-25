@@ -30,8 +30,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.fineract.accounting.glaccount.api.GLAccountJsonInputParams;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -39,6 +41,10 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "acc_gl_account", uniqueConstraints = { @UniqueConstraint(columnNames = { "gl_code" }, name = "acc_gl_code") })
+@NoArgsConstructor
+@Getter
+@Setter
+@Accessors(chain = true)
 public class GLAccount extends AbstractPersistableCustom {
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -59,7 +65,7 @@ public class GLAccount extends AbstractPersistableCustom {
     private String glCode;
 
     @Column(name = "disabled", nullable = false)
-    private boolean disabled = false;
+    private boolean disabled;
 
     @Column(name = "manual_journal_entries_allowed", nullable = false)
     private boolean manualEntriesAllowed = true;
@@ -77,23 +83,6 @@ public class GLAccount extends AbstractPersistableCustom {
     @JoinColumn(name = "tag_id")
     private CodeValue tagId;
 
-    protected GLAccount() {
-        //
-    }
-
-    private GLAccount(final GLAccount parent, final String name, final String glCode, final boolean disabled,
-            final boolean manualEntriesAllowed, final Integer type, final Integer usage, final String description, final CodeValue tagId) {
-        this.name = StringUtils.defaultIfEmpty(name, null);
-        this.glCode = StringUtils.defaultIfEmpty(glCode, null);
-        this.disabled = BooleanUtils.toBooleanDefaultIfNull(disabled, false);
-        this.manualEntriesAllowed = BooleanUtils.toBooleanDefaultIfNull(manualEntriesAllowed, true);
-        this.usage = usage;
-        this.type = type;
-        this.description = StringUtils.defaultIfEmpty(description, null);
-        this.parent = parent;
-        this.tagId = tagId;
-    }
-
     public static GLAccount fromJson(final GLAccount parent, final JsonCommand command, final CodeValue glAccountTagType) {
         final String name = command.stringValueOfParameterNamed(GLAccountJsonInputParams.NAME.getValue());
         final String glCode = command.stringValueOfParameterNamed(GLAccountJsonInputParams.GL_CODE.getValue());
@@ -103,7 +92,19 @@ public class GLAccount extends AbstractPersistableCustom {
         final Integer usage = command.integerValueSansLocaleOfParameterNamed(GLAccountJsonInputParams.USAGE.getValue());
         final Integer type = command.integerValueSansLocaleOfParameterNamed(GLAccountJsonInputParams.TYPE.getValue());
         final String description = command.stringValueOfParameterNamed(GLAccountJsonInputParams.DESCRIPTION.getValue());
-        return new GLAccount(parent, name, glCode, disabled, manualEntriesAllowed, type, usage, description, glAccountTagType);
+
+        //@formatter:off
+        return new GLAccount()
+                .setParent(parent)
+                .setName(name)
+                .setGlCode(glCode)
+                .setDisabled(disabled)
+                .setManualEntriesAllowed(manualEntriesAllowed)
+                .setType(type)
+                .setUsage(usage)
+                .setDescription(description)
+                .setTagId(glAccountTagType);
+        //@formatter:on
     }
 
     public Map<String, Object> update(final JsonCommand command) {
@@ -192,34 +193,6 @@ public class GLAccount extends AbstractPersistableCustom {
         return GLAccountUsage.HEADER.getValue().equals(this.usage);
     }
 
-    public Integer getUsage() {
-        return this.usage;
-    }
-
-    public List<GLAccount> getChildren() {
-        return this.children;
-    }
-
-    public boolean isDisabled() {
-        return this.disabled;
-    }
-
-    public boolean isManualEntriesAllowed() {
-        return this.manualEntriesAllowed;
-    }
-
-    public String getGlCode() {
-        return this.glCode;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public Integer getType() {
-        return this.type;
-    }
-
     public void generateHierarchy() {
 
         if (this.parent != null) {
@@ -237,12 +210,4 @@ public class GLAccount extends AbstractPersistableCustom {
         return GLAccountUsage.DETAIL.getValue().equals(this.usage);
     }
 
-    public void updateTagId(final CodeValue tagId) {
-        this.tagId = tagId;
-    }
-
-    public void updateParentAccount(final GLAccount parentAccount) {
-        this.parent = parentAccount;
-        generateHierarchy();
-    }
 }
