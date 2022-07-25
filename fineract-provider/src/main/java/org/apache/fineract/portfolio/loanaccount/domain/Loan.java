@@ -218,11 +218,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     // loan application states
     @Column(name = "submittedon_date")
     private LocalDate submittedOnDate;
-
-    // @ManyToOne(optional = true, fetch = FetchType.LAZY)
-    // @JoinColumn(name = "submittedon_userid", nullable = true)
-    // private AppUser submittedBy;
-
     @Column(name = "rejectedon_date")
     private LocalDate rejectedOnDate;
 

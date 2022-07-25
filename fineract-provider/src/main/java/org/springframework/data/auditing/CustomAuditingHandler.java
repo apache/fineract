@@ -20,11 +20,10 @@ package org.springframework.data.auditing;
 
 import java.time.temporal.TemporalAccessor;
 import java.util.Optional;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.fineract.infrastructure.core.auditing.CustomDateTimeProvider;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
-import org.springframework.core.log.LogMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.mapping.PersistentEntity;
 import org.springframework.data.mapping.PersistentProperty;
@@ -38,7 +37,7 @@ import org.springframework.util.Assert;
  */
 public class CustomAuditingHandler extends AuditingHandler {
 
-    private static final Log logger = LogFactory.getLog(CustomAuditingHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CustomAuditingHandler.class);
     private final AuditableBeanWrapperFactory factory;
     private boolean dateTimeForNow = true;
     private boolean modifyOnCreation = true;
@@ -129,12 +128,12 @@ public class CustomAuditingHandler extends AuditingHandler {
             touchAuditor(auditor, it, isNew);
             Optional<TemporalAccessor> now = dateTimeForNow ? touchDate(it, isNew) : Optional.empty();
 
-            if (logger.isDebugEnabled()) {
+            if (LOG.isDebugEnabled()) {
 
                 Object defaultedNow = now.map(Object::toString).orElse("not set");
                 Object defaultedAuditor = auditor.isPresent() ? auditor.toString() : "unknown";
 
-                logger.debug(LogMessage.format("Touched %s - Last modification at %s by %s", target, defaultedNow, defaultedAuditor));
+                LOG.debug("Touched {} - Last modification at {} by {}", target, defaultedNow, defaultedAuditor);
             }
 
             return it.getBean();
