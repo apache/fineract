@@ -63,7 +63,8 @@ public class ClientAuditingIntegrationTest {
     public void checkAuditDates() throws InterruptedException {
         final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
         String username = Utils.randomNameGenerator("user", 8);
-        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, 1, staffId, username, "resourceId");
+        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, 1, staffId, username, "password",
+                "resourceId");
         OffsetDateTime now = OffsetDateTime.now(ZoneId.of("Asia/Kolkata"));
         // Testing in minutes precision, but still need to take care around the end of the actual minute
         if (now.getSecond() > 56) {
