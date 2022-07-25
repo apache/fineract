@@ -20,21 +20,18 @@ package org.apache.fineract.accounting.financialactivityaccount.data;
 
 import java.util.List;
 import java.util.Map;
-import lombok.Getter;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 
 @RequiredArgsConstructor
-@Getter
+@Data
 public class FinancialActivityAccountData {
 
     private final Long id;
     private final FinancialActivityData financialActivityData;
     private final GLAccountData glAccountData;
-    @Setter
     private Map<String, List<GLAccountData>> glAccountOptions;
-    @Setter
     private List<FinancialActivityData> financialActivityOptions;
 
     public FinancialActivityAccountData() {

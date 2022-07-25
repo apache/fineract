@@ -18,12 +18,10 @@
  */
 package org.apache.fineract.accounting.financialactivityaccount.data;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 
-@RequiredArgsConstructor
-@Getter
+@Data
 public class FinancialActivityData {
 
     private final Integer id;
