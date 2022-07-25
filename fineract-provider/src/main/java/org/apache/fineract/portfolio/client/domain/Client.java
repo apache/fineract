@@ -180,14 +180,15 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "submittedon_date", nullable = true)
     private LocalDate submittedOnDate;
 
-    // Deprecated since common Auditable fields were introduced. Columns and data left untouched to help migration.
-
-    // @Column(name = "updated_on", nullable = true)
-    // private LocalDate updatedOnDate;
-
-    // @ManyToOne(optional = true, fetch = FetchType.LAZY)
-    // @JoinColumn(name = "updated_by", nullable = true)
-    // private AppUser updatedBy;
+    /*
+     * Deprecated since common Auditable fields were introduced. Columns and data left untouched to help migration.
+     *
+     * @Column(name = "updated_on", nullable = true) private LocalDate updatedOnDate;
+     *
+     * @ManyToOne(optional = true, fetch = FetchType.LAZY)
+     *
+     * @JoinColumn(name = "updated_by", nullable = true) private AppUser updatedBy;
+     */
 
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "activatedon_userid", nullable = true)
