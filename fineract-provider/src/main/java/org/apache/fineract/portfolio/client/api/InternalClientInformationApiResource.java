@@ -41,9 +41,10 @@ import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-//@Profile("test")
+@Profile("test")
 @Component
 @Path("/internal/client")
 @RequiredArgsConstructor

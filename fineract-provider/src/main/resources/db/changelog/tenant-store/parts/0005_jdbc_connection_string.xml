@@ -24,7 +24,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     <changeSet author="fineract" id="1" context="tenant_store_db">
         <update tableName="tenant_server_connections">
-            <column name="schema_connection_parameters" value="serverTimezone=UTC&amp;useLegacyDatetimeCode=false&amp;sessionVariables=time_zone='+00:00'"/>
+            <column name="schema_connection_parameters" value="serverTimezone=UTC&amp;useLegacyDatetimeCode=false&amp;sessionVariables=time_zone='-00:00'"/>
         </update>
     </changeSet>
 </databaseChangeLog>

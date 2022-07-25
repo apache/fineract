@@ -49,6 +49,12 @@ public final class UserHelper {
                 attribute);
     }
 
+    public static Object createUser(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, int roleId,
+            int staffId, String username, String password, String attribute) {
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_USER_URL,
+                getTestCreateUserAsJSON(roleId, staffId, username, password), attribute);
+    }
+
     public static PostUsersResponse createUser(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             PostUsersRequest request) {
         String requestBody = GSON.toJson(request);
@@ -86,7 +92,14 @@ public final class UserHelper {
     private static String getTestCreateUserAsJSON(int roleId, int staffId, String username) {
         return "{ \"username\": \"" + username + "\", \"firstname\": \"Test\", \"lastname\": \"User\", \"email\": \"whatever@mifos.org\","
                 + " \"officeId\": \"1\", \"staffId\": " + "\"" + staffId + "\",\"roles\": [\"" + roleId
-                + "\"], \"sendPasswordToEmail\": false,     \"password\": \"password\"," + "    \"repeatPassword\": \"password\"}";
+                + "\"], \"sendPasswordToEmail\": false}";
+    }
+
+    private static String getTestCreateUserAsJSON(int roleId, int staffId, String username, String password) {
+        return "{ \"username\": \"" + username + "\", \"firstname\": \"Test\", \"lastname\": \"User\", \"email\": \"whatever@mifos.org\","
+                + " \"officeId\": \"1\", \"staffId\": " + "\"" + staffId + "\",\"roles\": [\"" + roleId
+                + "\"], \"sendPasswordToEmail\": false,     \"password\": \"" + password + "\"," + "    \"repeatPassword\": \"" + password
+                + "\"}";
     }
 
     private static String getTestUpdateUserAsJSON(String username) {
