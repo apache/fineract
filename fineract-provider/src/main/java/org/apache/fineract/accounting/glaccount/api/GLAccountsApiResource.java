@@ -196,8 +196,7 @@ public class GLAccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(tags = {
-            "General Ledger Account" }, summary = "Update an Accounting closure", description = "Once an accounting closure is created, only the comments associated with it may be edited\n"
-                    + "\n")
+            "General Ledger Account" }, summary = "Update a GL Account", description = "Updates a GL Account")
     @RequestBody(content = @Content(schema = @Schema(implementation = GLAccountsApiResourceSwagger.PutGLAccountsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GLAccountsApiResourceSwagger.PutGLAccountsResponse.class))) })
@@ -216,7 +215,7 @@ public class GLAccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(tags = {
-            "General Ledger Account" }, summary = "Delete an accounting closure", description = "Note: Only the latest accounting closure associated with a branch may be deleted.")
+            "General Ledger Account" }, summary = "Delete a GL Account", description = "Deletes a GL Account")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GLAccountsApiResourceSwagger.DeleteGLAccountsRequest.class))) })
     public String deleteGLAccount(@PathParam("glAccountId") @Parameter(description = "glAccountId") final Long glAccountId) {
