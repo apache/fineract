@@ -58,7 +58,7 @@ public class ProductMixReadPlatformServiceImpl implements ProductMixReadPlatform
 
             final ProductMixDataExtractor extractor = new ProductMixDataExtractor(this.loanProductReadPlatformService, productId);
 
-            final String sql = "Select " + extractor.schema() + " where pm.product_id=? group by pm.product_id";
+            final String sql = "Select " + extractor.schema() + " where pm.product_id=?";
 
             final Map<Long, ProductMixData> productMixData = this.jdbcTemplate.query(sql, extractor, new Object[] { productId }); // NOSONAR
 
@@ -76,7 +76,7 @@ public class ProductMixReadPlatformServiceImpl implements ProductMixReadPlatform
 
         final ProductMixDataExtractor extractor = new ProductMixDataExtractor(this.loanProductReadPlatformService, null);
 
-        final String sql = "Select " + extractor.schema() + " group by pm.product_id";
+        final String sql = "Select " + extractor.schema();
 
         final Map<Long, ProductMixData> productMixData = this.jdbcTemplate.query(sql, extractor); // NOSONAR
 
