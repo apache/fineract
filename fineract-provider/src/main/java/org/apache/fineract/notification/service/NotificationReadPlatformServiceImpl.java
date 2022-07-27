@@ -108,6 +108,13 @@ public class NotificationReadPlatformServiceImpl implements NotificationReadPlat
     }
 
     @Override
+    public void updateSingleNotificationReadStatus(Long id) {
+        String sql = "UPDATE notification_mapper SET is_read = true WHERE is_read = false AND id = ?";
+        this.jdbcTemplate.update(sql, id);
+    }
+    
+
+    @Override
     public Page<NotificationData> getAllUnreadNotifications(final SearchParameters searchParameters) {
         final Long appUserId = context.authenticatedUser().getId();
         String sql = "SELECT " + sqlGenerator.calcFoundRows() + " ng.id as id, nm.user_id as userId, ng.object_type as objectType, "
