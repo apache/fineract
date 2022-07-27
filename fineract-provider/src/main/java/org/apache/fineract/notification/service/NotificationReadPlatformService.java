@@ -31,4 +31,6 @@ public interface NotificationReadPlatformService {
     Page<NotificationData> getAllNotifications(SearchParameters searchParameters);
 
     void updateNotificationReadStatus();
+
+    void updateSingleNotificationReadStatus(Long id);
 }
