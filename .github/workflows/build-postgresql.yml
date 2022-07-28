@@ -78,5 +78,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: test-results
+          name: server-logs
           path: integration-tests/build/cargo/
