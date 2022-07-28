@@ -62,7 +62,7 @@ public class ScheduledJobRunnerConfig {
         JobRepositoryFactoryBean factory = new JobRepositoryFactoryBean();
         factory.setDataSource(routingDataSource);
         factory.setTransactionManager(transactionManager);
-        factory.setIsolationLevelForCreate("ISOLATION_REPEATABLE_READ");
+        factory.setIsolationLevelForCreate("ISOLATION_READ_COMMITTED");
         factory.afterPropertiesSet();
         return factory;
     }
