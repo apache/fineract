@@ -366,10 +366,6 @@ public final class SavingsAccountData implements Serializable {
         return this.glAccountIdForInterestOnSavings;
     }
 
-    public SavingsAccountSummaryData getSavingsAccountSummaryData() {
-        return this.savingsAccountSummaryData;
-    }
-
     public List<SavingsAccountTransactionData> getSavingsAccountTransactionData() {
         return this.savingsAccountTransactionData;
     }
@@ -417,7 +413,7 @@ public final class SavingsAccountData implements Serializable {
         SavingsAccountTransactionData savingsTransaction = null;
         List<SavingsAccountTransactionData> trans = getTransactions();
         for (final SavingsAccountTransactionData transaction : trans) {
-            if (transaction.isNotReversed() && transaction.occursOn(date)) {
+            if (transaction.isNotReversed() && !transaction.isReversalTransaction() && transaction.occursOn(date)) {
                 savingsTransaction = transaction;
                 break;
             }
