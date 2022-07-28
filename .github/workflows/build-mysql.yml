@@ -65,3 +65,17 @@ jobs:
 
       - name: OAuth2 Build & Test
         run: ./gradlew --no-daemon -q --console=plain :oauth2-tests:test --fail-fast -PdbType=mysql
+
+      - name: Archive test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: integration-tests/build/reports/
+
+      - name: Archive server logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: server-logs
+          path: integration-tests/build/cargo/
