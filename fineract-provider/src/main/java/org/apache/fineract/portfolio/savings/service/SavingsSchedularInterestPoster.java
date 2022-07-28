@@ -22,6 +22,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -270,6 +271,7 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
                                     .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
                     savingsAccountData.getId() });
             List<SavingsAccountTransactionData> savingsAccountTransactionDataList = savingsAccountData.getSavingsAccountTransactionData();
+            LocalDateTime currentDate = DateUtils.getLocalDateTimeOfTenant();
             for (SavingsAccountTransactionData savingsAccountTransactionData : savingsAccountTransactionDataList) {
                 Date balanceEndDate = null;
                 if (savingsAccountTransactionData.getBalanceEndDate() != null) {
@@ -284,10 +286,9 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
                             savingsAccountTransactionData.isReversed(), savingsAccountTransactionData.getTransactionType().getId(),
                             savingsAccountTransactionData.getTransactionDate(), savingsAccountTransactionData.getAmount(), balanceEndDate,
                             savingsAccountTransactionData.getBalanceNumberOfDays(), savingsAccountTransactionData.getRunningBalance(),
-                            savingsAccountTransactionData.getCumulativeBalance(), savingsAccountTransactionData.getSubmittedOnDate(),
-                            Integer.valueOf(1), savingsAccountTransactionData.isManualTransaction(),
-                            savingsAccountTransactionData.getRefNo(), savingsAccountTransactionData.isReversalTransaction(),
-                            savingsAccountTransactionData.getOverdraftAmount(), });
+                            savingsAccountTransactionData.getCumulativeBalance(), currentDate, Integer.valueOf(1),
+                            savingsAccountTransactionData.isManualTransaction(), savingsAccountTransactionData.getRefNo(),
+                            savingsAccountTransactionData.isReversalTransaction(), savingsAccountTransactionData.getOverdraftAmount(), });
                 } else {
                     paramsForTransactionUpdate.add(new Object[] { savingsAccountTransactionData.isReversed(),
                             savingsAccountTransactionData.getAmount(), savingsAccountTransactionData.getOverdraftAmount(), balanceEndDate,

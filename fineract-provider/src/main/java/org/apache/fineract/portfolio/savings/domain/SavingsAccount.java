@@ -1168,8 +1168,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
     public void validatePivotDateTransaction(LocalDate transactionDate, final boolean backdatedTxnsAllowedTill,
             final Long relaxingDaysConfigForPivotDate, final String resourceTypeName) {
         if (backdatedTxnsAllowedTill) {
-            if (this.getSummary().getLastInterestCalculationDate() != null && transactionDate
-                    .isBefore(this.getSummary().getLastInterestCalculationDate().minusDays(relaxingDaysConfigForPivotDate))) {
+            if (this.getSummary().getInterestPostedTillDate() != null
+                    && transactionDate.isBefore(this.getSummary().getInterestPostedTillDate().minusDays(relaxingDaysConfigForPivotDate))) {
                 final Object[] defaultUserArgs = Arrays.asList(transactionDate, getActivationLocalDate()).toArray();
                 final String defaultUserMessage = "Transaction date cannot be before transactions pivot date.";
                 final ApiParameterError error = ApiParameterError.parameterError(

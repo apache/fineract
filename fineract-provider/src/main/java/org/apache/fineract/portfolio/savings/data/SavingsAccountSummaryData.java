@@ -152,7 +152,10 @@ public class SavingsAccountSummaryData implements Serializable {
     public void updateSummaryWithPivotConfig(final CurrencyData currency, final SavingsAccountTransactionSummaryWrapper wrapper,
             final SavingsAccountTransaction transaction, final List<SavingsAccountTransactionData> savingsAccountTransactions) {
 
-        if (transaction != null && !transaction.isReversalTransaction()) {
+        if (transaction != null) {
+            if (transaction.isReversalTransaction()) {
+                return;
+            }
             Money transactionAmount = Money.of(currency, transaction.getAmount());
             switch (SavingsAccountTransactionType.fromInt(transaction.getTypeOf())) {
                 case DEPOSIT:

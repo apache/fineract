@@ -164,7 +164,7 @@ public final class PostingPeriod {
             final LocalDate upToInterestCalculationDate, Collection<Long> interestPostTransactions, boolean isInterestTransfer,
             final Money minBalanceForInterestCalculation, final boolean isSavingsInterestPostingAtCurrentPeriodEnd,
             final BigDecimal overdraftInterestRateAsFraction, final Money minOverdraftForInterestCalculation, boolean isUserPosting,
-            int financialYearBeginningMonth) {
+            int financialYearBeginningMonth, final boolean isAllowOverdraft) {
 
         final List<EndOfDayBalance> accountEndOfDayBalances = new ArrayList<>();
         boolean interestTransfered = false;
@@ -182,7 +182,8 @@ public final class PostingPeriod {
                 openingDayBalance = endOfDayBalance.closingBalance();
 
             } else if (transaction.spansAnyPortionOf(periodInterval)) {
-                final EndOfDayBalance endOfDayBalance = transaction.toEndOfDayBalanceBoundedBy(openingDayBalance, periodInterval);
+                final EndOfDayBalance endOfDayBalance = transaction.toEndOfDayBalanceBoundedBy(openingDayBalance, periodInterval,
+                        isAllowOverdraft);
                 accountEndOfDayBalances.add(endOfDayBalance);
 
                 closeOfDayBalance = endOfDayBalance.closingBalance();
