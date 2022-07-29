@@ -27,6 +27,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.fineract.infrastructure.auditing.CustomAuditingHandler;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
@@ -50,11 +51,10 @@ public class CustomAuditingHandlerTest {
 
     @Test
     public void markCreated() {
-        Auditor auditor = Mockito.mock(Auditor.class);
         MappingContext mappingContext = Mockito.mock(MappingContext.class);
         CustomAuditingHandler testInstance = new CustomAuditingHandler(PersistentEntities.of(mappingContext));
         AbstractAuditableWithUTCDateTimeCustom targetObject = Mockito.spy(AbstractAuditableWithUTCDateTimeCustom.class);
-        targetObject = testInstance.markCreated(auditor, targetObject);
+        targetObject = testInstance.markCreated(targetObject);
         OffsetDateTime now = OffsetDateTime.now(DateUtils.getDateTimeZoneOfTenant());
 
         assertTrue(targetObject.getCreatedDate().isPresent());
@@ -67,11 +67,10 @@ public class CustomAuditingHandlerTest {
 
     @Test
     public void markModified() {
-        Auditor auditor = Mockito.mock(Auditor.class);
         MappingContext mappingContext = Mockito.mock(MappingContext.class);
         CustomAuditingHandler testInstance = new CustomAuditingHandler(PersistentEntities.of(mappingContext));
         AbstractAuditableWithUTCDateTimeCustom targetObject = Mockito.spy(AbstractAuditableWithUTCDateTimeCustom.class);
-        targetObject = testInstance.markModified(auditor, targetObject);
+        targetObject = testInstance.markModified(targetObject);
         OffsetDateTime now = OffsetDateTime.now(DateUtils.getDateTimeZoneOfTenant());
 
         assertTrue(targetObject.getLastModifiedDate().isPresent());
@@ -84,11 +83,10 @@ public class CustomAuditingHandlerTest {
 
     @Test
     public void markModifiedOldDateTimeProvider() {
-        Auditor auditor = Mockito.mock(Auditor.class);
         MappingContext mappingContext = Mockito.mock(MappingContext.class);
         CustomAuditingHandler testInstance = new CustomAuditingHandler(PersistentEntities.of(mappingContext));
         AbstractAuditableCustom targetObject = Mockito.spy(AbstractAuditableCustom.class);
-        targetObject = testInstance.markModified(auditor, targetObject);
+        targetObject = testInstance.markModified(targetObject);
         LocalDateTime now = LocalDateTime.now(ZoneId.systemDefault());
 
         assertTrue(targetObject.getLastModifiedDate().isPresent());
@@ -101,11 +99,10 @@ public class CustomAuditingHandlerTest {
 
     @Test
     public void markCreatedOldDateTimeProvider() {
-        Auditor auditor = Mockito.mock(Auditor.class);
         MappingContext mappingContext = Mockito.mock(MappingContext.class);
         CustomAuditingHandler testInstance = new CustomAuditingHandler(PersistentEntities.of(mappingContext));
         AbstractAuditableCustom targetObject = Mockito.spy(AbstractAuditableCustom.class);
-        targetObject = testInstance.markCreated(auditor, targetObject);
+        targetObject = testInstance.markCreated(targetObject);
         LocalDateTime now = LocalDateTime.now(ZoneId.systemDefault());
 
         assertTrue(targetObject.getCreatedDate().isPresent());
