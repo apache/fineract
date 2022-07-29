@@ -22,16 +22,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TimeZone;
-import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
-import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 
 public final class DateUtils {
 
@@ -55,15 +49,6 @@ public final class DateUtils {
         return ZoneId.of(tenant.getTimezoneId());
     }
 
-    public static TimeZone getTimeZoneOfTenant() {
-        final FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
-        TimeZone zone = null;
-        if (tenant != null) {
-            zone = TimeZone.getTimeZone(tenant.getTimezoneId());
-        }
-        return zone;
-    }
-
     public static LocalDate getLocalDateOfTenant() {
         final ZoneId zone = getDateTimeZoneOfTenant();
         return LocalDate.now(zone);
@@ -83,33 +68,8 @@ public final class DateUtils {
         return LocalDateTime.now(ZoneId.systemDefault()).truncatedTo(ChronoUnit.SECONDS);
     }
 
-    public static LocalDate parseLocalDate(final String stringDate, final String pattern, final ZoneId zoneId) {
-        try {
-            DateTimeFormatter dateStringFormat;
-            if (zoneId != null) {
-                dateStringFormat = DateTimeFormatter.ofPattern(pattern).withZone(zoneId);
-            } else {
-                dateStringFormat = DateTimeFormatter.ofPattern(pattern);
-            }
-            final ZonedDateTime dateTime = ZonedDateTime.parse(stringDate, dateStringFormat);
-            return dateTime.toLocalDate();
-        } catch (final IllegalArgumentException e) {
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-            final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.date.pattern",
-                    "The parameter `date` (value: " + stringDate + ") is invalid w.r.t. pattern `" + pattern + "`", "date", stringDate,
-                    pattern);
-            dataValidationErrors.add(error);
-            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                    dataValidationErrors, e);
-        }
-    }
-
-    public static LocalDate parseLocalDate(final String stringDate, final String pattern) {
-        return parseLocalDate(stringDate, pattern, getDateTimeZoneOfTenant());
-    }
-
     public static boolean isDateInTheFuture(final LocalDate localDate) {
-        return localDate.isAfter(getLocalDateOfTenant());
+        return localDate.isAfter(getBusinessLocalDate());
     }
 
     public static LocalDate getBusinessLocalDate() {
