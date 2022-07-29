@@ -31,9 +31,9 @@ public final class DateUtils {
 
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
     public static final String DEFAULT_DATETIME_FORMAT = DEFAULT_DATE_FORMAT + " HH:mm:ss";
-    public static final DateTimeFormatter DEFAULT_DATETIME_FORMATER = new DateTimeFormatterBuilder().appendPattern(DEFAULT_DATETIME_FORMAT)
+    public static final DateTimeFormatter DEFAULT_DATETIME_FORMATTER = new DateTimeFormatterBuilder().appendPattern(DEFAULT_DATETIME_FORMAT)
             .toFormatter();
-    public static final DateTimeFormatter DEFAULT_DATE_FORMATER = new DateTimeFormatterBuilder().appendPattern(DEFAULT_DATE_FORMAT)
+    public static final DateTimeFormatter DEFAULT_DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern(DEFAULT_DATE_FORMAT)
             .toFormatter();
 
     private DateUtils() {

@@ -138,7 +138,7 @@ public final class CalendarUtils {
 
     private static Date convertToiCal4JCompatibleDate(final LocalDateTime inputDate) {
         Date formattedDate = null;
-        final String seedDateStr = DateUtils.DEFAULT_DATETIME_FORMATER.format(inputDate);
+        final String seedDateStr = DateUtils.DEFAULT_DATETIME_FORMATTER.format(inputDate);
         try {
             formattedDate = new Date(seedDateStr, DateUtils.DEFAULT_DATETIME_FORMAT);
         } catch (final ParseException e) {

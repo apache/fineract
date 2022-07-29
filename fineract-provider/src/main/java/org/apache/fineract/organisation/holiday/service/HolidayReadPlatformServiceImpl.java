@@ -89,7 +89,7 @@ public class HolidayReadPlatformServiceImpl implements HolidayReadPlatformServic
             final LocalDate toDate) {
         this.context.authenticatedUser();
 
-        final DateTimeFormatter df = DateUtils.DEFAULT_DATE_FORMATER;
+        final DateTimeFormatter df = DateUtils.DEFAULT_DATE_FORMATTER;
 
         final Object[] objectArray = new Object[3];
         int arrayPos = 0;
