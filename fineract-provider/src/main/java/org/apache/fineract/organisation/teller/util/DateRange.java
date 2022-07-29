@@ -60,7 +60,7 @@ public class DateRange {
 
         final String testee;
         if (dateToParse == null) {
-            testee = DateUtils.DEFAULT_DATE_FORMATER.format(DateUtils.getBusinessLocalDate());
+            testee = DateUtils.DEFAULT_DATE_FORMATTER.format(DateUtils.getBusinessLocalDate());
         } else {
             testee = dateToParse;
         }
@@ -68,14 +68,14 @@ public class DateRange {
         final StringTokenizer tokenizer = new StringTokenizer(testee, DateRange.RANGE_DELIMITER);
 
         try {
-            dateRange.setStartDate(LocalDate.parse(tokenizer.nextToken(), DateUtils.DEFAULT_DATE_FORMATER));
+            dateRange.setStartDate(LocalDate.parse(tokenizer.nextToken(), DateUtils.DEFAULT_DATE_FORMATTER));
         } catch (DateTimeParseException ex) {
             LOG.error("Problem occurred in DateRange function Could not parse the date recieved.", ex);
         }
 
         if (tokenizer.hasMoreTokens()) {
             try {
-                dateRange.setEndDate(LocalDate.parse(tokenizer.nextToken(), DateUtils.DEFAULT_DATE_FORMATER));
+                dateRange.setEndDate(LocalDate.parse(tokenizer.nextToken(), DateUtils.DEFAULT_DATE_FORMATTER));
             } catch (DateTimeParseException ex) {
                 LOG.error("Problem occurred in DateRange function Could not parse the date recieved.", ex);
             }
