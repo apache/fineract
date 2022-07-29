@@ -90,9 +90,9 @@ public class DatabaseSpecificSQLGenerator {
 
     public String currentBusinessDate() {
         if (databaseTypeResolver.isMySQL()) {
-            return format("DATE('%s')", DateUtils.getBusinessLocalDate().format(DateUtils.DEFAULT_DATE_FORMATER));
+            return format("DATE('%s')", DateUtils.getBusinessLocalDate().format(DateUtils.DEFAULT_DATE_FORMATTER));
         } else if (databaseTypeResolver.isPostgreSQL()) {
-            return format("DATE '%s'", DateUtils.getBusinessLocalDate().format(DateUtils.DEFAULT_DATE_FORMATER));
+            return format("DATE '%s'", DateUtils.getBusinessLocalDate().format(DateUtils.DEFAULT_DATE_FORMATTER));
         } else {
             throw new IllegalStateException("Database type is not supported for current date " + databaseTypeResolver.databaseType());
         }
@@ -100,9 +100,9 @@ public class DatabaseSpecificSQLGenerator {
 
     public String currentTenantDate() {
         if (databaseTypeResolver.isMySQL()) {
-            return format("DATE('%s')", DateUtils.getLocalDateOfTenant().format(DateUtils.DEFAULT_DATE_FORMATER));
+            return format("DATE('%s')", DateUtils.getLocalDateOfTenant().format(DateUtils.DEFAULT_DATE_FORMATTER));
         } else if (databaseTypeResolver.isPostgreSQL()) {
-            return format("DATE '%s'", DateUtils.getLocalDateOfTenant().format(DateUtils.DEFAULT_DATE_FORMATER));
+            return format("DATE '%s'", DateUtils.getLocalDateOfTenant().format(DateUtils.DEFAULT_DATE_FORMATTER));
         } else {
             throw new IllegalStateException("Database type is not supported for current date " + databaseTypeResolver.databaseType());
         }
@@ -110,9 +110,9 @@ public class DatabaseSpecificSQLGenerator {
 
     public String currentTenantDateTime() {
         if (databaseTypeResolver.isMySQL()) {
-            return format("TIMESTAMP('%s')", DateUtils.getLocalDateTimeOfTenant().format(DateUtils.DEFAULT_DATETIME_FORMATER));
+            return format("TIMESTAMP('%s')", DateUtils.getLocalDateTimeOfTenant().format(DateUtils.DEFAULT_DATETIME_FORMATTER));
         } else if (databaseTypeResolver.isPostgreSQL()) {
-            return format("TIMESTAMP '%s'", DateUtils.getLocalDateTimeOfTenant().format(DateUtils.DEFAULT_DATETIME_FORMATER));
+            return format("TIMESTAMP '%s'", DateUtils.getLocalDateTimeOfTenant().format(DateUtils.DEFAULT_DATETIME_FORMATTER));
         } else {
             throw new IllegalStateException("Database type is not supported for current date time" + databaseTypeResolver.databaseType());
         }
