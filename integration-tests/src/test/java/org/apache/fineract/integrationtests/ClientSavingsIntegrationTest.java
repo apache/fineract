@@ -55,7 +55,6 @@ import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1866,7 +1865,6 @@ public class ClientSavingsIntegrationTest {
     }
 
     @Test
-    @Disabled // FIXME
     public void testSavingsAccount_DormancyTracking() throws InterruptedException {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
 
