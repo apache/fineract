@@ -18,6 +18,13 @@
  */
 package org.apache.fineract.portfolio.loanaccount.rescheduleloan.api;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.HashSet;
 import java.util.List;
@@ -86,6 +93,9 @@ public class RescheduleLoansApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve all reschedule loan reasons", description = "Retrieve all reschedule loan reasons as a template")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RescheduleLoansApiResourceSwagger.GetRescheduleReasonsTemplateResponse.class))) })
     public String retrieveTemplate(@Context final UriInfo uriInfo) {
 
         this.platformSecurityContext.authenticatedUser().validateHasReadPermission(RescheduleLoansApiConstants.ENTITY_NAME);
@@ -102,6 +112,9 @@ public class RescheduleLoansApiResource {
     @Path("{scheduleId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve loan reschedule request by schedule id", description = "Retrieve loan reschedule request by schedule id")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RescheduleLoansApiResourceSwagger.GetLoanRescheduleRequestResponse.class))) })
     public String readLoanRescheduleRequest(@Context final UriInfo uriInfo, @PathParam("scheduleId") final Long scheduleId,
             @QueryParam("command") final String command) {
         this.platformSecurityContext.authenticatedUser().validateHasReadPermission(RescheduleLoansApiConstants.ENTITY_NAME);
@@ -123,6 +136,10 @@ public class RescheduleLoansApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Create loan reschedule request", description = "Create a loan reschedule request.")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = String.class)), description = "{\"submittedOnDate\": \"05/02/2022\",\"rescheduleFromDate\": \"05/02/2022\",\"rescheduleReasonId\": 67,\"adjustedDueDate\": \"07/01/2022\",\"loanId\": \"18\",\"dateFormat\": \"MM/dd/yyyy\",\"locale\": \"en\"}")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RescheduleLoansApiResourceSwagger.PostCreateRescheduleLoansResponse.class))) })
     public String createLoanRescheduleRequest(final String apiRequestBodyAsJson) {
         final CommandWrapper commandWrapper = new CommandWrapperBuilder()
                 .createLoanRescheduleRequest(RescheduleLoansApiConstants.ENTITY_NAME).withJson(apiRequestBodyAsJson).build();
@@ -136,6 +153,10 @@ public class RescheduleLoansApiResource {
     @Path("{scheduleId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Update loan reschedule request", description = "Update a loan reschedule request by either approving/rejecting it.")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = String.class)), description = "{\"approvedOnDate\": \"05/02/2022\",\"dateFormat\": \"MM/dd/yyyy\",\"locale\": \"en\"}")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RescheduleLoansApiResourceSwagger.PostUpdateRescheduleLoansResponse.class))) })
     public String updateLoanRescheduleRequest(@PathParam("scheduleId") final Long scheduleId, @QueryParam("command") final String command,
             final String apiRequestBodyAsJson) {
         CommandWrapper commandWrapper = null;
@@ -175,6 +196,9 @@ public class RescheduleLoansApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve all reschedule requests", description = "Retrieve all reschedule requests.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RescheduleLoansApiResourceSwagger.GetLoanRescheduleRequestResponse.class)))) })
     public String retrieveAllRescheduleRequest(@Context final UriInfo uriInfo, @QueryParam("command") final String command) {
 
         this.platformSecurityContext.authenticatedUser().validateHasReadPermission(RescheduleLoansApiConstants.ENTITY_NAME);

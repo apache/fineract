@@ -27,8 +27,11 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
@@ -41,12 +44,15 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
+import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.apache.fineract.integrationtests.common.system.DatatableHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Test class for {@link org.apache.fineract.batch.command.CommandStrategyProvider}. This tests the response provided by
@@ -58,6 +64,8 @@ import org.junit.jupiter.api.Test;
  * @see org.apache.fineract.batch.domain.BatchRequest
  */
 public class BatchApiTest {
+
+    private static final Logger LOG = LoggerFactory.getLogger(BatchApiTest.class);
 
     /**
      * The response specification
@@ -716,6 +724,81 @@ public class BatchApiTest {
         Assertions.assertEquals(HttpStatus.SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Approve Loan");
         Assertions.assertEquals(HttpStatus.SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Disburse Loan");
         Assertions.assertEquals(HttpStatus.SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for Get Transaction By Id");
+    }
+
+    /**
+     * Test for the successful new loan reschedule request and approval for the same. A '200' status code is expected on
+     * successful responses.
+     *
+     * @see org.apache.fineract.batch.command.internal.CreateLoanRescheduleRequestCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.ApproveLoanRescheduleCommandStrategy
+     */
+    @Test
+    public void shouldReturnOkStatusOnSuccessfulDisbursementAndRescheduleLoan() {
+        final String loanProductJSON = new LoanProductTestBuilder() //
+                .withPrincipal("10000000.00") //
+                .withNumberOfRepayments("24") //
+                .withRepaymentAfterEvery("1") //
+                .withRepaymentTypeAsMonth() //
+                .withinterestRatePerPeriod("2") //
+                .withInterestRateFrequencyTypeAsMonths() //
+                .withAmortizationTypeAsEqualPrincipalPayment() //
+                .withInterestTypeAsDecliningBalance() //
+                .currencyDetails("0", "100").build(null);
+
+        final Long createActiveClientRequestId = 8462L;
+        final Long applyLoanRequestId = createActiveClientRequestId + 1;
+        final Long approveLoanRequestId = applyLoanRequestId + 1;
+        final Long disburseLoanRequestId = approveLoanRequestId + 1;
+        final Long rescheduleLoanRequestId = disburseLoanRequestId + 1;
+        final Long approveRescheduleLoanRequestId = rescheduleLoanRequestId + 1;
+
+        // Create product
+        LOG.info("LoanProduct {}", loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+
+        // Create client
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+
+        /* Retrieve/Create Code Values for the Code "LoanRescheduleReason = 23" */
+        final HashMap<String, Object> codeValue = CodeHelper.retrieveOrCreateCodeValue(23, this.requestSpec, this.responseSpec);
+
+        final Integer codeValueId = (Integer) codeValue.get("id");
+
+        // Create an ApplyLoan request
+        final BatchRequest applyLoanRequestWithClientId = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
+
+        // Create an approveLoan request
+        final BatchRequest approveLoanRequest = BatchHelper.approveLoanRequest(approveLoanRequestId, applyLoanRequestId);
+
+        // Create a disbursement request
+        final LocalDate disburseLoanDate = LocalDate.now(ZoneId.systemDefault()).minusDays(1);
+        final BatchRequest disburseLoanRequest = BatchHelper.disburseLoanRequest(disburseLoanRequestId, approveLoanRequestId,
+                disburseLoanDate);
+
+        // Create a reschedule loan request
+        final BatchRequest rescheduleLoanRequest = BatchHelper.createRescheduleLoanRequest(rescheduleLoanRequestId, disburseLoanRequestId,
+                disburseLoanDate.plusMonths(1), codeValueId);
+
+        // Approve reschedule loan request
+        final BatchRequest approveRescheduleLoanRequest = BatchHelper.approveRescheduleLoanRequest(approveRescheduleLoanRequestId,
+                rescheduleLoanRequestId);
+
+        final List<BatchRequest> batchRequests = Arrays.asList(applyLoanRequestWithClientId, approveLoanRequest, disburseLoanRequest,
+                rescheduleLoanRequest, approveRescheduleLoanRequest);
+
+        LOG.info("shouldReturnOkStatusOnSuccessfulDisbursementAndRescheduleLoan Request - {}", BatchHelper.toJsonString(batchRequests));
+        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+                BatchHelper.toJsonString(batchRequests));
+
+        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
+        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Approve Loan");
+        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Disburse Loan");
+        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(3).getStatusCode(),
+                "Verify Status Code 200 for Create Reschedule Loan request");
+        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(4).getStatusCode(),
+                "Verify Status Code 200 for Approve Reschedule Loan request");
     }
 
     /**

@@ -32,6 +32,7 @@ import org.apache.fineract.batch.command.internal.ApproveLoanRescheduleCommandSt
 import org.apache.fineract.batch.command.internal.CollectChargesCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateChargeCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateClientCommandStrategy;
+import org.apache.fineract.batch.command.internal.CreateLoanRescheduleRequestCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy;
 import org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetDatatableEntryByAppTableIdCommandStrategy;
@@ -77,6 +78,8 @@ public class CommandStrategyProviderTest {
                         mock(ApproveLoanCommandStrategy.class)),
                 Arguments.of("loans/123?command=disburse", HttpMethod.POST, "disburseLoanCommandStrategy",
                         mock(DisburseLoanCommandStrategy.class)),
+                Arguments.of("rescheduleloans", HttpMethod.POST, "createLoanRescheduleRequestCommandStrategy",
+                        mock(CreateLoanRescheduleRequestCommandStrategy.class)),
                 Arguments.of("rescheduleloans/123?command=approve", HttpMethod.POST, "approveLoanRescheduleCommandStrategy",
                         mock(ApproveLoanRescheduleCommandStrategy.class)),
                 Arguments.of("loans/123/transactions/123", HttpMethod.GET, "getTransactionByIdCommandStrategy",

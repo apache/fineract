@@ -207,8 +207,9 @@ public class ClientHelper {
         map.put("locale", "en");
         map.put("active", "true");
         map.put("activationDate", dateOfJoining);
-        log.info("map :  {}", map);
-        return GSON.toJson(map);
+        final String testClientAsJson = GSON.toJson(map);
+        log.info("TestClient Request :  {}", testClientAsJson);
+        return testClientAsJson;
     }
 
     public static String getTestClientAsJSONPending(final String submittedOnDate, final String officeId) {
