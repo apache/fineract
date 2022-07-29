@@ -98,6 +98,7 @@ public final class BatchHelper {
     public static List<BatchResponse> postBatchRequestsWithoutEnclosingTransaction(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String jsonifiedBatchRequests) {
         final String response = Utils.performServerPost(requestSpec, responseSpec, BATCH_API_URL, jsonifiedBatchRequests, null);
+        LOG.info("BatchHelper Response {}", response);
         return BatchHelper.fromJsonString(response);
     }
 
@@ -501,8 +502,6 @@ public final class BatchHelper {
      *            the reference ID
      * @param amount
      *            the amount
-     * @param date
-     *            the transaction date
      * @return BatchRequest the batch request
      */
     public static BatchRequest repayLoanRequest(final Long requestId, final Long reference, final String amount) {
@@ -574,6 +573,69 @@ public final class BatchHelper {
         br.setBody(String.format(
                 "{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", " + "\"transactionDate\": \"%s\",  \"transactionAmount\": %s}",
                 dateString, amount));
+
+        return br;
+    }
+
+    /**
+     * Creates and returns a
+     * {@link org.apache.fineract.batch.command.internal.CreateLoanRescheduleRequestCommandStrategy} request with given
+     * request ID.
+     *
+     *
+     * @param requestId
+     *            the request ID
+     * @param reference
+     *            teh reference
+     * @param rescheduleFromDate
+     *            the reschedule from date
+     * @param rescheduleReasonId
+     *            the reschedule reason code value id
+     *
+     * @return BatchRequest the created {@link BatchRequest}
+     */
+    public static BatchRequest createRescheduleLoanRequest(final Long requestId, final Long reference, final LocalDate rescheduleFromDate,
+            final Integer rescheduleReasonId) {
+        final BatchRequest br = new BatchRequest();
+
+        br.setRequestId(requestId);
+        br.setReference(reference);
+        br.setRelativeUrl("rescheduleloans");
+        br.setMethod("POST");
+        final LocalDate today = LocalDate.now(ZoneId.systemDefault());
+        final LocalDate adjustedDueDate = LocalDate.now(ZoneId.systemDefault()).plusDays(40);
+        final String submittedOnDate = today.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+        final String rescheduleFromDateString = rescheduleFromDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+        final String adjustedDueDateString = adjustedDueDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+        br.setBody(String.format("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", "
+                + "\"submittedOnDate\": \"%s\",  \"rescheduleFromDate\": \"%s\", \"rescheduleReasonId\": %d, \"adjustedDueDate\": \"%s\", \"loanId\": \"$.loanId\"}",
+                submittedOnDate, rescheduleFromDateString, rescheduleReasonId, adjustedDueDateString));
+
+        return br;
+    }
+
+    /**
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.ApproveLoanRescheduleCommandStrategy}
+     * request with given request ID.
+     *
+     *
+     * @param requestId
+     *            the request ID
+     * @param reference
+     *            teh reference
+     * @return BatchRequest the created {@link BatchRequest}
+     */
+    public static BatchRequest approveRescheduleLoanRequest(final Long requestId, final Long reference) {
+        final BatchRequest br = new BatchRequest();
+
+        br.setRequestId(requestId);
+        br.setReference(reference);
+        br.setRelativeUrl("rescheduleloans/$.resourceId?command=approve");
+        br.setMethod("POST");
+        final LocalDate approvedOnDate = LocalDate.now(ZoneId.systemDefault());
+        final String approvedOnDateString = approvedOnDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+        br.setBody(String.format("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", " + "\"approvedOnDate\": \"%s\"}",
+                approvedOnDateString));
 
         return br;
     }

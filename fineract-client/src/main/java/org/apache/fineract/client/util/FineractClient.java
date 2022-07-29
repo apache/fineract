@@ -103,6 +103,7 @@ import org.apache.fineract.client.services.RecurringDepositAccountTransactionsAp
 import org.apache.fineract.client.services.RecurringDepositProductApi;
 import org.apache.fineract.client.services.ReportMailingJobsApi;
 import org.apache.fineract.client.services.ReportsApi;
+import org.apache.fineract.client.services.RescheduleLoansApi;
 import org.apache.fineract.client.services.RolesApi;
 import org.apache.fineract.client.services.RunReportsApi;
 import org.apache.fineract.client.services.SavingsAccountApi;
@@ -234,6 +235,7 @@ public final class FineractClient {
     public final RecurringDepositProductApi recurringDepositProducts;
     public final ReportMailingJobsApi reportMailingJobs;
     public final ReportsApi reports;
+    public final RescheduleLoansApi rescheduleLoans;
     public final RolesApi roles;
     public final RunReportsApi reportsRun;
     public final SavingsAccountApi savingsAccounts;
@@ -346,6 +348,7 @@ public final class FineractClient {
         recurringDepositProducts = retrofit.create(RecurringDepositProductApi.class);
         reportMailingJobs = retrofit.create(ReportMailingJobsApi.class);
         reports = retrofit.create(ReportsApi.class);
+        rescheduleLoans = retrofit.create(RescheduleLoansApi.class);
         roles = retrofit.create(RolesApi.class);
         reportsRun = retrofit.create(RunReportsApi.class);
         savingsAccounts = retrofit.create(SavingsAccountApi.class);
