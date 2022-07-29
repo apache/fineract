@@ -320,7 +320,8 @@ final class ClientsApiResourceSwagger {
         public List<PostClientsDatatable> datatables;
         @Schema(description = "Address requests")
         public List<PostClientsAddressRequest> address;
-
+        @Schema(example = "test@test.com")
+        public String emailAddress;
     }
 
     @Schema(description = "PostClientsResponse")
