@@ -228,10 +228,26 @@ final class SelfLoansApiResourceSwagger {
                 public Integer id;
                 @Schema(example = "[2013, 11, 1]")
                 public LocalDate expectedDisbursementDate;
+                @Schema(example = "[2022, 07, 01]")
+                public LocalDate actualDisbursementDate;
                 @Schema(example = "22000.000000")
-                public Float principal;
+                public Double principal;
+                @Schema(example = "22000.000000")
+                public Double netDisbursalAmount;
+                @Schema(example = "1")
+                public String loanChargeId;
+                @Schema(example = "22000.000000")
+                public Double chargeAmount;
+                @Schema(example = "22000.000000")
+                public Double waivedChargeAmount;
                 @Schema(example = "22000.000000")
                 public Float approvedPrincipal;
+                @Schema(example = "dd MMMM yyyy")
+                public String dateFormat;
+                @Schema(example = "de_DE")
+                public String locale;
+                @Schema(example = "some note")
+                public String note;
             }
 
             static final class GetLoansLoanIdOverdueCharges {
@@ -337,78 +353,78 @@ final class SelfLoansApiResourceSwagger {
             }
 
             public GetLoansLoanIdCurrency currency;
-            @Schema(example = "1000000")
-            public Long principalDisbursed;
-            @Schema(example = "0")
-            public Long principalPaid;
-            @Schema(example = "0")
-            public Long principalWrittenOff;
-            @Schema(example = "1000000")
-            public Long principalOutstanding;
-            @Schema(example = "833333.3")
+            @Schema(example = "1000000.000000")
+            public Double principalDisbursed;
+            @Schema(example = "0.000000")
+            public Double principalPaid;
+            @Schema(example = "0.000000")
+            public Double principalWrittenOff;
+            @Schema(example = "1000000.000000")
+            public Double principalOutstanding;
+            @Schema(example = "833333.300000")
             public Double principalOverdue;
-            @Schema(example = "240000")
-            public Long interestCharged;
-            @Schema(example = "0")
-            public Long interestPaid;
-            @Schema(example = "0")
-            public Long interestWaived;
-            @Schema(example = "0")
-            public Long interestWrittenOff;
-            @Schema(example = "240000")
-            public Long interestOutstanding;
-            @Schema(example = "200000")
-            public Long interestOverdue;
-            @Schema(example = "18000")
-            public Long feeChargesCharged;
-            @Schema(example = "0")
-            public Long feeChargesDueAtDisbursementCharged;
-            @Schema(example = "0")
-            public Long feeChargesPaid;
-            @Schema(example = "0")
-            public Long feeChargesWaived;
-            @Schema(example = "0")
-            public Long feeChargesWrittenOff;
-            @Schema(example = "18000")
-            public Long feeChargesOutstanding;
-            @Schema(example = "15000")
-            public Long feeChargesOverdue;
-            @Schema(example = "0")
-            public Long penaltyChargesCharged;
-            @Schema(example = "0")
-            public Long penaltyChargesPaid;
-            @Schema(example = "0")
-            public Long penaltyChargesWaived;
-            @Schema(example = "0")
-            public Long penaltyChargesWrittenOff;
-            @Schema(example = "0")
-            public Long penaltyChargesOutstanding;
-            @Schema(example = "0")
-            public Long penaltyChargesOverdue;
-            @Schema(example = "1258000")
-            public Long totalExpectedRepayment;
-            @Schema(example = "0")
-            public Long totalRepayment;
-            @Schema(example = "258000")
-            public Long totalExpectedCostOfLoan;
-            @Schema(example = "0")
-            public Long totalCostOfLoan;
-            @Schema(example = "0")
-            public Long totalWaived;
-            @Schema(example = "0")
-            public Long totalWrittenOff;
-            @Schema(example = "1258000")
-            public Long totalOutstanding;
-            @Schema(example = "1048333.3")
+            @Schema(example = "240000.000000")
+            public Double interestCharged;
+            @Schema(example = "0.000000")
+            public Double interestPaid;
+            @Schema(example = "0.000000")
+            public Double interestWaived;
+            @Schema(example = "0.000000")
+            public Double interestWrittenOff;
+            @Schema(example = "240000.000000")
+            public Double interestOutstanding;
+            @Schema(example = "200000.000000")
+            public Double interestOverdue;
+            @Schema(example = "18000.000000")
+            public Double feeChargesCharged;
+            @Schema(example = "0.000000")
+            public Double feeChargesDueAtDisbursementCharged;
+            @Schema(example = "0.000000")
+            public Double feeChargesPaid;
+            @Schema(example = "0.000000")
+            public Double feeChargesWaived;
+            @Schema(example = "0.000000")
+            public Double feeChargesWrittenOff;
+            @Schema(example = "18000.000000")
+            public Double feeChargesOutstanding;
+            @Schema(example = "15000.000000")
+            public Double feeChargesOverdue;
+            @Schema(example = "0.000000")
+            public Double penaltyChargesCharged;
+            @Schema(example = "0.000000")
+            public Double penaltyChargesPaid;
+            @Schema(example = "0.000000")
+            public Double penaltyChargesWaived;
+            @Schema(example = "0.000000")
+            public Double penaltyChargesWrittenOff;
+            @Schema(example = "0.000000")
+            public Double penaltyChargesOutstanding;
+            @Schema(example = "0.000000")
+            public Double penaltyChargesOverdue;
+            @Schema(example = "1258000.000000")
+            public Double totalExpectedRepayment;
+            @Schema(example = "0.000000")
+            public Double totalRepayment;
+            @Schema(example = "258000.000000")
+            public Double totalExpectedCostOfLoan;
+            @Schema(example = "0.000000")
+            public Double totalCostOfLoan;
+            @Schema(example = "0.000000")
+            public Double totalWaived;
+            @Schema(example = "0.000000")
+            public Double totalWrittenOff;
+            @Schema(example = "1258000.000000")
+            public Double totalOutstanding;
+            @Schema(example = "1048333.30000")
             public Double totalOverdue;
             @Schema(example = "[2012, 5, 10]")
             public LocalDate overdueSinceDate;
             public GetLoansLoanIdLinkedAccount linkedAccount;
             public Set<GetLoansLoanIdDisbursementDetails> disbursementDetails;
             @Schema(example = "1100.000000")
-            public Float fixedEmiAmount;
-            @Schema(example = "35000")
-            public Long maxOutstandingLoanBalance;
+            public Double fixedEmiAmount;
+            @Schema(example = "35000.000000")
+            public Double maxOutstandingLoanBalance;
             @Schema(example = "false")
             public Boolean canDisburse;
             public Set<GetLoansLoanIdEmiVariations> emiAmountVariations;
