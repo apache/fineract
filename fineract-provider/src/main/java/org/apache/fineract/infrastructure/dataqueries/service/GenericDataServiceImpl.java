@@ -171,7 +171,7 @@ public class GenericDataServiceImpl implements GenericDataService {
                                     "[" + localDate.getYear() + ", " + localDate.getMonthValue() + ", " + localDate.getDayOfMonth() + "]");
                         } else if (currColType.equals("DATETIME")) {
                             final LocalDateTime localDateTime = LocalDateTime.parse(formatDateTimeValue(currVal),
-                                    DateUtils.DEFAULT_DATETIME_FORMATER);
+                                    DateUtils.DEFAULT_DATETIME_FORMATTER);
                             writer.append("[" + localDateTime.getYear() + ", " + localDateTime.getMonthValue() + ", "
                                     + localDateTime.getDayOfMonth() + ", " + localDateTime.getHour() + ", " + localDateTime.getMinute()
                                     + ", " + localDateTime.getSecond() + ", " + localDateTime.get(ChronoField.MILLI_OF_SECOND) + "]");
