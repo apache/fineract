@@ -116,6 +116,8 @@ public final class SavingsAccountData implements Serializable {
     private final BigDecimal minOverdraftForInterestCalculation;
     private transient List<SavingsAccountTransactionData> savingsAccountTransactionData = new ArrayList<>();
 
+    private transient SavingsAccountTransactionData lastSavingsAccountTransaction;
+
     private List<DatatableData> datatables = null;
 
     // import field
@@ -1103,5 +1105,13 @@ public final class SavingsAccountData implements Serializable {
 
     public Set<Long> getExistingReversedTransactionIds() {
         return this.existingReversedTransactionIds;
+    }
+
+    public SavingsAccountTransactionData getLastSavingsAccountTransaction() {
+        return lastSavingsAccountTransaction;
+    }
+
+    public void setLastSavingsAccountTransaction(SavingsAccountTransactionData lastSavingsAccountTransaction) {
+        this.lastSavingsAccountTransaction = lastSavingsAccountTransaction;
     }
 }
