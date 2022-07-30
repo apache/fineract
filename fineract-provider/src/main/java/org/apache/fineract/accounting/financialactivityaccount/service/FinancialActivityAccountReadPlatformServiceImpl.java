@@ -102,7 +102,12 @@ public class FinancialActivityAccountReadPlatformServiceImpl implements Financia
             final String glAccountName = rs.getString("glAccountName");
             final String glCode = rs.getString("glCode");
 
-            final GLAccountData glAccountData = new GLAccountData(glAccountId, glAccountName, glCode);
+            //@formatter:off
+            final GLAccountData glAccountData = new GLAccountData()
+                .setId(glAccountId)
+                .setName(glAccountName)
+                .setGlCode(glCode);
+            //@formatter:on
             final FinancialActivityData financialActivityData = FinancialActivity.toFinancialActivityData(financialActivityId);
 
             final FinancialActivityAccountData financialActivityAccountData = new FinancialActivityAccountData(id, financialActivityData,

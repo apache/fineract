@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.accounting.journalentry.service;
 
+import static java.util.Objects.requireNonNull;
+
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -390,7 +392,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
         final JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData();
         final GLAccountData contraAccount = this.glAccountReadPlatformService.retrieveGLAccountById(contraId, associationParametersData);
-        if (!GLAccountType.fromInt(contraAccount.getTypeId()).isEquityType()) {
+        if (!GLAccountType.fromInt(requireNonNull(requireNonNull(contraAccount.getType()).getId()).intValue()).isEquityType()) {
             throw new GeneralPlatformDomainRuleException(
                     "error.msg.configuration.opening.balance.contra.account.value.is.invalid.account.type",
                     "Global configuration 'office-opening-balances-contra-account' value is not an equity type account", contraId);

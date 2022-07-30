@@ -99,8 +99,28 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
             if (associationParametersData.isRunningBalanceRequired()) {
                 organizationRunningBalance = rs.getLong("organizationRunningBalance");
             }
-            return new GLAccountData(id, name, parentId, glCode, disabled, manualEntriesAllowed, accountType, usage, description,
-                    nameDecorated, tagId, organizationRunningBalance);
+
+            //@formatter:off
+
+            // NOTE: ... again, hard to read if constructor arguments are properly passed
+            // return new GLAccountData(id, name, parentId, glCode, disabled, manualEntriesAllowed, accountType, usage, description, nameDecorated, tagId, organizationRunningBalance);
+
+            // ... vs. easy to read fluent setters... and you can save those unnecessary null values variables... again, empty code that is only distracting
+            return new GLAccountData()
+                .setId(id)
+                .setName(name)
+                .setParentId(parentId)
+                .setGlCode(glCode)
+                .setDisabled(disabled)
+                .setManualEntriesAllowed(manualEntriesAllowed)
+                .setType(accountType)
+                .setUsage(usage)
+                .setDescription(description)
+                .setNameDecorated(nameDecorated)
+                .setTagId(tagId)
+                .setOrganizationRunningBalance(organizationRunningBalance);
+
+            //@formatter:on
         }
     }
 
@@ -275,7 +295,12 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
             final Long id = JdbcSupport.getLong(rs, "id");
             final String name = rs.getString("name");
             final String glCode = rs.getString("glCode");
-            return new GLAccountDataForLookup(id, name, glCode);
+            //@formatter:off
+            return new GLAccountDataForLookup()
+                .setId(id)
+                .setName(name)
+                .setGlCode(glCode);
+            //@formatter:on
         }
 
     }

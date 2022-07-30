@@ -147,7 +147,12 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
                 final Long debitAccountId = rs.getLong("debitAccountId");
                 final String debitAccountName = rs.getString("debitAccountName");
                 final String debitAccountGlCode = rs.getString("debitAccountGlCode");
-                debitAccountData = new GLAccountData(debitAccountId, debitAccountName, debitAccountGlCode);
+                //@formatter:off
+                debitAccountData = new GLAccountData()
+                    .setId(debitAccountId)
+                    .setName(debitAccountName)
+                    .setGlCode(debitAccountGlCode);
+                //@formatter:on
             }
 
             final Integer creditAccountTypeEnum = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "creditAccountTypeEnum");
@@ -160,7 +165,12 @@ public class TaxReadPlatformServiceImpl implements TaxReadPlatformService {
                 final Long creditAccountId = rs.getLong("creditAccountId");
                 final String creditAccountName = rs.getString("creditAccountName");
                 final String creditAccountGlCode = rs.getString("creditAccountGlCode");
-                creditAccountData = new GLAccountData(creditAccountId, creditAccountName, creditAccountGlCode);
+                //@formatter:off
+                creditAccountData = new GLAccountData()
+                    .setId(creditAccountId)
+                    .setName(creditAccountName)
+                    .setGlCode(creditAccountGlCode);
+                //@formatter:on
             }
             final LocalDate startDate = JdbcSupport.getLocalDate(rs, "startDate");
 

@@ -252,9 +252,41 @@ public class GLAccountsApiResource {
         final Collection<CodeValueData> allowedExpensesTagOptions = this.codeValueReadPlatformService
                 .retrieveCodeValuesByCode(AccountingConstants.EXPENSES_TAG_OPTION_CODE_NAME);
 
-        return new GLAccountData(glAccountData, accountTypeOptions, usageOptions, assetHeaderAccountOptions, liabilityHeaderAccountOptions,
-                equityHeaderAccountOptions, incomeHeaderAccountOptions, expenseHeaderAccountOptions, allowedAssetsTagOptions,
-                allowedLiabilitiesTagOptions, allowedEquityTagOptions, allowedIncomeTagOptions, allowedExpensesTagOptions);
+        //@formatter:off
+
+        // NOTE: ... again, hard to read if constructor arguments are properly passed
+        // return new GLAccountData(glAccountData, accountTypeOptions, usageOptions, assetHeaderAccountOptions, liabilityHeaderAccountOptions,
+        //         equityHeaderAccountOptions, incomeHeaderAccountOptions, expenseHeaderAccountOptions, allowedAssetsTagOptions,
+        //         allowedLiabilitiesTagOptions, allowedEquityTagOptions, allowedIncomeTagOptions, allowedExpensesTagOptions);
+
+        // ... vs. easy to read fluent setters... and you can save those unnecessary null values variables... again, empty code that is only distracting
+        return new GLAccountData()
+            .setId(glAccountData.getId())
+            .setName(glAccountData.getName())
+            .setParentId(glAccountData.getParentId())
+            .setGlCode(glAccountData.getGlCode())
+            .setDisabled(glAccountData.getDisabled())
+            .setManualEntriesAllowed(glAccountData.getManualEntriesAllowed())
+            .setType(glAccountData.getType())
+            .setUsage(glAccountData.getUsage())
+            .setDescription(glAccountData.getDescription())
+            .setNameDecorated(glAccountData.getNameDecorated())
+            .setTagId(glAccountData.getTagId())
+            .setOrganizationRunningBalance(glAccountData.getOrganizationRunningBalance())
+            .setAccountTypeOptions(accountTypeOptions)
+            .setUsageOptions(usageOptions)
+            .setAssetHeaderAccountOptions(assetHeaderAccountOptions)
+            .setLiabilityHeaderAccountOptions(liabilityHeaderAccountOptions)
+            .setEquityHeaderAccountOptions(equityHeaderAccountOptions)
+            .setIncomeHeaderAccountOptions(incomeHeaderAccountOptions)
+            .setExpenseHeaderAccountOptions(expenseHeaderAccountOptions)
+            .setAllowedAssetsTagOptions(allowedAssetsTagOptions)
+            .setAllowedLiabilitiesTagOptions(allowedLiabilitiesTagOptions)
+            .setAllowedEquityTagOptions(allowedEquityTagOptions)
+            .setAllowedIncomeTagOptions(allowedIncomeTagOptions)
+            .setAllowedExpensesTagOptions(allowedExpensesTagOptions);
+
+        //@formatter:on
     }
 
     private List<GLAccountData> defaultIfEmpty(final List<GLAccountData> list) {
