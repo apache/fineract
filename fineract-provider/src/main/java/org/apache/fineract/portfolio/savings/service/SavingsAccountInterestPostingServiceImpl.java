@@ -364,8 +364,12 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
         }
         final List<SavingsAccountTransactionData> listOfTransactionsSorted = new ArrayList<>();
         listOfTransactionsSorted.addAll(savingsAccountData.getTransactions());
-        final SavingsAccountTransactionDataComparator transactionComparator = new SavingsAccountTransactionDataComparator();
-        Collections.sort(listOfTransactionsSorted, transactionComparator);
+        if (!listOfTransactionsSorted.isEmpty()) {
+            final SavingsAccountTransactionDataComparator transactionComparator = new SavingsAccountTransactionDataComparator();
+            Collections.sort(listOfTransactionsSorted, transactionComparator);
+        } else {
+            listOfTransactionsSorted.add(savingsAccountData.getLastSavingsAccountTransaction());
+        }
         return listOfTransactionsSorted.get(0);
     }
 

@@ -76,7 +76,7 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
         Long maxSavingsIdInList = 0L;
         // initialise the executor service with fetched configurations
         final ExecutorService executorService = Executors.newFixedThreadPool(threadPoolSize);
-        final boolean backdatedTxnsAllowedTill = false;
+        final boolean backdatedTxnsAllowedTill = this.configurationDomainService.retrievePivotDateConfig();
 
         long start = System.currentTimeMillis();
 
