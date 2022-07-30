@@ -48,6 +48,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdraw
 import com.google.gson.JsonElement;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -74,6 +75,7 @@ import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
@@ -381,12 +383,23 @@ public class SavingsAccountAssembler {
     public SavingsAccountData assembleSavings(final SavingsAccountData account) {
 
         // Update last running balance on account level
-        if (account.getTransactions() != null && account.getTransactions().size() != 0
-                && account.getSummary().getInterestPostedTillDate() != null) {
-            account.getSummary().setRunningBalanceOnPivotDate(account.getTransactions().get(account.getTransactions().size() - 1)
-                    .getRunningBalance(account.getCurrency()).getAmount());
-        }
+        if (account.getTransactions() != null && account.getSummary().getInterestPostedTillDate() != null) {
+            List<SavingsAccountTransactionData> removalList = new ArrayList<>();
 
+            for (int i = 0; i < account.getTransactions().size(); i++) {
+                SavingsAccountTransactionData savingsAccountTransaction = account.getTransactions().get(i);
+                removalList.add(savingsAccountTransaction);
+                if ((savingsAccountTransaction.isInterestPostingAndNotReversed()
+                        || savingsAccountTransaction.isOverdraftInterestAndNotReversed())
+                        && !savingsAccountTransaction.isReversalTransaction()) {
+                    account.getSummary().setRunningBalanceOnPivotDate(savingsAccountTransaction.getRunningBalance());
+                    break;
+                }
+            }
+            account.getTransactions().removeAll(removalList);
+        } else {
+            account.getSummary().setRunningBalanceOnPivotDate(BigDecimal.ZERO);
+        }
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
         return account;
     }

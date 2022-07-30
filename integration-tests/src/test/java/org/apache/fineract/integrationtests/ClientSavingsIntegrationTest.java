@@ -2973,18 +2973,20 @@ public class ClientSavingsIntegrationTest {
 
         configurationForBackdatedTransaction();
 
-        String transactionDate = "1 July 2022";
+        LocalDate transactionDate = LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(6);
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+        String startDate = formatter.format(transactionDate);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, transactionDate);
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
         Assertions.assertNotNull(clientID);
 
-        final Integer savingsId = createSavingsAccountDailyPostingOverdraft(clientID, transactionDate);
-        this.savingsAccountHelper.depositToSavingsAccount(savingsId, "200", transactionDate, CommonConstants.RESPONSE_RESOURCE_ID);
+        final Integer savingsId = createSavingsAccountDailyPostingOverdraft(clientID, startDate);
+        this.savingsAccountHelper.depositToSavingsAccount(savingsId, "200", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
         final String jobName = "Post Interest For Savings";
         this.scheduleJobHelper.executeAndAwaitJob(jobName);
         final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
         final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
-        List<HashMap> error = (List<HashMap>) validationErrorHelper.depositToSavingsAccount(savingsId, "3000", transactionDate,
+        List<HashMap> error = (List<HashMap>) validationErrorHelper.depositToSavingsAccount(savingsId, "300", startDate,
                 CommonConstants.RESPONSE_ERROR);
 
         assertEquals("error.msg.savings.transaction.is.not.allowed", error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
