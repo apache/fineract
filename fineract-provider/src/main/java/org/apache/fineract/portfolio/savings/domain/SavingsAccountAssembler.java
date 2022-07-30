@@ -390,13 +390,8 @@ public class SavingsAccountAssembler {
             for (int i = 0; i < account.getTransactions().size(); i++) {
                 SavingsAccountTransactionData savingsAccountTransaction = account.getTransactions().get(i);
                 removalList.add(savingsAccountTransaction);
-                if ((savingsAccountTransaction.isInterestPostingAndNotReversed()
-                        || savingsAccountTransaction.isOverdraftInterestAndNotReversed())
-                        && !savingsAccountTransaction.isReversalTransaction()) {
-                    account.getSummary().setRunningBalanceOnPivotDate(savingsAccountTransaction.getRunningBalance());
-                    account.setLastSavingsAccountTransaction(savingsAccountTransaction);
-                    break;
-                }
+                account.getSummary().setRunningBalanceOnPivotDate(savingsAccountTransaction.getRunningBalance());
+                account.setLastSavingsAccountTransaction(savingsAccountTransaction);
             }
             account.getTransactions().removeAll(removalList);
         } else {
