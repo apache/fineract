@@ -51,6 +51,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ProductToGLAccountMappingHelper {
 
+    protected static final List<GLAccountType> ASSET_LIABILITY_TYPES = List.of(GLAccountType.ASSET, GLAccountType.LIABILITY);
+
     protected final GLAccountRepository accountRepository;
     protected final ProductToGLAccountMappingRepository accountMappingRepository;
     protected final FromJsonHelper fromApiJsonHelper;

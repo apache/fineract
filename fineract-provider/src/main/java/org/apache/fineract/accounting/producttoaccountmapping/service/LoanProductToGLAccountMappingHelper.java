@@ -20,16 +20,19 @@ package org.apache.fineract.accounting.producttoaccountmapping.service;
 
 import com.google.gson.JsonElement;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.fineract.accounting.common.AccountingConstants.AccrualAccountsForLoan;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForLoan;
 import org.apache.fineract.accounting.common.AccountingConstants.LoanProductAccountingParams;
 import org.apache.fineract.accounting.common.AccountingRuleType;
+import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepository;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.accounting.producttoaccountmapping.domain.PortfolioProductType;
 import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMappingRepository;
+import org.apache.fineract.accounting.producttoaccountmapping.exception.ProductToGLAccountMappingInvalidException;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
@@ -56,6 +59,14 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
         saveProductToAccountMapping(element, paramName, productId, placeHolderTypeId, GLAccountType.ASSET, PortfolioProductType.LOAN);
     }
 
+    public void saveLoanToAssetOrLiabilityAccountMapping(final JsonElement element, final String paramName, final Long productId,
+            final int placeHolderTypeId) {
+        GLAccountType glAccountType = getGLAccountType(element, paramName, ASSET_LIABILITY_TYPES);
+        if (glAccountType != null) {
+            saveProductToAccountMapping(element, paramName, productId, placeHolderTypeId, glAccountType, PortfolioProductType.LOAN);
+        }
+    }
+
     public void saveLoanToIncomeAccountMapping(final JsonElement element, final String paramName, final Long productId,
             final int placeHolderTypeId) {
         saveProductToAccountMapping(element, paramName, productId, placeHolderTypeId, GLAccountType.INCOME, PortfolioProductType.LOAN);
@@ -78,6 +89,15 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
             final int accountTypeId, final String accountTypeName, final Map<String, Object> changes) {
         mergeProductToAccountMappingChanges(element, paramName, productId, accountTypeId, accountTypeName, changes, GLAccountType.ASSET,
                 PortfolioProductType.LOAN);
+    }
+
+    public void mergeLoanToAssetOrLiabilityAccountMappingChanges(final JsonElement element, final String paramName, final Long productId,
+            final int accountTypeId, final String accountTypeName, final Map<String, Object> changes) {
+        GLAccountType glAccountType = getGLAccountType(element, paramName, ASSET_LIABILITY_TYPES);
+        if (glAccountType != null) {
+            mergeProductToAccountMappingChanges(element, paramName, productId, accountTypeId, accountTypeName, changes, glAccountType,
+                    PortfolioProductType.LOAN);
+        }
     }
 
     public void mergeLoanToIncomeAccountMappingChanges(final JsonElement element, final String paramName, final Long productId,
@@ -223,9 +243,11 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
             case NONE:
             break;
             case CASH_BASED:
-                // asset
-                mergeLoanToAssetAccountMappingChanges(element, LoanProductAccountingParams.FUND_SOURCE.getValue(), loanProductId,
+                // asset or liabilities
+                mergeLoanToAssetOrLiabilityAccountMappingChanges(element, LoanProductAccountingParams.FUND_SOURCE.getValue(), loanProductId,
                         CashAccountsForLoan.FUND_SOURCE.getValue(), CashAccountsForLoan.FUND_SOURCE.toString(), changes);
+
+                // asset
                 mergeLoanToAssetAccountMappingChanges(element, LoanProductAccountingParams.LOAN_PORTFOLIO.getValue(), loanProductId,
                         CashAccountsForLoan.LOAN_PORTFOLIO.getValue(), CashAccountsForLoan.LOAN_PORTFOLIO.toString(), changes);
                 mergeLoanToAssetAccountMappingChanges(element, LoanProductAccountingParams.TRANSFERS_SUSPENSE.getValue(), loanProductId,
@@ -255,9 +277,11 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
             case ACCRUAL_UPFRONT:
                 // fall through to periodic accrual
             case ACCRUAL_PERIODIC:
+                // asset or liabilities
+                mergeLoanToAssetOrLiabilityAccountMappingChanges(element, LoanProductAccountingParams.FUND_SOURCE.getValue(), loanProductId,
+                        CashAccountsForLoan.FUND_SOURCE.getValue(), CashAccountsForLoan.FUND_SOURCE.toString(), changes);
+
                 // assets (including receivables)
-                mergeLoanToAssetAccountMappingChanges(element, LoanProductAccountingParams.FUND_SOURCE.getValue(), loanProductId,
-                        AccrualAccountsForLoan.FUND_SOURCE.getValue(), AccrualAccountsForLoan.FUND_SOURCE.toString(), changes);
                 mergeLoanToAssetAccountMappingChanges(element, LoanProductAccountingParams.LOAN_PORTFOLIO.getValue(), loanProductId,
                         AccrualAccountsForLoan.LOAN_PORTFOLIO.getValue(), AccrualAccountsForLoan.LOAN_PORTFOLIO.toString(), changes);
                 mergeLoanToAssetAccountMappingChanges(element, LoanProductAccountingParams.TRANSFERS_SUSPENSE.getValue(), loanProductId,
@@ -300,6 +324,20 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
 
     public void deleteLoanProductToGLAccountMapping(final Long loanProductId) {
         deleteProductToGLAccountMapping(loanProductId, PortfolioProductType.LOAN);
+    }
+
+    private GLAccountType getGLAccountType(final JsonElement element, final String paramName, final List<GLAccountType> allowedTypes) {
+        GLAccountType gLAccountType = null;
+        final Long accountId = this.fromApiJsonHelper.extractLongNamed(paramName, element);
+        if (accountId != null) {
+            final GLAccount glAccount = getAccountById(paramName, accountId);
+            gLAccountType = GLAccountType.fromInt(glAccount.getType());
+            if (!allowedTypes.contains(gLAccountType)) {
+                throw new ProductToGLAccountMappingInvalidException(paramName, glAccount.getName(), accountId, gLAccountType.toString(),
+                        GLAccountType.ASSET.getCode() + " or " + GLAccountType.LIABILITY.getCode());
+            }
+        }
+        return gLAccountType;
     }
 
 }
