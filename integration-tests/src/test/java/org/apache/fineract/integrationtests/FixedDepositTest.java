@@ -30,7 +30,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -442,7 +445,7 @@ public class FixedDepositTest {
     }
 
     @Test
-    public void testFixedDepositAccountClosureTypeWithdrawal_WITH_HOLD_TAX() throws InterruptedException {
+    public void testFixedDepositAccountClosureTypeWithdrawal_WITH_HOLD_TAX() {
         this.fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
@@ -457,30 +460,23 @@ public class FixedDepositTest {
         final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
         final Account liabilityAccountForTax = this.accountHelper.createLiabilityAccount();
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        DateFormat monthDayFormat = new SimpleDateFormat("dd MMM", Locale.US);
-        DateFormat currentDateFormat = new SimpleDateFormat("dd");
+        DateTimeFormatter monthDayFormat = new DateTimeFormatterBuilder().appendPattern("dd MMM").toFormatter();
+        DateTimeFormatter currentDateFormat = new DateTimeFormatterBuilder().appendPattern("dd").toFormatter();
 
-        Calendar todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -20);
-        final String VALID_FROM = dateFormat.format(todaysDate.getTime());
-        todaysDate.add(Calendar.YEAR, 10);
-        final String VALID_TO = dateFormat.format(todaysDate.getTime());
+        LocalDate todaysDate = Utils.getLocalDateOfTenant();
+        todaysDate = todaysDate.minusMonths(20);
+        final String VALID_FROM = Utils.dateFormatter.format(todaysDate);
+        todaysDate = todaysDate.plusYears(10);
+        final String VALID_TO = Utils.dateFormatter.format(todaysDate);
 
-        todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -20);
-        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        monthDayFormat.format(todaysDate.getTime());
+        todaysDate = Utils.getLocalDateOfTenant();
+        todaysDate = todaysDate.minusMonths(20);
+        final String SUBMITTED_ON_DATE = Utils.dateFormatter.format(todaysDate);
+        final String APPROVED_ON_DATE = Utils.dateFormatter.format(todaysDate);
+        final String ACTIVATION_DATE = Utils.dateFormatter.format(todaysDate);
 
-        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
-        Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        int numberOfDaysLeft = daysInMonth - currentDate + 1;
-        todaysDate.add(Calendar.DATE, numberOfDaysLeft);
-        Calendar closedOn = Calendar.getInstance();
-        closedOn.add(Calendar.MONTH, -6);
-        final String CLOSED_ON_DATE = dateFormat.format(closedOn.getTime());
+        LocalDate closedOn = todaysDate.plusMonths(14);
+        final String CLOSED_ON_DATE = Utils.dateFormatter.format(closedOn);
 
         Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientId);
@@ -1282,26 +1278,23 @@ public class FixedDepositTest {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.fixedDepositAccountHelper = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        DateFormat monthDayFormat = new SimpleDateFormat("dd MMM", Locale.US);
-        DateFormat currentDateFormat = new SimpleDateFormat("dd");
+        DateTimeFormatter dateFormat = Utils.dateFormatter;
 
-        Calendar todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -3);
-        final String VALID_FROM = dateFormat.format(todaysDate.getTime());
-        todaysDate.add(Calendar.YEAR, 10);
-        final String VALID_TO = dateFormat.format(todaysDate.getTime());
+        LocalDate todaysDate = Utils.getLocalDateOfTenant();
+        todaysDate = todaysDate.minusMonths(3);
+        final String VALID_FROM = dateFormat.format(todaysDate);
+        todaysDate = todaysDate.plusYears(10);
+        final String VALID_TO = dateFormat.format(todaysDate);
 
-        todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -1);
-        todaysDate.add(Calendar.DAY_OF_MONTH, -1);
-        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        monthDayFormat.format(todaysDate.getTime());
-        todaysDate.add(Calendar.MONTH, 1);
-        todaysDate.add(Calendar.DAY_OF_MONTH, 1);
-        final String CLOSED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        todaysDate = Utils.getLocalDateOfTenant();
+        todaysDate = todaysDate.minusMonths(1);
+        todaysDate = todaysDate.minusDays(1);
+        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate);
+        final String APPROVED_ON_DATE = dateFormat.format(todaysDate);
+        final String ACTIVATION_DATE = dateFormat.format(todaysDate);
+
+        todaysDate = Utils.getLocalDateOfTenant();
+        final String CLOSED_ON_DATE = dateFormat.format(todaysDate);
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assertions.assertNotNull(clientId);
@@ -1345,18 +1338,13 @@ public class FixedDepositTest {
         log.info("per day = {}", perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
-        todaysDate.add(Calendar.MONTH, -1);
-        todaysDate.add(Calendar.DAY_OF_MONTH, -1);
-        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
-        Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        daysInMonth = daysInMonth - currentDate + 1;
-        Float interestPerMonth = (float) (interestPerDay * principal * daysInMonth);
+        todaysDate = todaysDate.minusMonths(1);
+        todaysDate = todaysDate.minusDays(1);
+
+        Float interestPerMonth = (float) (interestPerDay * principal * ChronoUnit.DAYS.between(todaysDate, Utils.getLocalDateOfTenant()));
         principal += interestPerMonth;
-        todaysDate.add(Calendar.DATE, daysInMonth);
-        log.info("{}", monthDayFormat.format(todaysDate.getTime()));
-        interestPerMonth = (float) (interestPerDay * principal * currentDate);
+        log.info("{}", Utils.dateFormatter.format(todaysDate));
         log.info("IPM = {}", interestPerMonth);
-        principal += interestPerMonth;
         log.info("principal = {}", principal);
 
         Integer transactionIdForPostInterest = this.fixedDepositAccountHelper.postInterestForFixedDeposit(fixedDepositAccountId);

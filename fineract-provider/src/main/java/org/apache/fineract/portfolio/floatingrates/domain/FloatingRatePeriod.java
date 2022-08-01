@@ -20,22 +20,18 @@ package org.apache.fineract.portfolio.floatingrates.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateDTO;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRatePeriodData;
-import org.apache.fineract.useradministration.domain.AppUser;
 
-//TODO: refactor to use AbstractAuditableCustom!
 @Entity
 @Table(name = "m_floating_rates_periods")
-public class FloatingRatePeriod extends AbstractPersistableCustom {
+public class FloatingRatePeriod extends AbstractAuditableWithUTCDateTimeCustom {
 
     @ManyToOne
     @JoinColumn(name = "floating_rates_id", nullable = false)
@@ -53,41 +49,30 @@ public class FloatingRatePeriod extends AbstractPersistableCustom {
     @Column(name = "is_active", nullable = false)
     private boolean isActive;
 
-    @ManyToOne(optional = true, fetch = FetchType.LAZY)
-    @JoinColumn(name = "createdby_id", nullable = false)
-    private AppUser createdBy;
-
-    @ManyToOne(optional = true, fetch = FetchType.LAZY)
-    @JoinColumn(name = "lastmodifiedby_id", nullable = false)
-    private AppUser modifiedBy;
-
-    @Column(name = "created_date", nullable = false)
-    private LocalDateTime createdOn;
-
-    @Column(name = "lastmodified_date", nullable = false)
-    private LocalDateTime modifiedOn;
+    /*
+     * Deprecated since common Auditable fields were introduced. Columns and data left untouched to help migration.
+     *
+     * @Column(name = "created_date", nullable = false) private LocalDateTime createdOn;
+     *
+     * @Column(name = "lastmodified_date", nullable = false) private LocalDateTime modifiedOn;
+     */
 
     public FloatingRatePeriod() {
 
     }
 
-    public FloatingRatePeriod(LocalDate fromDate, BigDecimal interestRate, boolean isDifferentialToBaseLendingRate, boolean isActive,
-            AppUser createdBy, AppUser modifiedBy, LocalDateTime createdOn, LocalDateTime modifiedOn) {
+    public FloatingRatePeriod(LocalDate fromDate, BigDecimal interestRate, boolean isDifferentialToBaseLendingRate, boolean isActive) {
         this.fromDate = fromDate;
         this.interestRate = interestRate;
         this.isDifferentialToBaseLendingRate = isDifferentialToBaseLendingRate;
         this.isActive = isActive;
-        this.createdBy = createdBy;
-        this.modifiedBy = modifiedBy;
-        this.createdOn = createdOn;
-        this.modifiedOn = modifiedOn;
     }
 
     public void updateFloatingRate(FloatingRate floatingRate) {
         this.floatingRate = floatingRate;
     }
 
-    public FloatingRate getFloatingRatesId() {
+    public FloatingRate getFloatingRate() {
         return this.floatingRate;
     }
 
@@ -107,32 +92,8 @@ public class FloatingRatePeriod extends AbstractPersistableCustom {
         return this.isActive;
     }
 
-    public AppUser getCreatedBy() {
-        return this.createdBy;
-    }
-
-    public AppUser getModifiedBy() {
-        return this.modifiedBy;
-    }
-
-    public LocalDateTime getCreatedOn() {
-        return this.createdOn;
-    }
-
-    public LocalDateTime getModifiedOn() {
-        return this.modifiedOn;
-    }
-
-    public void setModifiedBy(AppUser modifiedBy) {
-        this.modifiedBy = modifiedBy;
-    }
-
-    public void setModifiedOn(LocalDateTime modifiedOn) {
-        this.modifiedOn = modifiedOn;
-    }
-
-    public void setActive(boolean b) {
-        this.isActive = b;
+    public void setActive(boolean isActive) {
+        this.isActive = isActive;
     }
 
     public LocalDate fetchFromDate() {
@@ -147,13 +108,7 @@ public class FloatingRatePeriod extends AbstractPersistableCustom {
         }
 
         final LocalDate fromDate = getFromDate();
-        final LocalDateTime createdOn = getCreatedOn();
-        final LocalDateTime modifiedOn = getModifiedOn();
-
-        String createdBy = getCreatedBy() != null ? getCreatedBy().getUsername() : null;
-        String modifiedBy = getModifiedBy() != null ? getModifiedBy().getUsername() : null;
-        return new FloatingRatePeriodData(getId(), fromDate, interest, isDifferentialToBaseLendingRate(), isActive(), createdBy, createdOn,
-                modifiedBy, modifiedOn);
+        return new FloatingRatePeriodData(getId(), fromDate, interest, isDifferentialToBaseLendingRate(), isActive());
     }
 
 }

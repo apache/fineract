@@ -20,10 +20,13 @@ package org.apache.fineract.infrastructure.jobs.service.updatenpa;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSourceServiceFactory;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -37,9 +40,11 @@ public class UpdateNpaTasklet implements Tasklet {
     private final RoutingDataSourceServiceFactory dataSourceServiceFactory;
     private final DatabaseTypeResolver databaseTypeResolver;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
+    private final PlatformSecurityContext context;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+        AppUser user = context.getAuthenticatedUserIfPresent();
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
 
         final StringBuilder resetNPASqlBuilder = new StringBuilder();
@@ -52,11 +57,13 @@ public class UpdateNpaTasklet implements Tasklet {
         String wherePart = " where loan.id = sl.id ";
 
         if (databaseTypeResolver.isMySQL()) {
-            resetNPASqlBuilder.append(", ").append(fromPart).append(" set loan.is_npa = false").append(wherePart);
+            resetNPASqlBuilder.append(", ").append(fromPart).append(" set loan.is_npa = false")
+                    .append(", loan.last_modified_by = ?, loan.last_modified_on_utc = ? ").append(wherePart);
         } else {
-            resetNPASqlBuilder.append("set is_npa = false").append(" FROM ").append(fromPart).append(wherePart);
+            resetNPASqlBuilder.append("set is_npa = false").append(", last_modified_by = ?, last_modified_on_utc = ? ").append(" FROM ")
+                    .append(fromPart).append(wherePart);
         }
-        jdbcTemplate.update(resetNPASqlBuilder.toString());
+        jdbcTemplate.update(resetNPASqlBuilder.toString(), user.getId(), DateUtils.getOffsetDateTimeOfTenant());
 
         final StringBuilder updateSqlBuilder = new StringBuilder(900);
 
@@ -68,12 +75,14 @@ public class UpdateNpaTasklet implements Tasklet {
         wherePart = " where ml.id=sl.id ";
         updateSqlBuilder.append("UPDATE m_loan as ml ");
         if (databaseTypeResolver.isMySQL()) {
-            updateSqlBuilder.append(", ").append(fromPart).append(" SET ml.is_npa = true").append(wherePart);
+            updateSqlBuilder.append(", ").append(fromPart).append(" SET ml.is_npa = true")
+                    .append(", ml.last_modified_by = ?, ml.last_modified_on_utc = ? ").append(wherePart);
         } else {
-            updateSqlBuilder.append(" SET is_npa = true").append(" FROM ").append(fromPart).append(wherePart);
+            updateSqlBuilder.append(" SET is_npa = true").append(", last_modified_by = ?, last_modified_on_utc = ? ").append(" FROM ")
+                    .append(fromPart).append(wherePart);
         }
 
-        final int result = jdbcTemplate.update(updateSqlBuilder.toString());
+        final int result = jdbcTemplate.update(updateSqlBuilder.toString(), user.getId(), DateUtils.getOffsetDateTimeOfTenant());
 
         log.info("{}: Records affected by updateNPA: {}", ThreadLocalContextUtil.getTenant().getName(), result);
         return RepeatStatus.FINISHED;
