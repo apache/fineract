@@ -39,31 +39,31 @@ public class LoanAccrualPlatformServiceImpl implements LoanAccrualPlatformServic
     private final LoanAccrualWritePlatformService loanAccrualWritePlatformService;
 
     @Override
-    public void addPeriodicAccruals(final LocalDate tilldate) throws JobExecutionException {
-        Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas = this.loanReadPlatformService.retrivePeriodicAccrualData(tilldate);
-        addPeriodicAccruals(tilldate, loanScheduleAccrualDatas);
+    public void addPeriodicAccruals(final LocalDate tillDate) throws JobExecutionException {
+        Collection<LoanScheduleAccrualData> loanScheduleAccrualDataList = this.loanReadPlatformService.retrivePeriodicAccrualData(tillDate);
+        addPeriodicAccruals(tillDate, loanScheduleAccrualDataList);
     }
 
     @Override
-    public void addPeriodicAccruals(final LocalDate tilldate, Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas)
+    public void addPeriodicAccruals(final LocalDate tillDate, Collection<LoanScheduleAccrualData> loanScheduleAccrualDataList)
             throws JobExecutionException {
         Map<Long, Collection<LoanScheduleAccrualData>> loanDataMap = new HashMap<>();
-        for (final LoanScheduleAccrualData accrualData : loanScheduleAccrualDatas) {
+        for (final LoanScheduleAccrualData accrualData : loanScheduleAccrualDataList) {
             if (loanDataMap.containsKey(accrualData.getLoanId())) {
                 loanDataMap.get(accrualData.getLoanId()).add(accrualData);
             } else {
-                Collection<LoanScheduleAccrualData> accrualDatas = new ArrayList<>();
-                accrualDatas.add(accrualData);
-                loanDataMap.put(accrualData.getLoanId(), accrualDatas);
+                Collection<LoanScheduleAccrualData> accrualDataList = new ArrayList<>();
+                accrualDataList.add(accrualData);
+                loanDataMap.put(accrualData.getLoanId(), accrualDataList);
             }
         }
 
         List<Throwable> errors = new ArrayList<>();
         for (Map.Entry<Long, Collection<LoanScheduleAccrualData>> mapEntry : loanDataMap.entrySet()) {
             try {
-                this.loanAccrualWritePlatformService.addPeriodicAccruals(tilldate, mapEntry.getKey(), mapEntry.getValue());
+                this.loanAccrualWritePlatformService.addPeriodicAccruals(tillDate, mapEntry.getKey(), mapEntry.getValue());
             } catch (Exception e) {
-                log.error("Failed to add accural transaction for loan {}", mapEntry.getKey(), e);
+                log.error("Failed to add accrual transaction for loan {}", mapEntry.getKey(), e);
                 errors.add(e);
             }
         }

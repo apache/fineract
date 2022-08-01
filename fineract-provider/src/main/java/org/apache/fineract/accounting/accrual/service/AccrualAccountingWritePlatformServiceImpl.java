@@ -46,9 +46,9 @@ public class AccrualAccountingWritePlatformServiceImpl implements AccrualAccount
     @Override
     public CommandProcessingResult executeLoansPeriodicAccrual(JsonCommand command) {
         this.accountingDataValidator.validateLoanPeriodicAccrualData(command.json());
-        LocalDate tilldate = command.localDateValueOfParameterNamed(accrueTillParamName);
+        LocalDate tillDate = command.localDateValueOfParameterNamed(accrueTillParamName);
         try {
-            this.loanAccrualPlatformService.addPeriodicAccruals(tilldate);
+            this.loanAccrualPlatformService.addPeriodicAccruals(tillDate);
         } catch (MultiException e) {
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)

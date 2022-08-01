@@ -25,11 +25,9 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRate;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRateRepositoryWrapper;
 import org.apache.fineract.portfolio.floatingrates.serialization.FloatingRateDataValidator;
-import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,14 +40,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class FloatingRateWritePlatformServiceImpl implements FloatingRateWritePlatformService {
 
     private static final Logger LOG = LoggerFactory.getLogger(FloatingRateWritePlatformServiceImpl.class);
-    private final PlatformSecurityContext context;
     private final FloatingRateDataValidator fromApiJsonDeserializer;
     private final FloatingRateRepositoryWrapper floatingRateRepository;
 
     @Autowired
-    public FloatingRateWritePlatformServiceImpl(final PlatformSecurityContext context,
-            final FloatingRateDataValidator fromApiJsonDeserializer, final FloatingRateRepositoryWrapper floatingRateRepository) {
-        this.context = context;
+    public FloatingRateWritePlatformServiceImpl(final FloatingRateDataValidator fromApiJsonDeserializer,
+            final FloatingRateRepositoryWrapper floatingRateRepository) {
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.floatingRateRepository = floatingRateRepository;
     }
@@ -59,8 +55,7 @@ public class FloatingRateWritePlatformServiceImpl implements FloatingRateWritePl
     public CommandProcessingResult createFloatingRate(final JsonCommand command) {
         try {
             this.fromApiJsonDeserializer.validateForCreate(command.json());
-            final AppUser currentUser = this.context.authenticatedUser();
-            final FloatingRate newFloatingRate = FloatingRate.createNew(currentUser, command);
+            final FloatingRate newFloatingRate = FloatingRate.createNew(command);
             this.floatingRateRepository.saveAndFlush(newFloatingRate);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -82,8 +77,7 @@ public class FloatingRateWritePlatformServiceImpl implements FloatingRateWritePl
         try {
             final FloatingRate floatingRateForUpdate = this.floatingRateRepository.findOneWithNotFoundDetection(command.entityId());
             this.fromApiJsonDeserializer.validateForUpdate(command.json(), floatingRateForUpdate);
-            final AppUser currentUser = this.context.authenticatedUser();
-            final Map<String, Object> changes = floatingRateForUpdate.update(command, currentUser);
+            final Map<String, Object> changes = floatingRateForUpdate.update(command);
 
             if (!changes.isEmpty()) {
                 this.floatingRateRepository.save(floatingRateForUpdate);

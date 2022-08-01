@@ -45,15 +45,15 @@ public class AddAccrualEntriesTasklet implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas = loanReadPlatformService.retriveScheduleAccrualData();
+        Collection<LoanScheduleAccrualData> loanScheduleAccrualDataList = loanReadPlatformService.retriveScheduleAccrualData();
         Map<Long, Collection<LoanScheduleAccrualData>> loanDataMap = new HashMap<>();
-        for (final LoanScheduleAccrualData accrualData : loanScheduleAccrualDatas) {
+        for (final LoanScheduleAccrualData accrualData : loanScheduleAccrualDataList) {
             if (loanDataMap.containsKey(accrualData.getLoanId())) {
                 loanDataMap.get(accrualData.getLoanId()).add(accrualData);
             } else {
-                Collection<LoanScheduleAccrualData> accrualDatas = new ArrayList<>();
-                accrualDatas.add(accrualData);
-                loanDataMap.put(accrualData.getLoanId(), accrualDatas);
+                Collection<LoanScheduleAccrualData> accrualDataList = new ArrayList<>();
+                accrualDataList.add(accrualData);
+                loanDataMap.put(accrualData.getLoanId(), accrualDataList);
             }
         }
 
@@ -62,7 +62,7 @@ public class AddAccrualEntriesTasklet implements Tasklet {
             try {
                 loanAccrualWritePlatformService.addAccrualAccounting(mapEntry.getKey(), mapEntry.getValue());
             } catch (Exception e) {
-                log.error("Failed to add accural transaction for loan {}", mapEntry.getKey(), e);
+                log.error("Failed to add accrual transaction for loan {}", mapEntry.getKey(), e);
                 errors.add(e);
             }
         }
