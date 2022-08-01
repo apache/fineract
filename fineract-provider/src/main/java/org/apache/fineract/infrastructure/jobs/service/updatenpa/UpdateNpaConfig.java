@@ -22,6 +22,7 @@ import org.apache.fineract.infrastructure.core.service.RoutingDataSourceServiceF
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -46,6 +47,9 @@ public class UpdateNpaConfig {
     @Autowired
     private DatabaseSpecificSQLGenerator sqlGenerator;
 
+    @Autowired
+    private PlatformSecurityContext platformSecurityContext;
+
     @Bean
     protected Step updateNpaStep() {
         return steps.get(JobName.UPDATE_NPA.name()).tasklet(updateNpaTasklet()).build();
@@ -58,6 +62,6 @@ public class UpdateNpaConfig {
 
     @Bean
     public UpdateNpaTasklet updateNpaTasklet() {
-        return new UpdateNpaTasklet(dataSourceServiceFactory, databaseTypeResolver, sqlGenerator);
+        return new UpdateNpaTasklet(dataSourceServiceFactory, databaseTypeResolver, sqlGenerator, platformSecurityContext);
     }
 }

@@ -68,7 +68,7 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("tr.id as transactionId, tr.transaction_type_enum as transactionType,  ");
             sqlBuilder.append("tr.transaction_date as transactionDate, tr.amount as transactionAmount, ");
-            sqlBuilder.append("tr.created_date as submittedOnDate, tr.is_reversed as reversed, ");
+            sqlBuilder.append("tr.submitted_on_date as submittedOnDate, tr.is_reversed as reversed, ");
             sqlBuilder.append("tr.external_id as externalId, o.name as officeName, o.id as officeId, ");
             sqlBuilder.append("c.id as clientId, c.account_no as accountNo, ccpb.client_charge_id as clientChargeId, ");
             sqlBuilder.append("pd.payment_type_id as paymentType,pd.account_number as accountNumber,pd.check_number as checkNumber, ");
@@ -143,7 +143,7 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
         sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ").append(this.clientTransactionMapper.schema())
                 .append(" where c.id = ? ");
         parameters[0] = clientId;
-        sqlBuilder.append(" order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC ");
+        sqlBuilder.append(" order by tr.transaction_date DESC, tr.submitted_on_date DESC, tr.id DESC ");
 
         // apply limit and offsets
 
@@ -169,7 +169,7 @@ public class ClientTransactionReadPlatformServiceImpl implements ClientTransacti
             sql = sql + " and ccpb.client_charge_id = ?";
         }
         parameters[0] = clientId;
-        sql = sql + " order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC";
+        sql = sql + " order by tr.transaction_date DESC, tr.submitted_on_date DESC, tr.id DESC";
         return this.jdbcTemplate.query(sql, this.clientTransactionMapper, parameters); // NOSONAR
     }
 

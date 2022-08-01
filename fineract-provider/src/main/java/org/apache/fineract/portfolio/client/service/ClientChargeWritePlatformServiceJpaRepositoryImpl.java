@@ -54,7 +54,6 @@ import org.apache.fineract.portfolio.client.domain.ClientTransaction;
 import org.apache.fineract.portfolio.client.domain.ClientTransactionRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
-import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -174,7 +173,7 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
             final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
             ClientTransaction clientTransaction = ClientTransaction.payCharge(client, client.getOffice(), paymentDetail, transactionDate,
-                    chargePaid, clientCharge.getCurrency().getCode(), getAppUserIfPresent());
+                    chargePaid, clientCharge.getCurrency().getCode());
             this.clientTransactionRepository.saveAndFlush(clientTransaction);
 
             // update charge paid by associations
@@ -217,7 +216,7 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
 
             // create Waiver Transaction
             ClientTransaction clientTransaction = ClientTransaction.waiver(client, client.getOffice(), transactionDate, waivedAmount,
-                    clientCharge.getCurrency().getCode(), getAppUserIfPresent());
+                    clientCharge.getCurrency().getCode());
             this.clientTransactionRepository.saveAndFlush(clientTransaction);
 
             // update charge paid by associations
@@ -392,7 +391,8 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
     /**
      * Ensures that the charge transaction date (for payments) is not on a holiday or a non working day
      *
-     * @param savingsAccountCharge
+     * @param transactionDate
+     * @param clientCharge
      * @param fmt
      */
     private void validateTransactionDateOnWorkingDay(final LocalDate transactionDate, final ClientCharge clientCharge,
@@ -406,7 +406,8 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
      * @param date
      * @param officeId
      * @param jsonPropertyName
-     * @param errorMessageFragment
+     * @param errorMessageFragmentForActivityOnHoliday
+     * @param errorMessageFragmentForActivityOnNonWorkingDay
      * @param fmt
      */
     private void validateActivityDateFallOnAWorkingDay(final LocalDate date, final Long officeId, final String jsonPropertyName,
@@ -434,14 +435,6 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
                 }
             }
         }
-    }
-
-    private AppUser getAppUserIfPresent() {
-        AppUser user = null;
-        if (this.context != null) {
-            user = this.context.getAuthenticatedUserIfPresent();
-        }
-        return user;
     }
 
     private void handleDataIntegrityIssues(@SuppressWarnings("unused") final Long clientId, final Long clientChargeId,

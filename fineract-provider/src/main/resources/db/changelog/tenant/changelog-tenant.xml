@@ -42,4 +42,6 @@
     <include file="parts/0020_add_audit_entries.xml" relativeToChangelogFile="true"/>
     <include file="parts/0021_add_spring_batch_db_structure.xml" relativeToChangelogFile="true"/>
     <include file="parts/0022_add_batch_business_step_configuration_table.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0023_use_the_proper_date_or_datetime_type.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0024_add_audit_entries.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
