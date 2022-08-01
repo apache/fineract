@@ -37,7 +37,7 @@ configurations {
     driver
 }
 dependencies {
-    driver 'mysql:mysql-connector-java:8.0.29'
+    driver 'mysql:mysql-connector-java:8.0.30'
 }
 
 cargo {
