@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
+import org.apache.fineract.accounting.common.AccountingConstants.AccrualAccountsForLoan;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForLoan;
 import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
 import org.apache.fineract.accounting.journalentry.data.ChargePaymentDTO;
@@ -254,6 +255,19 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
             } else {
                 this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, CashAccountsForLoan.FUND_SOURCE.getValue(),
                         loanProductId, paymentTypeId, loanId, transactionId, transactionDate, totalDebitAmount, isReversal);
+            }
+        }
+
+        /**
+         * Charge Refunds (and their reversals) have an extra refund related pair of journal entries in addition to
+         * those related to the repayment above
+         ***/
+        if (!(totalDebitAmount.compareTo(BigDecimal.ZERO) == 0)) {
+            if (loanTransactionDTO.getTransactionType().isChargeRefund()) {
+                Integer incomeAccount = this.helper.getValueForFeeOrPenaltyIncomeAccount(loanTransactionDTO.getChargeRefundChargeType());
+                this.helper.createAccrualBasedJournalEntriesAndReversalsForLoan(office, currencyCode, incomeAccount,
+                        AccrualAccountsForLoan.FUND_SOURCE.getValue(), loanProductId, paymentTypeId, loanId, transactionId, transactionDate,
+                        totalDebitAmount, isReversal);
             }
         }
     }

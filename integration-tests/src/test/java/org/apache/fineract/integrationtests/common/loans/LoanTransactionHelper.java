@@ -63,6 +63,7 @@ public class LoanTransactionHelper {
     private static final String WAIVE_INTEREST_COMMAND = "waiveinterest";
     private static final String MAKE_REPAYMENT_COMMAND = "repayment";
     private static final String UNDO = "undo";
+    private static final String LOANCHARGE_REFUND_REPAYMENT_COMMAND = "chargeRefund";
     private static final String CREDIT_BALANCE_REFUND_COMMAND = "creditBalanceRefund";
     private static final String WITHDRAW_LOAN_APPLICATION_COMMAND = "withdrawnByApplicant";
     private static final String RECOVER_FROM_GUARANTORS_COMMAND = "recoverGuarantees";
@@ -349,6 +350,12 @@ public class LoanTransactionHelper {
                 getCreditBalanceRefundBodyAsJSON(date, amountToBePaid, externalId), jsonAttributeToGetback);
     }
 
+    public Object loanChargeRefund(final Integer loanChargeId, final Integer installmentNumber, final Float amountToBePaid,
+            final String externalId, final Integer loanID, String jsonAttributeToGetback) {
+        return performLoanTransaction(createLoanTransactionURL(LOANCHARGE_REFUND_REPAYMENT_COMMAND, loanID),
+                getLoanChargeRefundBodyAsJSON(loanChargeId, installmentNumber, amountToBePaid, externalId), jsonAttributeToGetback);
+    }
+
     public Object makeRepaymentTypePayment(final String repaymentTypeCommand, final String date, final Float amountToBePaid,
             final Integer loanID, String jsonAttributeToGetback) {
         return performLoanTransaction(createLoanTransactionURL(repaymentTypeCommand, loanID), getRepaymentBodyAsJSON(date, amountToBePaid),
@@ -452,10 +459,10 @@ public class LoanTransactionHelper {
         return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_CHARGES_URL, "");
     }
 
-    public HashMap getLoanTransactionDetails(final Integer loanId, final Integer txnId) {
+    public Object getLoanTransactionDetails(final Integer loanId, final Integer txnId, final String param) {
         final String GET_LOAN_CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/" + txnId + "?"
                 + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_CHARGES_URL, "");
+        return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_CHARGES_URL, param);
     }
 
     public HashMap getPostDatedCheck(final Integer loanId, final Integer installmentId) {
@@ -532,6 +539,23 @@ public class LoanTransactionHelper {
         map.put("rejectedOnDate", date);
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");
+        return new Gson().toJson(map);
+    }
+
+    private String getLoanChargeRefundBodyAsJSON(final Integer loanChargeId, final Integer installmentNumber, final Float transactionAmount,
+            final String externalId) {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("locale", "en");
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("loanChargeId", loanChargeId.toString());
+        map.put("transactionAmount", transactionAmount.toString());
+        map.put("note", "Loancharge Refund Made!!!");
+        if (externalId != null) {
+            map.put("externalId", externalId);
+        }
+        if (installmentNumber != null) {
+            map.put("installmentNumber", installmentNumber.toString());
+        }
         return new Gson().toJson(map);
     }
 

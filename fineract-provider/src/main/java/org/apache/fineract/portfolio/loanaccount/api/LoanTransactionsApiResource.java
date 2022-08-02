@@ -120,7 +120,7 @@ public class LoanTransactionsApiResource {
             + "loans/1/transactions/template?command=recoverypayment" + "\n" + "loans/1/transactions/template?command=prepayLoan" + "\n"
             + "loans/1/transactions/template?command=refundbycash" + "\n" + "loans/1/transactions/template?command=refundbytransfer" + "\n"
             + "loans/1/transactions/template?command=foreclosure" + "\n"
-            + "loans/1/transactions/template?command=creditBalanceRefund (returned 'amount' field will have the overpaid value")
+            + "loans/1/transactions/template?command=creditBalanceRefund (returned 'amount' field will have the overpaid value)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.GetLoansLoanIdTransactionsTemplateResponse.class))) })
     public String retrieveTransactionTemplate(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
@@ -228,14 +228,14 @@ public class LoanTransactionsApiResource {
             + "Example Requests:\n" + "\n" + "loans/1/transactions?command=repayment" + " | Make a Repayment | \n"
             + "loans/1/transactions?command=merchantIssuedRefund" + " | Merchant Issued Refund | \n"
             + "loans/1/transactions?command=payoutRefund" + " | Payout Refund | \n" + "loans/1/transactions?command=goodwillCredit"
-            + " | Goodwil Credit | \n" + "loans/1/transactions?command=waiveinterest" + " | Waive Interest | \n"
-            + "loans/1/transactions?command=writeoff" + " | Write-off Loan | \n" + "loans/1/transactions?command=close-rescheduled"
-            + " | Close Rescheduled Loan | \n" + "loans/1/transactions?command=close" + " | Close Loan | \n"
-            + "loans/1/transactions?command=undowriteoff" + " | Undo Loan Write-off | \n" + "loans/1/transactions?command=recoverypayment"
-            + " | Make Recovery Payment | \n" + "loans/1/transactions?command=refundByCash"
-            + " | Make a Refund of an Active Loan by Cash | \n" + "loans/1/transactions?command=foreclosure"
-            + " | Foreclosure of an Active Loan | \n" + "loans/1/transactions?command=creditBalanceRefund" + " | Credit Balance Refund"
-            + " |  \n")
+            + " | Goodwil Credit | \n" + "loans/1/transactions?command=chargeRefund" + " | Charge Refund | \n"
+            + "loans/1/transactions?command=waiveinterest" + " | Waive Interest | \n" + "loans/1/transactions?command=writeoff"
+            + " | Write-off Loan | \n" + "loans/1/transactions?command=close-rescheduled" + " | Close Rescheduled Loan | \n"
+            + "loans/1/transactions?command=close" + " | Close Loan | \n" + "loans/1/transactions?command=undowriteoff"
+            + " | Undo Loan Write-off | \n" + "loans/1/transactions?command=recoverypayment" + " | Make Recovery Payment | \n"
+            + "loans/1/transactions?command=refundByCash" + " | Make a Refund of an Active Loan by Cash | \n"
+            + "loans/1/transactions?command=foreclosure" + " | Foreclosure of an Active Loan | \n"
+            + "loans/1/transactions?command=creditBalanceRefund" + " | Credit Balance Refund" + " |  \n")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.PostLoansLoanIdTransactionsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.PostLoansLoanIdTransactionsResponse.class))) })
@@ -257,6 +257,9 @@ public class LoanTransactionsApiResource {
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "goodwillCredit")) {
             final CommandWrapper commandRequest = builder.loanGoodwillCreditTransaction(loanId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "chargeRefund")) {
+            final CommandWrapper commandRequest = builder.refundLoanCharge(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "waiveinterest")) {
             final CommandWrapper commandRequest = builder.waiveInterestPortionTransaction(loanId).build();

@@ -115,6 +115,9 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "manually_adjusted_or_reversed", nullable = false)
     private boolean manuallyAdjustedOrReversed;
 
+    @Column(name = "charge_refund_charge_type", length = 1, nullable = true, unique = true)
+    private String chargeRefundChargeType;
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "loanTransaction")
     private Set<LoanCollateralManagement> loanCollateralManagementSet = new HashSet<>();
 
@@ -147,8 +150,9 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public static LoanTransaction repaymentType(final LoanTransactionType repaymentType, final Office office, final Money amount,
-            final PaymentDetail paymentDetail, final LocalDate paymentDate, final String externalId) {
-        return new LoanTransaction(null, office, repaymentType, paymentDetail, amount.getAmount(), paymentDate, externalId);
+            final PaymentDetail paymentDetail, final LocalDate paymentDate, final String externalId, final String chargeRefundChargeType) {
+        return new LoanTransaction(null, office, repaymentType, paymentDetail, amount.getAmount(), paymentDate, externalId,
+                chargeRefundChargeType);
     }
 
     public void setLoanTransactionToRepaymentScheduleMappings(final Integer installmentId, final BigDecimal chargePerInstallment) {
@@ -344,7 +348,21 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         this.submittedOnDate = DateUtils.getBusinessLocalDate();
     }
 
+    private LoanTransaction(final Loan loan, final Office office, final LoanTransactionType type, final PaymentDetail paymentDetail,
+            final BigDecimal amount, final LocalDate date, final String externalId, final String chargeRefundChargeType) {
+        this.loan = loan;
+        this.typeOf = type.getValue();
+        this.paymentDetail = paymentDetail;
+        this.amount = amount;
+        this.dateOf = date;
+        this.externalId = externalId;
+        this.office = office;
+        this.submittedOnDate = DateUtils.getBusinessLocalDate();
+        this.chargeRefundChargeType = chargeRefundChargeType;
+    }
+
     public void reverse() {
+        this.loan.validateRepaymentTypeTransactionNotBeforeAChargeRefund(this, "reversed");
         this.reversed = true;
         this.loanTransactionToRepaymentScheduleMappings.clear();
     }
@@ -480,7 +498,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public boolean isRepaymentType() {
-        return isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit();
+        return isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isChargeRefund();
     }
 
     public boolean isRepayment() {
@@ -497,6 +515,10 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
 
     public boolean isGoodwillCredit() {
         return LoanTransactionType.GOODWILL_CREDIT.equals(getTypeOf()) && isNotReversed();
+    }
+
+    public boolean isChargeRefund() {
+        return LoanTransactionType.CHARGE_REFUND.equals(getTypeOf()) && isNotReversed();
     }
 
     public boolean isNotRepaymentType() {
@@ -640,6 +662,9 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         thisTransactionData.put("feeChargesPortion", this.feeChargesPortion);
         thisTransactionData.put("penaltyChargesPortion", this.penaltyChargesPortion);
         thisTransactionData.put("overPaymentPortion", this.overPaymentPortion);
+        if (transactionType.isChargeRefund()) {
+            thisTransactionData.put("chargeRefundChargeType", this.chargeRefundChargeType);
+        }
 
         if (this.paymentDetail != null) {
             thisTransactionData.put("paymentTypeId", this.paymentDetail.getPaymentType().getId());

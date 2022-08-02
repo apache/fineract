@@ -105,6 +105,7 @@ import org.apache.fineract.portfolio.businessevent.domain.loan.charge.LoanDelete
 import org.apache.fineract.portfolio.businessevent.domain.loan.charge.LoanUpdateChargeBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.charge.LoanWaiveChargeBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.charge.LoanWaiveChargeUndoBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanChargeRefundBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanUndoWrittenOffBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanWaiveInterestBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanWrittenOffPostBusinessEvent;
@@ -180,6 +181,7 @@ import org.apache.fineract.portfolio.loanaccount.exception.ExceedingTrancheCount
 import org.apache.fineract.portfolio.loanaccount.exception.InstallmentNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanTransactionTypeException;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidPaidInAdvanceAmountException;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanChargeRefundException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanForeclosureException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanMultiDisbursementException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
@@ -888,6 +890,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Override
     public CommandProcessingResult makeLoanRepayment(final LoanTransactionType repaymentTransactionType, final Long loanId,
             final JsonCommand command, final boolean isRecoveryRepayment) {
+        final String chargeRefundChargeType = null;
+        return makeLoanRepaymentWithChargeRefundChargeType(repaymentTransactionType, loanId, command, isRecoveryRepayment,
+                chargeRefundChargeType);
+    }
+
+    private CommandProcessingResult makeLoanRepaymentWithChargeRefundChargeType(final LoanTransactionType repaymentTransactionType,
+            final Long loanId, final JsonCommand command, final boolean isRecoveryRepayment, final String chargeRefundChargeType) {
 
         this.loanUtilService.validateRepaymentTransactionType(repaymentTransactionType);
         this.loanEventApiJsonValidator.validateNewRepaymentTransaction(command.json());
@@ -915,7 +924,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder();
         LoanTransaction loanTransaction = this.loanAccountDomainService.makeRepayment(repaymentTransactionType, loan,
                 commandProcessingResultBuilder, transactionDate, transactionAmount, paymentDetail, noteText, txnExternalId,
-                isRecoveryRepayment, isAccountTransfer, holidayDetailDto, isHolidayValidationDone);
+                isRecoveryRepayment, chargeRefundChargeType, isAccountTransfer, holidayDetailDto, isHolidayValidationDone);
 
         // Update loan transaction on repayment.
         if (AccountType.fromInt(loan.getLoanType()).isIndividualAccount()) {
@@ -984,10 +993,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     this.paymentDetailWritePlatformService.persistPaymentDetail(paymentDetail);
                 }
                 final CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder();
+                final String chargeRefundChargeType = null;
                 LoanTransaction loanTransaction = this.loanAccountDomainService.makeRepayment(LoanTransactionType.REPAYMENT, loan,
                         commandProcessingResultBuilder, bulkRepaymentCommand.getTransactionDate(),
                         singleLoanRepaymentCommand.getTransactionAmount(), paymentDetail, bulkRepaymentCommand.getNote(), null,
-                        isRecoveryRepayment, isAccountTransfer, holidayDetailDTO, isHolidayValidationDone);
+                        isRecoveryRepayment, chargeRefundChargeType, isAccountTransfer, holidayDetailDTO, isHolidayValidationDone);
                 transactionIds.add(loanTransaction.getId());
             }
         }
@@ -1644,6 +1654,182 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .withLoanId(loanId) //
                 .with(changes) //
                 .build();
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult loanChargeRefund(final Long loanId, final JsonCommand command) {
+
+        this.loanEventApiJsonValidator.validateLoanChargeRefundTransaction(command.json());
+
+        final Long loanChargeId = command.longValueOfParameterNamed("loanChargeId");
+        final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
+
+        final Integer installmentNumber = command.integerValueOfParameterNamed("installmentNumber");
+        final LocalDate dueDate = command.localDateValueOfParameterNamed("dueDate");
+        final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
+
+        final LoanInstallmentCharge installmentChargeEntry = loanChargeRefundEntranceValidation(loanCharge, installmentNumber, dueDate);
+        Integer installmentNumberIdentified = null;
+        if (installmentChargeEntry != null) {
+            installmentNumberIdentified = installmentChargeEntry.getRepaymentInstallment().getInstallmentNumber();
+        }
+        final BigDecimal fullRefundAbleAmount = loanChargeValidateRefundAmount(loanCharge, installmentChargeEntry, transactionAmount);
+
+        JsonCommand repaymentJsonCommand = adaptLoanChargeRefundCommandForFutherRepaymentProcessing(command, fullRefundAbleAmount);
+
+        boolean isRecoveryRepayment = false;
+        String chargeRefundChargeType = "F";
+        if (loanCharge.isPenaltyCharge()) {
+            chargeRefundChargeType = "P";
+        }
+        // chargeRefundChargeType only included as a parameter for accounting reason - in order to identify whether fee
+        // or penalty GL account is relevant
+        CommandProcessingResult result = makeLoanRepaymentWithChargeRefundChargeType(LoanTransactionType.CHARGE_REFUND,
+                repaymentJsonCommand.getLoanId(), repaymentJsonCommand, isRecoveryRepayment, chargeRefundChargeType);
+
+        Long loanChargeRefundTransactionId = result.resourceId();
+        LoanTransaction newChargeRefundTxn = null;
+        for (LoanTransaction chargeRefundTxn : loanCharge.getLoan().getLoanTransactions()) {
+            if (chargeRefundTxn.getId().equals(loanChargeRefundTransactionId)) {
+                newChargeRefundTxn = chargeRefundTxn;
+                final BigDecimal appliedRefundAmount = newChargeRefundTxn.getAmount(loanCharge.getLoan().getCurrency()).getAmount();
+                final LoanChargePaidBy loanChargePaidByForChargeRefund = new LoanChargePaidBy(newChargeRefundTxn, loanCharge,
+                        appliedRefundAmount, installmentNumberIdentified);
+                newChargeRefundTxn.getLoanChargesPaid().add(loanChargePaidByForChargeRefund);
+                loanCharge.getLoanChargePaidBySet().add(loanChargePaidByForChargeRefund);
+                break;
+            }
+        }
+
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanChargeRefundBusinessEvent(newChargeRefundTxn));
+        return result;
+
+    }
+
+    private JsonCommand adaptLoanChargeRefundCommandForFutherRepaymentProcessing(JsonCommand command, BigDecimal fullRefundAbleAmount) {
+        // creates JsonCommand for onward repayment processing
+        JsonObject jsonObject = (JsonObject) this.fromApiJsonHelper.parse(command.json());
+
+        String dateFormat;
+        if (this.fromApiJsonHelper.parameterExists("dateFormat", jsonObject)) {
+            dateFormat = this.fromApiJsonHelper.extractStringNamed("dateFormat", jsonObject);
+        } else {
+            dateFormat = "dd MMMM yyyy";
+            jsonObject.addProperty("dateFormat", dateFormat);
+        }
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(dateFormat);
+        LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
+        String transactionDateString = transactionDate.format(dateTimeFormatter);
+        jsonObject.addProperty("transactionDate", transactionDateString);
+        if (!this.fromApiJsonHelper.parameterExists("transactionAmount", jsonObject)) {
+            jsonObject.addProperty("transactionAmount", fullRefundAbleAmount.toString());
+        }
+        jsonObject.remove("loanChargeId");
+        jsonObject.remove("installmentNumber");
+        jsonObject.remove("dueDate");
+
+        JsonCommand repaymentJsonCommand = JsonCommand.fromExistingCommand(command, jsonObject);
+        return repaymentJsonCommand;
+    }
+
+    private BigDecimal loanChargeValidateRefundAmount(LoanCharge loanCharge, LoanInstallmentCharge installmentChargeEntry,
+            BigDecimal transactionAmount) {
+        // if transactionAmount not provided return max refundable amount (amount paid minus previous refunds)
+        BigDecimal chargeAmountPaid = BigDecimal.ZERO;
+        BigDecimal chargeAmountRefunded = BigDecimal.ZERO;
+        MonetaryCurrency loanCurrency = loanCharge.getLoan().getCurrency();
+        if (loanCharge.isInstalmentFee()) {
+            final Integer installmentNumber = installmentChargeEntry.getRepaymentInstallment().getInstallmentNumber();
+            chargeAmountPaid = installmentChargeEntry.getAmountPaid(loanCurrency).getAmount();
+            for (LoanChargePaidBy loanChargePaidBy : loanCharge.getLoanChargePaidBySet()) {
+                if (installmentNumber.equals(loanChargePaidBy.getInstallmentNumber())) {
+                    if (loanChargePaidBy.getLoanTransaction().isChargeRefund()) {
+                        chargeAmountRefunded = chargeAmountRefunded.add(loanChargePaidBy.getAmount());
+                    }
+                }
+            }
+        } else {
+            chargeAmountPaid = loanCharge.getAmountPaid(loanCurrency).getAmount();
+            for (LoanChargePaidBy loanChargePaidBy : loanCharge.getLoanChargePaidBySet()) {
+                if (loanChargePaidBy.getLoanTransaction().isChargeRefund()) {
+                    chargeAmountRefunded = chargeAmountRefunded.add(loanChargePaidBy.getAmount());
+                }
+            }
+        }
+
+        if (chargeAmountRefunded.compareTo(chargeAmountPaid) > 0) {
+            final String errorMessage = "loan.charge.more.refunded.than.paid.unexpected.system.error";
+            final String details = "Paid: " + chargeAmountPaid.toString() + "  Refunded: " + chargeAmountPaid.toString();
+            throw new LoanChargeRefundException(errorMessage, details);
+        }
+
+        BigDecimal refundableAmount = chargeAmountPaid.subtract(chargeAmountRefunded);
+        if (transactionAmount != null) { // refund amount was provided
+            if (transactionAmount.compareTo(refundableAmount) > 0) {
+                final String errorMessage = "loan.charge.transaction.amount.is.more.than.is.refundable";
+                final String details = "transactionAmount: " + transactionAmount.toString() + "  Refundable: "
+                        + refundableAmount.toString();
+                throw new LoanChargeRefundException(errorMessage, details);
+            }
+        }
+
+        return refundableAmount;
+    }
+
+    private LoanInstallmentCharge loanChargeRefundEntranceValidation(LoanCharge loanCharge, Integer installmentNumber, LocalDate dueDate) {
+
+        LoanInstallmentCharge installmentChargeEntry = null;
+
+        Loan loan = loanCharge.getLoan();
+        if (!(loan.isOpen() || loan.status().isClosedObligationsMet() || loan.status().isOverpaid())) {
+            final String errorMessage = "loan.charge.refund.invalid.status";
+            throw new LoanChargeRefundException(errorMessage, loan.status().toString());
+        }
+
+        if (dueDate != null && installmentNumber != null) {
+            throwLoanChargeRefundException("loan.charge.refund.dueDate.and.installmentNumber.provided.use.only.one", installmentNumber,
+                    dueDate);
+        }
+
+        if (loanCharge.isInstalmentFee()) { // identify specific installment
+            if (dueDate == null && installmentNumber == null) {
+                throwLoanChargeRefundException(
+                        "loan.charge.refund.neither.dueDate.nor.installmentNumber.provided.for.this.installment.charge", installmentNumber,
+                        dueDate);
+            }
+
+            if (dueDate != null) {
+                installmentChargeEntry = loanCharge.getInstallmentLoanCharge(dueDate);
+            } else if (installmentNumber != null) {
+                installmentChargeEntry = loanCharge.getInstallmentLoanCharge(installmentNumber);
+            }
+
+            if (installmentChargeEntry == null) {
+                throwLoanChargeRefundException("loan.charge.refund.installment.not.found", installmentNumber, dueDate);
+            }
+        } else {
+
+            if (dueDate != null || installmentNumber != null) {
+                throwLoanChargeRefundException(
+                        "loan.charge.refund.dueDate.or.installmentNumber.provided.but.this.is.not.an.installment.charge", installmentNumber,
+                        dueDate);
+            }
+        }
+
+        return installmentChargeEntry;
+    }
+
+    private void throwLoanChargeRefundException(String errorMessage, Integer installmentNumber, LocalDate dueDate) {
+        String dueDateValue = "";
+        String installmentNumberValue = "";
+        if (dueDate != null) {
+            dueDateValue = dueDate.toString();
+        }
+        if (installmentNumber != null) {
+            installmentNumberValue = installmentNumber.toString();
+        }
+        throw new LoanChargeRefundException(errorMessage, "dueDate: " + dueDateValue + "  installmentNumber: " + installmentNumberValue);
     }
 
     @Transactional

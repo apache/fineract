@@ -129,9 +129,11 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     public LoanTransaction makeRepayment(final LoanTransactionType repaymentTransactionType, final Loan loan,
             final CommandProcessingResultBuilder builderResult, final LocalDate transactionDate, final BigDecimal transactionAmount,
             final PaymentDetail paymentDetail, final String noteText, final String txnExternalId, final boolean isRecoveryRepayment,
-            boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto, Boolean isHolidayValidationDone) {
+            final String chargeRefundChargeType, boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto,
+            Boolean isHolidayValidationDone) {
         return makeRepayment(repaymentTransactionType, loan, builderResult, transactionDate, transactionAmount, paymentDetail, noteText,
-                txnExternalId, isRecoveryRepayment, isAccountTransfer, holidayDetailDto, isHolidayValidationDone, false);
+                txnExternalId, isRecoveryRepayment, chargeRefundChargeType, isAccountTransfer, holidayDetailDto, isHolidayValidationDone,
+                false);
     }
 
     @Transactional
@@ -154,8 +156,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     public LoanTransaction makeRepayment(final LoanTransactionType repaymentTransactionType, final Loan loan,
             final CommandProcessingResultBuilder builderResult, final LocalDate transactionDate, final BigDecimal transactionAmount,
             final PaymentDetail paymentDetail, final String noteText, final String txnExternalId, final boolean isRecoveryRepayment,
-            boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto, Boolean isHolidayValidationDone,
-            final boolean isLoanToLoanTransfer) {
+            final String chargeRefundChargeType, boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto,
+            Boolean isHolidayValidationDone, final boolean isLoanToLoanTransfer) {
         AppUser currentUser = getAppUserIfPresent();
         checkClientOrGroupActive(loan);
 
@@ -181,7 +183,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                     txnExternalId);
         } else {
             newRepaymentTransaction = LoanTransaction.repaymentType(repaymentTransactionType, loan.getOffice(), repaymentAmount,
-                    paymentDetail, transactionDate, txnExternalId);
+                    paymentDetail, transactionDate, txnExternalId, chargeRefundChargeType);
         }
 
         LocalDate recalculateFrom = null;
@@ -223,9 +225,11 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         recalculateAccruals(loan);
 
-        LoanTransactionBusinessEvent transactionRepaymentEvent = getTransactionRepaymentTypeBusinessEvent(repaymentTransactionType,
-                isRecoveryRepayment, newRepaymentTransaction);
-        businessEventNotifierService.notifyPostBusinessEvent(transactionRepaymentEvent);
+        if (!repaymentTransactionType.isChargeRefund()) {
+            LoanTransactionBusinessEvent transactionRepaymentEvent = getTransactionRepaymentTypeBusinessEvent(repaymentTransactionType,
+                    isRecoveryRepayment, newRepaymentTransaction);
+            businessEventNotifierService.notifyPostBusinessEvent(transactionRepaymentEvent);
+        }
 
         // disable all active standing orders linked to this loan if status
         // changes to closed
@@ -277,6 +281,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             repaymentEvent = new LoanTransactionPayoutRefundPreBusinessEvent(loan);
         } else if (repaymentTransactionType.isGoodwillCredit()) {
             repaymentEvent = new LoanTransactionGoodwillCreditPreBusinessEvent(loan);
+        } else if (repaymentTransactionType.isChargeRefund()) {
+            repaymentEvent = new LoanChargePaymentPreBusinessEvent(loan);
         } else if (isRecoveryRepayment) {
             repaymentEvent = new LoanTransactionRecoveryPaymentPreBusinessEvent(loan);
         }
@@ -294,6 +300,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             repaymentEvent = new LoanTransactionPayoutRefundPostBusinessEvent(transaction);
         } else if (repaymentTransactionType.isGoodwillCredit()) {
             repaymentEvent = new LoanTransactionGoodwillCreditPostBusinessEvent(transaction);
+        } else if (repaymentTransactionType.isChargeRefund()) {
+            repaymentEvent = new LoanChargePaymentPostBusinessEvent(transaction);
         } else if (isRecoveryRepayment) {
             repaymentEvent = new LoanTransactionRecoveryPaymentPostBusinessEvent(transaction);
         }

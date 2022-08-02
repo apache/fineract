@@ -427,6 +427,10 @@ public final class LoanEnumerations {
                 optionData = new LoanTransactionEnumData(LoanTransactionType.GOODWILL_CREDIT.getValue().longValue(),
                         LoanTransactionType.GOODWILL_CREDIT.getCode(), "Goodwill Credit");
             break;
+            case CHARGE_REFUND:
+                optionData = new LoanTransactionEnumData(LoanTransactionType.CHARGE_REFUND.getValue().longValue(),
+                        LoanTransactionType.CHARGE_REFUND.getCode(), "Charge Refund");
+            break;
         }
         return optionData;
     }

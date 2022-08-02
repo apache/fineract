@@ -44,4 +44,6 @@
     <include file="parts/0022_add_batch_business_step_configuration_table.xml" relativeToChangelogFile="true"/>
     <include file="parts/0023_use_the_proper_date_or_datetime_type.xml" relativeToChangelogFile="true"/>
     <include file="parts/0024_add_audit_entries.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0025_add_charge_refund_permission.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0026_add_charge_refund_charge_type_to_loan_transaction.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

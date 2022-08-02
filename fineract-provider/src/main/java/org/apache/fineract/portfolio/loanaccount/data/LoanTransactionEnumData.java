@@ -34,6 +34,7 @@ public class LoanTransactionEnumData {
     private final boolean merchantIssuedRefund;
     private final boolean payoutRefund;
     private final boolean goodwillCredit;
+    private final boolean chargeRefund;
     private final boolean contra;
     private final boolean waiveInterest;
     private final boolean waiveCharges;
@@ -59,6 +60,7 @@ public class LoanTransactionEnumData {
         this.merchantIssuedRefund = Long.valueOf(21).equals(this.id);
         this.payoutRefund = Long.valueOf(22).equals(this.id);
         this.goodwillCredit = Long.valueOf(23).equals(this.id);
+        this.chargeRefund = Long.valueOf(24).equals(this.id);
         this.contra = Long.valueOf(3).equals(this.id);
         this.waiveInterest = Long.valueOf(4).equals(this.id);
         this.waiveCharges = Long.valueOf(9).equals(this.id);
@@ -101,7 +103,7 @@ public class LoanTransactionEnumData {
     }
 
     public boolean isRepaymentType() {
-        if (isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit()) {
+        if (isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isChargeRefund()) {
             return true;
         }
         return false;
@@ -129,6 +131,10 @@ public class LoanTransactionEnumData {
 
     public boolean isGoodwillCredit() {
         return this.goodwillCredit;
+    }
+
+    public boolean isChargeRefund() {
+        return this.chargeRefund;
     }
 
     public boolean isWaiveInterest() {

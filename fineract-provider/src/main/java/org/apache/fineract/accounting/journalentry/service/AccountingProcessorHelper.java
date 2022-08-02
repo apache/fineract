@@ -124,6 +124,7 @@ public class AccountingProcessorHelper {
             final BigDecimal overPayments = (BigDecimal) map.get("overPaymentPortion");
             final boolean reversed = (Boolean) map.get("reversed");
             final Long paymentTypeId = (Long) map.get("paymentTypeId");
+            final String chargeRefundChargeType = (String) map.get("chargeRefundChargeType");
 
             final List<ChargePaymentDTO> feePaymentDetails = new ArrayList<>();
             final List<ChargePaymentDTO> penaltyPaymentDetails = new ArrayList<>();
@@ -151,7 +152,7 @@ public class AccountingProcessorHelper {
             }
             final LoanTransactionDTO transaction = new LoanTransactionDTO(transactionOfficeId, paymentTypeId, transactionId,
                     transactionDate, transactionType, amount, principal, interest, fees, penalties, overPayments, reversed,
-                    penaltyPaymentDetails, feePaymentDetails, isAccountTransfer);
+                    penaltyPaymentDetails, feePaymentDetails, isAccountTransfer, chargeRefundChargeType);
             Boolean isLoanToLoanTransfer = (Boolean) accountingBridgeData.get("isLoanToLoanTransfer");
             if (isLoanToLoanTransfer != null && isLoanToLoanTransfer) {
                 transaction.setLoanToLoanTransfer(true);
@@ -1301,4 +1302,27 @@ public class AccountingProcessorHelper {
     private GLAccount getGLAccountById(final Long accountId) {
         return this.accountRepositoryWrapper.findOneWithNotFoundDetection(accountId);
     }
+
+    public Integer getValueForFeeOrPenaltyIncomeAccount(final String chargeRefundChargeType) {
+        if (chargeRefundChargeType == null
+                || !(chargeRefundChargeType.equalsIgnoreCase("P") || chargeRefundChargeType.equalsIgnoreCase("F"))) {
+            String errorValue;
+            if (chargeRefundChargeType == null) {
+                errorValue = "Null";
+            } else {
+                errorValue = chargeRefundChargeType;
+            }
+            throw new PlatformDataIntegrityException("error.msg.chargeRefundChargeType.can.only.be.P.or.F",
+                    "chargeRefundChargeType can only be P (Penalty) or F(Fee) - Value is: " + errorValue);
+        }
+        Integer incomeAccount = null;
+        if (chargeRefundChargeType.equalsIgnoreCase("P")) {
+            incomeAccount = AccrualAccountsForLoan.INCOME_FROM_PENALTIES.getValue();
+        } else {
+            incomeAccount = AccrualAccountsForLoan.INCOME_FROM_FEES.getValue();
+
+        }
+        return incomeAccount;
+    }
+
 }
