@@ -38,8 +38,13 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.batch.core.configuration.ListableJobLocator;
+import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.gson.GsonAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -91,6 +96,18 @@ public class TestConfiguration {
     @Bean
     public JobBuilderFactory jobBuilderFactory() {
         return mock(JobBuilderFactory.class, RETURNS_MOCKS);
+    }
+
+    @Primary
+    @Bean
+    public JobExplorer jobExplorer() {
+        return mock(JobExplorer.class, RETURNS_MOCKS);
+    }
+
+    @Primary
+    @Bean
+    public JobLauncher jobLauncher() {
+        return mock(JobLauncher.class, RETURNS_MOCKS);
     }
 
     @Primary
@@ -160,5 +177,23 @@ public class TestConfiguration {
     @Bean
     public JdbcTemplate jdbcTemplate() {
         return mock(JdbcTemplate.class);
+    }
+
+    @Primary
+    @Bean
+    public BatchConfigurer batchConfigurer() {
+        return mock(BatchConfigurer.class, RETURNS_MOCKS);
+    }
+
+    @Primary
+    @Bean
+    public ListableJobLocator listableJobLocator() {
+        return mock(ListableJobLocator.class, RETURNS_MOCKS);
+    }
+
+    @Primary
+    @Bean
+    public JobRepository jobRepository() {
+        return mock(JobRepository.class, RETURNS_MOCKS);
     }
 }
