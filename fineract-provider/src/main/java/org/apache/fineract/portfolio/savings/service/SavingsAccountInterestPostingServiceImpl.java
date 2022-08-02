@@ -29,7 +29,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
@@ -247,14 +249,21 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
         if (savingsAccountData.getStartInterestCalculationDate() != null
                 && !savingsAccountData.getStartInterestCalculationDate().equals(savingsAccountData.getActivationLocalDate())) {
             final SavingsAccountTransactionData transaction = retrieveLastTransactions(savingsAccountData);
-
             if (transaction == null) {
-                periodStartingBalance = Money.zero(savingsAccountData.currency());
-            } else {
-                periodStartingBalance = Money.of(savingsAccountData.currency(),
-                        savingsAccountData.getSummary().getRunningBalanceOnPivotDate());
-            }
+                final String defaultUserMessage = "No transactions were found on the specified date "
+                        + savingsAccountData.getStartInterestCalculationDate().toString() + " for account number "
+                        + savingsAccountData.getAccountNo() + " and resource id " + savingsAccountData.getId();
 
+                final ApiParameterError error = ApiParameterError.parameterError(
+                        "error.msg.savingsaccount.transaction.incorrect.start.interest.calculation.date", defaultUserMessage,
+                        "transactionDate", savingsAccountData.getStartInterestCalculationDate().toString());
+
+                final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+                dataValidationErrors.add(error);
+
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
+            periodStartingBalance = transaction.getRunningBalance(savingsAccountData.currency());
         } else {
             periodStartingBalance = Money.zero(savingsAccountData.currency());
         }

@@ -74,7 +74,7 @@ public class PostInterestForSavingTasklet implements Tasklet {
         final int pageSize = batchSize * threadPoolSize;
         Long maxSavingsIdInList = 0L;
         final ExecutorService executorService = Executors.newFixedThreadPool(threadPoolSize);
-        final boolean backdatedTxnsAllowedTill = false;
+        final boolean backdatedTxnsAllowedTill = this.configurationDomainService.retrievePivotDateConfig();
 
         long start = System.currentTimeMillis();
 

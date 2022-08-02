@@ -223,16 +223,23 @@ public class SavingsAccountSummaryData implements Serializable {
             Money interestTotal = Money.of(currency, this.totalInterestPosted);
             Money withHoldTaxTotal = Money.of(currency, this.totalWithholdTax);
             Money overdraftInterestTotal = Money.of(currency, this.totalOverdraftInterestDerived);
+            this.totalDeposits = wrapper.calculateTotalDeposits(currency, savingsAccountTransactions);
+            this.totalWithdrawals = wrapper.calculateTotalWithdrawals(currency, savingsAccountTransactions);
             final HashMap<String, Money> map = updateRunningBalanceAndPivotDate(true, savingsAccountTransactions, interestTotal,
                     overdraftInterestTotal, withHoldTaxTotal, currency);
             interestTotal = map.get("interestTotal");
             withHoldTaxTotal = map.get("withHoldTax");
             overdraftInterestTotal = map.get("overdraftInterestTotal");
+            BigDecimal pivotInterest = interestTotal.minus(this.totalInterestPosted).getAmountDefaultedToNullIfZero();
+            BigDecimal pivotWithholdTax = withHoldTaxTotal.minus(this.totalWithholdTax).getAmountDefaultedToNullIfZero();
+            BigDecimal pivotOverdraftInterestDerived = overdraftInterestTotal.minus(this.totalOverdraftInterestDerived)
+                    .getAmountDefaultedToNullIfZero();
             this.totalInterestPosted = interestTotal.getAmountDefaultedToNullIfZero();
             this.totalWithholdTax = withHoldTaxTotal.getAmountDefaultedToNullIfZero();
             this.totalOverdraftInterestDerived = overdraftInterestTotal.getAmountDefaultedToNullIfZero();
-            this.accountBalance = Money.of(currency, this.accountBalance).plus(this.totalInterestPosted).minus(this.totalWithholdTax)
-                    .minus(this.totalOverdraftInterestDerived).getAmount();
+            this.accountBalance = getRunningBalanceOnPivotDate();
+            this.accountBalance = Money.of(currency, this.accountBalance).plus(Money.of(currency, this.totalDeposits)).plus(pivotInterest)
+                    .minus(this.totalWithdrawals).minus(pivotWithholdTax).minus(pivotOverdraftInterestDerived).getAmount();
         }
     }
 
