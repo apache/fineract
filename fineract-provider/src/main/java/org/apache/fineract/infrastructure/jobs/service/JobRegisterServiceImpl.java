@@ -22,7 +22,6 @@ import com.google.common.base.Splitter;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
 import lombok.extern.slf4j.Slf4j;
@@ -30,8 +29,6 @@ import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.PlatformInternalServerException;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.infrastructure.jobs.domain.JobParameter;
-import org.apache.fineract.infrastructure.jobs.domain.JobParameterRepository;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.apache.fineract.infrastructure.jobs.domain.SchedulerDetail;
 import org.apache.fineract.infrastructure.jobs.exception.JobNodeIdMismatchingException;
@@ -45,11 +42,7 @@ import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerListener;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.configuration.JobLocator;
-import org.springframework.batch.core.explore.JobExplorer;
-import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
@@ -75,12 +68,6 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     @Autowired
     private SchedulerTriggerListener globalSchedulerTriggerListener;
 
-    @Autowired
-    private JobParameterRepository jobParameterRepository;
-
-    @Autowired
-    private JobExplorer jobExplorer;
-
     private final HashMap<String, Scheduler> schedulers = new HashMap<>(4);
 
     // This cannot be injected as Autowired due to circular dependency
@@ -90,12 +77,12 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     private FineractProperties fineractProperties;
 
     @Autowired
-    private JobLauncher jobLauncher;
-
-    @Autowired
     private JobLocator jobLocator;
 
-    private static final String JOB_LAUNCHER_STARTER_METHOD_NAME = "run";
+    @Autowired
+    private JobStarter jobStarter;
+
+    private static final String JOB_STARTER_METHOD_NAME = "run";
 
     public void executeJob(final ScheduledJobDetail scheduledJobDetail, String triggerType) {
         try {
@@ -332,28 +319,14 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
 
         final MethodInvokingJobDetailFactoryBean jobDetailFactoryBean = new MethodInvokingJobDetailFactoryBean();
         jobDetailFactoryBean.setName(scheduledJobDetail.getJobName() + "JobDetail" + tenant.getId());
-        jobDetailFactoryBean.setTargetObject(jobLauncher);
-        jobDetailFactoryBean.setTargetMethod(JOB_LAUNCHER_STARTER_METHOD_NAME);
+        jobDetailFactoryBean.setTargetObject(jobStarter);
+        jobDetailFactoryBean.setTargetMethod(JOB_STARTER_METHOD_NAME);
         jobDetailFactoryBean.setGroup(scheduledJobDetail.getGroupName());
         jobDetailFactoryBean.setConcurrent(false);
 
-        Map<String, org.springframework.batch.core.JobParameter> jobParameterMap = getJobParameter(scheduledJobDetail);
-        JobParameters jobParameters = new JobParametersBuilder(jobExplorer).getNextJobParameters(job)
-                .addJobParameters(new JobParameters(jobParameterMap)).toJobParameters();
-
-        jobDetailFactoryBean.setArguments(job, jobParameters);
+        jobDetailFactoryBean.setArguments(job, scheduledJobDetail);
         jobDetailFactoryBean.afterPropertiesSet();
         return jobDetailFactoryBean.getObject();
-    }
-
-    public Map<String, org.springframework.batch.core.JobParameter> getJobParameter(ScheduledJobDetail scheduledJobDetail) {
-        List<JobParameter> jobParameterList = jobParameterRepository.findJobParametersByJobId(scheduledJobDetail.getId());
-        Map<String, org.springframework.batch.core.JobParameter> jobParameterMap = new HashMap<>();
-        for (JobParameter jobparameter : jobParameterList) {
-            jobParameterMap.put(jobparameter.getParameterName(),
-                    new org.springframework.batch.core.JobParameter(jobparameter.getParameterValue()));
-        }
-        return jobParameterMap;
     }
 
     private Trigger createTrigger(final ScheduledJobDetail scheduledJobDetails, final JobDetail jobDetail) throws ParseException {
