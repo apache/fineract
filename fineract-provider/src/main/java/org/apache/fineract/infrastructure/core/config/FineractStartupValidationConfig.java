@@ -32,8 +32,8 @@ import org.springframework.stereotype.Component;
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @RequiredArgsConstructor
-@Conditional(FineractModeValidationCondition.class)
-public class FineractModeValidationConfig implements InitializingBean {
+@Conditional(FineractValidationCondition.class)
+public class FineractStartupValidationConfig implements InitializingBean {
 
     private final ApplicationContext applicationContext;
 
@@ -43,8 +43,7 @@ public class FineractModeValidationConfig implements InitializingBean {
     }
 
     private void terminateApplication() {
-        log.error(
-                "The Fineract instance type is not configured properly. At least one of these environment variables should be true: FINERACT_MODE_READ_ENABLED, FINERACT_MODE_WRITE_ENABLED, FINERACT_MODE_BATCH_ENABLED");
-        ((ConfigurableApplicationContext) this.applicationContext).close();
+        log.error("The application startup fails on validations. Please check the log above for the details");
+        ((ConfigurableApplicationContext) applicationContext).close();
     }
 }
