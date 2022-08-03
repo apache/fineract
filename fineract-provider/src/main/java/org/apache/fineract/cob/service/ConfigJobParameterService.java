@@ -16,31 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.domain;
+package org.apache.fineract.cob.service;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.cob.data.JobBusinessStepConfigData;
+import org.apache.fineract.cob.data.JobBusinessStepDetail;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
-@Entity
-@Table(name = "m_batch_business_steps")
-@NoArgsConstructor
-@Getter
-public class BatchBusinessStep extends AbstractPersistableCustom {
+public interface ConfigJobParameterService {
 
-    @Column(name = "job_name", nullable = false)
-    private String jobName;
+    JobBusinessStepConfigData getBusinessStepConfigByJobName(String jobName);
 
-    @Setter
-    @Column(name = "step_name", nullable = false)
-    private String stepName;
+    CommandProcessingResult updateStepConfigByJobName(JsonCommand command, String jobName);
 
-    @Setter
-    @Column(name = "step_order", nullable = false)
-    private Long stepOrder;
-
+    JobBusinessStepDetail getAvailableBusinessStepsByJobName(String jobName);
 }
