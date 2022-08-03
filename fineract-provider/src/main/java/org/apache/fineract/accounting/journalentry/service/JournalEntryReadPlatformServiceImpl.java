@@ -101,7 +101,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                     .append(" journalEntry.type_enum as entryType,journalEntry.amount as amount, journalEntry.transaction_id as transactionId,")
                     .append(" journalEntry.entity_type_enum as entityType, journalEntry.entity_id as entityId, creatingUser.id as createdByUserId, ")
                     .append(" creatingUser.username as createdByUserName, journalEntry.description as comments, ")
-                    .append(" journalEntry.created_date as createdDate, journalEntry.reversed as reversed, ")
+                    .append(" journalEntry.submitted_on_date as createdDate, journalEntry.reversed as reversed, ")
                     .append(" journalEntry.currency_code as currencyCode, curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ")
                     .append(" curr.display_symbol as currencyDisplaySymbol, curr.decimal_places as currencyDigits, curr.currency_multiplesof as inMultiplesOf ");
             if (associationParametersData.isRunningBalanceRequired()) {
@@ -120,7 +120,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             sb.append(" from acc_gl_journal_entry as journalEntry ")
                     .append(" left join acc_gl_account as glAccount on glAccount.id = journalEntry.account_id")
                     .append(" left join m_office as office on office.id = journalEntry.office_id")
-                    .append(" left join m_appuser as creatingUser on creatingUser.id = journalEntry.createdby_id ")
+                    .append(" left join m_appuser as creatingUser on creatingUser.id = journalEntry.created_by ")
                     .append(" join m_currency curr on curr.code = journalEntry.currency_code ");
             if (associationParametersData.isTransactionDetailsRequired()) {
                 sb.append(" left join m_loan_transaction as lt on journalEntry.loan_transaction_id = lt.id ")

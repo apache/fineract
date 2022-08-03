@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+    <!--Journal entry-->
+    <changeSet author="fineract" id="journal-entry-1" context="mysql">
+        <addColumn tableName="acc_gl_journal_entry">
+            <column name="created_on_utc" type="DATETIME"/>
+            <column name="last_modified_on_utc" type="DATETIME"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="fineract" id="journal-entry-1" context="postgresql">
+        <addColumn tableName="acc_gl_journal_entry">
+            <column name="created_on_utc" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="last_modified_on_utc" type="TIMESTAMP WITH TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="journal-entry-2" author="fineract">
+        <dropNotNullConstraint tableName="acc_gl_journal_entry" columnName="created_date" columnDataType="datetime"/>
+        <dropNotNullConstraint tableName="acc_gl_journal_entry" columnName="lastmodified_date" columnDataType="datetime"/>
+    </changeSet>
+    <changeSet id="journal-entry-3" author="fineract">
+        <renameColumn tableName="acc_gl_journal_entry" oldColumnName="createdby_id" newColumnName="created_by" columnDataType="BIGINT"/>
+        <renameColumn tableName="acc_gl_journal_entry" oldColumnName="lastmodifiedby_id" newColumnName="last_modified_by" columnDataType="BIGINT"/>
+    </changeSet>
+    <changeSet author="fineract" id="journal-entry-4">
+        <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="acc_gl_journal_entry"
+                                 constraintName="FK_journal_entry_created_by" deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="m_appuser" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="acc_gl_journal_entry"
+                                 constraintName="FK_journal_entry_last_modified_by" deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="m_appuser" validate="true"/>
+    </changeSet>
+    <changeSet id="journal-entry-5" author="fineract" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from acc_gl_journal_entry</sqlCheck>
+        </preConditions>
+        <addNotNullConstraint tableName="acc_gl_journal_entry" columnName="created_on_utc" columnDataType="DATETIME"/>
+        <addNotNullConstraint tableName="acc_gl_journal_entry" columnName="last_modified_on_utc" columnDataType="DATETIME"/>
+    </changeSet>
+    <changeSet id="journal-entry-5" author="fineract" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from acc_gl_journal_entry</sqlCheck>
+        </preConditions>
+        <addNotNullConstraint tableName="acc_gl_journal_entry" columnName="created_on_utc" columnDataType="TIMESTAMP WITH TIME ZONE"/>
+        <addNotNullConstraint tableName="acc_gl_journal_entry" columnName="last_modified_on_utc" columnDataType="TIMESTAMP WITH TIME ZONE"/>
+    </changeSet>
+    <changeSet id="journal-entry-6" author="fineract">
+        <addColumn tableName="acc_gl_journal_entry">
+            <column name="submitted_on_date" type="DATE" valueComputed="created_date">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="fineract" id="journal-entry-7">
+        <setColumnRemarks
+                columnName="transaction_date"
+                remarks="Unfinished. Not maintained."
+                columnDataType="date"
+                tableName="acc_gl_journal_entry"/>
+    </changeSet>
+</databaseChangeLog>
