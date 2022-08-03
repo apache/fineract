@@ -19,10 +19,12 @@
 package org.apache.fineract.infrastructure.core.config;
 
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
+@Slf4j
 public class FineractModeValidationCondition implements Condition {
 
     @Override
@@ -33,6 +35,11 @@ public class FineractModeValidationCondition implements Condition {
                 .orElse(true);
         boolean isBatchModeEnabled = Optional.ofNullable(context.getEnvironment().getProperty("fineract.mode.batch-enabled", Boolean.class))
                 .orElse(true);
-        return !isReadModeEnabled && !isWriteModeEnabled && !isBatchModeEnabled;
+        boolean isValidationFails = !isReadModeEnabled && !isWriteModeEnabled && !isBatchModeEnabled;
+        if (isValidationFails) {
+            log.error(
+                    "The Fineract instance type is not configured properly. At least one of these environment variables should be true: FINERACT_MODE_READ_ENABLED, FINERACT_MODE_WRITE_ENABLED, FINERACT_MODE_BATCH_ENABLED");
+        }
+        return isValidationFails;
     }
 }

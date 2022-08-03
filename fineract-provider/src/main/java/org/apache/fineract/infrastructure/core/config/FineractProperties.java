@@ -19,6 +19,7 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -35,6 +36,8 @@ public class FineractProperties {
     private FineractModeProperties mode;
 
     private FineractCorrelationProperties correlation;
+
+    private FineractPartitionedJob partitionedJob;
 
     @Getter
     @Setter
@@ -71,5 +74,23 @@ public class FineractProperties {
 
         private boolean enabled;
         private String headerName;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractPartitionedJob {
+
+        // TODO should be used without wrapper class
+        private List<PartitionedJobProperty> partitionedJobProperties;
+    }
+
+    @Getter
+    @Setter
+    public static class PartitionedJobProperty {
+
+        private String jobName;
+        private Integer chunkSize;
+        private Integer partitionSize;
+        private Integer threadCount;
     }
 }
