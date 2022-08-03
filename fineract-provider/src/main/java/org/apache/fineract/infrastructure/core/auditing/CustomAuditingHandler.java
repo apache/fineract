@@ -16,9 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.auditing;
+package org.apache.fineract.infrastructure.core.auditing;
 
-import org.apache.fineract.infrastructure.core.auditing.CustomDateTimeProvider;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.auditing.AuditableBeanWrapper;
