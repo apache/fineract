@@ -110,8 +110,8 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
                 .append("crappu.username as createdBy, ").append("rate.created_date as createdOn, ")
                 .append("rate.created_on_utc as createdOnUTC, ").append("moappu.username as modifiedBy, ")
                 .append("rate.lastmodified_date as modifiedOn, ").append("rate.last_modified_on_utc as modifiedOnUTC ")
-                .append("FROM m_floating_rates as rate ").append("LEFT JOIN m_appuser as crappu on rate.createdby_id = crappu.id ")
-                .append("LEFT JOIN m_appuser as moappu on rate.lastmodifiedby_id = moappu.id ");
+                .append("FROM m_floating_rates as rate ").append("LEFT JOIN m_appuser as crappu on rate.created_by = crappu.id ")
+                .append("LEFT JOIN m_appuser as moappu on rate.last_modified_by = moappu.id ");
 
         FloatingRateRowMapper(final boolean addRatePeriods) {
             this.addRatePeriods = addRatePeriods;
@@ -155,11 +155,11 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
                 .append("period.interest_rate as interestRate, ")
                 .append("period.is_differential_to_base_lending_rate as isDifferentialToBaseLendingRate, ")
                 .append("period.is_active as isActive, ").append("crappu.username as createdBy, ")
-                .append("period.created_date as createdOn, ").append("rate.created_on_utc as createdOnUTC, ")
+                .append("period.created_date as createdOn, ").append("period.created_on_utc as createdOnUTC, ")
                 .append("moappu.username as modifiedBy, ").append("period.lastmodified_date as modifiedOn, ")
-                .append("rate.last_modified_on_utc as modifiedOnUTC ").append("FROM m_floating_rates_periods as period ")
-                .append("LEFT JOIN m_appuser as crappu on period.createdby_id = crappu.id ")
-                .append("LEFT JOIN m_appuser as moappu on period.lastmodifiedby_id = moappu.id ");
+                .append("period.last_modified_on_utc as modifiedOnUTC ").append("FROM m_floating_rates_periods as period ")
+                .append("LEFT JOIN m_appuser as crappu on period.created_by = crappu.id ")
+                .append("LEFT JOIN m_appuser as moappu on period.last_modified_by = moappu.id ");
 
         @Override
         public FloatingRatePeriodData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
