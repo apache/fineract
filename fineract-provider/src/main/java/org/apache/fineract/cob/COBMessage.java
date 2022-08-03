@@ -16,23 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.config;
+package org.apache.fineract.cob;
 
-import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
-import org.springframework.context.annotation.Conditional;
+import java.io.Serializable;
+import lombok.Data;
+import org.apache.fineract.infrastructure.core.domain.FineractContext;
+import org.springframework.batch.integration.partition.StepExecutionRequest;
 
-public class FineractValidationCondition extends AnyNestedCondition {
+@Data
+public class COBMessage implements Serializable {
 
-    public FineractValidationCondition() {
-        super(ConfigurationPhase.PARSE_CONFIGURATION);
-    }
-
-    @Conditional(FineractModeValidationCondition.class)
-    static class FineractModeValidation {}
-
-    @Conditional(FineractPartitionJobConfigValidationCondition.class)
-    static class FineractPartitionedJobValidation {}
-
-    @Conditional(FineractRemoteJobMessageHandlerCondition.class)
-    static class FineractRemoteJobMessageHandlerValidation {}
+    private StepExecutionRequest stepExecutionRequest;
+    private FineractContext context;
 }

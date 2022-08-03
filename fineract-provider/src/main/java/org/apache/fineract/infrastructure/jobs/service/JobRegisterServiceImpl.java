@@ -325,7 +325,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         jobDetailFactoryBean.setGroup(scheduledJobDetail.getGroupName());
         jobDetailFactoryBean.setConcurrent(false);
 
-        jobDetailFactoryBean.setArguments(job, scheduledJobDetail);
+        jobDetailFactoryBean.setArguments(job, scheduledJobDetail, ThreadLocalContextUtil.getContext());
         jobDetailFactoryBean.afterPropertiesSet();
         return jobDetailFactoryBean.getObject();
     }

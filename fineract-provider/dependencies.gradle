@@ -32,6 +32,10 @@ dependencies {
             'org.springframework.boot:spring-boot-starter-cache',
             'org.springframework.boot:spring-boot-starter-oauth2-resource-server',
             'org.springframework.boot:spring-boot-starter-actuator',
+            'org.springframework.boot:spring-boot-starter-batch',
+            'org.springframework.batch:spring-batch-integration',
+            'org.springframework.boot:spring-boot-starter-integration',
+            'org.springframework.integration:spring-integration-event',
 
             'org.glassfish.jersey.media:jersey-media-multipart:2.36',
 
@@ -127,9 +131,6 @@ dependencies {
         exclude group: 'commons-lang'
         exclude group: 'spotbugs-annotations'
         exclude group: 'xml-apis'
-    }
-
-    implementation ('org.springframework.boot:spring-boot-starter-batch') {
     }
 
     runtimeOnly('org.glassfish.jaxb:jaxb-runtime') {

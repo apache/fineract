@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.domain.FineractContext;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.domain.JobParameterRepository;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.springframework.batch.core.Job;
@@ -44,8 +46,10 @@ public class JobStarter {
     private final JobLauncher jobLauncher;
     private final JobParameterRepository jobParameterRepository;
 
-    public void run(Job job, ScheduledJobDetail scheduledJobDetail) throws JobInstanceAlreadyCompleteException,
-            JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
+    public void run(Job job, ScheduledJobDetail scheduledJobDetail, FineractContext fineractContext)
+            throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException,
+            JobRestartException {
+        ThreadLocalContextUtil.init(fineractContext);
         Map<String, JobParameter> jobParameterMap = getJobParameter(scheduledJobDetail);
         JobParameters jobParameters = new JobParametersBuilder(jobExplorer).getNextJobParameters(job)
                 .addJobParameters(new JobParameters(jobParameterMap)).toJobParameters();

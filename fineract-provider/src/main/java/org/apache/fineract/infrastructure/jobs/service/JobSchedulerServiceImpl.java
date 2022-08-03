@@ -18,9 +18,13 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -40,6 +44,7 @@ public class JobSchedulerServiceImpl implements ApplicationListener<ContextRefre
     private final SchedularWritePlatformService schedularWritePlatformService;
     private final TenantDetailsService tenantDetailsService;
     private final JobRegisterService jobRegisterService;
+    private final BusinessDateReadPlatformService businessDateReadPlatformService;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -51,6 +56,8 @@ public class JobSchedulerServiceImpl implements ApplicationListener<ContextRefre
         final List<FineractPlatformTenant> allTenants = tenantDetailsService.findAllTenants();
         for (final FineractPlatformTenant tenant : allTenants) {
             ThreadLocalContextUtil.setTenant(tenant);
+            HashMap<BusinessDateType, LocalDate> businessDates = businessDateReadPlatformService.getBusinessDates();
+            ThreadLocalContextUtil.setBusinessDates(businessDates);
             final List<ScheduledJobDetail> scheduledJobDetails = schedularWritePlatformService
                     .retrieveAllJobs(fineractProperties.getNodeId());
             for (final ScheduledJobDetail jobDetails : scheduledJobDetails) {
