@@ -3549,4 +3549,11 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder updateBusinessStepConfig(String jobName) {
+        this.actionName = "UPDATE";
+        this.entityName = "BATCH_BUSINESS_STEP";
+        this.href = "/jobs/" + jobName + "/steps";
+        return this;
+    }
+
 }
