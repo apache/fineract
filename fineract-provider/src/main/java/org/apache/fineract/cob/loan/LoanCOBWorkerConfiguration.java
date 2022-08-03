@@ -20,6 +20,7 @@ package org.apache.fineract.cob.loan;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.COBPropertyService;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -54,6 +55,8 @@ public class LoanCOBWorkerConfiguration {
     private LoanRepository loanRepository;
     @Autowired
     private QueueChannel inboundRequests;
+    @Autowired
+    private COBBusinessStepService cobBusinessStepService;
 
     @Bean(name = "Loan COB worker")
     public Step loanCOBWorkerStep() {
@@ -81,7 +84,7 @@ public class LoanCOBWorkerConfiguration {
 
     @Bean
     public ItemProcessor<Loan, Loan> itemProcessor() {
-        return null;
+        return new LoanItemProcessor(cobBusinessStepService);
     }
 
     @Bean

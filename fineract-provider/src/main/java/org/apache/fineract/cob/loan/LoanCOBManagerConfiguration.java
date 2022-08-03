@@ -18,12 +18,15 @@
  */
 package org.apache.fineract.cob.loan;
 
+import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.COBPropertyService;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.integration.config.annotation.EnableBatchIntegration;
 import org.springframework.batch.integration.partition.RemotePartitioningManagerStepBuilderFactory;
@@ -49,10 +52,16 @@ public class LoanCOBManagerConfiguration {
     private COBPropertyService cobPropertyService;
     @Autowired
     private DirectChannel outboundRequests;
+    @Autowired
+    private COBBusinessStepService cobBusinessStepService;
+    @Autowired
+    private JobOperator jobOperator;
+    @Autowired
+    private JobExplorer jobExplorer;
 
     @Bean
     public LoanCOBPartitioner partitioner() {
-        return new LoanCOBPartitioner(loanRepository, cobPropertyService);
+        return new LoanCOBPartitioner(loanRepository, cobPropertyService, cobBusinessStepService, jobOperator, jobExplorer);
     }
 
     @Bean
