@@ -111,7 +111,9 @@ fineract {
                 templateFile: "${projectDir}/buildSrc/src/main/resources/jira/changelog.txt.ftl"
             ],
             gpg: [
-                file: "${projectDir}/buildSrc/build/libs/buildSrc.jar"
+                files: [
+                    "${projectDir}/buildSrc/build/libs/buildSrc.jar"
+                ]
             ]
         ],
         step1: [
@@ -173,7 +175,10 @@ fineract {
             order: 7,
             description: 'Sign the distribution artifacts',
             gpg: [
-                file: "${rootDir}/fineract-war/build/distributions/apache-fineract-binary-${project.version}.tar.gz"
+                files: [
+                    "${rootDir}/fineract-war/build/distributions/apache-fineract-${project.version}-src.tar.gz",
+                    "${rootDir}/fineract-war/build/distributions/apache-fineract-${project.version}-binary.tar.gz"
+                ]
             ]
         ],
         step8: [

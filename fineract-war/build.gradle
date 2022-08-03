@@ -58,11 +58,7 @@ tasks.withType(Tar) {
 
 distributions {
     binary {
-        if(project.hasProperty("distVersion")) {
-            distributionBaseName = "apache-fineract-$distVersion-binary"
-        } else {
-            distributionBaseName = "apache-fineract-binary"
-        }
+        distributionBaseName = 'apache-fineract-binary'
         contents {
             from ("$rootDir/fineract-client/build/libs/") {
                 include 'fineract-client-*.jar'
@@ -88,18 +84,17 @@ distributions {
         }
     }
     src {
-        if(project.hasProperty("distVersion")) {
-            distributionBaseName = "apache-fineract-$distVersion-src"
-        } else {
-            distributionBaseName = "apache-fineract-src"
-        }
-
+        distributionBaseName = 'apache-fineract-src'
         contents {
             from "$rootDir/"
             exclude '**/build' , '.git', '**/.gradle', '.github', '**/.settings', '**/.project', '**/.classpath', '.idea', 'out', '._.DS_Store', '.DS_Store', 'WebContent', '**/.externalToolbuilders', '.theia', '.gitpod.yml', '.travis.yml', 'LICENSE_RELEASE', 'NOTICE_RELEASE', '**/licenses', '*.class', '**/bin', '*.log', '.dockerignore', '**/.gitkeep'
             rename ('LICENSE_SOURCE', 'LICENSE')
             rename ('NOTICE_SOURCE', 'NOTICE')
         }
+    }
+    doLast {
+        file("${buildDir}/distributions/apache-fineract-binary-${version}.tar.gz").renameTo("${buildDir}/distributions/apache-fineract-${version}-binary.tar.gz")
+        file("${buildDir}/distributions/apache-fineract-src-${version}.tar.gz").renameTo("${buildDir}/distributions/apache-fineract-${version}-src.tar.gz")
     }
 }
 
