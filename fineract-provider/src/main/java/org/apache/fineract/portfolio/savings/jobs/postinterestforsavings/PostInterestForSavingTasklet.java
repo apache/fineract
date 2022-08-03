@@ -36,6 +36,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
@@ -66,6 +67,7 @@ public class PostInterestForSavingTasklet implements Tasklet {
     private final Queue<List<SavingsAccountData>> queue = new ArrayDeque<>();
     private final ApplicationContext applicationContext;
     private final int queueSize = 1;
+    private final PlatformSecurityContext securityContext;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
@@ -157,6 +159,7 @@ public class PostInterestForSavingTasklet implements Tasklet {
             savingsSchedularInterestPoster.setBackdatedTxnsAllowedTill(backdatedTxnsAllowedTill);
             savingsSchedularInterestPoster.setTransactionTemplate(transactionTemplate);
             savingsSchedularInterestPoster.setConfigurationDomainService(configurationDomainService);
+            savingsSchedularInterestPoster.setPlatformSecurityContext(securityContext);
 
             posters.add(savingsSchedularInterestPoster);
 
