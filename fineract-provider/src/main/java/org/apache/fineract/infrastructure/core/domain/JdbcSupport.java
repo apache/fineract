@@ -27,7 +27,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -139,7 +138,8 @@ public final class JdbcSupport {
     public static OffsetDateTime getOffsetDateTime(ResultSet rs, String columnName) throws SQLException {
         final Timestamp timestamp = rs.getTimestamp(columnName);
         if (timestamp != null) {
-            OffsetDateTime offsetDateTimeAtUTC = OffsetDateTime.of(timestamp.toLocalDateTime(), ZoneOffset.UTC);
+            OffsetDateTime offsetDateTimeAtUTC = OffsetDateTime.of(timestamp.toLocalDateTime(),
+                    DateUtils.getSystemZoneId().getRules().getOffset(timestamp.toLocalDateTime()));
             return offsetDateTimeAtUTC
                     .withOffsetSameInstant(DateUtils.getDateTimeZoneOfTenant().getRules().getOffset(offsetDateTimeAtUTC.toInstant()));
         }
