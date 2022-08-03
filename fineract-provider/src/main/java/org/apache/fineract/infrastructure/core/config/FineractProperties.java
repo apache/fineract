@@ -39,6 +39,8 @@ public class FineractProperties {
 
     private FineractPartitionedJob partitionedJob;
 
+    private FineractRemoteJobMessageHandlerProperties remoteJobMessageHandler;
+
     @Getter
     @Setter
     public static class FineractTenantProperties {
@@ -92,5 +94,19 @@ public class FineractProperties {
         private Integer chunkSize;
         private Integer partitionSize;
         private Integer threadCount;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractRemoteJobMessageHandlerProperties {
+
+        private FineractRemoteJobMessageHandlerSpringEventsProperties springEvents;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractRemoteJobMessageHandlerSpringEventsProperties {
+
+        private boolean enabled;
     }
 }

@@ -54,7 +54,8 @@ public enum JobName {
     UPDATE_TRIAL_BALANCE_DETAILS("Update Trial Balance Details"), //
     EXECUTE_DIRTY_JOBS("Execute All Dirty Jobs"), //
     INCREASE_BUSINESS_DATE_BY_1_DAY("Increase Business Date by 1 day"), //
-    INCREASE_COB_DATE_BY_1_DAY("Increase COB Date by 1 day");
+    INCREASE_COB_DATE_BY_1_DAY("Increase COB Date by 1 day"), //
+    LOAN_COB("Loan COB");
 
     private final String name;
 

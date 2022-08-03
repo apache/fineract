@@ -16,23 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.core.config;
+package org.apache.fineract.cob;
 
-import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
-import org.springframework.context.annotation.Conditional;
+public interface COBPropertyService {
 
-public class FineractValidationCondition extends AnyNestedCondition {
+    Integer getPartitionSize(String jobName);
 
-    public FineractValidationCondition() {
-        super(ConfigurationPhase.PARSE_CONFIGURATION);
-    }
-
-    @Conditional(FineractModeValidationCondition.class)
-    static class FineractModeValidation {}
-
-    @Conditional(FineractPartitionJobConfigValidationCondition.class)
-    static class FineractPartitionedJobValidation {}
-
-    @Conditional(FineractRemoteJobMessageHandlerCondition.class)
-    static class FineractRemoteJobMessageHandlerValidation {}
+    Integer getChunkSize(String jobName);
 }
