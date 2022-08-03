@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.core.auditing;
 
-import org.apache.fineract.infrastructure.auditing.CustomAuditingHandler;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
@@ -28,7 +27,8 @@ public class JpaAuditingHandlerRegistrar implements ImportBeanDefinitionRegistra
 
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-        registry.registerBeanDefinition("jpaAuditingHandler", BeanDefinitionBuilder.rootBeanDefinition(CustomAuditingHandler.class)
-                .addConstructorArgReference("jpaMappingContext").addConstructorArgReference("auditorAware").getBeanDefinition());
+        registry.registerBeanDefinition("jpaAuditingHandler",
+                BeanDefinitionBuilder.rootBeanDefinition(CustomAuditingHandler.class).addConstructorArgReference("jpaMappingContext")
+                        .addConstructorArgReference("auditorAware").setScope("prototype").getBeanDefinition());
     }
 }
