@@ -116,4 +116,6 @@ public interface ConfigurationDomainService {
     boolean isBusinessDateEnabled();
 
     boolean isCOBDateAdjustmentEnabled();
+
+    boolean isReversalTransactionAllowed();
 }
