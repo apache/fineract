@@ -977,7 +977,6 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     protected void recalculateDailyBalances(final Money openingAccountBalance, final LocalDate interestPostingUpToDate,
             final boolean backdatedTxnsAllowedTill, boolean postReversals) {
-
         Money runningBalance = openingAccountBalance.copy();
 
         List<SavingsAccountTransaction> accountTransactionsSorted = null;
@@ -2775,6 +2774,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
     private void payActivationCharges(final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
             final AppUser user, final boolean backdatedTxnsAllowedTill) {
         boolean isSavingsChargeApplied = false;
+        boolean postReversals = false;
         UUID refNo = UUID.randomUUID();
         for (SavingsAccountCharge savingsAccountCharge : this.charges()) {
             if (savingsAccountCharge.isSavingsActivation()) {
@@ -2788,7 +2788,6 @@ public class SavingsAccount extends AbstractPersistableCustom {
             final MathContext mc = MathContext.DECIMAL64;
             boolean isInterestTransfer = false;
             LocalDate postInterestAsOnDate = null;
-            boolean postReversals = false;
             if (this.isBeforeLastPostingPeriod(getActivationLocalDate(), backdatedTxnsAllowedTill)) {
                 final LocalDate today = DateUtils.getBusinessLocalDate();
                 this.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
@@ -3551,12 +3550,12 @@ public class SavingsAccount extends AbstractPersistableCustom {
         this.closedOnDate = DateUtils.getBusinessLocalDate();
         this.closedBy = appUser;
         boolean postInterestAsOnDate = false;
+        boolean postReversals = false;
         LocalDate transactionDate = DateUtils.getBusinessLocalDate();
         if (this.getSummary().getAccountBalance(this.getCurrency()).isGreaterThanZero()) {
             SavingsAccountTransaction transaction = SavingsAccountTransaction.escheat(this, transactionDate, appUser, postInterestAsOnDate);
             this.transactions.add(transaction);
         }
-        boolean postReversals = false;
         recalculateDailyBalances(Money.zero(this.currency), transactionDate, false, postReversals);
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
     }

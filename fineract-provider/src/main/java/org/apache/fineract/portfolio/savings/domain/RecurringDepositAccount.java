@@ -270,11 +270,11 @@ public class RecurringDepositAccount extends SavingsAccount {
         }
     }
 
-    public void updateMaturityStatus(final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth) {
+    public void updateMaturityStatus(final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
+            final boolean postReversals) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.updateMaturityDetailsAction);
-
         final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
         if (!SavingsAccountStatusType.ACTIVE.hasStateOf(currentStatus)) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("not.in.active.state");
@@ -287,7 +287,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         if (!this.maturityDate().isAfter(todayDate)) {
             // update account status
             this.status = SavingsAccountStatusType.MATURED.getValue();
-            postMaturityInterest(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, todayDate);
+            postMaturityInterest(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, todayDate, postReversals);
         }
     }
 
@@ -537,7 +537,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         return Money.of(this.currency, this.minRequiredOpeningBalance);
     }
 
-    protected void processAccountUponActivation(final DateTimeFormatter fmt, final AppUser user) {
+    protected void processAccountUponActivation(final DateTimeFormatter fmt, final AppUser user, final boolean postReversals) {
         final Money minRequiredOpeningBalance = Money.of(this.currency, this.minRequiredOpeningBalance);
         final boolean backdatedTxnsAllowedTill = false;
         String refNo = null;
@@ -549,7 +549,6 @@ public class RecurringDepositAccount extends SavingsAccount {
 
             // update existing transactions so derived balance fields are
             // correct.
-            boolean postReversals = false;
             recalculateDailyBalances(Money.zero(this.currency), DateUtils.getBusinessLocalDate(), backdatedTxnsAllowedTill, postReversals);
         }
     }
@@ -635,7 +634,7 @@ public class RecurringDepositAccount extends SavingsAccount {
     }
 
     public void postMaturityInterest(final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
-            final LocalDate closeDate) {
+            final LocalDate closeDate, final boolean postReversals) {
         LocalDate interestPostingUpToDate = maturityDate();
         if (interestPostingUpToDate == null) {
             interestPostingUpToDate = closeDate;
@@ -645,7 +644,6 @@ public class RecurringDepositAccount extends SavingsAccount {
         boolean isInterestTransfer = false;
         LocalDate postInterestOnDate = null;
         final boolean backdatedTxnsAllowedTill = false;
-        boolean postReversals = false;
         final List<PostingPeriod> postingPeriods = calculateInterestUsing(mc, interestPostingUpToDate.minusDays(1), isInterestTransfer,
                 isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill,
                 postReversals);
@@ -690,7 +688,7 @@ public class RecurringDepositAccount extends SavingsAccount {
     }
 
     public void postPreMaturityInterest(final LocalDate accountCloseDate, final boolean isPreMatureClosure,
-            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth) {
+            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth, boolean postReversals) {
 
         final Money interestPostedToDate = totalInterestPosted();
         // calculate interest before one day of closure date
@@ -713,7 +711,6 @@ public class RecurringDepositAccount extends SavingsAccount {
         }
 
         applyWithholdTaxForDepositAccounts(accountCloseDate, recalucateDailyBalance, backdatedTxnsAllowedTill);
-        boolean postReversals = false;
         if (recalucateDailyBalance) {
             // update existing transactions so derived balance fields are
             // correct.
@@ -755,11 +752,11 @@ public class RecurringDepositAccount extends SavingsAccount {
         return interestOnMaturity;
     }
 
+    @Override
     public void postInterest(final MathContext mc, final LocalDate postingDate, final boolean isInterestTransfer,
             final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
-            final LocalDate postInterestAson, final boolean backdatedTxnsAllowedTill) {
+            final LocalDate postInterestAson, final boolean backdatedTxnsAllowedTill, final boolean postReversals) {
         final LocalDate interestPostingUpToDate = interestPostingUpToDate(postingDate);
-        boolean postReversals = false;
         super.postInterest(mc, interestPostingUpToDate, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
                 financialYearBeginningMonth, postInterestAson, backdatedTxnsAllowedTill, postReversals);
     }
