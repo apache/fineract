@@ -22,11 +22,10 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
@@ -85,11 +84,8 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         private final JournalEntryAssociationParametersData associationParametersData;
 
         GLJournalEntryMapper(final JournalEntryAssociationParametersData associationParametersData) {
-            if (associationParametersData == null) {
-                this.associationParametersData = new JournalEntryAssociationParametersData();
-            } else {
-                this.associationParametersData = associationParametersData;
-            }
+            this.associationParametersData = Objects.requireNonNullElseGet(associationParametersData,
+                    JournalEntryAssociationParametersData::new);
         }
 
         public String schema() {
@@ -101,7 +97,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                     .append(" journalEntry.type_enum as entryType,journalEntry.amount as amount, journalEntry.transaction_id as transactionId,")
                     .append(" journalEntry.entity_type_enum as entityType, journalEntry.entity_id as entityId, creatingUser.id as createdByUserId, ")
                     .append(" creatingUser.username as createdByUserName, journalEntry.description as comments, ")
-                    .append(" journalEntry.submitted_on_date as createdDate, journalEntry.reversed as reversed, ")
+                    .append(" journalEntry.submitted_on_date as submittedOnDate, journalEntry.reversed as reversed, ")
                     .append(" journalEntry.currency_code as currencyCode, curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ")
                     .append(" curr.display_symbol as currencyDisplaySymbol, curr.decimal_places as currencyDigits, curr.currency_multiplesof as inMultiplesOf ");
             if (associationParametersData.isRunningBalanceRequired()) {
@@ -159,7 +155,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
             final Long entityId = JdbcSupport.getLong(rs, "entityId");
             final Long createdByUserId = rs.getLong("createdByUserId");
-            final LocalDate createdDate = JdbcSupport.getLocalDate(rs, "createdDate");
+            final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedOnDate");
             final String createdByUserName = rs.getString("createdByUserName");
             final String comments = rs.getString("comments");
             final Boolean reversed = rs.getBoolean("reversed");
@@ -226,20 +222,21 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                 transactionDetailData = new TransactionDetailData(transaction, paymentDetailData, noteData, transactionTypeEnumData);
             }
             return new JournalEntryData(id, officeId, officeName, glAccountName, glAccountId, glCode, accountType, transactionDate,
-                    entryType, amount, transactionId, manualEntry, entityType, entityId, createdByUserId, createdDate, createdByUserName,
-                    comments, reversed, referenceNumber, officeRunningBalance, organizationRunningBalance, runningBalanceComputed,
-                    transactionDetailData, currency);
+                    entryType, amount, transactionId, manualEntry, entityType, entityId, createdByUserId, submittedOnDate,
+                    createdByUserName, comments, reversed, referenceNumber, officeRunningBalance, organizationRunningBalance,
+                    runningBalanceComputed, transactionDetailData, currency);
         }
     }
 
     @Override
     public Page<JournalEntryData> retrieveAll(final SearchParameters searchParameters, final Long glAccountId,
-            final Boolean onlyManualEntries, final LocalDate fromDate, final LocalDate toDate, final String transactionId,
-            final Integer entityType, final JournalEntryAssociationParametersData associationParametersData) {
+            final Boolean onlyManualEntries, final LocalDate fromDate, final LocalDate toDate, final LocalDate submittedOnDateFrom,
+            final LocalDate submittedOnDateTo, final String transactionId, final Integer entityType,
+            final JournalEntryAssociationParametersData associationParametersData) {
 
         GLJournalEntryMapper rm = new GLJournalEntryMapper(associationParametersData);
         final StringBuilder sqlBuilder = new StringBuilder(200);
-        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
+        sqlBuilder.append("select ").append(sqlGenerator.calcFoundRows()).append(" ");
         sqlBuilder.append(rm.schema());
 
         final Object[] objectArray = new Object[15];
@@ -247,7 +244,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         String whereClose = " where ";
 
         if (StringUtils.isNotBlank(transactionId)) {
-            sqlBuilder.append(whereClose + " journalEntry.transaction_id = ?");
+            sqlBuilder.append(whereClose).append(" journalEntry.transaction_id = ?");
             objectArray[arrayPos] = transactionId;
             arrayPos = arrayPos + 1;
 
@@ -256,7 +253,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
         if (entityType != null && entityType != 0 && (onlyManualEntries == null)) {
 
-            sqlBuilder.append(whereClose + " journalEntry.entity_type_enum = ?");
+            sqlBuilder.append(whereClose).append(" journalEntry.entity_type_enum = ?");
 
             objectArray[arrayPos] = entityType;
             arrayPos = arrayPos + 1;
@@ -265,7 +262,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         }
 
         if (searchParameters.isOfficeIdPassed()) {
-            sqlBuilder.append(whereClose + " journalEntry.office_id = ?");
+            sqlBuilder.append(whereClose).append(" journalEntry.office_id = ?");
             objectArray[arrayPos] = searchParameters.getOfficeId();
             arrayPos = arrayPos + 1;
 
@@ -273,7 +270,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         }
 
         if (searchParameters.isCurrencyCodePassed()) {
-            sqlBuilder.append(whereClose + " journalEntry.currency_code = ?");
+            sqlBuilder.append(whereClose).append(" journalEntry.currency_code = ?");
             objectArray[arrayPos] = searchParameters.getCurrencyCode();
             arrayPos = arrayPos + 1;
 
@@ -281,7 +278,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         }
 
         if (glAccountId != null && glAccountId != 0) {
-            sqlBuilder.append(whereClose + " journalEntry.account_id = ?");
+            sqlBuilder.append(whereClose).append(" journalEntry.account_id = ?");
             objectArray[arrayPos] = glAccountId;
             arrayPos = arrayPos + 1;
 
@@ -289,50 +286,69 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         }
 
         if (fromDate != null || toDate != null) {
-            final DateTimeFormatter df = new DateTimeFormatterBuilder().appendPattern("yyyy-MM-dd").toFormatter();
-            String fromDateString = null;
-            String toDateString = null;
             if (fromDate != null && toDate != null) {
-                fromDateString = df.format(fromDate);
-                toDateString = df.format(toDate);
-                sqlBuilder.append(whereClose + " journalEntry.entry_date between '" + fromDateString + "' and '" + toDateString + "' ");
-
+                sqlBuilder.append(whereClose).append(" journalEntry.entry_date between ? and ? ");
                 whereClose = " and ";
+                objectArray[arrayPos] = fromDate;
+                arrayPos = arrayPos + 1;
+                objectArray[arrayPos] = toDate;
+                arrayPos = arrayPos + 1;
             } else if (fromDate != null) {
-                fromDateString = df.format(fromDate);
-                sqlBuilder.append(whereClose + " journalEntry.entry_date >= '" + fromDateString + "' ");
+                sqlBuilder.append(whereClose).append(" journalEntry.entry_date >= ? ");
                 whereClose = " and ";
-
-            } else if (toDate != null) {
-                toDateString = df.format(toDate);
-                sqlBuilder.append(whereClose + " journalEntry.entry_date <= '" + toDateString + "' ");
-
+                objectArray[arrayPos] = fromDate;
+                arrayPos = arrayPos + 1;
+            } else {
+                sqlBuilder.append(whereClose).append(" journalEntry.entry_date <= ? ");
                 whereClose = " and ";
+                objectArray[arrayPos] = toDate;
+                arrayPos = arrayPos + 1;
+            }
+        }
+
+        if (submittedOnDateFrom != null || submittedOnDateTo != null) {
+            if (submittedOnDateFrom != null && toDate != null) {
+                sqlBuilder.append(whereClose).append(" journalEntry.submitted_on_date between ? and ? ");
+                whereClose = " and ";
+                objectArray[arrayPos] = submittedOnDateFrom;
+                arrayPos = arrayPos + 1;
+                objectArray[arrayPos] = submittedOnDateTo;
+                arrayPos = arrayPos + 1;
+            } else if (fromDate != null) {
+                sqlBuilder.append(whereClose).append(" journalEntry.submitted_on_date >= ? ");
+                whereClose = " and ";
+                objectArray[arrayPos] = submittedOnDateFrom;
+                arrayPos = arrayPos + 1;
+            } else {
+                sqlBuilder.append(whereClose).append(" journalEntry.submitted_on_date <= ? ");
+                whereClose = " and ";
+                objectArray[arrayPos] = submittedOnDateTo;
+                arrayPos = arrayPos + 1;
             }
         }
 
         if (onlyManualEntries != null) {
             if (onlyManualEntries) {
-                sqlBuilder.append(whereClose + " journalEntry.manual_entry = true");
-
+                sqlBuilder.append(whereClose).append(" journalEntry.manual_entry = ?");
                 whereClose = " and ";
+                objectArray[arrayPos] = Boolean.TRUE;
+                arrayPos = arrayPos + 1;
             }
         }
 
         if (searchParameters.isLoanIdPassed()) {
-            sqlBuilder.append(whereClose + " journalEntry.loan_transaction_id  in (select id from m_loan_transaction where loan_id = ?)");
+            sqlBuilder.append(whereClose)
+                    .append(" journalEntry.loan_transaction_id  in (select id from m_loan_transaction where loan_id = ?)");
             objectArray[arrayPos] = searchParameters.getLoanId();
             arrayPos = arrayPos + 1;
 
             whereClose = " and ";
         }
         if (searchParameters.isSavingsIdPassed()) {
-            sqlBuilder.append(whereClose
-                    + " journalEntry.savings_transaction_id in (select id from m_savings_account_transaction where savings_account_id = ?)");
+            sqlBuilder.append(whereClose).append(
+                    " journalEntry.savings_transaction_id in (select id from m_savings_account_transaction where savings_account_id = ?)");
             objectArray[arrayPos] = searchParameters.getSavingsId();
             arrayPos = arrayPos + 1;
-
-            whereClose = " and ";
         }
 
         if (searchParameters.isOrderByRequested()) {
@@ -368,9 +384,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             final GLJournalEntryMapper rm = new GLJournalEntryMapper(associationParametersData);
             final String sql = "select " + rm.schema() + " where journalEntry.id = ?";
 
-            final JournalEntryData glJournalEntryData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glJournalEntryId }); // NOSONAR
-
-            return glJournalEntryData;
+            return this.jdbcTemplate.queryForObject(sql, rm, glJournalEntryId);
         } catch (final EmptyResultDataAccessException e) {
             throw new JournalEntriesNotFoundException(glJournalEntryId, e);
         }
@@ -428,10 +442,8 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
         final LocalDate transactionDate = DateUtils.getBusinessLocalDate();
 
-        final OfficeOpeningBalancesData officeOpeningBalancesData = OfficeOpeningBalancesData.createNew(officeId, officeData.name(),
-                transactionDate, contraAccount, assetAccountOpeningBalances, liabityAccountOpeningBalances, incomeAccountOpeningBalances,
-                equityAccountOpeningBalances, expenseAccountOpeningBalances);
-        return officeOpeningBalancesData;
+        return OfficeOpeningBalancesData.createNew(officeId, officeData.name(), transactionDate, contraAccount, assetAccountOpeningBalances,
+                liabityAccountOpeningBalances, incomeAccountOpeningBalances, equityAccountOpeningBalances, expenseAccountOpeningBalances);
     }
 
     private List<JournalEntryData> populateOpeningBalances(final List<JournalEntryData> existingOpeningBalanceTransactions,
@@ -493,14 +505,16 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         final Boolean onlyManualEntries = null;
         final LocalDate fromDate = null;
         final LocalDate toDate = null;
+        final LocalDate submittedOnDateFrom = null;
+        final LocalDate submittedOnDateTo = null;
         final JournalEntryAssociationParametersData associationParametersData = null;
         final Long loanId = null;
         final Long savingsId = null;
 
         final SearchParameters searchParameters = SearchParameters.forJournalEntries(officeId, offset, limit, orderBy, sortOrder, loanId,
                 savingsId, currencyCode);
-        return retrieveAll(searchParameters, contraId, onlyManualEntries, fromDate, toDate, transactionId, entityType,
-                associationParametersData);
+        return retrieveAll(searchParameters, contraId, onlyManualEntries, fromDate, toDate, submittedOnDateFrom, submittedOnDateTo,
+                transactionId, entityType, associationParametersData);
 
     }
 

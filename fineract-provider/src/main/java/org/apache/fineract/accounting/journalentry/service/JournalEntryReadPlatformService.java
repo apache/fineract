@@ -30,7 +30,8 @@ public interface JournalEntryReadPlatformService {
     JournalEntryData retrieveGLJournalEntryById(long glJournalEntryId, JournalEntryAssociationParametersData associationParametersData);
 
     Page<JournalEntryData> retrieveAll(SearchParameters searchParameters, Long glAccountId, Boolean onlyManualEntries, LocalDate fromDate,
-            LocalDate toDate, String transactionId, Integer entityType, JournalEntryAssociationParametersData associationParametersData);
+            LocalDate toDate, LocalDate submittedOnDateFrom, LocalDate submittedOnDateTo, String transactionId, Integer entityType,
+            JournalEntryAssociationParametersData associationParametersData);
 
     OfficeOpeningBalancesData retrieveOfficeOpeningBalances(Long officeId, String currencyCode);
 
