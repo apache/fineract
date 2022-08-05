@@ -21,6 +21,7 @@ package org.apache.fineract.accounting.journalentry.data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import lombok.Getter;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -30,6 +31,7 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
  *
  * Note: no getter/setters required as google will produce json from fields of object.
  */
+@Getter
 public class JournalEntryData {
 
     private final Long id;
@@ -76,6 +78,8 @@ public class JournalEntryData {
 
     @SuppressWarnings("unused")
     private final TransactionDetailData transactionDetails;
+    @SuppressWarnings("unused")
+    private final LocalDate submittedOnDate;
 
     // import fields
     private transient Integer rowIndex;
@@ -132,6 +136,7 @@ public class JournalEntryData {
         this.organizationRunningBalance = null;
         this.runningBalanceComputed = null;
         this.transactionDetails = null;
+        this.submittedOnDate = null;
     }
 
     public static JournalEntryData importInstance(Long officeId, LocalDate transactionDate, String currencyCode, Long paymentTypeId,
@@ -179,6 +184,7 @@ public class JournalEntryData {
         this.entityType = null;
         this.entityId = null;
         this.createdByUserId = null;
+        this.submittedOnDate = null;
         this.createdDate = null;
         this.createdByUserName = null;
         this.reversed = null;
@@ -209,7 +215,7 @@ public class JournalEntryData {
     public JournalEntryData(final Long id, final Long officeId, final String officeName, final String glAccountName, final Long glAccountId,
             final String glAccountCode, final EnumOptionData glAccountClassification, final LocalDate transactionDate,
             final EnumOptionData entryType, final BigDecimal amount, final String transactionId, final Boolean manualEntry,
-            final EnumOptionData entityType, final Long entityId, final Long createdByUserId, final LocalDate createdDate,
+            final EnumOptionData entityType, final Long entityId, final Long createdByUserId, final LocalDate submittedOnDate,
             final String createdByUserName, final String comments, final Boolean reversed, final String referenceNumber,
             final BigDecimal officeRunningBalance, final BigDecimal organizationRunningBalance, final Boolean runningBalanceComputed,
             final TransactionDetailData transactionDetailData, final CurrencyData currency) {
@@ -228,7 +234,8 @@ public class JournalEntryData {
         this.entityType = entityType;
         this.entityId = entityId;
         this.createdByUserId = createdByUserId;
-        this.createdDate = createdDate;
+        this.createdDate = submittedOnDate;
+        this.submittedOnDate = submittedOnDate;
         this.createdByUserName = createdByUserName;
         this.comments = comments;
         this.reversed = reversed;
@@ -238,40 +245,6 @@ public class JournalEntryData {
         this.runningBalanceComputed = runningBalanceComputed;
         this.transactionDetails = transactionDetailData;
         this.currency = currency;
-    }
-
-    public JournalEntryData(final Long id, final Long officeId, final String glAccountName, final Long glAccountId,
-            final String glAccountCode, final EnumOptionData glAccountClassification, final LocalDate transactionDate,
-            final EnumOptionData entryType, final BigDecimal amount, final String transactionId, final Boolean manualEntry,
-            final EnumOptionData entityType, final Long entityId, final LocalDate createdDate, final String currencyCode,
-            final Long savingTransactionId) {
-        this.id = id;
-        this.officeId = officeId;
-        this.officeName = null;
-        this.glAccountName = glAccountName;
-        this.glAccountId = glAccountId;
-        this.glAccountCode = glAccountCode;
-        this.glAccountType = glAccountClassification;
-        this.transactionDate = transactionDate;
-        this.entryType = entryType;
-        this.amount = amount;
-        this.transactionId = transactionId;
-        this.savingTransactionId = savingTransactionId;
-        this.manualEntry = manualEntry;
-        this.entityType = entityType;
-        this.entityId = entityId;
-        this.createdByUserId = null;
-        this.createdDate = createdDate;
-        this.createdByUserName = null;
-        this.comments = null;
-        this.reversed = false;
-        this.referenceNumber = null;
-        this.officeRunningBalance = null;
-        this.organizationRunningBalance = null;
-        this.runningBalanceComputed = null;
-        this.transactionDetails = null;
-        this.currency = null;
-        this.currencyCode = currencyCode;
     }
 
     public static JournalEntryData fromGLAccountData(final GLAccountData glAccountData) {
@@ -291,7 +264,7 @@ public class JournalEntryData {
         final EnumOptionData entityType = null;
         final Long entityId = null;
         final Long createdByUserId = null;
-        final LocalDate createdDate = null;
+        final LocalDate submittedOnDate = null;
         final String createdByUserName = null;
         final String comments = null;
         final Boolean reversed = null;
@@ -302,65 +275,8 @@ public class JournalEntryData {
         final TransactionDetailData transactionDetailData = null;
         final CurrencyData currency = null;
         return new JournalEntryData(id, officeId, officeName, glAccountName, glAccountId, glAccountCode, glAccountClassification,
-                transactionDate, entryType, amount, transactionId, manualEntry, entityType, entityId, createdByUserId, createdDate,
+                transactionDate, entryType, amount, transactionId, manualEntry, entityType, entityId, createdByUserId, submittedOnDate,
                 createdByUserName, comments, reversed, referenceNumber, officeRunningBalance, organizationRunningBalance,
                 runningBalanceComputed, transactionDetailData, currency);
     }
-
-    public Long getId() {
-        return this.id;
-    }
-
-    public Long getGlAccountId() {
-        return this.glAccountId;
-    }
-
-    public EnumOptionData getGlAccountType() {
-        return this.glAccountType;
-    }
-
-    public BigDecimal getAmount() {
-        return this.amount;
-    }
-
-    public EnumOptionData getEntryType() {
-        return this.entryType;
-    }
-
-    public Long getOfficeId() {
-        return this.officeId;
-    }
-
-    public String getTransactionId() {
-        return transactionId;
-    }
-
-    public Long getSavingTransactionId() {
-        return this.savingTransactionId;
-    }
-
-    public String getCurrencyCode() {
-        return this.currencyCode;
-    }
-
-    public boolean isManualEntry() {
-        return this.manualEntry;
-    }
-
-    public EnumOptionData getEntityType() {
-        return this.entityType;
-    }
-
-    public Long getEntityId() {
-        return this.entityId;
-    }
-
-    public LocalDate getCreatedDate() {
-        return this.createdDate;
-    }
-
-    public Long getPaymentTypeId() {
-        return this.paymentTypeId;
-    }
-
 }
