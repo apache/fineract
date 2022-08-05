@@ -45,4 +45,5 @@
     <include file="parts/0023_use_the_proper_date_or_datetime_type.xml" relativeToChangelogFile="true"/>
     <include file="parts/0024_add_audit_entries.xml" relativeToChangelogFile="true"/>
     <include file="parts/0025_add_audit_entries_to_journal_entry.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0026_reversals_for_reversed_transactions.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

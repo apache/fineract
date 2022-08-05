@@ -99,8 +99,8 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
         // There are currently 37 global configurations.
-        Assertions.assertEquals(40, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(40, actualGlobalConfigurations.size());
+        Assertions.assertEquals(41, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(41, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -455,6 +455,14 @@ public class GlobalConfigurationHelper {
         isAutomaticCOBDateAdjustmentEnabled.put("enabled", true);
         isAutomaticCOBDateAdjustmentEnabled.put("trapDoor", false);
         defaults.add(isAutomaticCOBDateAdjustmentEnabled);
+
+        HashMap<String, Object> isReversalTransactionAllowed = new HashMap<>();
+        isReversalTransactionAllowed.put("id", 46);
+        isReversalTransactionAllowed.put("name", "enable-post-reversal-txns-for-reverse-transactions");
+        isReversalTransactionAllowed.put("value", 0);
+        isReversalTransactionAllowed.put("enabled", false);
+        isReversalTransactionAllowed.put("trapDoor", false);
+        defaults.add(isReversalTransactionAllowed);
 
         return defaults;
     }
