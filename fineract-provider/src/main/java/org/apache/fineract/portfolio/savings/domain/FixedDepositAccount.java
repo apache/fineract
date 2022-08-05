@@ -39,6 +39,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -77,6 +78,8 @@ public class FixedDepositAccount extends SavingsAccount {
 
     @Transient
     protected InterestRateChartAssembler chartAssembler;
+    @Transient
+    private ConfigurationDomainService configurationDomainService;
 
     protected FixedDepositAccount() {
         //
