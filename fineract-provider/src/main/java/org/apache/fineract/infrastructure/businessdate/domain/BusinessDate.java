@@ -28,12 +28,12 @@ import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 import lombok.Getter;
-import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
+import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 
 @Getter
 @Entity
 @Table(name = "m_business_date", uniqueConstraints = { @UniqueConstraint(name = "uq_business_date_type", columnNames = { "type" }) })
-public class BusinessDate extends AbstractAuditableCustom {
+public class BusinessDate extends AbstractAuditableWithUTCDateTimeCustom {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
