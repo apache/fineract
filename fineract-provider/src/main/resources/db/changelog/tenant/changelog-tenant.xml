@@ -51,4 +51,6 @@
     <include file="parts/0029_add_delinquency_buckets.xml" relativeToChangelogFile="true"/>
     <include file="parts/0030_add_audit_entries_to_business_date.xml" relativeToChangelogFile="true"/>
     <include file="parts/0031_add_audit_entries_to_client_identifier.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0032_add_some_missing_indexes.xml" relativeToChangelogFile="true"/>
+>>>>>>> 92a62bc2d (FINERACT-1670: Add some missing indexes)
 </databaseChangeLog>
