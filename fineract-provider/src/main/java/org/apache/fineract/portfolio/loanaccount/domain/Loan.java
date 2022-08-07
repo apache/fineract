@@ -113,6 +113,7 @@ import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanStateTrans
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanTransactionTypeException;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidRefundDateException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationDateException;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanChargeRefundException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanDisbursalException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanForeclosureException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerAssignmentDateException;
@@ -3055,6 +3056,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         }
         validateRepaymentTypeAccountStatus(repaymentTransaction, event);
         validateActivityNotBeforeClientOrGroupTransferDate(event, repaymentTransaction.getTransactionDate());
+        validateRepaymentTypeTransactionNotBeforeAChargeRefund(repaymentTransaction, "created");
         validateActivityNotBeforeLastTransactionDate(event, repaymentTransaction.getTransactionDate());
         if (!isHolidayValidationDone) {
             validateRepaymentDateIsOnHoliday(repaymentTransaction.getTransactionDate(), holidayDetailDTO.isAllowTransactionsOnHoliday(),
@@ -3073,7 +3075,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     private void validateRepaymentTypeAccountStatus(LoanTransaction repaymentTransaction, LoanEvent event) {
         if (repaymentTransaction.isGoodwillCredit() || repaymentTransaction.isMerchantIssuedRefund()
-                || repaymentTransaction.isPayoutRefund()) {
+                || repaymentTransaction.isPayoutRefund() || repaymentTransaction.isChargeRefund()) {
 
             if (!(isOpen() || isClosedObligationsMet() || isOverPaid())) {
                 final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -4914,6 +4916,20 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 break;
             }
             throw new InvalidLoanStateTransitionException(action, postfix, errorMessage, lastTransactionDate);
+        }
+    }
+
+    public void validateRepaymentTypeTransactionNotBeforeAChargeRefund(final LoanTransaction repaymentTransaction,
+            final String reversedOrCreated) {
+        if (repaymentTransaction.isRepaymentType() && !repaymentTransaction.isChargeRefund()) {
+            for (LoanTransaction txn : this.getLoanTransactions()) {
+                if (txn.isChargeRefund() && repaymentTransaction.getTransactionDate().isBefore(txn.getTransactionDate())) {
+                    final String errorMessage = "loan.transaction.cant.be." + reversedOrCreated + ".because.later.charge.refund.exists";
+                    final String details = "Loan Transaction: " + this.getId() + " Can't be " + reversedOrCreated
+                            + " because a Later Charge Refund Exists.";
+                    throw new LoanChargeRefundException(errorMessage, details);
+                }
+            }
         }
     }
 
