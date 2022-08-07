@@ -56,4 +56,6 @@ public class LoanTransactionDTO {
 
     @Setter
     private boolean isLoanToLoanTransfer;
+
+    private final String chargeRefundChargeType;
 }
