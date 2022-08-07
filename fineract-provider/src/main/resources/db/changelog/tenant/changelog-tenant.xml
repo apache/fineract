@@ -50,4 +50,5 @@
     <include file="parts/0028_add_charge_refund_charge_type_to_loan_transaction.xml" relativeToChangelogFile="true"/>
     <include file="parts/0029_add_delinquency_buckets.xml" relativeToChangelogFile="true"/>
     <include file="parts/0030_add_audit_entries_to_business_date.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0031_add_audit_entries_to_client_identifier.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
