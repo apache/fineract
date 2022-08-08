@@ -16,19 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanproduct.domain;
+package org.apache.fineract.portfolio.delinquency.service;
 
-import java.util.List;
-import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import java.util.Collection;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
 
-public interface LoanProductRepository extends JpaRepository<LoanProduct, Long>, JpaSpecificationExecutor<LoanProduct> {
+public interface DelinquencyReadPlatformService {
 
-    @Query("select loanProduct from LoanProduct loanProduct, IN(loanProduct.charges) charge where charge.id = :chargeId")
-    List<LoanProduct> retrieveLoanProductsByChargeId(@Param("chargeId") Long chargeId);
+    Collection<DelinquencyRangeData> retrieveAllDelinquencyRanges();
 
-    Long countByDelinquencyBucket(DelinquencyBucket delinquencyBucket);
+    DelinquencyRangeData retrieveDelinquencyRange(Long delinquencyRangeId);
+
+    Collection<DelinquencyBucketData> retrieveAllDelinquencyBuckets();
+
+    DelinquencyBucketData retrieveDelinquencyBucket(Long delinquencyBucketId);
+
+    DelinquencyRangeData retrieveCurrentDelinquencyTag(Long loanId);
 }

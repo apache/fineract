@@ -16,19 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanproduct.domain;
+package org.apache.fineract.portfolio.delinquency.exception;
 
-import java.util.List;
-import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-public interface LoanProductRepository extends JpaRepository<LoanProduct, Long>, JpaSpecificationExecutor<LoanProduct> {
+public class DelinquencyBucketAgesOverlapedException extends AbstractPlatformDomainRuleException {
 
-    @Query("select loanProduct from LoanProduct loanProduct, IN(loanProduct.charges) charge where charge.id = :chargeId")
-    List<LoanProduct> retrieveLoanProductsByChargeId(@Param("chargeId") Long chargeId);
-
-    Long countByDelinquencyBucket(DelinquencyBucket delinquencyBucket);
+    public DelinquencyBucketAgesOverlapedException(final String defaultUserMessage, final Object... defaultUserMessageArgs) {
+        super("error.msg.loan.delinquency.bucket.ages.overlaped", defaultUserMessage, defaultUserMessageArgs);
+    }
 }
