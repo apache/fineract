@@ -108,12 +108,10 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             final Long lastUpdatedByUserId = rs.getLong("updatingUserId");
             final String lastUpdatedByUserName = rs.getString("updatingUserName");
             final LocalTime meetingTime = JdbcSupport.getLocalTime(rs, "meetingTime");
-            final OffsetDateTime createdDate = createdDateUtc != null ?
-                    createdDateUtc :
-                    OffsetDateTime.of(createdDateLocal, DateUtils.getDateTimeZoneOfTenant().getRules().getOffset(createdDateLocal));
-            final OffsetDateTime lastModifiedDate = lastModifiedDateUtc != null ?
-                    lastModifiedDateUtc :
-                    OffsetDateTime.of(lastModifiedDateLocal,
+            final OffsetDateTime createdDate = createdDateUtc != null ? createdDateUtc
+                    : OffsetDateTime.of(createdDateLocal, DateUtils.getDateTimeZoneOfTenant().getRules().getOffset(createdDateLocal));
+            final OffsetDateTime lastModifiedDate = lastModifiedDateUtc != null ? lastModifiedDateUtc
+                    : OffsetDateTime.of(lastModifiedDateLocal,
                             DateUtils.getDateTimeZoneOfTenant().getRules().getOffset(lastModifiedDateLocal));
             return CalendarData.instance(id, calendarInstanceId, entityId, entityType, title, description, location, startDate, endDate,
                     duration, type, repeating, recurrence, frequency, interval, repeatsOnDay, repeatsOnNthDayOfMonth, remindBy,

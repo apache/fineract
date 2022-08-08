@@ -84,8 +84,10 @@ public class LoanScheduleHistoryWritePlatformServiceImpl implements LoanSchedule
                 oldLastModifiedOnDate = (LocalDateTime) oldDates.get("lastmodified_date");
             }
 
-            final Long createdByUser = repaymentScheduleInstallment.getCreatedBy().orElse(platformSecurityContext.authenticatedUser().getId());
-            final Long lastModifiedByUser = repaymentScheduleInstallment.getLastModifiedBy().orElse(platformSecurityContext.authenticatedUser().getId());
+            final Long createdByUser = repaymentScheduleInstallment.getCreatedBy()
+                    .orElse(platformSecurityContext.authenticatedUser().getId());
+            final Long lastModifiedByUser = repaymentScheduleInstallment.getLastModifiedBy()
+                    .orElse(platformSecurityContext.authenticatedUser().getId());
 
             OffsetDateTime lastModifiedOnDate = DateUtils.getOffsetDateTimeOfTenant();
             if (repaymentScheduleInstallment.getLastModifiedDate().isPresent()) {
