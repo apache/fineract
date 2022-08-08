@@ -31,14 +31,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
+import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
 
 @Entity
 @Table(name = "m_loan_repayment_schedule")
-public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom
+public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDateTimeCustom
         implements Comparable<LoanRepaymentScheduleInstallment> {
 
     @ManyToOne(optional = false)
@@ -135,7 +135,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "installment")
     private Set<LoanInstallmentCharge> installmentCharges = new HashSet<>();
 
-    LoanRepaymentScheduleInstallment() {
+    public LoanRepaymentScheduleInstallment() {
         this.installmentNumber = null;
         this.fromDate = null;
         this.dueDate = null;

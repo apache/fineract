@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+    <changeSet author="fineract" id="loan_repayment_schedule-1" context="mysql">
+        <addColumn tableName="m_loan_repayment_schedule">
+            <column name="created_on_utc" type="DATETIME"/>
+            <column name="last_modified_on_utc" type="DATETIME"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="fineract" id="loan_repayment_schedule-1" context="postgresql">
+        <addColumn tableName="m_loan_repayment_schedule">
+            <column name="created_on_utc" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="last_modified_on_utc" type="TIMESTAMP WITH TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="loan_repayment_schedule-2" author="fineract">
+        <dropNotNullConstraint tableName="m_loan_repayment_schedule" columnName="created_date" columnDataType="datetime"/>
+        <dropNotNullConstraint tableName="m_loan_repayment_schedule" columnName="lastmodified_date" columnDataType="datetime"/>
+    </changeSet>
+    <changeSet id="loan_repayment_schedule-3" author="fineract">
+        <renameColumn tableName="m_loan_repayment_schedule" oldColumnName="createdby_id" newColumnName="created_by" columnDataType="BIGINT"/>
+        <renameColumn tableName="m_loan_repayment_schedule" oldColumnName="lastmodifiedby_id" newColumnName="last_modified_by" columnDataType="BIGINT"/>
+    </changeSet>
+    <changeSet author="fineract" id="loan_repayment_schedule-4">
+        <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_loan_repayment_schedule"
+                                 constraintName="FK_loan_repayment_schedule_created_by" deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="m_appuser" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_loan_repayment_schedule"
+                                 constraintName="FK_loan_repayment_schedule_last_modified_by" deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="m_appuser" validate="true"/>
+    </changeSet>
+    <changeSet id="loan_repayment_schedule-5" author="fineract" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from m_loan_repayment_schedule</sqlCheck>
+        </preConditions>
+        <addNotNullConstraint tableName="m_loan_repayment_schedule" columnName="created_on_utc" columnDataType="DATETIME"/>
+        <addNotNullConstraint tableName="m_loan_repayment_schedule" columnName="last_modified_on_utc" columnDataType="DATETIME"/>
+    </changeSet>
+    <changeSet id="loan_repayment_schedule-5" author="fineract" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from m_loan_repayment_schedule</sqlCheck>
+        </preConditions>
+        <addNotNullConstraint tableName="m_loan_repayment_schedule" columnName="created_on_utc" columnDataType="TIMESTAMP WITH TIME ZONE"/>
+        <addNotNullConstraint tableName="m_loan_repayment_schedule" columnName="last_modified_on_utc" columnDataType="TIMESTAMP WITH TIME ZONE"/>
+    </changeSet>
+    <changeSet id="loan_repayment_schedule-6" author="fineract">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from m_loan_repayment_schedule where created_by is null or last_modified_by is null</sqlCheck>
+        </preConditions>
+        <addNotNullConstraint tableName="m_loan_repayment_schedule" columnName="created_by" columnDataType="BIGINT"/>
+        <addNotNullConstraint tableName="m_loan_repayment_schedule" columnName="last_modified_by" columnDataType="BIGINT"/>
+    </changeSet>
+    <changeSet author="fineract" id="loan_repayment_schedule_history-1" context="mysql">
+        <addColumn tableName="m_loan_repayment_schedule_history">
+            <column name="created_on_utc" type="DATETIME"/>
+            <column name="last_modified_on_utc" type="DATETIME"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="fineract" id="loan_repayment_schedule_history-1" context="postgresql">
+        <addColumn tableName="m_loan_repayment_schedule_history">
+            <column name="created_on_utc" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="last_modified_on_utc" type="TIMESTAMP WITH TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="loan_repayment_schedule_history-2" author="fineract" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from m_loan_repayment_schedule_history</sqlCheck>
+        </preConditions>
+        <addNotNullConstraint tableName="m_loan_repayment_schedule_history" columnName="created_on_utc" columnDataType="DATETIME"/>
+        <addNotNullConstraint tableName="m_loan_repayment_schedule_history" columnName="last_modified_on_utc" columnDataType="DATETIME"/>
+    </changeSet>
+    <changeSet id="loan_repayment_schedule_history-2" author="fineract" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from m_loan_repayment_schedule_history</sqlCheck>
+        </preConditions>
+        <addNotNullConstraint tableName="m_loan_repayment_schedule_history" columnName="created_on_utc" columnDataType="TIMESTAMP WITH TIME ZONE"/>
+        <addNotNullConstraint tableName="m_loan_repayment_schedule_history" columnName="last_modified_on_utc" columnDataType="TIMESTAMP WITH TIME ZONE"/>
+    </changeSet>
+</databaseChangeLog>
