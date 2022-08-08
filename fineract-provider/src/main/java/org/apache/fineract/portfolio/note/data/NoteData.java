@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.portfolio.note.data;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 /**
@@ -49,17 +49,17 @@ public class NoteData {
     @SuppressWarnings("unused")
     private final String createdByUsername;
     @SuppressWarnings("unused")
-    private final ZonedDateTime createdOn;
+    private final OffsetDateTime createdOn;
     @SuppressWarnings("unused")
     private final Long updatedById;
     @SuppressWarnings("unused")
     private final String updatedByUsername;
     @SuppressWarnings("unused")
-    private final ZonedDateTime updatedOn;
+    private final OffsetDateTime updatedOn;
 
     public NoteData(final Long id, final Long clientId, final Long groupId, final Long loanId, final Long transactionId,
             final Long depositAccountId, final Long savingAccountId, final EnumOptionData noteType, final String note,
-            final ZonedDateTime createdDate, final Long createdById, final String createdByUsername, final ZonedDateTime lastModifiedDate,
+            final OffsetDateTime createdDate, final Long createdById, final String createdByUsername, final OffsetDateTime lastModifiedDate,
             final Long lastModifiedById, final String updatedByUsername) {
         this.id = id;
         this.clientId = clientId;
