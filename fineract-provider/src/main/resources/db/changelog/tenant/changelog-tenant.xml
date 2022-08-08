@@ -52,5 +52,7 @@
     <include file="parts/0030_add_audit_entries_to_business_date.xml" relativeToChangelogFile="true"/>
     <include file="parts/0031_add_audit_entries_to_client_identifier.xml" relativeToChangelogFile="true"/>
     <include file="parts/0032_add_some_missing_indexes.xml" relativeToChangelogFile="true"/>
->>>>>>> 92a62bc2d (FINERACT-1670: Add some missing indexes)
+    <include file="parts/0033_add_audit_entries_to_loan_repayment_schedule_installment.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0034_add_audit_entries_to_note.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0035_add_audit_entries_to_calendar.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
