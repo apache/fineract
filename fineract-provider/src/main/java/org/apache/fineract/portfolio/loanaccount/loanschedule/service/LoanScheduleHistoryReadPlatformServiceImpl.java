@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -84,6 +85,12 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
         } catch (final EmptyResultDataAccessException e) {
             throw new LoanNotFoundException(loanId, e);
         }
+    }
+
+    @Override
+    public Map<String, Object> fetchOldAuditDates(Long id) {
+        final String sql = "select lrs.created_date, lrs.lastmodified_date from m_loan_repayment_schedule lrs where lrs.id = ?";
+        return this.jdbcTemplate.queryForMap(sql, id);
     }
 
     private static final class LoanScheduleArchiveResultSetExtractor implements ResultSetExtractor<LoanScheduleData> {

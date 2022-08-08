@@ -1943,9 +1943,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 // Subtract the amount waived from the existing fee charges waived amount.
                 chargePerInstallment.getInstallment().setFeeChargesWaived(feeChargesWaivedAmount.subtract(amountWaived));
 
-                // Set the last modification date.
-                chargePerInstallment.getInstallment().setLastModifiedDate(DateUtils.getLocalDateTimeOfSystem());
-
                 // Update loan charge.
                 loanCharge.setInstallmentLoanCharge(chargePerInstallment, chargePerInstallment.getInstallment().getInstallmentNumber());
 
