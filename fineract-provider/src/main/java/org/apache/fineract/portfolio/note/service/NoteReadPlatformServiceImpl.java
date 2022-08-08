@@ -78,12 +78,10 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
             final Long lastModifiedById = JdbcSupport.getLong(rs, "lastModifiedById");
             final String createdByUsername = rs.getString("createdBy");
             final String updatedByUsername = rs.getString("modifiedBy");
-            final OffsetDateTime createdDate = createdDateUtc != null ?
-                    createdDateUtc :
-                    OffsetDateTime.of(createdDateLocal, DateUtils.getDateTimeZoneOfTenant().getRules().getOffset(createdDateLocal));
-            final OffsetDateTime lastModifiedDate = lastModifiedDateUtc != null ?
-                    lastModifiedDateUtc :
-                    OffsetDateTime.of(lastModifiedDateLocal,
+            final OffsetDateTime createdDate = createdDateUtc != null ? createdDateUtc
+                    : OffsetDateTime.of(createdDateLocal, DateUtils.getDateTimeZoneOfTenant().getRules().getOffset(createdDateLocal));
+            final OffsetDateTime lastModifiedDate = lastModifiedDateUtc != null ? lastModifiedDateUtc
+                    : OffsetDateTime.of(lastModifiedDateLocal,
                             DateUtils.getDateTimeZoneOfTenant().getRules().getOffset(lastModifiedDateLocal));
             return new NoteData(id, clientId, groupId, loanId, transactionId, null, null, noteType, note, createdDate, createdById,
                     createdByUsername, lastModifiedDate, lastModifiedById, updatedByUsername);

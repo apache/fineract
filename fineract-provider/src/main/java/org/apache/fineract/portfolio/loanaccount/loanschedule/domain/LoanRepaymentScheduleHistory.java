@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
+import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.CREATED_DATE_DB_FIELD;
+import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.LAST_MODIFIED_DATE_DB_FIELD;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,8 +32,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.CREATED_DATE_DB_FIELD;
-import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.LAST_MODIFIED_DATE_DB_FIELD;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
 
@@ -83,7 +84,7 @@ public class LoanRepaymentScheduleHistory extends AbstractPersistableCustom {
     private OffsetDateTime createdDate;
 
     @Column(name = LAST_MODIFIED_DATE_DB_FIELD)
-    private OffsetDateTime  lastModifiedDate;
+    private OffsetDateTime lastModifiedDate;
 
     @Column(name = "version")
     private Integer version;
@@ -100,7 +101,8 @@ public class LoanRepaymentScheduleHistory extends AbstractPersistableCustom {
             final Integer installmentNumber, final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal,
             final BigDecimal interestCharged, final BigDecimal feeChargesCharged, final BigDecimal penaltyCharges,
             final LocalDateTime oldCreatedOnDate, final Long createdByUser, final Long lastModifiedByUser,
-            final LocalDateTime oldLastModifiedOnDate, final Integer version, final OffsetDateTime createdDate, final OffsetDateTime lastModifiedDate) {
+            final LocalDateTime oldLastModifiedOnDate, final Integer version, final OffsetDateTime createdDate,
+            final OffsetDateTime lastModifiedDate) {
 
         this.loan = loan;
         this.loanRescheduleRequest = loanRescheduleRequest;
@@ -127,11 +129,12 @@ public class LoanRepaymentScheduleHistory extends AbstractPersistableCustom {
             final Integer installmentNumber, final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal,
             final BigDecimal interestCharged, final BigDecimal feeChargesCharged, final BigDecimal penaltyCharges,
             final LocalDateTime oldCreatedOnDate, final Long createdByUser, final Long lastModifiedByUser,
-            final LocalDateTime oldLastModifiedOnDate, final Integer version, final OffsetDateTime createdDate, final OffsetDateTime lastModifiedDate) {
+            final LocalDateTime oldLastModifiedOnDate, final Integer version, final OffsetDateTime createdDate,
+            final OffsetDateTime lastModifiedDate) {
 
         return new LoanRepaymentScheduleHistory(loan, loanRescheduleRequest, installmentNumber, fromDate, dueDate, principal,
-                interestCharged, feeChargesCharged, penaltyCharges, oldCreatedOnDate, createdByUser, lastModifiedByUser, oldLastModifiedOnDate,
-                version, createdDate, lastModifiedDate);
+                interestCharged, feeChargesCharged, penaltyCharges, oldCreatedOnDate, createdByUser, lastModifiedByUser,
+                oldLastModifiedOnDate, version, createdDate, lastModifiedDate);
 
     }
 
