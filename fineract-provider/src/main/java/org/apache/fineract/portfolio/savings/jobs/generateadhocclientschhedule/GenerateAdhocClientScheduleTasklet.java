@@ -72,7 +72,7 @@ public class GenerateAdhocClientScheduleTasklet implements Tasklet {
                                 run = Math.toIntExact(ChronoUnit.YEARS.between(start, end)) >= 1;
                             }
                             case CUSTOM -> {
-                                next = start.plusDays((int) (long) adhoc.getReportRunEvery());
+                                next = start.plusDays((long) adhoc.getReportRunEvery());
                                 run = Math.toIntExact(ChronoUnit.DAYS.between(start, end)) >= adhoc.getReportRunEvery();
                             }
                         }

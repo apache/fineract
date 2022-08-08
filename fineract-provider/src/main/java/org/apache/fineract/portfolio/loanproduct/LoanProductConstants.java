@@ -141,5 +141,6 @@ public interface LoanProductConstants {
     String ALLOW_APPROVED_DISBURSED_AMOUNTS_OVER_APPLIED = "allowApprovedDisbursedAmountsOverApplied";
     String OVER_APPLIED_CALCULATION_TYPE = "overAppliedCalculationType";
     String OVER_APPLIED_NUMBER = "overAppliedNumber";
+    String DELINQUENCY_BUCKET_PARAM_NAME = "delinquencyBucketId";
 
 }

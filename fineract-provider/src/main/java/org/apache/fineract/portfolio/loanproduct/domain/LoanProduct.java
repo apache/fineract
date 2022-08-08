@@ -54,6 +54,7 @@ import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateDTO;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRatePeriodData;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRate;
@@ -194,6 +195,10 @@ public class LoanProduct extends AbstractPersistableCustom {
 
     @Column(name = "over_applied_number", nullable = true)
     private Integer overAppliedNumber;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "delinquency_bucket_id", nullable = true)
+    private DelinquencyBucket delinquencyBucket;
 
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate,
@@ -1001,6 +1006,15 @@ public class LoanProduct extends AbstractPersistableCustom {
             this.syncExpectedWithDisbursementDate = newValue;
         }
 
+        Long delinquencyBucketId = null;
+        if (this.delinquencyBucket != null) {
+            delinquencyBucketId = this.delinquencyBucket.getId();
+        }
+        if (command.isChangeInLongParameterNamed(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME, delinquencyBucketId)) {
+            final Long newValue = command.longValueOfParameterNamed(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME);
+            actualChanges.put(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME, newValue);
+        }
+
         /**
          * Update interest recalculation settings
          */
@@ -1576,6 +1590,14 @@ public class LoanProduct extends AbstractPersistableCustom {
 
     public void setLoanProducTrancheDetails(LoanProductTrancheDetails loanProducTrancheDetails) {
         this.loanProducTrancheDetails = loanProducTrancheDetails;
+    }
+
+    public DelinquencyBucket getDelinquencyBucket() {
+        return delinquencyBucket;
+    }
+
+    public void setDelinquencyBucket(DelinquencyBucket delinquencyBucket) {
+        this.delinquencyBucket = delinquencyBucket;
     }
 
 }

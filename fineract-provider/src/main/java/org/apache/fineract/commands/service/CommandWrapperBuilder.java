@@ -3494,4 +3494,50 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder createDelinquencyRange() {
+        this.actionName = "CREATE";
+        this.entityName = "DELINQUENCY_RANGE";
+        this.href = "/delinquency/range";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateDelinquencyRange(final Long delinquencyRangeId) {
+        this.actionName = "UPDATE";
+        this.entityName = "DELINQUENCY_RANGE";
+        this.entityId = delinquencyRangeId;
+        this.href = "/delinquency/range";
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteDelinquencyRange(final Long delinquencyRangeId) {
+        this.actionName = "DELETE";
+        this.entityName = "DELINQUENCY_RANGE";
+        this.entityId = delinquencyRangeId;
+        this.href = "/delinquency/range";
+        return this;
+    }
+
+    public CommandWrapperBuilder createDelinquencyBucket() {
+        this.actionName = "CREATE";
+        this.entityName = "DELINQUENCY_BUCKET";
+        this.href = "/delinquency/bucket";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateDelinquencyBucket(final Long delinquencyBucketId) {
+        this.actionName = "UPDATE";
+        this.entityName = "DELINQUENCY_BUCKET";
+        this.entityId = delinquencyBucketId;
+        this.href = "/delinquency/bucket";
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteDelinquencyBucket(final Long delinquencyBucketId) {
+        this.actionName = "DELETE";
+        this.entityName = "DELINQUENCY_BUCKET";
+        this.entityId = delinquencyBucketId;
+        this.href = "/delinquency/bucket";
+        return this;
+    }
+
 }

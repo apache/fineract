@@ -151,7 +151,7 @@ public class RecalculateInterestForLoanTasklet implements Tasklet {
         List<Callable<Void>> posters = new ArrayList<>();
         int fromIndex = 0;
         int size = loanIds.size();
-        double toGetCeilValue = size / threadPoolSize;
+        double toGetCeilValue = size / ((double) threadPoolSize);
         batchSize = (int) Math.ceil(toGetCeilValue);
 
         if (batchSize == 0) {

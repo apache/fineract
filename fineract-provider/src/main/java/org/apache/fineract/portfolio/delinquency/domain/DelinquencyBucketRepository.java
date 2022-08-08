@@ -16,19 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanproduct.domain;
+package org.apache.fineract.portfolio.delinquency.domain;
 
-import java.util.List;
-import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
-public interface LoanProductRepository extends JpaRepository<LoanProduct, Long>, JpaSpecificationExecutor<LoanProduct> {
+public interface DelinquencyBucketRepository extends JpaRepository<DelinquencyBucket, Long>, JpaSpecificationExecutor<DelinquencyBucket> {
 
-    @Query("select loanProduct from LoanProduct loanProduct, IN(loanProduct.charges) charge where charge.id = :chargeId")
-    List<LoanProduct> retrieveLoanProductsByChargeId(@Param("chargeId") Long chargeId);
-
-    Long countByDelinquencyBucket(DelinquencyBucket delinquencyBucket);
+    Optional<DelinquencyBucket> findByName(String name);
 }

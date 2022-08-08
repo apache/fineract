@@ -16,19 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanproduct.domain;
+package org.apache.fineract.portfolio.delinquency.api;
 
-import java.util.List;
-import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+public final class DelinquencyApiConstants {
 
-public interface LoanProductRepository extends JpaRepository<LoanProduct, Long>, JpaSpecificationExecutor<LoanProduct> {
+    private DelinquencyApiConstants() {
 
-    @Query("select loanProduct from LoanProduct loanProduct, IN(loanProduct.charges) charge where charge.id = :chargeId")
-    List<LoanProduct> retrieveLoanProductsByChargeId(@Param("chargeId") Long chargeId);
+    }
 
-    Long countByDelinquencyBucket(DelinquencyBucket delinquencyBucket);
+    public static final String NAME_PARAM_NAME = "name";
+    public static final String CLASSIFICATION_PARAM_NAME = "classification";
+    public static final String RANGES_PARAM_NAME = "ranges";
+    public static final String MINIMUMAGEDAYS_PARAM_NAME = "minimumAgeDays";
+    public static final String MAXIMUMAGEDAYS_PARAM_NAME = "maximumAgeDays";
+    public static final String LOCALE_PARAM_NAME = "locale";
+
 }
