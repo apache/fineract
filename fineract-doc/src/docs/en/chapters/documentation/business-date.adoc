@@ -1,0 +1,150 @@
+= Introducing Business Date into Fineract
+
+For banks, Apache Fineract is introducing transaction idempotency, business and
+effective date configuration as an addition to the currently supported
+
+* System date
+* Tenant date
+* User-provided date
+
+Bank business date or business day can be any day when a bank is open to the
+public for all of its business. Business date may or may not
+depend on a few things:
+
+* Region
+* Location
+* Government
+* Country
+* Circumstantial conditions
+
+As an example, business date can exclude weekends or government holidays. Bank
+may decide to close on a day as per circumstances with due notice as regulated
+by regulatory bodies, authorities, or government. Bank can also open itself for
+specific operations for the public and not everything on a open day.
+
+Business date can be also termed as business day, defining a full operations day
+of bank per date independent of the physical calendar.
+
+With Fineract, customers and developers can now integrate business date into the
+bank functionalities.
+
+= Features
+
+Customers and developers can now:
+
+* Enabling closing of business day
+* Having closing of business day relevant operations
+* Supporting logical date management
+* Define their own business date operations and boundaries
+* Closing a business day i.e., partially or completely limiting usual operations.
+* Testing purpose.
+
+Business date can be used in every situation where the transaction date/value
+date is not provided by the user or the user-provided date shall be validated.
+
+* Opening date
+* Closing date
+* Disbursal date
+* Transaction/Value date
+* Submitted date
+* Reversal date
+
+This excludes audit purposes:
+
+* Created on date
+* Updated on date
+
+= How to enable business date as a functionality
+
+Business date functionality can be added using Fineract job or using API. Both
+of these performs proper checks and output outcome parameter for the customers
+and developers. These also support timezones, daylight savings.
+
+== Job
+
+This depends on defining the closing of business day (CoB) operations. Customers
+and developers can now:
+
+* Scheduled job
+
+As an example:
+
+```POST /fineract-provider/api/v1/jobs/<job_id>?command=executeJob``
+
+== API
+
+Customers and developers can now manage business date using API calls.
+
+
+= Business date use case scenarios
+
+== Apply for loan
+
+* Tenant date
+* Business date
+* Submitted on date
+* Outcome: SUCESS/FAILURE
+* Message
+* Reason
+* Loan application details
+
+
+== Repayment for a loan
+
+* Tenant date
+* Business date
+* Transaction date
+* Outcome: SUCCESS/FAILURE
+* Loan transaction details
+  * Submitted on date
+  * Transaction date
+  * Created on date
+
+= Business date code examples
+
+== Increase Business date by 1 day
+
+```
+{
+
+IF (ENABLE_BUSINESS_DATE == TRUE) {
+  //VALIDATION
+  IF (ACTUAL_BUSINESS_DATE == null) {
+    THROW ERROR;
+}
+IF (ENABLE_AUTOMATIC_COB_DATE_ADJUSTMENT == TRUE) {
+  NEW_COB_DATE = ACTUAL_BUSINESS_DATE;
+}
+  NEW_BUSINESS_DATE = ACTUAL_BUSINESS_DATE + 1 DAY;
+}
+}
+```
+
+== API:
+
+Fetch business date using:
+
+`GET /fineract-provider/api/v1/businessdates/BUSINESS`
+
+
+```json
+
+Response
+{
+  "type": "BUSINESS",
+  "date": [2022, 5, 13]
+}
+```
+
+= Business date specifics
+
+== Business date type name
+
+* Type
+* Locale
+* DateFormat
+* DateValue
+
+== Business date configuration domain service
+
+* isBusinessDateEnabled()
