@@ -307,7 +307,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         }
 
         if (submittedOnDateFrom != null || submittedOnDateTo != null) {
-            if (submittedOnDateFrom != null && toDate != null) {
+            if (submittedOnDateFrom != null && submittedOnDateTo != null) {
                 sqlBuilder.append(whereClose).append(" journalEntry.submitted_on_date between ? and ? ");
                 whereClose = " and ";
                 objectArray[arrayPos] = submittedOnDateFrom;
