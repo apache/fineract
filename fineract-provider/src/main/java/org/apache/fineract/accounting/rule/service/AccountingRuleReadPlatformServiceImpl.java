@@ -113,8 +113,8 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
                                 : null;
                     } else {
                         creditTags = null;
-                        final GLAccountDataForLookup creditAccount = new GLAccountDataForLookup(accountToCreditId, creditAccountName,
-                                creditAccountGLCode);
+                        final GLAccountDataForLookup creditAccount = new GLAccountDataForLookup().setId(accountToCreditId)
+                                .setName(creditAccountName).setGlCode(creditAccountGLCode);
                         creditAccounts = new ArrayList<>(Arrays.asList(creditAccount));
                     }
                     if (accountToDebitId == null) {
@@ -125,8 +125,8 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
                                 : null;
                     } else {
                         debitTags = null;
-                        final GLAccountDataForLookup debitAccount = new GLAccountDataForLookup(accountToDebitId, debitAccountName,
-                                debitAccountGLCode);
+                        final GLAccountDataForLookup debitAccount = new GLAccountDataForLookup().setId(accountToDebitId)
+                                .setName(debitAccountName).setGlCode(debitAccountGLCode);
                         debitAccounts = new ArrayList<>(Arrays.asList(debitAccount));
                     }
                     accountingRuleData = new AccountingRuleData(id, officeId, officeName, name, description, systemDefined,
