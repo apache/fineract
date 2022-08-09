@@ -25,4 +25,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface DelinquencyRangeRepository extends JpaRepository<DelinquencyRange, Long>, JpaSpecificationExecutor<DelinquencyRange> {
 
     Optional<DelinquencyRange> findByClassification(String classification);
+
 }

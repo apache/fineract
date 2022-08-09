@@ -33,6 +33,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentScheduleInstallmentData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.data.PaidInAdvanceData;
@@ -104,11 +105,13 @@ public interface LoanReadPlatformService {
 
     Collection<LoanScheduleAccrualData> retriveScheduleAccrualData();
 
+    Collection<LoanScheduleDelinquencyData> retrieveScheduleDelinquencyData(LocalDate businessLocalDate);
+
     LoanTransactionData retrieveRecoveryPaymentTemplate(Long loanId);
 
     LoanTransactionData retrieveLoanWriteoffTemplate(Long loanId);
 
-    Collection<LoanScheduleAccrualData> retrivePeriodicAccrualData(LocalDate tillDate);
+    Collection<LoanScheduleAccrualData> retrievePeriodicAccrualData(LocalDate tillDate);
 
     Collection<Long> fetchLoansForInterestRecalculation();
 

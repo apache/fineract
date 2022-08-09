@@ -132,6 +132,11 @@ public class LoanProductTestBuilder {
     private String installmentAmountInMultiplesOf;
 
     public String build(final String chargeId) {
+        final HashMap<String, Object> map = build(chargeId, null);
+        return new Gson().toJson(map);
+    }
+
+    public HashMap<String, Object> build(final String chargeId, final Integer delinquencyBucketId) {
         final HashMap<String, Object> map = new HashMap<>();
 
         if (chargeId != null) {
@@ -234,7 +239,13 @@ public class LoanProductTestBuilder {
         if (installmentAmountInMultiplesOf != null) {
             map.put("installmentAmountInMultiplesOf", this.installmentAmountInMultiplesOf);
         }
-        return new Gson().toJson(map);
+
+        // Delinquency Bucket
+        if (delinquencyBucketId != null) {
+            map.put("delinquencyBucketId", delinquencyBucketId);
+        }
+
+        return map;
     }
 
     public LoanProductTestBuilder withInstallmentAmountInMultiplesOf(String installmentAmountInMultiplesOf) {

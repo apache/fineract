@@ -28,6 +28,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface LoanDelinquencyTagHistoryRepository
         extends JpaRepository<LoanDelinquencyTagHistory, Long>, JpaSpecificationExecutor<LoanDelinquencyTagHistory> {
 
+    LoanDelinquencyTagHistory findFirstByLoanOrderByAddedOnDateDesc(Loan loan);
+
     List<LoanDelinquencyTagHistory> findByLoanOrderByAddedOnDateDesc(Loan loan);
 
     Optional<LoanDelinquencyTagHistory> findByLoanAndLiftedOnDate(Loan loan, LocalDate liftedOnDate);

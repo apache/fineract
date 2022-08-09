@@ -31,4 +31,6 @@ public interface LoanProductRepository extends JpaRepository<LoanProduct, Long>,
     List<LoanProduct> retrieveLoanProductsByChargeId(@Param("chargeId") Long chargeId);
 
     Long countByDelinquencyBucket(DelinquencyBucket delinquencyBucket);
+
+    List<LoanProduct> findByDelinquencyBucketNotNull();
 }

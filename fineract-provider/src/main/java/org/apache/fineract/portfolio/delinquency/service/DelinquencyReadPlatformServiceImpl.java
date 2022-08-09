@@ -18,28 +18,25 @@
  */
 package org.apache.fineract.portfolio.delinquency.service;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
+import org.apache.fineract.portfolio.delinquency.data.LoanDelinquencyTagHistoryData;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketRepository;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRange;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRangeRepository;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyTagHistory;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyTagHistoryRepository;
-import org.apache.fineract.portfolio.delinquency.exception.DelinquencyBucketNotFoundException;
 import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyBucketMapper;
 import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyRangeMapper;
+import org.apache.fineract.portfolio.delinquency.mapper.LoanDelinquencyTagMapper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,6 +51,7 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
     private final LoanDelinquencyTagHistoryRepository repositoryLoanDelinquencyTagHistory;
     private final DelinquencyRangeMapper mapperRange;
     private final DelinquencyBucketMapper mapperBucket;
+    private final LoanDelinquencyTagMapper mapperLoanDelinquencyTagHistory;
     private final LoanAssembler loanAssembler;
 
     @Override
@@ -76,19 +74,10 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
 
     @Override
     public DelinquencyBucketData retrieveDelinquencyBucket(Long delinquencyBucketId) {
-        try {
-            final DelinquencyBucket delinquencyBucket = repositoryBucket.getReferenceById(delinquencyBucketId);
-            final DelinquencyBucketData delinquencyBucketData = mapperBucket.map(delinquencyBucket);
-
-            final DelinquencyBucketMappingMapper rmMappings = new DelinquencyBucketMappingMapper();
-            final String sql = "select " + rmMappings.schema() + " where buc.id = ? order by dran.min_age_days";
-            List<DelinquencyRangeData> ranges = this.jdbcTemplate.query(sql, rmMappings, delinquencyBucketId); // NOSONAR
-            delinquencyBucketData.setRanges(ranges);
-
-            return delinquencyBucketData;
-        } catch (final EmptyResultDataAccessException e) {
-            throw DelinquencyBucketNotFoundException.notFound(delinquencyBucketId, e);
-        }
+        final DelinquencyBucket delinquencyBucket = repositoryBucket.getReferenceById(delinquencyBucketId);
+        final DelinquencyBucketData delinquencyBucketData = mapperBucket.map(delinquencyBucket);
+        delinquencyBucketData.setRanges(mapperRange.map(delinquencyBucket.getRanges()));
+        return delinquencyBucketData;
     }
 
     @Override
@@ -102,24 +91,12 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
         return null;
     }
 
-    private static final class DelinquencyBucketMappingMapper implements RowMapper<DelinquencyRangeData> {
-
-        public String schema() {
-            return " dran.id as id, dran.classification as classification, dran.min_age_days as minimumAgeDays, dran.max_age_days as maximumAgeDays from m_delinquency_bucket buc "
-                    + " inner join m_delinquency_bucket_mappings dmap on dmap.delinquency_bucket_id = buc.id "
-                    + " inner join m_delinquency_range dran on dran.id = dmap.delinquency_range_id ";
-        }
-
-        @Override
-        public DelinquencyRangeData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
-            final Long id = rs.getLong("id");
-            final String classification = rs.getString("classification");
-            final Integer minimumAgeDays = rs.getInt("minimumAgeDays");
-            final Integer maximumAgeDays = rs.getInt("maximumAgeDays");
-
-            return new DelinquencyRangeData(id, classification, minimumAgeDays, maximumAgeDays);
-        }
+    @Override
+    public Collection<LoanDelinquencyTagHistoryData> retrieveDelinquencyRangeHistory(Long loanId) {
+        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        final List<LoanDelinquencyTagHistory> loanDelinquencyTagData = this.repositoryLoanDelinquencyTagHistory
+                .findByLoanOrderByAddedOnDateDesc(loan);
+        return mapperLoanDelinquencyTagHistory.map(loanDelinquencyTagData);
     }
 
 }

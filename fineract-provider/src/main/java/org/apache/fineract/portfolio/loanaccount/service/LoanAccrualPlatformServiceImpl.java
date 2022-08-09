@@ -40,7 +40,8 @@ public class LoanAccrualPlatformServiceImpl implements LoanAccrualPlatformServic
 
     @Override
     public void addPeriodicAccruals(final LocalDate tillDate) throws JobExecutionException {
-        Collection<LoanScheduleAccrualData> loanScheduleAccrualDataList = this.loanReadPlatformService.retrivePeriodicAccrualData(tillDate);
+        Collection<LoanScheduleAccrualData> loanScheduleAccrualDataList = this.loanReadPlatformService
+                .retrievePeriodicAccrualData(tillDate);
         addPeriodicAccruals(tillDate, loanScheduleAccrualDataList);
     }
 

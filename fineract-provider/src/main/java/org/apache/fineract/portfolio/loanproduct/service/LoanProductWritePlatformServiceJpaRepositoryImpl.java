@@ -143,6 +143,12 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                     this.aprCalculator, floatingRate, rates);
             loanProduct.updateLoanProductInRelatedClasses();
 
+            if (command.parameterExists("delinquencyBucketId")) {
+                DelinquencyBucket delinquencyBucket = this.delinquencyBucketRepository
+                        .getReferenceById(command.longValueOfParameterNamed("delinquencyBucketId"));
+                loanProduct.setDelinquencyBucket(delinquencyBucket);
+            }
+
             this.loanProductRepository.saveAndFlush(loanProduct);
 
             // save accounting mappings

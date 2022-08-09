@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -48,12 +49,15 @@ import org.apache.fineract.portfolio.delinquency.exception.DelinquencyRangeInval
 import org.apache.fineract.portfolio.delinquency.validator.DelinquencyBucketParseAndValidator;
 import org.apache.fineract.portfolio.delinquency.validator.DelinquencyRangeParseAndValidator;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlatformService {
 
     private final DelinquencyBucketParseAndValidator dataValidatorBucket;
@@ -65,6 +69,7 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
     private final LoanDelinquencyTagHistoryRepository loanDelinquencyTagRepository;
     private final LoanRepositoryWrapper loanRepository;
     private final LoanProductRepository loanProductRepository;
+    private final LoanRepaymentScheduleInstallmentRepository loanRepaymentScheduleInstallmentRepository;
 
     @Override
     public CommandProcessingResult createDelinquencyRange(JsonCommand command) {
@@ -139,11 +144,40 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(delinquencyBucket.getId()).build();
     }
 
+    @Override
+    public CommandProcessingResult applyDelinquencyTagToLoan(Long loanId, JsonCommand command) {
+        Map<String, Object> changes = new HashMap<>();
+
+        final Loan loan = this.loanRepository.findOneWithNotFoundDetection(loanId);
+        final DelinquencyBucket delinquencyBucket = loan.getLoanProduct().getDelinquencyBucket();
+        if (delinquencyBucket != null) {
+            final LocalDate businessDate = DateUtils.getBusinessLocalDate();
+            LoanRepaymentScheduleInstallment loanRepaymentSchedule = this.loanRepaymentScheduleInstallmentRepository
+                    .findFirstByLoanAndDueDateLessThanEqualAndObligationsMetOnDateOrderByDueDate(loan, businessDate, null);
+
+            Long overdueDays = 0L;
+            if (loanRepaymentSchedule != null) {
+                overdueDays = DateUtils.getDifferenceInDays(loanRepaymentSchedule.getDueDate(), businessDate);
+            }
+            changes = lookUpDelinquencyRange(loan, delinquencyBucket, overdueDays);
+        }
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(loan.getId()).with(changes).build();
+    }
+
+    @Override
+    public void applyDelinquencyTagToLoan(Long loanId, Long ageDays) {
+        final Loan loan = this.loanRepository.findOneWithNotFoundDetection(loanId);
+        final DelinquencyBucket delinquencyBucket = loan.getLoanProduct().getDelinquencyBucket();
+        if (delinquencyBucket != null) {
+            lookUpDelinquencyRange(loan, delinquencyBucket, ageDays);
+        }
+    }
+
     private DelinquencyRange createDelinquencyRange(DelinquencyRangeData data, Map<String, Object> changes) {
         Optional<DelinquencyRange> delinquencyRange = repositoryRange.findByClassification(data.getClassification());
 
         if (delinquencyRange.isEmpty()) {
-            if (data.getMinimumAgeDays() > data.getMaximumAgeDays()) {
+            if (data.getMaximumAgeDays() != null && data.getMinimumAgeDays() > data.getMaximumAgeDays()) {
                 final String errorMessage = "The age days values are invalid, the maximum age days can't be lower than minimum age days";
                 throw new DelinquencyRangeInvalidAgesException(errorMessage, data.getMinimumAgeDays(), data.getMaximumAgeDays());
             }
@@ -222,18 +256,12 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
 
     private void validateDelinquencyRanges(List<DelinquencyRange> ranges) {
         // Sort the ranges based on the minAgeDays
-        final Comparator<DelinquencyRange> orderByMinAge = new Comparator<DelinquencyRange>() {
+        ranges = sortDelinquencyRangesByMinAge(ranges);
 
-            @Override
-            public int compare(DelinquencyRange o1, DelinquencyRange o2) {
-                return o1.getMinimumAgeDays().compareTo(o2.getMinimumAgeDays());
-            }
-        };
-        Collections.sort(ranges, orderByMinAge);
         DelinquencyRange prevDelinquencyRange = null;
         for (DelinquencyRange delinquencyRange : ranges) {
             if (prevDelinquencyRange != null) {
-                if (isOverlaped(prevDelinquencyRange, delinquencyRange)) {
+                if (isOverlapped(prevDelinquencyRange, delinquencyRange)) {
                     final String errorMessage = "The delinquency ranges age days values are overlaped";
                     throw new DelinquencyBucketAgesOverlapedException(errorMessage, prevDelinquencyRange, delinquencyRange);
                 }
@@ -242,37 +270,104 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
         }
     }
 
-    private boolean isOverlaped(DelinquencyRange o1, DelinquencyRange o2) {
-        return Math.max(o1.getMinimumAgeDays(), o2.getMinimumAgeDays()) <= Math.min(o1.getMaximumAgeDays(), o2.getMaximumAgeDays());
+    private boolean isOverlapped(DelinquencyRange o1, DelinquencyRange o2) {
+        if (o2.getMaximumAgeDays() != null) { // Max Age undefined - Last one
+            return Math.max(o1.getMinimumAgeDays(), o2.getMinimumAgeDays()) <= Math.min(o1.getMaximumAgeDays(), o2.getMaximumAgeDays());
+        } else {
+            return Math.max(o1.getMinimumAgeDays(), o2.getMinimumAgeDays()) <= Math.min(o1.getMaximumAgeDays(), o2.getMinimumAgeDays());
+        }
     }
 
-    public void setLoanDelinquencyTag(Long loanId, Long delinquencyRangeId) {
-        final Loan loan = this.loanRepository.findOneWithNotFoundDetection(loanId);
+    private Map<String, Object> lookUpDelinquencyRange(final Loan loan, final DelinquencyBucket delinquencyBucket, long ageDays) {
+        Map<String, Object> changes = new HashMap<>();
 
-        final LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
-        List<LoanDelinquencyTagHistory> loanDelinquencyTagHistory = this.loanDelinquencyTagRepository
-                .findByLoanOrderByAddedOnDateDesc(loan);
+        if (ageDays <= 0) { // No Delinquency
+            log.debug("Loan {} without delinquency range with {} days", loan.getId(), ageDays);
+            changes = setLoanDelinquencyTag(loan, null);
+
+        } else {
+            // Sort the ranges based on the minAgeDays
+            List<DelinquencyRange> ranges = sortDelinquencyRangesByMinAge(delinquencyBucket.getRanges());
+
+            for (DelinquencyRange delinquencyRange : ranges) {
+                if (delinquencyRange.getMaximumAgeDays() == null) {
+                    if (delinquencyRange.getMinimumAgeDays() <= ageDays) {
+                        log.debug("Loan {} with delinquency range {} with {} days", loan.getId(), delinquencyRange.getClassification(),
+                                ageDays);
+                        changes = setLoanDelinquencyTag(loan, delinquencyRange.getId());
+                        break;
+                    }
+                } else {
+                    if (delinquencyRange.getMinimumAgeDays() <= ageDays && delinquencyRange.getMaximumAgeDays() >= ageDays) {
+                        log.debug("Loan {} with delinquency range {} with {} days", loan.getId(), delinquencyRange.getClassification(),
+                                ageDays);
+                        changes = setLoanDelinquencyTag(loan, delinquencyRange.getId());
+                        break;
+                    }
+                }
+            }
+        }
+        changes.put("ageDays", ageDays);
+        return changes;
+    }
+
+    public Map<String, Object> setLoanDelinquencyTag(Long loanId, Long delinquencyRangeId) {
+        final Loan loan = this.loanRepository.findOneWithNotFoundDetection(loanId);
+        return setLoanDelinquencyTag(loan, delinquencyRangeId);
+    }
+
+    public Map<String, Object> setLoanDelinquencyTag(Loan loan, Long delinquencyRangeId) {
+        Map<String, Object> changes = new HashMap<>();
+        List<LoanDelinquencyTagHistory> loanDelinquencyTagHistory = new ArrayList<>();
+        final LocalDate transactionDate = DateUtils.getBusinessLocalDate();
+        Optional<LoanDelinquencyTagHistory> optLoanDelinquencyTag = this.loanDelinquencyTagRepository.findByLoanAndLiftedOnDate(loan, null);
         // The delinquencyRangeId in null means just goes out from Delinquency
+        LoanDelinquencyTagHistory loanDelinquencyTagPrev = null;
         if (delinquencyRangeId == null) {
             // The Loan will go out from Delinquency
-            if (!loanDelinquencyTagHistory.isEmpty()) {
-                LoanDelinquencyTagHistory loanDelinquencyTagPrev = loanDelinquencyTagHistory.get(0);
+            if (optLoanDelinquencyTag.isPresent()) {
+                loanDelinquencyTagPrev = optLoanDelinquencyTag.get();
                 loanDelinquencyTagPrev.setLiftedOnDate(transactionDate);
-                this.loanDelinquencyTagRepository.saveAndFlush(loanDelinquencyTagPrev);
+                loanDelinquencyTagHistory.add(loanDelinquencyTagPrev);
+                changes.put("previous", loanDelinquencyTagPrev.getDelinquencyRange());
             }
         } else {
-            // The previous Loan Delinquency Tag will set as Lifted
-            if (!loanDelinquencyTagHistory.isEmpty()) {
-                LoanDelinquencyTagHistory loanDelinquencyTagPrev = loanDelinquencyTagHistory.get(0);
-                loanDelinquencyTagPrev.setLiftedOnDate(transactionDate);
-                this.loanDelinquencyTagRepository.save(loanDelinquencyTagPrev);
+            if (optLoanDelinquencyTag.isPresent()) {
+                loanDelinquencyTagPrev = optLoanDelinquencyTag.get();
             }
+            // If the Delinquency Tag has not changed
+            if (loanDelinquencyTagPrev != null && loanDelinquencyTagPrev.getDelinquencyRange().getId().equals(delinquencyRangeId)) {
+                changes.put("current", loanDelinquencyTagPrev.getDelinquencyRange());
+            } else {
+                // The previous Loan Delinquency Tag will set as Lifted
+                if (loanDelinquencyTagPrev != null) {
+                    loanDelinquencyTagPrev.setLiftedOnDate(transactionDate);
+                    loanDelinquencyTagHistory.add(loanDelinquencyTagPrev);
+                    changes.put("previous", loanDelinquencyTagPrev.getDelinquencyRange());
+                }
 
-            final DelinquencyRange delinquencyRange = repositoryRange.getReferenceById(delinquencyRangeId);
-            LoanDelinquencyTagHistory loanDelinquencyTag = new LoanDelinquencyTagHistory(delinquencyRange, loan, transactionDate, null);
-            loanDelinquencyTagHistory.add(loanDelinquencyTag);
-            this.loanDelinquencyTagRepository.saveAndFlush(loanDelinquencyTag);
+                final DelinquencyRange delinquencyRange = repositoryRange.getReferenceById(delinquencyRangeId);
+                LoanDelinquencyTagHistory loanDelinquencyTag = new LoanDelinquencyTagHistory(delinquencyRange, loan, transactionDate, null);
+                loanDelinquencyTagHistory.add(loanDelinquencyTag);
+                changes.put("current", loanDelinquencyTag.getDelinquencyRange());
+            }
         }
+        if (loanDelinquencyTagHistory.size() > 0) {
+            this.loanDelinquencyTagRepository.saveAllAndFlush(loanDelinquencyTagHistory);
+        }
+        return changes;
+    }
+
+    private List<DelinquencyRange> sortDelinquencyRangesByMinAge(List<DelinquencyRange> ranges) {
+        final Comparator<DelinquencyRange> orderByMinAge = new Comparator<DelinquencyRange>() {
+
+            @Override
+            public int compare(DelinquencyRange o1, DelinquencyRange o2) {
+                return o1.getMinimumAgeDays().compareTo(o2.getMinimumAgeDays());
+            }
+        };
+        Collections.sort(ranges, orderByMinAge);
+        return ranges;
     }
 
 }

@@ -1155,6 +1155,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder assignDelinquency(final Long loanId) {
+        this.actionName = "UPDATEDELINQUENCY";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId;
+        return this;
+    }
+
     public CommandWrapperBuilder createCodeValue(final Long codeId) {
         this.actionName = "CREATE";
         this.entityName = "CODEVALUE";

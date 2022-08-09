@@ -16,19 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.domain;
+package org.apache.fineract.portfolio.delinquency.data;
 
+import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.List;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-public interface LoanRepaymentScheduleInstallmentRepository
-        extends JpaRepository<LoanRepaymentScheduleInstallment, Long>, JpaSpecificationExecutor<LoanRepaymentScheduleInstallment> {
+@ToString
+@AllArgsConstructor
+@Getter
+@Setter
+public class LoanDelinquencyTagHistoryData implements Serializable {
 
-    LoanRepaymentScheduleInstallment findFirstByLoanAndDueDateLessThanEqualAndObligationsMetOnDateOrderByDueDate(Loan loan,
-            LocalDate businnessDate, LocalDate obligationsMetOnDate);
+    private Long id;
+    private Long loanId;
+    private String delinquencyRange;
+    private LocalDate addedOnDate;
+    private LocalDate liftedOnDate;
 
-    List<LoanRepaymentScheduleInstallment> findByLoanAndDueDateLessThanEqualAndObligationsMetOnDateOrderByDueDate(Loan loan,
-            LocalDate businnessDate, LocalDate obligationsMetOnDate);
 }

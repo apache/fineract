@@ -47,6 +47,7 @@ import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -421,4 +422,9 @@ public final class Utils {
         }
         return stringBuilder.toString();
     }
+
+    public static String convertToJson(HashMap<String, Object> map) {
+        return new Gson().toJson(map);
+    }
+
 }
