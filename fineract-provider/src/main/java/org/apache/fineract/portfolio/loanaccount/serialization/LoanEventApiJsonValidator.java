@@ -33,6 +33,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -51,23 +52,15 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleIns
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanRepaymentScheduleNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@AllArgsConstructor
 public final class LoanEventApiJsonValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final LoanApplicationCommandFromApiJsonHelper fromApiJsonDeserializer;
     private final LoanRepository loanRepository;
-
-    @Autowired
-    public LoanEventApiJsonValidator(final FromJsonHelper fromApiJsonHelper,
-            final LoanApplicationCommandFromApiJsonHelper fromApiJsonDeserializer, final LoanRepository loanRepository) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.loanRepository = loanRepository;
-    }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) {
@@ -195,7 +188,8 @@ public final class LoanEventApiJsonValidator {
         }
 
         final Set<String> transactionParameters = new HashSet<>(Arrays.asList("transactionDate", "transactionAmount", "externalId", "note",
-                "locale", "dateFormat", "paymentTypeId", "accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber"));
+                "locale", "dateFormat", "paymentTypeId", "accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber",
+                LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, transactionParameters);
@@ -212,6 +206,11 @@ public final class LoanEventApiJsonValidator {
 
         final String note = this.fromApiJsonHelper.extractStringNamed("note", element);
         baseDataValidator.reset().parameter("note").value(note).notExceedingLengthOf(1000);
+
+        final String reversalExternalId = this.fromApiJsonHelper.extractStringNamed(LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME,
+                element);
+        baseDataValidator.reset().parameter(LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME).ignoreIfNull().value(reversalExternalId)
+                .notExceedingLengthOf(100);
 
         validatePaymentDetails(baseDataValidator, element);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

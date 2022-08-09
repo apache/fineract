@@ -3606,7 +3606,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     public ChangedTransactionDetail adjustExistingTransaction(final LoanTransaction newTransactionDetail,
             final LoanLifecycleStateMachine loanLifecycleStateMachine, final LoanTransaction transactionForAdjustment,
             final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
-            final ScheduleGeneratorDTO scheduleGeneratorDTO) {
+            final ScheduleGeneratorDTO scheduleGeneratorDTO, final String reversalExternalId) {
 
         HolidayDetailDTO holidayDetailDTO = scheduleGeneratorDTO.getHolidayDetailDTO();
         validateActivityNotBeforeLastTransactionDate(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, transactionForAdjustment.getTransactionDate());
@@ -3630,7 +3630,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                     "adjustment.is.only.allowed.to.repayment.or.waiver.or.creditbalancerefund.transactions", errorMessage);
         }
 
-        transactionForAdjustment.reverse();
+        transactionForAdjustment.reverse(reversalExternalId);
         transactionForAdjustment.manuallyAdjustedOrReversed();
 
         if (isClosedWrittenOff()) {

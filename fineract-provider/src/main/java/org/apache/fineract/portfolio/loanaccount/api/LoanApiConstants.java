@@ -142,4 +142,8 @@ public interface LoanApiConstants {
     String fixedPrincipalPercentagePerInstallmentParamName = "fixedPrincipalPercentagePerInstallment";
 
     String LOAN_ASSOCIATIONS_ALL = "all";
+
+    // Reversal Transation Data
+    String REVERSAL_EXTERNAL_ID_PARAMNAME = "reversalExternalId";
+    String REVERSED_ON_DATE_PARAMNAME = "reversedOnDate";
 }
