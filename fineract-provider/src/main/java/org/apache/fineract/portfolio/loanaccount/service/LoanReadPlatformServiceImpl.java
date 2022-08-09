@@ -88,6 +88,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInterestRecalculationData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentScheduleInstallmentData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanSummaryData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
@@ -1648,6 +1649,22 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     @Override
+    public Collection<LoanScheduleDelinquencyData> retrieveScheduleDelinquencyData(LocalDate businessLocalDate) {
+        LoanScheduleDelinquencyMapper mapper = new LoanScheduleDelinquencyMapper(DateUtils.getBusinessLocalDate());
+        final StringBuilder sqlBuilder = new StringBuilder(400);
+        sqlBuilder.append("select ").append(mapper.schema())
+                .append(" where loan.loan_status_id=:active and ls.duedate <= :businessLocalDate and ")
+                .append(" mpl.delinquency_bucket_id is not null "); // Jusr the Loan Product linked to delinquency
+                                                                    // bucket
+        sqlBuilder.append(" order by loan.id, ls.duedate ");
+        Map<String, Object> paramMap = new HashMap<>(3);
+        paramMap.put("active", LoanStatus.ACTIVE.getValue());
+        paramMap.put("businessLocalDate", businessLocalDate);
+
+        return this.namedParameterJdbcTemplate.query(sqlBuilder.toString(), paramMap, mapper);
+    }
+
+    @Override
     public Collection<LoanScheduleAccrualData> retriveScheduleAccrualData() {
 
         LoanScheduleAccrualMapper mapper = new LoanScheduleAccrualMapper();
@@ -1673,7 +1690,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     @Override
-    public Collection<LoanScheduleAccrualData> retrivePeriodicAccrualData(final LocalDate tillDate) {
+    public Collection<LoanScheduleAccrualData> retrievePeriodicAccrualData(final LocalDate tillDate) {
 
         LoanSchedulePeriodicAccrualMapper mapper = new LoanSchedulePeriodicAccrualMapper();
         LocalDate organisationStartDate = this.configurationDomainService.retrieveOrganisationStartDate();
@@ -1813,6 +1830,34 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             return new LoanScheduleAccrualData(loanId, officeId, installmentNumber, accruedTill, frequency, repayEvery, dueDate, fromdate,
                     repaymentScheduleId, loanProductId, interestIncome, feeIncome, penaltyIncome, accruedInterestIncome, accruedFeeIncome,
                     accruedPenaltyIncome, currencyData, interestCalculatedFrom, interestIncomeWaived);
+        }
+    }
+
+    private static final class LoanScheduleDelinquencyMapper implements RowMapper<LoanScheduleDelinquencyData> {
+
+        private LocalDate businessDate;
+
+        LoanScheduleDelinquencyMapper(LocalDate businessDate) {
+            this.businessDate = businessDate;
+        }
+
+        public String schema() {
+            final StringBuilder sqlBuilder = new StringBuilder(400);
+            sqlBuilder.append(" loan.id as loanId, ls.duedate as duedate, ls.fromdate as fromdate, loan.product_id as productId ")
+                    .append(" from m_loan_repayment_schedule ls left join m_loan loan on loan.id=ls.loan_id ")
+                    .append(" left join m_product_loan mpl on mpl.id = loan.product_id ");
+            return sqlBuilder.toString();
+        }
+
+        @Override
+        public LoanScheduleDelinquencyData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+
+            final Long loanId = rs.getLong("loanId");
+            final Long productId = rs.getLong("productId");
+            final LocalDate dueDate = JdbcSupport.getLocalDate(rs, "duedate");
+            final LocalDate fromDate = JdbcSupport.getLocalDate(rs, "fromdate");
+            final long ageDays = DateUtils.getDifferenceInDays(dueDate, businessDate);
+            return new LoanScheduleDelinquencyData(loanId, productId, dueDate, fromDate, ageDays);
         }
     }
 

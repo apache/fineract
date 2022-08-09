@@ -16,29 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.delinquency.service;
+package org.apache.fineract.portfolio.delinquency.handler;
 
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.commands.annotation.CommandType;
+import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.delinquency.service.DelinquencyWritePlatformService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface DelinquencyWritePlatformService {
+@Service
+@RequiredArgsConstructor
+@CommandType(entity = "LOAN", action = "UPDATEDELINQUENCY")
+public class UpdateLoanDelinquencyBucketCommandHandler implements NewCommandSourceHandler {
 
-    CommandProcessingResult createDelinquencyRange(JsonCommand command);
+    private final DelinquencyWritePlatformService writePlatformService;
 
-    CommandProcessingResult updateDelinquencyRange(Long delinquencyRangeId, JsonCommand command);
-
-    CommandProcessingResult deleteDelinquencyRange(Long delinquencyRangeId, JsonCommand command);
-
-    CommandProcessingResult setLoanDelinquencyTag(Long loanId, Long delinquencyRangeId, JsonCommand command);
-
-    CommandProcessingResult createDelinquencyBucket(JsonCommand command);
-
-    CommandProcessingResult updateDelinquencyBucket(Long delinquencyBucketId, JsonCommand command);
-
-    CommandProcessingResult deleteDelinquencyBucket(Long delinquencyBucketId, JsonCommand command);
-
-    CommandProcessingResult applyDelinquencyTagToLoan(Long loanId, JsonCommand command);
-
-    void applyDelinquencyTagToLoan(Long loanId, Long ageDays);
-
+    @Transactional
+    @Override
+    public CommandProcessingResult processCommand(final JsonCommand command) {
+        return this.writePlatformService.applyDelinquencyTagToLoan(command.entityId(), command);
+    }
 }

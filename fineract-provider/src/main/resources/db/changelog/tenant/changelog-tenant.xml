@@ -59,4 +59,5 @@
     <include file="parts/0037_add_loan_cob_job_data.xml" relativeToChangelogFile="true"/>
     <include file="parts/0038_add_reversal_data_to_loan_transaction.xml" relativeToChangelogFile="true"/>
     <include file="parts/0039_add_loan_account_locks.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0040_add_delinquency_tags_job.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

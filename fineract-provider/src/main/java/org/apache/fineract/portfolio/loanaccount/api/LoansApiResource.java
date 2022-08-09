@@ -54,6 +54,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -100,6 +101,9 @@ import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.collateralmanagement.data.LoanCollateralResponseData;
 import org.apache.fineract.portfolio.collateralmanagement.service.LoanCollateralManagementReadPlatformService;
+import org.apache.fineract.portfolio.delinquency.api.DelinquencyApiResourceSwagger;
+import org.apache.fineract.portfolio.delinquency.data.LoanDelinquencyTagHistoryData;
+import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
 import org.apache.fineract.portfolio.floatingrates.data.InterestRatePeriodData;
 import org.apache.fineract.portfolio.fund.data.FundData;
 import org.apache.fineract.portfolio.fund.service.FundReadPlatformService;
@@ -201,6 +205,7 @@ import org.springframework.util.CollectionUtils;
         + "Specifies rest frequency start date for interest recalculation. This date must be before or equal to disbursement date\n"
         + "recalculationCompoundingFrequencyDate\n"
         + "Specifies compounding frequency start date for interest recalculation. This date must be equal to disbursement date")
+@RequiredArgsConstructor
 public class LoansApiResource {
 
     private final Set<String> loanDataParameters = new HashSet<>(Arrays.asList("id", "accountNo", "status", "externalId", "clientId",
@@ -259,63 +264,8 @@ public class LoansApiResource {
     private final DefaultToApiJsonSerializer<GlimRepaymentTemplate> glimTemplateToApiJsonSerializer;
     private final GLIMAccountInfoReadPlatformService glimAccountInfoReadPlatformService;
     private final LoanCollateralManagementReadPlatformService loanCollateralManagementReadPlatformService;
-
-    public LoansApiResource(final PlatformSecurityContext context, final LoanReadPlatformService loanReadPlatformService,
-            final LoanProductReadPlatformService loanProductReadPlatformService,
-            final LoanDropdownReadPlatformService dropdownReadPlatformService, final FundReadPlatformService fundReadPlatformService,
-            final ChargeReadPlatformService chargeReadPlatformService, final LoanChargeReadPlatformService loanChargeReadPlatformService,
-            final LoanScheduleCalculationPlatformService calculationPlatformService,
-            final GuarantorReadPlatformService guarantorReadPlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService, final GroupReadPlatformService groupReadPlatformService,
-            final DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer,
-            final DefaultToApiJsonSerializer<LoanApprovalData> loanApprovalDataToApiJsonSerializer,
-            final DefaultToApiJsonSerializer<LoanScheduleData> loanScheduleToApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper, final FromJsonHelper fromJsonHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final CalendarReadPlatformService calendarReadPlatformService, final NoteReadPlatformService noteReadPlatformService,
-            final PortfolioAccountReadPlatformService portfolioAccountReadPlatformServiceImpl,
-            final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService,
-            final LoanScheduleHistoryReadPlatformService loanScheduleHistoryReadPlatformService,
-            final AccountDetailsReadPlatformService accountDetailsReadPlatformService,
-            final EntityDatatableChecksReadService entityDatatableChecksReadService,
-            final BulkImportWorkbookService bulkImportWorkbookService,
-            final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService, final RateReadService rateReadService,
-            final ConfigurationDomainService configurationDomainService,
-            final DefaultToApiJsonSerializer<GlimRepaymentTemplate> glimTemplateToApiJsonSerializer,
-            final GLIMAccountInfoReadPlatformService glimAccountInfoReadPlatformService,
-            final LoanCollateralManagementReadPlatformService loanCollateralManagementReadPlatformService) {
-        this.context = context;
-        this.loanReadPlatformService = loanReadPlatformService;
-        this.loanProductReadPlatformService = loanProductReadPlatformService;
-        this.dropdownReadPlatformService = dropdownReadPlatformService;
-        this.fundReadPlatformService = fundReadPlatformService;
-        this.chargeReadPlatformService = chargeReadPlatformService;
-        this.loanChargeReadPlatformService = loanChargeReadPlatformService;
-        this.calculationPlatformService = calculationPlatformService;
-        this.guarantorReadPlatformService = guarantorReadPlatformService;
-        this.codeValueReadPlatformService = codeValueReadPlatformService;
-        this.groupReadPlatformService = groupReadPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.loanApprovalDataToApiJsonSerializer = loanApprovalDataToApiJsonSerializer;
-        this.loanScheduleToApiJsonSerializer = loanScheduleToApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.fromJsonHelper = fromJsonHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.calendarReadPlatformService = calendarReadPlatformService;
-        this.noteReadPlatformService = noteReadPlatformService;
-        this.portfolioAccountReadPlatformService = portfolioAccountReadPlatformServiceImpl;
-        this.accountAssociationsReadPlatformService = accountAssociationsReadPlatformService;
-        this.loanScheduleHistoryReadPlatformService = loanScheduleHistoryReadPlatformService;
-        this.accountDetailsReadPlatformService = accountDetailsReadPlatformService;
-        this.entityDatatableChecksReadService = entityDatatableChecksReadService;
-        this.rateReadService = rateReadService;
-        this.bulkImportWorkbookService = bulkImportWorkbookService;
-        this.bulkImportWorkbookPopulatorService = bulkImportWorkbookPopulatorService;
-        this.configurationDomainService = configurationDomainService;
-        this.glimTemplateToApiJsonSerializer = glimTemplateToApiJsonSerializer;
-        this.glimAccountInfoReadPlatformService = glimAccountInfoReadPlatformService;
-        this.loanCollateralManagementReadPlatformService = loanCollateralManagementReadPlatformService;
-    }
+    private final DefaultToApiJsonSerializer<LoanDelinquencyTagHistoryData> jsonSerializerTagHistory;
+    private final DelinquencyReadPlatformService delinquencyReadPlatformService;
 
     /*
      * This template API is used for loan approval, ideally this should be invoked on loan that are pending for
@@ -886,51 +836,37 @@ public class LoansApiResource {
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
-
-        CommandProcessingResult result = null;
-
+        CommandWrapper commandRequest = null;
         if (is(commandParam, "reject")) {
-            final CommandWrapper commandRequest = builder.rejectLoanApplication(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            commandRequest = builder.rejectLoanApplication(loanId).build();
         } else if (is(commandParam, "withdrawnByApplicant")) {
-            final CommandWrapper commandRequest = builder.withdrawLoanApplication(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            commandRequest = builder.withdrawLoanApplication(loanId).build();
         } else if (is(commandParam, "approve")) {
-            final CommandWrapper commandRequest = builder.approveLoanApplication(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            commandRequest = builder.approveLoanApplication(loanId).build();
         } else if (is(commandParam, "disburse")) {
-            final CommandWrapper commandRequest = builder.disburseLoanApplication(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            commandRequest = builder.disburseLoanApplication(loanId).build();
         } else if (is(commandParam, "disburseToSavings")) {
-            final CommandWrapper commandRequest = builder.disburseLoanToSavingsApplication(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        }
-
-        if (is(commandParam, "undoapproval")) {
-            final CommandWrapper commandRequest = builder.undoLoanApplicationApproval(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            commandRequest = builder.disburseLoanToSavingsApplication(loanId).build();
+        } else if (is(commandParam, "undoapproval")) {
+            commandRequest = builder.undoLoanApplicationApproval(loanId).build();
         } else if (is(commandParam, "undodisbursal")) {
-            final CommandWrapper commandRequest = builder.undoLoanApplicationDisbursal(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            commandRequest = builder.undoLoanApplicationDisbursal(loanId).build();
         } else if (is(commandParam, "undolastdisbursal")) {
-            final CommandWrapper commandRequest = builder.undoLastDisbursalLoanApplication(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        }
-
-        if (is(commandParam, "assignloanofficer")) {
-            final CommandWrapper commandRequest = builder.assignLoanOfficer(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            commandRequest = builder.undoLastDisbursalLoanApplication(loanId).build();
+        } else if (is(commandParam, "assignloanofficer")) {
+            commandRequest = builder.assignLoanOfficer(loanId).build();
         } else if (is(commandParam, "unassignloanofficer")) {
-            final CommandWrapper commandRequest = builder.unassignLoanOfficer(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            commandRequest = builder.unassignLoanOfficer(loanId).build();
         } else if (is(commandParam, "recoverGuarantees")) {
-            final CommandWrapper commandRequest = new CommandWrapperBuilder().recoverFromGuarantor(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            commandRequest = new CommandWrapperBuilder().recoverFromGuarantor(loanId).build();
+        } else if (is(commandParam, "assigndelinquency")) {
+            commandRequest = builder.assignDelinquency(loanId).build();
         }
 
-        if (result == null) {
+        if (commandRequest == null) {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }
+        CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -978,31 +914,25 @@ public class LoansApiResource {
 
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
-        CommandProcessingResult result = null;
-
+        CommandWrapper commandRequest = null;
         if (is(commandParam, "reject")) {
-            final CommandWrapper commandRequest = builder.rejectGLIMApplication(glimId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            commandRequest = builder.rejectGLIMApplication(glimId).build();
         } else if (is(commandParam, "approve")) {
-            final CommandWrapper commandRequest = builder.approveGLIMLoanApplication(glimId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            commandRequest = builder.approveGLIMLoanApplication(glimId).build();
         } else if (is(commandParam, "disburse")) {
-            final CommandWrapper commandRequest = builder.disburseGlimLoanApplication(glimId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            commandRequest = builder.disburseGlimLoanApplication(glimId).build();
         } else if (is(commandParam, "glimrepayment")) {
-            final CommandWrapper commandRequest = builder.repaymentGlimLoanApplication(glimId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            commandRequest = builder.repaymentGlimLoanApplication(glimId).build();
         } else if (is(commandParam, "undodisbursal")) {
-            final CommandWrapper commandRequest = builder.undoGLIMLoanDisbursal(glimId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            commandRequest = builder.undoGLIMLoanDisbursal(glimId).build();
         } else if (is(commandParam, "undoapproval")) {
-            final CommandWrapper commandRequest = builder.undoGLIMLoanApproval(glimId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            commandRequest = builder.undoGLIMLoanApproval(glimId).build();
         }
 
-        if (result == null) {
+        if (commandRequest == null) {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }
+        CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -1040,4 +970,21 @@ public class LoansApiResource {
                 uploadedInputStream, fileDetail, locale, dateFormat);
         return this.toApiJsonSerializer.serialize(importDocumentId);
     }
+
+    @GET
+    @Path("{loanId}/delinquencytags")
+    @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Retrieve the Loan Delinquency Tag history using the Loan Id", description = "")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DelinquencyApiResourceSwagger.GetDelinquencyTagHistoryResponse.class))) })
+    public String getDelinquencyTagHistory(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+            @Context final UriInfo uriInfo) {
+        context.authenticatedUser().validateHasReadPermission("DELINQUENCY_TAGS");
+        final Collection<LoanDelinquencyTagHistoryData> loanDelinquencyTagHistoryData = this.delinquencyReadPlatformService
+                .retrieveDelinquencyRangeHistory(loanId);
+        ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.jsonSerializerTagHistory.serialize(settings, loanDelinquencyTagHistoryData);
+    }
+
 }
