@@ -480,10 +480,10 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
             List<ChargePaymentDTO> chargePaymentDTOs = new ArrayList<>();
 
             for (ChargePaymentDTO chargePaymentDTO : loanTransactionDTO.getFeePayments()) {
-                chargePaymentDTOs.add(new ChargePaymentDTO(chargePaymentDTO.getChargeId(),
-                        chargePaymentDTO.getAmount().floatValue() < 0 ? chargePaymentDTO.getAmount().multiply(new BigDecimal(-1))
-                                : chargePaymentDTO.getAmount(),
-                        chargePaymentDTO.getLoanChargeId()));
+                chargePaymentDTOs.add(new ChargePaymentDTO().setChargeId(chargePaymentDTO.getChargeId())
+                        .setAmount(chargePaymentDTO.getAmount().floatValue() < 0 ? chargePaymentDTO.getAmount().multiply(new BigDecimal(-1))
+                                : chargePaymentDTO.getAmount())
+                        .setLoanChargeId(chargePaymentDTO.getLoanChargeId()));
             }
             this.helper.createCreditJournalEntryOrReversalForLoanCharges(office, currencyCode,
                     CashAccountsForLoan.INCOME_FROM_FEES.getValue(), loanProductId, loanId, transactionId, transactionDate, feesAmount,
@@ -495,10 +495,10 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
             List<ChargePaymentDTO> chargePaymentDTOs = new ArrayList<>();
 
             for (ChargePaymentDTO chargePaymentDTO : loanTransactionDTO.getPenaltyPayments()) {
-                chargePaymentDTOs.add(new ChargePaymentDTO(chargePaymentDTO.getChargeId(),
-                        chargePaymentDTO.getAmount().floatValue() < 0 ? chargePaymentDTO.getAmount().multiply(new BigDecimal(-1))
-                                : chargePaymentDTO.getAmount(),
-                        chargePaymentDTO.getLoanChargeId()));
+                chargePaymentDTOs.add(new ChargePaymentDTO().setChargeId(chargePaymentDTO.getChargeId())
+                        .setAmount(chargePaymentDTO.getAmount().floatValue() < 0 ? chargePaymentDTO.getAmount().multiply(new BigDecimal(-1))
+                                : chargePaymentDTO.getAmount())
+                        .setLoanChargeId(chargePaymentDTO.getLoanChargeId()));
             }
 
             this.helper.createCreditJournalEntryOrReversalForLoanCharges(office, currencyCode,

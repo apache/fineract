@@ -110,12 +110,11 @@ public class JournalEntriesImportHandler implements ImportHandler {
 
                     if (creditGLAcct != null) {
 
-                        CreditDebit credit = new CreditDebit(glAccountIdCredit, creditAmt);
+                        CreditDebit credit = new CreditDebit().setGlAccountId(glAccountIdCredit).setAmount(creditAmt);
                         journalEntry.addCredits(credit);
                     }
                     if (debitGLAcct != null) {
-                        CreditDebit debit = new CreditDebit(glAccountIdDebit, debitAmount);
-
+                        CreditDebit debit = new CreditDebit().setGlAccountId(glAccountIdDebit).setAmount(debitAmount);
                         journalEntry.addDebits(debit);
                     }
                 }
@@ -166,19 +165,19 @@ public class JournalEntriesImportHandler implements ImportHandler {
 
         if (glAccountNameCredit != null) {
             if (ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_CREDIT_COL, row) != null) {
-                credits.add(new CreditDebit(glAccountIdCredit,
-                        BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_CREDIT_COL, row))));
+                credits.add(new CreditDebit().setGlAccountId(glAccountIdCredit)
+                        .setAmount(BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_CREDIT_COL, row))));
             } else {
-                credits.add(new CreditDebit(glAccountIdCredit, null));
+                credits.add(new CreditDebit().setGlAccountId(glAccountIdCredit).setAmount(null));
             }
         }
 
         if (glAccountNameDebit != null) {
             if (ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_DEBIT_COL, row) != null) {
-                debits.add(new CreditDebit(glAccountIdDebit,
-                        BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_DEBIT_COL, row))));
+                debits.add(new CreditDebit().setGlAccountId(glAccountIdDebit)
+                        .setAmount(BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(JournalEntryConstants.AMOUNT_DEBIT_COL, row))));
             } else {
-                debits.add(new CreditDebit(glAccountIdDebit, null));
+                debits.add(new CreditDebit().setGlAccountId(glAccountIdDebit).setAmount(null));
             }
         }
         String accountNo = ImportHandlerUtils.readAsString(JournalEntryConstants.ACCOUNT_NO_COL, row);

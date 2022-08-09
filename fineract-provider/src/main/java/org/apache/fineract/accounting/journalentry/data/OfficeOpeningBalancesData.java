@@ -20,29 +20,34 @@ package org.apache.fineract.accounting.journalentry.data;
 
 import java.time.LocalDate;
 import java.util.List;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 
-@RequiredArgsConstructor
-@Getter
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class OfficeOpeningBalancesData {
 
-    private final Long officeId;
-    private final String officeName;
-    private final LocalDate transactionDate;
-    private final GLAccountData contraAccount;
-    private final List<JournalEntryData> assetAccountOpeningBalances;
-    private final List<JournalEntryData> liabityAccountOpeningBalances;
-    private final List<JournalEntryData> incomeAccountOpeningBalances;
-    private final List<JournalEntryData> equityAccountOpeningBalances;
-    private final List<JournalEntryData> expenseAccountOpeningBalances;
+    private Long officeId;
+    private String officeName;
+    private LocalDate transactionDate;
+    private GLAccountData contraAccount;
+    private List<JournalEntryData> assetAccountOpeningBalances;
+    private List<JournalEntryData> liabityAccountOpeningBalances;
+    private List<JournalEntryData> incomeAccountOpeningBalances;
+    private List<JournalEntryData> equityAccountOpeningBalances;
+    private List<JournalEntryData> expenseAccountOpeningBalances;
 
     public static OfficeOpeningBalancesData createNew(final Long officeId, final String officeName, final LocalDate transactionDate,
             final GLAccountData contraAccount, final List<JournalEntryData> assetAccountOpeningBalances,
             final List<JournalEntryData> liabityAccountOpeningBalances, final List<JournalEntryData> incomeAccountOpeningBalances,
             final List<JournalEntryData> equityAccountOpeningBalances, final List<JournalEntryData> expenseAccountOpeningBalances) {
-        return new OfficeOpeningBalancesData(officeId, officeName, transactionDate, contraAccount, assetAccountOpeningBalances,
-                liabityAccountOpeningBalances, incomeAccountOpeningBalances, equityAccountOpeningBalances, expenseAccountOpeningBalances);
+        return new OfficeOpeningBalancesData().setOfficeId(officeId).setOfficeName(officeName).setTransactionDate(transactionDate)
+                .setContraAccount(contraAccount).setAssetAccountOpeningBalances(assetAccountOpeningBalances)
+                .setLiabityAccountOpeningBalances(liabityAccountOpeningBalances)
+                .setIncomeAccountOpeningBalances(incomeAccountOpeningBalances).setEquityAccountOpeningBalances(equityAccountOpeningBalances)
+                .setExpenseAccountOpeningBalances(expenseAccountOpeningBalances);
     }
 }

@@ -21,41 +21,39 @@ package org.apache.fineract.accounting.journalentry.data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionEnumData;
 
-@RequiredArgsConstructor
-@Getter
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class LoanTransactionDTO {
 
-    private final Long officeId;
-    private final Long paymentTypeId;
-    private final String transactionId;
-    private final LocalDate transactionDate;
-    private final LoanTransactionEnumData transactionType;
+    private Long officeId;
+    private Long paymentTypeId;
+    private String transactionId;
+    private LocalDate transactionDate;
+    private LoanTransactionEnumData transactionType;
 
-    private final BigDecimal amount;
+    private BigDecimal amount;
 
     /*** Breakup of amounts in case of repayments **/
-    private final BigDecimal principal;
-    private final BigDecimal interest;
-    private final BigDecimal fees;
-    private final BigDecimal penalties;
-    private final BigDecimal overPayment;
+    private BigDecimal principal;
+    private BigDecimal interest;
+    private BigDecimal fees;
+    private BigDecimal penalties;
+    private BigDecimal overPayment;
 
     /*** Boolean values determines if the transaction is reversed ***/
-    private final boolean reversed;
+    private boolean reversed;
 
     /** Breakdowns of fees and penalties this Transaction pays **/
-    private final List<ChargePaymentDTO> penaltyPayments;
-    private final List<ChargePaymentDTO> feePayments;
+    private List<ChargePaymentDTO> penaltyPayments;
+    private List<ChargePaymentDTO> feePayments;
 
-    private final boolean isAccountTransfer;
-
-    @Setter
+    private boolean isAccountTransfer;
     private boolean isLoanToLoanTransfer;
-
-    private final String chargeRefundChargeType;
+    private String chargeRefundChargeType;
 }

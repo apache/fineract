@@ -148,8 +148,8 @@ public class JournalEntriesApiResource {
 
         final SearchParameters searchParameters = SearchParameters.forJournalEntries(officeId, offset, limit, orderBy, sortOrder, loanId,
                 savingsId);
-        JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData(transactionDetails,
-                runningBalance);
+        JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData()
+                .setTransactionDetailsRequired(transactionDetails).setRunningBalanceRequired(runningBalance);
 
         final Page<JournalEntryData> glJournalEntries = this.journalEntryReadPlatformService.retrieveAll(searchParameters, glAccountId,
                 onlyManualEntries, fromDate, toDate, submittedOnDateFrom, submittedOnDateTo, transactionId, entityType,
@@ -174,8 +174,8 @@ public class JournalEntriesApiResource {
             @QueryParam("transactionDetails") @Parameter(description = "transactionDetails") final boolean transactionDetails) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
-        JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData(transactionDetails,
-                runningBalance);
+        JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData()
+                .setTransactionDetailsRequired(transactionDetails).setRunningBalanceRequired(runningBalance);
         final JournalEntryData glJournalEntryData = this.journalEntryReadPlatformService.retrieveGLJournalEntryById(journalEntryId,
                 associationParametersData);
 

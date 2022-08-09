@@ -21,33 +21,35 @@ package org.apache.fineract.accounting.journalentry.data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.client.domain.ClientTransactionType;
 
-@RequiredArgsConstructor
-@Getter
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class ClientTransactionDTO {
 
-    private final Long clientId;
-    private final Long officeId;
+    private Long clientId;
+    private Long officeId;
 
-    private final Long paymentTypeId;
-    private final Long transactionId;
-    private final LocalDate transactionDate;
-    private final EnumOptionData transactionType;
-    private final String currencyCode;
+    private Long paymentTypeId;
+    private Long transactionId;
+    private LocalDate transactionDate;
+    private EnumOptionData transactionType;
+    private String currencyCode;
 
-    private final BigDecimal amount;
+    private BigDecimal amount;
 
     /*** Boolean values determines if the transaction is reversed ***/
-    private final boolean reversed;
+    private boolean reversed;
 
-    private final boolean accountingEnabled;
+    private boolean accountingEnabled;
 
     /** Breakdowns of fees this Transaction pays **/
-    private final List<ClientChargePaymentDTO> chargePayments;
+    private List<ClientChargePaymentDTO> chargePayments;
 
     public boolean isChargePayment() {
         return ClientTransactionType.PAY_CHARGE.getValue().equals(this.transactionType.getId().intValue());

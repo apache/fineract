@@ -210,21 +210,25 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                 if (PortfolioAccountType.fromInt(entityTypeId).isLoanAccount()) {
                     final LoanTransactionEnumData loanTransactionType = LoanEnumerations
                             .transactionType(JdbcSupport.getInteger(rs, "loanTransactionType"));
-                    transactionTypeEnumData = new TransactionTypeEnumData(loanTransactionType.id(), loanTransactionType.getCode(),
-                            loanTransactionType.getValue());
+                    transactionTypeEnumData = new TransactionTypeEnumData().setId(loanTransactionType.id())
+                            .setCode(loanTransactionType.getCode()).setValue(loanTransactionType.getValue());
                 } else if (PortfolioAccountType.fromInt(entityTypeId).isSavingsAccount()) {
                     final SavingsAccountTransactionEnumData savingsTransactionType = SavingsEnumerations
                             .transactionType(JdbcSupport.getInteger(rs, "savingsTransactionType"));
-                    transactionTypeEnumData = new TransactionTypeEnumData(savingsTransactionType.getId(), savingsTransactionType.getCode(),
-                            savingsTransactionType.getValue());
+                    transactionTypeEnumData = new TransactionTypeEnumData().setId(savingsTransactionType.getId())
+                            .setCode(savingsTransactionType.getCode()).setValue(savingsTransactionType.getValue());
                 }
 
-                transactionDetailData = new TransactionDetailData(transaction, paymentDetailData, noteData, transactionTypeEnumData);
+                transactionDetailData = new TransactionDetailData().setTransactionId(transaction).setPaymentDetails(paymentDetailData)
+                        .setNoteData(noteData).setTransactionType(transactionTypeEnumData);
             }
-            return new JournalEntryData(id, officeId, officeName, glAccountName, glAccountId, glCode, accountType, transactionDate,
-                    entryType, amount, transactionId, manualEntry, entityType, entityId, createdByUserId, submittedOnDate,
-                    createdByUserName, comments, reversed, referenceNumber, officeRunningBalance, organizationRunningBalance,
-                    runningBalanceComputed, transactionDetailData, currency);
+            return new JournalEntryData().setId(id).setOfficeId(officeId).setOfficeName(officeName).setGlAccountName(glAccountName)
+                    .setGlAccountId(glAccountId).setGlAccountCode(glCode).setGlAccountType(accountType).setTransactionDate(transactionDate)
+                    .setEntryType(entryType).setAmount(amount).setTransactionId(transactionId).setManualEntry(manualEntry)
+                    .setEntityType(entityType).setEntityId(entityId).setCreatedByUserId(createdByUserId).setSubmittedOnDate(submittedOnDate)
+                    .setCreatedByUserName(createdByUserName).setComments(comments).setReversed(reversed).setReferenceNumber(referenceNumber)
+                    .setOfficeRunningBalance(officeRunningBalance).setOrganizationRunningBalance(organizationRunningBalance)
+                    .setRunningBalanceComputed(runningBalanceComputed).setTransactionDetails(transactionDetailData).setCurrency(currency);
         }
     }
 
@@ -520,7 +524,8 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
     @Override
     public Page<JournalEntryData> retrieveJournalEntriesByEntityId(String transactionId, Long entityId, Integer entityType) {
-        JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData(true, true);
+        JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData()
+                .setTransactionDetailsRequired(true).setRunningBalanceRequired(true);
         try {
             final GLJournalEntryMapper rm = new GLJournalEntryMapper(associationParametersData);
             final String sql = "select " + rm.schema()
