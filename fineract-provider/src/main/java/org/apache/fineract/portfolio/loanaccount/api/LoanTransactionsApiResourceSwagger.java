@@ -142,6 +142,10 @@ final class LoanTransactionsApiResourceSwagger {
         public Double amount;
         @Schema(example = "559.88")
         public Double interestPortion;
+        @Schema(example = "20120514")
+        public String reversalExternalId;
+        @Schema(example = "[2012, 5, 18]")
+        public LocalDate reversedOnDate;
     }
 
     @Schema(description = "PostLoansLoanIdTransactionsRequest")

@@ -106,6 +106,12 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "external_id", length = 100, nullable = true, unique = true)
     private String externalId;
 
+    @Column(name = "reversal_external_id", length = 100, nullable = true, unique = true)
+    private String reversalExternalId;
+
+    @Column(name = "reversed_on_date", nullable = true)
+    private LocalDate reversedOnDate;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanTransaction", orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<LoanChargePaidBy> loanChargesPaid = new HashSet<>();
 
@@ -364,7 +370,13 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     public void reverse() {
         this.loan.validateRepaymentTypeTransactionNotBeforeAChargeRefund(this, "reversed");
         this.reversed = true;
+        this.reversedOnDate = DateUtils.getBusinessLocalDate();
         this.loanTransactionToRepaymentScheduleMappings.clear();
+    }
+
+    public void reverse(final String reversalExternalId) {
+        this.reverse();
+        this.reversalExternalId = reversalExternalId;
     }
 
     public void resetDerivedComponents() {
