@@ -255,12 +255,12 @@ public class ChartOfAccountsImportHandler implements ImportHandler {
 
         if (accountToBeDebitedCredited != null) {
             if (ImportHandlerUtils.readAsLong(ChartOfAcountsConstants.CREDIT_AMOUNT, row) != null) {
-                credits.add(new CreditDebit(glAccountIdToDebitedCredited,
-                        BigDecimal.valueOf(ImportHandlerUtils.readAsLong(ChartOfAcountsConstants.CREDIT_AMOUNT, row))));
+                credits.add(new CreditDebit().setGlAccountId(glAccountIdToDebitedCredited)
+                        .setAmount(BigDecimal.valueOf(ImportHandlerUtils.readAsLong(ChartOfAcountsConstants.CREDIT_AMOUNT, row))));
 
             } else if (ImportHandlerUtils.readAsLong(ChartOfAcountsConstants.DEBIT_AMOUNT, row) != null) {
-                debits.add(new CreditDebit(glAccountIdToDebitedCredited,
-                        BigDecimal.valueOf(ImportHandlerUtils.readAsLong(ChartOfAcountsConstants.DEBIT_AMOUNT, row))));
+                debits.add(new CreditDebit().setGlAccountId(glAccountIdToDebitedCredited)
+                        .setAmount(BigDecimal.valueOf(ImportHandlerUtils.readAsLong(ChartOfAcountsConstants.DEBIT_AMOUNT, row))));
             }
         }
 

@@ -137,7 +137,8 @@ public class AccountingProcessorHelper {
                     final Long loanChargeId = (Long) loanChargePaid.get("loanChargeId");
                     final boolean isPenalty = (Boolean) loanChargePaid.get("isPenalty");
                     final BigDecimal chargeAmountPaid = (BigDecimal) loanChargePaid.get("amount");
-                    final ChargePaymentDTO chargePaymentDTO = new ChargePaymentDTO(chargeId, chargeAmountPaid, loanChargeId);
+                    final ChargePaymentDTO chargePaymentDTO = new ChargePaymentDTO().setChargeId(chargeId).setAmount(chargeAmountPaid)
+                            .setLoanChargeId(loanChargeId);
                     if (isPenalty) {
                         penaltyPaymentDetails.add(chargePaymentDTO);
                     } else {
@@ -150,9 +151,13 @@ public class AccountingProcessorHelper {
                 isAccountTransfer = this.accountTransfersReadPlatformService.isAccountTransfer(Long.parseLong(transactionId),
                         PortfolioAccountType.LOAN);
             }
-            final LoanTransactionDTO transaction = new LoanTransactionDTO(transactionOfficeId, paymentTypeId, transactionId,
-                    transactionDate, transactionType, amount, principal, interest, fees, penalties, overPayments, reversed,
-                    penaltyPaymentDetails, feePaymentDetails, isAccountTransfer, chargeRefundChargeType);
+            final LoanTransactionDTO transaction = new LoanTransactionDTO().setOfficeId(transactionOfficeId).setPaymentTypeId(paymentTypeId)
+                    .setTransactionId(transactionId).setTransactionDate(transactionDate).setTransactionType(transactionType)
+                    .setAmount(amount).setPrincipal(principal).setInterest(interest).setFees(fees).setPenalties(penalties)
+                    .setOverPayment(overPayments).setReversed(reversed).setPenaltyPayments(penaltyPaymentDetails)
+                    .setFeePayments(feePaymentDetails).setAccountTransfer(isAccountTransfer)
+                    .setChargeRefundChargeType(chargeRefundChargeType);
+
             Boolean isLoanToLoanTransfer = (Boolean) accountingBridgeData.get("isLoanToLoanTransfer");
             if (isLoanToLoanTransfer != null && isLoanToLoanTransfer) {
                 transaction.setLoanToLoanTransfer(true);
@@ -163,8 +168,11 @@ public class AccountingProcessorHelper {
 
         }
 
-        return new LoanDTO(loanId, loanProductId, officeId, currencyData.code(), cashBasedAccountingEnabled,
-                upfrontAccrualBasedAccountingEnabled, periodicAccrualBasedAccountingEnabled, newLoanTransactions);
+        return new LoanDTO().setLoanId(loanId).setLoanProductId(loanProductId).setOfficeId(officeId).setCurrencyCode(currencyData.code())
+                .setCashBasedAccountingEnabled(cashBasedAccountingEnabled)
+                .setUpfrontAccrualBasedAccountingEnabled(upfrontAccrualBasedAccountingEnabled)
+                .setPeriodicAccrualBasedAccountingEnabled(periodicAccrualBasedAccountingEnabled)
+                .setNewLoanTransactions(newLoanTransactions);
     }
 
     public SavingsDTO populateSavingsDtoFromMap(final Map<String, Object> accountingBridgeData, final boolean cashBasedAccountingEnabled,
@@ -200,7 +208,8 @@ public class AccountingProcessorHelper {
                     final Long loanChargeId = (Long) loanChargePaid.get("savingsChargeId");
                     final boolean isPenalty = (Boolean) loanChargePaid.get("isPenalty");
                     final BigDecimal chargeAmountPaid = (BigDecimal) loanChargePaid.get("amount");
-                    final ChargePaymentDTO chargePaymentDTO = new ChargePaymentDTO(chargeId, chargeAmountPaid, loanChargeId);
+                    final ChargePaymentDTO chargePaymentDTO = new ChargePaymentDTO().setChargeId(chargeId).setAmount(chargeAmountPaid)
+                            .setLoanChargeId(loanChargeId);
                     if (isPenalty) {
                         penaltyPayments.add(chargePaymentDTO);
                     } else {
@@ -217,7 +226,8 @@ public class AccountingProcessorHelper {
                     final BigDecimal taxAmount = (BigDecimal) taxData.get("amount");
                     final Long creditAccountId = (Long) taxData.get("creditAccountId");
                     final Long debitAccountId = (Long) taxData.get("debitAccountId");
-                    taxPayments.add(new TaxPaymentDTO(debitAccountId, creditAccountId, taxAmount));
+                    taxPayments.add(
+                            new TaxPaymentDTO().setDebitAccountId(debitAccountId).setCreditAccountId(creditAccountId).setAmount(taxAmount));
                 }
             }
 
@@ -225,16 +235,19 @@ public class AccountingProcessorHelper {
                 isAccountTransfer = this.accountTransfersReadPlatformService.isAccountTransfer(Long.parseLong(transactionId),
                         PortfolioAccountType.SAVINGS);
             }
-            final SavingsTransactionDTO transaction = new SavingsTransactionDTO(transactionOfficeId, paymentTypeId, transactionId,
-                    transactionDate, transactionType, amount, reversed, feePayments, penaltyPayments, overdraftAmount, isAccountTransfer,
-                    taxPayments);
+            final SavingsTransactionDTO transaction = new SavingsTransactionDTO().setOfficeId(transactionOfficeId)
+                    .setPaymentTypeId(paymentTypeId).setTransactionId(transactionId).setTransactionDate(transactionDate)
+                    .setTransactionType(transactionType).setAmount(amount).setReversed(reversed).setFeePayments(feePayments)
+                    .setPenaltyPayments(penaltyPayments).setOverdraftAmount(overdraftAmount).setAccountTransfer(isAccountTransfer)
+                    .setTaxPayments(taxPayments);
 
             newSavingsTransactions.add(transaction);
 
         }
 
-        return new SavingsDTO(loanId, loanProductId, officeId, currencyData.code(), cashBasedAccountingEnabled,
-                accrualBasedAccountingEnabled, newSavingsTransactions);
+        return new SavingsDTO().setSavingsId(loanId).setSavingsProductId(loanProductId).setOfficeId(officeId)
+                .setCurrencyCode(currencyData.code()).setCashBasedAccountingEnabled(cashBasedAccountingEnabled)
+                .setAccrualBasedAccountingEnabled(accrualBasedAccountingEnabled).setNewSavingsTransactions(newSavingsTransactions);
     }
 
     public SharesDTO populateSharesDtoFromMap(final Map<String, Object> accountingBridgeData, final boolean cashBasedAccountingEnabled,
@@ -267,19 +280,24 @@ public class AccountingProcessorHelper {
                     final Long chargeId = (Long) chargePaid.get("chargeId");
                     final Long loanChargeId = (Long) chargePaid.get("sharesChargeId");
                     final BigDecimal chargeAmountPaid = (BigDecimal) chargePaid.get("amount");
-                    final ChargePaymentDTO chargePaymentDTO = new ChargePaymentDTO(chargeId, chargeAmountPaid, loanChargeId);
+                    final ChargePaymentDTO chargePaymentDTO = new ChargePaymentDTO().setChargeId(chargeId).setAmount(chargeAmountPaid)
+                            .setLoanChargeId(loanChargeId);
+
                     feePayments.add(chargePaymentDTO);
                 }
             }
-            final SharesTransactionDTO transaction = new SharesTransactionDTO(transactionOfficeId, paymentTypeId, transactionId,
-                    transactionDate, transactionType, transactionStatus, amount, chargeAmount, feePayments);
+            final SharesTransactionDTO transaction = new SharesTransactionDTO().setOfficeId(transactionOfficeId)
+                    .setPaymentTypeId(paymentTypeId).setTransactionId(transactionId).setTransactionDate(transactionDate)
+                    .setTransactionType(transactionType).setTransactionStatus(transactionStatus).setAmount(amount)
+                    .setChargeAmount(chargeAmount).setFeePayments(feePayments);
 
             newTransactions.add(transaction);
 
         }
 
-        return new SharesDTO(shareAccountId, shareProductId, officeId, currencyData.code(), cashBasedAccountingEnabled,
-                accrualBasedAccountingEnabled, newTransactions);
+        return new SharesDTO().setShareAccountId(shareAccountId).setShareProductId(shareProductId).setOfficeId(officeId)
+                .setCurrencyCode(currencyData.code()).setCashBasedAccountingEnabled(cashBasedAccountingEnabled)
+                .setAccrualBasedAccountingEnabled(accrualBasedAccountingEnabled).setNewTransactions(newTransactions);
     }
 
     public ClientTransactionDTO populateClientTransactionDtoFromMap(final Map<String, Object> accountingBridgeData) {
@@ -307,15 +325,17 @@ public class AccountingProcessorHelper {
                 final boolean isPenalty = (Boolean) clientChargePaid.get("isPenalty");
                 final BigDecimal chargeAmountPaid = (BigDecimal) clientChargePaid.get("amount");
                 final Long incomeAccountId = (Long) clientChargePaid.get("incomeAccountId");
-                final ClientChargePaymentDTO clientChargePaymentDTO = new ClientChargePaymentDTO(chargeId, chargeAmountPaid, clientChargeId,
-                        isPenalty, incomeAccountId);
+                final ClientChargePaymentDTO clientChargePaymentDTO = new ClientChargePaymentDTO().setChargeId(chargeId)
+                        .setAmount(chargeAmountPaid).setClientChargeId(clientChargeId).setPenalty(isPenalty)
+                        .setIncomeAccountId(incomeAccountId);
                 clientChargePaymentDTOs.add(clientChargePaymentDTO);
             }
         }
 
-        final ClientTransactionDTO clientTransactionDTO = new ClientTransactionDTO(clientId, transactionOfficeId, paymentTypeId,
-                transactionId, transactionDate, transactionType, currencyCode, amount, reversed, accountingEnabled,
-                clientChargePaymentDTOs);
+        final ClientTransactionDTO clientTransactionDTO = new ClientTransactionDTO().setClientId(clientId).setOfficeId(transactionOfficeId)
+                .setPaymentTypeId(paymentTypeId).setTransactionId(transactionId).setTransactionDate(transactionDate)
+                .setTransactionType(transactionType).setCurrencyCode(currencyCode).setAmount(amount).setReversed(reversed)
+                .setAccountingEnabled(accountingEnabled).setChargePayments(clientChargePaymentDTOs);
 
         return clientTransactionDTO;
 

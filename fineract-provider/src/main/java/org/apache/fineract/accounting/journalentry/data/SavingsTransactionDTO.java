@@ -21,31 +21,32 @@ package org.apache.fineract.accounting.journalentry.data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
 
-@RequiredArgsConstructor
-@Getter
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class SavingsTransactionDTO {
 
-    private final Long officeId;
-    private final Long paymentTypeId;
-    private final String transactionId;
-    private final LocalDate transactionDate;
-    private final SavingsAccountTransactionEnumData transactionType;
-
-    private final BigDecimal amount;
+    private Long officeId;
+    private Long paymentTypeId;
+    private String transactionId;
+    private LocalDate transactionDate;
+    private SavingsAccountTransactionEnumData transactionType;
+    private BigDecimal amount;
 
     /*** Boolean values determines if the transaction is reversed ***/
-    private final boolean reversed;
+    private boolean reversed;
 
     /** Breakdowns of fees and penalties this Transaction pays **/
-    private final List<ChargePaymentDTO> feePayments;
-    private final List<ChargePaymentDTO> penaltyPayments;
-    private final BigDecimal overdraftAmount;
-    private final boolean isAccountTransfer;
-    private final List<TaxPaymentDTO> taxPayments;
+    private List<ChargePaymentDTO> feePayments;
+    private List<ChargePaymentDTO> penaltyPayments;
+    private BigDecimal overdraftAmount;
+    private boolean isAccountTransfer;
+    private List<TaxPaymentDTO> taxPayments;
 
     public boolean isOverdraftTransaction() {
         return this.overdraftAmount != null && this.overdraftAmount.doubleValue() > 0;

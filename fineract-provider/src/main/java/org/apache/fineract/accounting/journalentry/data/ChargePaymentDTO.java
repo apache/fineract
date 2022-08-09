@@ -19,14 +19,16 @@
 package org.apache.fineract.accounting.journalentry.data;
 
 import java.math.BigDecimal;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
-@RequiredArgsConstructor
-@Getter
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class ChargePaymentDTO {
 
-    private final Long chargeId;
-    private final BigDecimal amount;
-    private final Long loanChargeId;
+    private Long chargeId;
+    private BigDecimal amount;
+    private Long loanChargeId;
 }

@@ -21,26 +21,28 @@ package org.apache.fineract.accounting.journalentry.data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionEnumData;
 
-@RequiredArgsConstructor
-@Getter
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class SharesTransactionDTO {
 
-    private final Long officeId;
-    private final Long paymentTypeId;
-    private final String transactionId;
-    private final LocalDate transactionDate;
-    private final ShareAccountTransactionEnumData transactionType;
-    private final ShareAccountTransactionEnumData transactionStatus;
+    private Long officeId;
+    private Long paymentTypeId;
+    private String transactionId;
+    private LocalDate transactionDate;
+    private ShareAccountTransactionEnumData transactionType;
+    private ShareAccountTransactionEnumData transactionStatus;
 
-    private final BigDecimal amount;
+    private BigDecimal amount;
 
     /*** Breakup of amounts **/
-    private final BigDecimal chargeAmount;
+    private BigDecimal chargeAmount;
 
     /** Breakdowns of fees and penalties this Transaction pays **/
-    private final List<ChargePaymentDTO> feePayments;
+    private List<ChargePaymentDTO> feePayments;
 }

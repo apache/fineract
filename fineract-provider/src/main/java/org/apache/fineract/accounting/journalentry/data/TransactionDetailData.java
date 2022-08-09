@@ -18,24 +18,19 @@
  */
 package org.apache.fineract.accounting.journalentry.data;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.fineract.portfolio.note.data.NoteData;
 import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
 
-@RequiredArgsConstructor
-@Getter
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class TransactionDetailData {
 
-    private final Long transactionId;
-    private final PaymentDetailData paymentDetails;
-    private final NoteData noteData;
-    private final TransactionTypeEnumData transactionType;
-
-    public TransactionDetailData(final Long transactionId, final PaymentDetailData paymentDetails, final NoteData noteData) {
-        this.transactionId = transactionId;
-        this.paymentDetails = paymentDetails;
-        this.noteData = noteData;
-        this.transactionType = null;
-    }
+    private Long transactionId;
+    private PaymentDetailData paymentDetails;
+    private NoteData noteData;
+    private TransactionTypeEnumData transactionType;
 }
