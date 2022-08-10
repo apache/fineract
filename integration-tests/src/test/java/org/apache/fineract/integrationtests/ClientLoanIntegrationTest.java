@@ -865,6 +865,39 @@ public class ClientLoanIntegrationTest {
         validateChargeExcludePrecission(flatAccTransfer, loanCharges, "100.0", "300", "100.0", "0.0");
         validateChargeExcludePrecission(flat, loanCharges, "50.0", "150", "0.0", "50.0");
 
+        // Loan Charges with US Locale using the amount as a number in the JSON body
+        this.loanTransactionHelper.addChargesForLoan(loanID,
+                LoanTransactionHelper.getInstallmentChargesForLoanAsJSON(String.valueOf(flat), 50.05, Locale.US));
+        loanCharges = this.loanTransactionHelper.getLoanCharges(loanID);
+
+        loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+        loanSchedule.remove(0);
+        for (HashMap installment : loanSchedule) {
+            validateNumberForEqualExcludePrecission("200.05", String.valueOf(installment.get("feeChargesDue")));
+        }
+
+        // Loan Charges with other Locale using comma (,) as decimal delimiter
+        this.loanTransactionHelper.addChargesForLoan(loanID,
+                LoanTransactionHelper.getInstallmentChargesForLoanAsJSON(String.valueOf(flat), "50,05", Locale.GERMAN));
+        loanCharges = this.loanTransactionHelper.getLoanCharges(loanID);
+
+        loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+        loanSchedule.remove(0);
+        for (HashMap installment : loanSchedule) {
+            validateNumberForEqualExcludePrecission("250.10", String.valueOf(installment.get("feeChargesDue")));
+        }
+
+        // Loan Charges with German Locale (where the comma is the decimal delimiter) using the amount as a number in
+        // the JSON body
+        this.loanTransactionHelper.addChargesForLoan(loanID,
+                LoanTransactionHelper.getInstallmentChargesForLoanAsJSON(String.valueOf(flat), 50.05, Locale.GERMAN));
+        loanCharges = this.loanTransactionHelper.getLoanCharges(loanID);
+
+        loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+        loanSchedule.remove(0);
+        for (HashMap installment : loanSchedule) {
+            validateNumberForEqualExcludePrecission("300.15", String.valueOf(installment.get("feeChargesDue")));
+        }
     }
 
     @Test
@@ -1080,7 +1113,8 @@ public class ClientLoanIntegrationTest {
     private void validateNumberForEqualExcludePrecission(String val, String val2) {
         DecimalFormat twoDForm = new DecimalFormat("#");
         Assertions.assertTrue(
-                Float.valueOf(twoDForm.format(Float.valueOf(val))).compareTo(Float.valueOf(twoDForm.format(Float.valueOf(val2)))) == 0);
+                Float.valueOf(twoDForm.format(Float.valueOf(val))).compareTo(Float.valueOf(twoDForm.format(Float.valueOf(val2)))) == 0,
+                String.format("%s is not equal to %s", val, val2));
     }
 
     private Integer createLoanProduct(final boolean multiDisburseLoan, final String accountingRule, final Account... accounts) {
