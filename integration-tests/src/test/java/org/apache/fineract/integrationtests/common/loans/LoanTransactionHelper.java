@@ -33,6 +33,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -674,8 +675,12 @@ public class LoanTransactionHelper {
     }
 
     public static String getInstallmentChargesForLoanAsJSON(final String chargeId, final String amount) {
-        final HashMap<String, String> map = new HashMap<>();
-        map.put("locale", "en_GB");
+        return getInstallmentChargesForLoanAsJSON(chargeId, amount, Locale.UK);
+    }
+
+    public static String getInstallmentChargesForLoanAsJSON(final String chargeId, final Object amount, final Locale locale) {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("locale", locale.getLanguage());
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("amount", amount);
         map.put("chargeId", chargeId);
