@@ -2883,7 +2883,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final JsonArray disbursementDataArray = command.arrayOfParameterNamed(LoanApiConstants.disbursementDataParameterName);
 
         if (isDisallowExpectedDisbursements) {
-            if (disbursementDataArray != null) {
+            if (!disbursementDataArray.isEmpty()) {
                 final String errorMessage = "For this loan product, disbursement details are not allowed";
                 throw new MultiDisbursementDataNotAllowedException(LoanApiConstants.disbursementDataParameterName, errorMessage);
             }

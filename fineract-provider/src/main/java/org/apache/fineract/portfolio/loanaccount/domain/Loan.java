@@ -1609,7 +1609,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             final JsonArray disbursementDataArray = command.arrayOfParameterNamed(LoanApiConstants.disbursementDataParameterName);
 
             if (loanProduct.isDisallowExpectedDisbursements()) {
-                if (disbursementDataArray != null) {
+                if (!disbursementDataArray.isEmpty()) {
                     final String errorMessage = "For this loan product, disbursement details are not allowed";
                     throw new MultiDisbursementDataNotAllowedException(LoanApiConstants.disbursementDataParameterName, errorMessage);
                 }
