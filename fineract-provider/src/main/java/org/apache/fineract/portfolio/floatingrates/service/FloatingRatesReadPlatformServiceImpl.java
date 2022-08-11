@@ -23,11 +23,9 @@ import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateData;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRatePeriodData;
 import org.apache.fineract.portfolio.floatingrates.data.InterestRatePeriodData;
@@ -124,21 +122,19 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
             final boolean isBaseLendingRate = rs.getBoolean("isBaseLendingRate");
             final boolean isActive = rs.getBoolean("isActive");
             final String createdBy = rs.getString("createdBy");
-            final LocalDateTime createdOnLocal = JdbcSupport.getLocalDateTime(rs, "createdOn");
+            final OffsetDateTime createdOnLocal = JdbcSupport.getOffsetDateTime(rs, "createdOn");
             final OffsetDateTime createdOnUtc = JdbcSupport.getOffsetDateTime(rs, "createdOnUTC");
             final String modifiedBy = rs.getString("modifiedBy");
-            final LocalDateTime modifiedOnLocal = JdbcSupport.getLocalDateTime(rs, "modifiedOn");
+            final OffsetDateTime modifiedOnLocal = JdbcSupport.getOffsetDateTime(rs, "modifiedOn");
             final OffsetDateTime modifiedOnUtc = JdbcSupport.getOffsetDateTime(rs, "modifiedOnUTC");
             List<FloatingRatePeriodData> ratePeriods = null;
-            final OffsetDateTime createdOn = createdOnUtc != null ? createdOnUtc
-                    : OffsetDateTime.of(createdOnLocal, DateUtils.getDateTimeZoneOfTenant().getRules().getOffset(createdOnLocal));
-            final OffsetDateTime modifiedOn = modifiedOnUtc != null ? modifiedOnUtc
-                    : OffsetDateTime.of(modifiedOnLocal, DateUtils.getDateTimeZoneOfTenant().getRules().getOffset(modifiedOnLocal));
+            final OffsetDateTime createdOn = createdOnUtc != null ? createdOnUtc : createdOnLocal;
+            final OffsetDateTime modifiedOn = modifiedOnUtc != null ? modifiedOnUtc : modifiedOnLocal;
             if (addRatePeriods) {
                 FloatingRatePeriodRowMapper ratePeriodMapper = new FloatingRatePeriodRowMapper();
                 final String sql = "select " + ratePeriodMapper.schema()
                         + " where period.is_active = true and period.floating_rates_id = ? " + " order by period.from_date desc ";
-                ratePeriods = jdbcTemplate.query(sql, ratePeriodMapper, new Object[] { id }); // NOSONAR
+                ratePeriods = jdbcTemplate.query(sql, ratePeriodMapper, id); // NOSONAR
             }
             return new FloatingRateData(id, name, isBaseLendingRate, isActive, createdBy, createdOn, modifiedBy, modifiedOn, ratePeriods,
                     null);
@@ -169,15 +165,13 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
             final boolean isDifferentialToBaseLendingRate = rs.getBoolean("isDifferentialToBaseLendingRate");
             final boolean isActive = rs.getBoolean("isActive");
             final String createdBy = rs.getString("createdBy");
-            final LocalDateTime createdOnLocal = JdbcSupport.getLocalDateTime(rs, "createdOn");
+            final OffsetDateTime createdOnLocal = JdbcSupport.getOffsetDateTime(rs, "createdOn");
             final OffsetDateTime createdOnUtc = JdbcSupport.getOffsetDateTime(rs, "createdOnUTC");
             final String modifiedBy = rs.getString("modifiedBy");
-            final LocalDateTime modifiedOnLocal = JdbcSupport.getLocalDateTime(rs, "modifiedOn");
+            final OffsetDateTime modifiedOnLocal = JdbcSupport.getOffsetDateTime(rs, "modifiedOn");
             final OffsetDateTime modifiedOnUtc = JdbcSupport.getOffsetDateTime(rs, "modifiedOnUTC");
-            final OffsetDateTime createdOn = createdOnUtc != null ? createdOnUtc
-                    : OffsetDateTime.of(createdOnLocal, DateUtils.getDateTimeZoneOfTenant().getRules().getOffset(createdOnLocal));
-            final OffsetDateTime modifiedOn = modifiedOnUtc != null ? modifiedOnUtc
-                    : OffsetDateTime.of(modifiedOnLocal, DateUtils.getDateTimeZoneOfTenant().getRules().getOffset(modifiedOnLocal));
+            final OffsetDateTime createdOn = createdOnUtc != null ? createdOnUtc : createdOnLocal;
+            final OffsetDateTime modifiedOn = modifiedOnUtc != null ? modifiedOnUtc : modifiedOnLocal;
             return new FloatingRatePeriodData(id, fromDate, interestRate, isDifferentialToBaseLendingRate, isActive, createdBy, createdOn,
                     modifiedBy, modifiedOn);
         }

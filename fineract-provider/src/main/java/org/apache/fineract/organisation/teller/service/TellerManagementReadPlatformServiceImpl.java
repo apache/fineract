@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Iterator;
 import lombok.RequiredArgsConstructor;
@@ -719,13 +719,13 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             final String txnNote = rs.getString("txn_note");
             final String entityType = rs.getString("entity_type");
             final Long entityId = rs.getLong("entity_id");
-            final LocalDateTime createdLocalDate = JdbcSupport.getLocalDateTime(rs, "created_date");
+            final OffsetDateTime createdLocalDate = JdbcSupport.getOffsetDateTime(rs, "created_date");
 
             LocalDate txnDate = null;
             if (txnLocalDate != null) {
                 txnDate = txnLocalDate;
             }
-            LocalDateTime createdDate = null;
+            OffsetDateTime createdDate = null;
             if (createdLocalDate != null) {
                 createdDate = createdLocalDate;
             }
