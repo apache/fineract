@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.calendar.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -99,20 +98,17 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
                 humanReadable = CalendarUtils.getRRuleReadable(startDate, recurrence);
             }
             Integer monthOnDay = CalendarUtils.getMonthOnDay(recurrence);
-            final LocalDateTime createdDateLocal = JdbcSupport.getLocalDateTime(rs, "createdDate");
+            final OffsetDateTime createdDateLocal = JdbcSupport.getOffsetDateTime(rs, "createdDate");
             final OffsetDateTime createdDateUtc = JdbcSupport.getOffsetDateTime(rs, "createdDateUtc");
-            final LocalDateTime lastModifiedDateLocal = JdbcSupport.getLocalDateTime(rs, "updatedDate");
+            final OffsetDateTime lastModifiedDateLocal = JdbcSupport.getOffsetDateTime(rs, "updatedDate");
             final OffsetDateTime lastModifiedDateUtc = JdbcSupport.getOffsetDateTime(rs, "updatedDateUtc");
             final Long createdByUserId = rs.getLong("creatingUserId");
             final String createdByUserName = rs.getString("creatingUserName");
             final Long lastUpdatedByUserId = rs.getLong("updatingUserId");
             final String lastUpdatedByUserName = rs.getString("updatingUserName");
             final LocalTime meetingTime = JdbcSupport.getLocalTime(rs, "meetingTime");
-            final OffsetDateTime createdDate = createdDateUtc != null ? createdDateUtc
-                    : OffsetDateTime.of(createdDateLocal, DateUtils.getDateTimeZoneOfTenant().getRules().getOffset(createdDateLocal));
-            final OffsetDateTime lastModifiedDate = lastModifiedDateUtc != null ? lastModifiedDateUtc
-                    : OffsetDateTime.of(lastModifiedDateLocal,
-                            DateUtils.getDateTimeZoneOfTenant().getRules().getOffset(lastModifiedDateLocal));
+            final OffsetDateTime createdDate = createdDateUtc != null ? createdDateUtc : createdDateLocal;
+            final OffsetDateTime lastModifiedDate = lastModifiedDateUtc != null ? lastModifiedDateUtc : lastModifiedDateLocal;
             return CalendarData.instance(id, calendarInstanceId, entityId, entityType, title, description, location, startDate, endDate,
                     duration, type, repeating, recurrence, frequency, interval, repeatsOnDay, repeatsOnNthDayOfMonth, remindBy,
                     firstReminder, secondReminder, humanReadable, createdDate, lastModifiedDate, createdByUserId, createdByUserName,

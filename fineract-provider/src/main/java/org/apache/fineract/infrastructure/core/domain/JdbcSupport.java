@@ -24,7 +24,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
@@ -44,15 +43,6 @@ public final class JdbcSupport {
         final Timestamp dateValue = rs.getTimestamp(columnName);
         if (dateValue != null) {
             dateTime = ZonedDateTime.ofInstant(dateValue.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-        return dateTime;
-    }
-
-    public static LocalDateTime getLocalDateTime(final ResultSet rs, final String columnName) throws SQLException {
-        LocalDateTime dateTime = null;
-        final Timestamp dateValue = rs.getTimestamp(columnName);
-        if (dateValue != null) {
-            dateTime = dateValue.toLocalDateTime();
         }
         return dateTime;
     }
