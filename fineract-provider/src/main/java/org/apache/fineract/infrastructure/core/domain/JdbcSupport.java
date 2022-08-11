@@ -42,7 +42,7 @@ public final class JdbcSupport {
         ZonedDateTime dateTime = null;
         final Timestamp dateValue = rs.getTimestamp(columnName);
         if (dateValue != null) {
-            dateTime = ZonedDateTime.ofInstant(dateValue.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            dateTime = ZonedDateTime.of(dateValue.toLocalDateTime(), DateUtils.getDateTimeZoneOfTenant());
         }
         return dateTime;
     }

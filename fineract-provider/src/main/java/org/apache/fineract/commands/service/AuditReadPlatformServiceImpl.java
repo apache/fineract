@@ -24,6 +24,7 @@ import com.google.gson.JsonObject;
 import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collection;
@@ -105,8 +106,8 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
             String partSql = " aud.id as id, aud.action_name as actionName, aud.entity_name as entityName,"
                     + " aud.resource_id as resourceId, aud.subresource_id as subresourceId,aud.client_id as clientId, aud.loan_id as loanId,"
-                    + " mk.username as maker, aud.made_on_date as madeOnDate, " + " aud.api_get_url as resourceGetUrl, "
-                    + "ck.username as checker, aud.checked_on_date as checkedOnDate, ev.enum_message_property as processingResult "
+                    + " mk.username as maker, aud.made_on_date as madeOnDate, aud.made_on_date_utc as madeOnDateUTC, aud.api_get_url as resourceGetUrl, "
+                    + "ck.username as checker, aud.checked_on_date as checkedOnDate, aud.checked_on_date_utc as checkedOnDateUTC,  ev.enum_message_property as processingResult "
                     + commandAsJsonString + ", "
                     + " o.name as officeName, gl.level_name as groupLevelName, g.display_name as groupName, c.display_name as clientName, "
                     + " l.account_no as loanAccountNo, s.account_no as savingsAccountNo " + " from m_portfolio_command_source aud "
@@ -136,9 +137,11 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             final Long loanId = JdbcSupport.getLong(rs, "loanId");
             final Long subresourceId = JdbcSupport.getLong(rs, "subresourceId");
             final String maker = rs.getString("maker");
-            final ZonedDateTime madeOnDate = JdbcSupport.getDateTime(rs, "madeOnDate");
+            final ZonedDateTime madeOnDateTenant = JdbcSupport.getDateTime(rs, "madeOnDate");
+            final OffsetDateTime madeOnDateUTC = JdbcSupport.getOffsetDateTime(rs, "madeOnDateUTC");
             final String checker = rs.getString("checker");
-            final ZonedDateTime checkedOnDate = JdbcSupport.getDateTime(rs, "checkedOnDate");
+            final ZonedDateTime checkedOnDateTenant = JdbcSupport.getDateTime(rs, "checkedOnDate");
+            final OffsetDateTime checkedOnDateUTC = JdbcSupport.getOffsetDateTime(rs, "checkedOnDateUTC");
             final String processingResult = rs.getString("processingResult");
             final String resourceGetUrl = rs.getString("resourceGetUrl");
             String commandAsJson;
@@ -155,6 +158,9 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             final String clientName = rs.getString("clientName");
             final String loanAccountNo = rs.getString("loanAccountNo");
             final String savingsAccountNo = rs.getString("savingsAccountNo");
+
+            ZonedDateTime madeOnDate = madeOnDateUTC != null ? madeOnDateUTC.toZonedDateTime() : madeOnDateTenant;
+            ZonedDateTime checkedOnDate = checkedOnDateUTC != null ? checkedOnDateUTC.toZonedDateTime() : checkedOnDateTenant;
 
             return new AuditData(id, actionName, entityName, resourceId, subresourceId, maker, madeOnDate, checker, checkedOnDate,
                     processingResult, commandAsJson, officeName, groupLevelName, groupName, clientName, loanAccountNo, savingsAccountNo,
