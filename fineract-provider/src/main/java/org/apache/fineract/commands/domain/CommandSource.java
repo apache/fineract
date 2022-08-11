@@ -18,8 +18,7 @@
  */
 package org.apache.fineract.commands.domain;
 
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -72,15 +71,23 @@ public class CommandSource extends AbstractPersistableCustom {
     @JoinColumn(name = "maker_id", nullable = false)
     private AppUser maker;
 
-    @Column(name = "made_on_date", nullable = false)
-    private LocalDateTime madeOnDate;
+    /*
+     * Deprecated: Columns and data left untouched to help migration.
+     *
+     * @Column(name = "made_on_date", nullable = false) private LocalDateTime madeOnDate;
+     *
+     * @Column(name = "checked_on_date", nullable = true) private LocalDateTime checkedOnDate;
+     */
+
+    @Column(name = "made_on_date_utc", nullable = false)
+    private OffsetDateTime madeOnDate;
+
+    @Column(name = "checked_on_date_utc")
+    private OffsetDateTime checkedOnDate;
 
     @ManyToOne
     @JoinColumn(name = "checker_id", nullable = true)
     private AppUser checker;
-
-    @Column(name = "checked_on_date", nullable = true)
-    private LocalDateTime checkedOnDate;
 
     @Column(name = "processing_result_enum", nullable = false)
     private Integer processingResult;
@@ -99,7 +106,7 @@ public class CommandSource extends AbstractPersistableCustom {
 
     public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker) {
         return new CommandSource(wrapper.actionName(), wrapper.entityName(), wrapper.getHref(), command.entityId(), command.subentityId(),
-                command.json(), maker, ZonedDateTime.now(DateUtils.getDateTimeZoneOfTenant()));
+                command.json(), maker);
     }
 
     protected CommandSource() {
@@ -107,7 +114,7 @@ public class CommandSource extends AbstractPersistableCustom {
     }
 
     private CommandSource(final String actionName, final String entityName, final String href, final Long resourceId,
-            final Long subresourceId, final String commandSerializedAsJson, final AppUser maker, final ZonedDateTime madeOnDateTime) {
+            final Long subresourceId, final String commandSerializedAsJson, final AppUser maker) {
         this.actionName = actionName;
         this.entityName = entityName;
         this.resourceGetUrl = href;
@@ -115,7 +122,7 @@ public class CommandSource extends AbstractPersistableCustom {
         this.subresourceId = subresourceId;
         this.commandAsJson = commandSerializedAsJson;
         this.maker = maker;
-        this.madeOnDate = madeOnDateTime != null ? madeOnDateTime.toLocalDateTime() : null;
+        this.madeOnDate = DateUtils.getOffsetDateTimeOfTenant();
         this.processingResult = CommandProcessingResultType.PROCESSED.getValue();
     }
 
@@ -135,15 +142,15 @@ public class CommandSource extends AbstractPersistableCustom {
         this.organisationCreditBureauId = organisationCreditBureauId;
     }
 
-    public void markAsChecked(final AppUser checker, final ZonedDateTime checkedOnDate) {
+    public void markAsChecked(final AppUser checker) {
         this.checker = checker;
-        this.checkedOnDate = checkedOnDate != null ? checkedOnDate.toLocalDateTime() : null;
+        this.checkedOnDate = DateUtils.getOffsetDateTimeOfTenant();
         this.processingResult = CommandProcessingResultType.PROCESSED.getValue();
     }
 
-    public void markAsRejected(final AppUser checker, final ZonedDateTime checkedOnDate) {
+    public void markAsRejected(final AppUser checker) {
         this.checker = checker;
-        this.checkedOnDate = checkedOnDate != null ? checkedOnDate.toLocalDateTime() : null;
+        this.checkedOnDate = DateUtils.getOffsetDateTimeOfTenant();
         this.processingResult = CommandProcessingResultType.REJECTED.getValue();
     }
 

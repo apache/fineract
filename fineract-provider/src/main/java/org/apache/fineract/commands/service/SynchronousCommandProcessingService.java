@@ -22,7 +22,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.time.Instant;
-import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +31,7 @@ import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
 import org.apache.fineract.commands.domain.CommandWrapper;
+import org.apache.fineract.commands.exception.CommandNotFoundException;
 import org.apache.fineract.commands.exception.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.apache.fineract.commands.exception.UnsupportedCommandException;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
@@ -41,7 +41,6 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.hooks.event.HookEvent;
 import org.apache.fineract.infrastructure.hooks.event.HookEventSource;
@@ -84,10 +83,11 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
         final AppUser maker = this.context.authenticatedUser(wrapper);
 
-        CommandSource commandSourceResult = null;
+        CommandSource commandSourceResult;
         if (command.commandId() != null) {
-            commandSourceResult = this.commandSourceRepository.findById(command.commandId()).orElse(null);
-            commandSourceResult.markAsChecked(maker, ZonedDateTime.now(DateUtils.getDateTimeZoneOfTenant()));
+            commandSourceResult = this.commandSourceRepository.findById(command.commandId())
+                    .orElseThrow(() -> new CommandNotFoundException(command.commandId()));
+            commandSourceResult.markAsChecked(maker);
         } else {
             commandSourceResult = CommandSource.fullEntryFrom(wrapper, command, maker);
         }
@@ -95,7 +95,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         commandSourceResult.updateForAudit(result.getOfficeId(), result.getGroupId(), result.getClientId(), result.getLoanId(),
                 result.getSavingsId(), result.getProductId(), result.getTransactionId());
 
-        String changesOnlyJson = null;
+        String changesOnlyJson;
         boolean rollBack = (rollbackTransaction || result.isRollbackTransaction()) && !isApprovedByChecker;
         if (result.hasChanges() && !rollBack) {
             changesOnlyJson = this.toApiJsonSerializer.serializeResult(result.getChanges());
@@ -142,7 +142,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     }
 
     private NewCommandSourceHandler findCommandHandler(final CommandWrapper wrapper) {
-        NewCommandSourceHandler handler = null;
+        NewCommandSourceHandler handler;
 
         if (wrapper.isDatatableResource()) {
             if (wrapper.isCreateDatatable()) {
@@ -209,8 +209,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     private void publishErrorEvent(CommandWrapper wrapper, JsonCommand command, Throwable t) {
 
         ErrorInfo ex;
-        if (t instanceof RuntimeException) {
-            final RuntimeException e = (RuntimeException) t;
+        if (t instanceof final RuntimeException e) {
             ex = ErrorHandler.handler(e);
         } else {
             ex = new ErrorInfo(500, 9999, "{\"Exception\": " + t.toString() + "}");
@@ -249,8 +248,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                     reqmap.put("clientId", resultCopy.getClientId());
                     resultCopy.setOfficeId(null);
                     reqmap.put("response", resultCopy);
-                } else if (result instanceof ErrorInfo) {
-                    ErrorInfo ex = (ErrorInfo) result;
+                } else if (result instanceof ErrorInfo ex) {
                     reqmap.put("status", "Exception");
 
                     Map<String, Object> errorMap = gson.fromJson(ex.getMessage(), type);
