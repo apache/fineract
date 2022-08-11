@@ -20,7 +20,7 @@
 # https://www.gitpod.io/docs/41_Config_Gitpod_File/
 # https://github.com/gitpod-io/workspace-images/tree/master/mysql
 
-image: gitpod/workspace-mysql
+image: gitpod/workspace-mysql:2022-08-04-13-40-17
 ports:
 - port: 3306
   onOpen: ignore
@@ -40,3 +40,4 @@ tasks:
       ./gradlew createDB -PdbName=fineract_tenants
       ./gradlew createDB -PdbName=fineract_default
       ./gradlew build -x test
+  init: sdk default java 17.0.4.fx-zulu
