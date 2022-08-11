@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.note.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,7 +28,6 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.note.data.NoteData;
 import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.note.exception.NoteNotFoundException;
@@ -70,19 +68,16 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
             final Integer noteTypeId = JdbcSupport.getInteger(rs, "noteTypeEnum");
             final EnumOptionData noteType = NoteEnumerations.noteType(noteTypeId);
             final String note = rs.getString("note");
-            final LocalDateTime createdDateLocal = JdbcSupport.getLocalDateTime(rs, "createdDate");
+            final OffsetDateTime createdDateLocal = JdbcSupport.getOffsetDateTime(rs, "createdDate");
             final OffsetDateTime createdDateUtc = JdbcSupport.getOffsetDateTime(rs, "createdDateUtc");
             final Long createdById = JdbcSupport.getLong(rs, "createdById");
-            final LocalDateTime lastModifiedDateLocal = JdbcSupport.getLocalDateTime(rs, "lastModifiedDate");
+            final OffsetDateTime lastModifiedDateLocal = JdbcSupport.getOffsetDateTime(rs, "lastModifiedDate");
             final OffsetDateTime lastModifiedDateUtc = JdbcSupport.getOffsetDateTime(rs, "lastModifiedDateUtc");
             final Long lastModifiedById = JdbcSupport.getLong(rs, "lastModifiedById");
             final String createdByUsername = rs.getString("createdBy");
             final String updatedByUsername = rs.getString("modifiedBy");
-            final OffsetDateTime createdDate = createdDateUtc != null ? createdDateUtc
-                    : OffsetDateTime.of(createdDateLocal, DateUtils.getDateTimeZoneOfTenant().getRules().getOffset(createdDateLocal));
-            final OffsetDateTime lastModifiedDate = lastModifiedDateUtc != null ? lastModifiedDateUtc
-                    : OffsetDateTime.of(lastModifiedDateLocal,
-                            DateUtils.getDateTimeZoneOfTenant().getRules().getOffset(lastModifiedDateLocal));
+            final OffsetDateTime createdDate = createdDateUtc != null ? createdDateUtc : createdDateLocal;
+            final OffsetDateTime lastModifiedDate = lastModifiedDateUtc != null ? lastModifiedDateUtc : lastModifiedDateLocal;
             return new NoteData(id, clientId, groupId, loanId, transactionId, null, null, noteType, note, createdDate, createdById,
                     createdByUsername, lastModifiedDate, lastModifiedById, updatedByUsername);
         }

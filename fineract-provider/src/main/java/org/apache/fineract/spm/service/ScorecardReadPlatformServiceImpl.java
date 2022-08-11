@@ -20,7 +20,7 @@ package org.apache.fineract.spm.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -89,7 +89,7 @@ public class ScorecardReadPlatformServiceImpl implements ScorecardReadPlatformSe
 
             final Long questionId = rs.getLong("questionId");
             final Long responseId = rs.getLong("responseId");
-            final LocalDateTime createdOn = JdbcSupport.getLocalDateTime(rs, "createdOn");
+            final OffsetDateTime createdOn = JdbcSupport.getOffsetDateTime(rs, "createdOn");
             final Integer value = rs.getInt("value");
 
             return ScorecardValue.instance(questionId, responseId, value, createdOn);
