@@ -245,7 +245,8 @@ public final class SavingsAccountTransactionData implements Serializable {
         return this.transactionDate;
     }
 
-    public EndOfDayBalance toEndOfDayBalanceBoundedBy(final Money openingBalance, final LocalDateInterval boundedBy) {
+    public EndOfDayBalance toEndOfDayBalanceBoundedBy(final Money openingBalance, final LocalDateInterval boundedBy,
+            final boolean isAllowOverdraft) {
 
         final MonetaryCurrency currency = openingBalance.getCurrency();
         Money endOfDayBalance = openingBalance.copy();
@@ -263,7 +264,7 @@ public final class SavingsAccountTransactionData implements Serializable {
             if (isDeposit() || isDividendPayoutAndNotReversed()) {
                 endOfDayBalance = endOfDayBalance.plus(getAmount());
             } else if (isWithdrawal() || isChargeTransactionAndNotReversed()) {
-                if (endOfDayBalance.isGreaterThanZero()) {
+                if (endOfDayBalance.isGreaterThanZero() || isAllowOverdraft) {
                     endOfDayBalance = endOfDayBalance.minus(getAmount());
                 } else {
                     endOfDayBalance = Money.of(currency, this.runningBalance);
