@@ -55,4 +55,5 @@
     <include file="parts/0033_add_audit_entries_to_loan_repayment_schedule_installment.xml" relativeToChangelogFile="true"/>
     <include file="parts/0034_add_audit_entries_to_note.xml" relativeToChangelogFile="true"/>
     <include file="parts/0035_add_audit_entries_to_calendar.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0036_add_audit_entries_and_rework_command_source_datetime_fields.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
