@@ -37,7 +37,7 @@ dependencies {
             'org.springframework.boot:spring-boot-starter-integration',
             'org.springframework.integration:spring-integration-event',
 
-            'org.glassfish.jersey.media:jersey-media-multipart:2.36',
+            'org.glassfish.jersey.media:jersey-media-multipart:3.0.6',
 
             'org.springframework:spring-jms',
             'org.springframework:spring-context-support',
