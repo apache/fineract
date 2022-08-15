@@ -1031,6 +1031,8 @@ final class LoansApiResourceSwagger {
         public String externalId;
         @Schema(description = "List of PostLoansDisbursementData")
         public List<PostLoansDisbursementData> disbursementData;
+        @Schema(description = "Maximum allowed outstanding balance")
+        public BigDecimal maxOutstandingLoanBalance;
     }
 
     @Schema(description = "PostLoansResponse")
