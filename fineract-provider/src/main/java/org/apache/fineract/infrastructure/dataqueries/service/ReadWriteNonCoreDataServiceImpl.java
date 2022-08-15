@@ -26,10 +26,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -1231,8 +1231,6 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             LOG.info("Update sql: {}", sql);
             if (StringUtils.isNotBlank(sql)) {
                 this.jdbcTemplate.update(sql);
-                changes.put("locale", dataParams.get("locale"));
-                changes.put("dateFormat", "yyyy-MM-dd");
             } else {
                 LOG.info("No Changes");
             }
@@ -1484,13 +1482,18 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             for (int i = 0; i < rsmd.getColumnCount(); i++) {
                 final String columnName = rsmd.getColumnName(i + 1);
                 final String colType = genericResultsetData.getColTypeOfColumnNamed(columnName);
-                if ("DECIMAL".equalsIgnoreCase(colType)) {
-                    columnValues.add(rowSet.getBigDecimal(columnName));
-                } else if ("DATE".equalsIgnoreCase(colType) || ("TIMESTAMP WITHOUT TIME ZONE".equalsIgnoreCase(colType) // PostgreSQL
-                        || "DATETIME".equalsIgnoreCase(colType) || "TIMESTAMP".equalsIgnoreCase(colType))) {
-                    columnValues.add(rowSet.getObject(columnName));
+
+                if ("DATE".equalsIgnoreCase(colType)) {
+                    Date tmpDate = (Date) rowSet.getObject(columnName);
+                    columnValues.add(tmpDate != null ? tmpDate.toLocalDate() : null);
+                } else if ("TIMESTAMP WITHOUT TIME ZONE".equalsIgnoreCase(colType) // PostgreSQL
+                        || "DATETIME".equalsIgnoreCase(colType) || "TIMESTAMP".equalsIgnoreCase(colType)) {
+                    Object tmpDate = rowSet.getObject(columnName);
+
+                    columnValues
+                            .add(tmpDate != null ? tmpDate instanceof Timestamp ? ((Timestamp) tmpDate).toLocalDateTime() : tmpDate : null);
                 } else {
-                    columnValues.add(rowSet.getString(columnName));
+                    columnValues.add(rowSet.getObject(columnName));
                 }
             }
 
@@ -1506,7 +1509,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         String applicationTableName = "";
 
-        final SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, new Object[] { datatable }); // NOSONAR
+        final SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, datatable); // NOSONAR
         if (rowSet.next()) {
             applicationTableName = rowSet.getString("application_table_name");
         } else {
@@ -1523,7 +1526,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private String getAddSql(final List<ResultsetColumnHeaderData> columnHeaders, final String datatable, final String fkName,
             final Long appTableId, final Map<String, String> queryParams) {
 
-        final Map<String, String> affectedColumns = getAffectedColumns(columnHeaders, queryParams, fkName);
+        final Map<String, Object> affectedColumns = getAffectedColumns(columnHeaders, queryParams, fkName);
 
         String pValueWrite = "";
         String addSql = "";
@@ -1536,7 +1539,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         for (final ResultsetColumnHeaderData pColumnHeader : columnHeaders) {
             final String key = pColumnHeader.getColumnName();
             if (affectedColumns.containsKey(key)) {
-                pValue = affectedColumns.get(key);
+                pValue = String.valueOf(affectedColumns.get(key));
                 if (StringUtils.isEmpty(pValue)) {
                     pValueWrite = "null";
                 } else {
@@ -1589,7 +1592,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     public String getAddSqlWithScore(final List<ResultsetColumnHeaderData> columnHeaders, final String datatable, final String fkName,
             final Long appTableId, final Map<String, String> queryParams) {
 
-        final Map<String, String> affectedColumns = getAffectedColumns(columnHeaders, queryParams, fkName);
+        final Map<String, Object> affectedColumns = getAffectedColumns(columnHeaders, queryParams, fkName);
 
         String pValueWrite = "";
         String scoresId = " ";
@@ -1600,7 +1603,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         String columnName = "";
         String pValue = null;
         for (final String key : affectedColumns.keySet()) {
-            pValue = affectedColumns.get(key);
+            pValue = String.valueOf(affectedColumns.get(key));
 
             if (StringUtils.isEmpty(pValue)) {
                 pValueWrite = "null";
@@ -1655,7 +1658,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                     sql += ", ";
                 }
 
-                pValue = (String) changedColumns.get(key);
+                pValue = String.valueOf(changedColumns.get(key));
                 if (StringUtils.isEmpty(pValue)) {
                     pValueWrite = "null";
                 } else {
@@ -1688,13 +1691,12 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private Map<String, Object> getAffectedAndChangedColumns(final GenericResultsetData grs, final Map<String, String> queryParams,
             final String fkName) {
 
-        final Map<String, String> affectedColumns = getAffectedColumns(grs.getColumnHeaders(), queryParams, fkName);
+        final Map<String, Object> affectedColumns = getAffectedColumns(grs.getColumnHeaders(), queryParams, fkName);
         final Map<String, Object> affectedAndChangedColumns = new HashMap<>();
 
         for (final String key : affectedColumns.keySet()) {
-            final String columnValue = affectedColumns.get(key);
-            final String colType = grs.getColTypeOfColumnNamed(key);
-            if (columnChanged(key, columnValue, colType, grs)) {
+            final Object columnValue = affectedColumns.get(key);
+            if (columnChanged(key, columnValue, grs)) {
                 affectedAndChangedColumns.put(key, columnValue);
             }
         }
@@ -1702,27 +1704,24 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         return affectedAndChangedColumns;
     }
 
-    private boolean columnChanged(final String key, final String keyValue, final String colType, final GenericResultsetData grs) {
+    private boolean columnChanged(final String key, final Object value, final GenericResultsetData grs) {
 
         final List<Object> columnValues = grs.getData().get(0).getRow();
 
-        String columnValue = null;
+        Object columnValue = null;
         for (int i = 0; i < grs.getColumnHeaders().size(); i++) {
 
             if (key.equals(grs.getColumnHeaders().get(i).getColumnName())) {
-                columnValue = (String) columnValues.get(i);
+                columnValue = columnValues.get(i);
 
-                if (notTheSame(columnValue, keyValue, colType)) {
-                    return true;
-                }
-                return false;
+                return notTheSame(columnValue, value);
             }
         }
 
         throw new PlatformDataIntegrityException("error.msg.invalid.columnName", "Parameter Column Name: " + key + " not found");
     }
 
-    public Map<String, String> getAffectedColumns(final List<ResultsetColumnHeaderData> columnHeaders,
+    public Map<String, Object> getAffectedColumns(final List<ResultsetColumnHeaderData> columnHeaders,
             final Map<String, String> queryParams, final String keyFieldName) {
 
         final String dateFormat = queryParams.get("dateFormat");
@@ -1735,11 +1734,12 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         final String underscore = "_";
         final String space = " ";
         String pValue = null;
+        Object validatedValue = null;
         String queryParamColumnUnderscored;
         String columnHeaderUnderscored;
         boolean notFound;
 
-        final Map<String, String> affectedColumns = new HashMap<>();
+        final Map<String, Object> affectedColumns = new HashMap<>();
         final Set<String> keys = queryParams.keySet();
         for (final String key : keys) {
             // ignores id and foreign key fields
@@ -1756,8 +1756,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                         columnHeaderUnderscored = this.genericDataService.replace(columnHeader.getColumnName(), space, underscore);
                         if (queryParamColumnUnderscored.equalsIgnoreCase(columnHeaderUnderscored)) {
                             pValue = queryParams.get(key);
-                            pValue = validateColumn(columnHeader, pValue, dateFormat, clientApplicationLocale);
-                            affectedColumns.put(columnHeader.getColumnName(), pValue);
+                            validatedValue = validateColumn(columnHeader, pValue, dateFormat, clientApplicationLocale);
+                            affectedColumns.put(columnHeader.getColumnName(), validatedValue);
                             notFound = false;
                         }
                     }
@@ -1771,7 +1771,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         return affectedColumns;
     }
 
-    private String validateColumn(final ResultsetColumnHeaderData columnHeader, final String pValue, final String dateFormat,
+    private Object validateColumn(final ResultsetColumnHeaderData columnHeader, final String pValue, final String dateFormat,
             final Locale clientApplicationLocale) {
 
         String paramValue = pValue;
@@ -1793,7 +1793,6 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }
 
         if (StringUtils.isNotEmpty(paramValue)) {
-
             if (columnHeader.hasColumnValues()) {
                 if (columnHeader.isCodeValueDisplayType()) {
 
@@ -1819,7 +1818,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                                 dataValidationErrors);
                     }
 
-                    return paramValue;
+                    return codeLookup;
                 } else {
                     throw new PlatformDataIntegrityException("error.msg.invalid.columnType.", "Code: " + columnHeader.getColumnName()
                             + " - Invalid Type " + columnHeader.getColumnType() + " (neither varchar nor int)");
@@ -1827,35 +1826,13 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             }
 
             if (columnHeader.isDateDisplayType()) {
-                final LocalDate tmpDate = JsonParserHelper.convertFrom(paramValue, columnHeader.getColumnName(), dateFormat,
-                        clientApplicationLocale);
-                if (tmpDate == null) {
-                    paramValue = null;
-                } else {
-                    paramValue = tmpDate.toString();
-                }
+                return JsonParserHelper.convertFrom(paramValue, columnHeader.getColumnName(), dateFormat, clientApplicationLocale);
             } else if (columnHeader.isDateTimeDisplayType()) {
-                final LocalDateTime tmpDateTime = JsonParserHelper.convertDateTimeFrom(paramValue, columnHeader.getColumnName(), dateFormat,
-                        clientApplicationLocale);
-                if (tmpDateTime == null) {
-                    paramValue = null;
-                } else {
-                    paramValue = tmpDateTime.toString();
-                }
+                return JsonParserHelper.convertDateTimeFrom(paramValue, columnHeader.getColumnName(), dateFormat, clientApplicationLocale);
             } else if (columnHeader.isIntegerDisplayType()) {
-                final Integer tmpInt = this.helper.convertToInteger(paramValue, columnHeader.getColumnName(), clientApplicationLocale);
-                if (tmpInt == null) {
-                    paramValue = null;
-                } else {
-                    paramValue = tmpInt.toString();
-                }
+                return this.helper.convertToInteger(paramValue, columnHeader.getColumnName(), clientApplicationLocale);
             } else if (columnHeader.isDecimalDisplayType()) {
-                final BigDecimal tmpDecimal = this.helper.convertFrom(paramValue, columnHeader.getColumnName(), clientApplicationLocale);
-                if (tmpDecimal == null) {
-                    paramValue = null;
-                } else {
-                    paramValue = tmpDecimal.toString();
-                }
+                return this.helper.convertFrom(paramValue, columnHeader.getColumnName(), clientApplicationLocale);
             } else if (columnHeader.isBooleanDisplayType()) {
 
                 final Boolean tmpBoolean = BooleanUtils.toBooleanObject(paramValue);
@@ -1870,7 +1847,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                     throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
                             dataValidationErrors);
                 }
-                paramValue = tmpBoolean.toString();
+                return tmpBoolean;
             } else if (columnHeader.isString()) {
                 if (columnHeader.getColumnLength() > 0 && paramValue.length() > columnHeader.getColumnLength()) {
                     final ApiParameterError error = ApiParameterError.parameterError(
@@ -1884,7 +1861,6 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 }
             }
         }
-
         return paramValue;
     }
 
@@ -1911,31 +1887,18 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         return multiRow;
     }
 
-    private boolean notTheSame(final String currValue, final String pValue, final String colType) {
-        if (StringUtils.isEmpty(currValue) && StringUtils.isEmpty(pValue)) {
+    private boolean notTheSame(final Object currValue, final Object pValue) {
+        if (currValue == null && pValue == null) {
             return false;
-        }
-
-        if (StringUtils.isEmpty(currValue)) {
+        } else if (currValue == null || pValue == null) {
             return true;
         }
-
-        if (StringUtils.isEmpty(pValue)) {
-            return true;
+        // Equals would fail if the scale is not the same
+        if (currValue instanceof BigDecimal && pValue instanceof BigDecimal) {
+            return !(((BigDecimal) currValue).compareTo((BigDecimal) pValue) == 0);
+        } else {
+            return !currValue.equals(pValue);
         }
-
-        if ("DECIMAL".equalsIgnoreCase(colType)) {
-            final BigDecimal currentDecimal = BigDecimal.valueOf(Double.parseDouble(currValue));
-            final BigDecimal newDecimal = BigDecimal.valueOf(Double.parseDouble(pValue));
-
-            return currentDecimal.compareTo(newDecimal) != 0;
-        }
-
-        if (currValue.equals(pValue)) {
-            return false;
-        }
-
-        return true;
     }
 
     @Override
