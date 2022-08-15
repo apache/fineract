@@ -39,15 +39,18 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import java.util.TimeZone;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.conn.HttpHostConnectException;
@@ -61,27 +64,25 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("unchecked")
 public final class Utils {
 
-    private Utils() {
-
-    }
-
-    private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
-    private static final SecureRandom random = new SecureRandom();
-    private static final Gson gson = new Gson();
-
     public static final String TENANT_PARAM_NAME = "tenantIdentifier";
     public static final String DEFAULT_TENANT = "default";
     public static final String TENANT_IDENTIFIER = TENANT_PARAM_NAME + '=' + DEFAULT_TENANT;
-
-    public static final String TENANT_TIME_ZONE = "Asia/Kolkata";
-
-    private static final String HEALTH_URL = "/fineract-provider/actuator/health";
     private static final String LOGIN_URL = "/fineract-provider/api/v1/authentication?" + TENANT_IDENTIFIER;
-
+    public static final String TENANT_TIME_ZONE = "Asia/Kolkata";
     public static final String DATE_FORMAT = "dd MMMM yyyy";
     public static final String DATE_TIME_FORMAT = "dd MMMM yyyy HH:mm";
     public static final DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern(DATE_FORMAT).toFormatter();
     public static final DateTimeFormatter dateTimeFormatter = new DateTimeFormatterBuilder().appendPattern(DATE_TIME_FORMAT).toFormatter();
+    private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
+    private static final SecureRandom random = new SecureRandom();
+    private static final Gson gson = new Gson();
+    private static final String HEALTH_URL = "/fineract-provider/actuator/health";
+
+    private static final Random r = new Random();
+
+    private Utils() {
+
+    }
 
     public static void initializeRESTAssured() {
         RestAssured.baseURI = "https://localhost";
@@ -270,7 +271,7 @@ public final class Utils {
 
     @SuppressFBWarnings(value = {
             "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
-    public static Long randomNumberGenerator(final int expectedLength) {
+    public static Integer randomNumberGenerator(final int expectedLength) {
         final String source = "1234567890";
         final int lengthOfSource = source.length();
 
@@ -278,7 +279,22 @@ public final class Utils {
         for (int i = 0; i < expectedLength; i++) {
             stringBuilder.append(source.charAt(random.nextInt(lengthOfSource)));
         }
-        return Long.parseLong(stringBuilder.toString());
+        return Integer.parseInt(stringBuilder.toString());
+    }
+
+    public static Float randomDecimalGenerator(final int expectedWholeLength, final int expectedFractionLength) {
+        final String source = "1234567890";
+        final int lengthOfSource = source.length();
+
+        StringBuilder stringBuilder = new StringBuilder(expectedWholeLength + expectedFractionLength + 1);
+        for (int i = 0; i < expectedWholeLength; i++) {
+            stringBuilder.append(source.charAt(random.nextInt(lengthOfSource)));
+        }
+        stringBuilder.append(".");
+        for (int i = 0; i < expectedFractionLength; i++) {
+            stringBuilder.append(source.charAt(random.nextInt(lengthOfSource)));
+        }
+        return Float.parseFloat(stringBuilder.toString());
     }
 
     public static String convertDateToURLFormat(final Calendar dateToBeConvert) {
@@ -343,4 +359,66 @@ public final class Utils {
         return "{}";
     }
 
+    public static String randomDateGenerator(String dateFormat) {
+        DateTimeFormatter dateTimeFormatterBuilder = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient()
+                .appendPattern(dateFormat).optionalStart().appendPattern(" HH:mm:ss").optionalEnd()
+                .parseDefaulting(ChronoField.HOUR_OF_DAY, 0).parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+                .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0).toFormatter();
+        LocalDate localDate = LocalDate.of(getYear(), getMonth(), getDay());
+        return dateTimeFormatterBuilder.format(localDate);
+    }
+
+    public static String randomDateTimeGenerator(String dateFormat) {
+        DateTimeFormatter dateTimeFormatterBuilder = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient()
+                .appendPattern(dateFormat).optionalStart().appendPattern(" HH:mm:ss").optionalEnd()
+                .parseDefaulting(ChronoField.HOUR_OF_DAY, 0).parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+                .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0).toFormatter();
+        LocalDateTime localDate = LocalDateTime.of(getYear(), getMonth(), getDay(), getHour(), getMinute(), getSecond());
+        return dateTimeFormatterBuilder.format(localDate);
+    }
+
+    private static int getYear() {
+        return 1000 + r.nextInt(1001);
+    }
+
+    private static int getMonth() {
+        return 10 + r.nextInt(3);
+    }
+
+    private static int getDay() {
+        return 10 + r.nextInt(16);
+    }
+
+    private static int getHour() {
+        return 10 + r.nextInt(14);
+    }
+
+    private static int getMinute() {
+        return 10 + r.nextInt(50);
+    }
+
+    private static int getSecond() {
+        return 10 + r.nextInt(50);
+    }
+
+    public static String arrayDateToString(List intArray) {
+        String[] strArray = (String[]) intArray.stream().map(String::valueOf).toArray(String[]::new);
+        return String.join("-", strArray);
+    }
+
+    public static String arrayDateTimeToString(List<Integer> integerList) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            if (i < 2) {
+                stringBuilder.append(integerList.get(i)).append("-");
+            } else if (i == 2) {
+                stringBuilder.append(integerList.get(i)).append(" ");
+            } else if (i == 3) {
+                stringBuilder.append(integerList.get(i));
+            } else {
+                stringBuilder.append(":").append(integerList.get(i));
+            }
+        }
+        return stringBuilder.toString();
+    }
 }

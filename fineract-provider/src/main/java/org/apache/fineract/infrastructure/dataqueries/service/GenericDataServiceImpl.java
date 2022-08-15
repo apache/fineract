@@ -24,7 +24,6 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
@@ -82,10 +81,18 @@ public class GenericDataServiceImpl implements GenericDataService {
                 final List<Object> columnValues = new ArrayList<>();
                 for (int i = 0; i < rsmd.getColumnCount(); i++) {
                     final String columnName = rsmd.getColumnName(i + 1);
-                    final String columnValue = rs.getString(columnName);
-                    columnValues.add(columnValue);
+                    final String colType = columnHeaders.get(i).getColumnType();
+                    if ("DATE".equalsIgnoreCase(colType)) {
+                        java.sql.Date tmpDate = (java.sql.Date) rs.getObject(columnName);
+                        columnValues.add(tmpDate != null ? tmpDate.toLocalDate() : null);
+                    } else if ("TIMESTAMP WITHOUT TIME ZONE".equalsIgnoreCase(colType) // PostgreSQL
+                            || "DATETIME".equalsIgnoreCase(colType) || "TIMESTAMP".equalsIgnoreCase(colType)) {
+                        Timestamp tmpDate = (Timestamp) rs.getObject(columnName);
+                        columnValues.add(tmpDate != null ? tmpDate.toLocalDateTime() : null);
+                    } else {
+                        columnValues.add(rs.getObject(columnName));
+                    }
                 }
-
                 final ResultsetRowData resultsetDataRow = ResultsetRowData.create(columnValues);
                 resultsetDataRows.add(resultsetDataRow);
             }
@@ -167,19 +174,20 @@ public class GenericDataServiceImpl implements GenericDataService {
                 }
                 currVal = row.get(j);
                 if (currVal != null && currColType != null) {
-                    if (currColType.equals("DECIMAL") || currColType.equals("INTEGER")) {
+                    if (currColType.equalsIgnoreCase("DECIMAL") || currColType.equalsIgnoreCase("INTEGER")
+                            || currColType.equalsIgnoreCase("CODELOOKUP")) {
                         writer.append(currVal);
                     } else {
-                        if (currColType.equals("DATE")) {
-                            final LocalDate localDate = new java.sql.Date(((Date) currVal).getTime()).toLocalDate();
+                        if (currColType.equalsIgnoreCase("DATE")) {
+                            final LocalDate localDate = (LocalDate) currVal;
                             writer.append(format("[%d,%d,%d]", localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth()));
-                        } else if (currColType.equals("DATETIME")) {
-                            final LocalDateTime ldt = currVal instanceof Timestamp ? ((Timestamp) currVal).toLocalDateTime()
-                                    : (LocalDateTime) currVal;
-                            writer.append(format("[%d,%d,%d,%d,%d,%d,%d]", ldt.getYear(), ldt.getMonthValue(), ldt.getDayOfMonth(),
-                                    ldt.getHour(), ldt.getMinute(), ldt.getSecond(), ldt.getNano()));
+                        } else if (currColType.equalsIgnoreCase("DATETIME")) {
+                            final LocalDateTime localDateTime = (LocalDateTime) currVal;
+                            writer.append(format("[%d,%d,%d,%d,%d,%d,%d]", localDateTime.getYear(), localDateTime.getMonthValue(),
+                                    localDateTime.getDayOfMonth(), localDateTime.getHour(), localDateTime.getMinute(),
+                                    localDateTime.getSecond(), localDateTime.getNano()));
                         } else {
-                            writer.append(doubleQuote + replace((String) currVal, doubleQuote, slashDoubleQuote) + doubleQuote);
+                            writer.append(doubleQuote + replace(String.valueOf(currVal), doubleQuote, slashDoubleQuote) + doubleQuote);
                         }
                     }
                 } else {
