@@ -149,7 +149,7 @@ configurations {
     driver
 }
 dependencies {
-    driver 'org.mariadb.jdbc:mariadb-java-client:2.7.6'
+    driver 'org.mariadb.jdbc:mariadb-java-client:3.0.7'
     driver 'org.postgresql:postgresql:42.4.0'
     driver 'mysql:mysql-connector-java:8.0.30'
 }
@@ -221,7 +221,7 @@ bootRun {
     ]
 
     dependencies {
-        implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.6'
+        implementation 'org.mariadb.jdbc:mariadb-java-client:3.0.7'
         implementation 'org.postgresql:postgresql:42.4.0'
     }
 }
@@ -285,7 +285,7 @@ jib {
     allowInsecureRegistries = true
 
     dependencies {
-        implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.6'
+        implementation 'org.mariadb.jdbc:mariadb-java-client:3.0.7'
         implementation 'org.postgresql:postgresql:42.4.0'
     }
 
