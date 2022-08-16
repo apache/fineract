@@ -67,7 +67,7 @@ public class SchedulerStopListener implements JobListener {
                     SchedulerStopListener.this.jobRegisterService.stopScheduler(schedulerName);
                 }
             });
-            newThread.run();
+            newThread.start();
         }
     }
 
