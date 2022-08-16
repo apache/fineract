@@ -43,6 +43,10 @@
     "allowedVersions": "<=1.0.1"
   },
   {
+    "matchPackageNames": ["org.glassfish.jersey.media:jersey-media-multipart"],
+    "allowedVersions": "<=2.36"
+  },
+  {
     "depTypeList": ["dependencies"],
     "updateTypes": ["patch", "minor"],
     "groupName": "non-major"
