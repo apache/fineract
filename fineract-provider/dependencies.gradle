@@ -72,22 +72,6 @@ dependencies {
 
             'org.apache.pdfbox:pdfbox',
 
-            'org.pentaho.reporting.engine:classic-core',
-            'org.pentaho.reporting.engine:classic-extensions',
-            'org.pentaho.reporting.engine:classic-extensions-scripting',
-            'org.pentaho.reporting.engine:wizard-core',
-            'org.pentaho.reporting.designer:wizard-xul',
-            'org.pentaho.reporting.library:libbase',
-            'org.pentaho.reporting.library:libdocbundle',
-            'org.pentaho.reporting.library:libfonts',
-            'org.pentaho.reporting.library:libformat',
-            'org.pentaho.reporting.library:libformula',
-            'org.pentaho.reporting.library:libloader',
-            'org.pentaho.reporting.library:librepository',
-            'org.pentaho.reporting.library:libserializer',
-            'org.pentaho.reporting.library:libsparkline',
-            'org.pentaho.reporting.library:libxml',
-            'org.openjdk.nashorn:nashorn-core',
             'mysql:mysql-connector-java',
             'org.apache.commons:commons-email',
             'com.sun.activation:jakarta.activation',
@@ -96,6 +80,9 @@ dependencies {
             'org.springdoc:springdoc-openapi-ui',
             'org.springdoc:springdoc-openapi-common',
             'org.springdoc:springdoc-openapi-security',
+            fileTree('thirdparty') {
+                include '*.jar' },
+            'org.openjdk.nashorn:nashorn-core'
             )
 
     implementation ('org.apache.commons:commons-email') {

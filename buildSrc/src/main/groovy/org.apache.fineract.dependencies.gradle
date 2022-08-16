@@ -167,7 +167,7 @@ dependencyManagement {
 
         dependency 'org.owasp.esapi:esapi:2.4.0.0'
 
-        dependencySet(group: 'org.apache.poi', version: '5.2.2') {
+        dependencySet(group: 'org.apache.poi', version: '4.1.2') {
             entry 'poi'
             entry 'poi-ooxml'
             entry 'poi-ooxml-schemas'
