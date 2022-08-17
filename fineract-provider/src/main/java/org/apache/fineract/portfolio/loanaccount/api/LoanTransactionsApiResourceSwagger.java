@@ -163,6 +163,17 @@ final class LoanTransactionsApiResourceSwagger {
         public String externalId;
         @Schema(example = "3")
         public Integer paymentTypeId;
+        @Schema(example = "acc123")
+        public String accountNumber;
+        @Schema(example = "che123")
+        public String checkNumber;
+        @Schema(example = "rou123")
+        public String routingCode;
+        @Schema(example = "rec123")
+        public String receiptNumber;
+        @Schema(example = "ban123")
+        public String bankNumber;
+
     }
 
     @Schema(description = "PostLoansLoanIdTransactionsResponse")
