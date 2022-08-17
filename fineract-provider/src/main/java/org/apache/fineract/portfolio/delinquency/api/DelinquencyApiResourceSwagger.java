@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.delinquency.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDate;
 
 public final class DelinquencyApiResourceSwagger {
 
@@ -131,6 +132,23 @@ public final class DelinquencyApiResourceSwagger {
 
         @Schema(example = "1")
         public Integer resourceId;
+    }
+
+    @Schema(description = "GetDelinquencyTagHistoryResponse")
+    public static final class GetDelinquencyTagHistoryResponse {
+
+        private GetDelinquencyTagHistoryResponse() {}
+
+        @Schema(example = "1")
+        public Integer id;
+        @Schema(example = "10")
+        public Long loanId;
+        @Schema(example = "Delinquent 1")
+        public String delinquencyRange;
+        @Schema(example = "2013,1,2")
+        public LocalDate addedOnDate;
+        @Schema(example = "2013,2,20")
+        public LocalDate liftedOnDate;
     }
 
 }
