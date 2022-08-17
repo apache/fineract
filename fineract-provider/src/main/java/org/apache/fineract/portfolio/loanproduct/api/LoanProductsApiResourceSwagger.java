@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.portfolio.delinquency.api.DelinquencyApiResourceSwagger.GetDelinquencyBucketsResponse;
 
 /**
  * Created by Chirag Gupta on 12/27/17.
@@ -151,6 +152,8 @@ final class LoanProductsApiResourceSwagger {
         public Integer overpaymentLiabilityAccountId;
         @Schema(example = "41")
         public Integer writeOffAccountId;
+        @Schema(example = "48")
+        public Integer goodwillCreditAccountId;
         @Schema(example = "false")
         public Boolean includeInBorrowerCycle;
         @Schema(example = "false")
@@ -1221,6 +1224,7 @@ final class LoanProductsApiResourceSwagger {
         public Integer overdueDaysForNPA;
         @Schema(example = "50")
         public Integer principalThresholdForLastInstalment;
+        public GetDelinquencyBucketsResponse delinquencyBucket;
     }
 
     @Schema(description = "PutLoanProductsProductIdRequest")

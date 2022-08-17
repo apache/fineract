@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+import org.apache.fineract.portfolio.delinquency.api.DelinquencyApiResourceSwagger.GetDelinquencyRangesResponse;
 
 /**
  * Created by Chirag Gupta on 12/09/17.
@@ -960,6 +961,7 @@ final class LoansApiResourceSwagger {
         public GetLoansLoanIdCollectionData delinquent;
         @Schema(description = "Set of charges")
         public Set<GetLoansLoanIdLoanChargeData> charges;
+        public GetDelinquencyRangesResponse delinquencyRange;
     }
 
     @Schema(description = "GetLoansResponse")
