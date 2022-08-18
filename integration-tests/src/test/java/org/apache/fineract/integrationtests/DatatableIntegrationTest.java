@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -256,7 +257,7 @@ public class DatatableIntegrationTest {
 
     @Test
     public void validateReadDatatableMultirow() {
-        // Fetch / Create tst code
+        // Fetch / Create TST code
         HashMap<String, Object> codeResponse = CodeHelper.getCodeByName(this.requestSpec, this.responseSpec, "TST_TST_TST");
 
         Integer createdCodeId = (Integer) codeResponse.get("id");
@@ -284,13 +285,13 @@ public class DatatableIntegrationTest {
         columnMap.put("entitySubType", "");
         columnMap.put("multiRow", true);
         DatatableHelper.addDatatableColumns(datatableColumnsList, "itsABoolean", "Boolean", false, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsADate", "Date", true, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsADatetime", "Datetime", true, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsADecimal", "Decimal", true, null, null);
+        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsADate", "Date", false, null, null);
+        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsADatetime", "Datetime", false, null, null);
+        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsADecimal", "Decimal", false, null, null);
         DatatableHelper.addDatatableColumns(datatableColumnsList, "itsADropdown", "Dropdown", false, null, "TST_TST_TST");
-        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsANumber", "Number", true, null, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsAString", "String", true, 10, null);
-        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsAText", "Text", true, null, null);
+        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsANumber", "Number", false, null, null);
+        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsAString", "String", false, 10, null);
+        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsAText", "Text", false, null, null);
         columnMap.put("columns", datatableColumnsList);
         String datatabelRequestJsonString = new Gson().toJson(columnMap);
         LOG.info("map : {}", datatabelRequestJsonString);
@@ -338,7 +339,7 @@ public class DatatableIntegrationTest {
         assertNotNull(datatableEntryResponseSecond.get("resourceId"), "ERROR IN CREATING THE ENTITY DATATABLE RECORD");
 
         // Read the Datatable entry generated with genericResultSet in true (default)
-        final HashMap<String, Object> items = this.datatableHelper.readDatatableEntry(datatableName, loanID, genericResultSet, null, "");
+        HashMap<String, Object> items = this.datatableHelper.readDatatableEntry(datatableName, loanID, genericResultSet, null, "");
         assertNotNull(items);
         assertEquals(2, ((List) items.get("data")).size());
 
@@ -404,54 +405,75 @@ public class DatatableIntegrationTest {
 
         Boolean previousBoolean = (Boolean) datatableEntryMap.get("itsABoolean");
 
-        datatableEntryMap.put("itsABoolean", !previousBoolean);
-        datatableEntryMap.put("itsADate", Utils.randomDateGenerator("yyyy-MM-dd"));
-        datatableEntryMap.put("itsADatetime", Utils.randomDateTimeGenerator("yyyy-MM-dd"));
-        datatableEntryMap.put("itsADecimal", Utils.randomDecimalGenerator(4, 3));
-        datatableEntryMap.put("TST_TST_TST_cd_itsADropdown", createdCodeValueIdSecond);
-        datatableEntryMap.put("itsANumber", Utils.randomNumberGenerator(5));
-        datatableEntryMap.put("itsAString", Utils.randomStringGenerator("", 8));
-        datatableEntryMap.put("itsAText", Utils.randomStringGenerator("", 1000));
+        datatableEntryMap.put("itsABoolean", null);
+        datatableEntryMap.put("itsADate", null);
+        datatableEntryMap.put("itsADatetime", null);
+        datatableEntryMap.put("itsADecimal", null);
+        datatableEntryMap.put("TST_TST_TST_cd_itsADropdown", null);
+        datatableEntryMap.put("itsANumber", null);
+        datatableEntryMap.put("itsAString", null);
+        datatableEntryMap.put("itsAText", null);
 
         datatableEntryMap.put("locale", "en");
         datatableEntryMap.put("dateFormat", "yyyy-MM-dd");
 
-        datatabelEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
+        datatabelEntryRequestJsonString = new GsonBuilder().serializeNulls().create().toJson(datatableEntryMap);
         LOG.info("map : {}", datatabelEntryRequestJsonString);
 
         HashMap<String, Object> updatedDatatableEntryResponse = this.datatableHelper.updateDatatableEntry(datatableName, loanID, 1, false,
                 datatabelEntryRequestJsonString);
+        this.datatableHelper.updateDatatableEntry(datatableName, loanID, 2, false, datatabelEntryRequestJsonString);
 
         assertEquals(loanID, updatedDatatableEntryResponse.get("loanId"));
 
-        assertEquals(datatableEntryMap.get("itsABoolean"), ((Map) updatedDatatableEntryResponse.get("changes")).get("itsABoolean"));
-        assertEquals(datatableEntryMap.get("itsADate"),
-                Utils.arrayDateToString((List) ((Map) updatedDatatableEntryResponse.get("changes")).get("itsADate")));
-        assertEquals(datatableEntryMap.get("itsADecimal"), ((Map) updatedDatatableEntryResponse.get("changes")).get("itsADecimal"));
-        assertEquals(datatableEntryMap.get("itsADatetime"),
-                Utils.arrayDateTimeToString((List<Integer>) ((Map) updatedDatatableEntryResponse.get("changes")).get("itsADatetime")));
+        assertEquals(null, ((Map) updatedDatatableEntryResponse.get("changes")).get("itsABoolean"));
+        assertEquals(null, ((Map) updatedDatatableEntryResponse.get("changes")).get("itsADate"));
+        assertEquals(null, ((Map) updatedDatatableEntryResponse.get("changes")).get("itsADecimal"));
+        assertEquals(null, ((Map) updatedDatatableEntryResponse.get("changes")).get("itsADatetime"));
+        assertEquals(null, ((Map) updatedDatatableEntryResponse.get("changes")).get("TST_TST_TST_cd_itsADropdown"));
+        assertEquals(null, ((Map) updatedDatatableEntryResponse.get("changes")).get("itsANumber"));
+        assertEquals(null, ((Map) updatedDatatableEntryResponse.get("changes")).get("itsAString"));
+        assertEquals(null, ((Map) updatedDatatableEntryResponse.get("changes")).get("itsAText"));
+
+        items = this.datatableHelper.readDatatableEntry(datatableName, loanID, genericResultSet, null, "");
+        assertNotNull(items);
+        assertEquals(2, ((List) items.get("data")).size());
+
+        assertEquals("loan_id", ((Map) ((List) items.get("columnHeaders")).get(1)).get("columnName"));
+        assertEquals(loanID, ((List) ((Map) ((List) items.get("data")).get(1)).get("row")).get(1));
+        assertEquals("itsABoolean", ((Map) ((List) items.get("columnHeaders")).get(2)).get("columnName"));
+        assertEquals(null, ((List) ((Map) ((List) items.get("data")).get(1)).get("row")).get(2));
+        assertEquals("itsADate", ((Map) ((List) items.get("columnHeaders")).get(3)).get("columnName"));
+        assertEquals(null, ((List) ((Map) ((List) items.get("data")).get(1)).get("row")).get(3));
+        assertEquals("itsADatetime", ((Map) ((List) items.get("columnHeaders")).get(4)).get("columnName"));
+        assertEquals(null, ((List) ((Map) ((List) items.get("data")).get(1)).get("row")).get(4));
+        assertEquals("itsADecimal", ((Map) ((List) items.get("columnHeaders")).get(5)).get("columnName"));
+        assertEquals(null, ((List) ((Map) ((List) items.get("data")).get(1)).get("row")).get(5));
+        assertEquals("TST_TST_TST_cd_itsADropdown", ((Map) ((List) items.get("columnHeaders")).get(6)).get("columnName"));
+        assertEquals(null, ((List) ((Map) ((List) items.get("data")).get(1)).get("row")).get(6));
+        assertEquals("itsANumber", ((Map) ((List) items.get("columnHeaders")).get(7)).get("columnName"));
+        assertEquals(null, ((List) ((Map) ((List) items.get("data")).get(1)).get("row")).get(7));
+        assertEquals("itsAString", ((Map) ((List) items.get("columnHeaders")).get(8)).get("columnName"));
+        assertEquals(null, ((List) ((Map) ((List) items.get("data")).get(1)).get("row")).get(8));
+        assertEquals("itsAText", ((Map) ((List) items.get("columnHeaders")).get(9)).get("columnName"));
+        assertEquals(null, ((List) ((Map) ((List) items.get("data")).get(1)).get("row")).get(9));
+
+        // Read the Datatable entry generated with genericResultSet in false
+        datatableEntryResponseNoGenericResult = this.datatableHelper.readDatatableEntry(datatableName, loanID, !genericResultSet,
+                (Integer) datatableEntryResponseFirst.get("resourceId"), "");
+        assertNotNull(datatableEntryResponseNoGenericResult, "ERROR IN GETTING THE DATE VALUE FROM DATATABLE RECORD");
+        assertEquals(1, datatableEntryResponseNoGenericResult.size());
+
+        assertEquals(loanID, datatableEntryResponseNoGenericResult.get(0).get("loan_id"));
+        assertEquals(datatableEntryMap.get("itsABoolean"), datatableEntryResponseNoGenericResult.get(0).get("itsABoolean"));
+        assertEquals(datatableEntryMap.get("itsADate"), datatableEntryResponseNoGenericResult.get(0).get("itsADate"));
+        assertEquals(datatableEntryMap.get("itsADecimal"), datatableEntryResponseNoGenericResult.get(0).get("itsADecimal"));
+        assertEquals(datatableEntryMap.get("itsADatetime"), datatableEntryResponseNoGenericResult.get(0).get("itsADatetime"));
         assertEquals(datatableEntryMap.get("TST_TST_TST_cd_itsADropdown"),
-                ((Map) updatedDatatableEntryResponse.get("changes")).get("TST_TST_TST_cd_itsADropdown"));
-        assertEquals(datatableEntryMap.get("itsANumber"), ((Map) updatedDatatableEntryResponse.get("changes")).get("itsANumber"));
-        assertEquals(datatableEntryMap.get("itsAString"), ((Map) updatedDatatableEntryResponse.get("changes")).get("itsAString"));
-        assertEquals(datatableEntryMap.get("itsAText"), ((Map) updatedDatatableEntryResponse.get("changes")).get("itsAText"));
-
-        updatedDatatableEntryResponse = this.datatableHelper.updateDatatableEntry(datatableName, loanID, 2, false,
-                datatabelEntryRequestJsonString);
-
-        assertEquals(loanID, updatedDatatableEntryResponse.get("loanId"));
-
-        assertEquals(datatableEntryMap.get("itsABoolean"), ((Map) updatedDatatableEntryResponse.get("changes")).get("itsABoolean"));
-        assertEquals(datatableEntryMap.get("itsADate"),
-                Utils.arrayDateToString((List) ((Map) updatedDatatableEntryResponse.get("changes")).get("itsADate")));
-        assertEquals(datatableEntryMap.get("itsADecimal"), ((Map) updatedDatatableEntryResponse.get("changes")).get("itsADecimal"));
-        assertEquals(datatableEntryMap.get("itsADatetime"),
-                Utils.arrayDateTimeToString((List<Integer>) ((Map) updatedDatatableEntryResponse.get("changes")).get("itsADatetime")));
-        assertEquals(datatableEntryMap.get("TST_TST_TST_cd_itsADropdown"),
-                ((Map) updatedDatatableEntryResponse.get("changes")).get("TST_TST_TST_cd_itsADropdown"));
-        assertEquals(datatableEntryMap.get("itsANumber"), ((Map) updatedDatatableEntryResponse.get("changes")).get("itsANumber"));
-        assertEquals(datatableEntryMap.get("itsAString"), ((Map) updatedDatatableEntryResponse.get("changes")).get("itsAString"));
-        assertEquals(datatableEntryMap.get("itsAText"), ((Map) updatedDatatableEntryResponse.get("changes")).get("itsAText"));
+                datatableEntryResponseNoGenericResult.get(0).get("TST_TST_TST_cd_itsADropdown"));
+        assertEquals(datatableEntryMap.get("itsANumber"), datatableEntryResponseNoGenericResult.get(0).get("itsANumber"));
+        assertEquals(datatableEntryMap.get("itsAString"), datatableEntryResponseNoGenericResult.get(0).get("itsAString"));
+        assertEquals(datatableEntryMap.get("itsAText"), datatableEntryResponseNoGenericResult.get(0).get("itsAText"));
 
         // deleting datatable entries
         Integer appTableId = this.datatableHelper.deleteDatatableEntries(datatableName, loanID, "loanId");

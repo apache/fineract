@@ -1659,7 +1659,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 }
 
                 pValue = String.valueOf(changedColumns.get(key));
-                if (StringUtils.isEmpty(pValue)) {
+                if (StringUtils.isEmpty(pValue) || "null".equalsIgnoreCase(pValue)) {
                     pValueWrite = "null";
                 } else {
                     if ("bit".equalsIgnoreCase(pColumnHeader.getColumnType())) {
