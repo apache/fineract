@@ -31,10 +31,10 @@ public class LoanProductTrancheDetails {
     @Column(name = "allow_multiple_disbursals")
     private boolean multiDisburseLoan;
 
-    @Column(name = "max_disbursals", nullable = true)
+    @Column(name = "max_disbursals")
     private Integer maxTrancheCount;
 
-    @Column(name = "max_outstanding_loan_balance", scale = 6, precision = 19, nullable = true)
+    @Column(name = "max_outstanding_loan_balance", scale = 6, precision = 19)
     private BigDecimal outstandingLoanBalance;
 
     protected LoanProductTrancheDetails() {
@@ -67,7 +67,6 @@ public class LoanProductTrancheDetails {
                 final BigDecimal newValue = command
                         .bigDecimalValueOfParameterNamed(LoanProductConstants.OUTSTANDING_LOAN_BALANCE_PARAMETER_NAME);
                 actualChanges.put(LoanProductConstants.OUTSTANDING_LOAN_BALANCE_PARAMETER_NAME, newValue);
-                actualChanges.put(LoanProductConstants.OUTSTANDING_LOAN_BALANCE_PARAMETER_NAME, localeAsInput);
                 this.outstandingLoanBalance = newValue;
             }
         } else {

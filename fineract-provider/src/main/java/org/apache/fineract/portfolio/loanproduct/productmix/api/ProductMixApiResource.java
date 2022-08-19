@@ -53,7 +53,7 @@ import org.springframework.stereotype.Component;
 @Path("/loanproducts/{productId}/productmix")
 @Component
 @Scope("singleton")
-@Tag(name = "Product Mix", description = "")
+@Tag(name = "Product Mix")
 public class ProductMixApiResource {
 
     private final String resourceNameForPermissions = "PRODUCTMIX";

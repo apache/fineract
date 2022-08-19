@@ -60,7 +60,7 @@ public class ProductMixReadPlatformServiceImpl implements ProductMixReadPlatform
 
             final String sql = "Select " + extractor.schema() + " where pm.product_id=?";
 
-            final Map<Long, ProductMixData> productMixData = this.jdbcTemplate.query(sql, extractor, new Object[] { productId }); // NOSONAR
+            final Map<Long, ProductMixData> productMixData = this.jdbcTemplate.query(sql, extractor, productId); // NOSONAR
 
             return productMixData.get(productId);
 

@@ -1333,7 +1333,7 @@ public final class LoanAccountData {
             final CollectionData delinquent) {
         LoanProductConfigurableAttributes loanProductConfigurableAttributes = null;
         if (acc.product != null) {
-            loanProductConfigurableAttributes = acc.product.getloanProductConfigurableAttributes();
+            loanProductConfigurableAttributes = acc.product.getLoanProductConfigurableAttributes();
         }
 
         return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, acc.clientId, acc.clientAccountNo, acc.clientName,
@@ -1788,7 +1788,7 @@ public final class LoanAccountData {
         this.createStandingInstructionAtDisbursement = createStandingInstructionAtDisbursement;
         this.paidInAdvance = paidInAdvance;
         if (this.product != null) {
-            this.product.setloanProductConfigurableAttributes(product.getloanProductConfigurableAttributes());
+            this.product.setLoanProductConfigurableAttributes(product.getLoanProductConfigurableAttributes());
         }
         this.interestRatesPeriods = interestRatesPeriods;
         this.isVariableInstallmentsAllowed = isVariableInstallmentsAllowed;

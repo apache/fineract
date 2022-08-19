@@ -22,7 +22,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +41,7 @@ public final class ProductMixDataValidator {
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("restrictedProducts"));
+    private final Set<String> supportedParameters = new HashSet<>(List.of("restrictedProducts"));
 
     private final FromJsonHelper fromApiJsonHelper;
 

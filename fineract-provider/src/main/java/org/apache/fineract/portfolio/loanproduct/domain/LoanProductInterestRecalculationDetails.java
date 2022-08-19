@@ -60,28 +60,28 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
     @Column(name = "rest_frequency_interval", nullable = false)
     private Integer restInterval;
 
-    @Column(name = "rest_frequency_nth_day_enum", nullable = true)
+    @Column(name = "rest_frequency_nth_day_enum")
     private Integer restFrequencyNthDay;
 
-    @Column(name = "rest_frequency_weekday_enum", nullable = true)
+    @Column(name = "rest_frequency_weekday_enum")
     private Integer restFrequencyWeekday;
 
-    @Column(name = "rest_frequency_on_day", nullable = true)
+    @Column(name = "rest_frequency_on_day")
     private Integer restFrequencyOnDay;
 
-    @Column(name = "compounding_frequency_type_enum", nullable = true)
+    @Column(name = "compounding_frequency_type_enum")
     private Integer compoundingFrequencyType;
 
-    @Column(name = "compounding_frequency_interval", nullable = true)
+    @Column(name = "compounding_frequency_interval")
     private Integer compoundingInterval;
 
-    @Column(name = "compounding_frequency_nth_day_enum", nullable = true)
+    @Column(name = "compounding_frequency_nth_day_enum")
     private Integer compoundingFrequencyNthDay;
 
-    @Column(name = "compounding_frequency_weekday_enum", nullable = true)
+    @Column(name = "compounding_frequency_weekday_enum")
     private Integer compoundingFrequencyWeekday;
 
-    @Column(name = "compounding_frequency_on_day", nullable = true)
+    @Column(name = "compounding_frequency_on_day")
     private Integer compoundingFrequencyOnDay;
 
     @Column(name = "arrears_based_on_original_schedule")
@@ -302,8 +302,8 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
         InterestRecalculationCompoundingMethod compoundingMethod = InterestRecalculationCompoundingMethod
                 .fromInt(this.interestRecalculationCompoundingMethod);
         if (compoundingMethod.isCompoundingEnabled()) {
-            RecalculationFrequencyType compoundingfrequencyType = RecalculationFrequencyType.fromInt(this.compoundingFrequencyType);
-            if (compoundingfrequencyType.isSameAsRepayment()) {
+            RecalculationFrequencyType compoundingFrequencyType = RecalculationFrequencyType.fromInt(this.compoundingFrequencyType);
+            if (compoundingFrequencyType.isSameAsRepayment()) {
                 this.compoundingInterval = null;
                 this.compoundingFrequencyNthDay = null;
                 this.compoundingFrequencyWeekday = null;
@@ -346,10 +346,10 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
                     this.compoundingFrequencyWeekday = null;
                 }
 
-                if (compoundingfrequencyType.isWeekly()) {
+                if (compoundingFrequencyType.isWeekly()) {
                     this.compoundingFrequencyNthDay = null;
                     this.compoundingFrequencyOnDay = null;
-                } else if (compoundingfrequencyType.isMonthly()) {
+                } else if (compoundingFrequencyType.isMonthly()) {
                     if (command
                             .integerValueOfParameterNamed(LoanProductConstants.recalculationCompoundingFrequencyOnDayParamName) != null) {
                         this.compoundingFrequencyNthDay = null;
@@ -357,13 +357,13 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
                     } else {
                         this.compoundingFrequencyOnDay = null;
                     }
-                } else if (compoundingfrequencyType.isDaily()) {
+                } else if (compoundingFrequencyType.isDaily()) {
                     this.compoundingFrequencyNthDay = null;
                     this.compoundingFrequencyWeekday = null;
                     this.compoundingFrequencyOnDay = null;
                 }
             }
-            if (!compoundingfrequencyType.isDaily()) {
+            if (!compoundingFrequencyType.isDaily()) {
                 if (command.isChangeInBooleanParameterNamed(LoanProductConstants.allowCompoundingOnEodParamName, allowCompoundingOnEod())) {
                     boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.allowCompoundingOnEodParamName);
                     actualChanges.put(LoanProductConstants.allowCompoundingOnEodParamName, newValue);

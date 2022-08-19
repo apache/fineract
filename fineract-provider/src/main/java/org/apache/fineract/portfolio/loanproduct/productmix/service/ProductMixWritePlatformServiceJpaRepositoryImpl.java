@@ -180,18 +180,18 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
 
     private Map<Long, LoanProduct> getRestrictedProducts(final Set<String> restrictedIds) {
 
-        final Map<Long, LoanProduct> restricrtedProducts = new HashMap<>();
+        final Map<Long, LoanProduct> restrictedProducts = new HashMap<>();
 
         for (final String restrictedId : restrictedIds) {
             final Long restrictedIdAsLong = Long.valueOf(restrictedId);
             final LoanProduct restrictedProduct = findByProductIdIfProvided(Long.valueOf(restrictedId));
-            restricrtedProducts.put(restrictedIdAsLong, restrictedProduct);
+            restrictedProducts.put(restrictedIdAsLong, restrictedProduct);
         }
-        return restricrtedProducts;
+        return restrictedProducts;
     }
 
     private void handleDataIntegrityIssues(final NonTransientDataAccessException dve) {
-        LOG.error("Error occured.", dve);
+        LOG.error("Error occurred.", dve);
         throw new PlatformDataIntegrityException("error.msg.product.loan.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }

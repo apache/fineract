@@ -65,7 +65,7 @@ public interface LoanProductConstants {
     String MIN_NUMBER_OF_REPAYMENTS = "minNumberOfRepayments";
     String MAX_NUMBER_OF_REPAYMENTS = "maxNumberOfRepayments";
 
-    String VALUE_CONDITION_END_WITH_ERROR = "condition.type.must.end.with.greterthan";
+    String VALUE_CONDITION_END_WITH_ERROR = "condition.type.must.end.with.greater.than";
     String VALUE_CONDITION_START_WITH_ERROR = "condition.type.must.start.with.equal";
     String SHORT_NAME = "shortName";
 
