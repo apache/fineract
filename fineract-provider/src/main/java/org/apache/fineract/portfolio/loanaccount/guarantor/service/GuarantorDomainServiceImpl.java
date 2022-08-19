@@ -99,7 +99,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
     @Override
     public void validateGuarantorBusinessRules(Loan loan) {
         LoanProduct loanProduct = loan.loanProduct();
-        BigDecimal principal = loan.getPrincpal().getAmount();
+        BigDecimal principal = loan.getPrincipal().getAmount();
         if (loanProduct.isHoldGuaranteeFundsEnabled()) {
             LoanProductGuaranteeDetails guaranteeData = loanProduct.getLoanProductGuaranteeDetails();
             final List<Guarantor> existGuarantorList = this.guarantorRepository.findByLoan(loan);
@@ -241,8 +241,8 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                     releaseLoanIds.put(loanId, guarantorFundingDetails.getId());
                     try {
                         BigDecimal remainingAmount = guarantorFundingDetails.getAmountRemaining();
-                        if (loan.getGuaranteeAmount().compareTo(loan.getPrincpal().getAmount()) > 0) {
-                            remainingAmount = remainingAmount.multiply(loan.getPrincpal().getAmount()).divide(loan.getGuaranteeAmount(),
+                        if (loan.getGuaranteeAmount().compareTo(loan.getPrincipal().getAmount()) > 0) {
+                            remainingAmount = remainingAmount.multiply(loan.getPrincipal().getAmount()).divide(loan.getGuaranteeAmount(),
                                     MoneyHelper.getRoundingMode());
                         }
                         AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, remainingAmount, fromAccountType,
@@ -393,7 +393,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
 
             BigDecimal amountForRelease = loanTransaction.getPrincipalPortion();
             BigDecimal totalGuaranteeAmount = loan.getGuaranteeAmount();
-            BigDecimal principal = loan.getPrincpal().getAmount();
+            BigDecimal principal = loan.getPrincipal().getAmount();
             if ((amountForRelease != null) && (totalGuaranteeAmount != null)) {
                 amountForRelease = amountForRelease.multiply(totalGuaranteeAmount).divide(principal, MoneyHelper.getRoundingMode());
                 List<DepositAccountOnHoldTransaction> accountOnHoldTransactions = new ArrayList<>();

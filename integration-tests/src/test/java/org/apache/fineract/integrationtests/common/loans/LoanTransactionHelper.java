@@ -151,7 +151,7 @@ public class LoanTransactionHelper {
         return response;
     }
 
-    public Object getLoanDetail(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer loanID,
+    public <T> T getLoanDetail(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer loanID,
             final String param) {
         final String URL = "/fineract-provider/api/v1/loans/" + loanID + "?associations=all&" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, URL, param);
@@ -232,9 +232,14 @@ public class LoanTransactionHelper {
         return performLoanTransaction(createLoanOperationURL(UNDO_APPROVAL_LOAN_COMMAND, loanID), undoBodyJson);
     }
 
-    public HashMap disburseLoan(final String date, final Integer loanID, final String netDisbursalAmount) {
+    public HashMap disburseLoanWithNetDisbursalAmount(final String date, final Integer loanID, final String netDisbursalAmount) {
         return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID),
                 getDisburseLoanAsJSON(date, null, netDisbursalAmount));
+    }
+
+    public HashMap disburseLoanWithTransactionAmount(final String date, final Integer loanID, final String transactionAmount) {
+        return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID),
+                getDisburseLoanAsJSON(date, transactionAmount, null));
     }
 
     public HashMap disburseLoanWithPostDatedChecks(final String date, final Integer loanId, final BigDecimal transactionAmount,
@@ -264,12 +269,13 @@ public class LoanTransactionHelper {
                 getDisburseLoanWithRepaymentRescheduleAsJSON(date, null, adjustRepaymentDate));
     }
 
-    public HashMap disburseLoan(final String date, final Integer loanID, final String disburseAmt, final String netDisbursalAmount) {
+    public HashMap disburseLoanWithNetDisbursalAmount(final String date, final Integer loanID, final String disburseAmt,
+            final String netDisbursalAmount) {
         return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID),
                 getDisburseLoanAsJSON(date, disburseAmt, netDisbursalAmount));
     }
 
-    public Object disburseLoan(final String date, final Integer loanID, ResponseSpecification responseValidationError,
+    public Object disburseLoanWithNetDisbursalAmount(final String date, final Integer loanID, ResponseSpecification responseValidationError,
             final String netDisbursalAmount) {
         return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID),
                 getDisburseLoanAsJSON(date, null, netDisbursalAmount), responseValidationError);

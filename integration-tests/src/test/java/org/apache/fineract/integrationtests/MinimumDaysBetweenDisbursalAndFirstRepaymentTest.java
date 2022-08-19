@@ -117,7 +117,7 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
 
         // Test for loan account approved can be disbursed
         String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, this.loanId);
-        this.loanTransactionHelper.disburseLoan(disbursalDate, this.loanId,
+        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(disbursalDate, this.loanId,
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, this.loanId);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);

@@ -249,7 +249,7 @@ public class SchedulerJobsTestResults {
         Assertions.assertEquals(1, chargesPendingState.size());
 
         String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(AccountTransferTest.LOAN_DISBURSAL_DATE, loanID,
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(AccountTransferTest.LOAN_DISBURSAL_DATE, loanID,
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
         final HashMap summaryBefore = this.savingsAccountHelper.getSavingsSummary(savingsId);
@@ -291,7 +291,7 @@ public class SchedulerJobsTestResults {
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
 
         String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(AccountTransferTest.LOAN_DISBURSAL_DATE, loanID,
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(AccountTransferTest.LOAN_DISBURSAL_DATE, loanID,
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
@@ -440,7 +440,7 @@ public class SchedulerJobsTestResults {
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
 
         String loanDetails = loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        loanStatusHashMap = loanTransactionHelper.disburseLoan(AccountTransferTest.LOAN_DISBURSAL_DATE, loanID,
+        loanStatusHashMap = loanTransactionHelper.disburseLoanWithNetDisbursalAmount(AccountTransferTest.LOAN_DISBURSAL_DATE, loanID,
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
@@ -570,8 +570,8 @@ public class SchedulerJobsTestResults {
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
 
         String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(AccountTransferTest.LOAN_APPROVAL_DATE_PLUS_ONE, loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(AccountTransferTest.LOAN_APPROVAL_DATE_PLUS_ONE,
+                loanID, JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         String JobName = "Apply penalty to overdue loans";
@@ -617,8 +617,8 @@ public class SchedulerJobsTestResults {
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
 
         String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(AccountTransferTest.LOAN_APPROVAL_DATE_PLUS_ONE, loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(AccountTransferTest.LOAN_APPROVAL_DATE_PLUS_ONE,
+                loanID, JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         String JobName = "Apply penalty to overdue loans";
@@ -669,8 +669,8 @@ public class SchedulerJobsTestResults {
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
 
         String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(AccountTransferTest.LOAN_APPROVAL_DATE_PLUS_ONE, loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(AccountTransferTest.LOAN_APPROVAL_DATE_PLUS_ONE,
+                loanID, JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         final Boolean isNPABefore = (Boolean) this.loanTransactionHelper.getLoanDetail(requestSpec, responseSpec, loanID, "isNPA");

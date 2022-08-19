@@ -245,7 +245,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     }
 
     @Override
-    public boolean isPaymnetypeApplicableforDisbursementCharge() {
+    public boolean isPaymentTypeApplicableForDisbursementCharge() {
         final String propertyName = "paymenttype-applicable-for-disbursement-charges";
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
         return property.isEnabled();
@@ -372,13 +372,13 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final String propertyName = "allow-backdated-transaction-before-interest-posting-date-for-days";
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
         if (property.getValue() == null) {
-            return Long.valueOf(0);
+            return 0L;
         }
         return property.getValue();
     }
 
     @Cacheable(value = "configByName", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#propertyName)")
-    private GlobalConfigurationPropertyData getGlobalConfigurationPropertyData(final String propertyName) {
+    public GlobalConfigurationPropertyData getGlobalConfigurationPropertyData(final String propertyName) {
         String identifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
         String key = identifier + "_" + propertyName;
         if (!configurations.containsKey(key)) {

@@ -218,7 +218,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
         Collection<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
         final List<LoanSchedulePeriodData> installmentData = new ArrayList<>();
         final MonetaryCurrency currency = loan.getCurrency();
-        Money outstanding = loan.getPrincpal();
+        Money outstanding = loan.getPrincipal();
 
         List<LoanDisbursementDetails> disbursementDetails = new ArrayList<>();
         if (loan.isMultiDisburmentLoan()) {

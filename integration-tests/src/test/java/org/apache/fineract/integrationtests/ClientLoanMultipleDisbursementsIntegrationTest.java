@@ -93,7 +93,7 @@ public class ClientLoanMultipleDisbursementsIntegrationTest {
                 .withNumberOfRepayments("4") //
                 .withRepaymentEveryAfter("1") //
                 .withRepaymentFrequencyTypeAsMonths() //
-                .withInterestRatePerPeriod("2") //
+                .withInterestRatePerPeriod("0") //
                 .withAmortizationTypeAsEqualInstallments() //
                 .withInterestTypeAsDecliningBalance() //
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
@@ -160,21 +160,21 @@ public class ClientLoanMultipleDisbursementsIntegrationTest {
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         LOG.info("-------------------------------DISBURSE 8 LOANS -------------------------------------------");
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan("12 January 2021", loanID, "1");
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("12 January 2021", loanID, "1");
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan("12 January 2021", loanID, "2");
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("12 January 2021", loanID, "2");
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan("12 January 2021", loanID, "4");
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("12 January 2021", loanID, "4");
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan("13 January 2021", loanID, "8");
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("13 January 2021", loanID, "8");
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan("14 January 2021", loanID, "16");
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("14 January 2021", loanID, "16");
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan("14 January 2021", loanID, "32");
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("14 January 2021", loanID, "32");
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan("15 January 2021", loanID, "64");
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("15 January 2021", loanID, "64");
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan("15 January 2021", loanID, "128");
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("15 January 2021", loanID, "128");
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
@@ -200,7 +200,6 @@ public class ClientLoanMultipleDisbursementsIntegrationTest {
                 disbursalCount += 1;
                 totalPrincipalDisbursed = totalPrincipalDisbursed.add(principalDisbursed);
             }
-            // LOG.info(loanSchedule.get(i).toString());
         }
         assertEquals(expectedDisbursals, disbursalCount, "Checking for eight disbursals");
         assertEquals(expectedTotalPrincipalDisbursed, totalPrincipalDisbursed, "Checking Principal Disburse is 255");
@@ -210,6 +209,186 @@ public class ClientLoanMultipleDisbursementsIntegrationTest {
 
         final BigDecimal principalLoanBalanceOutstanding = BigDecimal
                 .valueOf(Double.parseDouble(loanSchedule.get(8).get("principalLoanBalanceOutstanding").toString()));
+        assertEquals(expectedPrincipalLoanBalanceOutstanding, principalLoanBalanceOutstanding,
+                "Checking Principal Loan Balance Outstanding is zero");
+
+    }
+
+    @Test
+    public void checkThatAllMultiDisbursalsAppearOnLoanScheduleAndOutStandingBalanceIsZeroButLoanGotReopenedTest() {
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+
+        /***
+         * Create loan product with allowing multiple disbursals
+         */
+        boolean allowMultipleDisbursals = true;
+        final Integer loanProductID = createLoanProduct(allowMultipleDisbursals);
+        Assertions.assertNotNull(loanProductID);
+
+        /***
+         * Apply for loan application and verify loan status
+         */
+        final String savingsId = null;
+        final String principal = "12,000.00";
+
+        LOG.info("-----------------------------------2 Tranches--------------------------------------");
+        List<HashMap> tranches = new ArrayList<>();
+        tranches.add(createTrancheDetail("01 January 2021", "1"));
+        tranches.add(createTrancheDetail("02 January 2021", "2"));
+        String submitDate = "01 January 2021";
+
+        final Integer loanID = applyForLoanApplicationWithTranches(clientID, loanProductID, savingsId, principal, tranches, submitDate);
+        Assertions.assertNotNull(loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+        LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
+        loanStatusHashMap = this.loanTransactionHelper.approveLoan("01 January 2021", loanID);
+        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+
+        LOG.info(
+                "-------------------------------DISBURSE 1, repay fully, disburse again LOANS -------------------------------------------");
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithTransactionAmount("12 January 2021", loanID, "1");
+        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+        HashMap repaymentDetails = this.loanTransactionHelper.makeRepayment("13 January 2021", 1.0f, loanID);
+        loanStatusHashMap = this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID, "status");
+        LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithTransactionAmount("14 January 2021", loanID, "2");
+        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+
+        ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+        final int loanScheduleLineCount = loanSchedule.size();
+        final int expectedLoanScheduleLineCount = 3;
+        final int expectedDisbursals = 2;
+        final BigDecimal expectedTotalPrincipalDisbursed = BigDecimal.valueOf(3.0);
+        final BigDecimal expectedPrincipalDue = BigDecimal.valueOf(3.0);
+        final BigDecimal expectedPrincipalPaid = BigDecimal.valueOf(1.0);
+        final BigDecimal expectedPrincipalOutstanding = BigDecimal.valueOf(2.0);
+        final BigDecimal expectedPrincipalLoanBalanceOutstanding = BigDecimal.valueOf(0.0);
+
+        assertEquals(expectedLoanScheduleLineCount, loanScheduleLineCount, "Checking 3 lines in schedule");
+
+        int disbursalCount = 0;
+        BigDecimal totalPrincipalDisbursed = BigDecimal.ZERO;
+        // First 8 lines should be disbursals
+        for (int i = 0; i < loanScheduleLineCount - 1; i++) {
+            final Integer period = (Integer) loanSchedule.get(i).get("period");
+            final BigDecimal principalDisbursed = BigDecimal
+                    .valueOf(Double.parseDouble(loanSchedule.get(i).get("principalDisbursed").toString()));
+
+            if (period == null) {
+                disbursalCount += 1;
+                totalPrincipalDisbursed = totalPrincipalDisbursed.add(principalDisbursed);
+            }
+            // LOG.info(loanSchedule.get(i).toString());
+        }
+        assertEquals(expectedDisbursals, disbursalCount, "Checking for 2 disbursals");
+        assertEquals(expectedTotalPrincipalDisbursed, totalPrincipalDisbursed, "Checking Principal Disburse is 3");
+
+        final BigDecimal principalDue = BigDecimal.valueOf(Double.parseDouble(loanSchedule.get(2).get("principalDue").toString()));
+        assertEquals(expectedPrincipalDue, principalDue, "Checking Principal Due is 3");
+        final BigDecimal principalPaid = BigDecimal.valueOf(Double.parseDouble(loanSchedule.get(2).get("principalPaid").toString()));
+        assertEquals(expectedPrincipalPaid, principalPaid, "Checking Principal Paid is 1");
+        final BigDecimal principalOutstanding = BigDecimal
+                .valueOf(Double.parseDouble(loanSchedule.get(2).get("principalOutstanding").toString()));
+        assertEquals(expectedPrincipalOutstanding, principalOutstanding, "Checking Principal Due is 2");
+
+        final BigDecimal principalLoanBalanceOutstanding = BigDecimal
+                .valueOf(Double.parseDouble(loanSchedule.get(2).get("principalLoanBalanceOutstanding").toString()));
+        assertEquals(expectedPrincipalLoanBalanceOutstanding, principalLoanBalanceOutstanding,
+                "Checking Principal Loan Balance Outstanding is zero");
+
+    }
+
+    @Test
+    public void checkThatAllMultiDisbursalsAppearOnLoanScheduleAndOutStandingBalanceIsZeroButLoanGotReopenedFromOverPaidTest() {
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+
+        /***
+         * Create loan product with allowing multiple disbursals
+         */
+        boolean allowMultipleDisbursals = true;
+        final Integer loanProductID = createLoanProduct(allowMultipleDisbursals);
+        Assertions.assertNotNull(loanProductID);
+
+        /***
+         * Apply for loan application and verify loan status
+         */
+        final String savingsId = null;
+        final String principal = "12,000.00";
+
+        LOG.info("-----------------------------------2 Tranches--------------------------------------");
+        List<HashMap> tranches = new ArrayList<>();
+        tranches.add(createTrancheDetail("01 January 2021", "1"));
+        tranches.add(createTrancheDetail("02 January 2021", "2"));
+        String submitDate = "01 January 2021";
+
+        final Integer loanID = applyForLoanApplicationWithTranches(clientID, loanProductID, savingsId, principal, tranches, submitDate);
+        Assertions.assertNotNull(loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+        LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
+        loanStatusHashMap = this.loanTransactionHelper.approveLoan("01 January 2021", loanID);
+        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+
+        LOG.info(
+                "-------------------------------DISBURSE 1, repay fully, disburse again LOANS -------------------------------------------");
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithTransactionAmount("12 January 2021", loanID, "1");
+        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+        HashMap repaymentDetails = this.loanTransactionHelper.makeRepayment("13 January 2021", 2.0f, loanID);
+        loanStatusHashMap = this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID, "status");
+        LoanStatusChecker.verifyLoanAccountIsOverPaid(loanStatusHashMap);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithTransactionAmount("14 January 2021", loanID, "2");
+        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+
+        ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+        final int loanScheduleLineCount = loanSchedule.size();
+        final int expectedLoanScheduleLineCount = 3;
+        final int expectedDisbursals = 2;
+        final BigDecimal expectedTotalPrincipalDisbursed = BigDecimal.valueOf(3.0);
+        final BigDecimal expectedPrincipalDue = BigDecimal.valueOf(3.0);
+        final BigDecimal expectedPrincipalPaid = BigDecimal.valueOf(2.0);
+        final BigDecimal expectedPrincipalOutstanding = BigDecimal.valueOf(1.0);
+        final BigDecimal expectedPrincipalLoanBalanceOutstanding = BigDecimal.valueOf(0.0);
+
+        assertEquals(expectedLoanScheduleLineCount, loanScheduleLineCount, "Checking nine lines in schedule");
+
+        int disbursalCount = 0;
+        BigDecimal totalPrincipalDisbursed = BigDecimal.ZERO;
+        // First 8 lines should be disbursals
+        for (int i = 0; i < loanScheduleLineCount - 1; i++) {
+            final Integer period = (Integer) loanSchedule.get(i).get("period");
+            final BigDecimal principalDisbursed = BigDecimal
+                    .valueOf(Double.parseDouble(loanSchedule.get(i).get("principalDisbursed").toString()));
+
+            if (period == null) {
+                disbursalCount += 1;
+                totalPrincipalDisbursed = totalPrincipalDisbursed.add(principalDisbursed);
+            }
+            // LOG.info(loanSchedule.get(i).toString());
+        }
+        assertEquals(expectedDisbursals, disbursalCount, "Checking for 2 disbursals");
+        assertEquals(expectedTotalPrincipalDisbursed, totalPrincipalDisbursed, "Checking Principal Disburse is 3");
+
+        final BigDecimal principalDue = BigDecimal.valueOf(Double.parseDouble(loanSchedule.get(2).get("principalDue").toString()));
+        assertEquals(expectedPrincipalDue, principalDue, "Checking Principal Due is 3");
+        final BigDecimal principalPaid = BigDecimal.valueOf(Double.parseDouble(loanSchedule.get(2).get("principalPaid").toString()));
+        assertEquals(expectedPrincipalPaid, principalPaid, "Checking Principal Paid is 1");
+        final BigDecimal principalOutstanding = BigDecimal
+                .valueOf(Double.parseDouble(loanSchedule.get(2).get("principalOutstanding").toString()));
+        assertEquals(expectedPrincipalOutstanding, principalOutstanding, "Checking Principal Due is 2");
+
+        final BigDecimal principalLoanBalanceOutstanding = BigDecimal
+                .valueOf(Double.parseDouble(loanSchedule.get(2).get("principalLoanBalanceOutstanding").toString()));
         assertEquals(expectedPrincipalLoanBalanceOutstanding, principalLoanBalanceOutstanding,
                 "Checking Principal Loan Balance Outstanding is zero");
 

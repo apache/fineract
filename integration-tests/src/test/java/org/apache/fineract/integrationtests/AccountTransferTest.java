@@ -271,7 +271,7 @@ public class AccountTransferTest {
         LoanStatusChecker.verifyLoanIsApproved(toLoanStatusHashMap);
 
         String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, toLoanID);
-        toLoanStatusHashMap = this.loanTransactionHelper.disburseLoan(LOAN_DISBURSAL_DATE, toLoanID,
+        toLoanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(LOAN_DISBURSAL_DATE, toLoanID,
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(toLoanStatusHashMap);
 
@@ -391,7 +391,7 @@ public class AccountTransferTest {
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
 
         String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(LOAN_DISBURSAL_DATE, loanID,
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(LOAN_DISBURSAL_DATE, loanID,
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 

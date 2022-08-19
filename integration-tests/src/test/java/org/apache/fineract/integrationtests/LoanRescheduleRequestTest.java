@@ -169,7 +169,7 @@ public class LoanRescheduleRequestTest {
 
         if (this.loanId != null) {
             String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, this.loanId);
-            this.loanTransactionHelper.disburseLoan(this.dateString, this.loanId,
+            this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(this.dateString, this.loanId,
                     JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
             LOG.info("Successfully disbursed loan (ID: {} )", this.loanId);
         }
