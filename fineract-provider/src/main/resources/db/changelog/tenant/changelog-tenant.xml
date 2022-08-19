@@ -58,4 +58,5 @@
     <include file="parts/0036_add_audit_entries_and_rework_command_source_datetime_fields.xml" relativeToChangelogFile="true"/>
     <include file="parts/0037_add_loan_cob_job_data.xml" relativeToChangelogFile="true"/>
     <include file="parts/0038_add_reversal_data_to_loan_transaction.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0039_add_loan_account_locks.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
