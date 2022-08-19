@@ -478,7 +478,7 @@ public class DelinquencyBucketsIntegrationTest {
         // First Loan Delinquency Classification after Disbursement command
         assertEquals(getLoansLoanIdResponse.getDelinquencyRange().getClassification(), classificationExpected);
 
-        printRepaymentSchedule(getLoansLoanIdResponse);
+        loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
 
         // Apply a partial repayment
         operationDate = Utils.dateFormatter.format(todaysDate);
@@ -660,7 +660,7 @@ public class DelinquencyBucketsIntegrationTest {
         // First Loan Delinquency Classification after Disbursement command
         assertEquals(getLoansLoanIdResponse.getDelinquencyRange().getClassification(), classificationExpected01);
 
-        printRepaymentSchedule(getLoansLoanIdResponse);
+        loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
 
         // Apply a repayment to get a first full paid installment
         operationDate = Utils.dateFormatter.format(todaysDate);
@@ -752,7 +752,7 @@ public class DelinquencyBucketsIntegrationTest {
         // First Loan Delinquency Classification after Disbursement command
         assertEquals(getLoansLoanIdResponse.getDelinquencyRange().getClassification(), classificationExpected);
 
-        printRepaymentSchedule(getLoansLoanIdResponse);
+        loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
 
         // Apply a repayment to get a full paid installment
         operationDate = Utils.dateFormatter.format(todaysDate);

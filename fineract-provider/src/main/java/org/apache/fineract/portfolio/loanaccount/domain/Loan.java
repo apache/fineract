@@ -59,6 +59,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -142,6 +143,7 @@ import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDat
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Entity
 @Component
 @Table(name = "m_loan", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "loan_account_no_UNIQUE"),
@@ -5112,15 +5114,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         actualChanges.put(LoanApiConstants.disbursementPrincipalParameterName,
                 command.bigDecimalValueOfParameterNamed(LoanApiConstants.disbursementPrincipalParameterName, locale));
 
-        Collection<LoanDisbursementDetails> loanDisburseDetails = this.getDisbursementDetails();
-        BigDecimal setPrincipalAmount = BigDecimal.ZERO;
-        for (LoanDisbursementDetails details : loanDisburseDetails) {
-            if (details.actualDisbursementDate() != null) {
-                setPrincipalAmount = setPrincipalAmount.add(details.principal());
-            }
-        }
+        this.loanRepaymentScheduleDetail.setPrincipal(getPrincipalAmountForRepaymentSchedule());
 
-        this.loanRepaymentScheduleDetail.setPrincipal(setPrincipalAmount);
         if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
             regenerateRepaymentScheduleWithInterestRecalculation(scheduleGeneratorDTO);
         } else {
@@ -5139,6 +5134,25 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         }
 
         return changedTransactionDetail;
+    }
+
+    public BigDecimal getPrincipalAmountForRepaymentSchedule() {
+        BigDecimal principalAmount = BigDecimal.ZERO;
+
+        if (isMultiDisburmentLoan() && isDisbursed()) {
+            Collection<LoanDisbursementDetails> loanDisburseDetails = this.getDisbursementDetails();
+            for (LoanDisbursementDetails details : loanDisburseDetails) {
+                if (details.actualDisbursementDate() != null) {
+                    principalAmount = principalAmount.add(details.principal());
+                }
+            }
+        } else if (isApproved()) {
+            principalAmount = getApprovedPrincipal();
+        } else {
+            principalAmount = getPrincipal().getAmount();
+        }
+
+        return principalAmount;
     }
 
     public BigDecimal retriveLastEmiAmount() {
