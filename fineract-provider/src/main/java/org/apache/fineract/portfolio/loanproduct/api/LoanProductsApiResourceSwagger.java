@@ -530,17 +530,17 @@ final class LoanProductsApiResourceSwagger {
 
             private GetLoanProductsTemplateCurrency() {}
 
-            @Schema(example = "")
+            @Schema(example = "USD")
             public String code;
-            @Schema(example = "")
+            @Schema(example = "Usa dollar")
             public String name;
             @Schema(example = "0")
             public Integer decimalPlaces;
             @Schema(example = "0")
             public Integer inMultiplesOf;
-            @Schema(example = "")
+            @Schema(example = "$")
             public String displaySymbol;
-            @Schema(example = "")
+            @Schema(example = "USD")
             public String nameCode;
             @Schema(example = "[]")
             public String displayLabel;

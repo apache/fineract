@@ -47,6 +47,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProductParamType;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
 import org.apache.fineract.portfolio.rate.data.RateData;
 import org.apache.fineract.portfolio.rate.service.RateReadService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -91,7 +92,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final LoanProductMapper rm = new LoanProductMapper(charges, borrowerCycleVariationDatas, rates, delinquencyBucketOptions);
             final String sql = "select " + rm.loanProductSchema() + " where lp.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId }); // NOSONAR
+            return this.jdbcTemplate.queryForObject(sql, rm, loanProductId); // NOSONAR
 
         } catch (final EmptyResultDataAccessException e) {
             throw new LoanProductNotFoundException(loanProductId, e);
@@ -102,7 +103,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     public Collection<LoanProductBorrowerCycleVariationData> retrieveLoanProductBorrowerCycleVariations(final Long loanProductId) {
         final LoanProductBorrowerCycleMapper rm = new LoanProductBorrowerCycleMapper();
         final String sql = "select " + rm.schema() + " where bc.loan_product_id=?  order by bc.borrower_cycle_number,bc.value_condition";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { loanProductId }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, loanProductId); // NOSONAR
     }
 
     @Override
@@ -261,7 +262,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         }
 
         @Override
-        public LoanProductData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public LoanProductData mapRow(@NotNull final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
             final Long id = JdbcSupport.getLong(rs, "id");
             final String name = rs.getString("name");
@@ -564,9 +565,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final BigDecimal maxValue = rs.getBigDecimal("maxVal");
             final BigDecimal minValue = rs.getBigDecimal("minVal");
 
-            final LoanProductBorrowerCycleVariationData borrowerCycleVariationData = new LoanProductBorrowerCycleVariationData(id,
-                    cycleNumber, paramTypeData, conditionTypeData, defaultValue, minValue, maxValue);
-            return borrowerCycleVariationData;
+            return new LoanProductBorrowerCycleVariationData(id, cycleNumber, paramTypeData, conditionTypeData, defaultValue, minValue,
+                    maxValue);
         }
 
     }
@@ -587,7 +587,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             sql += " and id in (" + inClause + ") ";
         }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { currencyCode }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, currencyCode); // NOSONAR
     }
 
     @Override
@@ -636,7 +636,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             sql += " and lp.id in ( " + inClause2 + " ) ";
         }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { productId, productId }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, productId, productId); // NOSONAR
     }
 
     @Override
@@ -659,7 +659,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         sql += "lp.id not in (" + "Select pm.restricted_product_id from m_product_mix pm where pm.product_id=? " + "UNION "
                 + "Select pm.product_id from m_product_mix pm where pm.restricted_product_id=?)";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { productId, productId }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, productId, productId); // NOSONAR
     }
 
     @Override
@@ -669,7 +669,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final LoanProductFloatingRateMapper rm = new LoanProductFloatingRateMapper();
             final String sql = "select " + rm.schema() + " where lp.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId }); // NOSONAR
+            return this.jdbcTemplate.queryForObject(sql, rm, loanProductId); // NOSONAR
 
         } catch (final EmptyResultDataAccessException e) {
             throw new LoanProductNotFoundException(loanProductId, e);
@@ -693,7 +693,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         }
 
         @Override
-        public LoanProductData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public LoanProductData mapRow(@NotNull final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
             final Long id = JdbcSupport.getLong(rs, "id");
             final String name = rs.getString("name");

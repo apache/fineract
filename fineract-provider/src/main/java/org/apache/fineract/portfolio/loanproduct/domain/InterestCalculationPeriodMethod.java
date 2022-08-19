@@ -42,19 +42,11 @@ public enum InterestCalculationPeriodMethod {
 
     public static InterestCalculationPeriodMethod fromInt(final Integer selectedMethod) {
 
-        InterestCalculationPeriodMethod repaymentMethod = null;
-        switch (selectedMethod) {
-            case 0:
-                repaymentMethod = InterestCalculationPeriodMethod.DAILY;
-            break;
-            case 1:
-                repaymentMethod = InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD;
-            break;
-            default:
-                repaymentMethod = InterestCalculationPeriodMethod.INVALID;
-            break;
-        }
-        return repaymentMethod;
+        return switch (selectedMethod) {
+            case 0 -> InterestCalculationPeriodMethod.DAILY;
+            case 1 -> InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD;
+            default -> InterestCalculationPeriodMethod.INVALID;
+        };
     }
 
     public boolean isDaily() {

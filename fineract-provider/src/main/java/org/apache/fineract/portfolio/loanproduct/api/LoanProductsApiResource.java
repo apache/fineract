@@ -351,7 +351,7 @@ public class LoanProductsApiResource {
         }
 
         final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions = this.dropdownReadPlatformService
-                .retreiveTransactionProcessingStrategies();
+                .retrieveTransactionProcessingStrategies();
 
         final Map<String, List<GLAccountData>> accountOptions = this.accountingDropdownReadPlatformService
                 .retrieveAccountMappingOptionsForLoanProducts();
@@ -374,7 +374,7 @@ public class LoanProductsApiResource {
         final List<EnumOptionData> interestRecalculationDayOfWeekTypeOptions = dropdownReadPlatformService
                 .retrieveInterestRecalculationDayOfWeekTypeOptions();
         final List<EnumOptionData> preCloseInterestCalculationStrategyOptions = dropdownReadPlatformService
-                .retrivePreCloseInterestCalculationStrategyOptions();
+                .retrievePreCloseInterestCalculationStrategyOptions();
         final List<FloatingRateData> floatingRateOptions = this.floatingRateReadPlatformService.retrieveLookupActive();
 
         return new LoanProductData(productData, chargeOptions, penaltyOptions, paymentTypeOptions, currencyOptions, amortizationTypeOptions,

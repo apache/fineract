@@ -57,7 +57,7 @@ public class LoanProductVariableInstallmentConfig extends AbstractPersistableCus
         this.loanProduct = loanProduct;
     }
 
-    public Map<? extends String, ? extends Object> update(JsonCommand command) {
+    public Map<? extends String, ?> update(JsonCommand command) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(3);
 
         if (command.isChangeInIntegerParameterNamed(LoanProductConstants.minimumGapBetweenInstallments, this.minimumGap)) {

@@ -254,7 +254,7 @@ public class LoanProductData implements Serializable {
         final Integer overAppliedNumber = null;
 
         final LoanProductGuaranteeData productGuaranteeData = null;
-        final Boolean holdGuaranteeFunds = false;
+        final boolean holdGuaranteeFunds = false;
         final BigDecimal principalThresholdForLastInstallment = null;
         final BigDecimal fixedPrincipalPercentagePerInstallment = null;
         final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion = false;
@@ -364,7 +364,7 @@ public class LoanProductData implements Serializable {
         final boolean isInterestRecalculationEnabled = false;
         final LoanProductInterestRecalculationData interestRecalculationData = null;
         final Integer minimumDaysBetweenDisbursalAndFirstRepayment = null;
-        final Boolean holdGuaranteeFunds = false;
+        final boolean holdGuaranteeFunds = false;
         final LoanProductGuaranteeData productGuaranteeData = null;
         final BigDecimal principalThresholdForLastInstallment = null;
         final BigDecimal fixedPrincipalPercentagePerInstallment = null;
@@ -476,7 +476,7 @@ public class LoanProductData implements Serializable {
         final LoanProductInterestRecalculationData interestRecalculationData = LoanProductInterestRecalculationData
                 .sensibleDefaultsForNewLoanProductCreation();
         final Integer minimumDaysBetweenDisbursalAndFirstRepayment = null;
-        final Boolean holdGuaranteeFunds = false;
+        final boolean holdGuaranteeFunds = false;
         final LoanProductGuaranteeData productGuaranteeData = null;
         final BigDecimal principalThresholdForLastInstallment = null;
         final BigDecimal fixedPrincipalPercentagePerInstallment = null;
@@ -582,7 +582,7 @@ public class LoanProductData implements Serializable {
         final LoanProductInterestRecalculationData interestRecalculationData = LoanProductInterestRecalculationData
                 .sensibleDefaultsForNewLoanProductCreation();
         final Integer minimumDaysBetweenDisbursalAndFirstRepayment = null;
-        final Boolean holdGuaranteeFunds = false;
+        final boolean holdGuaranteeFunds = false;
         final LoanProductGuaranteeData productGuaranteeData = null;
         final BigDecimal principalThresholdForLastInstallment = null;
         final BigDecimal fixedPrincipalPercentagePerInstallment = null;
@@ -1265,11 +1265,11 @@ public class LoanProductData implements Serializable {
         return this.canDefineInstallmentAmount;
     }
 
-    public LoanProductConfigurableAttributes getloanProductConfigurableAttributes() {
+    public LoanProductConfigurableAttributes getLoanProductConfigurableAttributes() {
         return this.allowAttributeOverrides;
     }
 
-    public void setloanProductConfigurableAttributes(LoanProductConfigurableAttributes loanProductConfigurableAttributes) {
+    public void setLoanProductConfigurableAttributes(LoanProductConfigurableAttributes loanProductConfigurableAttributes) {
         this.allowAttributeOverrides = loanProductConfigurableAttributes;
     }
 

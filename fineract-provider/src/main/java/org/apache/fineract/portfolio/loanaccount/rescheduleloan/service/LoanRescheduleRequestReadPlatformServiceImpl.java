@@ -182,7 +182,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
             final boolean isSpecificToInstallment = rs.getBoolean("isSpecificToInstallment");
             final int termType = rs.getInt("termType");
 
-            return new LoanTermVariationsData(id, LoanEnumerations.loanvariationType(termType), variationApplicableFrom, decimalValue,
+            return new LoanTermVariationsData(id, LoanEnumerations.loanVariationType(termType), variationApplicableFrom, decimalValue,
                     dateValue, isSpecificToInstallment);
         }
 

@@ -72,7 +72,7 @@ public class LoanProductValidationStepDefinitions implements En {
 
     private LoanProduct newLoanProduct(boolean allowMultipleDisbursals) {
         LoanProduct lp = new LoanProduct();
-        lp.setLoanProducTrancheDetails(new LoanProductTrancheDetails(allowMultipleDisbursals, null, null));
+        lp.setLoanProductTrancheDetails(new LoanProductTrancheDetails(allowMultipleDisbursals, null, null));
         return lp;
     }
 }

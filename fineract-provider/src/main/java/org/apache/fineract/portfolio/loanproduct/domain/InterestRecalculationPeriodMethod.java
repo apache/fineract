@@ -53,8 +53,7 @@ public enum InterestRecalculationPeriodMethod {
     }
 
     public static InterestRecalculationPeriodMethod fromInt(final Integer ruleTypeValue) {
-        final InterestRecalculationPeriodMethod type = intToEnumMap.get(ruleTypeValue);
-        return type;
+        return intToEnumMap.get(ruleTypeValue);
     }
 
     InterestRecalculationPeriodMethod(final Integer value, final String code) {

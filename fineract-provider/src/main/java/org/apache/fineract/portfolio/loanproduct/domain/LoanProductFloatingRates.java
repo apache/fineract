@@ -105,7 +105,7 @@ public class LoanProductFloatingRates extends AbstractPersistableCustom {
         return this.isFloatingInterestRateCalculationAllowed;
     }
 
-    public Map<? extends String, ? extends Object> update(JsonCommand command, FloatingRate floatingRate) {
+    public Map<? extends String, ?> update(JsonCommand command, FloatingRate floatingRate) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(20);
         if (floatingRate != null) {
             final String floatingRatesId = "floatingRatesId";

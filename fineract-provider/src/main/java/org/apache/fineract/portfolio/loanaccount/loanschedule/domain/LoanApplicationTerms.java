@@ -691,7 +691,7 @@ public final class LoanApplicationTerms {
         }
         switch (interestMethod) {
             case FLAT:
-                if (this.isEqualAmortization() && this.totalInterestDue != null && this.interestMethod.isDecliningBalnce()) {
+                if (this.isEqualAmortization() && this.totalInterestDue != null && this.interestMethod.isDecliningBalance()) {
                     interestForInstallment = flatInterestPerInstallment(mc, this.totalInterestDue);
                 } else {
                     switch (this.amortizationMethod) {

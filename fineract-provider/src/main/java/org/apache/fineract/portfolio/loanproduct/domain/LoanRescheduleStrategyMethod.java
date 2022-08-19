@@ -48,8 +48,7 @@ public enum LoanRescheduleStrategyMethod {
     }
 
     public static LoanRescheduleStrategyMethod fromInt(final Integer ruleTypeValue) {
-        final LoanRescheduleStrategyMethod type = intToEnumMap.get(ruleTypeValue);
-        return type;
+        return intToEnumMap.get(ruleTypeValue);
     }
 
     LoanRescheduleStrategyMethod(final Integer value, final String code) {

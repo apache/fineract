@@ -120,6 +120,7 @@ import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -1096,7 +1097,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         }
 
         @Override
-        public LoanScheduleData extractData(final ResultSet rs) throws SQLException, DataAccessException {
+        public LoanScheduleData extractData(@NotNull final ResultSet rs) throws SQLException, DataAccessException {
             BigDecimal waivedChargeAmount = BigDecimal.ZERO;
             for (DisbursementData disbursementDetail : disbursementData) {
                 waivedChargeAmount = waivedChargeAmount.add(disbursementDetail.getWaivedChargeAmount());
@@ -1426,7 +1427,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 .retrieveLoanInterestRateCalculatedInPeriodOptions();
         final Collection<FundData> fundOptions = this.fundReadPlatformService.retrieveAllFunds();
         final Collection<TransactionProcessingStrategyData> repaymentStrategyOptions = this.loanDropdownReadPlatformService
-                .retreiveTransactionProcessingStrategies();
+                .retrieveTransactionProcessingStrategies();
         final Collection<CodeValueData> loanPurposeOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("LoanPurpose");
         final Collection<CodeValueData> loanCollateralOptions = this.codeValueReadPlatformService
                 .retrieveCodeValuesByCode("LoanCollateral");
@@ -1641,7 +1642,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final LocalDate dateValue = JdbcSupport.getLocalDate(rs, "dateValue");
             final boolean isSpecificToInstallment = rs.getBoolean("isSpecificToInstallment");
 
-            return new LoanTermVariationsData(id, LoanEnumerations.loanvariationType(LoanTermVariationType.EMI_AMOUNT),
+            return new LoanTermVariationsData(id, LoanEnumerations.loanVariationType(LoanTermVariationType.EMI_AMOUNT),
                     variationApplicableFrom, decimalValue, dateValue, isSpecificToInstallment);
         }
 

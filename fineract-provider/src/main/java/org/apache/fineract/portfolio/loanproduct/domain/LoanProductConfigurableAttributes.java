@@ -23,7 +23,7 @@ import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -33,35 +33,35 @@ import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 @Table(name = "m_product_loan_configurable_attributes")
 public class LoanProductConfigurableAttributes extends AbstractPersistableCustom implements Serializable {
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "loan_product_id", nullable = false)
     private LoanProduct loanProduct;
 
-    @Column(name = "amortization_method_enum", nullable = true)
+    @Column(name = "amortization_method_enum")
     private Boolean amortizationType;
 
-    @Column(name = "interest_method_enum", nullable = true)
+    @Column(name = "interest_method_enum")
     private Boolean interestType;
 
-    @Column(name = "loan_transaction_strategy_id", nullable = true)
+    @Column(name = "loan_transaction_strategy_id")
     private Boolean transactionProcessingStrategyId;
 
-    @Column(name = "interest_calculated_in_period_enum", nullable = true)
+    @Column(name = "interest_calculated_in_period_enum")
     private Boolean interestCalculationPeriodType;
 
-    @Column(name = "arrearstolerance_amount", nullable = true)
+    @Column(name = "arrearstolerance_amount")
     private Boolean inArrearsTolerance;
 
-    @Column(name = "repay_every", nullable = true)
+    @Column(name = "repay_every")
     private Boolean repaymentEvery;
 
-    @Column(name = "moratorium", nullable = true)
+    @Column(name = "moratorium")
     private Boolean graceOnPrincipalAndInterestPayment;
 
-    @Column(name = "grace_on_arrears_ageing", nullable = true)
+    @Column(name = "grace_on_arrears_ageing")
     private Boolean graceOnArrearsAgeing;
 
-    private static final String[] supportedloanConfigurableAttributes = { LoanProductConstants.amortizationTypeParamName,
+    private static final String[] supportedLoanConfigurableAttributes = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyIdParamName,
             LoanProductConstants.interestCalculationPeriodTypeParamName, LoanProductConstants.inArrearsToleranceParamName,
             LoanProductConstants.repaymentEveryParamName, LoanProductConstants.graceOnPrincipalAndInterestPaymentParamName,
@@ -134,7 +134,7 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
     }
 
     public static String[] getAllowedLoanConfigurableAttributes() {
-        return supportedloanConfigurableAttributes;
+        return supportedLoanConfigurableAttributes;
     }
 
     public LoanProduct getLoanProduct() {

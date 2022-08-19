@@ -40,22 +40,14 @@ public enum InterestMethod {
 
     public static InterestMethod fromInt(final Integer selectedMethod) {
 
-        InterestMethod repaymentMethod = null;
-        switch (selectedMethod) {
-            case 0:
-                repaymentMethod = InterestMethod.DECLINING_BALANCE;
-            break;
-            case 1:
-                repaymentMethod = InterestMethod.FLAT;
-            break;
-            default:
-                repaymentMethod = InterestMethod.INVALID;
-            break;
-        }
-        return repaymentMethod;
+        return switch (selectedMethod) {
+            case 0 -> InterestMethod.DECLINING_BALANCE;
+            case 1 -> InterestMethod.FLAT;
+            default -> InterestMethod.INVALID;
+        };
     }
 
-    public boolean isDecliningBalnce() {
+    public boolean isDecliningBalance() {
         return this.value.equals(InterestMethod.DECLINING_BALANCE.getValue());
     }
 }
