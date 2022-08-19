@@ -181,7 +181,7 @@ public class GuarantorTest {
 
         LOG.info("-------------------------------DISBURSE LOAN-------------------------------------------");
         String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(loanDisbursementDate, loanID,
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(loanDisbursementDate, loanID,
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
@@ -377,7 +377,7 @@ public class GuarantorTest {
 
         LOG.info("-------------------------------DISBURSE LOAN-------------------------------------------");
         String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(loanDisbursementDate, loanID,
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(loanDisbursementDate, loanID,
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
@@ -483,7 +483,7 @@ public class GuarantorTest {
 
         LOG.info("-------------------------------DISBURSE LOAN-------------------------------------------");
         String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(loanDisbursementDate, loanID,
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(loanDisbursementDate, loanID,
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
@@ -559,7 +559,7 @@ public class GuarantorTest {
 
         LOG.info("-------------------------------DISBURSE LOAN-------------------------------------------");
         String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(loanDisbursementDate, loanID,
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(loanDisbursementDate, loanID,
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
@@ -631,7 +631,7 @@ public class GuarantorTest {
 
         LOG.info("-------------------------------DISBURSE LOAN-------------------------------------------");
         String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(loanDisbursementDate, loanID,
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(loanDisbursementDate, loanID,
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 

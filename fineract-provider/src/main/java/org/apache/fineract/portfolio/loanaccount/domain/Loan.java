@@ -902,7 +902,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 if (isMultiDisburmentLoan() && loanCharge.isDisbursementCharge()) {
                     amount = getTotalAllTrancheDisbursementAmount().getAmount().add(totalInterestCharged);
                 } else {
-                    amount = getPrincpal().getAmount().add(totalInterestCharged);
+                    amount = getPrincipal().getAmount().add(totalInterestCharged);
                 }
             break;
             case PERCENT_OF_INTEREST:
@@ -912,7 +912,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 if (loanCharge.getTrancheDisbursementCharge() != null) {
                     amount = loanCharge.getTrancheDisbursementCharge().getloanDisbursementDetails().principal();
                 } else {
-                    amount = getPrincpal().getAmount();
+                    amount = getPrincipal().getAmount();
                 }
             break;
             default:
@@ -1306,7 +1306,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             if (loanTransaction.getInterestPortion(getCurrency()).isGreaterThanZero()) {
                 if (loanTransaction.getInterestPortion(getCurrency()).isNotEqualTo(interestApplied)) {
                     loanTransaction.reverse();
-                    final LocalDateTime currentDateTime = DateUtils.getLocalDateTimeOfTenant();
                     final LoanTransaction interestAppliedTransaction = LoanTransaction.accrueInterest(getOffice(), this, interestApplied,
                             getDisbursementDate());
                     addLoanTransaction(interestAppliedTransaction);
@@ -2537,7 +2536,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 LoanStatus.fromInt(this.loanStatus));
 
         boolean isMultiTrancheDisburse = false;
-        if (LoanStatus.fromInt(this.loanStatus).isActive() && isAllTranchesNotDisbursed()) {
+        LoanStatus actualLoanStatus = LoanStatus.fromInt(this.loanStatus);
+        if ((actualLoanStatus.isActive() || actualLoanStatus.isClosedObligationsMet() || actualLoanStatus.isOverpaid())
+                && isAllTranchesNotDisbursed()) {
             LoanDisbursementDetails details = fetchLastDisburseDetail();
 
             if (details != null) {
@@ -2550,7 +2551,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             }
             isMultiTrancheDisburse = true;
         }
-        return !statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus)) || isMultiTrancheDisburse;
+        return !statusEnum.hasStateOf(actualLoanStatus) || isMultiTrancheDisburse;
     }
 
     public Money adjustDisburseAmount(final JsonCommand command, final LocalDate actualDisbursementDate) {
@@ -4021,9 +4022,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     private boolean isAllTranchesNotDisbursed() {
-        return this.loanProduct.isMultiDisburseLoan()
-                && (LoanStatus.fromInt(this.loanStatus).isActive() || LoanStatus.fromInt(this.loanStatus).isApproved())
-                && isDisbursementAllowed();
+        LoanStatus actualLoanStatus = LoanStatus.fromInt(this.loanStatus);
+        return this.loanProduct.isMultiDisburseLoan() && (actualLoanStatus.isActive() || actualLoanStatus.isApproved()
+                || actualLoanStatus.isClosedObligationsMet() || actualLoanStatus.isOverpaid()) && isDisbursementAllowed();
     }
 
     private boolean hasDisbursementTransaction() {
@@ -4193,7 +4194,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return this.interestChargedFromDate;
     }
 
-    public Money getPrincpal() {
+    public Money getPrincipal() {
         return this.loanRepaymentScheduleDetail.getPrincipal();
     }
 
@@ -6399,7 +6400,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                     }
                 }
             } else {
-                amount = getPrincpal().getAmount();
+                amount = getPrincipal().getAmount();
             }
         }
         return amount;

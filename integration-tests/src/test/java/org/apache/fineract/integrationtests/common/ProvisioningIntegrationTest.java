@@ -97,7 +97,7 @@ public class ProvisioningIntegrationTest {
             LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
             LOG.info("-------------------------------DISBURSE LOAN-------------------------------------------");
             String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-            loanStatusHashMap = this.loanTransactionHelper.disburseLoan("20 September 2011", loanID,
+            loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("20 September 2011", loanID,
                     JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
             LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
             Assertions.assertNotNull(loanID);

@@ -153,7 +153,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
 
         LOG.info("-------------------------------DISBURSE LOAN -------------------------------------------"); //
         // String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(submitApproveDisburseDate, loanID, principal);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(submitApproveDisburseDate, loanID, principal);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
         return loanID;
     }

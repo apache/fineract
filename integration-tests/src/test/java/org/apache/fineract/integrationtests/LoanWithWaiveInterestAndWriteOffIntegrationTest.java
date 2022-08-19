@@ -106,7 +106,7 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
 
         // DISBURSE
         String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(DISBURSEMENT_DATE, loanID,
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(DISBURSEMENT_DATE, loanID,
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LOG.info("DISBURSE {}", loanStatusHashMap.toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
@@ -120,7 +120,7 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         // DIBURSE AGAIN
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(DISBURSEMENT_DATE, loanID,
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(DISBURSEMENT_DATE, loanID,
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LOG.info("DISBURSE {}", loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
@@ -168,7 +168,7 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
 
         // DISBURSE
         String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(DISBURSEMENT_DATE, loanID,
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(DISBURSEMENT_DATE, loanID,
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LOG.info("DISBURSE {}", loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);

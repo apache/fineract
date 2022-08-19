@@ -160,7 +160,8 @@ public class ClientLoanNonTrancheMultipleDisbursementsIntegrationTest {
 
         LOG.info("-------------------------------DISBURSE non-tranch multi-disbursal loan       ----------");
         final String netDisbursedAmt = null;
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(submitDate, loanID, approved.toString(), netDisbursedAmt);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(submitDate, loanID, approved.toString(),
+                netDisbursedAmt);
 
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
@@ -173,7 +174,8 @@ public class ClientLoanNonTrancheMultipleDisbursementsIntegrationTest {
 
         LOG.info("------------------------------- 2nd DISBURSE non-tranch multi-disbursal loan       ----------");
         final Float anotherDisbursalAmount = 900.00f;
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(submitDate, loanID, anotherDisbursalAmount.toString(), netDisbursedAmt);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(submitDate, loanID,
+                anotherDisbursalAmount.toString(), netDisbursedAmt);
 
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
@@ -188,8 +190,8 @@ public class ClientLoanNonTrancheMultipleDisbursementsIntegrationTest {
         LOG.info("------------------------------- 3rd DISBURSE non-tranch multi-disbursal loan       ----------");
         final Float thirdDisbursalAmount = 500.00f;
         String thirdDisbursalDate = "03 February 2021";
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(thirdDisbursalDate, loanID, thirdDisbursalAmount.toString(),
-                netDisbursedAmt);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(thirdDisbursalDate, loanID,
+                thirdDisbursalAmount.toString(), netDisbursedAmt);
 
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);

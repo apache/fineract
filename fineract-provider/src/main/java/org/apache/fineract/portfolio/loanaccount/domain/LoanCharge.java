@@ -158,7 +158,7 @@ public class LoanCharge extends AbstractPersistableCustom {
                 if (command.hasParameter("principal")) {
                     amountPercentageAppliedTo = command.bigDecimalValueOfParameterNamed("principal");
                 } else {
-                    amountPercentageAppliedTo = loan.getPrincpal().getAmount();
+                    amountPercentageAppliedTo = loan.getPrincipal().getAmount();
                 }
             break;
             case PERCENT_OF_AMOUNT_AND_INTEREST:
@@ -166,7 +166,7 @@ public class LoanCharge extends AbstractPersistableCustom {
                     amountPercentageAppliedTo = command.bigDecimalValueOfParameterNamed("principal")
                             .add(command.bigDecimalValueOfParameterNamed("interest"));
                 } else {
-                    amountPercentageAppliedTo = loan.getPrincpal().getAmount().add(loan.getTotalInterest());
+                    amountPercentageAppliedTo = loan.getPrincipal().getAmount().add(loan.getTotalInterest());
                 }
             break;
             case PERCENT_OF_INTEREST:
@@ -448,11 +448,11 @@ public class LoanCharge extends AbstractPersistableCustom {
                             }
                         }
                     } else {
-                        amountPercentageAppliedTo = this.loan.getPrincpal().getAmount();
+                        amountPercentageAppliedTo = this.loan.getPrincipal().getAmount();
                     }
                 break;
                 case PERCENT_OF_AMOUNT_AND_INTEREST:
-                    amountPercentageAppliedTo = this.loan.getPrincpal().getAmount().add(this.loan.getTotalInterest());
+                    amountPercentageAppliedTo = this.loan.getPrincipal().getAmount().add(this.loan.getTotalInterest());
                 break;
                 case PERCENT_OF_INTEREST:
                     amountPercentageAppliedTo = this.loan.getTotalInterest();

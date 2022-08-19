@@ -218,7 +218,7 @@ public class LoanRescheduleOnDecliningBalanceLoanTest {
 
         if (this.loanId != null) {
             String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, this.loanId);
-            this.loanTransactionHelper.disburseLoan(disburseDate, this.loanId,
+            this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(disburseDate, this.loanId,
                     JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
             LOG.info("Successfully disbursed loan (ID: {} )", this.loanId);
         }
