@@ -98,6 +98,7 @@ public class LoanProductTestBuilder {
     private Boolean allowApprovedDisbursedAmountsOverApplied = false;
     private String overAppliedCalculationType = null;
     private Integer overAppliedNumber = null;
+    private Boolean isEqualAmortization = false;
 
     private Boolean isInterestRecalculationEnabled = false;
     private String daysInYearType = "1";
@@ -168,6 +169,7 @@ public class LoanProductTestBuilder {
         map.put("accountingRule", this.accountingRule);
         map.put("minPrincipal", this.minPrincipal);
         map.put("maxPrincipal", this.maxPrincipal);
+        map.put("isEqualAmortization", this.isEqualAmortization);
         map.put("overdueDaysForNPA", this.overdueDaysForNPA);
         if (this.minimumDaysBetweenDisbursalAndFirstRepayment != null) {
             map.put("minimumDaysBetweenDisbursalAndFirstRepayment", this.minimumDaysBetweenDisbursalAndFirstRepayment);
@@ -379,6 +381,11 @@ public class LoanProductTestBuilder {
 
     public LoanProductTestBuilder withTranches(boolean multiDisburseLoan) {
         this.multiDisburseLoan = multiDisburseLoan;
+        return this;
+    }
+
+    public LoanProductTestBuilder withEqualAmortization(boolean isEqualAmortization) {
+        this.isEqualAmortization = isEqualAmortization;
         return this;
     }
 
