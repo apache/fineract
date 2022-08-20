@@ -35,6 +35,31 @@ Beware that this database container database keeps its state inside the containe
 
 Tomcat v9 is only required if you wish to deploy the Fineract WAR to a separate external servlet container.  Note that you do not require to install Tomcat to develop Fineract, or to run it in production if you use the self-contained JAR, which transparently embeds a servlet container using Spring Boot.  (Until FINERACT-730, Tomcat 7/8 were also supported, but now Tomcat 9 is required.)
 
+IMPORTANT: if you use MySQL or MariaDB
+============
+
+Recently (after release 1.7.0) we introduced improved date time handling in Fineract. Date time is from now on stored in UTC and we are enforcing UTC timezone even on the JDBC driver, e. g. for MySQL:
+
+```
+serverTimezone=UTC&useLegacyDatetimeCode=false&sessionVariables=time_zone=‘-00:00’
+```
+
+__DO__: If you do use MySQL as your Fineract databsae then the following configuration is highly recommended:
+
+* Run the application in UTC (the default command line in our Docker image has the necessary parameters already set)
+* Run the MySQL database server in UTC (if you use managed services like AWS RDS then this should be the default anyway, but it would be good to double-check)
+
+__DON'T__: In case the Fineract instance and the MySQL server are __not__ running in UTC then the following could happen:
+
+* MySQL is saving date time values differently from PostgreSQL
+* Example scenario: if the Fineract instance runs in timezone: GMT+2, and the local date time is 2022-08-11 17:15 ...
+* ... then __PostgreSQL saves__ the LocalDateTime as is: __2022-08-11 17:15__
+* ... and __MySQL saves__ the LocalDateTime in UTC: __2022-08-11 15:15__
+* ... but when we __read__ the date time from PostgreSQL __or__ from MySQL, then both systems give us the same values: __2022-08-11 17:15 GMT+2__
+
+If a previously used Fineract instance didn't run in UTC (backward compatibility), then all prior dates will be read wrongly by MySQL/MariaDB. This can cause issues when you run the database migration scripts.
+
+__RECOMMENDATION__: you need to shift all dates in your database by the timezone offset that your Fineract instance used.
 
 Instructions how to run for local development
 ============
