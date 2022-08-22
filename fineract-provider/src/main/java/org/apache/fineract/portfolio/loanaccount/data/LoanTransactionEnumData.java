@@ -50,6 +50,8 @@ public class LoanTransactionEnumData {
     private final boolean refundForActiveLoans;
     private final boolean creditBalanceRefund;
 
+    private final boolean chargeback;
+
     public LoanTransactionEnumData(final Long id, final String code, final String value) {
         this.id = id;
         this.code = code;
@@ -75,6 +77,7 @@ public class LoanTransactionEnumData {
         this.chargePayment = Long.valueOf(17).equals(this.id);
         this.refundForActiveLoans = Long.valueOf(18).equals(this.id);
         this.creditBalanceRefund = Long.valueOf(20).equals(this.id);
+        this.chargeback = Long.valueOf(25).equals(this.id);
     }
 
     public Long id() {
@@ -187,6 +190,10 @@ public class LoanTransactionEnumData {
 
     public boolean isCreditBalanceRefund() {
         return this.creditBalanceRefund;
+    }
+
+    public boolean isChargeback() {
+        return this.chargeback;
     }
 
 }
