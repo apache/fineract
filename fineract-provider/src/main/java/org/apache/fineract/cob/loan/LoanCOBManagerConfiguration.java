@@ -20,6 +20,7 @@ package org.apache.fineract.cob.loan;
 
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.COBPropertyService;
+import org.apache.fineract.cob.listener.COBExecutionListenerRunner;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.springframework.batch.core.Job;
@@ -32,6 +33,7 @@ import org.springframework.batch.integration.config.annotation.EnableBatchIntegr
 import org.springframework.batch.integration.partition.RemotePartitioningManagerStepBuilderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.channel.DirectChannel;
@@ -58,6 +60,8 @@ public class LoanCOBManagerConfiguration {
     private JobOperator jobOperator;
     @Autowired
     private JobExplorer jobExplorer;
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Bean
     public LoanCOBPartitioner partitioner() {
@@ -72,7 +76,11 @@ public class LoanCOBManagerConfiguration {
 
     @Bean(name = "loanCOBJob")
     public Job loanCOBJob() {
-        return jobBuilderFactory.get(JobName.LOAN_COB.name()).start(loanCOBStep()).incrementer(new RunIdIncrementer()).build();
+        return jobBuilderFactory.get(JobName.LOAN_COB.name()) //
+                .listener(new COBExecutionListenerRunner(applicationContext, JobName.LOAN_COB.name())) //
+                .start(loanCOBStep()) //
+                .incrementer(new RunIdIncrementer()) //
+                .build();
     }
 
 }
