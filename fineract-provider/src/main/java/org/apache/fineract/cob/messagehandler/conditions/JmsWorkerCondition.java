@@ -16,26 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob;
+package org.apache.fineract.cob.messagehandler.conditions;
 
-import org.springframework.batch.integration.config.annotation.EnableBatchIntegration;
+import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.channel.DirectChannel;
 
-@Configuration
-@EnableBatchIntegration
-@ConditionalOnProperty(value = "fineract.mode.batch-manager-enabled", havingValue = "true")
-public class COBManagerConfig {
+public class JmsWorkerCondition extends AllNestedConditions {
 
-    @Bean
-    public DirectChannel outboundRequests() {
-        return new DirectChannel();
+    public JmsWorkerCondition() {
+        super(ConfigurationPhase.PARSE_CONFIGURATION);
     }
 
-    @Bean
-    public COBOutputChannelInterceptor outputInterceptor() {
-        return new COBOutputChannelInterceptor();
-    }
+    @ConditionalOnProperty(value = "fineract.mode.batch-worker-enabled", havingValue = "true")
+    static class WorkerCondition {}
+
+    @ConditionalOnProperty(value = "fineract.remote-job-message-handler.jms.enabled", havingValue = "true")
+    static class JmsCondition {}
 }

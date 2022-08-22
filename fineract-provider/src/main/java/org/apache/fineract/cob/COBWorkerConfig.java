@@ -22,31 +22,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.channel.QueueChannel;
-import org.springframework.integration.dsl.IntegrationFlow;
-import org.springframework.integration.dsl.IntegrationFlows;
-import org.springframework.integration.event.core.MessagingEvent;
-import org.springframework.integration.event.inbound.ApplicationEventListeningMessageProducer;
-import org.springframework.integration.handler.LoggingHandler;
 
 @Configuration
 @ConditionalOnProperty(value = "fineract.mode.batch-worker-enabled", havingValue = "true")
 public class COBWorkerConfig {
-
-    @Bean
-    public IntegrationFlow inboundFlow() {
-        return IntegrationFlows.from(eventListener()) //
-                .log(LoggingHandler.Level.DEBUG) //
-                .channel(inboundRequests()) //
-                .intercept(inputInterceptor()) //
-                .get(); //
-    }
-
-    @Bean
-    public ApplicationEventListeningMessageProducer eventListener() {
-        ApplicationEventListeningMessageProducer producer = new ApplicationEventListeningMessageProducer();
-        producer.setEventTypes(MessagingEvent.class);
-        return producer;
-    }
 
     @Bean
     public QueueChannel inboundRequests() {

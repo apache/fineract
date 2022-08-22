@@ -33,19 +33,26 @@ public class FineractRemoteJobMessageHandlerCondition implements Condition {
                 .ofNullable(
                         context.getEnvironment().getProperty("fineract.remote-job-message-handler.spring-events.enabled", Boolean.class))
                 .orElse(true);
+        boolean isJmsEnabled = Optional
+                .ofNullable(context.getEnvironment().getProperty("fineract.remote-job-message-handler.jms.enabled", Boolean.class))
+                .orElse(true);
         boolean isBatchManagerModeEnabled = Optional
                 .ofNullable(context.getEnvironment().getProperty("fineract.mode.batch-manager-enabled", Boolean.class)).orElse(true);
         boolean isBatchWorkerModeEnabled = Optional
                 .ofNullable(context.getEnvironment().getProperty("fineract.mode.batch-worker-enabled", Boolean.class)).orElse(true);
         // TODO extend this expression with other message handlers in the future
-        boolean isMessageHandlerCountFails = !isSpringEventsEnabled;
-        boolean isSpringEventValidationFails = !(isSpringEventsEnabled && isBatchManagerModeEnabled && isBatchWorkerModeEnabled);
-        if (isMessageHandlerCountFails) {
+        boolean conditionFails = false;
+        boolean onlyOneMessageHandlerEnabled = isSpringEventsEnabled ^ isJmsEnabled;
+        if (!onlyOneMessageHandlerEnabled) {
+            conditionFails = true;
             log.error("For remote partitioning jobs exactly one Message Handler must be enabled.");
         }
-        if (isSpringEventValidationFails) {
-            log.error("If Spring Event Message Handler is enabled, the instance must be Batch Manager and Batch Worker too.");
+        if (isSpringEventsEnabled) {
+            if (!(isBatchManagerModeEnabled && isBatchWorkerModeEnabled)) {
+                conditionFails = true;
+                log.error("If Spring Event Message Handler is enabled, the instance must be Batch Manager and Batch Worker too.");
+            }
         }
-        return isMessageHandlerCountFails || isSpringEventValidationFails;
+        return conditionFails;
     }
 }
