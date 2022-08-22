@@ -327,39 +327,6 @@ public class AccountingProcessorHelper {
      * The target accounts for debits and credits are switched in case of a reversal
      *
      * @param office
-     * @param accountTypeToBeDebited
-     *            Enum of the placeholder GLAccount to be debited
-     * @param accountTypeToBeCredited
-     *            Enum of the placeholder of the GLAccount to be credited
-     * @param loanProductId
-     * @param paymentTypeId
-     * @param loanId
-     * @param transactionId
-     * @param transactionDate
-     * @param amount
-     * @param isReversal
-     */
-    public void createAccrualBasedJournalEntriesAndReversalsForLoan(final Office office, final String currencyCode,
-            final Integer accountTypeToBeDebited, final Integer accountTypeToBeCredited, final Long loanProductId, final Long paymentTypeId,
-            final Long loanId, final String transactionId, final LocalDate transactionDate, final BigDecimal amount,
-            final Boolean isReversal) {
-        int accountTypeToDebitId = accountTypeToBeDebited;
-        int accountTypeToCreditId = accountTypeToBeCredited;
-        // reverse debits and credits for reversals
-        if (isReversal) {
-            accountTypeToDebitId = accountTypeToBeCredited;
-            accountTypeToCreditId = accountTypeToBeDebited;
-        }
-        createJournalEntriesForLoan(office, currencyCode, accountTypeToDebitId, accountTypeToCreditId, loanProductId, paymentTypeId, loanId,
-                transactionId, transactionDate, amount);
-    }
-
-    /**
-     * Convenience method that creates a pair of related Debits and Credits for Accrual Based accounting.
-     *
-     * The target accounts for debits and credits are switched in case of a reversal
-     *
-     * @param office
      *            office
      * @param currencyCode
      *            currencyCode
@@ -382,7 +349,7 @@ public class AccountingProcessorHelper {
      * @param chargePaymentDTOs
      *            chargePaymentDTOs
      */
-    public void createAccrualBasedJournalEntriesAndReversalsForLoanCharges(final Office office, final String currencyCode,
+    public void createJournalEntriesAndReversalsForLoanCharges(final Office office, final String currencyCode,
             final Integer accountTypeToBeDebited, final Integer accountTypeToBeCredited, final Long loanProductId, final Long loanId,
             final String transactionId, final LocalDate transactionDate, final BigDecimal totalAmount, final Boolean isReversal,
             final List<ChargePaymentDTO> chargePaymentDTOs) {
@@ -476,7 +443,7 @@ public class AccountingProcessorHelper {
      * @param amount
      * @param isReversal
      */
-    public void createCashBasedJournalEntriesAndReversalsForLoan(final Office office, final String currencyCode,
+    public void createJournalEntriesAndReversalsForLoan(final Office office, final String currencyCode,
             final Integer accountTypeToBeDebited, final Integer accountTypeToBeCredited, final Long loanProductId, final Long paymentTypeId,
             final Long loanId, final String transactionId, final LocalDate transactionDate, final BigDecimal amount,
             final Boolean isReversal) {
