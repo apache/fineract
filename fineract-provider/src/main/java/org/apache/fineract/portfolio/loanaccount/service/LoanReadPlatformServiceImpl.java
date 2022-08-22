@@ -2419,7 +2419,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             sqlBuilder.append(
                     "left join (select lt.loan_id, lt.transaction_date as transactionDate, lt.amount as amount from m_loan_transaction lt ");
             sqlBuilder.append(
-                    "where lt.loan_id =? and lt.is_reversed = false and lt.transaction_type_enum=2 order by lt.transaction_date desc limit 1) lre on lre.loan_id = l.id ");
+                    "where lt.loan_id =? and lt.is_reversed = false and lt.transaction_type_enum=2 order by lt.transaction_date desc, lt.id desc limit 1) lre on lre.loan_id = l.id ");
             sqlBuilder.append("where l.id=? ");
             return sqlBuilder.toString();
         }

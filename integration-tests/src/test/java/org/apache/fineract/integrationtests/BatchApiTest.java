@@ -525,6 +525,75 @@ public class BatchApiTest {
     }
 
     /**
+     * Tests successful run of batch goodwill credit for loans. 200(OK) status is returned for successful responses. It
+     * first creates a new loan, approves and disburses the loan. Then a goodwill credit request is made
+     *
+     * @see CreateTransactionLoanCommandStrategy
+     */
+    @Test
+    public void shouldReturnOkStatusForBatchGoodwillCredit() {
+
+        final String loanProductJSON = new LoanProductTestBuilder() //
+                .withPrincipal("1000.00") //
+                .withNumberOfRepayments("24") //
+                .withRepaymentAfterEvery("1") //
+                .withRepaymentTypeAsMonth() //
+                .withinterestRatePerPeriod("2") //
+                .withInterestRateFrequencyTypeAsMonths() //
+                .withAmortizationTypeAsEqualPrincipalPayment() //
+                .withInterestTypeAsDecliningBalance() //
+                .currencyDetails("0", "100").build(null);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                clientID.toString(), collateralId);
+        Assertions.assertNotNull(clientCollateralId);
+
+        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+
+        final Long createActiveClientRequestId = 4730L;
+        final Long applyLoanRequestId = createActiveClientRequestId + 1;
+        final Long approveLoanRequestId = applyLoanRequestId + 1;
+        final Long disburseLoanRequestId = approveLoanRequestId + 1;
+        final Long goodwillCreditRequestId = disburseLoanRequestId + 1;
+
+        // Create a createClient Request
+        final BatchRequest br1 = BatchHelper.createActiveClientRequest(createActiveClientRequestId, "");
+
+        // Create a ApplyLoan Request
+        final BatchRequest br2 = BatchHelper.applyLoanRequest(applyLoanRequestId, createActiveClientRequestId, productId,
+                clientCollateralId);
+
+        // Create a approveLoan Request
+        final BatchRequest br3 = BatchHelper.approveLoanRequest(approveLoanRequestId, applyLoanRequestId);
+
+        // Create a disburseLoan Request
+        final BatchRequest br4 = BatchHelper.disburseLoanRequest(disburseLoanRequestId, approveLoanRequestId);
+
+        // Create a good will credit request.
+        final BatchRequest br5 = BatchHelper.goodwillCreditRequest(goodwillCreditRequestId, disburseLoanRequestId, "500");
+
+        final List<BatchRequest> batchRequests = new ArrayList<>();
+
+        batchRequests.add(br1);
+        batchRequests.add(br2);
+        batchRequests.add(br3);
+        batchRequests.add(br4);
+        batchRequests.add(br5);
+
+        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
+
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+                jsonifiedRequest);
+
+        Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(4).getStatusCode(), "Verify Status Code 200 for Goodwill credit");
+    }
+
+    /**
      * Test for the successful activation of a pending client using 'ActivateClientCommandStrategy'. A '200' status code
      * is expected on successful activation.
      *
@@ -1030,6 +1099,71 @@ public class BatchApiTest {
             deleteDatatable(datatableName);
         }
 
+    }
+
+    /**
+     * Test for the successful merchant issued and payout refund transaction. A '200' status code is expected on
+     * successful responses.
+     *
+     * @see org.apache.fineract.batch.command.internal.ApplyLoanCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.ApproveLoanCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy
+     */
+    @Test
+    public void shouldReturnOkStatusOnSuccessfulTransactionMerchantIssuedAndPayoutRefund() {
+        final String loanProductJSON = new LoanProductTestBuilder() //
+                .withPrincipal("10000000.00") //
+                .withNumberOfRepayments("24") //
+                .withRepaymentAfterEvery("1") //
+                .withRepaymentTypeAsMonth() //
+                .withinterestRatePerPeriod("2") //
+                .withInterestRateFrequencyTypeAsMonths() //
+                .withAmortizationTypeAsEqualPrincipalPayment() //
+                .withInterestTypeAsDecliningBalance() //
+                .currencyDetails("0", "100").build(null);
+
+        final Long applyLoanRequestId = 5730L;
+        final Long approveLoanRequestId = 5731L;
+        final Long disburseLoanRequestId = 5732L;
+        final Long merchantIssuedRefundRequestId = 5733L;
+        final Long payoutRefundRequestId = 5734L;
+
+        // Create product
+        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+
+        // Create client
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+
+        // Create an ApplyLoan Request
+        final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
+
+        // Create an approveLoan Request
+        final BatchRequest approveLoanRequest = BatchHelper.approveLoanRequest(approveLoanRequestId, applyLoanRequestId);
+
+        // Create a disbursement request
+        final BatchRequest disburseLoanRequest = BatchHelper.disburseLoanRequest(disburseLoanRequestId, approveLoanRequestId,
+                LocalDate.now(ZoneId.systemDefault()).minusDays(1));
+
+        // Create a merchant issued refund request
+        final BatchRequest merchantIssuedRefundRequest = BatchHelper.merchantIssuedRefundRequest(merchantIssuedRefundRequestId,
+                applyLoanRequestId, "10");
+
+        // Create a payout refund request
+        final BatchRequest payoutRefundRequest = BatchHelper.payoutRefundRequest(payoutRefundRequestId, applyLoanRequestId, "10");
+
+        final List<BatchRequest> batchRequests = Arrays.asList(applyLoanRequest, approveLoanRequest, disburseLoanRequest,
+                merchantIssuedRefundRequest, payoutRefundRequest);
+
+        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
+                BatchHelper.toJsonString(batchRequests));
+
+        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
+        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Approve Loan");
+        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Disburse loan");
+        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for merchant issued refund");
+        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(4).getStatusCode(), "Verify Status Code 200 for payout refund");
     }
 
     /**

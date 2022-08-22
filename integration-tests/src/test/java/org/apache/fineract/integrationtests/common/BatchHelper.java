@@ -505,7 +505,7 @@ public final class BatchHelper {
      * @return BatchRequest the batch request
      */
     public static BatchRequest repayLoanRequest(final Long requestId, final Long reference, final String amount) {
-        return repayLoanRequest(requestId, reference, amount, LocalDate.now(ZoneId.systemDefault()));
+        return createTransactionRequest(requestId, reference, "repayment", amount, LocalDate.now(ZoneId.systemDefault()));
     }
 
     /**
@@ -521,12 +521,13 @@ public final class BatchHelper {
      *            the transaction date
      * @return BatchRequest the batch request
      */
-    public static BatchRequest repayLoanRequest(final Long requestId, final Long reference, final String amount, final LocalDate date) {
+    public static BatchRequest createTransactionRequest(final Long requestId, final Long reference, final String transactionCommand,
+            final String amount, final LocalDate date) {
         final BatchRequest br = new BatchRequest();
 
         br.setRequestId(requestId);
         br.setReference(reference);
-        br.setRelativeUrl("loans/$.loanId/transactions?command=repayment");
+        br.setRelativeUrl(String.format("loans/$.loanId/transactions?command=%s", transactionCommand));
         br.setMethod("POST");
         String dateString = date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
         br.setBody(String.format(
@@ -543,38 +544,64 @@ public final class BatchHelper {
      * @param requestId
      *            the request ID
      * @param reference
-     *            teh reference
+     *            the reference
+     * @param amount
+     *            the amount
      * @return BatchRequest the created {@link BatchRequest}
      */
     public static BatchRequest creditBalanceRefundRequest(final Long requestId, final Long reference, final String amount) {
-        return creditBalanceRefundRequest(requestId, reference, amount, LocalDate.now(ZoneId.systemDefault()));
+        return createTransactionRequest(requestId, reference, "creditBalanceRefund", amount, LocalDate.now(ZoneId.systemDefault()));
     }
 
     /**
-     * Creates and returns a {@link CreateTransactionLoanCommandStrategy} request with given request ID.
+     * Creates and returns a {@link CreateTransactionLoanCommandStrategy} request with given request ID for goodwill
+     * credit transaction.
      *
      *
      * @param requestId
      *            the request ID
      * @param reference
-     *            teh reference
-     * @param date
-     *            the transaction date
+     *            the reference
+     * @param amount
+     *            the amount
      * @return BatchRequest the created {@link BatchRequest}
      */
-    public static BatchRequest creditBalanceRefundRequest(final Long requestId, final Long reference, final String amount, LocalDate date) {
-        final BatchRequest br = new BatchRequest();
+    public static BatchRequest goodwillCreditRequest(final Long requestId, final Long reference, final String amount) {
+        return createTransactionRequest(requestId, reference, "goodwillCredit", amount, LocalDate.now(ZoneId.systemDefault()));
+    }
 
-        br.setRequestId(requestId);
-        br.setReference(reference);
-        br.setRelativeUrl("loans/$.loanId/transactions?command=creditBalanceRefund");
-        br.setMethod("POST");
-        String dateString = date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
-        br.setBody(String.format(
-                "{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", " + "\"transactionDate\": \"%s\",  \"transactionAmount\": %s}",
-                dateString, amount));
+    /**
+     * Creates and returns a {@link CreateTransactionLoanCommandStrategy} request with given request ID for merchant
+     * issued refund transaction.
+     *
+     *
+     * @param requestId
+     *            the request ID
+     * @param reference
+     *            the reference
+     * @param amount
+     *            the amount
+     * @return BatchRequest the created {@link BatchRequest}
+     */
+    public static BatchRequest merchantIssuedRefundRequest(final Long requestId, final Long reference, final String amount) {
+        return createTransactionRequest(requestId, reference, "merchantIssuedRefund", amount, LocalDate.now(ZoneId.systemDefault()));
+    }
 
-        return br;
+    /**
+     * Creates and returns a {@link CreateTransactionLoanCommandStrategy} request with given request ID for payout
+     * refund transaction.
+     *
+     *
+     * @param requestId
+     *            the request ID
+     * @param reference
+     *            the reference
+     * @param amount
+     *            the amount
+     * @return BatchRequest the created {@link BatchRequest}
+     */
+    public static BatchRequest payoutRefundRequest(final Long requestId, final Long reference, final String amount) {
+        return createTransactionRequest(requestId, reference, "payoutRefund", amount, LocalDate.now(ZoneId.systemDefault()));
     }
 
     /**
