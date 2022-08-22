@@ -101,6 +101,7 @@ public class FineractProperties {
     public static class FineractRemoteJobMessageHandlerProperties {
 
         private FineractRemoteJobMessageHandlerSpringEventsProperties springEvents;
+        private FineractRemoteJobMessageHandlerJmsProperties jms;
     }
 
     @Getter
@@ -108,5 +109,13 @@ public class FineractProperties {
     public static class FineractRemoteJobMessageHandlerSpringEventsProperties {
 
         private boolean enabled;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractRemoteJobMessageHandlerJmsProperties {
+
+        private boolean enabled;
+        private String requestQueueName;
     }
 }
