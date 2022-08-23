@@ -422,7 +422,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         }
         final List<JournalEntryData> transactions = populateOpeningBalances(existingOpeningBalanceTransactions, allOpeningTransactions);
         final List<JournalEntryData> assetAccountOpeningBalances = new ArrayList<>();
-        final List<JournalEntryData> liabityAccountOpeningBalances = new ArrayList<>();
+        final List<JournalEntryData> liabilityAccountOpeningBalances = new ArrayList<>();
         final List<JournalEntryData> incomeAccountOpeningBalances = new ArrayList<>();
         final List<JournalEntryData> equityAccountOpeningBalances = new ArrayList<>();
         final List<JournalEntryData> expenseAccountOpeningBalances = new ArrayList<>();
@@ -432,7 +432,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             if (type.isAssetType()) {
                 assetAccountOpeningBalances.add(journalEntryData);
             } else if (type.isLiabilityType()) {
-                liabityAccountOpeningBalances.add(journalEntryData);
+                liabilityAccountOpeningBalances.add(journalEntryData);
             } else if (type.isEquityType()) {
                 equityAccountOpeningBalances.add(journalEntryData);
             } else if (type.isIncomeType()) {
@@ -445,26 +445,26 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         final LocalDate transactionDate = DateUtils.getBusinessLocalDate();
 
         return OfficeOpeningBalancesData.createNew(officeId, officeData.name(), transactionDate, contraAccount, assetAccountOpeningBalances,
-                liabityAccountOpeningBalances, incomeAccountOpeningBalances, equityAccountOpeningBalances, expenseAccountOpeningBalances);
+                liabilityAccountOpeningBalances, incomeAccountOpeningBalances, equityAccountOpeningBalances, expenseAccountOpeningBalances);
     }
 
     private List<JournalEntryData> populateOpeningBalances(final List<JournalEntryData> existingOpeningBalanceTransactions,
             final List<JournalEntryData> allOpeningTransactions) {
-        final List<JournalEntryData> allOpeningBalnceTransactions = new ArrayList<>(allOpeningTransactions.size());
+        final List<JournalEntryData> allOpeningBalanceTransactions = new ArrayList<>(allOpeningTransactions.size());
         for (final JournalEntryData newOpeningBalanceTransaction : allOpeningTransactions) {
             boolean isNewTransactionAddedToCollection = false;
             for (final JournalEntryData existingOpeningBalanceTransaction : existingOpeningBalanceTransactions) {
                 if (newOpeningBalanceTransaction.getGlAccountId().equals(existingOpeningBalanceTransaction.getGlAccountId())) {
-                    allOpeningBalnceTransactions.add(existingOpeningBalanceTransaction);
+                    allOpeningBalanceTransactions.add(existingOpeningBalanceTransaction);
                     isNewTransactionAddedToCollection = true;
                     break;
                 }
             }
             if (!isNewTransactionAddedToCollection) {
-                allOpeningBalnceTransactions.add(newOpeningBalanceTransaction);
+                allOpeningBalanceTransactions.add(newOpeningBalanceTransaction);
             }
         }
-        return allOpeningBalnceTransactions;
+        return allOpeningBalanceTransactions;
     }
 
     private List<JournalEntryData> populateAllTransactionsFromGLAccounts(final Long contraId) {

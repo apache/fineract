@@ -44,8 +44,8 @@ public class JournalEntry extends AbstractAuditableWithUTCDateTimeCustom {
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
 
-    @ManyToOne(optional = true)
-    @JoinColumn(name = "payment_details_id", nullable = true)
+    @ManyToOne()
+    @JoinColumn(name = "payment_details_id")
     private PaymentDetail paymentDetail;
 
     @ManyToOne
@@ -74,7 +74,7 @@ public class JournalEntry extends AbstractAuditableWithUTCDateTimeCustom {
     @JoinColumn(name = "client_transaction_id", nullable = false)
     private ClientTransaction clientTransaction;
 
-    @Column(name = "share_transaction_id", nullable = true)
+    @Column(name = "share_transaction_id")
     private Long shareTransactionId;
 
     @Column(name = "reversed", nullable = false)
