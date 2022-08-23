@@ -167,7 +167,7 @@ public class JournalEntriesApiResource {
             + "journalentries/1?transactionDetails=true")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = JournalEntryData.class))) })
-    public String retreiveJournalEntryById(
+    public String retrieveJournalEntryById(
             @PathParam("journalEntryId") @Parameter(description = "journalEntryId") final Long journalEntryId,
             @Context final UriInfo uriInfo,
             @QueryParam("runningBalance") @Parameter(description = "runningBalance") final boolean runningBalance,
@@ -197,7 +197,7 @@ public class JournalEntriesApiResource {
     public String createGLJournalEntry(@Parameter(hidden = true) final String jsonRequestBody,
             @QueryParam("command") @Parameter(description = "command") final String commandParam) {
 
-        CommandProcessingResult result = null;
+        CommandProcessingResult result;
         if (is(commandParam, "updateRunningBalance")) {
             final CommandWrapper commandRequest = new CommandWrapperBuilder().updateRunningBalanceForJournalEntry()
                     .withJson(jsonRequestBody).build();
@@ -225,7 +225,7 @@ public class JournalEntriesApiResource {
     public String createReversalJournalEntry(@Parameter(hidden = true) final String jsonRequestBody,
             @PathParam("transactionId") @Parameter(description = "transactionId") final String transactionId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam) {
-        CommandProcessingResult result = null;
+        CommandProcessingResult result;
         if (is(commandParam, "reverse")) {
             final CommandWrapper commandRequest = new CommandWrapperBuilder().reverseJournalEntry(transactionId).withJson(jsonRequestBody)
                     .build();

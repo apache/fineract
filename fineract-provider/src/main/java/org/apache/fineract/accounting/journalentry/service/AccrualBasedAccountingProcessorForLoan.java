@@ -175,22 +175,22 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
      *
      * <b>Principal Repayment</b>: Debits "Fund Source" and Credits "Loan Portfolio"<br/>
      *
-     * <b>Interest Repayment</b>:Debits "Fund Source" and and Credits "Receivable Interest" <br/>
+     * <b>Interest Repayment</b>:Debits "Fund Source" and Credits "Receivable Interest" <br/>
      *
-     * <b>Fee Repayment</b>:Debits "Fund Source" (or "Interest on Loans" in case of repayment at disbursement) and and
+     * <b>Fee Repayment</b>:Debits "Fund Source" (or "Interest on Loans" in case of repayment at disbursement) and
      * Credits "Receivable Fees" <br/>
      *
-     * <b>Penalty Repayment</b>: Debits "Fund Source" and and Credits "Receivable Penalties" <br/>
+     * <b>Penalty Repayment</b>: Debits "Fund Source" and Credits "Receivable Penalties" <br/>
      * <br/>
      * Handles write offs using the following posting rules <br/>
      * <br/>
      * <b>Principal Write off</b>: Debits "Losses Written Off" and Credits "Loan Portfolio"<br/>
      *
-     * <b>Interest Write off</b>:Debits "Losses Written off" and and Credits "Receivable Interest" <br/>
+     * <b>Interest Write off</b>:Debits "Losses Written off" and Credits "Receivable Interest" <br/>
      *
-     * <b>Fee Write off</b>:Debits "Losses Written off" and and Credits "Receivable Fees" <br/>
+     * <b>Fee Write off</b>:Debits "Losses Written off" and Credits "Receivable Fees" <br/>
      *
-     * <b>Penalty Write off</b>: Debits "Losses Written off" and and Credits "Receivable Penalties" <br/>
+     * <b>Penalty Write off</b>: Debits "Losses Written off" and Credits "Receivable Penalties" <br/>
      * <br/>
      * <br/>
      * In case the loan transaction has been reversed, all debits are turned into credits and vice versa

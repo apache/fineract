@@ -52,7 +52,7 @@ public enum JournalEntryJsonInputParams {
 
     @Override
     public String toString() {
-        return name().toString().replaceAll("_", " ");
+        return name().replaceAll("_", " ");
     }
 
     public String getValue() {
