@@ -61,4 +61,5 @@
     <include file="parts/0039_add_loan_account_locks.xml" relativeToChangelogFile="true"/>
     <include file="parts/0040_add_delinquency_tags_job.xml" relativeToChangelogFile="true"/>
     <include file="parts/0041_add_update_business_step_permission.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0042_table_report_query_fix.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
