@@ -147,6 +147,8 @@ final class LoanProductsApiResourceSwagger {
         public Boolean canUseForTopup;
         @Schema(example = "false")
         public Boolean holdGuaranteeFunds;
+        @Schema(example = "1")
+        public Long delinquencyBucketId;
 
         // Interest Recalculation
         @Schema(example = "false")
