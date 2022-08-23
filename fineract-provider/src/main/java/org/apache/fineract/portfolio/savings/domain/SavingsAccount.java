@@ -1015,7 +1015,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
                 if (!transaction.getRunningBalance(transactionAmount.getCurrency()).isEqualTo(transactionAmount)) {
                     transaction.updateRunningBalance(runningBalance);
                 }
-                if (overdraftAmount.isZero() && runningBalance.isLessThanZero()) {
+                if (overdraftAmount.isZero() && runningBalance.isLessThanZero() && !transaction.isAmountOnHold()) {
                     overdraftAmount = overdraftAmount.plus(runningBalance.getAmount().negate());
                 }
                 if (transaction.getId() == null && overdraftAmount.isGreaterThanZero()) {
