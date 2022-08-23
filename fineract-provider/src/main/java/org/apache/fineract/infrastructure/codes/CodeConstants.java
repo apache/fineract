@@ -21,7 +21,14 @@ package org.apache.fineract.infrastructure.codes;
 import java.util.HashSet;
 import java.util.Set;
 
-public class CodeConstants {
+public final class CodeConstants {
+
+    private CodeConstants() {
+
+    }
+
+    public static final String ENGLISH_LOCALE = "en";
+    public static final String FRENCH_LOCALE = "fr";
 
     /***
      * Enum of all parameters passed in while creating/updating a code and code value

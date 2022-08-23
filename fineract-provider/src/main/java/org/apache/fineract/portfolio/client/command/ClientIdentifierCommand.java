@@ -20,47 +20,53 @@ package org.apache.fineract.portfolio.client.command;
 
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 
 /**
  * Immutable command for creating or updating details of a client identifier.
  */
+@Getter
+@Setter
 public class ClientIdentifierCommand {
 
     private final Long documentTypeId;
+    private final String documentIssueCountryCode;
     private final String documentKey;
     private final String description;
     private final String status;
 
-    public ClientIdentifierCommand(final Long documentTypeId, final String documentKey, final String statusString,
-            final String description) {
+    public ClientIdentifierCommand(final Long documentTypeId, final String documentIssueCountryCode, final String documentKey,
+            final String status, final String description) {
         this.documentTypeId = documentTypeId;
+        this.documentIssueCountryCode = documentIssueCountryCode;
         this.documentKey = documentKey;
-        this.status = statusString;
+        this.status = status;
         this.description = description;
     }
 
-    public Long getDocumentTypeId() {
-        return this.documentTypeId;
-    }
-
-    public String getDocumentKey() {
-        return this.documentKey;
-    }
-
-    public String getDescription() {
-        return this.description;
-    }
-
-    public void validateForCreate() {
+    public void validateForCreate(final CodeValue documentType, final JsonCommand command) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("clientIdentifier");
 
         baseDataValidator.reset().parameter("documentTypeId").value(this.documentTypeId).notNull().integerGreaterThanZero();
         baseDataValidator.reset().parameter("documentKey").value(this.documentKey).notBlank();
+
+        if (ClientApiConstants.clientIdentifierPassportParamName.equals(documentType.label())) {
+            final String documentIssueCountryCode = command.stringValueOfParameterNamed("documentIssueCountryCode");
+            if (StringUtils.isBlank(documentIssueCountryCode)) {
+                throw new PlatformDataIntegrityException("Selection of Country is Mandatory", "error.msg.selection.of.country.mandatory");
+            }
+        }
 
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",

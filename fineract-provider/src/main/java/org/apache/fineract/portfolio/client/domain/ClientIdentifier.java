@@ -48,6 +48,9 @@ public class ClientIdentifier extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "document_key", length = 1000)
     private String documentKey;
 
+    @Column(name = "document_issue_country_code", length = 3)
+    private String documentIssueCountryCode;
+
     @Column(name = "status", nullable = false)
     private Integer status;
 
@@ -61,17 +64,20 @@ public class ClientIdentifier extends AbstractAuditableWithUTCDateTimeCustom {
         final String documentKey = command.stringValueOfParameterNamed("documentKey");
         final String description = command.stringValueOfParameterNamed("description");
         final String status = command.stringValueOfParameterNamed("status");
-        return new ClientIdentifier(client, documentType, documentKey, status, description);
+        final String documentIssueCountryCode = command.stringValueOfParameterNamed("documentIssueCountryCode");
+
+        return new ClientIdentifier(client, documentType, documentIssueCountryCode, documentKey, status, description);
     }
 
     protected ClientIdentifier() {
         //
     }
 
-    private ClientIdentifier(final Client client, final CodeValue documentType, final String documentKey, final String statusName,
-            String description) {
+    private ClientIdentifier(final Client client, final CodeValue documentType, final String documentIssueCountryCode,
+            final String documentKey, final String statusName, String description) {
         this.client = client;
         this.documentType = documentType;
+        this.documentIssueCountryCode = documentIssueCountryCode;
         this.documentKey = StringUtils.defaultIfEmpty(documentKey, null);
         this.description = StringUtils.defaultIfEmpty(description, null);
         ClientIdentifierStatus statusEnum = ClientIdentifierStatus.valueOf(statusName.toUpperCase());
@@ -103,6 +109,13 @@ public class ClientIdentifier extends AbstractAuditableWithUTCDateTimeCustom {
             this.documentKey = StringUtils.defaultIfEmpty(newValue, null);
         }
 
+        final String documentIssueCountryCodeParamName = "documentIssueCountryCode";
+        if (command.isChangeInStringParameterNamed(documentIssueCountryCodeParamName, this.documentIssueCountryCode)) {
+            final String newValue = command.stringValueOfParameterNamed(documentIssueCountryCodeParamName);
+            actualChanges.put(documentIssueCountryCodeParamName, newValue);
+            this.documentIssueCountryCode = StringUtils.defaultIfEmpty(newValue, null);
+        }
+
         final String descriptionParamName = "description";
         if (command.isChangeInStringParameterNamed(descriptionParamName, this.description)) {
             final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
@@ -122,6 +135,10 @@ public class ClientIdentifier extends AbstractAuditableWithUTCDateTimeCustom {
 
     public String documentKey() {
         return this.documentKey;
+    }
+
+    public String documentIssueCountryCode() {
+        return this.documentIssueCountryCode;
     }
 
     public Long documentTypeId() {
