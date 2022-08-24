@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.cob.messagehandler;
 
-import javax.jms.ConnectionFactory;
+import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.fineract.cob.COBOutputChannelInterceptor;
 import org.apache.fineract.cob.messagehandler.conditions.JmsManagerCondition;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
@@ -36,6 +37,7 @@ import org.springframework.integration.jms.dsl.Jms;
 @Configuration
 @EnableBatchIntegration
 @Conditional(JmsManagerCondition.class)
+@Import(value = { JmsBrokerConfiguration.class })
 public class COBJmsManagerConfig {
 
     @Autowired
@@ -43,17 +45,15 @@ public class COBJmsManagerConfig {
     @Autowired
     private COBOutputChannelInterceptor outputInterceptor;
     @Autowired
-    private ConnectionFactory connectionFactory;
-    @Autowired
     private FineractProperties fineractProperties;
 
     @Bean
-    public IntegrationFlow outboundFlow() {
+    public IntegrationFlow outboundFlow(ActiveMQConnectionFactory connectionFactory) {
         return IntegrationFlows.from(outboundRequests) //
                 .intercept(outputInterceptor) //
                 .log(LoggingHandler.Level.DEBUG) //
-                .handle(Jms.outboundGateway(connectionFactory)
-                        .requestDestination(fineractProperties.getRemoteJobMessageHandler().getJms().getRequestQueueName()))
+                .handle(Jms.outboundAdapter(connectionFactory)
+                        .destination(fineractProperties.getRemoteJobMessageHandler().getJms().getRequestQueueName()))
                 .get();
     }
 }
