@@ -18,7 +18,8 @@
  */
 package org.apache.fineract.cob.messagehandler;
 
-import javax.jms.ConnectionFactory;
+import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.fineract.cob.COBInputChannelInterceptor;
 import org.apache.fineract.cob.messagehandler.conditions.JmsWorkerCondition;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.springframework.batch.integration.config.annotation.EnableBatchIntegration;
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
@@ -35,22 +37,23 @@ import org.springframework.integration.jms.dsl.Jms;
 @Configuration
 @EnableBatchIntegration
 @Conditional(JmsWorkerCondition.class)
+@Import(value = { JmsBrokerConfiguration.class })
 public class COBJmsWorkerConfig {
 
     @Autowired
-    private ConnectionFactory connectionFactory;
-    @Autowired
     private QueueChannel inboundRequests;
+    @Autowired
+    private COBInputChannelInterceptor inputInterceptor;
     @Autowired
     private FineractProperties fineractProperties;
 
     @Bean
-    public IntegrationFlow inboundFlow() {
+    public IntegrationFlow inboundFlow(ActiveMQConnectionFactory connectionFactory) {
         return IntegrationFlows.from(Jms.messageDrivenChannelAdapter(connectionFactory) //
-                .configureListenerContainer(c -> c.subscriptionDurable(true)) //
+                .configureListenerContainer(c -> c.subscriptionDurable(false)) //
                 .destination(fineractProperties.getRemoteJobMessageHandler().getJms().getRequestQueueName())) //
                 .channel(inboundRequests) //
-                .log(LoggingHandler.Level.DEBUG) //
+                .intercept(inputInterceptor).log(LoggingHandler.Level.DEBUG) //
                 .get();
     }
 }
