@@ -27,6 +27,11 @@ RUN ./gradlew --no-daemon -q  -x compileTestJava -x test -x spotlessJavaCheck -x
 RUN mv /fineract/fineract-provider/build/libs/*.jar /fineract/fineract-provider/build/libs/fineract-provider.jar
 
 
+#building pentaho reports
+WORKDIR /fineract/fineract-pentaho
+RUN chmod +x gradlew
+RUN ./gradlew --no-daemon -q -x test build
+
 # https://issues.apache.org/jira/browse/LEGAL-462
 # https://issues.apache.org/jira/browse/FINERACT-762
 # We include an alternative JDBC driver (which is faster, but not allowed to be default in Apache distribution)
@@ -34,6 +39,8 @@ RUN mv /fineract/fineract-provider/build/libs/*.jar /fineract/fineract-provider/
 # The commented out lines in the docker-compose.yml illustrate how to do this.
 WORKDIR /app/libs
 RUN wget -q https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.23/mysql-connector-java-8.0.23.jar
+
+RUN cp /fineract/fineract-pentaho/build/dist/lib/*.jar /app/libs/
 # =========================================
 
 FROM azul/zulu-openjdk:17 as fineract
@@ -44,6 +51,7 @@ COPY --from=builder /fineract/fineract-provider/pentahoReports/*.prpt /root/.mif
 
 COPY --from=builder /fineract/fineract-provider/build/libs/ /app
 COPY --from=builder /app/libs /app/libs
+
 
 ENV TZ="UTC"
 ENV FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME="com.mysql.cj.jdbc.Driver"
@@ -78,5 +86,12 @@ ENV FINERACT_DEFAULT_TENANTDB_NAME="fineract_moniafrica"
 ENV FINERACT_DEFAULT_TENANTDB_DESCRIPTION="MoniAfrica Default Tenant"
 ENV FINERACT_SERVER_SSL_ENABLED="true"
 ENV FINERACT_SERVER_PORT="8443"
+ENV DRIVERCLASS_NAME=com.mysql.cj.jdbc.Driver
+ENV PROTOCOL=jdbc
+ENV SUB_PROTOCOL=mysql
+ENV fineract_tenants_uid=admin
+ENV FINERACT_DEFAULT_TENANTDB_PORT=3306
+ENV fineract_tenants_driver=com.mysql.cj.jdbc.Driver
+ENV TZ="UTC"
 
 ENTRYPOINT ["java", "-Dloader.path=/app/libs/", "-jar", "/app/fineract-provider.jar"]
