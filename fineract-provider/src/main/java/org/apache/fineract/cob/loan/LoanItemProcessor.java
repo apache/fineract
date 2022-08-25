@@ -43,7 +43,7 @@ public class LoanItemProcessor implements ItemProcessor<Loan, Loan>, StepExecuti
 
     @Override
     public Loan process(Loan item) throws Exception {
-        ExecutionContext executionContext = stepExecution.getJobExecution().getExecutionContext();
+        ExecutionContext executionContext = stepExecution.getExecutionContext();
         TreeMap<Long, String> businessStepMap = (TreeMap<Long, String>) executionContext.get("BusinessStepMap");
         return cobBusinessStepService.run(businessStepMap, item);
     }
