@@ -287,10 +287,10 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
 
         } else {
             // Sort the ranges based on the minAgeDays
-            List<DelinquencyRange> ranges = sortDelinquencyRangesByMinAge(delinquencyBucket.getRanges());
+            final List<DelinquencyRange> ranges = sortDelinquencyRangesByMinAge(delinquencyBucket.getRanges());
 
-            for (DelinquencyRange delinquencyRange : ranges) {
-                if (delinquencyRange.getMaximumAgeDays() == null) {
+            for (final DelinquencyRange delinquencyRange : ranges) {
+                if (delinquencyRange.getMaximumAgeDays() == null) { // Last Range in the Bucket
                     if (delinquencyRange.getMinimumAgeDays() <= ageDays) {
                         log.debug("Loan {} with delinquency range {} with {} days", loan.getId(), delinquencyRange.getClassification(),
                                 ageDays);

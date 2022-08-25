@@ -30,7 +30,6 @@ public class LoanScheduleDelinquencyData implements Serializable {
     private final Long loanId;
     private final Long productId;
     private final LocalDate dueDate;
-    private final LocalDate fromDate;
     private final Long ageDays;
 
 }

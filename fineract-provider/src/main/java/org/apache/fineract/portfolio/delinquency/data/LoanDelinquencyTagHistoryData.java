@@ -33,7 +33,7 @@ public class LoanDelinquencyTagHistoryData implements Serializable {
 
     private Long id;
     private Long loanId;
-    private String delinquencyRange;
+    private DelinquencyRangeData delinquencyRange;
     private LocalDate addedOnDate;
     private LocalDate liftedOnDate;
 

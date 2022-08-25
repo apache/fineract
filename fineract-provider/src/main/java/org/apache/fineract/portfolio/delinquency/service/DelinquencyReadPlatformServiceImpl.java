@@ -35,8 +35,7 @@ import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyBucketMapper;
 import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyRangeMapper;
 import org.apache.fineract.portfolio.delinquency.mapper.LoanDelinquencyTagMapper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,14 +44,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
     private final DelinquencyRangeRepository repositoryRange;
     private final DelinquencyBucketRepository repositoryBucket;
     private final LoanDelinquencyTagHistoryRepository repositoryLoanDelinquencyTagHistory;
     private final DelinquencyRangeMapper mapperRange;
     private final DelinquencyBucketMapper mapperBucket;
     private final LoanDelinquencyTagMapper mapperLoanDelinquencyTagHistory;
-    private final LoanAssembler loanAssembler;
+    private final LoanRepository loanRepository;
 
     @Override
     public Collection<DelinquencyRangeData> retrieveAllDelinquencyRanges() {
@@ -82,7 +80,7 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
 
     @Override
     public DelinquencyRangeData retrieveCurrentDelinquencyTag(Long loanId) {
-        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        final Loan loan = this.loanRepository.getReferenceById(loanId);
         Optional<LoanDelinquencyTagHistory> optLoanDelinquencyTag = this.repositoryLoanDelinquencyTagHistory.findByLoanAndLiftedOnDate(loan,
                 null);
         if (optLoanDelinquencyTag.isPresent()) {
@@ -93,7 +91,7 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
 
     @Override
     public Collection<LoanDelinquencyTagHistoryData> retrieveDelinquencyRangeHistory(Long loanId) {
-        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        final Loan loan = this.loanRepository.getReferenceById(loanId);
         final List<LoanDelinquencyTagHistory> loanDelinquencyTagData = this.repositoryLoanDelinquencyTagHistory
                 .findByLoanOrderByAddedOnDateDesc(loan);
         return mapperLoanDelinquencyTagHistory.map(loanDelinquencyTagData);

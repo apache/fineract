@@ -1696,7 +1696,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             return new LoanTermVariationsData(id, LoanEnumerations.loanVariationType(LoanTermVariationType.EMI_AMOUNT),
                     variationApplicableFrom, decimalValue, dateValue, isSpecificToInstallment);
         }
-
     }
 
     @Override
@@ -1704,10 +1703,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         LoanScheduleDelinquencyMapper mapper = new LoanScheduleDelinquencyMapper(DateUtils.getBusinessLocalDate());
         final StringBuilder sqlBuilder = new StringBuilder(400);
         sqlBuilder.append("select ").append(mapper.schema())
+                // Just get the overdued installments
                 .append(" where loan.loan_status_id=:active and ls.duedate <= :businessLocalDate and ")
-                .append(" mpl.delinquency_bucket_id is not null "); // Jusr the Loan Product linked to delinquency
-                                                                    // bucket
-        sqlBuilder.append(" order by loan.id, ls.duedate ");
+                // Just get the unpaid installments using the completed_derived flag
+                .append(" ls.completed_derived = false and ")
+                // Just the Loan Product linked to delinquency bucket
+                .append(" mpl.delinquency_bucket_id is not null ");
+        sqlBuilder.append(" group by ls.loan_id, loan.product_id ");
         Map<String, Object> paramMap = new HashMap<>(3);
         paramMap.put("active", LoanStatus.ACTIVE.getValue());
         paramMap.put("businessLocalDate", businessLocalDate);
@@ -1894,7 +1896,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         public String schema() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
-            sqlBuilder.append(" loan.id as loanId, ls.duedate as duedate, ls.fromdate as fromdate, loan.product_id as productId ")
+            sqlBuilder.append(" ls.loan_id as loanId, loan.product_id as productId, min(ls.duedate) as duedate ")
                     .append(" from m_loan_repayment_schedule ls left join m_loan loan on loan.id=ls.loan_id ")
                     .append(" left join m_product_loan mpl on mpl.id = loan.product_id ");
             return sqlBuilder.toString();
@@ -1906,9 +1908,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final Long loanId = rs.getLong("loanId");
             final Long productId = rs.getLong("productId");
             final LocalDate dueDate = JdbcSupport.getLocalDate(rs, "duedate");
-            final LocalDate fromDate = JdbcSupport.getLocalDate(rs, "fromdate");
             final long ageDays = DateUtils.getDifferenceInDays(dueDate, businessDate);
-            return new LoanScheduleDelinquencyData(loanId, productId, dueDate, fromDate, ageDays);
+            return new LoanScheduleDelinquencyData(loanId, productId, dueDate, ageDays);
         }
     }
 
