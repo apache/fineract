@@ -26,7 +26,6 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyWritePlatformService;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -36,16 +35,18 @@ import org.springframework.batch.repeat.RepeatStatus;
 @RequiredArgsConstructor
 public class SetLoanDelinquencyTagsTasklet implements Tasklet {
 
-    private final LoanProductRepository loanProductRepository;
     private final DelinquencyWritePlatformService delinquencyWritePlatformService;
     private final LoanReadPlatformService loanReadPlatformService;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+        log.debug("Run job for date {}", DateUtils.getBusinessLocalDate());
         Collection<LoanScheduleDelinquencyData> loanScheduleDelinquencyData = this.loanReadPlatformService
                 .retrieveScheduleDelinquencyData(DateUtils.getBusinessLocalDate());
         log.debug("Were found {} items", loanScheduleDelinquencyData.size());
         for (LoanScheduleDelinquencyData loanDelinquencyData : loanScheduleDelinquencyData) {
+            log.debug("Processing Loan {} with due date {} and {} overdue days", loanDelinquencyData.getLoanId(),
+                    loanDelinquencyData.getDueDate(), loanDelinquencyData.getAgeDays());
             this.delinquencyWritePlatformService.applyDelinquencyTagToLoan(loanDelinquencyData.getLoanId(),
                     loanDelinquencyData.getAgeDays());
         }

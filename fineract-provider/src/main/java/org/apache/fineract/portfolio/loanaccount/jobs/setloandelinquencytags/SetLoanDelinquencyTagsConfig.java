@@ -22,7 +22,6 @@ import lombok.AllArgsConstructor;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyWritePlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -38,7 +37,6 @@ public class SetLoanDelinquencyTagsConfig {
     private JobBuilderFactory jobs;
     private StepBuilderFactory steps;
 
-    private LoanProductRepository loanProductRepository;
     private DelinquencyWritePlatformService delinquencyWritePlatformService;
     private LoanReadPlatformService loanReadPlatformService;
 
@@ -55,7 +53,7 @@ public class SetLoanDelinquencyTagsConfig {
 
     @Bean
     public SetLoanDelinquencyTagsTasklet setLoanDelinquencyTagsTasklet() {
-        return new SetLoanDelinquencyTagsTasklet(loanProductRepository, delinquencyWritePlatformService, loanReadPlatformService);
+        return new SetLoanDelinquencyTagsTasklet(delinquencyWritePlatformService, loanReadPlatformService);
     }
 
 }

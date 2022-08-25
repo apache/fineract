@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.delinquency.domain;
 import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -39,11 +38,11 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 @Table(name = "m_loan_delinquency_tag_history")
 public class LoanDelinquencyTagHistory extends AbstractAuditableWithUTCDateTimeCustom {
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "delinquency_range_id", nullable = false)
     private DelinquencyRange delinquencyRange;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "loan_id", nullable = false)
     private Loan loan;
 

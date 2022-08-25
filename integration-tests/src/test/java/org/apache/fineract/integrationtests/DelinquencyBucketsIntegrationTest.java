@@ -21,6 +21,7 @@ package org.apache.fineract.integrationtests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -36,12 +37,17 @@ import org.apache.fineract.client.models.DeleteDelinquencyRangeResponse;
 import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
 import org.apache.fineract.client.models.GetDelinquencyRangesResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
+import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
 import org.apache.fineract.client.models.PostDelinquencyRangeResponse;
 import org.apache.fineract.client.models.PutDelinquencyBucketResponse;
 import org.apache.fineract.client.models.PutDelinquencyRangeResponse;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
@@ -221,6 +227,13 @@ public class DelinquencyBucketsIntegrationTest {
 
     @Test
     public void testLoanClassificationJob() {
+        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+
+        LocalDate businessDate = Utils.getLocalDateOfTenant();
+        businessDate = businessDate.minusDays(57);
+        log.info("Current date {}", businessDate);
+        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
+
         // Given
         final LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
         final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
@@ -253,12 +266,10 @@ public class DelinquencyBucketsIntegrationTest {
         final GetLoanProductsProductIdResponse getLoanProductsProductResponse = loanTransactionHelper.getLoanProduct(loanProductId);
         log.info("Loan Product Bucket Name: {}", getLoanProductsProductResponse.getDelinquencyBucket().getName());
 
-        LocalDate todaysDate = Utils.getLocalDateOfTenant();
-        todaysDate = todaysDate.minusDays(40);
-        final String operationDate = Utils.dateFormatter.format(todaysDate);
+        final String operationDate = Utils.dateFormatter.format(businessDate);
         final String principalAmount = "10000";
 
-        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(principalAmount).withLoanTermFrequency("12")
+        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(principalAmount).withLoanTermFrequency("12")
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("12").withRepaymentEveryAfter("1")
                 .withRepaymentFrequencyTypeAsMonths() //
                 .withInterestRatePerPeriod("2") //
@@ -271,19 +282,43 @@ public class DelinquencyBucketsIntegrationTest {
         loanTransactionHelper.disburseLoanWithNetDisbursalAmount(operationDate, loanId, principalAmount);
 
         // When
+        // Run first time the Job
         final String jobName = "Loan Delinquency Classification";
         schedulerJobHelper.executeAndAwaitJob(jobName);
 
-        final GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
-        log.info("Loan Delinquency Range {}", getLoansLoanIdResponse.getDelinquencyRange().getClassification());
+        // Get loan details expecting to have not a delinquency classification
+        GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        final GetDelinquencyRangesResponse firstTestCase = getLoansLoanIdResponse.getDelinquencyRange();
+        log.info("Loan Delinquency Range is null {}", (firstTestCase == null));
+        GetLoansLoanIdRepaymentSchedule getLoanRepaymentSchedule = getLoansLoanIdResponse.getRepaymentSchedule();
+        if (getLoanRepaymentSchedule != null) {
+            log.info("Loan with {} periods", getLoanRepaymentSchedule.getPeriods().size());
+            for (GetLoansLoanIdRepaymentPeriod period : getLoanRepaymentSchedule.getPeriods()) {
+                log.info("Period number {} for due date {}", period.getPeriod(), period.getDueDate());
+            }
+        }
+
+        // Move the Business date to get older the loan and to have an overdue loan
+        businessDate = businessDate.plusDays(40);
+        log.info("Current date {}", businessDate);
+        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
+        // Run Second time the Job
+        schedulerJobHelper.executeAndAwaitJob(jobName);
+
+        // Get loan details expecting to have a delinquency classification
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        final GetDelinquencyRangesResponse secondTestCase = getLoansLoanIdResponse.getDelinquencyRange();
+        log.info("Loan Delinquency Range is {}", secondTestCase.getClassification());
 
         // Then
         assertNotNull(delinquencyBucketResponse);
         assertNotNull(getLoanProductsProductResponse);
+        assertNull(firstTestCase);
         assertEquals(getLoanProductsProductResponse.getDelinquencyBucket().getName(), delinquencyBucket.getName());
-        assertNotNull(getLoansLoanIdResponse);
-        assertEquals(getLoansLoanIdResponse.getDelinquencyRange().getClassification(), classificationExpected);
+        assertNotNull(secondTestCase);
+        assertEquals(secondTestCase.getClassification(), classificationExpected);
 
+        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
     }
 
 }

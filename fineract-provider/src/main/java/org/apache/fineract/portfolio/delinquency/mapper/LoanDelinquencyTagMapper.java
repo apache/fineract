@@ -23,15 +23,15 @@ import org.apache.fineract.portfolio.delinquency.data.LoanDelinquencyTagHistoryD
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyTagHistory;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = DelinquencyRangeMapper.class)
 public interface LoanDelinquencyTagMapper {
 
-    @Mappings({ @Mapping(target = "id", source = "source.id"), @Mapping(target = "loanId", source = "source.loan.id"),
-            @Mapping(target = "delinquencyRange", source = "source.delinquencyRange.classification"),
-            @Mapping(target = "addedOnDate", source = "source.addedOnDate"),
-            @Mapping(target = "liftedOnDate", source = "source.liftedOnDate") })
+    @Mapping(target = "id", source = "source.id")
+    @Mapping(target = "loanId", source = "source.loan.id")
+    @Mapping(target = "delinquencyRange", source = "source.delinquencyRange")
+    @Mapping(target = "addedOnDate", source = "source.addedOnDate")
+    @Mapping(target = "liftedOnDate", source = "source.liftedOnDate")
     LoanDelinquencyTagHistoryData map(LoanDelinquencyTagHistory source);
 
     List<LoanDelinquencyTagHistoryData> map(List<LoanDelinquencyTagHistory> sources);

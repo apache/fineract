@@ -983,8 +983,7 @@ public class LoansApiResource {
         context.authenticatedUser().validateHasReadPermission("DELINQUENCY_TAGS");
         final Collection<LoanDelinquencyTagHistoryData> loanDelinquencyTagHistoryData = this.delinquencyReadPlatformService
                 .retrieveDelinquencyRangeHistory(loanId);
-        ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.jsonSerializerTagHistory.serialize(settings, loanDelinquencyTagHistoryData);
+        return this.jsonSerializerTagHistory.serialize(loanDelinquencyTagHistoryData);
     }
 
 }
