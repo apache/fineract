@@ -1,0 +1,208 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+{
+  "name": "FixedDepositAccountEventV1",
+  "namespace": "org.apache.fineract.avro.fixeddeposit.v1",
+  "type": "record",
+  "fields": [
+    {
+      "name": "id",
+      "type": [
+        "null",
+        "int"
+      ]
+    },
+    {
+      "name": "accountNo",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "clientId",
+      "type": [
+        "null",
+        "int"
+      ]
+    },
+    {
+      "name": "clientName",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "savingsProductId",
+      "type": [
+        "null",
+        "int"
+      ]
+    },
+    {
+      "name": "savingsProductName",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "fieldOfficerId",
+      "type": [
+        "null",
+        "int"
+      ]
+    },
+    {
+      "name": "status",
+      "type": [
+        "null",
+        "org.apache.fineract.avro.fixeddeposit.v1.FixedDepositAccountEventV1Status"
+      ]
+    },
+    {
+      "name": "timeline",
+      "type": [
+        "null",
+        "org.apache.fineract.avro.fixeddeposit.v1.FixedDepositAccountEventV1Timeline"
+      ]
+    },
+    {
+      "name": "currency",
+      "type": [
+        "null",
+        "org.apache.fineract.avro.fixeddeposit.v1.FixedDepositAccountEventV1Currency"
+      ]
+    },
+    {
+      "name": "interestCompoundingPeriodType",
+      "type": [
+        "null",
+        "org.apache.fineract.avro.fixeddeposit.v1.FixedDepositAccountEventV1InterestCompoundingPeriodType"
+      ]
+    },
+    {
+      "name": "interestPostingPeriodType",
+      "type": [
+        "null",
+        "org.apache.fineract.avro.fixeddeposit.v1.FixedDepositAccountEventV1InterestPostingPeriodType"
+      ]
+    },
+    {
+      "name": "interestCalculationType",
+      "type": [
+        "null",
+        "org.apache.fineract.avro.fixeddeposit.v1.FixedDepositAccountEventV1InterestCalculationType"
+      ]
+    },
+    {
+      "name": "interestCalculationDaysInYearType",
+      "type": [
+        "null",
+        "org.apache.fineract.avro.fixeddeposit.v1.FixedDepositAccountEventV1InterestCalculationDaysInYearType"
+      ]
+    },
+    {
+      "name": "summary",
+      "type": [
+        "null",
+        "org.apache.fineract.avro.fixeddeposit.v1.FixedDepositAccountEventV1Summary"
+      ]
+    },
+    {
+      "name": "interestFreePeriodApplicable",
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    {
+      "name": "preClosurePenalApplicable",
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    {
+      "name": "minDepositTerm",
+      "type": [
+        "null",
+        "int"
+      ]
+    },
+    {
+      "name": "maxDepositTerm",
+      "type": [
+        "null",
+        "int"
+      ]
+    },
+    {
+      "name": "minDepositTermType",
+      "type": [
+        "null",
+        "org.apache.fineract.avro.fixeddeposit.v1.FixedDepositAccountEventV1MinDepositTermType"
+      ]
+    },
+    {
+      "name": "maxDepositTermType",
+      "type": [
+        "null",
+        "org.apache.fineract.avro.fixeddeposit.v1.FixedDepositAccountEventV1MaxDepositTermType"
+      ]
+    },
+    {
+      "name": "depositAmount",
+      "type": [
+        "null",
+        "float"
+      ]
+    },
+    {
+      "name": "maturityAmount",
+      "type": [
+        "null",
+        "float"
+      ]
+    },
+    {
+      "name": "maturityDate",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "depositPeriod",
+      "type": [
+        "null",
+        "int"
+      ]
+    },
+    {
+      "name": "depositPeriodFrequency",
+      "type": [
+        "null",
+        "org.apache.fineract.avro.fixeddeposit.v1.FixedDepositAccountEventV1DepositPeriodFrequency"
+      ]
+    }
+  ]
+}

@@ -185,5 +185,7 @@ dependencyManagement {
 
         dependency 'org.mapstruct:mapstruct:1.5.2.Final'
         dependency 'org.mapstruct:mapstruct-processor:1.5.2.Final'
+
+        dependency "org.apache.avro:avro:1.11.0"
     }
 }

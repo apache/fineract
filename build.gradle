@@ -33,11 +33,13 @@ buildscript {
                 'fineract-client',
                 'core',
                 'service',
-                'starter'
+                'starter',
+                'fineract-avro-schemas'
             ].contains(it.name)
         }
         fineractPublishProjects = subprojects.findAll{
             [
+                'fineract-avro-schemas',
                 'fineract-client'
             ].contains(it.name)
         }
@@ -80,6 +82,7 @@ plugins {
     id 'com.github.andygoossens.modernizer' version '1.6.2' apply false
     id 'com.github.spotbugs' version '5.0.10' apply false
     id 'se.thinkcode.cucumber-runner' version '0.0.11' apply false
+    id "com.github.davidmc24.gradle.plugin.avro-base" version "1.3.0" apply false
 }
 
 apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.release.gradle"
