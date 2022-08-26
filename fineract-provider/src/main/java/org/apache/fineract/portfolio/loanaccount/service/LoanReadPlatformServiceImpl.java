@@ -31,7 +31,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
@@ -63,6 +65,7 @@ import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.service.CalendarReadPlatformService;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
+import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.client.data.ClientData;
@@ -151,7 +154,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private final CalendarReadPlatformService calendarReadPlatformService;
     private final StaffReadPlatformService staffReadPlatformService;
     private final PaginationHelper paginationHelper;
-    private final LoanMapper loaanLoanMapper;
+    private final LoanMapper loanMapper;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
@@ -199,7 +202,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         this.configurationDomainService = configurationDomainService;
         this.accountDetailsReadPlatformService = accountDetailsReadPlatformService;
         this.columnValidator = columnValidator;
-        this.loaanLoanMapper = new LoanMapper(sqlGenerator, delinquencyReadPlatformService);
+        this.loanMapper = new LoanMapper(sqlGenerator, delinquencyReadPlatformService);
         this.sqlGenerator = sqlGenerator;
         this.paginationHelper = paginationHelper;
         this.delinquencyReadPlatformService = delinquencyReadPlatformService;
@@ -303,7 +306,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
-        sqlBuilder.append(this.loaanLoanMapper.loanSchema());
+        sqlBuilder.append(this.loanMapper.loanSchema());
 
         // TODO - for time being this will data scope list of loans returned to
         // only loans that have a client associated.
@@ -367,7 +370,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         }
         final Object[] objectArray = extraCriterias.toArray();
         final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), finalObjectArray, this.loaanLoanMapper);
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), finalObjectArray, this.loanMapper);
     }
 
     @Override
@@ -1040,7 +1043,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final BigDecimal amount = rs.getBigDecimal("amount");
             final String dateFormat = "yyyy-MM-dd";
             final String dueDate = rs.getString("dueDate");
-            final String locale = "en_GB";
+            final String locale = Locale.ENGLISH.toLanguageTag();
 
             final BigDecimal principalDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalDue");
             final BigDecimal principalPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalPaid");
@@ -1556,6 +1559,46 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         sqlBuilder.append(" and ls.duedate >= " + sqlGenerator.subDate(sqlGenerator.currentBusinessDate(), "(? + 1)", "day"));
 
         return this.jdbcTemplate.query(sqlBuilder.toString(), rm, penaltyWaitPeriod, penaltyWaitPeriod);
+    }
+
+    @Override
+    public Collection<OverdueLoanScheduleData> retrieveAllOverdueInstallmentsForLoan(final Loan loan) {
+        Collection<OverdueLoanScheduleData> list = new ArrayList<>();
+
+        if (!loan.isOpen()) {
+            return list;
+        }
+        final Long penaltyWaitPeriod = configurationDomainService.retrievePenaltyWaitPeriod();
+        final boolean backdatePenalties = configurationDomainService.isBackdatePenaltiesEnabled();
+
+        for (LoanRepaymentScheduleInstallment installment : loan.getRepaymentScheduleInstallments()) {
+            if (installment.isObligationsMet() || installment.isRecalculatedInterestComponent()) {
+                continue;
+            }
+
+            boolean isPenaltyDue = installment.isOverdueOn(DateUtils.getBusinessLocalDate().plusDays(penaltyWaitPeriod + 1));
+            boolean isDueToday = installment.getDueDate().equals(DateUtils.getBusinessLocalDate().plusDays(penaltyWaitPeriod));
+
+            if (isPenaltyDue) {
+                if (!backdatePenalties && !isDueToday) {
+                    continue;
+                }
+                Optional<Charge> penaltyCharge = loan.getLoanProduct().getLoanProductCharges().stream()
+                        .filter((e) -> ChargeTimeType.OVERDUE_INSTALLMENT.getValue().equals(e.getChargeTimeType()) && e.isLoanCharge())
+                        .findFirst();
+
+                if (penaltyCharge.isEmpty()) {
+                    continue;
+                }
+
+                list.add(new OverdueLoanScheduleData(loan.getId(), penaltyCharge.get().getId(),
+                        DateUtils.DEFAULT_DATE_FORMATTER.format(installment.getDueDate()), penaltyCharge.get().getAmount(),
+                        DateUtils.DEFAULT_DATE_FORMAT, Locale.ENGLISH.toLanguageTag(),
+                        installment.getPrincipalOutstanding(loan.getCurrency()).getAmount(),
+                        installment.getInterestOutstanding(loan.getCurrency()).getAmount(), installment.getInstallmentNumber()));
+            }
+        }
+        return list;
     }
 
     @SuppressWarnings("deprecation")

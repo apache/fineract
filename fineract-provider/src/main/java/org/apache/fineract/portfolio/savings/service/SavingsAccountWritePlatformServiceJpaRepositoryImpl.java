@@ -64,9 +64,7 @@ import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepositoryWrapper;
-import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
-import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.office.domain.Office;
@@ -1544,10 +1542,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private void postJournalEntries(final SavingsAccount savingsAccount, final Set<Long> existingTransactionIds,
             final Set<Long> existingReversedTransactionIds, final boolean backdatedTxnsAllowedTill) {
 
-        final MonetaryCurrency currency = savingsAccount.getCurrency();
-        final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepositoryWrapper.findOneWithNotFoundDetection(currency);
         boolean isAccountTransfer = false;
-        final Map<String, Object> accountingBridgeData = savingsAccount.deriveAccountingBridgeData(applicationCurrency.toData(),
+        final Map<String, Object> accountingBridgeData = savingsAccount.deriveAccountingBridgeData(savingsAccount.getCurrency().getCode(),
                 existingTransactionIds, existingReversedTransactionIds, isAccountTransfer, backdatedTxnsAllowedTill);
         this.journalEntryWritePlatformService.createJournalEntriesForSavings(accountingBridgeData);
     }

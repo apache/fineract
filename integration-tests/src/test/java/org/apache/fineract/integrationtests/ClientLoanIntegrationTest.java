@@ -4167,7 +4167,7 @@ public class ClientLoanIntegrationTest {
         todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
 
         Integer overdueFeeChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
-                ChargesHelper.getLoanOverdueFeeJSONWithCalculattionTypePercentage("10"));
+                ChargesHelper.getLoanOverdueFeeJSONWithCalculationTypePercentage("10"));
         Assertions.assertNotNull(overdueFeeChargeId);
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);

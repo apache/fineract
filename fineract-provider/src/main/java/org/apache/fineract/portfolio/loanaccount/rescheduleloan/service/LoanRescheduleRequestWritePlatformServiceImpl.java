@@ -42,8 +42,6 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
-import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
@@ -99,7 +97,6 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
     private final PlatformSecurityContext platformSecurityContext;
     private final LoanRescheduleRequestDataValidator loanRescheduleRequestDataValidator;
     private final LoanRescheduleRequestRepository loanRescheduleRequestRepository;
-    private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
     private final LoanRepaymentScheduleHistoryRepository loanRepaymentScheduleHistoryRepository;
     private final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService;
     private final LoanTransactionRepository loanTransactionRepository;
@@ -125,7 +122,6 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             final PlatformSecurityContext platformSecurityContext,
             final LoanRescheduleRequestDataValidator loanRescheduleRequestDataValidator,
             final LoanRescheduleRequestRepository loanRescheduleRequestRepository,
-            final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
             final LoanRepaymentScheduleHistoryRepository loanRepaymentScheduleHistoryRepository,
             final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService,
             final LoanTransactionRepository loanTransactionRepository,
@@ -140,7 +136,6 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
         this.platformSecurityContext = platformSecurityContext;
         this.loanRescheduleRequestDataValidator = loanRescheduleRequestDataValidator;
         this.loanRescheduleRequestRepository = loanRescheduleRequestRepository;
-        this.applicationCurrencyRepository = applicationCurrencyRepository;
         this.loanRepaymentScheduleHistoryRepository = loanRepaymentScheduleHistoryRepository;
         this.loanScheduleHistoryWritePlatformService = loanScheduleHistoryWritePlatformService;
         this.loanTransactionRepository = loanTransactionRepository;
@@ -538,10 +533,9 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
     private void postJournalEntries(Loan loan, List<Long> existingTransactionIds, List<Long> existingReversedTransactionIds) {
         final MonetaryCurrency currency = loan.getCurrency();
-        final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
         boolean isAccountTransfer = false;
-        final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(applicationCurrency.toData(),
-                existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
+        final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(currency.getCode(), existingTransactionIds,
+                existingReversedTransactionIds, isAccountTransfer);
         this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
     }
 

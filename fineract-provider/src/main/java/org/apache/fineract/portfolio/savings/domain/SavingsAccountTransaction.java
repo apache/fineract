@@ -39,7 +39,6 @@ import javax.persistence.Table;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.office.domain.Office;
@@ -544,7 +543,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
         return transactionAmount.isNotEqualTo(amountToCheck);
     }
 
-    public Map<String, Object> toMapData(final CurrencyData currencyData) {
+    public Map<String, Object> toMapData(final String currencyCode) {
         final Map<String, Object> thisTransactionData = new LinkedHashMap<>();
 
         final SavingsAccountTransactionEnumData transactionType = SavingsEnumerations.transactionType(this.typeOf);
@@ -552,9 +551,9 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
         thisTransactionData.put("id", getId());
         thisTransactionData.put("officeId", this.office.getId());
         thisTransactionData.put("type", transactionType);
-        thisTransactionData.put("reversed", Boolean.valueOf(isReversed()));
+        thisTransactionData.put("reversed", isReversed());
         thisTransactionData.put("date", getTransactionLocalDate());
-        thisTransactionData.put("currency", currencyData);
+        thisTransactionData.put("currencyCode", currencyCode);
         thisTransactionData.put("amount", this.amount);
         thisTransactionData.put("overdraftAmount", this.overdraftAmount);
 

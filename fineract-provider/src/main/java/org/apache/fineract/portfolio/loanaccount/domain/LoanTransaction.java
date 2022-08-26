@@ -656,7 +656,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
                 transfer, null, outstandingLoanBalance, this.unrecognizedIncomePortion, this.manuallyAdjustedOrReversed);
     }
 
-    public Map<String, Object> toMapData(final CurrencyData currencyData) {
+    public Map<String, Object> toMapData(final String currencyCode) {
         final Map<String, Object> thisTransactionData = new LinkedHashMap<>();
 
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(this.typeOf);
@@ -666,7 +666,7 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         thisTransactionData.put("type", transactionType);
         thisTransactionData.put("reversed", Boolean.valueOf(isReversed()));
         thisTransactionData.put("date", getTransactionDate());
-        thisTransactionData.put("currency", currencyData);
+        thisTransactionData.put("currencyCode", currencyCode);
         thisTransactionData.put("amount", this.amount);
         thisTransactionData.put("netDisbursalAmount", this.loan.getNetDisbursalAmount());
         thisTransactionData.put("principalPortion", this.principalPortion);

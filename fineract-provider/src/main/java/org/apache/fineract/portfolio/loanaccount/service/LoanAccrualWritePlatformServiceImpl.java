@@ -33,8 +33,6 @@ import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlat
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
-import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
@@ -49,7 +47,6 @@ import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -64,10 +61,8 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
     private final JdbcTemplate jdbcTemplate;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
-    private final AppUserRepositoryWrapper userRepository;
     private final PlatformSecurityContext context;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
-    private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
 
     @Override
     @Transactional
@@ -289,7 +284,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
         accountingBridgeData.put("loanId", loanScheduleAccrualData.getLoanId());
         accountingBridgeData.put("loanProductId", loanScheduleAccrualData.getLoanProductId());
         accountingBridgeData.put("officeId", loanScheduleAccrualData.getOfficeId());
-        accountingBridgeData.put("currency", loanScheduleAccrualData.getCurrencyData());
+        accountingBridgeData.put("currencyCode", loanScheduleAccrualData.getCurrencyData().getCode());
         accountingBridgeData.put("cashBasedAccountingEnabled", false);
         accountingBridgeData.put("upfrontAccrualBasedAccountingEnabled", false);
         accountingBridgeData.put("periodicAccrualBasedAccountingEnabled", true);
@@ -489,10 +484,9 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
     private void postJournalEntries(final Loan loan, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds) {
         final MonetaryCurrency currency = loan.getCurrency();
-        final ApplicationCurrency applicationCurrency = applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
         boolean isAccountTransfer = false;
-        final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(applicationCurrency.toData(),
-                existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
+        final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(currency.getCode(), existingTransactionIds,
+                existingReversedTransactionIds, isAccountTransfer);
         journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
     }
 }

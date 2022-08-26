@@ -59,7 +59,6 @@ import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGL
 import org.apache.fineract.accounting.producttoaccountmapping.exception.ProductToGLAccountMappingNotFoundException;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepository;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
@@ -105,7 +104,7 @@ public class AccountingProcessorHelper {
         final Long loanId = (Long) accountingBridgeData.get("loanId");
         final Long loanProductId = (Long) accountingBridgeData.get("loanProductId");
         final Long officeId = (Long) accountingBridgeData.get("officeId");
-        final CurrencyData currencyData = (CurrencyData) accountingBridgeData.get("currency");
+        final String currencyCode = (String) accountingBridgeData.get("currencyCode");
         final List<LoanTransactionDTO> newLoanTransactions = new ArrayList<>();
         boolean isAccountTransfer = (Boolean) accountingBridgeData.get("isAccountTransfer");
 
@@ -160,8 +159,8 @@ public class AccountingProcessorHelper {
 
         }
 
-        return new LoanDTO(loanId, loanProductId, officeId, currencyData.code(), cashBasedAccountingEnabled,
-                upfrontAccrualBasedAccountingEnabled, periodicAccrualBasedAccountingEnabled, newLoanTransactions);
+        return new LoanDTO(loanId, loanProductId, officeId, currencyCode, cashBasedAccountingEnabled, upfrontAccrualBasedAccountingEnabled,
+                periodicAccrualBasedAccountingEnabled, newLoanTransactions);
     }
 
     public SavingsDTO populateSavingsDtoFromMap(final Map<String, Object> accountingBridgeData, final boolean cashBasedAccountingEnabled,
@@ -169,7 +168,7 @@ public class AccountingProcessorHelper {
         final Long loanId = (Long) accountingBridgeData.get("savingsId");
         final Long loanProductId = (Long) accountingBridgeData.get("savingsProductId");
         final Long officeId = (Long) accountingBridgeData.get("officeId");
-        final CurrencyData currencyData = (CurrencyData) accountingBridgeData.get("currency");
+        final String currencyCode = (String) accountingBridgeData.get("currencyCode");
         final List<SavingsTransactionDTO> newSavingsTransactions = new ArrayList<>();
         boolean isAccountTransfer = (Boolean) accountingBridgeData.get("isAccountTransfer");
 
@@ -230,8 +229,8 @@ public class AccountingProcessorHelper {
 
         }
 
-        return new SavingsDTO(loanId, loanProductId, officeId, currencyData.code(), cashBasedAccountingEnabled,
-                accrualBasedAccountingEnabled, newSavingsTransactions);
+        return new SavingsDTO(loanId, loanProductId, officeId, currencyCode, cashBasedAccountingEnabled, accrualBasedAccountingEnabled,
+                newSavingsTransactions);
     }
 
     public SharesDTO populateSharesDtoFromMap(final Map<String, Object> accountingBridgeData, final boolean cashBasedAccountingEnabled,
@@ -239,7 +238,7 @@ public class AccountingProcessorHelper {
         final Long shareAccountId = (Long) accountingBridgeData.get("shareAccountId");
         final Long shareProductId = (Long) accountingBridgeData.get("shareProductId");
         final Long officeId = (Long) accountingBridgeData.get("officeId");
-        final CurrencyData currencyData = (CurrencyData) accountingBridgeData.get("currency");
+        final String currencyCode = (String) accountingBridgeData.get("currencyCode");
         final List<SharesTransactionDTO> newTransactions = new ArrayList<>();
 
         @SuppressWarnings("unchecked")
@@ -275,7 +274,7 @@ public class AccountingProcessorHelper {
 
         }
 
-        return new SharesDTO(shareAccountId, shareProductId, officeId, currencyData.code(), cashBasedAccountingEnabled,
+        return new SharesDTO(shareAccountId, shareProductId, officeId, currencyCode, cashBasedAccountingEnabled,
                 accrualBasedAccountingEnabled, newTransactions);
     }
 
