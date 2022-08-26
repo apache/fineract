@@ -71,7 +71,6 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.RandomPasswordGenerator;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.service.HolidayUtil;
-import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -2394,8 +2393,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return actualChanges;
     }
 
-    public Collection<Long> findExistingTransactionIds() {
-        final Collection<Long> ids = new ArrayList<>();
+    public List<Long> findExistingTransactionIds() {
+        final List<Long> ids = new ArrayList<>();
         List<LoanTransaction> transactions = getLoanTransactions();
         for (final LoanTransaction transaction : transactions) {
             ids.add(transaction.getId());
@@ -2404,9 +2403,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return ids;
     }
 
-    public Collection<Long> findExistingReversedTransactionIds() {
+    public List<Long> findExistingReversedTransactionIds() {
 
-        final Collection<Long> ids = new ArrayList<>();
+        final List<Long> ids = new ArrayList<>();
         List<LoanTransaction> transactions = getLoanTransactions();
         for (final LoanTransaction transaction : transactions) {
             if (transaction.isReversed()) {
@@ -4411,14 +4410,14 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return this.proposedPrincipal;
     }
 
-    public Map<String, Object> deriveAccountingBridgeData(final CurrencyData currencyData, final List<Long> existingTransactionIds,
+    public Map<String, Object> deriveAccountingBridgeData(final String currencyCode, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds, boolean isAccountTransfer) {
 
         final Map<String, Object> accountingBridgeData = new LinkedHashMap<>();
         accountingBridgeData.put("loanId", getId());
         accountingBridgeData.put("loanProductId", productId());
         accountingBridgeData.put("officeId", getOfficeId());
-        accountingBridgeData.put("currency", currencyData);
+        accountingBridgeData.put("currencyCode", currencyCode);
         accountingBridgeData.put("calculatedInterest", this.summary.getTotalInterestCharged());
         accountingBridgeData.put("cashBasedAccountingEnabled", isCashBasedAccountingEnabledOnLoanProduct());
         accountingBridgeData.put("upfrontAccrualBasedAccountingEnabled", isUpfrontAccrualAccountingEnabledOnLoanProduct());
@@ -4429,9 +4428,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         for (final LoanTransaction transaction : this.loanTransactions) {
             if (transaction.isReversed() && existingTransactionIds.contains(transaction.getId())
                     && !existingReversedTransactionIds.contains(transaction.getId())) {
-                newLoanTransactions.add(transaction.toMapData(currencyData));
+                newLoanTransactions.add(transaction.toMapData(currencyCode));
             } else if (!existingTransactionIds.contains(transaction.getId())) {
-                newLoanTransactions.add(transaction.toMapData(currencyData));
+                newLoanTransactions.add(transaction.toMapData(currencyCode));
             }
         }
 

@@ -23,9 +23,11 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
+@Getter
 @Table(name = "m_loan_overdue_installment_charge")
 public class LoanOverdueInstallmentCharge extends AbstractPersistableCustom {
 
@@ -54,9 +56,4 @@ public class LoanOverdueInstallmentCharge extends AbstractPersistableCustom {
     public void updateLoanRepaymentScheduleInstallment(LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment) {
         this.installment = loanRepaymentScheduleInstallment;
     }
-
-    public LoanRepaymentScheduleInstallment getInstallment() {
-        return this.installment;
-    }
-
 }

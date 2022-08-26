@@ -111,7 +111,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final HolidayRepository holidayRepository;
     private final WorkingDaysRepositoryWrapper workingDaysRepository;
 
-    private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final NoteRepository noteRepository;
     private final AccountTransferRepository accountTransferRepository;
@@ -417,10 +416,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final List<Long> existingReversedTransactionIds, boolean isAccountTransfer, boolean isLoanToLoanTransfer) {
 
         final MonetaryCurrency currency = loanAccount.getCurrency();
-        final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepositoryWrapper.findOneWithNotFoundDetection(currency);
 
-        final Map<String, Object> accountingBridgeData = loanAccount.deriveAccountingBridgeData(applicationCurrency.toData(),
-                existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
+        final Map<String, Object> accountingBridgeData = loanAccount.deriveAccountingBridgeData(currency.getCode(), existingTransactionIds,
+                existingReversedTransactionIds, isAccountTransfer);
         accountingBridgeData.put("isLoanToLoanTransfer", isLoanToLoanTransfer);
         this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
     }
@@ -535,14 +533,13 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
      */
     @Override
     public void recalculateAccruals(Loan loan) {
-        boolean isInterestCalcualtionHappened = loan.repaymentScheduleDetail().isInterestRecalculationEnabled();
-        recalculateAccruals(loan, isInterestCalcualtionHappened);
+        recalculateAccruals(loan, loan.repaymentScheduleDetail().isInterestRecalculationEnabled());
     }
 
     @Override
-    public void recalculateAccruals(Loan loan, boolean isInterestCalcualtionHappened) {
+    public void recalculateAccruals(Loan loan, boolean isInterestCalculationHappened) {
         LocalDate accruedTill = loan.getAccruedTill();
-        if (!loan.isPeriodicAccrualAccountingEnabledOnLoanProduct() || !isInterestCalcualtionHappened || accruedTill == null || loan.isNpa()
+        if (!loan.isPeriodicAccrualAccountingEnabledOnLoanProduct() || !isInterestCalculationHappened || accruedTill == null || loan.isNpa()
                 || !loan.status().isActive()) {
             return;
         }
@@ -552,7 +549,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         if (isOrganisationDateEnabled) {
             organisationStartDate = this.configurationDomainService.retrieveOrganisationStartDate();
         }
-        Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas = new ArrayList<>();
+        Collection<LoanScheduleAccrualData> loanScheduleAccrualList = new ArrayList<>();
         List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
         Long loanId = loan.getId();
         Long officeId = loan.getOfficeId();
@@ -571,15 +568,15 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 accruedTill = DateUtils.getBusinessLocalDate();
             }
             if (!isOrganisationDateEnabled || organisationStartDate.isBefore(installment.getDueDate())) {
-                generateLoanScheduleAccrualData(accruedTill, loanScheduleAccrualDatas, loanId, officeId, accrualStartDate,
+                generateLoanScheduleAccrualData(accruedTill, loanScheduleAccrualList, loanId, officeId, accrualStartDate,
                         repaymentFrequency, repayEvery, interestCalculatedFrom, loanProductId, currency, currencyData, loanCharges,
                         installment);
             }
         }
 
-        if (!loanScheduleAccrualDatas.isEmpty()) {
+        if (!loanScheduleAccrualList.isEmpty()) {
             try {
-                this.loanAccrualPlatformService.addPeriodicAccruals(accruedTill, loanScheduleAccrualDatas);
+                this.loanAccrualPlatformService.addPeriodicAccruals(accruedTill, loanScheduleAccrualList);
             } catch (MultiException e) {
                 String globalisationMessageCode = "error.msg.accrual.exception";
                 throw new GeneralPlatformDomainRuleException(globalisationMessageCode, e.getMessage(), e);

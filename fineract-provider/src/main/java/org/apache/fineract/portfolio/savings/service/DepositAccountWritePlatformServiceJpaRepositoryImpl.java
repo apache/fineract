@@ -52,9 +52,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavaila
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepositoryWrapper;
-import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
-import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.office.domain.Office;
@@ -1369,10 +1367,8 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     private void postJournalEntries(final SavingsAccount savingsAccount, final Set<Long> existingTransactionIds,
             final Set<Long> existingReversedTransactionIds) {
 
-        final MonetaryCurrency currency = savingsAccount.getCurrency();
-        final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepositoryWrapper.findOneWithNotFoundDetection(currency);
         boolean isAccountTransfer = false;
-        final Map<String, Object> accountingBridgeData = savingsAccount.deriveAccountingBridgeData(applicationCurrency.toData(),
+        final Map<String, Object> accountingBridgeData = savingsAccount.deriveAccountingBridgeData(savingsAccount.getCurrency().getCode(),
                 existingTransactionIds, existingReversedTransactionIds, isAccountTransfer, false);
         this.journalEntryWritePlatformService.createJournalEntriesForSavings(accountingBridgeData);
     }

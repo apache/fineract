@@ -302,7 +302,7 @@ public final class ChargesHelper {
         return chargesCreateJson;
     }
 
-    public static String getLoanOverdueFeeJSONWithCalculattionTypePercentage(String penaltyPercentageAmount) {
+    public static String getLoanOverdueFeeJSONWithCalculationTypePercentage(String penaltyPercentageAmount) {
         final HashMap<String, Object> map = populateDefaultsForLoan();
         map.put("penalty", ChargesHelper.PENALTY);
         map.put("amount", penaltyPercentageAmount);

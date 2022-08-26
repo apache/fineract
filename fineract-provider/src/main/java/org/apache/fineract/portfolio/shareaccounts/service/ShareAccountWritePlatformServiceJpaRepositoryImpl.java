@@ -38,8 +38,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.organisation.monetary.data.CurrencyData;
-import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.accounts.constants.ShareAccountApiConstants;
 import org.apache.fineract.portfolio.businessevent.domain.share.ShareAccountApproveBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.share.ShareAccountCreateBusinessEvent;
@@ -130,16 +128,13 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
 
     private Map<String, Object> populateJournalEntries(final ShareAccount account, final Set<ShareAccountTransaction> transactions) {
         final Map<String, Object> accountingBridgeData = new HashMap<>();
-        Boolean cashBasedAccounting = account.getShareProduct().getAccountingType().intValue() == 2 ? Boolean.TRUE : Boolean.FALSE;
+        Boolean cashBasedAccounting = account.getShareProduct().getAccountingType() == 2 ? Boolean.TRUE : Boolean.FALSE;
         accountingBridgeData.put("cashBasedAccountingEnabled", cashBasedAccounting);
         accountingBridgeData.put("accrualBasedAccountingEnabled", Boolean.FALSE);
         accountingBridgeData.put("shareAccountId", account.getId());
         accountingBridgeData.put("shareProductId", account.getShareProduct().getId());
         accountingBridgeData.put("officeId", account.getOfficeId());
-        MonetaryCurrency currency = account.getCurrency();
-        final CurrencyData currencyData = new CurrencyData(currency.getCode(), "", currency.getDigitsAfterDecimal(),
-                currency.getCurrencyInMultiplesOf(), "", "");
-        accountingBridgeData.put("currency", currencyData);
+        accountingBridgeData.put("currencyCode", account.getCurrency().getCode());
         final List<Map<String, Object>> newTransactionsMap = new ArrayList<>();
         accountingBridgeData.put("newTransactions", newTransactionsMap);
 

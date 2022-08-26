@@ -31,15 +31,17 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
+import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.service.ChargeDropdownReadPlatformService;
 import org.apache.fineract.portfolio.charge.service.ChargeEnumerations;
 import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidByData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInstallmentChargeData;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -51,7 +53,6 @@ import org.springframework.stereotype.Service;
 public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
-    private final PlatformSecurityContext context;
     private final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService;
     private final DropdownReadPlatformService dropdownReadPlatformService;
 
@@ -243,16 +244,18 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
     }
 
     @Override
-    public Collection<Integer> retrieveOverdueInstallmentChargeFrequencyNumber(final Long loanId, final Long chargeId,
+    public Collection<Integer> retrieveOverdueInstallmentChargeFrequencyNumber(final Loan loan, final Charge charge,
             final Integer periodNumber) {
-        String sql = "select oic.frequency_number from m_loan_overdue_installment_charge oic  inner join m_loan_charge lc on lc.id=oic.loan_charge_id inner join m_loan_repayment_schedule rs on rs.id = oic.loan_schedule_id inner join m_loan loan on loan.id=rs.loan_id "
-                + "where lc.is_active = true and loan.id = ? and rs.installment=?";
-        Object[] params = { loanId, periodNumber };
-        if (chargeId != null) {
-            sql += " and lc.charge_id = ? ";
-            params = new Object[] { loanId, periodNumber, chargeId };
+
+        List<Integer> frequencyNumbers = new ArrayList<>();
+        for (LoanCharge loanCharge : loan.getLoanCharges()) {
+            if (loanCharge.isOverdueInstallmentCharge() && charge.equals(loanCharge.getCharge()) && loanCharge.isActive()
+                    && periodNumber.equals(loanCharge.getOverdueInstallmentCharge().getInstallment().getInstallmentNumber())) {
+                frequencyNumbers.add(loanCharge.getOverdueInstallmentCharge().getFrequencyNumber());
+            }
         }
-        return this.jdbcTemplate.queryForList(sql, Integer.class, params);
+
+        return frequencyNumbers;
     }
 
     @Override

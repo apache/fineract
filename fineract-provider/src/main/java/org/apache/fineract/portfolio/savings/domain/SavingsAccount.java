@@ -82,7 +82,6 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.RandomPasswordGenerator;
 import org.apache.fineract.interoperation.domain.InteropIdentifier;
-import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
@@ -1878,13 +1877,13 @@ public class SavingsAccount extends AbstractPersistableCustom {
         }
     }
 
-    public Map<String, Object> deriveAccountingBridgeData(final CurrencyData currencyData, final Set<Long> existingTransactionIds,
+    public Map<String, Object> deriveAccountingBridgeData(final String currencyCode, final Set<Long> existingTransactionIds,
             final Set<Long> existingReversedTransactionIds, boolean isAccountTransfer, final boolean backdatedTxnsAllowedTill) {
 
         final Map<String, Object> accountingBridgeData = new LinkedHashMap<>();
         accountingBridgeData.put("savingsId", getId());
         accountingBridgeData.put("savingsProductId", productId());
-        accountingBridgeData.put("currency", currencyData);
+        accountingBridgeData.put("currencyCode", currencyCode);
         accountingBridgeData.put("officeId", officeId());
         accountingBridgeData.put("cashBasedAccountingEnabled", isCashBasedAccountingEnabledOnSavingsProduct());
         accountingBridgeData.put("accrualBasedAccountingEnabled", isAccrualBasedAccountingEnabledOnSavingsProduct());
@@ -1903,9 +1902,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
         // Adding new transactions to the array
         for (final SavingsAccountTransaction transaction : trans) {
             if (transaction.isReversed() && !existingReversedTransactionIds.contains(transaction.getId())) {
-                newSavingsTransactions.add(transaction.toMapData(currencyData));
+                newSavingsTransactions.add(transaction.toMapData(currencyCode));
             } else if (!existingTransactionIds.contains(transaction.getId())) {
-                newSavingsTransactions.add(transaction.toMapData(currencyData));
+                newSavingsTransactions.add(transaction.toMapData(currencyCode));
             }
         }
 
