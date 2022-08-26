@@ -29,8 +29,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.COBPropertyService;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.explore.JobExplorer;
@@ -44,45 +42,54 @@ import org.springframework.batch.item.ExecutionContext;
 @RequiredArgsConstructor
 public class LoanCOBPartitioner implements Partitioner {
 
-    private final LoanRepository loanRepository;
     private final COBPropertyService cobPropertyService;
     private final COBBusinessStepService cobBusinessStepService;
     private final JobOperator jobOperator;
     private final JobExplorer jobExplorer;
+    private final RetrieveLoanIdService retrieveLoanIdService;
 
-    private static final String PARTITION_PREFIX = "partition";
+    private static final String PARTITION_PREFIX = "partition_";
     private static final String JOB_NAME = "LOAN_COB";
     private static final String LOAN_COB_JOB_NAME = "LOAN_CLOSE_OF_BUSINESS";
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-        int partitionCount = cobPropertyService.getPartitionSize(JOB_NAME);
+        int partitionSize = cobPropertyService.getPartitionSize(JOB_NAME);
         TreeMap<Long, String> cobBusinessStepMap = cobBusinessStepService.getCOBBusinessStepMap(LoanCOBBusinessStep.class,
                 LOAN_COB_JOB_NAME);
         if (cobBusinessStepMap.isEmpty()) {
             return stopJobExecution();
         }
-        return getPartitions(partitionCount, cobBusinessStepMap);
+        return getPartitions(partitionSize, cobBusinessStepMap);
     }
 
-    @NotNull
-    private Map<String, ExecutionContext> getPartitions(int partitionCount, TreeMap<Long, String> cobBusinessStepMap) {
+    private Map<String, ExecutionContext> getPartitions(int partitionSize, TreeMap<Long, String> cobBusinessStepMap) {
         Map<String, ExecutionContext> partitions = new HashMap<>();
-        for (int i = 0; i < partitionCount; i++) {
-            ExecutionContext executionContext = new ExecutionContext();
-            executionContext.put("loanIds", new ArrayList<Integer>());
-            executionContext.put("BusinessStepMap", cobBusinessStepMap);
-            partitions.put(PARTITION_PREFIX + i, executionContext);
+        List<Integer> allNonClosedLoanIds = retrieveLoanIdService.retrieveLoanIds();
+        if (allNonClosedLoanIds.isEmpty()) {
+            return stopJobExecution();
         }
-
-        List<Integer> allNonClosedLoanIds = loanRepository.findAllNonClosedLoanIds();
-        for (int i = 0; i < allNonClosedLoanIds.size(); i++) {
-            String key = PARTITION_PREFIX + (i % partitionCount);
+        int partitionIndex = 0;
+        createNewPartition(partitions, partitionIndex, cobBusinessStepMap);
+        for (Integer allNonClosedLoanId : allNonClosedLoanIds) {
+            if (partitions.get(PARTITION_PREFIX + partitionIndex).size() == partitionSize) {
+                partitionIndex++;
+                createNewPartition(partitions, partitionIndex, cobBusinessStepMap);
+            }
+            String key = PARTITION_PREFIX + partitionIndex;
             ExecutionContext executionContext = partitions.get(key);
             List<Integer> data = (List<Integer>) executionContext.get("loanIds");
-            data.add(allNonClosedLoanIds.get(i));
+            data.add(allNonClosedLoanId);
         }
         return partitions;
+    }
+
+    private void createNewPartition(Map<String, ExecutionContext> partitions, int partitionIndex,
+            TreeMap<Long, String> cobBusinessStepMap) {
+        ExecutionContext executionContext = new ExecutionContext();
+        executionContext.put("loanIds", new ArrayList<Integer>());
+        executionContext.put("BusinessStepMap", cobBusinessStepMap);
+        partitions.put(PARTITION_PREFIX + partitionIndex, executionContext);
     }
 
     @Nullable
