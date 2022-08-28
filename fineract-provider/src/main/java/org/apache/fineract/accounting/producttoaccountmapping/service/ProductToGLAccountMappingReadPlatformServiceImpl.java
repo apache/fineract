@@ -246,7 +246,6 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
 
     /**
      * @param loanProductId
-     * @param paymentTypeToGLAccountMappers
      * @return
      */
     private List<PaymentTypeToGLAccountMapper> fetchPaymentTypeToFundSourceMappings(final PortfolioProductType portfolioProductType,
@@ -271,8 +270,8 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
 
             final GLAccountData gLAccountData = new GLAccountData().setId(glAccountId).setName(glAccountName).setGlCode(glCode);
 
-            final PaymentTypeToGLAccountMapper paymentTypeToGLAccountMapper = new PaymentTypeToGLAccountMapper(paymentTypeData,
-                    gLAccountData);
+            final PaymentTypeToGLAccountMapper paymentTypeToGLAccountMapper = new PaymentTypeToGLAccountMapper()
+                    .setPaymentType(paymentTypeData).setFundSourceAccount(gLAccountData);
             paymentTypeToGLAccountMappers.add(paymentTypeToGLAccountMapper);
         }
         return paymentTypeToGLAccountMappers;
@@ -323,7 +322,8 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
             final String chargeName = (String) chargeToIncomeAccountMap.get("chargeName");
             final Boolean penalty1 = (Boolean) chargeToIncomeAccountMap.get("penalty");
             final ChargeData chargeData = ChargeData.lookup(chargeId, chargeName, penalty1);
-            final ChargeToGLAccountMapper chargeToGLAccountMapper = new ChargeToGLAccountMapper(chargeData, gLAccountData);
+            final ChargeToGLAccountMapper chargeToGLAccountMapper = new ChargeToGLAccountMapper().setCharge(chargeData)
+                    .setIncomeAccount(gLAccountData);
             chargeToGLAccountMappers.add(chargeToGLAccountMapper);
         }
         return chargeToGLAccountMappers;
