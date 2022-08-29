@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.cob;
 
+import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -31,6 +32,7 @@ public class COBInputChannelInterceptor implements ExecutorChannelInterceptor {
     public Message<?> beforeHandle(Message<?> message, MessageChannel channel, MessageHandler handler) {
         COBMessage castedMessage = COBMessage.class.cast(message.getPayload());
         ThreadLocalContextUtil.init(castedMessage.getContext());
+        ThreadLocalContextUtil.setActionContext(ActionContext.COB);
         return new GenericMessage<>(castedMessage.getStepExecutionRequest());
     }
 }

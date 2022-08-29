@@ -1576,8 +1576,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 continue;
             }
 
-            boolean isPenaltyDue = installment.isOverdueOn(DateUtils.getBusinessLocalDate().plusDays(penaltyWaitPeriod + 1));
-            boolean isDueToday = installment.getDueDate().equals(DateUtils.getBusinessLocalDate().plusDays(penaltyWaitPeriod));
+            boolean isPenaltyDue = installment.isOverdueOn(DateUtils.getBusinessLocalDate().minusDays(penaltyWaitPeriod).plusDays(1));
+            boolean isDueToday = installment.getDueDate().equals(DateUtils.getBusinessLocalDate().minusDays(penaltyWaitPeriod));
 
             if (isPenaltyDue) {
                 if (!backdatePenalties && !isDueToday) {

@@ -26,6 +26,8 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.cob.domain.BatchBusinessStep;
 import org.apache.fineract.cob.domain.BatchBusinessStepRepository;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.domain.ActionContext;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -42,8 +44,13 @@ public class COBBusinessStepServiceImpl implements COBBusinessStepService {
     @Override
     public <T extends COBBusinessStep<S>, S extends AbstractPersistableCustom> S run(TreeMap<Long, String> executionMap, S item) {
         for (String businessStep : executionMap.values()) {
-            COBBusinessStep<S> businessStepBean = (COBBusinessStep<S>) applicationContext.getBean(businessStep);
-            item = businessStepBean.execute(item);
+            try {
+                COBBusinessStep<S> businessStepBean = (COBBusinessStep<S>) applicationContext.getBean(businessStep);
+                item = businessStepBean.execute(item);
+            } finally {
+                // Fallback to COB action context after each business step
+                ThreadLocalContextUtil.setActionContext(ActionContext.COB);
+            }
         }
         return item;
     }
