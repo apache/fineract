@@ -61,9 +61,6 @@ public class GlobalConfigurationWritePlatformServiceJpaRepositoryImpl implements
     @Transactional
     @Override
     public CommandProcessingResult update(final Long configId, final JsonCommand command) {
-
-        this.context.authenticatedUser();
-
         try {
             this.globalConfigurationDataValidator.validateForUpdate(command);
 
