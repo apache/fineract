@@ -19,15 +19,12 @@
 package org.apache.fineract.infrastructure.bulkimport.domain;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.documentmanagement.domain.Document;
@@ -41,13 +38,11 @@ public class ImportDocument extends AbstractPersistableCustom {
     @JoinColumn(name = "document_id")
     private Document document;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "import_time")
-    private Date importTime;
+    private LocalDateTime importTime;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "end_time")
-    private Date endTime;
+    private LocalDateTime endTime;
 
     @Column(name = "completed", nullable = false)
     private Boolean completed;
@@ -88,8 +83,8 @@ public class ImportDocument extends AbstractPersistableCustom {
             final Integer entityType, final AppUser createdBy, final Integer totalRecords, final Integer successCount,
             final Integer failureCount) {
         this.document = document;
-        this.importTime = Date.from(importTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant());
-        this.endTime = Date.from(endTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.importTime = importTime;
+        this.endTime = endTime;
         this.completed = completed;
         this.entityType = entityType;
         this.createdBy = createdBy;
@@ -100,7 +95,7 @@ public class ImportDocument extends AbstractPersistableCustom {
     }
 
     public void update(final LocalDateTime endTime, final Integer successCount, final Integer errorCount) {
-        this.endTime = Date.from(endTime.atZone(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        this.endTime = endTime;
         this.completed = Boolean.TRUE;
         this.successCount = successCount;
         this.failureCount = errorCount;

@@ -43,6 +43,7 @@ public class AuditHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(AuditHelper.class);
     private static final String AUDIT_BASE_URL = "/fineract-provider/api/v1/audits?" + Utils.TENANT_IDENTIFIER;
+    private static final String AUDITSEARCH_BASE_URL = "/fineract-provider/api/v1/audits/searchtemplate?" + Utils.TENANT_IDENTIFIER;
 
     public AuditHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
@@ -50,19 +51,20 @@ public class AuditHelper {
     }
 
     public List getAuditDetails(final Integer resourceId, final String actionName, final String entityName) {
-        final String AUDIT_URL = "/fineract-provider/api/v1/audits/?" + "entityName=" + entityName + "&resourceId=" + resourceId
-                + "&actionName=" + actionName + "&orderBy=id&sortBy=DSC&" + Utils.TENANT_IDENTIFIER;
+        final String AUDIT_URL = AUDIT_BASE_URL + "&entityName=" + entityName + "&resourceId=" + resourceId + "&actionName=" + actionName
+                + "&orderBy=id&sortBy=DSC";
         List<HashMap<String, Object>> responseAudits = Utils.performServerGet(requestSpec, responseSpec, AUDIT_URL, "");
         return responseAudits;
     }
 
     public List getAuditDetails(final int limit) {
-
-        final String AUDIT_URL = "/fineract-provider/api/v1/audits?paged=true&limit=" + Integer.toString(limit) + "&"
-                + Utils.TENANT_IDENTIFIER;
+        final String AUDIT_URL = AUDIT_BASE_URL + "&paged=true&limit=" + Integer.toString(limit);
         LinkedHashMap responseAudits = Utils.performServerGet(requestSpec, responseSpec, AUDIT_URL, "");
         return (List) responseAudits.get("pageItems");
+    }
 
+    public LinkedHashMap getAuditSearchTemplate() {
+        return Utils.performServerGet(requestSpec, responseSpec, AUDITSEARCH_BASE_URL, "$");
     }
 
     /**
@@ -101,7 +103,7 @@ public class AuditHelper {
     }
 
     public void verifyOrderBysupported(final String orderByValue) {
-        final String AUDIT_URL = "/fineract-provider/api/v1/audits/?paged=true&orderBy=" + orderByValue + "&" + Utils.TENANT_IDENTIFIER;
+        final String AUDIT_URL = AUDIT_BASE_URL + "&paged=true&orderBy=" + orderByValue;
         Utils.performServerGet(requestSpec, responseSpec, AUDIT_URL, "");
     }
 

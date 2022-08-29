@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet author="fineract" id="1">
+        <createTable tableName="m_business_date">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="type" type="VARCHAR(100)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="date" type="DATE">
+                <constraints unique="false" nullable="false"/>
+            </column>
+            <column name="createdby_id" type="BIGINT"/>
+            <column name="created_date" type="DATETIME "/>
+            <column name="version" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="NULL" name="lastmodifiedby_id" type="BIGINT"/>
+            <column defaultValueComputed="NULL" name="lastmodified_date" type="DATETIME"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="2" author="fineract">
+        <insert tableName="c_configuration">
+            <column name="name" value="enable_business_date"/>
+            <column name="value"/>
+            <column name="date_value"/>
+            <column name="string_value"/>
+            <column name="enabled" valueBoolean="false"/>
+            <column name="is_trap_door" valueBoolean="false"/>
+            <column name="description" value="Whether the logical business date functionality is enabled in the system"/>
+        </insert>
+        <insert tableName="c_configuration">
+            <column name="name" value="enable_automatic_cob_date_adjustment"/>
+            <column name="value"/>
+            <column name="date_value"/>
+            <column name="string_value"/>
+            <column name="enabled" valueBoolean="true"/>
+            <column name="is_trap_door" valueBoolean="false"/>
+            <column name="description" value="Whether the cob date will be automatically recalculated based on the business date"/>
+        </insert>
+    </changeSet>
+    <changeSet id="3" author="fineract">
+        <insert tableName="m_permission">
+            <column name="grouping" value="organisation"/>
+            <column name="code" value="READ_BUSINESS_DATE"/>
+            <column name="entity_name" value="BUSINESS_DATE"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="organisation"/>
+            <column name="code" value="UPDATE_BUSINESS_DATE"/>
+            <column name="entity_name" value="BUSINESS_DATE"/>
+            <column name="action_name" value="UPDATE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet id="4" author="fineract">
+        <validCheckSum>8:f7e5e697680e1e81eca6566f2481b879</validCheckSum>
+        <insert tableName="job">
+            <column name="name" value="Increase Business Date by 1 day"/>
+            <column name="display_name" value="Increase Business Date by 1 day"/>
+            <column name="cron_expression" value="0 0 0 1/1 * ? *"/>
+            <column name="create_time" valueDate="${current_datetime}"/>
+            <column name="task_priority" valueNumeric="99"/>
+            <column name="group_name"/>
+            <column name="previous_run_start_time"/>
+            <column name="job_key" value="Increase Business Date by 1 dayJobDetail1 _ DEFAULT"/>
+            <column name="initializing_errorlog"/>
+            <column name="is_active" valueBoolean="false"/>
+            <column name="currently_running" valueBoolean="false"/>
+            <column name="updates_allowed" valueBoolean="true"/>
+            <column name="scheduler_group" valueNumeric="0"/>
+            <column name="is_misfired" valueBoolean="false"/>
+            <column name="node_id" valueNumeric="1"/>
+            <column name="is_mismatched_job" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet id="5" author="fineract">
+        <validCheckSum>8:cb7f67c27941deda1e83d317bd78dabd</validCheckSum>
+        <insert tableName="job">
+            <column name="name" value="Increase COB Date by 1 day"/>
+            <column name="display_name" value="Increase COB Date by 1 day"/>
+            <column name="cron_expression" value="0 0 0 1/1 * ? *"/>
+            <column name="create_time" valueDate="${current_datetime}"/>
+            <column name="task_priority" valueNumeric="98"/>
+            <column name="group_name"/>
+            <column name="previous_run_start_time"/>
+            <column name="job_key" value="Increase COB Date by 1 dayJobDetail1 _ DEFAULT"/>
+            <column name="initializing_errorlog"/>
+            <column name="is_active" valueBoolean="false"/>
+            <column name="currently_running" valueBoolean="false"/>
+            <column name="updates_allowed" valueBoolean="true"/>
+            <column name="scheduler_group" valueNumeric="0"/>
+            <column name="is_misfired" valueBoolean="false"/>
+            <column name="node_id" valueNumeric="1"/>
+            <column name="is_mismatched_job" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.guarantor.domain;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +31,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -65,8 +63,7 @@ public class Guarantor extends AbstractPersistableCustom {
     private String lastname;
 
     @Column(name = "dob")
-    @Temporal(TemporalType.DATE)
-    private Date dateOfBirth;
+    private LocalDate dateOfBirth;
 
     @Column(name = "address_line_1", length = 500)
     private String addressLine1;
@@ -106,9 +103,9 @@ public class Guarantor extends AbstractPersistableCustom {
     }
 
     private Guarantor(final Loan loan, final CodeValue clientRelationshipType, final Integer gurantorType, final Long entityId,
-            final String firstname, final String lastname, final Date dateOfBirth, final String addressLine1, final String addressLine2,
-            final String city, final String state, final String country, final String zip, final String housePhoneNumber,
-            final String mobilePhoneNumber, final String comment, final boolean active,
+            final String firstname, final String lastname, final LocalDate dateOfBirth, final String addressLine1,
+            final String addressLine2, final String city, final String state, final String country, final String zip,
+            final String housePhoneNumber, final String mobilePhoneNumber, final String comment, final boolean active,
             final List<GuarantorFundingDetails> guarantorFundDetails) {
         this.loan = loan;
         this.clientRelationshipType = clientRelationshipType;
@@ -138,7 +135,7 @@ public class Guarantor extends AbstractPersistableCustom {
         if (GuarantorType.EXTERNAL.getValue().equals(gurantorType)) {
             final String firstname = command.stringValueOfParameterNamed(GuarantorJSONinputParams.FIRSTNAME.getValue());
             final String lastname = command.stringValueOfParameterNamed(GuarantorJSONinputParams.LASTNAME.getValue());
-            final Date dateOfBirth = command.dateValueOfParameterNamed(GuarantorJSONinputParams.DATE_OF_BIRTH.getValue());
+            final LocalDate dateOfBirth = command.localDateValueOfParameterNamed(GuarantorJSONinputParams.DATE_OF_BIRTH.getValue());
             final String addressLine1 = command.stringValueOfParameterNamed(GuarantorJSONinputParams.ADDRESS_LINE_1.getValue());
             final String addressLine2 = command.stringValueOfParameterNamed(GuarantorJSONinputParams.ADDRESS_LINE_2.getValue());
             final String city = command.stringValueOfParameterNamed(GuarantorJSONinputParams.CITY.getValue());
@@ -249,9 +246,9 @@ public class Guarantor extends AbstractPersistableCustom {
     }
 
     private void handlePropertyUpdate(final JsonCommand command, final Map<String, Object> actualChanges, final String paramName,
-            Date propertyToBeUpdated) {
+            LocalDate propertyToBeUpdated) {
         if (command.isChangeInDateParameterNamed(paramName, propertyToBeUpdated)) {
-            final Date newValue = command.dateValueOfParameterNamed(paramName);
+            final LocalDate newValue = command.localDateValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
             // propertyToBeUpdated = newValue;
 

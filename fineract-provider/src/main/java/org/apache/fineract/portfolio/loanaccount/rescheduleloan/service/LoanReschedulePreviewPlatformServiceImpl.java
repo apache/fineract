@@ -21,9 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.rescheduleloan.service;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
@@ -109,8 +107,7 @@ public class LoanReschedulePreviewPlatformServiceImpl implements LoanRescheduleP
                 if (loanRescheduleRequestToTermVariationMapping.getLoanTermVariations().getTermType().isDueDateVariation()
                         && rescheduleFromDate != null) {
                     adjustedApplicableDate = loanRescheduleRequestToTermVariationMapping.getLoanTermVariations().fetchDateValue();
-                    loanRescheduleRequestToTermVariationMapping.getLoanTermVariations()
-                            .setTermApplicableFrom(Date.from(rescheduleFromDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                    loanRescheduleRequestToTermVariationMapping.getLoanTermVariations().setTermApplicableFrom(rescheduleFromDate);
                 }
                 loanTermVariationsData.add(loanRescheduleRequestToTermVariationMapping.getLoanTermVariations().toData());
             }

@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -134,15 +135,15 @@ public class LoanTransactionsApiResource {
         if (is(commandParam, "repayment")) {
             transactionData = this.loanReadPlatformService.retrieveLoanTransactionTemplate(loanId);
         } else if (is(commandParam, "merchantIssuedRefund")) {
-            LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
+            LocalDate transactionDate = DateUtils.getBusinessLocalDate();
             transactionData = this.loanReadPlatformService.retrieveLoanPrePaymentTemplate(LoanTransactionType.MERCHANT_ISSUED_REFUND,
                     loanId, transactionDate);
         } else if (is(commandParam, "payoutRefund")) {
-            LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
+            LocalDate transactionDate = DateUtils.getBusinessLocalDate();
             transactionData = this.loanReadPlatformService.retrieveLoanPrePaymentTemplate(LoanTransactionType.PAYOUT_REFUND, loanId,
                     transactionDate);
         } else if (is(commandParam, "goodwillCredit")) {
-            LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
+            LocalDate transactionDate = DateUtils.getBusinessLocalDate();
             transactionData = this.loanReadPlatformService.retrieveLoanPrePaymentTemplate(LoanTransactionType.GOODWILL_CREDIT, loanId,
                     transactionDate);
         } else if (is(commandParam, "waiveinterest")) {
@@ -166,10 +167,9 @@ public class LoanTransactionsApiResource {
         } else if (is(commandParam, "prepayLoan")) {
             LocalDate transactionDate = null;
             if (transactionDateParam == null) {
-                transactionDate = DateUtils.getLocalDateOfTenant();
+                transactionDate = DateUtils.getBusinessLocalDate();
             } else {
-                transactionDate = LocalDate.ofInstant(transactionDateParam.getDate("transactionDate", dateFormat, locale).toInstant(),
-                        DateUtils.getDateTimeZoneOfTenant());
+                transactionDate = transactionDateParam.getDate("transactionDate", dateFormat, locale);
             }
             transactionData = this.loanReadPlatformService.retrieveLoanPrePaymentTemplate(LoanTransactionType.REPAYMENT, loanId,
                     transactionDate);
@@ -180,10 +180,9 @@ public class LoanTransactionsApiResource {
         } else if (is(commandParam, "foreclosure")) {
             LocalDate transactionDate = null;
             if (transactionDateParam == null) {
-                transactionDate = DateUtils.getLocalDateOfTenant();
+                transactionDate = DateUtils.getBusinessLocalDate();
             } else {
-                transactionDate = LocalDate.ofInstant(transactionDateParam.getDate("transactionDate", dateFormat, locale).toInstant(),
-                        DateUtils.getDateTimeZoneOfTenant());
+                transactionDate = transactionDateParam.getDate("transactionDate", dateFormat, locale);
             }
             transactionData = this.loanReadPlatformService.retrieveLoanForeclosureTemplate(loanId, transactionDate);
         } else if (is(commandParam, "creditBalanceRefund")) {
@@ -206,6 +205,7 @@ public class LoanTransactionsApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.GetLoansLoanIdTransactionsTransactionIdResponse.class))) })
     public String retrieveTransaction(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @PathParam("transactionId") @Parameter(description = "transactionId") final Long transactionId,
+            @QueryParam("fields") @Parameter(in = ParameterIn.QUERY, name = "fields", description = "Optional Loan Transaction attribute list to be in the response", required = false, example = "id,date,amount") final String fields,
             @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);

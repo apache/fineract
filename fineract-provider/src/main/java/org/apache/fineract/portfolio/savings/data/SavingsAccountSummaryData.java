@@ -121,6 +121,10 @@ public class SavingsAccountSummaryData implements Serializable {
         return this.availableBalance;
     }
 
+    public BigDecimal getAccountBalance() {
+        return accountBalance;
+    }
+
     public BigDecimal getTotalOverdraftInterestDerived() {
         return this.totalOverdraftInterestDerived;
     }
@@ -149,6 +153,9 @@ public class SavingsAccountSummaryData implements Serializable {
             final SavingsAccountTransaction transaction, final List<SavingsAccountTransactionData> savingsAccountTransactions) {
 
         if (transaction != null) {
+            if (transaction.isReversalTransaction()) {
+                return;
+            }
             Money transactionAmount = Money.of(currency, transaction.getAmount());
             switch (SavingsAccountTransactionType.fromInt(transaction.getTypeOf())) {
                 case DEPOSIT:
@@ -215,22 +222,31 @@ public class SavingsAccountSummaryData implements Serializable {
             // boolean isUpdated = false;
             Money interestTotal = Money.of(currency, this.totalInterestPosted);
             Money withHoldTaxTotal = Money.of(currency, this.totalWithholdTax);
-
+            Money overdraftInterestTotal = Money.of(currency, this.totalOverdraftInterestDerived);
+            this.totalDeposits = wrapper.calculateTotalDeposits(currency, savingsAccountTransactions);
+            this.totalWithdrawals = wrapper.calculateTotalWithdrawals(currency, savingsAccountTransactions);
             final HashMap<String, Money> map = updateRunningBalanceAndPivotDate(true, savingsAccountTransactions, interestTotal,
-                    withHoldTaxTotal, currency);
+                    overdraftInterestTotal, withHoldTaxTotal, currency);
             interestTotal = map.get("interestTotal");
             withHoldTaxTotal = map.get("withHoldTax");
+            overdraftInterestTotal = map.get("overdraftInterestTotal");
+            BigDecimal deltaInterest = interestTotal.minus(this.totalInterestPosted).getAmountDefaultedToNullIfZero();
+            BigDecimal deltaWithholdTax = withHoldTaxTotal.minus(this.totalWithholdTax).getAmountDefaultedToNullIfZero();
+            BigDecimal deltaOverdraftInterestDerived = overdraftInterestTotal.minus(this.totalOverdraftInterestDerived)
+                    .getAmountDefaultedToNullIfZero();
             this.totalInterestPosted = interestTotal.getAmountDefaultedToNullIfZero();
             this.totalWithholdTax = withHoldTaxTotal.getAmountDefaultedToNullIfZero();
-            this.accountBalance = Money.of(currency, this.accountBalance).plus(this.totalInterestPosted).minus(this.totalWithholdTax)
-                    .getAmount();
+            this.totalOverdraftInterestDerived = overdraftInterestTotal.getAmountDefaultedToNullIfZero();
+            this.accountBalance = getRunningBalanceOnPivotDate();
+            this.accountBalance = Money.of(currency, this.accountBalance).plus(Money.of(currency, this.totalDeposits)).plus(deltaInterest)
+                    .minus(this.totalWithdrawals).minus(deltaWithholdTax).minus(deltaOverdraftInterestDerived).getAmount();
         }
     }
 
     public void updateFromInterestPeriodSummaries(final MonetaryCurrency currency, final List<PostingPeriod> allPostingPeriods) {
 
         Money totalEarned = Money.zero(currency);
-        LocalDate interestCalculationDate = DateUtils.getLocalDateOfTenant();
+        LocalDate interestCalculationDate = DateUtils.getBusinessLocalDate();
         for (final PostingPeriod period : allPostingPeriods) {
             Money interestEarned = period.interest();
             interestEarned = interestEarned == null ? Money.zero(currency) : interestEarned;
@@ -242,14 +258,22 @@ public class SavingsAccountSummaryData implements Serializable {
 
     @SuppressWarnings("unchecked")
     private HashMap<String, Money> updateRunningBalanceAndPivotDate(final boolean backdatedTxnsAllowedTill,
-            final List<SavingsAccountTransactionData> savingsAccountTransactions, Money interestTotal, Money withHoldTaxTotal,
-            CurrencyData currency) {
+            final List<SavingsAccountTransactionData> savingsAccountTransactions, Money interestTotal, Money overdraftInterestTotal,
+            Money withHoldTaxTotal, CurrencyData currency) {
         boolean isUpdated = false;
         HashMap<String, Money> map = new HashMap<>();
         for (int i = savingsAccountTransactions.size() - 1; i >= 0; i--) {
             final SavingsAccountTransactionData savingsAccountTransaction = savingsAccountTransactions.get(i);
-            if (savingsAccountTransaction.isInterestPostingAndNotReversed() && savingsAccountTransaction.isNotReversed() && !isUpdated) {
-                setRunningBalanceOnPivotDate(savingsAccountTransaction.getRunningBalance(currency).getAmount());
+            if (savingsAccountTransaction.isInterestPostingAndNotReversed() && !savingsAccountTransaction.isReversalTransaction()
+                    && !isUpdated) {
+                setInterestPostedTillDate(savingsAccountTransaction.getTransactionDate());
+                isUpdated = true;
+                if (!backdatedTxnsAllowedTill) {
+                    break;
+                }
+            }
+            if (savingsAccountTransaction.isOverdraftInterestAndNotReversed() && !savingsAccountTransaction.isReversalTransaction()
+                    && !isUpdated) {
                 setInterestPostedTillDate(savingsAccountTransaction.getTransactionDate());
                 isUpdated = true;
                 if (!backdatedTxnsAllowedTill) {
@@ -257,11 +281,13 @@ public class SavingsAccountSummaryData implements Serializable {
                 }
             }
             if (backdatedTxnsAllowedTill) {
-                if (savingsAccountTransaction.isInterestPostingAndNotReversed() && savingsAccountTransaction.isNotReversed()) {
+                if (savingsAccountTransaction.isInterestPostingAndNotReversed() && !savingsAccountTransaction.isReversalTransaction()) {
                     interestTotal = interestTotal.plus(savingsAccountTransaction.getAmount());
                 }
-
-                if (savingsAccountTransaction.isWithHoldTaxAndNotReversed()) {
+                if (savingsAccountTransaction.isOverdraftInterestAndNotReversed() && !savingsAccountTransaction.isReversalTransaction()) {
+                    overdraftInterestTotal = overdraftInterestTotal.plus(savingsAccountTransaction.getAmount());
+                }
+                if (savingsAccountTransaction.isWithHoldTaxAndNotReversed() && !savingsAccountTransaction.isReversalTransaction()) {
                     withHoldTaxTotal = withHoldTaxTotal.plus(savingsAccountTransaction.getAmount());
                 }
             }
@@ -269,6 +295,7 @@ public class SavingsAccountSummaryData implements Serializable {
         if (backdatedTxnsAllowedTill) {
             map.put("interestTotal", interestTotal);
             map.put("withHoldTax", withHoldTaxTotal);
+            map.put("overdraftInterestTotal", overdraftInterestTotal);
         }
         return map;
     }
@@ -289,7 +316,7 @@ public class SavingsAccountSummaryData implements Serializable {
         this.totalWithholdTax = wrapper.calculateTotalWithholdTaxWithdrawal(currency, transactions);
 
         // boolean isUpdated = false;
-        updateRunningBalanceAndPivotDate(false, transactions, null, null, currency);
+        updateRunningBalanceAndPivotDate(false, transactions, null, null, null, currency);
 
         this.accountBalance = Money.of(currency, this.totalDeposits).plus(this.totalInterestPosted).minus(this.totalWithdrawals)
                 .minus(this.totalWithdrawalFees).minus(this.totalAnnualFees).minus(this.totalFeeCharge).minus(this.totalPenaltyCharge)

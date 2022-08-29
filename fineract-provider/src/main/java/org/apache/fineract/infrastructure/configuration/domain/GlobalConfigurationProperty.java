@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.configuration.domain;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.persistence.Column;
@@ -44,7 +44,7 @@ public class GlobalConfigurationProperty extends AbstractPersistableCustom {
     private Long value;
 
     @Column(name = "date_value", nullable = true)
-    private Date dateValue;
+    private LocalDate dateValue;
 
     @Column(name = "string_value", nullable = true)
     private String stringValue;
@@ -65,7 +65,7 @@ public class GlobalConfigurationProperty extends AbstractPersistableCustom {
         this.isTrapDoor = false;
     }
 
-    public GlobalConfigurationProperty(final String name, final boolean enabled, final Long value, final Date dateValue,
+    public GlobalConfigurationProperty(final String name, final boolean enabled, final Long value, final LocalDate dateValue,
             final String stringValue, final String description, final boolean isTrapDoor) {
         this.name = name;
         this.enabled = enabled;
@@ -84,7 +84,7 @@ public class GlobalConfigurationProperty extends AbstractPersistableCustom {
         return this.value;
     }
 
-    public Date getDateValue() {
+    public LocalDate getDateValue() {
         return this.dateValue;
     }
 
@@ -117,7 +117,7 @@ public class GlobalConfigurationProperty extends AbstractPersistableCustom {
 
         final String dateValueParamName = "dateValue";
         if (command.isChangeInDateParameterNamed(dateValueParamName, this.dateValue)) {
-            final Date newDateValue = command.dateValueOfParameterNamed(dateValueParamName);
+            final LocalDate newDateValue = command.localDateValueOfParameterNamed(dateValueParamName);
             actualChanges.put(dateValueParamName, newDateValue);
             this.dateValue = newDateValue;
         }

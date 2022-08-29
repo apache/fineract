@@ -39,7 +39,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
@@ -53,6 +52,7 @@ import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -76,12 +76,15 @@ public class ClientSavingsIntegrationTest {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private SavingsAccountHelper savingsAccountHelper;
+    private SavingsProductHelper savingsProductHelper;
+    private SchedulerJobHelper scheduleJobHelper;
 
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.requestSpec.header("Fineract-Platform-TenantId", "default");
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
@@ -1920,7 +1923,7 @@ public class ClientSavingsIntegrationTest {
         savingsList.add(savingsId);
 
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
-        LocalDate transactionDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
+        LocalDate transactionDate = LocalDate.now(Utils.getZoneIdOfTenant());
         for (int i = 0; i < 4; i++) {
             String transactionDateValue = formatter.format(transactionDate);
             Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsList.get(i), DEPOSIT_AMOUNT,
@@ -1953,7 +1956,7 @@ public class ClientSavingsIntegrationTest {
         balance -= chargeAmt;
         assertEquals(balance, summary.get("accountBalance"), "Verifying account Balance");
 
-        String transactionDateValue = formatter.format(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
+        String transactionDateValue = formatter.format(LocalDate.now(Utils.getZoneIdOfTenant()));
         Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsList.get(1), DEPOSIT_AMOUNT,
                 transactionDateValue, CommonConstants.RESPONSE_RESOURCE_ID);
         savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(1));
@@ -1972,7 +1975,7 @@ public class ClientSavingsIntegrationTest {
         balance -= chargeAmt;
         assertEquals(balance, summary.get("accountBalance"), "Verifying account Balance");
 
-        transactionDateValue = formatter.format(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
+        transactionDateValue = formatter.format(LocalDate.now(Utils.getZoneIdOfTenant()));
         depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsList.get(2), DEPOSIT_AMOUNT,
                 transactionDateValue, CommonConstants.RESPONSE_RESOURCE_ID);
         savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(2));
@@ -2225,7 +2228,7 @@ public class ClientSavingsIntegrationTest {
                 error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         Integer releaseTransactionId = this.savingsAccountHelper.releaseAmount(savingsId, holdTransactionId);
-        Date today = Date.from(Utils.getLocalDateOfTenant().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant());
+        Date today = Date.from(Utils.getLocalDateOfTenant().atStartOfDay(Utils.getZoneIdOfTenant()).toInstant());
         String todayDate = today.toString();
         SimpleDateFormat dt1 = new SimpleDateFormat("dd MMM yyyy");
         todayDate = dt1.format(today).toString();
@@ -2689,7 +2692,6 @@ public class ClientSavingsIntegrationTest {
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
         // Assertions.assertNotNull(clientID);
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = "0";
@@ -2731,5 +2733,359 @@ public class ClientSavingsIntegrationTest {
 
         assertEquals(balance, summary.get("accountBalance"), "Verifying opening Balance is 500");
 
+    }
+
+    @Test
+    public void testReversalWhenIsBulkIsTrue() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final String minBalanceForInterestCalculation = null;
+        final String minRequiredBalance = "0";
+        final String enforceMinRequiredBalance = "false";
+        final boolean allowOverdraft = false;
+        final boolean isBulk = true;
+
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+                minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
+        Assertions.assertNotNull(savingsProductID);
+
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assertions.assertNotNull(savingsId);
+        final Integer withdrawalChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
+                ChargesHelper.getSavingsWithdrawalFeeJSON());
+        Assertions.assertNotNull(withdrawalChargeId);
+
+        this.savingsAccountHelper.addChargesForSavings(savingsId, withdrawalChargeId, false);
+
+        HashMap savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        Integer withdrawalTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "500",
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        Float balance = Float.parseFloat("400.0");
+        assertEquals(balance, summary.get("accountBalance"), "Verifying account balance is 400");
+        LOG.info("------------------------When Bulk transaction is true------------------------");
+        this.savingsAccountHelper.reverseSavingsAccountTransaction(savingsId, withdrawalTransactionId, isBulk);
+        summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        balance = Float.parseFloat("1000.0");
+        assertEquals(balance, summary.get("accountBalance"), "Verifying account balance is 1000");
+    }
+
+    @Test
+    public void testReversalWhenIsBulkIsFalse() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final String minBalanceForInterestCalculation = null;
+        final String minRequiredBalance = "0";
+        final String enforceMinRequiredBalance = "false";
+        final boolean allowOverdraft = false;
+        final boolean isBulk = false;
+
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+                minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
+        Assertions.assertNotNull(savingsProductID);
+
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assertions.assertNotNull(savingsId);
+        final Integer withdrawalChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
+                ChargesHelper.getSavingsWithdrawalFeeJSON());
+        Assertions.assertNotNull(withdrawalChargeId);
+
+        this.savingsAccountHelper.addChargesForSavings(savingsId, withdrawalChargeId, false);
+
+        HashMap savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        Integer withdrawalTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "500",
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        Float balance = Float.parseFloat("400.0");
+        assertEquals(balance, summary.get("accountBalance"), "Verifying account balance is 400");
+        LOG.info("------------------------When Bulk transaction is false------------------------");
+        this.savingsAccountHelper.reverseSavingsAccountTransaction(savingsId, withdrawalTransactionId, isBulk);
+        summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        balance = Float.parseFloat("900.0");
+        assertEquals(balance, summary.get("accountBalance"), "Verifying account balance is 900");
+    }
+
+    @Test
+    public void testAccountBalanceAndTransactionRunningBalanceWithConfigOn() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        configurationForBackdatedTransaction();
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final String minBalanceForInterestCalculation = null;
+        final String minRequiredBalance = "0";
+        final String enforceMinRequiredBalance = "false";
+        final boolean allowOverdraft = true;
+
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, "0", minBalanceForInterestCalculation,
+                minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
+        Assertions.assertNotNull(savingsProductID);
+
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assertions.assertNotNull(savingsId);
+
+        HashMap savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+        LocalDate transactionDate = LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(5);
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+        String startDate = formatter.format(transactionDate);
+        // withdrawal transaction 1
+        Integer withdrawalTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "500", startDate,
+                CommonConstants.RESPONSE_RESOURCE_ID);
+        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        Float balance = Float.parseFloat("-500.0");
+        assertEquals(balance, summary.get("accountBalance"), "Verifying account balance is -500");
+
+        // withdrawal transaction 2
+        withdrawalTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "500", startDate,
+                CommonConstants.RESPONSE_RESOURCE_ID);
+        summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        balance = Float.parseFloat("-1000.0");
+        assertEquals(balance, summary.get("accountBalance"), "Verifying account balance is -1000");
+
+        // Check for last transactions running balance
+        Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
+        ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
+        HashMap<String, Object> requestedTransaction = transactions.get(transactions.size() - 2);
+        balance = Float.parseFloat("-1000.0");
+        assertEquals(balance.toString(), requestedTransaction.get("runningBalance").toString(), "Equality check for Balance");
+    }
+
+    @Test
+    public void testRunningBalanceAfterWithdrawalWithBackdateConfigurationOn() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        this.savingsProductHelper = new SavingsProductHelper();
+        this.scheduleJobHelper = new SchedulerJobHelper(requestSpec);
+        configurationForBackdatedTransaction();
+        LocalDate transactionDate = LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(5);
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+        String startDate = formatter.format(transactionDate);
+        String secondTrx = formatter.format(transactionDate.plusDays(1));
+        final String jobName = "Post Interest For Savings";
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        Assertions.assertNotNull(clientID);
+
+        final Integer savingsId = createSavingsAccountDailyPostingOverdraft(clientID, startDate);
+        this.savingsAccountHelper.depositToSavingsAccount(savingsId, "100", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+        this.scheduleJobHelper.executeAndAwaitJob(jobName);
+        this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "200", secondTrx, CommonConstants.RESPONSE_RESOURCE_ID);
+        HashMap<String, Object> summaryObj = this.savingsAccountHelper.getSavingsSummary(savingsId);
+
+        assertEquals("-100.0822", summaryObj.get("availableBalance").toString(), "Equality check for Balance");
+    }
+
+    @Test
+    public void testRunningBalanceAfterDepositWithBackdateConfigurationOn() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        this.savingsProductHelper = new SavingsProductHelper();
+        this.scheduleJobHelper = new SchedulerJobHelper(requestSpec);
+        configurationForBackdatedTransaction();
+        LocalDate transactionDate = LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(5);
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+        String startDate = formatter.format(transactionDate);
+        String secondTrx = formatter.format(transactionDate.plusDays(1));
+        final String jobName = "Post Interest For Savings";
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        Assertions.assertNotNull(clientID);
+
+        final Integer savingsId = createSavingsAccountDailyPostingOverdraft(clientID, startDate);
+        this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "100", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+        this.scheduleJobHelper.executeAndAwaitJob(jobName);
+        this.savingsAccountHelper.depositToSavingsAccount(savingsId, "200", secondTrx, CommonConstants.RESPONSE_RESOURCE_ID);
+        HashMap<String, Object> summaryObj = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        assertEquals("100.0822", summaryObj.get("availableBalance").toString(), "Equality check for Balance");
+    }
+
+    @Test
+    public void testRunningBalanceAfterWithdrawalReversalWithBackdateConfigurationOn() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        this.savingsProductHelper = new SavingsProductHelper();
+        this.scheduleJobHelper = new SchedulerJobHelper(requestSpec);
+        configurationForBackdatedTransaction();
+        LocalDate transactionDate = LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(5);
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+        String startDate = formatter.format(transactionDate);
+        String secondTrx = formatter.format(transactionDate.plusDays(1));
+        final String jobName = "Post Interest For Savings";
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        Assertions.assertNotNull(clientID);
+
+        final Integer savingsId = createSavingsAccountDailyPostingOverdraft(clientID, startDate);
+        this.savingsAccountHelper.depositToSavingsAccount(savingsId, "100", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+        this.scheduleJobHelper.executeAndAwaitJob(jobName);
+
+        Integer withdrawalToReverse = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "200", secondTrx,
+                CommonConstants.RESPONSE_RESOURCE_ID);
+        this.savingsAccountHelper.reverseSavingsAccountTransaction(savingsId, withdrawalToReverse);
+        HashMap<String, Object> summaryObj = this.savingsAccountHelper.getSavingsSummary(savingsId);
+
+        assertEquals("100.137", summaryObj.get("availableBalance").toString(), "Equality check for Balance");
+    }
+
+    @Test
+    public void testRunningBalanceAfterDepositReversalWithBackdateConfigurationOn() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        this.savingsProductHelper = new SavingsProductHelper();
+        this.scheduleJobHelper = new SchedulerJobHelper(requestSpec);
+        configurationForBackdatedTransaction();
+        LocalDate transactionDate = LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(5);
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+        String startDate = formatter.format(transactionDate);
+        String secondTrx = formatter.format(transactionDate.plusDays(1));
+        final String jobName = "Post Interest For Savings";
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        Assertions.assertNotNull(clientID);
+
+        final Integer savingsId = createSavingsAccountDailyPostingOverdraft(clientID, startDate);
+        this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "100", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+        this.scheduleJobHelper.executeAndAwaitJob(jobName);
+        Integer depositToReverse = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "200", secondTrx,
+                CommonConstants.RESPONSE_RESOURCE_ID);
+        this.savingsAccountHelper.reverseSavingsAccountTransaction(savingsId, depositToReverse);
+
+        HashMap<String, Object> summaryObj = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        assertEquals("-100.137", summaryObj.get("availableBalance").toString(), "Equality check for Balance");
+    }
+
+    @Test
+    public void testToPerformTransactionBeforePivotDate() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        this.savingsProductHelper = new SavingsProductHelper();
+        this.scheduleJobHelper = new SchedulerJobHelper(requestSpec);
+
+        configurationForBackdatedTransaction();
+
+        LocalDate transactionDate = LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(10);
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+        String startDate = formatter.format(transactionDate);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        Assertions.assertNotNull(clientID);
+
+        final Integer savingsId = createSavingsAccountDailyPostingOverdraft(clientID, startDate);
+        this.savingsAccountHelper.depositToSavingsAccount(savingsId, "200", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+        final String jobName = "Post Interest For Savings";
+        this.scheduleJobHelper.executeAndAwaitJob(jobName);
+        final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
+        final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
+        List<HashMap> error = (List<HashMap>) validationErrorHelper.depositToSavingsAccount(savingsId, "300", startDate,
+                CommonConstants.RESPONSE_ERROR);
+
+        assertEquals("error.msg.savings.transaction.is.not.allowed", error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+    }
+
+    @Test
+    public void testReversalEntriesAfterSystemReversingTransactionWithReversalConfigOn() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        this.savingsProductHelper = new SavingsProductHelper();
+        this.scheduleJobHelper = new SchedulerJobHelper(requestSpec);
+        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "46", true);
+        LocalDate transactionDate = LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(5);
+        LocalDate nextTransactionDate = transactionDate.plusDays(2);
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+        String startDate = formatter.format(transactionDate);
+        String nxtTransaction = formatter.format(nextTransactionDate);
+        final String jobName = "Post Interest For Savings";
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        Assertions.assertNotNull(clientID);
+
+        final Integer savingsId = createSavingsAccountDailyPostingOverdraft(clientID, startDate);
+        this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "100", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+        this.scheduleJobHelper.executeAndAwaitJob(jobName);
+        this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "100", nxtTransaction, CommonConstants.RESPONSE_RESOURCE_ID);
+
+        List<HashMap> transactions = this.savingsAccountHelper.getSavingsTransactions(savingsId);
+        boolean reversalFlag = false;
+        for (int i = 0; i < transactions.size(); i++) {
+            boolean isReversal = (boolean) transactions.get(i).get("isReversal");
+            if (isReversal) {
+                reversalFlag = true;
+                break;
+            }
+        }
+        Assertions.assertTrue(reversalFlag);
+    }
+
+    @Test
+    public void testReversalEntriesAfterSystemReversingTransactionWithReversalConfigOff() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        this.savingsProductHelper = new SavingsProductHelper();
+        this.scheduleJobHelper = new SchedulerJobHelper(requestSpec);
+        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "46", false);
+        LocalDate transactionDate = LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(5);
+        LocalDate nextTransactionDate = transactionDate.plusDays(2);
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+        String startDate = formatter.format(transactionDate);
+        String nxtTransaction = formatter.format(nextTransactionDate);
+        final String jobName = "Post Interest For Savings";
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        Assertions.assertNotNull(clientID);
+
+        final Integer savingsId = createSavingsAccountDailyPostingOverdraft(clientID, startDate);
+        this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "100", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+        this.scheduleJobHelper.executeAndAwaitJob(jobName);
+        this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "100", nxtTransaction, CommonConstants.RESPONSE_RESOURCE_ID);
+
+        List<HashMap> transactions = this.savingsAccountHelper.getSavingsTransactions(savingsId);
+        boolean reversalFlag = false;
+        for (int i = 0; i < transactions.size(); i++) {
+            boolean isReversal = (boolean) transactions.get(i).get("isReversal");
+            if (isReversal) {
+                reversalFlag = true;
+                break;
+            }
+        }
+        Assertions.assertFalse(reversalFlag);
+    }
+
+    private Integer createSavingsAccountDailyPostingOverdraft(final Integer clientID, final String startDate) {
+        final Integer savingsProductID = createSavingsProductDailyPostingOverdraft();
+        Assertions.assertNotNull(savingsProductID);
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplicationOnDate(clientID, savingsProductID,
+                ACCOUNT_TYPE_INDIVIDUAL, startDate);
+        Assertions.assertNotNull(savingsId);
+        HashMap savingsStatusHashMap = this.savingsAccountHelper.approveSavingsOnDate(savingsId, startDate);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavingsAccount(savingsId, startDate);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+        return savingsId;
+    }
+
+    private Integer createSavingsProductDailyPostingOverdraft() {
+        final String overDraftLimit = "10000.0";
+        final String nominalAnnualInterestRateOverdraft = "10";
+        final String savingsProductJSON = this.savingsProductHelper.withInterestCompoundingPeriodTypeAsDaily()
+                .withInterestPostingPeriodTypeAsDaily().withInterestCalculationPeriodTypeAsDailyBalance()
+                .withOverDraftRate(overDraftLimit, nominalAnnualInterestRateOverdraft).build();
+        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+    }
+
+    public void configurationForBackdatedTransaction() {
+        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "38", false);
+        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "39", true);
+        GlobalConfigurationHelper.updateValueForGlobalConfiguration(requestSpec, responseSpec, "39", "5");
+    }
+
+    @AfterEach
+    public void tearDown() {
+        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
     }
 }

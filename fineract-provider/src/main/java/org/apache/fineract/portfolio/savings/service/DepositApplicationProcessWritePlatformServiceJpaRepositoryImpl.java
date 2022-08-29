@@ -27,7 +27,6 @@ import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +54,9 @@ import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationType;
 import org.apache.fineract.portfolio.account.domain.AccountAssociations;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationsRepository;
+import org.apache.fineract.portfolio.businessevent.domain.deposit.FixedDepositAccountCreateBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.deposit.RecurringDepositAccountCreateBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarFrequencyType;
@@ -66,11 +68,7 @@ import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
-import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepository;
 import org.apache.fineract.portfolio.group.exception.CenterNotActiveException;
@@ -232,11 +230,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             }
 
             final Long savingsId = account.getId();
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.FIXED_DEPOSIT_ACCOUNT_CREATE,
-                    constructEntityMap(BusinessEntity.DEPOSIT_ACCOUNT, account));
-
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.FIXED_DEPOSIT_ACCOUNT_CREATE,
-                    constructEntityMap(BusinessEntity.DEPOSIT_ACCOUNT, account));
+            businessEventNotifierService.notifyPostBusinessEvent(new FixedDepositAccountCreateBusinessEvent(account));
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -294,12 +288,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             account.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
                     financialYearBeginningMonth);
             account.validateApplicableInterestRate();
-            this.savingAccountRepository.save(account);
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.RECURRING_DEPOSIT_ACCOUNT_CREATE,
-                    constructEntityMap(BusinessEntity.DEPOSIT_ACCOUNT, account));
-
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.RECURRING_DEPOSIT_ACCOUNT_CREATE,
-                    constructEntityMap(BusinessEntity.DEPOSIT_ACCOUNT, account));
+            savingAccountRepository.save(account);
+            businessEventNotifierService.notifyPostBusinessEvent(new RecurringDepositAccountCreateBusinessEvent(account));
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -394,7 +384,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     DepositAccountType.FIXED_DEPOSIT);
             checkClientOrGroupActive(account);
             account.modifyApplication(command, changes);
-            account.validateNewApplicationState(DateUtils.getLocalDateOfTenant(), DepositAccountType.FIXED_DEPOSIT.resourceName());
+            account.validateNewApplicationState(DateUtils.getBusinessLocalDate(), DepositAccountType.FIXED_DEPOSIT.resourceName());
 
             if (!changes.isEmpty()) {
                 updateFDAndRDCommonChanges(changes, command, account);
@@ -484,7 +474,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     DepositAccountType.RECURRING_DEPOSIT);
             checkClientOrGroupActive(account);
             account.modifyApplication(command, changes);
-            account.validateNewApplicationState(DateUtils.getLocalDateOfTenant(), DepositAccountType.RECURRING_DEPOSIT.resourceName());
+            account.validateNewApplicationState(DateUtils.getBusinessLocalDate(), DepositAccountType.RECURRING_DEPOSIT.resourceName());
 
             if (!changes.isEmpty()) {
                 updateFDAndRDCommonChanges(changes, command, account);
@@ -648,7 +638,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         final SavingsAccount savingsAccount = this.depositAccountAssembler.assembleFrom(savingsId, depositAccountType);
         checkClientOrGroupActive(savingsAccount);
 
-        final Map<String, Object> changes = savingsAccount.approveApplication(currentUser, command, DateUtils.getLocalDateOfTenant());
+        final Map<String, Object> changes = savingsAccount.approveApplication(currentUser, command, DateUtils.getBusinessLocalDate());
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(savingsAccount);
 
@@ -718,7 +708,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         final SavingsAccount savingsAccount = this.depositAccountAssembler.assembleFrom(savingsId, depositAccountType);
         checkClientOrGroupActive(savingsAccount);
 
-        final Map<String, Object> changes = savingsAccount.rejectApplication(currentUser, command, DateUtils.getLocalDateOfTenant());
+        final Map<String, Object> changes = savingsAccount.rejectApplication(currentUser, command, DateUtils.getBusinessLocalDate());
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(savingsAccount);
 
@@ -753,7 +743,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         checkClientOrGroupActive(savingsAccount);
 
         final Map<String, Object> changes = savingsAccount.applicantWithdrawsFromApplication(currentUser, command,
-                DateUtils.getLocalDateOfTenant());
+                DateUtils.getBusinessLocalDate());
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(savingsAccount);
 
@@ -792,12 +782,5 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 throw new GroupNotActiveException(group.getId());
             }
         }
-    }
-
-    private Map<BusinessEventNotificationConstants.BusinessEntity, Object> constructEntityMap(final BusinessEntity entityEvent,
-            Object entity) {
-        Map<BusinessEventNotificationConstants.BusinessEntity, Object> map = new HashMap<>(1);
-        map.put(entityEvent, entity);
-        return map;
     }
 }

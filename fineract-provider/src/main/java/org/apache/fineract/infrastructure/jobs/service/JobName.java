@@ -20,9 +20,9 @@ package org.apache.fineract.infrastructure.jobs.service;
 
 public enum JobName {
 
-    UPDATE_LOAN_SUMMARY("Update loan Summary"), UPDATE_LOAN_ARREARS_AGEING("Update Loan Arrears Ageing"), UPDATE_LOAN_PAID_IN_ADVANCE(
-            "Update Loan Paid In Advance"), APPLY_ANNUAL_FEE_FOR_SAVINGS("Apply Annual Fee For Savings"), APPLY_HOLIDAYS_TO_LOANS(
-                    "Apply Holidays To Loans"), POST_INTEREST_FOR_SAVINGS("Post Interest For Savings"), TRANSFER_FEE_CHARGE_FOR_LOANS(
+    UPDATE_LOAN_ARREARS_AGEING("Update Loan Arrears Ageing"), APPLY_ANNUAL_FEE_FOR_SAVINGS(
+            "Apply Annual Fee For Savings"), APPLY_HOLIDAYS_TO_LOANS("Apply Holidays To Loans"), POST_INTEREST_FOR_SAVINGS(
+                    "Post Interest For Savings"), TRANSFER_FEE_CHARGE_FOR_LOANS(
                             "Transfer Fee For Loans From Savings"), ACCOUNTING_RUNNING_BALANCE_UPDATE(
                                     "Update Accounting Running Balances"), PAY_DUE_SAVINGS_CHARGES(
                                             "Pay Due Savings Charges"), APPLY_CHARGE_TO_OVERDUE_LOAN_INSTALLMENT(
@@ -45,9 +45,11 @@ public enum JobName {
                                                                                                                                                                                     "Get Delivery Reports from SMS Gateway"), GENERATE_ADHOCCLIENT_SCEHDULE(
                                                                                                                                                                                             "Generate AdhocClient Schedule"), UPDATE_EMAIL_OUTBOUND_WITH_CAMPAIGN_MESSAGE(
                                                                                                                                                                                                     "Update Email Outbound with campaign message"), EXECUTE_EMAIL(
-                                                                                                                                                                                                            "Execute Email"), UPDATE_TRAIL_BALANCE_DETAILS(
+                                                                                                                                                                                                            "Execute Email"), UPDATE_TRIAL_BALANCE_DETAILS(
                                                                                                                                                                                                                     "Update Trial Balance Details"), EXECUTE_DIRTY_JOBS(
-                                                                                                                                                                                                                            "Execute All Dirty Jobs");
+                                                                                                                                                                                                                            "Execute All Dirty Jobs"), INCREASE_BUSINESS_DATE_BY_1_DAY(
+                                                                                                                                                                                                                                    "Increase Business Date by 1 day"), INCREASE_COB_DATE_BY_1_DAY(
+                                                                                                                                                                                                                                            "Increase COB Date by 1 day");
 
     private final String name;
 

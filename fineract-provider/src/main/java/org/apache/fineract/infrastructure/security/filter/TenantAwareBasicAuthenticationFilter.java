@@ -19,11 +19,15 @@
 package org.apache.fineract.infrastructure.security.filter;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.HashMap;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.time.StopWatch;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
 import org.apache.fineract.infrastructure.cache.domain.CacheType;
 import org.apache.fineract.infrastructure.cache.service.CacheWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -31,7 +35,7 @@ import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.data.PlatformRequestLog;
-import org.apache.fineract.infrastructure.security.exception.InvalidTenantIdentiferException;
+import org.apache.fineract.infrastructure.security.exception.InvalidTenantIdentifierException;
 import org.apache.fineract.infrastructure.security.service.BasicAuthTenantDetailsService;
 import org.apache.fineract.notification.service.NotificationReadPlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -80,6 +84,9 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
     @Autowired
     private BasicAuthTenantDetailsService basicAuthTenantDetailsService;
 
+    @Autowired
+    private BusinessDateReadPlatformService businessDateReadPlatformService;
+
     private final String tenantRequestHeader = "Fineract-Platform-TenantId";
     private final boolean exceptionIfHeaderMissing = true;
 
@@ -109,7 +116,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                 }
 
                 if (tenantIdentifier == null && this.exceptionIfHeaderMissing) {
-                    throw new InvalidTenantIdentiferException("No tenant identifier found: Add request header of '"
+                    throw new InvalidTenantIdentifierException("No tenant identifier found: Add request header of '"
                             + this.tenantRequestHeader + "' or add the parameter 'tenantIdentifier' to query string of request URL.");
                 }
 
@@ -119,8 +126,9 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                     isReportRequest = true;
                 }
                 final FineractPlatformTenant tenant = this.basicAuthTenantDetailsService.loadTenantById(tenantIdentifier, isReportRequest);
-
                 ThreadLocalContextUtil.setTenant(tenant);
+                HashMap<BusinessDateType, LocalDate> businessDates = this.businessDateReadPlatformService.getBusinessDates();
+                ThreadLocalContextUtil.setBusinessDates(businessDates);
                 String authToken = request.getHeader("Authorization");
 
                 if (authToken != null && authToken.startsWith("Basic ")) {
@@ -142,7 +150,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
             }
 
             super.doFilterInternal(request, response, filterChain);
-        } catch (final InvalidTenantIdentiferException e) {
+        } catch (final InvalidTenantIdentifierException e) {
             // deal with exception at low level
             SecurityContextHolder.getContext().setAuthentication(null);
 

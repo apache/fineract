@@ -19,6 +19,7 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
+import org.apache.fineract.infrastructure.instancemode.filter.FineractInstanceModeApiFilter;
 import org.apache.fineract.infrastructure.security.filter.TenantAwareBasicAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.filter.TwoFactorAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.service.TenantAwareJpaPlatformUserDetailsService;
@@ -54,11 +55,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private TwoFactorAuthenticationFilter twoFactorAuthenticationFilter;
 
     @Autowired
+    private FineractInstanceModeApiFilter fineractInstanceModeApiFilter;
+
+    @Autowired
+    private FineractProperties fineractProperties;
+
+    @Autowired
     private ServerProperties serverProperties;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-
         http //
                 .csrf().disable() // NOSONAR only creating a service that is used by non-browser clients
                 .antMatcher("/api/**").authorizeRequests() //
@@ -68,6 +74,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/api/*/self/authentication").permitAll() //
                 .antMatchers(HttpMethod.POST, "/api/*/self/registration").permitAll() //
                 .antMatchers(HttpMethod.POST, "/api/*/self/registration/user").permitAll() //
+                .antMatchers(HttpMethod.PUT, "/api/*/instance-mode").permitAll() //
                 .antMatchers(HttpMethod.POST, "/api/*/twofactor/validate").fullyAuthenticated() //
                 .antMatchers("/api/*/twofactor").fullyAuthenticated() //
                 .antMatchers("/api/**").access("isFullyAuthenticated() and hasAuthority('TWOFACTOR_AUTHENTICATED')").and() //
@@ -77,7 +84,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement() //
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS) //
                 .and() //
-                .addFilterAfter(tenantAwareBasicAuthenticationFilter(), SecurityContextPersistenceFilter.class) //
+                .addFilterAfter(fineractInstanceModeApiFilter, SecurityContextPersistenceFilter.class) //
+                .addFilterAfter(tenantAwareBasicAuthenticationFilter(), FineractInstanceModeApiFilter.class) //
                 .addFilterAfter(twoFactorAuthenticationFilter, BasicAuthenticationFilter.class); //
 
         if (serverProperties.getSsl().isEnabled()) {

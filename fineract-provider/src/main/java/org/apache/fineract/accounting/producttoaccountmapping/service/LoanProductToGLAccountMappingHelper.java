@@ -245,6 +245,8 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
                 // expenses
                 mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(), loanProductId,
                         CashAccountsForLoan.LOSSES_WRITTEN_OFF.getValue(), CashAccountsForLoan.LOSSES_WRITTEN_OFF.toString(), changes);
+                mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.GOODWILL_CREDIT.getValue(), loanProductId,
+                        CashAccountsForLoan.GOODWILL_CREDIT.getValue(), CashAccountsForLoan.GOODWILL_CREDIT.toString(), changes);
 
                 // liabilities
                 mergeLoanToLiabilityAccountMappingChanges(element, LoanProductAccountingParams.OVERPAYMENT.getValue(), loanProductId,
@@ -286,6 +288,8 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
                 mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(), loanProductId,
                         AccrualAccountsForLoan.LOSSES_WRITTEN_OFF.getValue(), AccrualAccountsForLoan.LOSSES_WRITTEN_OFF.toString(),
                         changes);
+                mergeLoanToExpenseAccountMappingChanges(element, LoanProductAccountingParams.GOODWILL_CREDIT.getValue(), loanProductId,
+                        AccrualAccountsForLoan.GOODWILL_CREDIT.getValue(), AccrualAccountsForLoan.GOODWILL_CREDIT.toString(), changes);
 
                 // liabilities
                 mergeLoanToLiabilityAccountMappingChanges(element, LoanProductAccountingParams.OVERPAYMENT.getValue(), loanProductId,

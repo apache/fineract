@@ -67,35 +67,20 @@ public class EventResultSetExtractor implements ResultSetExtractor<List<Grouping
             final Grouping group = new Grouping();
             group.setName(groupingEntry.getKey());
             for (final Map.Entry<String, List<String>> entityEntry : groupingEntry.getValue().entrySet()) {
-                final List<String> actions = new ArrayList<>();
                 final Entity entity = new Entity();
                 entity.setName(entityEntry.getKey());
-                for (final String action : entityEntry.getValue()) {
-                    actions.add(action);
-                }
+                final List<String> actions = new ArrayList<>(entityEntry.getValue());
                 Collections.sort(actions);
                 entity.setActions(actions);
                 entities.add(entity);
             }
 
-            Collections.sort(entities, new Comparator<Entity>() {
-
-                @Override
-                public int compare(final Entity entity1, final Entity entity2) {
-                    return entity1.getName().compareTo(entity2.getName());
-                }
-            });
+            entities.sort(Comparator.comparing(Entity::getName));
             group.setEntities(entities);
             groupings.add(group);
         }
 
-        Collections.sort(groupings, new Comparator<Grouping>() {
-
-            @Override
-            public int compare(final Grouping grouping1, final Grouping grouping2) {
-                return grouping1.getName().compareTo(grouping2.getName());
-            }
-        });
+        groupings.sort(Comparator.comparing(Grouping::getName));
 
         return groupings;
     }

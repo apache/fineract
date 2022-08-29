@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.configuration.domain;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
@@ -38,6 +38,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ConfigurationDomainServiceJpa implements ConfigurationDomainService {
 
+    public static final String ENABLE_BUSINESS_DATE = "enable_business_date";
+    public static final String ENABLE_AUTOMATIC_COB_DATE_ADJUSTMENT = "enable_automatic_cob_date_adjustment";
     private final PermissionRepository permissionRepository;
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
     private final PlatformCacheRepository cacheTypeRepository;
@@ -115,15 +117,16 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
 
     @Override
     public boolean isEhcacheEnabled() {
-        return this.cacheTypeRepository.findById(1L).get().isEhcacheEnabled();
+        return this.cacheTypeRepository.findById(1L).map(PlatformCache::isEhcacheEnabled).orElseThrow();
     }
 
     @Transactional
     @Override
     public void updateCache(final CacheType cacheType) {
-        final PlatformCache cache = this.cacheTypeRepository.findById(1L).get();
-        cache.update(cacheType);
-        this.cacheTypeRepository.save(cache);
+        this.cacheTypeRepository.findById(1L).ifPresent(cache -> {
+            cache.update(cacheType);
+            this.cacheTypeRepository.save(cache);
+        });
     }
 
     @Override
@@ -235,7 +238,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     }
 
     @Override
-    public Date retrieveOrganisationStartDate() {
+    public LocalDate retrieveOrganisationStartDate() {
         final String propertyName = "organisation-start-date";
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
         return property.getDateValue();
@@ -432,4 +435,20 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         return property.isEnabled();
     }
 
+    @Override
+    public boolean isBusinessDateEnabled() {
+        return getGlobalConfigurationPropertyData(ENABLE_BUSINESS_DATE).isEnabled();
+    }
+
+    @Override
+    public boolean isCOBDateAdjustmentEnabled() {
+        return getGlobalConfigurationPropertyData(ENABLE_AUTOMATIC_COB_DATE_ADJUSTMENT).isEnabled();
+    }
+
+    @Override
+    public boolean isReversalTransactionAllowed() {
+        final String propertyName = "enable-post-reversal-txns-for-reverse-transactions";
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
+        return property.isEnabled();
+    }
 }

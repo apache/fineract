@@ -19,8 +19,8 @@
 package org.apache.fineract.infrastructure.sms.api;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -121,11 +121,11 @@ public class SmsApiResource {
 
         final SearchParameters searchParameters = SearchParameters.forSMSCampaign(sqlSearch, offset, limit, orderBy, sortOrder);
 
-        Date fromDate = null;
+        LocalDate fromDate = null;
         if (fromDateParam != null) {
             fromDate = fromDateParam.getDate("fromDate", dateFormat, locale);
         }
-        Date toDate = null;
+        LocalDate toDate = null;
         if (toDateParam != null) {
             toDate = toDateParam.getDate("toDate", dateFormat, locale);
         }

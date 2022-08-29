@@ -18,10 +18,11 @@
  */
 package org.apache.fineract.infrastructure.entityaccess.service;
 
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityRelationData;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityToEntityMappingData;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
@@ -242,7 +243,9 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
             final Long toId = rs.getLong("toId");
             final Date startDate = rs.getDate("startDate");
             final Date endDate = rs.getDate("endDate");
-            return FineractEntityToEntityMappingData.getRelatedEntities(relId, fromId, toId, startDate, endDate);
+            final LocalDate startLocalDate = startDate != null ? startDate.toLocalDate() : null;
+            final LocalDate endLocalDate = endDate != null ? endDate.toLocalDate() : null;
+            return FineractEntityToEntityMappingData.getRelatedEntities(relId, fromId, toId, startLocalDate, endLocalDate);
         }
 
     }
@@ -314,8 +317,10 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
             final String toEntity = rs.getString("to_name");
             final Date startDate = rs.getDate("startDate");
             final Date endDate = rs.getDate("endDate");
-            return FineractEntityToEntityMappingData.getRelatedEntities(mapId, relId, fromId, toId, startDate, endDate, fromEntity,
-                    toEntity);
+            final LocalDate startLocalDate = startDate != null ? startDate.toLocalDate() : null;
+            final LocalDate endLocalDate = endDate != null ? endDate.toLocalDate() : null;
+            return FineractEntityToEntityMappingData.getRelatedEntities(mapId, relId, fromId, toId, startLocalDate, endLocalDate,
+                    fromEntity, toEntity);
         }
     }
 

@@ -19,12 +19,10 @@
 package org.apache.fineract.portfolio.calendar.service;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -232,7 +230,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         final Calendar calendarForUpdate = this.calendarRepository.findById(calendarId)
                 .orElseThrow(() -> new CalendarNotFoundException(calendarId));
 
-        final Date oldStartDate = calendarForUpdate.getStartDate();
+        final LocalDate oldStartDate = calendarForUpdate.getStartDate();
         // create calendar history before updating calendar
         final CalendarHistory calendarHistory = new CalendarHistory(calendarForUpdate, oldStartDate);
 
@@ -281,7 +279,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
                 presentMeetingDate = command.localDateValueOfParameterNamed(CalendarSupportedParameters.START_DATE.getValue());
             }
             if (null != newMeetingDate) {
-                final Date endDate = Date.from(presentMeetingDate.minusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+                final LocalDate endDate = presentMeetingDate.minusDays(1);
                 calendarHistory.updateEndDate(endDate);
             }
             this.calendarHistoryRepository.save(calendarHistory);

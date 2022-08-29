@@ -24,7 +24,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -162,7 +161,7 @@ public final class ClientFamilyMemberCommandFromApiJsonDeserializer {
         if (this.fromApiJsonHelper.extractLocalDateNamed("dateOfBirth", element) != null) {
             final LocalDate dateOfBirth = this.fromApiJsonHelper.extractLocalDateNamed("dateOfBirth", element);
             baseDataValidator.reset().parameter("dateOfBirth").value(dateOfBirth).value(dateOfBirth).notNull()
-                    .validateDateBefore(DateUtils.getLocalDateOfTenant());
+                    .validateDateBefore(DateUtils.getBusinessLocalDate());
 
         }
 
@@ -229,10 +228,8 @@ public final class ClientFamilyMemberCommandFromApiJsonDeserializer {
         }
 
         if (this.fromApiJsonHelper.extractLocalDateNamed("dateOfBirth", element) != null) {
-            LocalDateTime currentDate = LocalDateTime.now(DateUtils.getDateTimeZoneOfTenant());
-
             final LocalDate dateOfBirth = this.fromApiJsonHelper.extractLocalDateNamed("dateOfBirth", element);
-            baseDataValidator.reset().parameter("dateOfBirth").value(dateOfBirth).validateDateBefore(currentDate.toLocalDate());
+            baseDataValidator.reset().parameter("dateOfBirth").value(dateOfBirth).validateDateBefore(DateUtils.getBusinessLocalDate());
 
         }
 

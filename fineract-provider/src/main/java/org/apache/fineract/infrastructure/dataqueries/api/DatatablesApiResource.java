@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.dataqueries.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -31,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -53,7 +55,6 @@ import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.service.GenericDataService;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -71,7 +72,6 @@ public class DatatablesApiResource {
     private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
     private final ToApiJsonSerializer<GenericResultsetData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(DatatablesApiResource.class);
 
     @Autowired
     public DatatablesApiResource(final PlatformSecurityContext context, final GenericDataService genericDataService,
@@ -257,9 +257,9 @@ public class DatatablesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String getDatatableManyEntry(@PathParam("datatable") final String datatable, @PathParam("apptableId") final Long apptableId,
-            @PathParam("datatableId") final Long datatableId, @QueryParam("order") final String order, @Context final UriInfo uriInfo) {
-
-        LOG.debug("::1 we came in the getDatatbleManyEntry apiRessource method");
+            @PathParam("datatableId") final Long datatableId, @QueryParam("order") final String order,
+            @DefaultValue("false") @QueryParam("genericResultSet") @Parameter(in = ParameterIn.QUERY, name = "genericResultSet", description = "Optional flag to format the response", required = false) final boolean genericResultSet,
+            @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasDatatableReadPermission(datatable);
 
@@ -267,7 +267,6 @@ public class DatatablesApiResource {
                 order, datatableId);
 
         String json = "";
-        final boolean genericResultSet = ApiParameterHelper.genericResultSet(uriInfo.getQueryParameters());
         if (genericResultSet) {
             final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
             json = this.toApiJsonSerializer.serializePretty(prettyPrint, results);
@@ -306,7 +305,7 @@ public class DatatablesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update Entry in Data Table (One to One)", description = "Updates the row (if it exists) of the data table.")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PutDataTablesAppTableIdRequest.class)))
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = String.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PutDataTablesAppTableIdResponse.class))) })
     public String updateDatatableEntryOnetoOne(@PathParam("datatable") @Parameter(description = "datatable") final String datatable,
@@ -328,7 +327,7 @@ public class DatatablesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update Entry in Data Table (One to Many)", description = "Updates the row (if it exists) of the data table.")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PutDataTablesAppTableIdDatatableIdRequest.class)))
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = String.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DatatablesApiResourceSwagger.PutDataTablesAppTableIdDatatableIdResponse.class))) })
     public String updateDatatableEntryOneToMany(@PathParam("datatable") @Parameter(description = "datatable") final String datatable,

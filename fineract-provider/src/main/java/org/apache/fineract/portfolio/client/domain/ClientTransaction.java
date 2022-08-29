@@ -20,9 +20,8 @@ package org.apache.fineract.portfolio.client.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -36,8 +35,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
@@ -73,9 +70,8 @@ public class ClientTransaction extends AbstractPersistableCustom {
     @Column(name = "transaction_type_enum", nullable = false)
     private Integer typeOf;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "transaction_date", nullable = false)
-    private Date dateOf;
+    private LocalDate dateOf;
 
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
@@ -86,9 +82,8 @@ public class ClientTransaction extends AbstractPersistableCustom {
     @Column(name = "external_id", length = 100, nullable = true, unique = true)
     private String externalId;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_date", nullable = false)
-    private Date createdDate;
+    private LocalDateTime createdDate;
 
     @ManyToOne
     @JoinColumn(name = "appuser_id", nullable = true)
@@ -107,7 +102,7 @@ public class ClientTransaction extends AbstractPersistableCustom {
         final boolean isReversed = false;
         final String externalId = null;
         return new ClientTransaction(client, office, paymentDetail, ClientTransactionType.PAY_CHARGE.getValue(), date, amount, isReversed,
-                externalId, DateUtils.getDateOfTenant(), currencyCode, appUser);
+                externalId, DateUtils.getLocalDateTimeOfTenant(), currencyCode, appUser);
     }
 
     public static ClientTransaction waiver(final Client client, final Office office, final LocalDate date, final Money amount,
@@ -116,17 +111,17 @@ public class ClientTransaction extends AbstractPersistableCustom {
         final String externalId = null;
         final PaymentDetail paymentDetail = null;
         return new ClientTransaction(client, office, paymentDetail, ClientTransactionType.WAIVE_CHARGE.getValue(), date, amount, isReversed,
-                externalId, DateUtils.getDateOfTenant(), currencyCode, appUser);
+                externalId, DateUtils.getLocalDateTimeOfTenant(), currencyCode, appUser);
     }
 
     public ClientTransaction(Client client, Office office, PaymentDetail paymentDetail, Integer typeOf, LocalDate transactionLocalDate,
-            Money amount, boolean reversed, String externalId, Date createdDate, String currencyCode, AppUser appUser) {
+            Money amount, boolean reversed, String externalId, LocalDateTime createdDate, String currencyCode, AppUser appUser) {
 
         this.client = client;
         this.office = office;
         this.paymentDetail = paymentDetail;
         this.typeOf = typeOf;
-        this.dateOf = Date.from(transactionLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        this.dateOf = transactionLocalDate;
         this.amount = amount.getAmount();
         this.reversed = reversed;
         this.externalId = externalId;
@@ -228,7 +223,7 @@ public class ClientTransaction extends AbstractPersistableCustom {
     }
 
     public LocalDate getTransactionDate() {
-        return LocalDate.ofInstant(this.dateOf.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        return this.dateOf;
     }
 
 }

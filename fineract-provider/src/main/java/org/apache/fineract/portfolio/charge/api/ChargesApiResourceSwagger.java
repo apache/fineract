@@ -135,6 +135,10 @@ final class ChargesApiResourceSwagger {
         public Integer chargePaymentMode;
         @Schema(example = "true")
         public String active;
+        @Schema(example = "dd MMMM")
+        public String monthDayFormat;
+        @Schema(example = "false")
+        public String penalty;
     }
 
     @Schema(description = "PostChargesResponse")

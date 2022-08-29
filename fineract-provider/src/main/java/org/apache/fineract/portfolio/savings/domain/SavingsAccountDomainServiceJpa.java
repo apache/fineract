@@ -23,12 +23,11 @@ import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -38,9 +37,9 @@ import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepos
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
-import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
+import org.apache.fineract.portfolio.businessevent.domain.savings.transaction.SavingsDepositBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.savings.transaction.SavingsWithdrawalBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.SavingsTransactionBooleanValues;
@@ -92,6 +91,8 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         account.validateForDebitBlock();
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
+        final Long relaxingDaysConfigForPivotDate = this.configurationDomainService.retrieveRelaxingDaysConfigForPivotDate();
+        final boolean postReversals = this.configurationDomainService.isReversalTransactionAllowed();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
         if (transactionBooleanValues.isRegularTransaction() && !account.allowWithdrawal()) {
             throw new DepositAccountTransactionNotAllowedException(account.getId(), "withdraw", account.depositAccountType());
@@ -108,19 +109,21 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
 
         Integer accountType = null;
         final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
-                paymentDetail, new Date(), user, accountType);
+                paymentDetail, DateUtils.getLocalDateTimeOfSystem(), user, accountType);
+        UUID refNo = UUID.randomUUID();
         final SavingsAccountTransaction withdrawal = account.withdraw(transactionDTO, transactionBooleanValues.isApplyWithdrawFee(),
-                backdatedTxnsAllowedTill);
+                backdatedTxnsAllowedTill, relaxingDaysConfigForPivotDate, refNo.toString());
         final MathContext mc = MathContext.DECIMAL64;
 
+        final LocalDate today = DateUtils.getBusinessLocalDate();
+
         if (account.isBeforeLastPostingPeriod(transactionDate, backdatedTxnsAllowedTill)) {
-            final LocalDate today = DateUtils.getLocalDateOfTenant();
             account.postInterest(mc, today, transactionBooleanValues.isInterestTransfer(), isSavingsInterestPostingAtCurrentPeriodEnd,
-                    financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill);
+                    financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill, postReversals);
         } else {
-            final LocalDate today = DateUtils.getLocalDateOfTenant();
             account.calculateInterestUsing(mc, today, transactionBooleanValues.isInterestTransfer(),
-                    isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill);
+                    isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill,
+                    postReversals);
         }
 
         List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions = null;
@@ -133,14 +136,16 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
                 depositAccountOnHoldTransactions, backdatedTxnsAllowedTill);
 
         saveTransactionToGenerateTransactionId(withdrawal);
-
+        if (backdatedTxnsAllowedTill) {
+            // Update transactions separately
+            saveUpdatedTransactionsOfSavingsAccount(account.getSavingsAccountTransactionsWithPivotConfig());
+        }
         this.savingsAccountRepository.save(account);
 
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, transactionBooleanValues.isAccountTransfer(),
                 backdatedTxnsAllowedTill);
 
-        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.SAVINGS_WITHDRAWAL,
-                constructEntityMap(BusinessEntity.SAVINGS_TRANSACTION, withdrawal));
+        businessEventNotifierService.notifyPostBusinessEvent(new SavingsWithdrawalBusinessEvent(withdrawal));
         return withdrawal;
     }
 
@@ -174,7 +179,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
-
+        final Long relaxingDaysConfigForPivotDate = this.configurationDomainService.retrieveRelaxingDaysConfigForPivotDate();
         if (isRegularTransaction && !account.allowDeposit()) {
             throw new DepositAccountTransactionNotAllowedException(account.getId(), "deposit", account.depositAccountType());
         }
@@ -190,19 +195,21 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
 
         Integer accountType = null;
         final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
-                paymentDetail, new Date(), user, accountType);
-        final SavingsAccountTransaction deposit = account.deposit(transactionDTO, savingsAccountTransactionType, backdatedTxnsAllowedTill);
+                paymentDetail, DateUtils.getLocalDateTimeOfSystem(), user, accountType);
+        UUID refNo = UUID.randomUUID();
+        final SavingsAccountTransaction deposit = account.deposit(transactionDTO, savingsAccountTransactionType, backdatedTxnsAllowedTill,
+                relaxingDaysConfigForPivotDate, refNo.toString());
         final LocalDate postInterestOnDate = null;
         final MathContext mc = MathContext.DECIMAL64;
 
+        final LocalDate today = DateUtils.getBusinessLocalDate();
+        boolean postReversals = this.configurationDomainService.isReversalTransactionAllowed();
         if (account.isBeforeLastPostingPeriod(transactionDate, backdatedTxnsAllowedTill)) {
-            final LocalDate today = DateUtils.getLocalDateOfTenant();
             account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
-                    postInterestOnDate, backdatedTxnsAllowedTill);
+                    postInterestOnDate, backdatedTxnsAllowedTill, postReversals);
         } else {
-            final LocalDate today = DateUtils.getLocalDateOfTenant();
             account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                    financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill);
+                    financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill, postReversals);
         }
 
         saveTransactionToGenerateTransactionId(deposit);
@@ -215,8 +222,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         this.savingsAccountRepository.saveAndFlush(account);
 
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer, backdatedTxnsAllowedTill);
-        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.SAVINGS_DEPOSIT,
-                constructEntityMap(BusinessEntity.SAVINGS_TRANSACTION, deposit));
+        businessEventNotifierService.notifyPostBusinessEvent(new SavingsDepositBusinessEvent(deposit));
         return deposit;
     }
 
@@ -225,10 +231,9 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
     public SavingsAccountTransaction handleHold(final SavingsAccount account, final AppUser createdUser, BigDecimal amount,
             LocalDate transactionDate, Boolean lienAllowed) {
         final PaymentDetail paymentDetails = null;
-        Date createdDate = new Date();
 
         SavingsAccountTransaction transaction = SavingsAccountTransaction.holdAmount(account, account.office(), paymentDetails,
-                transactionDate, Money.of(account.getCurrency(), amount), createdDate, createdUser, lienAllowed);
+                transactionDate, Money.of(account.getCurrency(), amount), DateUtils.getLocalDateTimeOfSystem(), createdUser, lienAllowed);
         return transaction;
     }
 
@@ -285,22 +290,15 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer, backdatedTxnsAllowedTill);
     }
 
-    private Map<BusinessEntity, Object> constructEntityMap(final BusinessEntity entityEvent, Object entity) {
-        Map<BusinessEntity, Object> map = new HashMap<>(1);
-        map.put(entityEvent, entity);
-        return map;
-    }
-
     @Override
-    public SavingsAccountTransaction handleReversal(SavingsAccount account, SavingsAccountTransaction savingsAccountTransaction,
+    public SavingsAccountTransaction handleReversal(SavingsAccount account, List<SavingsAccountTransaction> savingsAccountTransactions,
             boolean backdatedTxnsAllowedTill) {
 
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
-
-        final Set<SavingsAccountChargePaidBy> chargePaidBySet = savingsAccountTransaction.getSavingsAccountChargesPaid();
-
+        final Long relaxingDaysConfigForPivotDate = this.configurationDomainService.retrieveRelaxingDaysConfigForPivotDate();
+        final boolean postReversals = true;
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
 
@@ -309,31 +307,41 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         } else {
             updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         }
+        List<SavingsAccountTransaction> newTransactions = new ArrayList<>();
+        SavingsAccountTransaction reversal = null;
 
-        SavingsAccountTransaction reversal = SavingsAccountTransaction.reversal(savingsAccountTransaction);
-        reversal.getSavingsAccountChargesPaid().addAll(chargePaidBySet);
-        account.undoTransaction(savingsAccountTransaction);
+        Set<SavingsAccountChargePaidBy> chargePaidBySet = null;
+        for (SavingsAccountTransaction savingsAccountTransaction : savingsAccountTransactions) {
+            reversal = SavingsAccountTransaction.reversal(savingsAccountTransaction);
+            chargePaidBySet = savingsAccountTransaction.getSavingsAccountChargesPaid();
+            reversal.getSavingsAccountChargesPaid().addAll(chargePaidBySet);
+            account.undoTransaction(savingsAccountTransaction);
+            if (postReversals) {
+                newTransactions.add(reversal);
+            }
+        }
 
         boolean isInterestTransfer = false;
         LocalDate postInterestOnDate = null;
-        final LocalDate today = DateUtils.getLocalDateOfTenant();
+        final LocalDate today = DateUtils.getBusinessLocalDate();
         final MathContext mc = new MathContext(15, MoneyHelper.getRoundingMode());
+        for (SavingsAccountTransaction savingsAccountTransaction : savingsAccountTransactions) {
+            if (savingsAccountTransaction.isPostInterestCalculationRequired()
+                    && account.isBeforeLastPostingPeriod(savingsAccountTransaction.transactionLocalDate(), backdatedTxnsAllowedTill)) {
 
-        if (savingsAccountTransaction.isPostInterestCalculationRequired()
-                && account.isBeforeLastPostingPeriod(savingsAccountTransaction.transactionLocalDate(), backdatedTxnsAllowedTill)) {
-            account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
-                    postInterestOnDate, backdatedTxnsAllowedTill);
-        } else {
-            account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                    financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill);
+                account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
+                        postInterestOnDate, backdatedTxnsAllowedTill, postReversals);
+            } else {
+                account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
+                        financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill, postReversals);
+            }
+            account.validatePivotDateTransaction(savingsAccountTransaction.getLastTransactionDate(), backdatedTxnsAllowedTill,
+                    relaxingDaysConfigForPivotDate, "savingsaccount");
+            account.validateAccountBalanceDoesNotBecomeNegativeMinimal(savingsAccountTransaction.getAmount(), false);
+            account.activateAccountBasedOnBalance();
         }
-
-        List<SavingsAccountTransaction> newTransactions = new ArrayList<>();
-        newTransactions.add(reversal);
-
-        account.validateAccountBalanceDoesNotBecomeNegativeMinimal(savingsAccountTransaction.getAmount(), false);
-        account.activateAccountBasedOnBalance();
         this.savingsAccountRepository.save(account);
+        newTransactions.addAll(account.getSavingsAccountTransactionsWithPivotConfig());
         this.savingsAccountTransactionRepository.saveAll(newTransactions);
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, false, backdatedTxnsAllowedTill);
 

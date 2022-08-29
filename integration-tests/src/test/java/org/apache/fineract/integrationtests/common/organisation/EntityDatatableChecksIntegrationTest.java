@@ -82,6 +82,26 @@ public class EntityDatatableChecksIntegrationTest {
     }
 
     @Test
+    public void validateCreateDeleteDatatableCheck() {
+        // creating datatable
+        String datatableName = this.datatableHelper.createDatatable(CLIENT_APP_TABLE_NAME, false);
+        DatatableHelper.verifyDatatableCreatedOnServer(this.requestSpec, this.responseSpec, datatableName);
+
+        // creating new entity datatable check
+        Integer entityDatatableCheckId = this.entityDatatableChecksHelper.createEntityDatatableCheck(CLIENT_APP_TABLE_NAME, datatableName,
+                100, null);
+        assertNotNull(entityDatatableCheckId, "ERROR IN CREATING THE ENTITY DATATABLE CHECK");
+
+        // deleting entity datatable check
+        entityDatatableCheckId = this.entityDatatableChecksHelper.deleteEntityDatatableCheck(entityDatatableCheckId);
+        assertNotNull(entityDatatableCheckId, "ERROR IN DELETING THE ENTITY DATATABLE CHECK");
+
+        // deleting the datatable
+        String deletedDataTableName = this.datatableHelper.deleteDatatable(datatableName);
+        assertEquals(datatableName, deletedDataTableName, "ERROR IN DELETING THE DATATABLE");
+    }
+
+    @Test
     public void validateCreateDeleteEntityDatatableCheck() {
         // creating datatable
         String datatableName = this.datatableHelper.createDatatable(CLIENT_APP_TABLE_NAME, false);

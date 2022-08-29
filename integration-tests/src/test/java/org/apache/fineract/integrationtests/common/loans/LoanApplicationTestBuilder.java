@@ -43,6 +43,7 @@ public class LoanApplicationTestBuilder {
     public static final String RBI_INDIA_STRATEGY = "4";
     public static final String INTEREST_PRINCIPAL_PENALTIES_FEES_ORDER_STRATEGY = "6";
 
+    private String externalId = null;
     private String principal = "10,000";
     private String glimPrincipal = "1000";
     private String loanTermFrequency = "";
@@ -124,7 +125,7 @@ public class LoanApplicationTestBuilder {
         if (this.glimPrincipal != null) {
             map.put("glimPrincipal", this.glimPrincipal);
         }
-        map.put("locale", "en_GB");
+        map.put("locale", LOCALE);
 
         String approvalFormData = new Gson().toJson(map);
         LOG.info("approvalFormData: {} ", approvalFormData);
@@ -153,6 +154,10 @@ public class LoanApplicationTestBuilder {
         map.put("collateral", this.collaterals);
         map.put("interestChargedFromDate", this.interestChargedFromDate);
 
+        if (this.externalId != null) {
+            map.put("externalId", this.externalId);
+        }
+
         if (repaymentsStartingFromDate != null) {
             map.put("repaymentsStartingFromDate", this.repaymentsStartingFromDate);
         }
@@ -175,15 +180,19 @@ public class LoanApplicationTestBuilder {
         if (disbursementData != null) {
             map.put("disbursementData", disbursementData);
             map.put("fixedEmiAmount", fixedEmiAmount);
-            map.put("maxOutstandingLoanBalance", maxOutstandingLoanBalance);
-
         }
+        map.put("maxOutstandingLoanBalance", maxOutstandingLoanBalance);
 
         if (datatables != null) {
             map.put("datatables", this.datatables);
         }
         LOG.info("Loan Application request : {} ", map);
         return new Gson().toJson(map);
+    }
+
+    public LoanApplicationTestBuilder withExternalId(final String externalId) {
+        this.externalId = externalId;
+        return this;
     }
 
     public LoanApplicationTestBuilder withPrincipal(final String principalAmount) {

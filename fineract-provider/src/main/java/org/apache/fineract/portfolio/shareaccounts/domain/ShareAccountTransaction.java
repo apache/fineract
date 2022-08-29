@@ -19,7 +19,7 @@
 package org.apache.fineract.portfolio.shareaccounts.domain;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
@@ -30,8 +30,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
@@ -43,8 +41,7 @@ public class ShareAccountTransaction extends AbstractPersistableCustom {
     private ShareAccount shareAccount;
 
     @Column(name = "transaction_date")
-    @Temporal(TemporalType.DATE)
-    private Date transactionDate;
+    private LocalDate transactionDate;
 
     @Column(name = "total_shares")
     private Long totalShares;
@@ -81,7 +78,7 @@ public class ShareAccountTransaction extends AbstractPersistableCustom {
         this.shareAccount = shareAccount;
     }
 
-    public ShareAccountTransaction(final Date transactionDate, final Long totalShares, final BigDecimal shareValue) {
+    public ShareAccountTransaction(final LocalDate transactionDate, final Long totalShares, final BigDecimal shareValue) {
         this.transactionDate = transactionDate;
         this.totalShares = totalShares;
         this.shareValue = shareValue;
@@ -91,8 +88,8 @@ public class ShareAccountTransaction extends AbstractPersistableCustom {
         this.amountPaid = new BigDecimal(this.amount.doubleValue());
     }
 
-    private ShareAccountTransaction(final Date transactionDate, final Long totalShares, final BigDecimal shareValue, final Integer status,
-            final Integer type, final BigDecimal amount, final BigDecimal chargeAmount, final BigDecimal amountPaid) {
+    private ShareAccountTransaction(final LocalDate transactionDate, final Long totalShares, final BigDecimal shareValue,
+            final Integer status, final Integer type, final BigDecimal amount, final BigDecimal chargeAmount, final BigDecimal amountPaid) {
         this.transactionDate = transactionDate;
         this.totalShares = totalShares;
         this.shareValue = shareValue;
@@ -103,7 +100,7 @@ public class ShareAccountTransaction extends AbstractPersistableCustom {
         this.amountPaid = amountPaid;
     }
 
-    public static ShareAccountTransaction createRedeemTransaction(final Date transactionDate, final Long totalShares,
+    public static ShareAccountTransaction createRedeemTransaction(final LocalDate transactionDate, final Long totalShares,
             final BigDecimal shareValue) {
         final Integer status = PurchasedSharesStatusType.APPROVED.getValue();
         final Integer type = PurchasedSharesStatusType.REDEEMED.getValue();
@@ -112,7 +109,7 @@ public class ShareAccountTransaction extends AbstractPersistableCustom {
         return new ShareAccountTransaction(transactionDate, totalShares, shareValue, status, type, amount, null, amountPaid);
     }
 
-    public static ShareAccountTransaction createChargeTransaction(final Date transactionDate, final ShareAccountCharge charge) {
+    public static ShareAccountTransaction createChargeTransaction(final LocalDate transactionDate, final ShareAccountCharge charge) {
         final Long totalShares = null;
         final BigDecimal unitPrice = null;
         final Integer status = PurchasedSharesStatusType.APPROVED.getValue();
@@ -123,7 +120,7 @@ public class ShareAccountTransaction extends AbstractPersistableCustom {
         return new ShareAccountTransaction(transactionDate, totalShares, unitPrice, status, type, amount, chargeAmount, amountPaid);
     }
 
-    public Date getPurchasedDate() {
+    public LocalDate getPurchasedDate() {
         return this.transactionDate;
     }
 
@@ -135,7 +132,7 @@ public class ShareAccountTransaction extends AbstractPersistableCustom {
         return this.shareValue;
     }
 
-    public void update(final Date purchasedDate, final Long totalShares, final BigDecimal shareValue) {
+    public void update(final LocalDate purchasedDate, final Long totalShares, final BigDecimal shareValue) {
         this.transactionDate = purchasedDate;
         this.totalShares = totalShares;
         this.shareValue = shareValue;
@@ -243,7 +240,7 @@ public class ShareAccountTransaction extends AbstractPersistableCustom {
         }
     }
 
-    public void updateTransactionDate(final Date transactionDate) {
+    public void updateTransactionDate(final LocalDate transactionDate) {
         this.transactionDate = transactionDate;
     }
 

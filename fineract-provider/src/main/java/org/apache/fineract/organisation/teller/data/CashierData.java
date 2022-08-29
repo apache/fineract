@@ -19,8 +19,8 @@
 package org.apache.fineract.organisation.teller.data;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import org.apache.fineract.organisation.staff.data.StaffData;
 
 /**
@@ -39,8 +39,8 @@ public final class CashierData implements Serializable {
     private final Long officeId;
     private final Long staffId;
     private final String description;
-    private final Date startDate;
-    private final Date endDate;
+    private final LocalDate startDate;
+    private final LocalDate endDate;
     private final Boolean isFullDay;
     private final String startTime;
     private final String endTime;
@@ -55,7 +55,7 @@ public final class CashierData implements Serializable {
      * Creates a new cashier.
      */
     private CashierData(final Long id, final Long officeId, String officeName, final Long staffId, final String staffName,
-            final Long tellerId, final String tellerName, final String description, final Date startDate, final Date endDate,
+            final Long tellerId, final String tellerName, final String description, final LocalDate startDate, final LocalDate endDate,
             final Boolean isFullDay, final String startTime, final String endTime, Collection<StaffData> staffOptions) {
         this.id = id;
         this.officeId = officeId;
@@ -113,7 +113,7 @@ public final class CashierData implements Serializable {
      * @return
      */
     public static CashierData instance(final Long id, final Long officeId, String officeName, final Long staffId, final String staffName,
-            final Long tellerId, final String tellerName, final String description, final Date startDate, final Date endDate,
+            final Long tellerId, final String tellerName, final String description, final LocalDate startDate, final LocalDate endDate,
             final Boolean isFullDay, final String startTime, final String endTime) {
         return new CashierData(id, officeId, officeName, staffId, staffName, tellerId, tellerName, description, startDate, endDate,
                 isFullDay, startTime, endTime, null);
@@ -182,7 +182,7 @@ public final class CashierData implements Serializable {
      *
      * @return the valid from date of this cashier
      */
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
@@ -195,7 +195,7 @@ public final class CashierData implements Serializable {
      *
      * @return the valid to date of this cashier
      */
-    public Date getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 

@@ -2,7 +2,8 @@
   "extends": [
     "config:base",
     "group:allNonMajor",
-    "schedule:weekly"
+    "schedule:weekly",
+    "helpers:pinGitHubActionDigests"
   ],
   "ignorePaths": [
     "docs/**"
@@ -20,6 +21,26 @@
   {
     "matchPackageNames": ["org.eclipse.persistence:org.eclipse.persistence.jpa"],
     "allowedVersions": "<=2.7.10"
+  },
+  {
+    "matchPackageNames": ["org.glassfish.jaxb:jaxb-runtime"],
+    "allowedVersions": "<=2.3.6"
+  },
+  {
+    "matchPackageNames": ["com.sun.mail:jakarta.mail"],
+    "allowedVersions": "<=1.6.7"
+  },
+  {
+    "matchPackageNames": ["org.apache.oltu.oauth2:org.apache.oltu.oauth2.common"],
+    "allowedVersions": "<=1.0.1"
+  },
+  {
+    "matchPackageNames": ["org.apache.oltu.oauth2:org.apache.oltu.oauth2.client"],
+    "allowedVersions": "<=1.0.1"
+  },
+  {
+    "matchPackageNames": ["org.apache.oltu.oauth2:org.apache.oltu.oauth2.httpclient4"],
+    "allowedVersions": "<=1.0.1"
   },
   {
     "depTypeList": ["dependencies"],

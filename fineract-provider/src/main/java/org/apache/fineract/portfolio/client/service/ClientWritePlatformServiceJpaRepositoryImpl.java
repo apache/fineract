@@ -20,15 +20,13 @@ package org.apache.fineract.portfolio.client.service;
 
 import com.google.gson.JsonElement;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import javax.persistence.PersistenceException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandProcessingService;
@@ -55,6 +53,10 @@ import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.address.service.AddressWritePlatformService;
+import org.apache.fineract.portfolio.businessevent.domain.client.ClientActivateBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.client.ClientCreateBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.client.ClientRejectBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.data.ClientDataValidator;
 import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
@@ -69,9 +71,6 @@ import org.apache.fineract.portfolio.client.exception.ClientHasNoStaffException;
 import org.apache.fineract.portfolio.client.exception.ClientMustBePendingToBeDeletedException;
 import org.apache.fineract.portfolio.client.exception.InvalidClientSavingProductException;
 import org.apache.fineract.portfolio.client.exception.InvalidClientStateTransitionException;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEntity;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BusinessEvents;
-import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepository;
 import org.apache.fineract.portfolio.group.exception.GroupMemberCountNotInPermissibleRangeException;
@@ -87,8 +86,6 @@ import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.apache.fineract.portfolio.savings.service.SavingsApplicationProcessWritePlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -96,9 +93,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
 public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWritePlatformService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ClientWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final ClientRepositoryWrapper clientRepository;
@@ -191,7 +187,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
-            LOG.error("Error occured.", throwable);
+            log.error("Error occured.", throwable);
             throw new PlatformDataIntegrityException("error.msg.client.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.", dve);
         }
@@ -305,8 +301,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             this.clientRepository.saveAndFlush(newClient);
             if (newClient.isActive()) {
-                this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.CLIENTS_ACTIVATE,
-                        constructEntityMap(BusinessEntity.CLIENT, newClient));
+                businessEventNotifierService.notifyPostBusinessEvent(new ClientActivateBusinessEvent(newClient));
             }
             if (newClient.isAccountNumberRequiresAutoGeneration()) {
                 AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.CLIENT);
@@ -340,10 +335,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                         command.arrayOfParameterNamed(ClientApiConstants.datatables));
             }
 
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.CLIENTS_CREATE,
-                    constructEntityMap(BusinessEntity.CLIENT, newClient));
+            businessEventNotifierService.notifyPostBusinessEvent(new ClientCreateBusinessEvent(newClient));
 
-            this.entityDatatableChecksWritePlatformService.runTheCheck(newClient.getId(), EntityTables.CLIENT.getName(),
+            entityDatatableChecksWritePlatformService.runTheCheck(newClient.getId(), EntityTables.CLIENT.getName(),
                     StatusEnum.CREATE.getCode().longValue(), EntityTables.CLIENT.getForeignKeyColumnNameOnDatatable());
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -594,9 +588,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final AppUser currentUser = this.context.authenticatedUser();
             client.activate(currentUser, fmt, activationDate);
             CommandProcessingResult result = openSavingsAccount(client, fmt);
-            this.clientRepository.saveAndFlush(client);
-            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.CLIENTS_ACTIVATE,
-                    constructEntityMap(BusinessEntity.CLIENT, client));
+            clientRepository.saveAndFlush(client);
+            businessEventNotifierService.notifyPostBusinessEvent(new ClientActivateBusinessEvent(client));
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withOfficeId(client.officeId()) //
@@ -627,7 +620,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
-        LOG.error("Error occured.", dve);
+        log.error("Error occured.", dve);
     }
 
     @Transactional
@@ -735,8 +728,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 if (loanStatus.isOpen() || loanStatus.isPendingApproval() || loanStatus.isAwaitingDisbursal()) {
                     final String errorMessage = "Client cannot be closed because of non-closed loans.";
                     throw new InvalidClientStateTransitionException("close", "loan.non-closed", errorMessage);
-                } else if (loanStatus.isClosed()
-                        && loan.getClosedOnDate().after(Date.from(closureDate.atStartOfDay(ZoneId.systemDefault()).toInstant()))) {
+                } else if (loanStatus.isClosed() && loan.getClosedOnDate().isAfter(closureDate)) {
                     final String errorMessage = "The client closureDate cannot be before the loan closedOnDate.";
                     throw new InvalidClientStateTransitionException("close", "date.cannot.before.loan.closed.date", errorMessage,
                             closureDate, loan.getClosedOnDate());
@@ -754,7 +746,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 }
             }
 
-            client.close(currentUser, closureReason, Date.from(closureDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+            client.close(currentUser, closureReason, closureDate);
             this.clientRepository.saveAndFlush(client);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -848,10 +840,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             throw new InvalidClientStateTransitionException("rejection", "date.cannot.before.client.submitted.date", errorMessage,
                     rejectionDate, client.getSubmittedOnDate());
         }
-        client.reject(currentUser, rejectionReason, Date.from(rejectionDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
-        this.clientRepository.saveAndFlush(client);
-        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEvents.CLIENTS_REJECT,
-                constructEntityMap(BusinessEntity.CLIENT, client));
+        client.reject(currentUser, rejectionReason, rejectionDate);
+        clientRepository.saveAndFlush(client);
+        businessEventNotifierService.notifyPostBusinessEvent(new ClientRejectBusinessEvent(client));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withClientId(entityId) //
@@ -880,7 +871,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             throw new InvalidClientStateTransitionException("withdrawal", "date.cannot.before.client.submitted.date", errorMessage,
                     withdrawalDate, client.getSubmittedOnDate());
         }
-        client.withdraw(currentUser, withdrawalReason, Date.from(withdrawalDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        client.withdraw(currentUser, withdrawalReason, withdrawalDate);
         this.clientRepository.saveAndFlush(client);
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -905,7 +896,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             throw new InvalidClientStateTransitionException("reactivation", "date.cannot.before.client.closed.date", errorMessage,
                     reactivateDate, client.getClosureDate());
         }
-        client.reActivate(currentUser, Date.from(reactivateDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        client.reActivate(currentUser, reactivateDate);
         this.clientRepository.saveAndFlush(client);
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -931,7 +922,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     undoRejectDate, client.getRejectedDate());
         }
 
-        client.reOpened(currentUser, Date.from(undoRejectDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        client.reOpened(currentUser, undoRejectDate);
         this.clientRepository.saveAndFlush(client);
 
         return new CommandProcessingResultBuilder() //
@@ -957,7 +948,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             throw new InvalidClientStateTransitionException("reopened", "date.cannot.before.client.withdrawal.date", errorMessage,
                     undoWithdrawalDate, client.getWithdrawalDate());
         }
-        client.reOpened(currentUser, Date.from(undoWithdrawalDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        client.reOpened(currentUser, undoWithdrawalDate);
         this.clientRepository.saveAndFlush(client);
 
         return new CommandProcessingResultBuilder() //
@@ -965,11 +956,5 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 .withClientId(entityId) //
                 .withEntityId(entityId) //
                 .build();
-    }
-
-    private Map<BusinessEntity, Object> constructEntityMap(final BusinessEntity entityEvent, Object entity) {
-        Map<BusinessEntity, Object> map = new HashMap<>(1);
-        map.put(entityEvent, entity);
-        return map;
     }
 }

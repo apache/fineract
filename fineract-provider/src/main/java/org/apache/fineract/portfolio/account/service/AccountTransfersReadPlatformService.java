@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.account.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
@@ -42,7 +41,7 @@ public interface AccountTransfersReadPlatformService {
 
     Collection<Long> fetchPostInterestTransactionIds(Long accountId);
 
-    Collection<Long> fetchPostInterestTransactionIdsWithPivotDate(Long accountId, Date pivotDate);
+    Collection<Long> fetchPostInterestTransactionIdsWithPivotDate(Long accountId, LocalDate pivotDate);
 
     AccountTransferData retrieveRefundByTransferTemplate(Long fromOfficeId, Long fromClientId, Long fromAccountId, Integer fromAccountType,
             Long toOfficeId, Long toClientId, Long toAccountId, Integer toAccountType);

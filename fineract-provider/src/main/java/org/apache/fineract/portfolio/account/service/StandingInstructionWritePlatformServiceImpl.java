@@ -25,10 +25,8 @@ import static org.apache.fineract.portfolio.account.api.StandingInstructionApiCo
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -183,7 +181,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
 
     @Override
     public CommandProcessingResult delete(final Long id) {
-        AccountTransferStandingInstruction standingInstructionsForUpdate = this.standingInstructionRepository.findById(id).get();
+        AccountTransferStandingInstruction standingInstructionsForUpdate = this.standingInstructionRepository.findById(id).orElseThrow();
         // update the "deleted" and "name" properties of the standing
         // instruction
         standingInstructionsForUpdate.delete();
@@ -199,11 +197,11 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
         Collection<StandingInstructionData> instructionDatas = this.standingInstructionReadPlatformService
                 .retrieveAll(StandingInstructionStatus.ACTIVE.getValue());
         List<Throwable> errors = new ArrayList<>();
+        LocalDate transactionDate = DateUtils.getBusinessLocalDate();
         for (StandingInstructionData data : instructionDatas) {
             boolean isDueForTransfer = false;
             AccountTransferRecurrenceType recurrenceType = data.recurrenceType();
             StandingInstructionType instructionType = data.instructionType();
-            LocalDate transactionDate = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
             if (recurrenceType.isPeriodicRecurrence()) {
                 final ScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
                 PeriodFrequencyType frequencyType = data.recurrenceFrequency();
@@ -232,7 +230,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
                     transactionAmount = standingInstructionDuesData.totalDueAmount();
                 }
                 if (recurrenceType.isDuesRecurrence()) {
-                    isDueForTransfer = LocalDate.now(DateUtils.getDateTimeZoneOfTenant()).equals(standingInstructionDuesData.dueDate());
+                    isDueForTransfer = DateUtils.getBusinessLocalDate().equals(standingInstructionDuesData.dueDate());
                 }
             }
 
@@ -249,8 +247,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
 
                 if (transferCompleted) {
                     final String updateQuery = "UPDATE m_account_transfer_standing_instructions SET last_run_date = ? where id = ?";
-                    this.jdbcTemplate.update(updateQuery, Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant()),
-                            data.getId());
+                    this.jdbcTemplate.update(updateQuery, transactionDate, data.getId());
                 }
 
             }
@@ -265,7 +262,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
         StringBuilder errorLog = new StringBuilder();
         StringBuilder updateQuery = new StringBuilder(
                 "INSERT INTO m_account_transfer_standing_instructions_history (standing_instruction_id, " + sqlGenerator.escape("status")
-                        + ", amount,execution_time, error_log) VALUES (");
+                        + ", amount, execution_time, error_log) VALUES (");
         try {
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
         } catch (final PlatformApiDataValidationException e) {
@@ -294,8 +291,8 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
             updateQuery.append("'success'").append(",");
         }
         updateQuery.append(accountTransferDTO.getTransactionAmount().doubleValue());
-        updateQuery.append(", now(),");
-        updateQuery.append("'").append(errorLog.toString()).append("')");
+        updateQuery.append(", ").append(sqlGenerator.currentTenantDateTime()).append(" ");
+        updateQuery.append(", '").append(errorLog).append("')");
         this.jdbcTemplate.update(updateQuery.toString());
         return transferCompleted;
     }

@@ -19,22 +19,22 @@ This instruction describes how to get Fineract OAuth working with a Keycloak (ht
 == Set up Keycloak
 
 1. From terminal, run: 'docker run -p 9000:8080 -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=admin quay.io/keycloak/keycloak:15.0.2'
-1. Go to URL 'http://localhost:9000/auth/admin' and login with admin/admin
-1. Hover your mouse over text "Master" and click on "Add realm"
-1. Enter name "fineract" for your realm
-1. Click on tab "Users" on the left, then "Add user" and create user with username "mifos" 
-1. Click on tab "Credentials" at the top, and set password to "password", turning "temporary" setting to off
-1. Click on tab "Clients" on the left, and create client with ID 'community-app'
-1. In settings tab, set 'access-type' to 'confidential' and enter 'localhost' in the valid redirect URIs. 
-1. In credentials tab, copy string in field 'secret' as this will be needed in the step to request the access token
+2. Go to URL 'http://localhost:9000/auth/admin' and login with admin/admin
+3. Hover your mouse over text "Master" and click on "Add realm"
+4. Enter name "fineract" for your realm
+5. Click on tab "Users" on the left, then "Add user" and create user with username "mifos"
+6. Click on tab "Credentials" at the top, and set password to "password", turning "temporary" setting to off
+7. Click on tab "Clients" on the left, and create client with ID 'community-app'
+8. In settings tab, set 'access-type' to 'confidential' and enter 'localhost' in the valid redirect URIs.
+9. In credentials tab, copy string in field 'secret' as this will be needed in the step to request the access token
 
 Finally we need to change Keycloak configuration so that it uses the username as a subject of the token:
 
 1. Choose client 'community-app' in the tab 'Clients'
-1. Go to tab 'Mappers' and click on 'Create'
-1. Enter 'usernameInSub' as 'Name'
-1. Choose mapper type 'User Property'
-1. Enter 'username' into the field 'Property' and 'sub' into the field 'Token Claim Name'. Choose 'String' as 'Claim JSON Type'
+2. Go to tab 'Mappers' and click on 'Create'
+3. Enter 'usernameInSub' as 'Name'
+4. Choose mapper type 'User Property'
+5. Enter 'username' into the field 'Property' and 'sub' into the field 'Token Claim Name'. Choose 'String' as 'Claim JSON Type'
 
 You are now ready to test out OAuth:
 

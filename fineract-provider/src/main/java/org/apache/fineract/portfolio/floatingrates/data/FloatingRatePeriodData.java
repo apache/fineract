@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.floatingrates.data;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -33,12 +34,12 @@ public class FloatingRatePeriodData implements Comparable<FloatingRatePeriodData
     private boolean isDifferentialToBaseLendingRate;
     private boolean isActive;
     private String createdBy;
-    private LocalDate createdOn;
+    private LocalDateTime createdOn;
     private String modifiedBy;
-    private LocalDate modifiedOn;
+    private LocalDateTime modifiedOn;
 
     public FloatingRatePeriodData(Long id, LocalDate fromDate, BigDecimal interestRate, boolean isDifferentialToBaseLendingRate,
-            boolean isActive, String createdBy, LocalDate createdOn, String modifiedBy, LocalDate modifiedOn) {
+            boolean isActive, String createdBy, LocalDateTime createdOn, String modifiedBy, LocalDateTime modifiedOn) {
         this.id = id;
         this.fromDate = fromDate;
         this.interestRate = interestRate;
@@ -78,7 +79,7 @@ public class FloatingRatePeriodData implements Comparable<FloatingRatePeriodData
         return this.createdBy;
     }
 
-    public LocalDate getCreatedOn() {
+    public LocalDateTime getCreatedOn() {
         return this.createdOn;
     }
 
@@ -86,7 +87,7 @@ public class FloatingRatePeriodData implements Comparable<FloatingRatePeriodData
         return this.modifiedBy;
     }
 
-    public LocalDate getModifiedOn() {
+    public LocalDateTime getModifiedOn() {
         return this.modifiedOn;
     }
 

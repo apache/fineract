@@ -37,9 +37,9 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -87,10 +87,10 @@ public class SavingsAccountTransactionDataValidator {
         final boolean backdatedTxnsAllowedTill = this.configurationDomainService.retrievePivotDateConfig();
         final boolean isRelaxingDaysConfigOn = this.configurationDomainService.isRelaxingDaysConfigForPivotDateEnabled();
 
-        final Date lastInterestPostingDate = savingsAccount.getSummary().getInterestPostedTillDate();
+        final LocalDate lastInterestPostingDate = savingsAccount.getSummary().getInterestPostedTillDate();
 
         if (backdatedTxnsAllowedTill && lastInterestPostingDate != null) {
-            LocalDate pivotDate = LocalDate.ofInstant(lastInterestPostingDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            LocalDate pivotDate = lastInterestPostingDate;
             if (isRelaxingDaysConfigOn) {
                 pivotDate = pivotDate.minusDays(this.configurationDomainService.retrieveRelaxingDaysConfigForPivotDate());
             }
@@ -123,6 +123,9 @@ public class SavingsAccountTransactionDataValidator {
 
         final BigDecimal transactionAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(transactionAmountParamName, element);
         baseDataValidator.reset().parameter(transactionAmountParamName).value(transactionAmount).notNull().positiveAmount();
+
+        final Integer paymentType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(paymentTypeIdParamName, element);
+        baseDataValidator.reset().parameter(paymentTypeIdParamName).value(paymentType).notNull();
 
         validatePaymentTypeDetails(baseDataValidator, element);
 
@@ -323,8 +326,8 @@ public class SavingsAccountTransactionDataValidator {
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
-        Date createdDate = new Date();
-        LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
+        LocalDateTime createdDate = DateUtils.getLocalDateTimeOfSystem();
+        LocalDate transactionDate = DateUtils.getBusinessLocalDate();
         SavingsAccountTransaction transaction = SavingsAccountTransaction.releaseAmount(holdTransaction, transactionDate, createdDate,
                 createdUser);
         return transaction;

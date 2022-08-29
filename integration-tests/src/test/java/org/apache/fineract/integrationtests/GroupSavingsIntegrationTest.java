@@ -31,12 +31,10 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GroupHelper;
@@ -74,6 +72,7 @@ public class GroupSavingsIntegrationTest {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.requestSpec.header("Fineract-Platform-TenantId", "default");
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
@@ -771,7 +770,7 @@ public class GroupSavingsIntegrationTest {
         assertEquals(expectedNextDueDate, nextDueDate);
 
         this.savingsAccountHelper.closeSavingsAccountAndGetBackRequiredField(savingsId, "true", null,
-                sdf.format(Date.from(Utils.getLocalDateOfTenant().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant())));
+                Utils.getLocalDateOfTenant().format(Utils.dateFormatter));
 
     }
 

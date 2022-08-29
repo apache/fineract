@@ -46,7 +46,7 @@ task buildJavaSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateT
     skipValidateSpec = true
     inputSpec = "file:///$swaggerFile"
     outputDir = "$buildDir/generated/java".toString()
-    templateDir = "$rootDir/fineract-client/src/main/resources/java/template/"
+    templateDir = "$projectDir/src/main/resources/templates/java"
     groupId = 'org.apache.fineract'
     apiPackage = 'org.apache.fineract.client.services'
     invokerPackage = 'org.apache.fineract.client'

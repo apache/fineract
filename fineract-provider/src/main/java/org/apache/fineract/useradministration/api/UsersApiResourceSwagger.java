@@ -20,6 +20,7 @@ package org.apache.fineract.useradministration.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Collection;
+import java.util.List;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.useradministration.data.RoleData;
@@ -111,6 +112,10 @@ final class UsersApiResourceSwagger {
 
         @Schema(example = "newuser")
         public String username;
+        @Schema(example = "password")
+        public String password;
+        @Schema(example = "repeatPassword")
+        public String repeatPassword;
         @Schema(example = "Test")
         public String firstname;
         @Schema(example = "User")
@@ -122,7 +127,7 @@ final class UsersApiResourceSwagger {
         @Schema(example = "1")
         public Long staffId;
         @Schema(example = "[2,3]")
-        public String roles;
+        public List<String> roles;
         @Schema(example = "true")
         public Boolean sendPasswordToEmail;
         @Schema(example = "true")

@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
  * into JSON.
  */
 @Component
-public final class DefaultToApiJsonSerializer<T> implements ToApiJsonSerializer<T> {
+public class DefaultToApiJsonSerializer<T> implements ToApiJsonSerializer<T> {
 
     private final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOff;
     private final ExcludeNothingWithPrettyPrintingOnJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOn;

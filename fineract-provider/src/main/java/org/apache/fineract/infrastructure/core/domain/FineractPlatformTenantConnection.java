@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.core.domain;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import javax.sql.DataSource;
 import org.apache.commons.lang3.StringUtils;
@@ -25,7 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * Holds Tenant's DB server connection connection details.
  */
-public class FineractPlatformTenantConnection {
+public class FineractPlatformTenantConnection implements Serializable {
 
     private final Long connectionId;
     private final String schemaServer;
@@ -34,6 +35,12 @@ public class FineractPlatformTenantConnection {
     private final String schemaUsername;
     private final String schemaPassword;
     private final String schemaName;
+    private final String readOnlySchemaServer;
+    private final String readOnlySchemaServerPort;
+    private final String readOnlySchemaName;
+    private final String readOnlySchemaUsername;
+    private final String readOnlySchemaPassword;
+    private final String readOnlySchemaConnectionParameters;
     private final boolean autoUpdateEnabled;
     private final int initialSize;
     private final long validationInterval;
@@ -57,7 +64,9 @@ public class FineractPlatformTenantConnection {
             final boolean removeAbandoned, final int removeAbandonedTimeout, final boolean logAbandoned,
             final int abandonWhenPercentageFull, final int maxActive, final int minIdle, final int maxIdle, final int suspectTimeout,
             final int timeBetweenEvictionRunsMillis, final int minEvictableIdleTimeMillis, final int maxRetriesOnDeadlock,
-            final int maxIntervalBetweenRetries, final boolean tesOnBorrow) {
+            final int maxIntervalBetweenRetries, final boolean tesOnBorrow, final String readOnlySchemaServer,
+            final String readOnlySchemaServerPort, final String readOnlySchemaName, final String readOnlySchemaUsername,
+            final String readOnlySchemaPassword, final String readOnlySchemaConnectionParameters) {
 
         this.connectionId = connectionId;
         this.schemaName = schemaName;
@@ -82,6 +91,12 @@ public class FineractPlatformTenantConnection {
         this.maxRetriesOnDeadlock = maxRetriesOnDeadlock;
         this.maxIntervalBetweenRetries = maxIntervalBetweenRetries;
         this.testOnBorrow = tesOnBorrow;
+        this.readOnlySchemaServer = readOnlySchemaServer;
+        this.readOnlySchemaServerPort = readOnlySchemaServerPort;
+        this.readOnlySchemaName = readOnlySchemaName;
+        this.readOnlySchemaUsername = readOnlySchemaUsername;
+        this.readOnlySchemaPassword = readOnlySchemaPassword;
+        this.readOnlySchemaConnectionParameters = readOnlySchemaConnectionParameters;
     }
 
     public String getSchemaServer() {
@@ -176,6 +191,30 @@ public class FineractPlatformTenantConnection {
         return schemaName;
     }
 
+    public String getReadOnlySchemaServer() {
+        return readOnlySchemaServer;
+    }
+
+    public String getReadOnlySchemaServerPort() {
+        return readOnlySchemaServerPort;
+    }
+
+    public String getReadOnlySchemaName() {
+        return readOnlySchemaName;
+    }
+
+    public String getReadOnlySchemaUsername() {
+        return readOnlySchemaUsername;
+    }
+
+    public String getReadOnlySchemaPassword() {
+        return readOnlySchemaPassword;
+    }
+
+    public String getReadOnlySchemaConnectionParameters() {
+        return readOnlySchemaConnectionParameters;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(this.schemaName).append(":").append(this.schemaServer).append(":")
@@ -204,4 +243,5 @@ public class FineractPlatformTenantConnection {
             throw new RuntimeException(e);
         }
     }
+
 }

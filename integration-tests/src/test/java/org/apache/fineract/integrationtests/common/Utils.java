@@ -23,6 +23,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -37,11 +40,16 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.http.conn.HttpHostConnectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +67,7 @@ public final class Utils {
 
     private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
     private static final SecureRandom random = new SecureRandom();
+    private static final Gson gson = new Gson();
 
     public static final String TENANT_PARAM_NAME = "tenantIdentifier";
     public static final String DEFAULT_TENANT = "default";
@@ -68,6 +77,11 @@ public final class Utils {
 
     private static final String HEALTH_URL = "/fineract-provider/actuator/health";
     private static final String LOGIN_URL = "/fineract-provider/api/v1/authentication?" + TENANT_IDENTIFIER;
+
+    public static final String DATE_FORMAT = "dd MMMM yyyy";
+    public static final String DATE_TIME_FORMAT = "dd MMMM yyyy HH:mm";
+    public static final DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern(DATE_FORMAT).toFormatter();
+    public static final DateTimeFormatter dateTimeFormatter = new DateTimeFormatterBuilder().appendPattern(DATE_TIME_FORMAT).toFormatter();
 
     public static void initializeRESTAssured() {
         RestAssured.baseURI = "https://localhost";
@@ -118,12 +132,17 @@ public final class Utils {
     }
 
     public static String loginIntoServerAndGetBase64EncodedAuthenticationKey() {
+        return loginIntoServerAndGetBase64EncodedAuthenticationKey("mifos", "password");
+    }
+
+    public static String loginIntoServerAndGetBase64EncodedAuthenticationKey(String username, String password) {
         awaitSpringBootActuatorHealthyUp();
         try {
             LOG.info("Logging in, for integration test...");
             // system.out.println("-----------------------------------LOGIN-----------------------------------------");
-            String json = RestAssured.given().contentType(ContentType.JSON).body("{\"username\":\"mifos\", \"password\":\"password\"}")
-                    .expect().log().ifError().when().post(LOGIN_URL).asString();
+            String json = RestAssured.given().contentType(ContentType.JSON)
+                    .body("{\"username\":\"" + username + "\", \"password\":\"" + password + "\"}").expect().log().ifError().when()
+                    .post(LOGIN_URL).asString();
             assertThat("Failed to login into fineract platform", StringUtils.isBlank(json), is(false));
             String key = JsonPath.with(json).get("base64EncodedAuthenticationKey");
             assertThat("Failed to obtain key: " + json, StringUtils.isBlank(key), is(false));
@@ -152,6 +171,20 @@ public final class Utils {
         return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
     }
 
+    public static List<String> performServerGetList(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String getURL, final String jsonAttributeToGetBack) {
+        final JsonPath jsonPath = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).jsonPath();
+        List<String> items = jsonPath.getList(jsonAttributeToGetBack);
+        return items;
+    }
+
+    public static JsonElement performServerGetArray(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String getURL, final int position, final String jsonAttributeToGetBack) {
+        final JsonPath jsonPath = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).jsonPath();
+        List<Map<String, Object>> items = jsonPath.getList("$");
+        return gson.fromJson(((ArrayList) items.get(position).get(jsonAttributeToGetBack)).toString(), JsonArray.class);
+    }
+
     public static String performGetTextResponse(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String getURL) {
         return given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
@@ -177,10 +210,18 @@ public final class Utils {
         return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
     }
 
+    public static String performServerPut(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String putURL, final String jsonBodyToSend) {
+        return performServerPut(requestSpec, responseSpec, putURL, jsonBodyToSend, null);
+    }
+
     public static <T> T performServerPut(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String putURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
         final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError().when().put(putURL)
                 .andReturn().asString();
+        if (jsonAttributeToGetBack == null) {
+            return (T) json;
+        }
         return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
     }
 
@@ -246,17 +287,40 @@ public final class Utils {
         return dateFormat.format(dateToBeConvert.getTime());
     }
 
-    public static LocalDate getLocalDateOfTenant() {
-        LocalDate today = LocalDate.now(DateUtils.getDateTimeZoneOfTenant());
-        final ZoneId zone = ZoneId.of(TENANT_TIME_ZONE);
-        if (zone != null) {
-            today = LocalDate.now(zone);
-        }
-        return today;
+    public static String convertDateToURLFormat(final Calendar dateToBeConvert, final String dateGormat) {
+        DateFormat dateFormat = new SimpleDateFormat(dateGormat);
+        dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
+        return dateFormat.format(dateToBeConvert.getTime());
     }
 
     public static TimeZone getTimeZoneOfTenant() {
         return TimeZone.getTimeZone(TENANT_TIME_ZONE);
+    }
+
+    public static ZoneId getZoneIdOfTenant() {
+        return ZoneId.of(TENANT_TIME_ZONE);
+    }
+
+    public static LocalDate getLocalDateOfTenant() {
+        return LocalDate.now(getZoneIdOfTenant());
+    }
+
+    public static Date convertJsonElementAsDate(JsonElement jsonElement) {
+        if (jsonElement.isJsonArray()) {
+            JsonArray jsonArray = jsonElement.getAsJsonArray();
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.YEAR, jsonArray.get(0).getAsInt());
+            calendar.set(Calendar.MONTH, jsonArray.get(1).getAsInt() - 1);
+            calendar.set(Calendar.DATE, jsonArray.get(2).getAsInt());
+            // If the Array includes Time
+            if (jsonArray.size() > 3) {
+                calendar.set(Calendar.HOUR, jsonArray.get(3).getAsInt());
+                calendar.set(Calendar.MINUTE, jsonArray.get(4).getAsInt());
+                calendar.set(Calendar.SECOND, jsonArray.get(5).getAsInt());
+            }
+            return calendar.getTime();
+        }
+        return null;
     }
 
     public static String performServerTemplatePost(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,

@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.bulkimport.importhandler.chartofaccou
 import com.google.gson.GsonBuilder;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
@@ -47,6 +46,7 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -234,10 +234,7 @@ public class ChartOfAccountsImportHandler implements ImportHandler {
 
     // for opening balance
     private JournalEntryData readAddJournalEntries(Row row, String locale, String dateFormat) {
-        LocalDate transactionDateCheck = LocalDate.now(ZoneId.systemDefault());
-        if (transactionDateCheck != null) {
-            transactionDate = transactionDateCheck;
-        }
+        transactionDate = DateUtils.getBusinessLocalDate();
 
         String officeName = ImportHandlerUtils.readAsString(ChartOfAcountsConstants.OFFICE_COL, row);
         Long officeId = ImportHandlerUtils.readAsLong(ChartOfAcountsConstants.OFFICE_COL_ID, row);

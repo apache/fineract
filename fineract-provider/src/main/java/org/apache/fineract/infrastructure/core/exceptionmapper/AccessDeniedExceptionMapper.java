@@ -23,6 +23,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.access.AccessDeniedException;
@@ -37,6 +38,7 @@ import org.springframework.stereotype.Component;
 @Provider
 @Component
 @Scope("singleton")
+@Slf4j
 public class AccessDeniedExceptionMapper implements ExceptionMapper<AccessDeniedException> {
 
     @Override
@@ -44,6 +46,7 @@ public class AccessDeniedExceptionMapper implements ExceptionMapper<AccessDenied
         // Status code 403 really reads as:
         // "Authenticated - but not authorized":
         final String defaultUserMessage = exception.getMessage();
+        log.warn("Exception: {}, Message: {}", exception.getClass().getName(), defaultUserMessage);
         return Response.status(Status.FORBIDDEN).entity(ApiGlobalErrorResponse.unAuthorized(defaultUserMessage))
                 .type(MediaType.APPLICATION_JSON).build();
     }

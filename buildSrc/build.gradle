@@ -17,7 +17,7 @@
  * under the License.
  */
 plugins {
-    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.12.RELEASE'
     id 'groovy'
     id 'java-gradle-plugin'
     id 'groovy-gradle-plugin'
@@ -33,6 +33,7 @@ repositories {
 }
 
 dependencies {
+    implementation 'com.sun.activation:jakarta.activation'
     implementation 'com.sun.mail:jakarta.mail'
     implementation 'org.freemarker:freemarker'
     implementation 'org.tmatesoft.svnkit:svnkit'

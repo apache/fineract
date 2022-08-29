@@ -18,9 +18,7 @@
  */
 package org.apache.fineract.infrastructure.reportmailingjob.util;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobStretchyReportParamDateOption;
 
 public final class ReportMailingJobDateUtil {
@@ -35,60 +33,21 @@ public final class ReportMailingJobDateUtil {
      * get the current date as string using the mysql date format yyyy-MM-dd
      **/
     public static String getTodayDateAsString() {
-        // get a calendar instance, which defaults to "now"
-        Calendar calendar = Calendar.getInstance();
-
-        // get a date to represent "today"
-        Date today = calendar.getTime();
-
-        // get a SimpleDateFormat instance, passing the mysql date format as
-        // parameter
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MYSQL_DATE_FORMAT);
-
-        // return date as string
-        return simpleDateFormat.format(today);
+        return DateUtils.getLocalDateOfTenant().format(DateUtils.DEFAULT_DATE_FORMATER);
     }
 
     /**
      * get the yesterday's date as string using the mysql date format yyyy-MM-dd
      **/
     public static String getYesterdayDateAsString() {
-        // get a calendar instance, which defaults to "now"
-        Calendar calendar = Calendar.getInstance();
-
-        // add one day to the date/calendar
-        calendar.add(Calendar.DAY_OF_YEAR, -1);
-
-        // now get "yesterday"
-        Date yesterday = calendar.getTime();
-
-        // get a SimpleDateFormat instance, passing the mysql date format as
-        // parameter
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MYSQL_DATE_FORMAT);
-
-        // return date as string
-        return simpleDateFormat.format(yesterday);
+        return DateUtils.getLocalDateOfTenant().minusDays(1).format(DateUtils.DEFAULT_DATE_FORMATER);
     }
 
     /**
      * get the tomorrow's date as string using the mysql date format yyyy-MM-dd
      **/
     public static String getTomorrowDateAsString() {
-        // get a calendar instance, which defaults to "now"
-        Calendar calendar = Calendar.getInstance();
-
-        // add one day to the date/calendar
-        calendar.add(Calendar.DAY_OF_YEAR, 1);
-
-        // now get "tomorrow"
-        Date tomorrow = calendar.getTime();
-
-        // get a SimpleDateFormat instance, passing the mysql date format as
-        // parameter
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(MYSQL_DATE_FORMAT);
-
-        // return date as string
-        return simpleDateFormat.format(tomorrow);
+        return DateUtils.getLocalDateOfTenant().plusDays(1).format(DateUtils.DEFAULT_DATE_FORMATER);
     }
 
     /**

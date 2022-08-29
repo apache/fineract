@@ -90,6 +90,9 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 this.loanProductToGLAccountMappingHelper.saveLoanToExpenseAccountMapping(element,
                         LoanProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(), loanProductId,
                         CashAccountsForLoan.LOSSES_WRITTEN_OFF.getValue());
+                this.loanProductToGLAccountMappingHelper.saveLoanToExpenseAccountMapping(element,
+                        LoanProductAccountingParams.GOODWILL_CREDIT.getValue(), loanProductId,
+                        CashAccountsForLoan.GOODWILL_CREDIT.getValue());
 
                 // liabilities
                 this.loanProductToGLAccountMappingHelper.saveLoanToLiabilityAccountMapping(element,
@@ -139,6 +142,9 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 this.loanProductToGLAccountMappingHelper.saveLoanToExpenseAccountMapping(element,
                         LoanProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(), loanProductId,
                         AccrualAccountsForLoan.LOSSES_WRITTEN_OFF.getValue());
+                this.loanProductToGLAccountMappingHelper.saveLoanToExpenseAccountMapping(element,
+                        LoanProductAccountingParams.GOODWILL_CREDIT.getValue(), loanProductId,
+                        AccrualAccountsForLoan.GOODWILL_CREDIT.getValue());
 
                 // liabilities
                 this.loanProductToGLAccountMappingHelper.saveLoanToLiabilityAccountMapping(element,

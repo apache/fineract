@@ -19,10 +19,11 @@
 package org.apache.fineract.portfolio.floatingrates.service;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateData;
@@ -158,9 +159,9 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
             final boolean isDifferentialToBaseLendingRate = rs.getBoolean("isDifferentialToBaseLendingRate");
             final boolean isActive = rs.getBoolean("isActive");
             final String createdBy = rs.getString("createdBy");
-            final LocalDate createdOn = JdbcSupport.getLocalDate(rs, "createdOn");
+            final LocalDateTime createdOn = JdbcSupport.getLocalDateTime(rs, "createdOn");
             final String modifiedBy = rs.getString("modifiedBy");
-            final LocalDate modifiedOn = JdbcSupport.getLocalDate(rs, "modifiedOn");
+            final LocalDateTime modifiedOn = JdbcSupport.getLocalDateTime(rs, "modifiedOn");
             return new FloatingRatePeriodData(id, fromDate, interestRate, isDifferentialToBaseLendingRate, isActive, createdBy, createdOn,
                     modifiedBy, modifiedOn);
         }
@@ -221,8 +222,9 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
             final boolean isDifferentialToBLR = rs.getBoolean("linkedrateperiods_is_differential_to_base_lending_rate");
             final Date blrFromDate = rs.getDate("baserate_from_date");
             final BigDecimal blrInterestRate = rs.getBigDecimal("baserate_interest_rate");
-
-            return new InterestRatePeriodData(fromDate, interestRate, isDifferentialToBLR, blrFromDate, blrInterestRate);
+            final LocalDate fromLocalDate = fromDate != null ? fromDate.toLocalDate() : null;
+            final LocalDate blrFromLocalDate = blrFromDate != null ? blrFromDate.toLocalDate() : null;
+            return new InterestRatePeriodData(fromLocalDate, interestRate, isDifferentialToBLR, blrFromLocalDate, blrInterestRate);
         }
 
         public String schema() {

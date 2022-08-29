@@ -19,7 +19,7 @@
 package org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.Column;
@@ -30,7 +30,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 
@@ -51,7 +50,7 @@ public class PostDatedChecks extends AbstractPersistableCustom {
     @Column(name = "amount", scale = 6, precision = 19)
     private BigDecimal amount;
     @Column(name = "repayment_date", nullable = false)
-    private Date repaymentDate;
+    private LocalDate repaymentDate;
     @Column(name = "status", columnDefinition = "0")
     private Integer status;
     @Column(name = "check_no", nullable = false, unique = true)
@@ -60,7 +59,8 @@ public class PostDatedChecks extends AbstractPersistableCustom {
     public PostDatedChecks() {}
 
     private PostDatedChecks(final Long accountNo, final String bankName, final BigDecimal amount,
-            final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment, final Date date, final Loan loan, final Long checkNo) {
+            final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment, final LocalDate date, final Loan loan,
+            final Long checkNo) {
         this.bankName = bankName;
         this.accountNo = accountNo;
         this.amount = amount;
@@ -73,8 +73,7 @@ public class PostDatedChecks extends AbstractPersistableCustom {
     public static PostDatedChecks instanceOf(final Long accountNo, final String bankName, final BigDecimal amount,
             final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment, final Loan loan, final Long checkNo) {
         return new PostDatedChecks(accountNo, bankName, amount, loanRepaymentScheduleInstallment,
-                Date.from(loanRepaymentScheduleInstallment.getDueDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
-                loan, checkNo);
+                loanRepaymentScheduleInstallment.getDueDate(), loan, checkNo);
     }
 
     public void setLoan(Loan loan) {

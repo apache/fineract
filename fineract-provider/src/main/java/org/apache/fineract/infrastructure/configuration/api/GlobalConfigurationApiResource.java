@@ -20,7 +20,6 @@ package org.apache.fineract.infrastructure.configuration.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -103,7 +102,7 @@ public class GlobalConfigurationApiResource {
             + "Returns the list global enable/disable survey configurations.\n" + "\n" + "Example Requests:\n" + "\n"
             + "configurations/survey")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "List of example \\n response \\nsurveys response   \\ngiven below", content = @Content(array = @ArraySchema(schema = @Schema(implementation = GlobalConfigurationApiResourceSwagger.GetGlobalConfigurationsResponse.class)))) })
+            @ApiResponse(responseCode = "200", description = "List of example \\n response \\nsurveys response   \\ngiven below", content = @Content(schema = @Schema(implementation = GlobalConfigurationApiResourceSwagger.GetGlobalConfigurationsResponse.class))) })
     public String retrieveConfiguration(@Context final UriInfo uriInfo,
             @DefaultValue("false") @QueryParam("survey") @Parameter(description = "survey") final boolean survey) {
 

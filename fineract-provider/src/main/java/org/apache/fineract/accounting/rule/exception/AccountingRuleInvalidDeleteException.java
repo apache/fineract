@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.accounting.rule.exception;
 
-import java.util.Date;
+import java.time.LocalDate;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
@@ -26,7 +26,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
  */
 public class AccountingRuleInvalidDeleteException extends AbstractPlatformDomainRuleException {
 
-    public AccountingRuleInvalidDeleteException(final Long officeId, final String officeName, final Date latestclosureDate) {
+    public AccountingRuleInvalidDeleteException(final Long officeId, final String officeName, final LocalDate latestclosureDate) {
         super("error.msg.glclosure.invalid.delete", "The latest closure for office with Id " + officeId + " and name " + officeName
                 + " is on " + latestclosureDate.toString() + ", please delete this closure first", latestclosureDate);
     }

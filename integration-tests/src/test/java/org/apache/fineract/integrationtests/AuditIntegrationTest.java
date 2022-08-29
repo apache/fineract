@@ -18,6 +18,10 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -27,6 +31,7 @@ import io.restassured.specification.ResponseSpecification;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import org.apache.fineract.integrationtests.common.AuditHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -60,6 +65,18 @@ public class AuditIntegrationTest {
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.auditHelper = new AuditHelper(this.requestSpec, this.responseSpec);
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+    }
+
+    @Test
+    public void testAuditSearchTemplate() {
+        // given
+        // when
+        LinkedHashMap auditSearchTemplate = this.auditHelper.getAuditSearchTemplate();
+
+        // then
+        assertNotNull(auditSearchTemplate);
+        assertEquals(4, auditSearchTemplate.size()); // appUsers, actionNames, entityNames, processingResults
+        assertTrue(((List) auditSearchTemplate.get("actionNames")).size() > 0);
     }
 
     /**

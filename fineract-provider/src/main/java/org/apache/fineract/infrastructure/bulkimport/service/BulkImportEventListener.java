@@ -30,7 +30,6 @@ import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.infrastructure.bulkimport.domain.ImportDocument;
 import org.apache.fineract.infrastructure.bulkimport.domain.ImportDocumentRepository;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
-import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -66,10 +65,7 @@ public class BulkImportEventListener implements ApplicationListener<BulkImportEv
 
     @Override
     public void onApplicationEvent(final BulkImportEvent event) {
-
-        final String tenantIdentifier = event.getTenantIdentifier();
-        final FineractPlatformTenant tenant = this.tenantDetailsService.loadTenantById(tenantIdentifier);
-        ThreadLocalContextUtil.setTenant(tenant);
+        ThreadLocalContextUtil.init(event.getContext());
         ImportHandler importHandler = null;
         final ImportDocument importDocument = this.importRepository.findById(event.getImportId()).orElse(null);
         final GlobalEntityType entityType = GlobalEntityType.fromInt(importDocument.getEntityType());

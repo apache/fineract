@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.PersistenceException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -37,7 +39,6 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 import org.apache.fineract.infrastructure.core.service.PlatformEmailSendException;
 import org.apache.fineract.infrastructure.security.service.PlatformPasswordEncoder;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.notification.service.TopicDomainService;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.staff.domain.Staff;
@@ -55,9 +56,6 @@ import org.apache.fineract.useradministration.domain.UserDomainService;
 import org.apache.fineract.useradministration.exception.PasswordPreviouslyUsedException;
 import org.apache.fineract.useradministration.exception.RoleNotFoundException;
 import org.apache.fineract.useradministration.exception.UserNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -70,9 +68,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWritePlatformService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(AppUserWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final UserDomainService userDomainService;
@@ -84,27 +82,6 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     private final AppUserPreviousPasswordRepository appUserPreviewPasswordRepository;
     private final StaffRepositoryWrapper staffRepositoryWrapper;
     private final ClientRepositoryWrapper clientRepositoryWrapper;
-    private final TopicDomainService topicDomainService;
-
-    @Autowired
-    public AppUserWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final AppUserRepository appUserRepository,
-            final UserDomainService userDomainService, final OfficeRepositoryWrapper officeRepositoryWrapper,
-            final RoleRepository roleRepository, final PlatformPasswordEncoder platformPasswordEncoder,
-            final UserDataValidator fromApiJsonDeserializer, final AppUserPreviousPasswordRepository appUserPreviewPasswordRepository,
-            final StaffRepositoryWrapper staffRepositoryWrapper, final ClientRepositoryWrapper clientRepositoryWrapper,
-            final TopicDomainService topicDomainService) {
-        this.context = context;
-        this.appUserRepository = appUserRepository;
-        this.userDomainService = userDomainService;
-        this.officeRepositoryWrapper = officeRepositoryWrapper;
-        this.roleRepository = roleRepository;
-        this.platformPasswordEncoder = platformPasswordEncoder;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.appUserPreviewPasswordRepository = appUserPreviewPasswordRepository;
-        this.staffRepositoryWrapper = staffRepositoryWrapper;
-        this.clientRepositoryWrapper = clientRepositoryWrapper;
-        this.topicDomainService = topicDomainService;
-    }
 
     @Override
     @Transactional
@@ -152,8 +129,6 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             final Boolean sendPasswordToEmail = command.booleanObjectValueOfParameterNamed("sendPasswordToEmail");
             this.userDomainService.create(appUser, sendPasswordToEmail);
 
-            this.topicDomainService.subscribeUserToTopic(appUser);
-
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withEntityId(appUser.getId()) //
@@ -162,11 +137,11 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         } catch (final DataIntegrityViolationException dve) {
             throw handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
         } catch (final JpaSystemException | PersistenceException | AuthenticationServiceException dve) {
-            LOG.error("createUser: JpaSystemException | PersistenceException | AuthenticationServiceException", dve);
+            log.error("createUser: JpaSystemException | PersistenceException | AuthenticationServiceException", dve);
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             throw handleDataIntegrityIssues(command, throwable, dve);
         } catch (final PlatformEmailSendException e) {
-            LOG.error("createUser: PlatformEmailSendException", e);
+            log.error("createUser: PlatformEmailSendException", e);
 
             final String email = command.stringValueOfParameterNamed("email");
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.user.email.invalid",
@@ -208,7 +183,6 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
             final Map<String, Object> changes = userToUpdate.update(command, this.platformPasswordEncoder, clients);
 
-            this.topicDomainService.updateUserSubscription(userToUpdate, changes);
             if (changes.containsKey("officeId")) {
                 final Long officeId = (Long) changes.get("officeId");
                 final Office office = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
@@ -248,7 +222,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         } catch (final DataIntegrityViolationException dve) {
             throw handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
         } catch (final JpaSystemException | PersistenceException | AuthenticationServiceException dve) {
-            LOG.error("updateUser: JpaSystemException | PersistenceException | AuthenticationServiceException", dve);
+            log.error("updateUser: JpaSystemException | PersistenceException | AuthenticationServiceException", dve);
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             throw handleDataIntegrityIssues(command, throwable, dve);
         }
@@ -303,7 +277,6 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         }
 
         user.delete();
-        this.topicDomainService.unsubcribeUserFromTopic(user);
         this.appUserRepository.save(user);
 
         return new CommandProcessingResultBuilder().withEntityId(userId).withOfficeId(user.getOffice().getId()).build();
@@ -333,7 +306,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                     "Self Service User Id is already created. Go to Admin->Users to edit or delete the self-service user.");
         }
 
-        LOG.error("handleDataIntegrityIssues: Neither duplicate username nor existing user; unknown error occured", dve);
+        log.error("handleDataIntegrityIssues: Neither duplicate username nor existing user; unknown error occured", dve);
         return new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
     }
 }

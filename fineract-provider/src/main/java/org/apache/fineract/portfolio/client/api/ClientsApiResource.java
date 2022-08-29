@@ -30,7 +30,6 @@ import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -61,7 +60,6 @@ import org.apache.fineract.infrastructure.core.data.UploadRequest;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -442,8 +440,7 @@ public class ClientsApiResource {
     public String retrieveTransferTemplate(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
-        final Date transferDate = this.clientReadPlatformService.retrieveClientTransferProposalDate(clientId);
-        return this.toApiJsonSerializer.serialize(
-                (transferDate != null ? LocalDate.ofInstant(transferDate.toInstant(), DateUtils.getDateTimeZoneOfTenant()) : null));
+        final LocalDate transferDate = this.clientReadPlatformService.retrieveClientTransferProposalDate(clientId);
+        return this.toApiJsonSerializer.serialize(transferDate);
     }
 }

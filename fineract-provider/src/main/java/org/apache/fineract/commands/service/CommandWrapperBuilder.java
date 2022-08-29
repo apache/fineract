@@ -3478,4 +3478,11 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder updateBusinessDate() {
+        this.actionName = "UPDATE";
+        this.entityName = "BUSINESS_DATE";
+        this.href = "/businessdate";
+        return this;
+    }
+
 }

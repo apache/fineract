@@ -19,17 +19,18 @@
 package org.apache.fineract.accounting.provisioning.service;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.provisioning.data.LoanProductProvisioningEntryData;
 import org.apache.fineract.accounting.provisioning.data.ProvisioningEntryData;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
@@ -51,11 +52,11 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
     private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     @Override
-    public Collection<LoanProductProvisioningEntryData> retrieveLoanProductsProvisioningData(Date date) {
-        String formattedDate = new SimpleDateFormat("yyyy-MM-dd").format(date);
+    public Collection<LoanProductProvisioningEntryData> retrieveLoanProductsProvisioningData(LocalDate date) {
+        String formattedDate = DateUtils.DEFAULT_DATE_FORMATER.format(date);
         LoanProductProvisioningEntryMapper mapper = new LoanProductProvisioningEntryMapper(sqlGenerator);
         final String sql = mapper.schema();
-        return this.jdbcTemplate.query(sql, mapper, new Object[] { formattedDate, formattedDate, formattedDate });
+        return this.jdbcTemplate.query(sql, mapper, formattedDate, formattedDate, formattedDate);
     }
 
     private static final class LoanProductProvisioningEntryMapper implements RowMapper<LoanProductProvisioningEntryData> {
@@ -107,8 +108,7 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
     public ProvisioningEntryData retrieveProvisioningEntryData(Long entryId) {
         ProvisioningEntryDataMapperWithSumReserved mapper1 = new ProvisioningEntryDataMapperWithSumReserved();
         final String sql = "select" + mapper1.getSchema() + " where entry.id = ? group by entry.id, created.username, modified.username";
-        ProvisioningEntryData data = this.jdbcTemplate.queryForObject(sql, mapper1, new Object[] { entryId }); // NOSONAR
-        return data;
+        return this.jdbcTemplate.queryForObject(sql, mapper1, entryId);
     }
 
     private static final class ProvisioningEntryDataMapper implements RowMapper<ProvisioningEntryData> {
@@ -130,7 +130,8 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
             Long modifiedById = rs.getLong("lastmodifiedby_id");
             String modifieUser = rs.getString("modifieduser");
             BigDecimal totalReservedAmount = null;
-            return new ProvisioningEntryData(id, journalEntry, createdById, createdUser, createdDate, modifiedById, modifieUser,
+            LocalDate createdLocalDate = createdDate != null ? createdDate.toLocalDate() : null;
+            return new ProvisioningEntryData(id, journalEntry, createdById, createdUser, createdLocalDate, modifiedById, modifieUser,
                     totalReservedAmount);
         }
 
@@ -203,7 +204,8 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
             Long modifiedById = rs.getLong("lastmodifiedby_id");
             String modifieUser = rs.getString("modifieduser");
             BigDecimal totalReservedAmount = rs.getBigDecimal("totalreserved");
-            return new ProvisioningEntryData(id, journalEntry, createdById, createdUser, createdDate, modifiedById, modifieUser,
+            LocalDate createdLocalDate = createdDate != null ? createdDate.toLocalDate() : null;
+            return new ProvisioningEntryData(id, journalEntry, createdById, createdUser, createdLocalDate, modifiedById, modifieUser,
                     totalReservedAmount);
         }
 
@@ -239,7 +241,7 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
         final String sql1 = "select " + mapper1.getSchema() + " where entry.created_date like ? ";
         ProvisioningEntryData data = null;
         try {
-            data = this.jdbcTemplate.queryForObject(sql1, mapper1, new Object[] { date }); // NOSONAR
+            data = this.jdbcTemplate.queryForObject(sql1, mapper1, date); // NOSONAR
         } catch (EmptyResultDataAccessException e) {
             log.error("Problem occurred in retrieveProvisioningEntryData function", e);
         }
@@ -252,12 +254,12 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
         ProvisioningEntryData data = null;
         LoanProductProvisioningEntryRowMapper mapper = new LoanProductProvisioningEntryRowMapper();
         final String sql = "select " + mapper.getSchema() + " where entry.criteria_id = ?";
-        Collection<LoanProductProvisioningEntryData> entries = this.jdbcTemplate.query(sql, mapper, new Object[] { criteriaId }); // NOSONAR
+        Collection<LoanProductProvisioningEntryData> entries = this.jdbcTemplate.query(sql, mapper, criteriaId); // NOSONAR
         if (entries != null && entries.size() > 0) {
             Long entryId = ((LoanProductProvisioningEntryData) entries.toArray()[0]).getHistoryId();
             ProvisioningEntryDataMapper mapper1 = new ProvisioningEntryDataMapper();
             final String sql1 = "select " + mapper1.getSchema() + " where entry.id = ?";
-            data = this.jdbcTemplate.queryForObject(sql1, mapper1, new Object[] { entryId }); // NOSONAR
+            data = this.jdbcTemplate.queryForObject(sql1, mapper1, entryId); // NOSONAR
             data.setEntries(entries);
         }
         return data;
@@ -290,7 +292,8 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
             Long modifiedBy = null;
             String modifiedName = null;
             BigDecimal totalReservedAmount = null;
-            return new ProvisioningEntryData(id, Boolean.TRUE, createdBy, createdName, createdDate, modifiedBy, modifiedName,
+            LocalDate createdLocalDate = createdDate != null ? createdDate.toLocalDate() : null;
+            return new ProvisioningEntryData(id, Boolean.TRUE, createdBy, createdName, createdLocalDate, modifiedBy, modifiedName,
                     totalReservedAmount);
         }
 

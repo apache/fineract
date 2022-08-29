@@ -18,6 +18,12 @@
  */
 package org.apache.fineract.notification.api;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -28,6 +34,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
@@ -36,15 +43,12 @@ import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.notification.data.NotificationData;
 import org.apache.fineract.notification.service.NotificationReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Path("/notifications")
 @Component
-@Scope("singleton")
-
 @Tag(name = "Notification", description = "")
+@RequiredArgsConstructor
 public class NotificationApiResource {
 
     private final PlatformSecurityContext context;
@@ -52,21 +56,18 @@ public class NotificationApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final ToApiJsonSerializer<NotificationData> toApiJsonSerializer;
 
-    @Autowired
-    public NotificationApiResource(PlatformSecurityContext context, NotificationReadPlatformService notificationReadPlatformService,
-            ApiRequestParameterHelper apiRequestParameterHelper, ToApiJsonSerializer<NotificationData> toApiJsonSerializer) {
-        this.context = context;
-        this.notificationReadPlatformService = notificationReadPlatformService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-    }
-
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String getAllNotifications(@Context final UriInfo uriInfo, @QueryParam("orderBy") final String orderBy,
-            @QueryParam("limit") final Integer limit, @QueryParam("offset") final Integer offset,
-            @QueryParam("sortOrder") final String sortOrder, @QueryParam("isRead") final boolean isRead) {
+    @Operation
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = NotificationApiResourceSwagger.GetNotificationsResponse.class))) })
+    public String getAllNotifications(@Context final UriInfo uriInfo,
+            @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
+            @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
+            @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
+            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder,
+            @QueryParam("isRead") @Parameter(description = "isRead") final boolean isRead) {
 
         this.context.authenticatedUser();
         final Page<NotificationData> notificationData;

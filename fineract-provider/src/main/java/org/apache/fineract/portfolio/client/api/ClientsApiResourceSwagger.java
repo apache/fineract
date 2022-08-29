@@ -302,6 +302,8 @@ final class ClientsApiResourceSwagger {
         public String externalId;
         @Schema(example = "Client_LastName")
         public String lastname;
+        @Schema(example = "[2013, 1, 1]")
+        public LocalDate dateOfBirth;
         @Schema(example = "1")
         public Integer groupId;
         @Schema(example = "dd MMMM yyyy")
@@ -312,6 +314,8 @@ final class ClientsApiResourceSwagger {
         public Boolean active;
         @Schema(example = "04 March 2009")
         public String activationDate;
+        @Schema(example = "+353851239876")
+        public String mobileNo;
         @Schema(description = "List of PostClientsDatatable")
         public List<PostClientsDatatable> datatables;
         @Schema(description = "Address requests")

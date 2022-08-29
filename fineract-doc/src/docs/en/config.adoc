@@ -5,7 +5,7 @@
 :compress:
 :pdf-page-size: LETTER
 :experimental:
-:pdf-version: 1.7
+:pdf-version: 1.8
 :page-layout: base
 :toc-title: Table of Contents
 :toc: left

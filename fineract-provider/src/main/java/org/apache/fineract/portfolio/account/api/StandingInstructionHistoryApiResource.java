@@ -25,7 +25,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.Date;
+import java.time.LocalDate;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -99,8 +99,8 @@ public class StandingInstructionHistoryApiResource {
 
         final SearchParameters searchParameters = SearchParameters.forAccountTransfer(sqlSearch, externalId, offset, limit, orderBy,
                 sortOrder);
-        Date startDateRange = null;
-        Date endDateRange = null;
+        LocalDate startDateRange = null;
+        LocalDate endDateRange = null;
         if (fromDateParam != null) {
             startDateRange = fromDateParam.getDate("fromDate", dateFormat, locale);
         }

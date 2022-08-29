@@ -27,29 +27,29 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-public class AuditorAwareImpl implements AuditorAware<AppUser> {
+public class AuditorAwareImpl implements AuditorAware<Long> {
 
     @Autowired
     private AppUserRepository userRepository;
 
     @Override
-    public Optional<AppUser> getCurrentAuditor() {
-        Optional<AppUser> currentUser;
+    public Optional<Long> getCurrentAuditor() {
+        Optional<Long> currentUserId;
         final SecurityContext securityContext = SecurityContextHolder.getContext();
         if (securityContext != null) {
             final Authentication authentication = securityContext.getAuthentication();
             if (authentication != null) {
-                currentUser = Optional.ofNullable((AppUser) authentication.getPrincipal());
+                currentUserId = Optional.ofNullable(((AppUser) authentication.getPrincipal()).getId());
             } else {
-                currentUser = retrieveSuperUser();
+                currentUserId = retrieveSuperUser();
             }
         } else {
-            currentUser = retrieveSuperUser();
+            currentUserId = retrieveSuperUser();
         }
-        return currentUser;
+        return currentUserId;
     }
 
-    private Optional<AppUser> retrieveSuperUser() {
-        return this.userRepository.findById(Long.valueOf("1"));
+    private Optional<Long> retrieveSuperUser() {
+        return Optional.of(1L);
     }
 }

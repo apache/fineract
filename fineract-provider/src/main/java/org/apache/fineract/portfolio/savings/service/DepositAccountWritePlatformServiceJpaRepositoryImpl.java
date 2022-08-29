@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -47,7 +48,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
-import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
@@ -147,7 +147,6 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     private final HolidayRepositoryWrapper holidayRepository;
     private final WorkingDaysRepositoryWrapper workingDaysRepository;
     private final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository;
-    private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
     public DepositAccountWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -167,8 +166,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             final AccountTransfersWritePlatformService accountTransfersWritePlatformService,
             final DepositAccountReadPlatformService depositAccountReadPlatformService,
             final CalendarInstanceRepository calendarInstanceRepository, final ConfigurationDomainService configurationDomainService,
-            final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository,
-            final FromJsonHelper fromApiJsonHelper) {
+            final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository) {
 
         this.context = context;
         this.savingAccountRepositoryWrapper = savingAccountRepositoryWrapper;
@@ -192,7 +190,6 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         this.calendarInstanceRepository = calendarInstanceRepository;
         this.configurationDomainService = configurationDomainService;
         this.depositAccountOnHoldTransactionRepository = depositAccountOnHoldTransactionRepository;
-        this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
     @Transactional
@@ -204,7 +201,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
-
+        final boolean postReversals = false;
         this.depositAccountTransactionDataValidator.validateActivation(command);
         final MathContext mc = MathContext.DECIMAL64;
         final FixedDepositAccount account = (FixedDepositAccount) this.depositAccountAssembler.assembleFrom(savingsId,
@@ -215,7 +212,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
 
-        final Map<String, Object> changes = account.activate(user, command, DateUtils.getLocalDateOfTenant());
+        final Map<String, Object> changes = account.activate(user, command, DateUtils.getBusinessLocalDate());
         Money activationChargeAmount = getActivationCharge(account);
         if (!changes.isEmpty()) {
             final Locale locale = command.extractLocale();
@@ -246,13 +243,13 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                     payActivationCharge(account, user);
                 }
                 if (account.isBeforeLastPostingPeriod(account.getActivationLocalDate(), false)) {
-                    final LocalDate today = DateUtils.getLocalDateOfTenant();
+                    final LocalDate today = DateUtils.getBusinessLocalDate();
                     account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
                             financialYearBeginningMonth, postInterestOnDate, false);
                 } else {
-                    final LocalDate today = DateUtils.getLocalDateOfTenant();
+                    final LocalDate today = DateUtils.getBusinessLocalDate();
                     account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                            financialYearBeginningMonth, postInterestOnDate, false);
+                            financialYearBeginningMonth, postInterestOnDate, false, postReversals);
                 }
 
                 updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
@@ -296,7 +293,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         for (SavingsAccountCharge savingsAccountCharge : account.charges()) {
             if (savingsAccountCharge.isSavingsActivation()) {
                 account.payCharge(savingsAccountCharge, savingsAccountCharge.getAmount(account.getCurrency()),
-                        account.getActivationLocalDate(), user, false);
+                        account.getActivationLocalDate(), user, false, null);
             }
         }
     }
@@ -311,7 +308,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
-
+        final boolean postReversals = false;
         this.depositAccountTransactionDataValidator.validateActivation(command);
 
         final RecurringDepositAccount account = (RecurringDepositAccount) this.depositAccountAssembler.assembleFrom(savingsId,
@@ -322,7 +319,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
 
-        final Map<String, Object> changes = account.activate(user, command, DateUtils.getLocalDateOfTenant());
+        final Map<String, Object> changes = account.activate(user, command, DateUtils.getBusinessLocalDate());
 
         if (!changes.isEmpty()) {
             final Locale locale = command.extractLocale();
@@ -365,18 +362,18 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                         financialYearBeginningMonth);
             }
 
-            final LocalDate overdueUptoDate = DateUtils.getLocalDateOfTenant();
+            final LocalDate overdueUptoDate = DateUtils.getBusinessLocalDate();
             account.updateOverduePayments(overdueUptoDate);
             final boolean isInterestTransfer = false;
             final LocalDate postInterestOnDate = null;
             if (account.isBeforeLastPostingPeriod(account.getActivationLocalDate(), false)) {
-                final LocalDate today = DateUtils.getLocalDateOfTenant();
+                final LocalDate today = DateUtils.getBusinessLocalDate();
                 account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
-                        postInterestOnDate, false);
+                        postInterestOnDate, false, postReversals);
             } else {
-                final LocalDate today = DateUtils.getLocalDateOfTenant();
+                final LocalDate today = DateUtils.getBusinessLocalDate();
                 account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                        financialYearBeginningMonth, postInterestOnDate, false);
+                        financialYearBeginningMonth, postInterestOnDate, false, postReversals);
             }
             List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions = null;
             if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) > 0) {
@@ -523,12 +520,13 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final SavingsAccount account = this.depositAccountAssembler.assembleFrom(savingsId, depositAccountType);
         checkClientOrGroupActive(account);
 
-        final LocalDate today = DateUtils.getLocalDateOfTenant();
+        final LocalDate today = DateUtils.getBusinessLocalDate();
+        final boolean postReversals = false;
         final MathContext mc = new MathContext(15, MoneyHelper.getRoundingMode());
         boolean isInterestTransfer = false;
         LocalDate postInterestOnDate = null;
         account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                financialYearBeginningMonth, postInterestOnDate, false);
+                financialYearBeginningMonth, postInterestOnDate, false, postReversals);
 
         this.savingAccountRepositoryWrapper.save(account);
 
@@ -567,12 +565,13 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
-        final LocalDate today = DateUtils.getLocalDateOfTenant();
+        final LocalDate today = DateUtils.getBusinessLocalDate();
         final MathContext mc = new MathContext(10, MoneyHelper.getRoundingMode());
         boolean isInterestTransfer = false;
         LocalDate postInterestOnDate = null;
+        final boolean postReversals = false;
         account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
-                postInterestOnDate, false);
+                postInterestOnDate, false, postReversals);
         this.savingAccountRepositoryWrapper.saveAndFlush(account);
 
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
@@ -635,7 +634,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                     transactionId);
         }
 
-        final LocalDate today = DateUtils.getLocalDateOfTenant();
+        final LocalDate today = DateUtils.getBusinessLocalDate();
         final MathContext mc = MathContext.DECIMAL64;
 
         if (account.isNotActive()) {
@@ -645,13 +644,14 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         boolean isInterestTransfer = false;
         LocalDate postInterestOnDate = null;
         checkClientOrGroupActive(account);
+        final boolean postReversals = false;
         if (savingsAccountTransaction.isPostInterestCalculationRequired()
                 && account.isBeforeLastPostingPeriod(savingsAccountTransaction.transactionLocalDate(), false)) {
             account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
-                    postInterestOnDate, false);
+                    postInterestOnDate, false, postReversals);
         } else {
             account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                    financialYearBeginningMonth, postInterestOnDate, false);
+                    financialYearBeginningMonth, postInterestOnDate, false, postReversals);
         }
         List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions = null;
         if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) > 0) {
@@ -666,7 +666,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         account.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
                 financialYearBeginningMonth);
 
-        final LocalDate overdueUptoDate = DateUtils.getLocalDateOfTenant();
+        final LocalDate overdueUptoDate = DateUtils.getBusinessLocalDate();
 
         if (savingsAccountTransaction.isDeposit()) {
             account.updateScheduleInstallments();
@@ -701,7 +701,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
-
+        final Long relaxingDaysConfigForPivotDate = this.configurationDomainService.retrieveRelaxingDaysConfigForPivotDate();
         this.depositAccountTransactionDataValidator.validate(command, DepositAccountType.RECURRING_DEPOSIT);
 
         final SavingsAccountTransaction savingsAccountTransaction = this.savingsAccountTransactionRepository
@@ -721,7 +721,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                     transactionId);
         }
 
-        final LocalDate today = DateUtils.getLocalDateOfTenant();
+        final LocalDate today = DateUtils.getBusinessLocalDate();
 
         final RecurringDepositAccount account = (RecurringDepositAccount) this.depositAccountAssembler.assembleFrom(savingsId,
                 DepositAccountType.RECURRING_DEPOSIT);
@@ -744,25 +744,27 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         SavingsAccountTransaction transaction = null;
         Integer accountType = null;
+        UUID refNo = UUID.randomUUID();
         if (savingsAccountTransaction.isDeposit()) {
             final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
-                    paymentDetail, savingsAccountTransaction.createdDate(), user, accountType);
-            transaction = account.deposit(transactionDTO, false);
+                    paymentDetail, savingsAccountTransaction.getCreatedDate(), user, accountType);
+            transaction = account.deposit(transactionDTO, false, relaxingDaysConfigForPivotDate, refNo.toString());
         } else {
             final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
-                    paymentDetail, savingsAccountTransaction.createdDate(), user, accountType);
-            transaction = account.withdraw(transactionDTO, true, false);
+                    paymentDetail, savingsAccountTransaction.getCreatedDate(), user, accountType);
+            transaction = account.withdraw(transactionDTO, true, false, relaxingDaysConfigForPivotDate, refNo.toString());
         }
         final Long newtransactionId = saveTransactionToGenerateTransactionId(transaction);
         boolean isInterestTransfer = false;
         final LocalDate postInterestOnDate = null;
+        final boolean postReversals = false;
         if (account.isBeforeLastPostingPeriod(transactionDate, false)
                 || account.isBeforeLastPostingPeriod(savingsAccountTransaction.transactionLocalDate(), false)) {
             account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
-                    postInterestOnDate, false);
+                    postInterestOnDate, false, postReversals);
         } else {
             account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                    financialYearBeginningMonth, postInterestOnDate, false);
+                    financialYearBeginningMonth, postInterestOnDate, false, postReversals);
         }
         List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions = null;
         if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) > 0) {
@@ -777,7 +779,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         if (savingsAccountTransaction.isDeposit()) {
             account.handleScheduleInstallments(savingsAccountTransaction);
         }
-        final LocalDate overdueUptoDate = DateUtils.getLocalDateOfTenant();
+        final LocalDate overdueUptoDate = DateUtils.getBusinessLocalDate();
         account.updateOverduePayments(overdueUptoDate);
 
         this.savingAccountRepositoryWrapper.saveAndFlush(account);
@@ -831,7 +833,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 DepositAccountType.FIXED_DEPOSIT);
         checkClientOrGroupActive(account);
 
-        this.depositAccountDomainService.handleFDAccountClosure(account, paymentDetail, user, command, DateUtils.getLocalDateOfTenant(),
+        this.depositAccountDomainService.handleFDAccountClosure(account, paymentDetail, user, command, DateUtils.getBusinessLocalDate(),
                 changes);
 
         final String noteText = command.stringValueOfParameterNamed("note");
@@ -865,7 +867,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 DepositAccountType.RECURRING_DEPOSIT);
         checkClientOrGroupActive(account);
 
-        this.depositAccountDomainService.handleRDAccountClosure(account, paymentDetail, user, command, DateUtils.getLocalDateOfTenant(),
+        this.depositAccountDomainService.handleRDAccountClosure(account, paymentDetail, user, command, DateUtils.getBusinessLocalDate(),
                 changes);
 
         final String noteText = command.stringValueOfParameterNamed("note");
@@ -900,7 +902,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         checkClientOrGroupActive(account);
 
         this.depositAccountDomainService.handleFDAccountPreMatureClosure(account, paymentDetail, user, command,
-                DateUtils.getLocalDateOfTenant(), changes);
+                DateUtils.getBusinessLocalDate(), changes);
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
@@ -943,7 +945,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         }
 
         this.depositAccountDomainService.handleRDAccountPreMatureClosure(account, paymentDetail, user, command,
-                DateUtils.getLocalDateOfTenant(), changes);
+                DateUtils.getBusinessLocalDate(), changes);
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
@@ -984,8 +986,9 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         savingsAccount.setStatus(SavingsAccountStatusType.TRANSFER_IN_PROGRESS.getValue());
         final MathContext mc = MathContext.DECIMAL64;
         boolean isInterestTransfer = false;
+        final boolean postReversals = false;
         savingsAccount.calculateInterestUsing(mc, transferDate, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                financialYearBeginningMonth, postInterestOnDate, false);
+                financialYearBeginningMonth, postInterestOnDate, false, postReversals);
 
         this.savingsAccountTransactionRepository.save(newTransferTransaction);
         this.savingAccountRepositoryWrapper.saveAndFlush(savingsAccount);
@@ -1015,11 +1018,12 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 savingsAccount.office(), transferDate, user);
         savingsAccount.addTransaction(withdrawtransferTransaction);
         savingsAccount.setStatus(SavingsAccountStatusType.ACTIVE.getValue());
+        final boolean postReversals = false;
         final MathContext mc = MathContext.DECIMAL64;
         boolean isInterestTransfer = false;
         LocalDate postInterestOnDate = null;
         savingsAccount.calculateInterestUsing(mc, transferDate, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                financialYearBeginningMonth, postInterestOnDate, false);
+                financialYearBeginningMonth, postInterestOnDate, false, postReversals);
 
         this.savingsAccountTransactionRepository.save(withdrawtransferTransaction);
         this.savingAccountRepositoryWrapper.saveAndFlush(savingsAccount);
@@ -1060,10 +1064,11 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             savingsAccount.reassignSavingsOfficer(fieldOfficer, transferDate);
         }
         boolean isInterestTransfer = false;
+        final boolean postReversals = false;
         LocalDate postInterestOnDate = null;
         final MathContext mc = MathContext.DECIMAL64;
         savingsAccount.calculateInterestUsing(mc, transferDate, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                financialYearBeginningMonth, postInterestOnDate, false);
+                financialYearBeginningMonth, postInterestOnDate, false, postReversals);
 
         this.savingsAccountTransactionRepository.save(acceptTransferTransaction);
         this.savingAccountRepositoryWrapper.saveAndFlush(savingsAccount);
@@ -1216,14 +1221,15 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         boolean isInterestTransfer = false;
         LocalDate postInterestOnDate = null;
         final MathContext mc = MathContext.DECIMAL64;
+        final boolean postReversals = false;
         if (account.isBeforeLastPostingPeriod(savingsAccountCharge.getDueLocalDate(), false)) {
-            final LocalDate today = DateUtils.getLocalDateOfTenant();
+            final LocalDate today = DateUtils.getBusinessLocalDate();
             account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
-                    postInterestOnDate, false);
+                    postInterestOnDate, false, postReversals);
         } else {
-            final LocalDate today = DateUtils.getLocalDateOfTenant();
+            final LocalDate today = DateUtils.getBusinessLocalDate();
             account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                    financialYearBeginningMonth, postInterestOnDate, false);
+                    financialYearBeginningMonth, postInterestOnDate, false, postReversals);
         }
         List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions = null;
         if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) > 0) {
@@ -1324,7 +1330,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     public void applyChargeDue(final Long savingsAccountChargeId, final Long accountId,
             @SuppressWarnings("unused") final DepositAccountType depositAccountType) {
         // always use current date as transaction date for batch job
-        final LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
+        final LocalDate transactionDate = DateUtils.getBusinessLocalDate();
         final SavingsAccountCharge savingsAccountCharge = this.savingsAccountChargeRepository
                 .findOneWithNotFoundDetection(savingsAccountChargeId, accountId);
 
@@ -1351,18 +1357,19 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
-        account.payCharge(savingsAccountCharge, amountPaid, transactionDate, formatter, user, false);
+        account.payCharge(savingsAccountCharge, amountPaid, transactionDate, formatter, user, false, null);
         boolean isInterestTransfer = false;
         LocalDate postInterestOnDate = null;
         final MathContext mc = MathContext.DECIMAL64;
+        final boolean postReversals = false;
         if (account.isBeforeLastPostingPeriod(transactionDate, false)) {
-            final LocalDate today = DateUtils.getLocalDateOfTenant();
+            final LocalDate today = DateUtils.getBusinessLocalDate();
             account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
-                    postInterestOnDate, false);
+                    postInterestOnDate, false, postReversals);
         } else {
-            final LocalDate today = DateUtils.getLocalDateOfTenant();
+            final LocalDate today = DateUtils.getBusinessLocalDate();
             account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                    financialYearBeginningMonth, postInterestOnDate, false);
+                    financialYearBeginningMonth, postInterestOnDate, false, postReversals);
         }
         List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions = null;
         if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) > 0) {
@@ -1385,7 +1392,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
-
+        final boolean postReversals = false;
         final SavingsAccount account = this.depositAccountAssembler.assembleFrom(depositAccountId, depositAccountType);
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
@@ -1420,7 +1427,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             }
         } else if (depositAccountType.isRecurringDeposit()) {
             ((RecurringDepositAccount) account).updateMaturityStatus(isSavingsInterestPostingAtCurrentPeriodEnd,
-                    financialYearBeginningMonth);
+                    financialYearBeginningMonth, postReversals);
         }
         this.savingAccountRepositoryWrapper.saveAndFlush(account);
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);

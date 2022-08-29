@@ -19,11 +19,12 @@
 package org.apache.fineract.portfolio.address.service;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
@@ -93,14 +94,15 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
             final String created_by = rs.getString("created_by");
 
             final Date created_on = rs.getDate("created_on");
-
+            final LocalDate created_on_local_date = created_on != null ? created_on.toLocalDate() : null;
             final String updated_by = rs.getString("updated_by");
 
             final Date updated_on = rs.getDate("updated_on");
+            final LocalDate update_on_local_date = updated_on != null ? updated_on.toLocalDate() : null;
 
             return AddressData.instance1(addressId, street, address_line_1, address_line_2, address_line_3, town_village, city,
-                    county_district, state_province_id, country_id, postal_code, latitude, longitude, created_by, created_on, updated_by,
-                    updated_on);
+                    county_district, state_province_id, country_id, postal_code, latitude, longitude, created_by, created_on_local_date,
+                    updated_by, update_on_local_date);
 
         }
     }
@@ -162,13 +164,17 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 
             final Date created_on = rs.getDate("created_on");
 
+            final LocalDate created_on_local_date = created_on != null ? created_on.toLocalDate() : null;
+
             final String updated_by = rs.getString("updated_by");
 
             final Date updated_on = rs.getDate("updated_on");
 
+            final LocalDate update_on_local_date = updated_on != null ? updated_on.toLocalDate() : null;
+
             return AddressData.instance(addressType, client_id, addressId, address_type_id, is_active, street, address_line_1,
                     address_line_2, address_line_3, town_village, city, county_district, state_province_id, country_id, state_name,
-                    country_name, postal_code, latitude, longitude, created_by, created_on, updated_by, updated_on);
+                    country_name, postal_code, latitude, longitude, created_by, created_on_local_date, updated_by, update_on_local_date);
 
         }
     }

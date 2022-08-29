@@ -89,15 +89,9 @@ public class CreditReportWritePlatformServiceImpl implements CreditReportWritePl
         try {
             Long creditBureauID = command.longValueOfParameterNamed("creditBureauID");
 
-            Optional<String> creditBureauName = getCreditBureau(creditBureauID);
+            String creditBureauName = getCreditBureauName(creditBureauID);
 
-            if (creditBureauName.isEmpty()) {
-                baseDataValidator.reset().failWithCode("creditBureau.has.not.been.Integrated");
-                throw new PlatformApiDataValidationException("creditBureau.has.not.been.Integrated", "creditBureau.has.not.been.Integrated",
-                        dataValidationErrors);
-            }
-
-            if (Objects.equals(creditBureauName.get(), CreditBureauConfigurations.THITSAWORKS.toString())) {
+            if (Objects.equals(creditBureauName, CreditBureauConfigurations.THITSAWORKS.toString())) {
 
                 CreditBureauReportData reportobj = this.thitsaWorksCreditBureauIntegrationWritePlatformService
                         .getCreditReportFromThitsaWorks(command);
@@ -128,10 +122,10 @@ public class CreditReportWritePlatformServiceImpl implements CreditReportWritePl
     @Transactional
     public String addCreditReport(Long bureauId, File creditReport, FormDataContentDisposition fileDetail) {
 
-        Optional<String> creditBureauName = getCreditBureau(bureauId);
+        String creditBureauName = getCreditBureauName(bureauId);
         String responseMessage = null;
 
-        if (Objects.equals(creditBureauName.get(), CreditBureauConfigurations.THITSAWORKS.toString())) {
+        if (Objects.equals(creditBureauName, CreditBureauConfigurations.THITSAWORKS.toString())) {
             responseMessage = this.thitsaWorksCreditBureauIntegrationWritePlatformService.addCreditReport(bureauId, creditReport,
                     fileDetail);
         } else {
@@ -146,20 +140,19 @@ public class CreditReportWritePlatformServiceImpl implements CreditReportWritePl
 
     }
 
-    private Optional<String> getCreditBureau(Long creditBureauID) {
+    private String getCreditBureauName(Long creditBureauID) {
 
         if (creditBureauID != null) {
             Optional<CreditBureau> creditBureau = this.creditBureauRepository.findById(creditBureauID);
 
-            if (creditBureau.isEmpty()) {
-                return Optional.empty();
+            if (!creditBureau.isEmpty()) {
+                return creditBureau.get().getName();
             }
-
-            return Optional.of(creditBureau.get().getName());
-
         }
 
-        return Optional.empty();
+        baseDataValidator.reset().failWithCode("creditBureau.has.not.been.Integrated");
+        throw new PlatformApiDataValidationException("creditBureau.has.not.been.Integrated", "creditBureau.has.not.been.Integrated",
+                dataValidationErrors);
     }
 
     // saving the fetched creditreport in database
@@ -170,10 +163,10 @@ public class CreditReportWritePlatformServiceImpl implements CreditReportWritePl
         try {
             this.context.authenticatedUser();
 
-            Optional<String> creditBureauName = getCreditBureau(creditBureauId);
+            String creditBureauName = getCreditBureauName(creditBureauId);
             CreditReport creditReport = null;
 
-            if (Objects.equals(creditBureauName.get(), CreditBureauConfigurations.THITSAWORKS.toString())) {
+            if (Objects.equals(creditBureauName, CreditBureauConfigurations.THITSAWORKS.toString())) {
 
                 // checks whether creditReport for same nationalId was saved before. if yes, then deletes it & replaces
                 // with new one.
@@ -208,10 +201,10 @@ public class CreditReportWritePlatformServiceImpl implements CreditReportWritePl
 
         this.context.authenticatedUser();
 
-        Optional<String> creditBureauName = getCreditBureau(creditBureauId);
+        String creditBureauName = getCreditBureauName(creditBureauId);
         CreditReport creditReport = null;
 
-        if (Objects.equals(creditBureauName.get(), CreditBureauConfigurations.THITSAWORKS.toString())) {
+        if (Objects.equals(creditBureauName, CreditBureauConfigurations.THITSAWORKS.toString())) {
 
             String nationalId = command.stringValueOfParameterNamed("nationalId");
 

@@ -20,8 +20,11 @@ package org.apache.fineract.infrastructure.hooks.data;
 
 import java.io.Serializable;
 import java.util.List;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 
 @SuppressWarnings("unused")
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class HookTemplateData implements Serializable {
 
     private final Long id;
@@ -34,16 +37,8 @@ public final class HookTemplateData implements Serializable {
         return new HookTemplateData(id, name, schema);
     }
 
-    private HookTemplateData(final Long id, final String name, final List<Field> schema) {
-        this.id = id;
-        this.name = name;
-
-        // associations
-        this.schema = schema;
-    }
-
     public Long getServiceId() {
-        return this.id;
+        return id;
     }
 
 }

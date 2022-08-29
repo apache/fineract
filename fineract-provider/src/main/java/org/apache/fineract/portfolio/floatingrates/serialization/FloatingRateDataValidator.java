@@ -117,7 +117,7 @@ public class FloatingRateDataValidator {
 
                     final LocalDate fromDate = this.fromApiJsonHelper.extractLocalDateNamed("fromDate", ratePeriod);
                     baseDataValidator.reset().parameter("fromDate").parameterAtIndexArray("fromDate", i + 1).value(fromDate).notBlank()
-                            .validateDateAfter(DateUtils.getLocalDateOfTenant().plusDays(1));
+                            .validateDateAfter(DateUtils.getBusinessLocalDate().plusDays(1));
                     if (fromDate != null) {
                         fromDates.add(fromDate);
                     }
