@@ -129,8 +129,11 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
                                 .setName(debitAccountName).setGlCode(debitAccountGLCode);
                         debitAccounts = new ArrayList<>(Arrays.asList(debitAccount));
                     }
-                    accountingRuleData = new AccountingRuleData(id, officeId, officeName, name, description, systemDefined,
-                            allowMultipleDebitEntries, allowMultipleCreditEntries, creditTags, debitTags, creditAccounts, debitAccounts);
+                    accountingRuleData = new AccountingRuleData().setId(id).setOfficeId(officeId).setOfficeName(officeName).setName(name)
+                            .setDescription(description).setSystemDefined(systemDefined)
+                            .setAllowMultipleDebitEntries(allowMultipleDebitEntries)
+                            .setAllowMultipleCreditEntries(allowMultipleCreditEntries).setCreditTags(creditTags).setDebitTags(debitTags)
+                            .setCreditAccounts(creditAccounts).setDebitAccounts(debitAccounts);
                 }
 
                 extractedData.put(id, accountingRuleData);
@@ -196,7 +199,7 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
             final String tagName = rs.getString("tagName");
             final CodeValueData tag = CodeValueData.instance(tagId, tagName);
             final EnumOptionData transactionTypeEnum = AccountingEnumerations.journalEntryType(transactionType);
-            return new AccountingTagRuleData(id, tag, transactionTypeEnum);
+            return new AccountingTagRuleData().setId(id).setTag(tag).setTransactionType(transactionTypeEnum);
         }
 
     }
