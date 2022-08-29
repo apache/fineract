@@ -18,7 +18,9 @@
  */
 package org.apache.fineract.infrastructure.core.domain;
 
-public class FineractPlatformTenant {
+import java.io.Serializable;
+
+public class FineractPlatformTenant implements Serializable {
 
     private final Long id;
     private final String tenantIdentifier;

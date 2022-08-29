@@ -99,17 +99,23 @@ public class FixedDepositProductHelper {
     private String taxGroupId = null;
 
     public String build(final String validFrom, final String validTo) {
+        return build(validFrom, validTo, true);
+    }
+
+    public String build(final String validFrom, final String validTo, final boolean withCharts) {
         final HashMap<String, Object> map = new HashMap<>();
 
         List<HashMap<String, Object>> charts = new ArrayList<HashMap<String, Object>>();
-        HashMap<String, Object> chartsMap = new HashMap<>();
-        chartsMap.put("fromDate", validFrom);
-        chartsMap.put("endDate", validTo);
-        chartsMap.put("dateFormat", "dd MMMM yyyy");
-        chartsMap.put("locale", LOCALE);
-        chartsMap.put("chartSlabs", this.chartSlabs);
-        chartsMap.put("isPrimaryGroupingByAmount", this.isPrimaryGroupingByAmount);
-        charts.add(chartsMap);
+        if (withCharts) {
+            HashMap<String, Object> chartsMap = new HashMap<>();
+            chartsMap.put("fromDate", validFrom);
+            chartsMap.put("endDate", validTo);
+            chartsMap.put("dateFormat", "dd MMMM yyyy");
+            chartsMap.put("locale", LOCALE);
+            chartsMap.put("chartSlabs", this.chartSlabs);
+            chartsMap.put("isPrimaryGroupingByAmount", this.isPrimaryGroupingByAmount);
+            charts.add(chartsMap);
+        }
 
         map.put("charts", charts);
         map.put("name", this.name);

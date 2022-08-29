@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.portfolio.group.domain;
 
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -32,6 +32,6 @@ public interface GroupRepository extends JpaRepository<Group, Long>, JpaSpecific
     String RETRIEVE_SUBMITTED_ON_DATE = "select g.submittedOnDate from Group g where g.id = :groupId";
 
     @Query(RETRIEVE_SUBMITTED_ON_DATE)
-    Date retrieveGroupTypeSubmitteOndDate(@Param("groupId") Long groupId);
+    LocalDate retrieveGroupTypeSubmitteOndDate(@Param("groupId") Long groupId);
 
 }

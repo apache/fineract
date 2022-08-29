@@ -106,7 +106,7 @@ public class LoanRepaymentScheduleProcessingWrapper {
                         if (loanCharge.getLoan() != null && loanCharge.isSpecifiedDueDate()
                                 && loanCharge.getLoan().isMultiDisburmentLoan()) {
                             for (final LoanDisbursementDetails loanDisbursementDetails : loanCharge.getLoan().getDisbursementDetails()) {
-                                if (!loanDisbursementDetails.expectedDisbursementDate().after(loanCharge.getDueDate())) {
+                                if (!loanDisbursementDetails.expectedDisbursementDate().isAfter(loanCharge.getDueDate())) {
                                     amount = amount.add(loanDisbursementDetails.principal());
                                 }
                             }

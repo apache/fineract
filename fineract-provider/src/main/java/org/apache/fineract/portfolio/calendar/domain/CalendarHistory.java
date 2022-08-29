@@ -19,16 +19,12 @@
 package org.apache.fineract.portfolio.calendar.domain;
 
 import java.time.LocalDate;
-import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 @Entity
 @Table(name = "m_calendar_history")
@@ -48,12 +44,10 @@ public class CalendarHistory extends AbstractPersistableCustom {
     private String location;
 
     @Column(name = "start_date", nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date startDate;
+    private LocalDate startDate;
 
     @Column(name = "end_date", nullable = true)
-    @Temporal(TemporalType.DATE)
-    private Date endDate;
+    private LocalDate endDate;
 
     @Column(name = "duration", nullable = true)
     private Integer duration;
@@ -80,7 +74,7 @@ public class CalendarHistory extends AbstractPersistableCustom {
 
     }
 
-    public CalendarHistory(Calendar calendar, Date startDate) {
+    public CalendarHistory(Calendar calendar, LocalDate startDate) {
         this.calendar = calendar;
         this.title = calendar.getTitle();
         this.description = calendar.getDescription();
@@ -102,19 +96,11 @@ public class CalendarHistory extends AbstractPersistableCustom {
     }
 
     public LocalDate getStartDateLocalDate() {
-        LocalDate startDateLocalDate = null;
-        if (this.startDate != null) {
-            startDateLocalDate = LocalDate.ofInstant(this.startDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-        return startDateLocalDate;
+        return this.startDate;
     }
 
     public LocalDate getEndDateLocalDate() {
-        LocalDate endDateLocalDate = null;
-        if (this.endDate != null) {
-            endDateLocalDate = LocalDate.ofInstant(this.endDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-        return endDateLocalDate;
+        return this.endDate;
     }
 
     public boolean isEndDateAfterOrEqual(final LocalDate compareDate) {
@@ -144,7 +130,7 @@ public class CalendarHistory extends AbstractPersistableCustom {
         return false;
     }
 
-    public void updateEndDate(Date historyCalEndDate) {
+    public void updateEndDate(LocalDate historyCalEndDate) {
         this.endDate = historyCalEndDate;
     }
 

@@ -20,9 +20,7 @@ package org.apache.fineract.accounting.provisioning.service;
 
 import com.google.gson.JsonObject;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -111,9 +109,9 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
     }
 
     private void validateForCreateJournalEntry(ProvisioningEntryData existingEntry, ProvisioningEntry requested) {
-        Date existingDate = existingEntry.getCreatedDate();
-        Date requestedDate = requested.getCreatedDate();
-        if (existingDate.after(requestedDate) || existingDate.compareTo(requestedDate) == 0 ? Boolean.TRUE : Boolean.FALSE) {
+        LocalDate existingDate = existingEntry.getCreatedDate();
+        LocalDate requestedDate = requested.getCreatedDate();
+        if (existingDate.isAfter(requestedDate) || existingDate.compareTo(requestedDate) == 0 ? Boolean.TRUE : Boolean.FALSE) {
             throw new ProvisioningJournalEntriesCannotbeCreatedException(existingEntry.getCreatedDate(), requestedDate);
         }
     }
@@ -127,15 +125,14 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
         return bool;
     }
 
-    private Date parseDate(JsonCommand command) {
-        LocalDate localDate = this.fromApiJsonHelper.extractLocalDateNamed("date", command.parsedJson());
-        return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    private LocalDate parseDate(JsonCommand command) {
+        return this.fromApiJsonHelper.extractLocalDateNamed("date", command.parsedJson());
     }
 
     @Override
     @CronTarget(jobName = JobName.GENERATE_LOANLOSS_PROVISIONING)
     public void generateLoanLossProvisioningAmount() {
-        Date currentDate = Date.from(DateUtils.getLocalDateOfTenant().atStartOfDay(ZoneId.systemDefault()).toInstant());
+        LocalDate currentDate = DateUtils.getBusinessLocalDate();
         boolean addJournalEntries = true;
         try {
             Collection<ProvisioningCriteriaData> criteriaCollection = this.provisioningCriteriaReadPlatformService
@@ -156,7 +153,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
     @Override
     public CommandProcessingResult createProvisioningEntries(JsonCommand command) {
         this.fromApiJsonDeserializer.validateForCreate(command.json());
-        Date createdDate = parseDate(command);
+        LocalDate createdDate = parseDate(command);
         boolean addJournalEntries = isJournalEntriesRequired(command);
         try {
             Collection<ProvisioningCriteriaData> criteriaCollection = this.provisioningCriteriaReadPlatformService
@@ -171,14 +168,14 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
         }
     }
 
-    private ProvisioningEntry createProvsioningEntry(Date date, boolean addJournalEntries) {
+    private ProvisioningEntry createProvsioningEntry(LocalDate date, boolean addJournalEntries) {
         ProvisioningEntry existingEntry = this.provisioningEntryRepository.findByProvisioningEntryDate(date);
         if (existingEntry != null) {
             throw new ProvisioningEntryAlreadyCreatedException(existingEntry.getId(), existingEntry.getCreatedDate());
         }
         AppUser currentUser = this.platformSecurityContext.authenticatedUser();
         AppUser lastModifiedBy = null;
-        Date lastModifiedDate = null;
+        LocalDate lastModifiedDate = null;
         Set<LoanProductProvisioningEntry> nullEntries = null;
         ProvisioningEntry requestedEntry = new ProvisioningEntry(currentUser, date, lastModifiedBy, lastModifiedDate, nullEntries);
         Collection<LoanProductProvisioningEntry> entries = generateLoanProvisioningEntry(requestedEntry, date);
@@ -205,16 +202,16 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(requestedEntry.getId()).build();
     }
 
-    private Collection<LoanProductProvisioningEntry> generateLoanProvisioningEntry(ProvisioningEntry parent, Date date) {
+    private Collection<LoanProductProvisioningEntry> generateLoanProvisioningEntry(ProvisioningEntry parent, LocalDate date) {
         Collection<LoanProductProvisioningEntryData> entries = this.provisioningEntriesReadPlatformService
                 .retrieveLoanProductsProvisioningData(date);
         Map<Integer, LoanProductProvisioningEntry> provisioningEntries = new HashMap<>();
         for (LoanProductProvisioningEntryData data : entries) {
-            LoanProduct loanProduct = this.loanProductRepository.findById(data.getProductId()).get();
+            LoanProduct loanProduct = this.loanProductRepository.findById(data.getProductId()).orElseThrow();
             Office office = this.officeRepositoryWrapper.findOneWithNotFoundDetection(data.getOfficeId());
-            ProvisioningCategory provisioningCategory = provisioningCategoryRepository.findById(data.getCategoryId()).get();
-            GLAccount liabilityAccount = glAccountRepository.findById(data.getLiablityAccount()).get();
-            GLAccount expenseAccount = glAccountRepository.findById(data.getExpenseAccount()).get();
+            ProvisioningCategory provisioningCategory = provisioningCategoryRepository.findById(data.getCategoryId()).orElse(null);
+            GLAccount liabilityAccount = glAccountRepository.findById(data.getLiablityAccount()).orElseThrow();
+            GLAccount expenseAccount = glAccountRepository.findById(data.getExpenseAccount()).orElseThrow();
             MonetaryCurrency currency = loanProduct.getPrincipalAmount().getCurrency();
             Money money = Money.of(currency, data.getBalance());
             Money amountToReserve = money.percentageOf(data.getPercentage(), MoneyHelper.getRoundingMode());

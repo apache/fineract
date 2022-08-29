@@ -21,12 +21,11 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -53,12 +52,9 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanPreClosureInterestCa
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public final class LoanApplicationTerms {
-
-    private static final Logger LOG = LoggerFactory.getLogger(LoanApplicationTerms.class);
 
     private final ApplicationCurrency currency;
 
@@ -675,7 +671,7 @@ public final class LoanApplicationTerms {
             case INVALID:
             break;
             case WHOLE_TERM:
-                LOG.error("TODO Implement getPeriodEndDate for WHOLE_TERM");
+                log.error("TODO Implement getPeriodEndDate for WHOLE_TERM");
             break;
         }
         return dueRepaymentPeriodDate;
@@ -843,10 +839,10 @@ public final class LoanApplicationTerms {
                 int diffDays = 0;
                 if (this.loanCalendar == null) {
                     startDateAfterConsideringMonths = startDate.plusMonths(numberOfMonths);
-                    startDateAfterConsideringMonths = CalendarUtils.adjustDate(startDateAfterConsideringMonths, getSeedDate(),
+                    startDateAfterConsideringMonths = (LocalDate) CalendarUtils.adjustDate(startDateAfterConsideringMonths, getSeedDate(),
                             this.repaymentPeriodFrequencyType);
                     endDateAfterConsideringMonths = startDate.plusMonths(numberOfMonths + 1);
-                    endDateAfterConsideringMonths = CalendarUtils.adjustDate(endDateAfterConsideringMonths, getSeedDate(),
+                    endDateAfterConsideringMonths = (LocalDate) CalendarUtils.adjustDate(endDateAfterConsideringMonths, getSeedDate(),
                             this.repaymentPeriodFrequencyType);
                 } else {
                     LocalDate expectedStartDate = startDate;
@@ -1042,8 +1038,7 @@ public final class LoanApplicationTerms {
             break;
             case DAILY:
                 // For daily work out number of days in the period
-                BigDecimal numberOfDaysInPeriod = BigDecimal
-                        .valueOf(Math.toIntExact(ChronoUnit.DAYS.between(periodStartDate, periodEndDate)));
+                BigDecimal numberOfDaysInPeriod = BigDecimal.valueOf(ChronoUnit.DAYS.between(periodStartDate, periodEndDate));
 
                 final BigDecimal oneDayOfYearInterestRate = this.annualNominalInterestRate.divide(loanTermPeriodsInYearBigDecimal, mc)
                         .divide(divisor, mc);
@@ -1080,7 +1075,7 @@ public final class LoanApplicationTerms {
                         periodicInterestRate = oneDayOfYearInterestRate.multiply(numberOfDaysInPeriod, mc);
                     break;
                     case WHOLE_TERM:
-                        LOG.error("TODO Implement periodicInterestRate for WHOLE_TERM");
+                        log.error("TODO Implement periodicInterestRate for WHOLE_TERM");
                     break;
                 }
             break;
@@ -1391,20 +1386,12 @@ public final class LoanApplicationTerms {
         return this.repaymentPeriodFrequencyType;
     }
 
-    public Date getRepaymentStartFromDate() {
-        Date dateValue = null;
-        if (this.repaymentsStartingFromDate != null) {
-            dateValue = Date.from(this.repaymentsStartingFromDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        }
-        return dateValue;
+    public LocalDate getRepaymentStartFromDate() {
+        return this.repaymentsStartingFromDate;
     }
 
-    public Date getInterestChargedFromDate() {
-        Date dateValue = null;
-        if (this.interestChargedFromDate != null) {
-            dateValue = Date.from(this.interestChargedFromDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        }
-        return dateValue;
+    public LocalDate getInterestChargedFromDate() {
+        return this.interestChargedFromDate;
     }
 
     public void setPrincipal(Money principal) {

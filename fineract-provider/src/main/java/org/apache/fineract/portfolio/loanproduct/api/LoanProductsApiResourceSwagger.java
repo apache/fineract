@@ -21,8 +21,11 @@ package org.apache.fineract.portfolio.loanproduct.api;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 /**
  * Created by Chirag Gupta on 12/27/17.
@@ -35,6 +38,56 @@ final class LoanProductsApiResourceSwagger {
     public static final class PostLoanProductsRequest {
 
         private PostLoanProductsRequest() {}
+
+        static final class AllowAttributeOverrides {
+
+            private AllowAttributeOverrides() {}
+
+            @Schema(example = "true")
+            public boolean amortizationType;
+            @Schema(example = "true")
+            public boolean interestType;
+            @Schema(example = "true")
+            public boolean transactionProcessingStrategyId;
+            @Schema(example = "true")
+            public boolean interestCalculationPeriodType;
+            @Schema(example = "true")
+            public boolean inArrearsTolerance;
+            @Schema(example = "true")
+            public boolean repaymentEvery;
+            @Schema(example = "true")
+            public boolean graceOnPrincipalAndInterestPayment;
+            @Schema(example = "true")
+            public boolean graceOnArrearsAgeing;
+        }
+
+        static final class ChargeId {
+
+            private ChargeId() {}
+
+            @Schema(example = "1")
+            public Integer id;
+        }
+
+        static final class RateData {
+
+            private RateData() {}
+
+            @Schema(example = "1")
+            public Long id;
+
+            @Schema(example = "some name")
+            public String name;
+
+            @Schema(example = "20")
+            public BigDecimal percentage;
+
+            @Schema(description = "Apply specific product using its id, code, and value.")
+            public EnumOptionData productApply;
+
+            @Schema(example = "false")
+            public boolean active;
+        }
 
         @Schema(example = "LP Accrual Accounting")
         public String name;
@@ -98,6 +151,96 @@ final class LoanProductsApiResourceSwagger {
         public Integer overpaymentLiabilityAccountId;
         @Schema(example = "41")
         public Integer writeOffAccountId;
+        @Schema(example = "false")
+        public Boolean includeInBorrowerCycle;
+        @Schema(example = "false")
+        public Boolean useBorrowerCycle;
+        @Schema(example = "[]")
+        public List<Integer> principalVariationsForBorrowerCycle;
+        @Schema(example = "[]")
+        public List<Integer> interestRateVariationsForBorrowerCycle;
+        @Schema(example = "[]")
+        public List<Integer> numberOfRepaymentVariationsForBorrowerCycle;
+        @Schema(example = "true")
+        public Boolean multiDisburseLoan;
+        @Schema(example = "0")
+        public Integer interestRecalculationCompoundingMethod;
+        @Schema(example = "2")
+        public Integer rescheduleStrategyMethod;
+        @Schema(example = "1")
+        public Integer preClosureInterestCalculationStrategy;
+        @Schema(example = "false")
+        public Boolean isLinkedToFloatingInterestRates;
+        @Schema(example = "false")
+        public Boolean allowVariableInstallments;
+        @Schema(example = "non-interest bearing product")
+        public String description;
+        @Schema(example = "1")
+        public Integer installmentAmountInMultiplesOf;
+        @Schema(example = "5000.000000")
+        public Double minPrincipal;
+        @Schema(example = "15000.000000")
+        public Double maxPrincipal;
+        @Schema(example = "30")
+        public Integer minimumDaysBetweenDisbursalAndFirstRepayment;
+        @Schema(example = "true")
+        public Boolean allowPartialPeriodInterestCalcualtion;
+        @Schema(example = "true")
+        public Boolean disallowExpectedDisbursements;
+        @Schema(example = "true")
+        public Boolean allowApprovedDisbursedAmountsOverApplied;
+        @Schema(example = "percentage")
+        public String overAppliedCalculationType;
+        @Schema(example = "50")
+        public Integer overAppliedNumber;
+        @Schema(example = "true")
+        public Boolean canDefineInstallmentAmount;
+        @Schema(example = "50")
+        public Integer principalThresholdForLastInstallment;
+        @Schema(example = "50")
+        public Integer recalculationRestFrequencyType;
+        @Schema(example = "3")
+        public Integer maxTrancheCount;
+        @Schema(example = "36000.000000")
+        public Double outstandingLoanBalance;
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
+        public Set<GetLoanProductsProductIdResponse.GetLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings;
+        public Set<GetLoanProductsProductIdResponse.GetLoanFeeToIncomeAccountMappings> feeToIncomeAccountMappings;
+        public Collection<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings;
+        public AllowAttributeOverrides allowAttributeOverrides;
+        public List<ChargeId> charges;
+        public List<RateData> rates;
+        @Schema(example = "3")
+        public Long fundId;
+        @Schema(example = "10 July 2022")
+        public String startDate;
+        @Schema(example = "10 July 2022")
+        public String closeDate;
+        @Schema(example = "1")
+        public Integer minNumberOfRepayments;
+        @Schema(example = "1")
+        public Integer maxNumberOfRepayments;
+        @Schema(example = "0")
+        public Double minInterestRatePerPeriod;
+        @Schema(example = "0")
+        public Double maxInterestRatePerPeriod;
+        @Schema(example = "false")
+        public Boolean isEqualAmortization;
+        @Schema(example = "3")
+        public Integer graceOnArrearsAgeing;
+        @Schema(example = "179")
+        public Integer overdueDaysForNPA;
+        @Schema(example = "false")
+        public Boolean accountMovesOutOfNPAOnlyOnArrearsCompletion;
+        @Schema(example = "false")
+        public Boolean canUseForTopup;
+        @Schema(example = "false")
+        public Boolean holdGuaranteeFunds;
+        @Schema(example = "5")
+        public Long transfersInSuspenseAccountId;
+        @Schema(example = "15")
+        public Long incomeFromRecoveryAccountId;
     }
 
     @Schema(description = "PostLoanProductsResponse")
@@ -313,11 +456,11 @@ final class LoanProductsApiResourceSwagger {
         public String status;
         public GetLoanProductsCurrency currency;
         @Schema(example = "10000.000000")
-        public Float principal;
+        public Double principal;
         @Schema(example = "5000.000000")
-        public Float minPrincipal;
+        public Double minPrincipal;
         @Schema(example = "15000.000000")
-        public Float maxPrincipal;
+        public Double maxPrincipal;
         @Schema(example = "10")
         public Integer numberOfRepayments;
         @Schema(example = "5")
@@ -328,10 +471,10 @@ final class LoanProductsApiResourceSwagger {
         public Integer repaymentEvery;
         public GetLoanProductsRepaymentFrequencyType repaymentFrequencyType;
         @Schema(example = "15.000000")
-        public Float interestRatePerPeriod;
+        public Double interestRatePerPeriod;
         public GetLoanProductsResponse.GetLoanProductsInterestRateFrequencyType interestRateFrequencyType;
         @Schema(example = "15.000000")
-        public Float annualInterestRate;
+        public Double annualInterestRate;
         public GetLoanProductsAmortizationType amortizationType;
         @Schema(example = "5.5")
         public BigDecimal fixedPrincipalPercentagePerInstallment;
@@ -862,11 +1005,11 @@ final class LoanProductsApiResourceSwagger {
             public GetLoanProductsParamType paramType;
             public GetLoanProductsValueConditionType valueConditionType;
             @Schema(example = "2000.000000")
-            public Float minValue;
+            public Double minValue;
             @Schema(example = "20000.000000")
-            public Float maxValue;
+            public Double maxValue;
             @Schema(example = "15000.000000")
-            public Float defaultValue;
+            public Double defaultValue;
         }
 
         static final class GetLoanAccountingMappings {
@@ -1033,21 +1176,21 @@ final class LoanProductsApiResourceSwagger {
         public String status;
         public GetLoanProductsResponse.GetLoanProductsCurrency currency;
         @Schema(example = "10000.000000")
-        public Float principal;
+        public Double principal;
         @Schema(example = "2000.000000")
-        public Float minPrincipal;
+        public Double minPrincipal;
         @Schema(example = "15000.000000")
-        public Float maxPrincipal;
+        public Double maxPrincipal;
         @Schema(example = "7")
         public Integer numberOfRepayments;
         @Schema(example = "7")
         public Integer repaymentEvery;
         public GetLoanProductsResponse.GetLoanProductsRepaymentFrequencyType repaymentFrequencyType;
         @Schema(example = "5.000000")
-        public Float interestRatePerPeriod;
+        public Double interestRatePerPeriod;
         public GetLoanProductsProductIdResponse.GetLoanProductsInterestRateFrequencyType interestRateFrequencyType;
         @Schema(example = "60.000000")
-        public Float annualInterestRate;
+        public Double annualInterestRate;
         public GetLoanProductsResponse.GetLoanProductsAmortizationType amortizationType;
         @Schema(example = "5.5")
         public BigDecimal fixedPrincipalPercentagePerInstallment;
@@ -1073,7 +1216,7 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "3")
         public Integer maxTrancheCount;
         @Schema(example = "36000.000000")
-        public Float outstandingLoanBalance;
+        public Double outstandingLoanBalance;
         @Schema(example = "2")
         public Integer overdueDaysForNPA;
         @Schema(example = "50")

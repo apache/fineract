@@ -18,20 +18,16 @@
  */
 package org.apache.fineract.notification.service;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.notification.domain.Notification;
 import org.apache.fineract.notification.domain.NotificationRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class NotificationGeneratorWritePlatformServiceImpl implements NotificationGeneratorWritePlatformService {
 
     private final NotificationRepository notificationRepository;
-
-    @Autowired
-    public NotificationGeneratorWritePlatformServiceImpl(NotificationRepository notificationRepository) {
-        this.notificationRepository = notificationRepository;
-    }
 
     @Override
     public Long create(Notification notification) {

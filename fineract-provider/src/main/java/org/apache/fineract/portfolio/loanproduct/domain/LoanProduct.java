@@ -22,11 +22,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -45,14 +43,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.charge.domain.Charge;
@@ -126,12 +121,10 @@ public class LoanProduct extends AbstractPersistableCustom {
     private LoanProductTrancheDetails loanProducTrancheDetails;
 
     @Column(name = "start_date", nullable = true)
-    @Temporal(TemporalType.DATE)
-    private Date startDate;
+    private LocalDate startDate;
 
     @Column(name = "close_date", nullable = true)
-    @Temporal(TemporalType.DATE)
-    private Date closeDate;
+    private LocalDate closeDate;
 
     @Column(name = "external_id", length = 100, nullable = true, unique = true)
     private String externalId;
@@ -676,13 +669,8 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.includeInBorrowerCycle = includeInBorrowerCycle;
         this.useBorrowerCycle = useBorrowerCycle;
 
-        if (startDate != null) {
-            this.startDate = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        }
-
-        if (closeDate != null) {
-            this.closeDate = Date.from(closeDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        }
+        this.startDate = startDate;
+        this.closeDate = closeDate;
 
         this.externalId = externalId;
         this.borrowerCycleVariations = loanProductBorrowerCycleVariations;
@@ -970,12 +958,7 @@ public class LoanProduct extends AbstractPersistableCustom {
             actualChanges.put(dateFormatParamName, dateFormatAsInput);
             actualChanges.put(localeParamName, localeAsInput);
 
-            final LocalDate newValue = command.localDateValueOfParameterNamed(startDateParamName);
-            if (newValue != null) {
-                this.startDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
-            } else {
-                this.startDate = null;
-            }
+            this.startDate = command.localDateValueOfParameterNamed(startDateParamName);
         }
 
         final String closeDateParamName = "closeDate";
@@ -985,12 +968,7 @@ public class LoanProduct extends AbstractPersistableCustom {
             actualChanges.put(dateFormatParamName, dateFormatAsInput);
             actualChanges.put(localeParamName, localeAsInput);
 
-            final LocalDate newValue = command.localDateValueOfParameterNamed(closeDateParamName);
-            if (newValue != null) {
-                this.closeDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
-            } else {
-                this.closeDate = null;
-            }
+            this.closeDate = command.localDateValueOfParameterNamed(closeDateParamName);
         }
 
         final String externalIdTypeParamName = "externalId";
@@ -1312,19 +1290,11 @@ public class LoanProduct extends AbstractPersistableCustom {
     }
 
     public LocalDate getStartDate() {
-        LocalDate startLocalDate = null;
-        if (this.startDate != null) {
-            startLocalDate = LocalDate.ofInstant(this.startDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-        return startLocalDate;
+        return this.startDate;
     }
 
     public LocalDate getCloseDate() {
-        LocalDate closeLocalDate = null;
-        if (this.closeDate != null) {
-            closeLocalDate = LocalDate.ofInstant(this.closeDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-        return closeLocalDate;
+        return this.closeDate;
     }
 
     public String productName() {

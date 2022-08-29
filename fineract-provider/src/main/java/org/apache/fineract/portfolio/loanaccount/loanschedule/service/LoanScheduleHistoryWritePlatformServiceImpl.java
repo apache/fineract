@@ -19,9 +19,9 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.service;
 
 import java.math.BigDecimal;
-import java.time.ZoneId;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -29,7 +29,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleIns
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanRepaymentScheduleHistory;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanRepaymentScheduleHistoryRepository;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
-import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,15 +57,15 @@ public class LoanScheduleHistoryWritePlatformServiceImpl implements LoanSchedule
 
         for (LoanRepaymentScheduleInstallment repaymentScheduleInstallment : repaymentScheduleInstallments) {
             final Integer installmentNumber = repaymentScheduleInstallment.getInstallmentNumber();
-            Date fromDate = null;
-            Date dueDate = null;
+            LocalDate fromDate = null;
+            LocalDate dueDate = null;
 
             if (repaymentScheduleInstallment.getFromDate() != null) {
-                fromDate = Date.from(repaymentScheduleInstallment.getFromDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+                fromDate = repaymentScheduleInstallment.getFromDate();
             }
 
             if (repaymentScheduleInstallment.getDueDate() != null) {
-                dueDate = Date.from(repaymentScheduleInstallment.getDueDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+                dueDate = repaymentScheduleInstallment.getDueDate();
             }
 
             final BigDecimal principal = repaymentScheduleInstallment.getPrincipal(currency).getAmount();
@@ -74,18 +73,18 @@ public class LoanScheduleHistoryWritePlatformServiceImpl implements LoanSchedule
             final BigDecimal feeChargesCharged = repaymentScheduleInstallment.getFeeChargesCharged(currency).getAmount();
             final BigDecimal penaltyCharges = repaymentScheduleInstallment.getPenaltyChargesCharged(currency).getAmount();
 
-            Date createdOnDate = null;
+            LocalDateTime createdOnDate = null;
             if (repaymentScheduleInstallment.getCreatedDate().isPresent()) {
-                createdOnDate = Date.from(repaymentScheduleInstallment.getCreatedDate().get());
+                createdOnDate = repaymentScheduleInstallment.getCreatedDate().get(); // NOSONAR
             }
 
-            final AppUser createdByUser = repaymentScheduleInstallment.getCreatedBy().orElse(null);
-            final AppUser lastModifiedByUser = repaymentScheduleInstallment.getLastModifiedBy().orElse(null);
+            final Long createdByUser = repaymentScheduleInstallment.getCreatedBy().orElse(null);
+            final Long lastModifiedByUser = repaymentScheduleInstallment.getLastModifiedBy().orElse(null);
 
-            Date lastModifiedOnDate = null;
+            LocalDateTime lastModifiedOnDate = null;
 
             if (repaymentScheduleInstallment.getLastModifiedDate().isPresent()) {
-                lastModifiedOnDate = Date.from(repaymentScheduleInstallment.getLastModifiedDate().get());
+                lastModifiedOnDate = repaymentScheduleInstallment.getLastModifiedDate().get(); // NOSONAR
             }
 
             LoanRepaymentScheduleHistory loanRepaymentScheduleHistory = LoanRepaymentScheduleHistory.instance(loan, loanRescheduleRequest,

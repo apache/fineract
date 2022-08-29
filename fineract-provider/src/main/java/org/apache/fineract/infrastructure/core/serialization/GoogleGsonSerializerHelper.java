@@ -22,8 +22,10 @@ import com.google.gson.ExclusionStrategy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.MonthDay;
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -32,7 +34,9 @@ import org.apache.fineract.infrastructure.core.api.DateAdapter;
 import org.apache.fineract.infrastructure.core.api.JodaDateTimeAdapter;
 import org.apache.fineract.infrastructure.core.api.JodaMonthDayAdapter;
 import org.apache.fineract.infrastructure.core.api.LocalDateAdapter;
+import org.apache.fineract.infrastructure.core.api.LocalDateTimeAdapter;
 import org.apache.fineract.infrastructure.core.api.LocalTimeAdapter;
+import org.apache.fineract.infrastructure.core.api.OffsetDateTimeAdapter;
 import org.apache.fineract.infrastructure.core.api.ParameterListExclusionStrategy;
 import org.apache.fineract.infrastructure.core.api.ParameterListInclusionStrategy;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
@@ -112,5 +116,7 @@ public final class GoogleGsonSerializerHelper {
         builder.registerTypeAdapter(LocalTime.class, new LocalTimeAdapter());
         builder.registerTypeAdapter(ZonedDateTime.class, new JodaDateTimeAdapter());
         builder.registerTypeAdapter(MonthDay.class, new JodaMonthDayAdapter());
+        builder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter());
+        builder.registerTypeAdapter(OffsetDateTime.class, new OffsetDateTimeAdapter());
     }
 }

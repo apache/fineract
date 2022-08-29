@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.self.loanaccount.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -43,6 +44,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.exception.ClientNotFoundException;
+import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource;
 import org.apache.fineract.portfolio.loanaccount.api.LoanTransactionsApiResource;
 import org.apache.fineract.portfolio.loanaccount.api.LoansApiResource;
@@ -61,7 +63,6 @@ import org.springframework.stereotype.Component;
 @Path("/self/loans")
 @Component
 @Scope("singleton")
-
 @Tag(name = "Self Loans", description = "")
 public class SelfLoansApiResource {
 
@@ -106,7 +107,10 @@ public class SelfLoansApiResource {
         validateAppuserLoanMapping(loanId);
 
         final boolean staffInSelectedOfficeOnly = false;
-        return this.loansApiResource.retrieveLoan(loanId, staffInSelectedOfficeOnly, uriInfo);
+        final String associations = LoanApiConstants.LOAN_ASSOCIATIONS_ALL;
+        final String exclude = null;
+        final String fields = null;
+        return this.loansApiResource.retrieveLoan(loanId, staffInSelectedOfficeOnly, associations, exclude, fields, uriInfo);
     }
 
     @GET
@@ -119,13 +123,14 @@ public class SelfLoansApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SelfLoansApiResourceSwagger.GetSelfLoansLoanIdTransactionsTransactionIdResponse.class))) })
     public String retrieveTransaction(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @PathParam("transactionId") @Parameter(description = "transactionId") final Long transactionId,
+            @QueryParam("fields") @Parameter(in = ParameterIn.QUERY, name = "fields", description = "Optional Loan Transaction attribute list to be in the response", required = false, example = "id,date,amount") final String fields,
             @Context final UriInfo uriInfo) {
 
         this.dataValidator.validateRetrieveTransaction(uriInfo);
 
         validateAppuserLoanMapping(loanId);
 
-        return this.loanTransactionsApiResource.retrieveTransaction(loanId, transactionId, uriInfo);
+        return this.loanTransactionsApiResource.retrieveTransaction(loanId, transactionId, fields, uriInfo);
     }
 
     @GET

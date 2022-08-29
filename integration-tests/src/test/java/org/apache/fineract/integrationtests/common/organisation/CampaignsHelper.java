@@ -29,7 +29,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.report.ReportData;
 import org.slf4j.Logger;
@@ -110,7 +109,7 @@ public class CampaignsHelper {
         map.put("triggerType", triggerType);
         if (2 == triggerType) {
             map.put("recurrenceStartDate",
-                    LocalDateTime.now(DateUtils.getDateTimeZoneOfTenant()).format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
+                    LocalDateTime.now(Utils.getZoneIdOfTenant()).format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
             map.put("frequency", 1);
             map.put("interval", "1");
         }
@@ -138,7 +137,7 @@ public class CampaignsHelper {
         map.put("triggerType", triggerType);
         if (2 == triggerType) {
             map.put("recurrenceStartDate",
-                    LocalDateTime.now(DateUtils.getDateTimeZoneOfTenant()).format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
+                    LocalDateTime.now(Utils.getZoneIdOfTenant()).format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
         }
         map.put("campaignName", Utils.randomNameGenerator("Campaign_Name_", 5));
         map.put("campaignType", 1);

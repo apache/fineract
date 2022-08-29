@@ -77,13 +77,13 @@ import org.apache.fineract.client.services.JournalEntriesApi;
 import org.apache.fineract.client.services.ListReportMailingJobHistoryApi;
 import org.apache.fineract.client.services.LoanChargesApi;
 import org.apache.fineract.client.services.LoanCollateralApi;
+import org.apache.fineract.client.services.LoanDisbursementDetailsApi;
 import org.apache.fineract.client.services.LoanProductsApi;
 import org.apache.fineract.client.services.LoanReschedulingApi;
 import org.apache.fineract.client.services.LoanTransactionsApi;
 import org.apache.fineract.client.services.LoansApi;
 import org.apache.fineract.client.services.MakerCheckerOr4EyeFunctionalityApi;
 import org.apache.fineract.client.services.MappingFinancialActivitiesToAccountsApi;
-import org.apache.fineract.client.services.MifosxBatchJobsApi;
 import org.apache.fineract.client.services.MixMappingApi;
 import org.apache.fineract.client.services.MixReportApi;
 import org.apache.fineract.client.services.MixTaxonomyApi;
@@ -110,6 +110,7 @@ import org.apache.fineract.client.services.SavingsAccountTransactionsApi;
 import org.apache.fineract.client.services.SavingsChargesApi;
 import org.apache.fineract.client.services.SavingsProductApi;
 import org.apache.fineract.client.services.SchedulerApi;
+import org.apache.fineract.client.services.SchedulerJobApi;
 import org.apache.fineract.client.services.ScoreCardApi;
 import org.apache.fineract.client.services.SearchApiApi;
 import org.apache.fineract.client.services.SelfAccountTransferApi;
@@ -140,6 +141,8 @@ import org.apache.fineract.client.services.UserGeneratedDocumentsApi;
 import org.apache.fineract.client.services.UsersApi;
 import org.apache.fineract.client.services.WorkingDaysApi;
 import org.apache.fineract.client.util.JSON.GsonCustomConverterFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import retrofit2.Retrofit;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
@@ -208,10 +211,10 @@ public final class FineractClient {
     public final LoanProductsApi loanProducts;
     public final LoanReschedulingApi loanSchedules;
     public final LoansApi loans;
+    public final LoanDisbursementDetailsApi loanDisbursementDetails;
     public final LoanTransactionsApi loanTransactions;
     public final MakerCheckerOr4EyeFunctionalityApi makerCheckers;
     public final MappingFinancialActivitiesToAccountsApi financialActivyAccountMappings;
-    public final MifosxBatchJobsApi jobs;
     public final MixMappingApi mixMappings;
     public final MixReportApi mixReports;
     public final MixTaxonomyApi mixTaxonomies;
@@ -238,6 +241,7 @@ public final class FineractClient {
     public final SavingsProductApi savingsProducts;
     public final SavingsAccountTransactionsApi savingsTransactions;
     public final SchedulerApi jobsScheduler;
+    public final SchedulerJobApi jobs;
     public final ScoreCardApi surveyScorecards;
     public final SearchApiApi search;
     public final SelfAccountTransferApi selfAccountTransfers;
@@ -318,10 +322,11 @@ public final class FineractClient {
         loanProducts = retrofit.create(LoanProductsApi.class);
         loanSchedules = retrofit.create(LoanReschedulingApi.class);
         loans = retrofit.create(LoansApi.class);
+        loanDisbursementDetails = retrofit.create(LoanDisbursementDetailsApi.class);
         loanTransactions = retrofit.create(LoanTransactionsApi.class);
         makerCheckers = retrofit.create(MakerCheckerOr4EyeFunctionalityApi.class);
         financialActivyAccountMappings = retrofit.create(MappingFinancialActivitiesToAccountsApi.class);
-        jobs = retrofit.create(MifosxBatchJobsApi.class);
+        jobs = retrofit.create(SchedulerJobApi.class);
         mixMappings = retrofit.create(MixMappingApi.class);
         mixReports = retrofit.create(MixReportApi.class);
         mixTaxonomies = retrofit.create(MixTaxonomyApi.class);
@@ -402,6 +407,8 @@ public final class FineractClient {
     }
 
     public static final class Builder {
+
+        private static final Logger log = LoggerFactory.getLogger(Builder.class);
 
         private final JSON json = new JSON();
         private final OkHttpClient.Builder okBuilder = new OkHttpClient.Builder();
@@ -485,14 +492,22 @@ public final class FineractClient {
             retrofitBuilder.baseUrl(has("baseURL", baseURL));
 
             // Tenant
-            ApiKeyAuth tenantAuth = new ApiKeyAuth("header", "fineract-platform-tenantid");
-            tenantAuth.setApiKey(has("tenant", tenant));
-            okBuilder.addInterceptor(tenantAuth);
+            if (tenant != null) {
+                ApiKeyAuth tenantAuth = new ApiKeyAuth("header", "fineract-platform-tenantid");
+                tenantAuth.setApiKey(has("tenant", tenant));
+                okBuilder.addInterceptor(tenantAuth);
+            } else {
+                log.warn("Tenant hasn't been configured for the client");
+            }
 
             // BASIC Auth
-            HttpBasicAuth basicAuth = new HttpBasicAuth();
-            basicAuth.setCredentials(has("username", username), has("password", password));
-            okBuilder.addInterceptor(basicAuth);
+            if (username != null && password != null) {
+                HttpBasicAuth basicAuth = new HttpBasicAuth();
+                basicAuth.setCredentials(has("username", username), has("password", password));
+                okBuilder.addInterceptor(basicAuth);
+            } else {
+                log.warn("Username and password haven't been configured for the client");
+            }
 
             OkHttpClient okHttpClient = okBuilder.build();
             retrofitBuilder.client(okHttpClient);

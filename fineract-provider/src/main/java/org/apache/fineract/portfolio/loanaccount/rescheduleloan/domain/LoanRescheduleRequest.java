@@ -19,8 +19,6 @@
 package org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,11 +30,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRescheduleRequestToTermVariationMapping;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
@@ -57,9 +52,8 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom {
     @Column(name = "reschedule_from_installment")
     private Integer rescheduleFromInstallment;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "reschedule_from_date")
-    private Date rescheduleFromDate;
+    private LocalDate rescheduleFromDate;
 
     @Column(name = "recalculate_interest")
     private Boolean recalculateInterest;
@@ -71,25 +65,22 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom {
     @Column(name = "reschedule_reason_comment")
     private String rescheduleReasonComment;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "submitted_on_date")
-    private Date submittedOnDate;
+    private LocalDate submittedOnDate;
 
     @ManyToOne
     @JoinColumn(name = "submitted_by_user_id")
     private AppUser submittedByUser;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "approved_on_date")
-    private Date approvedOnDate;
+    private LocalDate approvedOnDate;
 
     @ManyToOne
     @JoinColumn(name = "approved_by_user_id")
     private AppUser approvedByUser;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "rejected_on_date")
-    private Date rejectedOnDate;
+    private LocalDate rejectedOnDate;
 
     @ManyToOne
     @JoinColumn(name = "rejected_by_user_id")
@@ -107,9 +98,9 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom {
      * LoanRescheduleRequest constructor
      **/
     private LoanRescheduleRequest(final Loan loan, final Integer statusEnum, final Integer rescheduleFromInstallment,
-            final Date rescheduleFromDate, final Boolean recalculateInterest, final CodeValue rescheduleReasonCodeValue,
-            final String rescheduleReasonComment, final Date submittedOnDate, final AppUser submittedByUser, final Date approvedOnDate,
-            final AppUser approvedByUser, final Date rejectedOnDate, AppUser rejectedByUser) {
+            final LocalDate rescheduleFromDate, final Boolean recalculateInterest, final CodeValue rescheduleReasonCodeValue,
+            final String rescheduleReasonComment, final LocalDate submittedOnDate, final AppUser submittedByUser,
+            final LocalDate approvedOnDate, final AppUser approvedByUser, final LocalDate rejectedOnDate, AppUser rejectedByUser) {
         this.loan = loan;
         this.statusEnum = statusEnum;
         this.rescheduleFromInstallment = rescheduleFromInstallment;
@@ -129,9 +120,9 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom {
      * @return a new instance of the LoanRescheduleRequest class
      **/
     public static LoanRescheduleRequest instance(final Loan loan, final Integer statusEnum, final Integer rescheduleFromInstallment,
-            final Date rescheduleFromDate, final Boolean recalculateInterest, final CodeValue rescheduleReasonCodeValue,
-            final String rescheduleReasonComment, final Date submittedOnDate, final AppUser submittedByUser, final Date approvedOnDate,
-            final AppUser approvedByUser, final Date rejectedOnDate, AppUser rejectedByUser) {
+            final LocalDate rescheduleFromDate, final Boolean recalculateInterest, final CodeValue rescheduleReasonCodeValue,
+            final String rescheduleReasonComment, final LocalDate submittedOnDate, final AppUser submittedByUser,
+            final LocalDate approvedOnDate, final AppUser approvedByUser, final LocalDate rejectedOnDate, AppUser rejectedByUser) {
 
         return new LoanRescheduleRequest(loan, statusEnum, rescheduleFromInstallment, rescheduleFromDate, recalculateInterest,
                 rescheduleReasonCodeValue, rescheduleReasonComment, submittedOnDate, submittedByUser, approvedOnDate, approvedByUser,
@@ -163,14 +154,7 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom {
      * @return due date of the rescheduling start point
      **/
     public LocalDate getRescheduleFromDate() {
-
-        LocalDate localDate = null;
-
-        if (this.rescheduleFromDate != null) {
-            localDate = LocalDate.ofInstant(this.rescheduleFromDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-
-        return localDate;
+        return this.rescheduleFromDate;
     }
 
     /**
@@ -191,13 +175,7 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom {
      * @return the date the request was submitted
      **/
     public LocalDate getSubmittedOnDate() {
-        LocalDate localDate = null;
-
-        if (this.submittedOnDate != null) {
-            localDate = LocalDate.ofInstant(this.submittedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-
-        return localDate;
+        return this.submittedOnDate;
     }
 
     /**
@@ -211,13 +189,7 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom {
      * @return the date the request was approved
      **/
     public LocalDate getApprovedOnDate() {
-        LocalDate localDate = null;
-
-        if (this.approvedOnDate != null) {
-            localDate = LocalDate.ofInstant(this.approvedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-
-        return localDate;
+        return this.approvedOnDate;
     }
 
     /**
@@ -231,13 +203,7 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom {
      * @return the date the request was rejected
      **/
     public LocalDate getRejectedOnDate() {
-        LocalDate localDate = null;
-
-        if (this.rejectedOnDate != null) {
-            localDate = LocalDate.ofInstant(this.rejectedOnDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-
-        return localDate;
+        return this.rejectedOnDate;
     }
 
     /**
@@ -274,7 +240,7 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom {
 
         if (approvedOnDate != null) {
             this.approvedByUser = approvedByUser;
-            this.approvedOnDate = Date.from(approvedOnDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.approvedOnDate = approvedOnDate;
             this.statusEnum = LoanStatus.APPROVED.getValue();
         }
     }
@@ -293,7 +259,7 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom {
 
         if (approvedOnDate != null) {
             this.rejectedByUser = approvedByUser;
-            this.rejectedOnDate = Date.from(approvedOnDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.rejectedOnDate = approvedOnDate;
             this.statusEnum = LoanStatus.REJECTED.getValue();
         }
     }

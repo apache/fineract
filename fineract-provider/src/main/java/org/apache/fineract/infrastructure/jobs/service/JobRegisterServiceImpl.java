@@ -97,6 +97,10 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
 
     @PostConstruct
     public void loadAllJobs() {
+        // If the instance is not Batch Enabled will not load the Jobs
+        if (!fineractProperties.getMode().isBatchManagerEnabled()) {
+            return;
+        }
         final List<FineractPlatformTenant> allTenants = this.tenantDetailsService.findAllTenants();
         for (final FineractPlatformTenant tenant : allTenants) {
             ThreadLocalContextUtil.setTenant(tenant);
@@ -184,7 +188,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
                 final List<ScheduledJobDetail> scheduledJobDetails = this.schedularWritePlatformService
                         .retrieveAllJobs(fineractProperties.getNodeId());
                 for (final ScheduledJobDetail jobDetail : scheduledJobDetails) {
-                    if (jobDetail.isTriggerMisfired()) {
+                    if (jobDetail.isTriggerMisfired() || jobDetail.getIsMismatchedJob()) {
                         if (jobDetail.isActiveSchedular()) {
                             executeJob(jobDetail, SchedulerServiceConstants.TRIGGER_TYPE_CRON);
                             jobDetail.setIsMismatchedJob(false);
@@ -236,6 +240,8 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
 
         if (nodeIdStored.equals(fineractProperties.getNodeId()) || nodeIdStored.equals("0")) {
             executeJob(scheduledJobDetail, null);
+            scheduledJobDetail.setIsMismatchedJob(false);
+            this.schedularWritePlatformService.saveOrUpdate(scheduledJobDetail);
         } else {
             scheduledJobDetail.setIsMismatchedJob(true);
             this.schedularWritePlatformService.saveOrUpdate(scheduledJobDetail);

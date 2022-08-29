@@ -49,10 +49,11 @@ public class ShareAccountSchedularServiceImpl implements ShareAccountSchedularSe
     @Transactional
     public void postDividend(final Long dividendDetailId, final Long savingsId) {
 
-        ShareAccountDividendDetails shareAccountDividendDetails = this.shareAccountDividendRepository.findById(dividendDetailId).get();
+        ShareAccountDividendDetails shareAccountDividendDetails = this.shareAccountDividendRepository.findById(dividendDetailId)
+                .orElseThrow();
         final SavingsAccount savingsAccount = this.savingsAccountAssembler.assembleFrom(savingsId, false);
         SavingsAccountTransaction savingsAccountTransaction = this.savingsAccountDomainService.handleDividendPayout(savingsAccount,
-                DateUtils.getLocalDateOfTenant(), shareAccountDividendDetails.getAmount(), false);
+                DateUtils.getBusinessLocalDate(), shareAccountDividendDetails.getAmount(), false);
         shareAccountDividendDetails.update(ShareAccountDividendStatusType.POSTED.getValue(), savingsAccountTransaction.getId());
         this.shareAccountDividendRepository.saveAndFlush(shareAccountDividendDetails);
     }

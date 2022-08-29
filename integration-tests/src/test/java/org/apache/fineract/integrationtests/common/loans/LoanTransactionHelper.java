@@ -63,6 +63,7 @@ public class LoanTransactionHelper {
     private static final String WRITE_OFF_LOAN_COMMAND = "writeoff";
     private static final String WAIVE_INTEREST_COMMAND = "waiveinterest";
     private static final String MAKE_REPAYMENT_COMMAND = "repayment";
+    private static final String UNDO = "undo";
     private static final String CREDIT_BALANCE_REFUND_COMMAND = "creditBalanceRefund";
     private static final String WITHDRAW_LOAN_APPLICATION_COMMAND = "withdrawnByApplicant";
     private static final String RECOVER_FROM_GUARANTORS_COMMAND = "recoverGuarantees";
@@ -81,7 +82,11 @@ public class LoanTransactionHelper {
     }
 
     public Integer getLoanId(final String loanApplicationJSON) {
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, APPLY_LOAN_URL, loanApplicationJSON, "loanId");
+        return this.getLoanId(loanApplicationJSON, this.requestSpec, this.responseSpec);
+    }
+
+    public Integer getLoanId(final String loanApplicationJSON, RequestSpecification requestSpec, ResponseSpecification responseSpec) {
+        return Utils.performServerPost(requestSpec, responseSpec, APPLY_LOAN_URL, loanApplicationJSON, "loanId");
     }
 
     public HashMap<String, Integer> getGlimId(final String loanApplicationJSON) {
@@ -178,6 +183,12 @@ public class LoanTransactionHelper {
     public ArrayList getLoanCharges(final Integer loanId) {
         final String GET_LOAN_CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/charges?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_CHARGES_URL, "");
+    }
+
+    public List getRepaymentTemplate(final Integer loanId) {
+        final String GET_REPAYMENTS_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/template?command=repayment&"
+                + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerGet(requestSpec, responseSpec, GET_REPAYMENTS_URL, "$");
     }
 
     public ArrayList<HashMap> getRepayments(final Integer loanId) {
@@ -339,15 +350,19 @@ public class LoanTransactionHelper {
                 getCreditBalanceRefundBodyAsJSON(date, amountToBePaid, externalId), jsonAttributeToGetback);
     }
 
-    public HashMap makeRepaymentTypePayment(final String repaymentTypeCommand, final String date, final Float amountToBePaid,
-            final Integer loanID) {
-        return (HashMap) performLoanTransaction(createLoanTransactionURL(repaymentTypeCommand, loanID),
-                getRepaymentBodyAsJSON(date, amountToBePaid), "");
+    public Object makeRepaymentTypePayment(final String repaymentTypeCommand, final String date, final Float amountToBePaid,
+            final Integer loanID, String jsonAttributeToGetback) {
+        return performLoanTransaction(createLoanTransactionURL(repaymentTypeCommand, loanID), getRepaymentBodyAsJSON(date, amountToBePaid),
+                jsonAttributeToGetback);
     }
 
     public HashMap makeRepayment(final String date, final Float amountToBePaid, final Integer loanID) {
         return (HashMap) performLoanTransaction(createLoanTransactionURL(MAKE_REPAYMENT_COMMAND, loanID),
                 getRepaymentBodyAsJSON(date, amountToBePaid), "");
+    }
+
+    public HashMap reverseRepayment(final Integer loanId, final Integer transactionId, String date) {
+        return (HashMap) performLoanTransaction(createLoanTransactionURL(UNDO, loanId, transactionId), getUndoJsonBody(date), "");
     }
 
     public HashMap makeRepaymentWithPDC(final String date, final Float amountToBePaid, final Integer loanID, final Integer paymentType) {
@@ -456,7 +471,9 @@ public class LoanTransactionHelper {
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("actualDisbursementDate", actualDisbursementDate);
-        map.put("netDisbursalAmount", netDisbursalAmount);
+        if (netDisbursalAmount != null) {
+            map.put("netDisbursalAmount", netDisbursalAmount);
+        }
         map.put("note", "DISBURSE NOTE");
         if (transactionAmount != null) {
             map.put("transactionAmount", transactionAmount);
@@ -539,6 +556,15 @@ public class LoanTransactionHelper {
         map.put("transactionDate", transactionDate);
         map.put("transactionAmount", transactionAmount.toString());
         map.put("note", "Repayment Made!!!");
+        return new Gson().toJson(map);
+    }
+
+    private String getUndoJsonBody(String date) {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("transactionDate", date);
+        map.put("transactionAmount", "0");
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("locale", "en");
         return new Gson().toJson(map);
     }
 
@@ -696,6 +722,11 @@ public class LoanTransactionHelper {
         return "/fineract-provider/api/v1/loans/" + loanID + "/transactions?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
     }
 
+    private String createLoanTransactionURL(final String command, final Integer loanID, final Integer transactionId) {
+        return "/fineract-provider/api/v1/loans/" + loanID + "/transactions/" + transactionId + "?command=" + command + "&"
+                + Utils.TENANT_IDENTIFIER;
+    }
+
     private String createGlimAccountURL(final String command, final Integer glimID) {
         return "/fineract-provider/api/v1/loans/glimAccount/" + glimID + "?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
     }
@@ -780,7 +811,7 @@ public class LoanTransactionHelper {
                 LocalDate accrualEntryDate = LocalDate.of(accrualEntryDateAsArray.get(0), accrualEntryDateAsArray.get(1),
                         accrualEntryDateAsArray.get(2));
 
-                if (transactionDate.equals(accrualEntryDate)) {
+                if (transactionDate.isEqual(accrualEntryDate)) {
                     isTransactionFound = true;
                     assertEquals(interestPortion, Float.valueOf(String.valueOf(transactions.get(i).get("interestPortion"))),
                             "Mismatch in transaction amounts");
@@ -937,5 +968,21 @@ public class LoanTransactionHelper {
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN);
         return Utils.performServerOutputTemplateLocationGet(requestSpec, responseSpec,
                 "/fineract-provider/api/v1/imports/getOutputTemplateLocation" + "?" + Utils.TENANT_IDENTIFIER, importDocumentId);
+    }
+
+    public static HashMap<String, Object> getLoanAuditFields(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer loanId, final String jsonReturn) {
+        final String GET_LOAN_URL = "/fineract-provider/api/v1/internal/loan/" + loanId + "/audit?" + Utils.TENANT_IDENTIFIER;
+        LOG.info("---------------------------------GET A LOAN ENTITY AUDIT FIELDS---------------------------------------------");
+        return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_URL, jsonReturn);
+    }
+
+    public static HashMap<String, Object> getLoanTransactionAuditFields(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer loanId, final Integer transactionId, final String jsonReturn) {
+        final String GET_LOAN_TRANSACTION_URL = "/fineract-provider/api/v1/internal/loan/" + loanId + "/transaction/" + transactionId
+                + "/audit?" + Utils.TENANT_IDENTIFIER;
+        LOG.info(
+                "---------------------------------GET A LOAN TRANSACTION ENTITY AUDIT FIELDS---------------------------------------------");
+        return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_TRANSACTION_URL, jsonReturn);
     }
 }

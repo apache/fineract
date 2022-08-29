@@ -22,7 +22,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
-import java.util.Date;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
@@ -60,8 +59,8 @@ public class CashierTransactionDataValidator {
         final Integer limit = null;
         final String orderBy = null;
         final String sortOrder = null;
-        final Date fromDate = null;
-        final Date toDate = null;
+        final LocalDate fromDate = null;
+        final LocalDate toDate = null;
         final SearchParameters searchParameters = SearchParameters.forPagination(offset, limit, orderBy, sortOrder);
         final CashierTransactionsWithSummaryData cashierTxnWithSummary = this.tellerManagementReadPlatformService
                 .retrieveCashierTransactionsWithSummary(cashierId, false, fromDate, toDate, currencyCode, searchParameters);
@@ -78,8 +77,8 @@ public class CashierTransactionDataValidator {
 
     public void validateCashierAllowedDateAndTime(final Cashier cashier, final Teller teller) {
         Long staffId = cashier.getStaff().getId();
-        final LocalDate fromDate = LocalDate.ofInstant(cashier.getStartDate().toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        final LocalDate endDate = LocalDate.ofInstant(cashier.getEndDate().toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        final LocalDate fromDate = cashier.getStartDate();
+        final LocalDate endDate = cashier.getEndDate();
         final LocalDate tellerFromDate = teller.getStartLocalDate();
         final LocalDate tellerEndDate = teller.getEndLocalDate();
         /**

@@ -335,7 +335,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final LocalDate startDate = JdbcSupport.getLocalDate(rs, "startDate");
             final LocalDate closeDate = JdbcSupport.getLocalDate(rs, "closeDate");
             String status = "";
-            if (closeDate != null && closeDate.isBefore(DateUtils.getLocalDateOfTenant())) {
+            if (closeDate != null && closeDate.isBefore(DateUtils.getBusinessLocalDate())) {
                 status = "loanProduct.inActive";
             } else {
                 status = "loanProduct.active";
@@ -499,7 +499,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         }
 
         public String activeOnlySchema() {
-            return schema() + " where (close_date is null or close_date >= " + sqlGenerator.currentDate() + ")";
+            return schema() + " where (close_date is null or close_date >= " + sqlGenerator.currentBusinessDate() + ")";
         }
 
         public String productMixSchema() {

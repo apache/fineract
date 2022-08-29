@@ -22,10 +22,10 @@ package org.apache.fineract.portfolio.client.service;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -82,65 +82,41 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
         String mobileNumber = "";
         Long age = null;
         Boolean isDependent = false;
-        Date dateOfBirth = null;
+        LocalDate dateOfBirth = null;
 
         this.context.authenticatedUser();
         apiJsonDeserializer.validateForCreate(clientId, command.json());
 
         Client client = clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
-
-        if (command.stringValueOfParameterNamed("firstName") != null) {
-            firstName = command.stringValueOfParameterNamed("firstName");
-        }
-
-        if (command.stringValueOfParameterNamed("middleName") != null) {
-            middleName = command.stringValueOfParameterNamed("middleName");
-        }
-
-        if (command.stringValueOfParameterNamed("lastName") != null) {
-            lastName = command.stringValueOfParameterNamed("lastName");
-        }
-
-        if (command.stringValueOfParameterNamed("qualification") != null) {
-            qualification = command.stringValueOfParameterNamed("qualification");
-        }
-
-        if (command.stringValueOfParameterNamed("mobileNumber") != null) {
-            mobileNumber = command.stringValueOfParameterNamed("mobileNumber");
-        }
-
-        if (command.longValueOfParameterNamed("age") != null) {
-            age = command.longValueOfParameterNamed("age");
-        }
-
-        if (command.booleanObjectValueOfParameterNamed("isDependent") != null) {
-            isDependent = command.booleanObjectValueOfParameterNamed("isDependent");
-        }
+        firstName = command.stringValueOfParameterNamed("firstName");
+        middleName = command.stringValueOfParameterNamed("middleName");
+        lastName = command.stringValueOfParameterNamed("lastName");
+        qualification = command.stringValueOfParameterNamed("qualification");
+        mobileNumber = command.stringValueOfParameterNamed("mobileNumber");
+        age = command.longValueOfParameterNamed("age");
+        isDependent = command.booleanObjectValueOfParameterNamed("isDependent");
 
         if (command.longValueOfParameterNamed("relationshipId") != null) {
             relationshipId = command.longValueOfParameterNamed("relationshipId");
-            relationship = this.codeValueRepository.getById(relationshipId);
+            relationship = this.codeValueRepository.getReferenceById(relationshipId);
         }
 
         if (command.longValueOfParameterNamed("maritalStatusId") != null) {
             maritalStatusId = command.longValueOfParameterNamed("maritalStatusId");
-            maritalStatus = this.codeValueRepository.getById(maritalStatusId);
+            maritalStatus = this.codeValueRepository.getReferenceById(maritalStatusId);
         }
 
         if (command.longValueOfParameterNamed("genderId") != null) {
             genderId = command.longValueOfParameterNamed("genderId");
-            gender = this.codeValueRepository.getById(genderId);
+            gender = this.codeValueRepository.getReferenceById(genderId);
         }
 
         if (command.longValueOfParameterNamed("professionId") != null) {
             professionId = command.longValueOfParameterNamed("professionId");
-            profession = this.codeValueRepository.getById(professionId);
+            profession = this.codeValueRepository.getReferenceById(professionId);
         }
 
-        if (command.dateValueOfParameterNamed("dateOfBirth") != null) {
-            dateOfBirth = command.dateValueOfParameterNamed("dateOfBirth");
-
-        }
+        dateOfBirth = command.localDateValueOfParameterNamed("dateOfBirth");
 
         ClientFamilyMembers clientFamilyMembers = ClientFamilyMembers.fromJson(client, firstName, middleName, lastName, qualification,
                 mobileNumber, age, isDependent, relationship, maritalStatus, gender, dateOfBirth, profession);
@@ -166,7 +142,7 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
         String middleName = "";
         String lastName = "";
         String qualification = "";
-        Date dateOfBirth = null;
+        LocalDate dateOfBirth = null;
         String mobileNumber = "";
         Long age = null;
         Boolean isDependent = false;
@@ -218,32 +194,33 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
 
             if (member.get("relationshipId") != null) {
                 relationshipId = member.get("relationshipId").getAsLong();
-                relationship = this.codeValueRepository.getById(relationshipId);
+                relationship = this.codeValueRepository.getReferenceById(relationshipId);
             }
 
             if (member.get("maritalStatusId") != null) {
                 maritalStatusId = member.get("maritalStatusId").getAsLong();
-                maritalStatus = this.codeValueRepository.getById(maritalStatusId);
+                maritalStatus = this.codeValueRepository.getReferenceById(maritalStatusId);
             }
 
             if (member.get("genderId") != null) {
                 genderId = member.get("genderId").getAsLong();
-                gender = this.codeValueRepository.getById(genderId);
+                gender = this.codeValueRepository.getReferenceById(genderId);
             }
 
             if (member.get("professionId") != null) {
                 professionId = member.get("professionId").getAsLong();
-                profession = this.codeValueRepository.getById(professionId);
+                profession = this.codeValueRepository.getReferenceById(professionId);
             }
 
             if (member.get("dateOfBirth") != null) {
 
-                DateFormat format = new SimpleDateFormat(member.get("dateFormat").getAsString());
-                Date date;
+                DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendPattern(member.get("dateFormat").getAsString())
+                        .toFormatter();
+                LocalDate date;
                 try {
-                    date = format.parse(member.get("dateOfBirth").getAsString());
+                    date = LocalDate.parse(member.get("dateOfBirth").getAsString(), formatter);
                     dateOfBirth = date;
-                } catch (ParseException e) {
+                } catch (DateTimeParseException e) {
                     // TODO Auto-generated catch block
                     LOG.error("Problem occurred in addClientFamilyMember function", e);
                 }
@@ -280,7 +257,7 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
         String middleName = "";
         String lastName = "";
         String qualification = "";
-        Date dateOfBirth = null;
+        LocalDate dateOfBirth = null;
         String mobileNumber = "";
         Long age = null;
         Boolean isDependent = false;
@@ -295,7 +272,7 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
          * command.longValueOfParameterNamed("clientFamilyMemberId"); }
          */
 
-        ClientFamilyMembers clientFamilyMember = clientFamilyRepository.getById(familyMemberId);
+        ClientFamilyMembers clientFamilyMember = clientFamilyRepository.getReferenceById(familyMemberId);
 
         // Client
         // client=clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
@@ -337,30 +314,30 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
 
         if (command.longValueOfParameterNamed("relationShipId") != null) {
             relationshipId = command.longValueOfParameterNamed("relationShipId");
-            relationship = this.codeValueRepository.getById(relationshipId);
+            relationship = this.codeValueRepository.getReferenceById(relationshipId);
             clientFamilyMember.setRelationship(relationship);
         }
 
         if (command.longValueOfParameterNamed("maritalStatusId") != 0) {
             maritalStatusId = command.longValueOfParameterNamed("maritalStatusId");
-            maritalStatus = this.codeValueRepository.getById(maritalStatusId);
+            maritalStatus = this.codeValueRepository.getReferenceById(maritalStatusId);
             clientFamilyMember.setMaritalStatus(maritalStatus);
         }
 
         if (command.longValueOfParameterNamed("genderId") != 0) {
             genderId = command.longValueOfParameterNamed("genderId");
-            gender = this.codeValueRepository.getById(genderId);
+            gender = this.codeValueRepository.getReferenceById(genderId);
             clientFamilyMember.setGender(gender);
         }
 
         if (command.longValueOfParameterNamed("professionId") != 0) {
             professionId = command.longValueOfParameterNamed("professionId");
-            profession = this.codeValueRepository.getById(professionId);
+            profession = this.codeValueRepository.getReferenceById(professionId);
             clientFamilyMember.setProfession(profession);
         }
 
-        if (command.dateValueOfParameterNamed("dateOfBirth") != null) {
-            dateOfBirth = command.dateValueOfParameterNamed("dateOfBirth");
+        if (command.localDateValueOfParameterNamed("dateOfBirth") != null) {
+            dateOfBirth = command.localDateValueOfParameterNamed("dateOfBirth");
             clientFamilyMember.setDateOfBirth(dateOfBirth);
 
         }
@@ -386,7 +363,7 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
         ClientFamilyMembers clientFamilyMember = null;
 
         if (clientFamilyMemberId != null) {
-            clientFamilyMember = clientFamilyRepository.getById(clientFamilyMemberId);
+            clientFamilyMember = clientFamilyRepository.getReferenceById(clientFamilyMemberId);
             clientFamilyRepository.delete(clientFamilyMember);
 
         }

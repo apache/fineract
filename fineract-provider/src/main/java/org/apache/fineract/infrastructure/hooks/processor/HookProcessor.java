@@ -18,12 +18,11 @@
  */
 package org.apache.fineract.infrastructure.hooks.processor;
 
+import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.hooks.domain.Hook;
-import org.apache.fineract.useradministration.domain.AppUser;
 
 public interface HookProcessor {
 
-    void process(Hook hook, AppUser appUser, String payload, String entityName, String actionName, String tenantIdentifier,
-            String authToken) throws Exception;
+    void process(Hook hook, String payload, String entityName, String actionName, FineractContext context) throws Exception;
 
 }

@@ -18,9 +18,10 @@
  */
 package org.apache.fineract.useradministration.domain;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -36,9 +37,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -48,21 +48,19 @@ import org.apache.fineract.infrastructure.security.domain.PlatformUser;
 import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
 import org.apache.fineract.infrastructure.security.service.PlatformPasswordEncoder;
 import org.apache.fineract.infrastructure.security.service.RandomPasswordGenerator;
+import org.apache.fineract.infrastructure.security.utils.LogParameterEscapeUtil;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.useradministration.service.AppUserConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
+@Slf4j
 @Entity
 @Table(name = "m_appuser", uniqueConstraints = @UniqueConstraint(columnNames = { "username" }, name = "username_org"))
 public class AppUser extends AbstractPersistableCustom implements PlatformUser {
-
-    private static final Logger LOG = LoggerFactory.getLogger(AppUser.class);
 
     @Column(name = "email", nullable = false, length = 100)
     private String email;
@@ -110,8 +108,7 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
     private Set<Role> roles;
 
     @Column(name = "last_time_password_updated")
-    @Temporal(TemporalType.DATE)
-    private Date lastTimePasswordUpdated;
+    private LocalDate lastTimePasswordUpdated;
 
     @Column(name = "password_never_expires", nullable = false)
     private boolean passwordNeverExpires;
@@ -185,7 +182,7 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
         this.enabled = user.isEnabled();
         this.roles = roles;
         this.firstTimeLoginRemaining = true;
-        this.lastTimePasswordUpdated = DateUtils.getDateOfTenant();
+        this.lastTimePasswordUpdated = DateUtils.getLocalDateOfTenant();
         this.staff = staff;
         this.passwordNeverExpires = passwordNeverExpire;
         this.isSelfServiceUser = isSelfServiceUser;
@@ -208,7 +205,7 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
 
         this.password = encodePassword;
         this.firstTimeLoginRemaining = false;
-        this.lastTimePasswordUpdated = DateUtils.getDateOfTenant();
+        this.lastTimePasswordUpdated = DateUtils.getBusinessLocalDate();
 
     }
 
@@ -468,7 +465,7 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
         return this.passwordNeverExpires;
     }
 
-    public Date getLastTimePasswordUpdated() {
+    public LocalDate getLastTimePasswordUpdated() {
         return this.lastTimePasswordUpdated;
     }
 
@@ -552,9 +549,20 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
     }
 
     public void validateHasReadPermission(final String resourceType) {
+        validateHasPermission("READ", resourceType);
+    }
 
-        final String authorizationMessage = "User has no authority to view " + resourceType.toLowerCase() + "s";
-        final String matchPermission = "READ_" + resourceType.toUpperCase();
+    public void validateHasCreatePermission(final String resourceType) {
+        validateHasPermission("CREATE", resourceType);
+    }
+
+    public void validateHasUpdatePermission(final String resourceType) {
+        validateHasPermission("UPDATE", resourceType);
+    }
+
+    private void validateHasPermission(final String prefix, final String resourceType) {
+        final String authorizationMessage = "User has no authority to " + prefix + " " + resourceType.toLowerCase() + "s";
+        final String matchPermission = prefix + "_" + resourceType.toUpperCase();
 
         if (!hasNotPermissionForAnyOf("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", matchPermission)) {
             return;
@@ -599,7 +607,11 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
         return !hasAnyPermission(permissions);
     }
 
-    private boolean hasAnyPermission(final List<String> permissions) {
+    public boolean hasAnyPermission(String... permissions) {
+        return hasAnyPermission(Arrays.asList(permissions));
+    }
+
+    public boolean hasAnyPermission(final List<String> permissions) {
         boolean hasAtLeastOneOf = false;
 
         for (final String permissionCode : permissions) {
@@ -622,16 +634,14 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
     public void validateHasPermissionTo(final String function) {
         if (hasNotPermissionTo(function)) {
             final String authorizationMessage = "User has no authority to: " + function;
-            LOG.info("Unauthorized access: userId: {} action: {} allowed: {}", getId(), function, getAuthorities());
+            log.info("Unauthorized access: userId: {} action: {} allowed: {}", getId(), LogParameterEscapeUtil.escapeLogParameter(function),
+                    getAuthorities());
             throw new NoAuthorizationException(authorizationMessage);
         }
     }
 
     public void validateHasReadPermission(final String function, final Long userId) {
-        if ("USER".equalsIgnoreCase(function) && userId.equals(getId())) {
-            // abstain from validation as user allowed fetch their own data no
-            // matter what permissions they have.
-        } else {
+        if (!("USER".equalsIgnoreCase(function) && userId.equals(getId()))) {
             validateHasReadPermission(function);
         }
     }

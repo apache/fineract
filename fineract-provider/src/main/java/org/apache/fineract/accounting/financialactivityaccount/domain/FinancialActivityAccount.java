@@ -24,11 +24,18 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "acc_gl_financial_activity_account")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Getter
 public class FinancialActivityAccount extends AbstractPersistableCustom {
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -40,23 +47,6 @@ public class FinancialActivityAccount extends AbstractPersistableCustom {
 
     public static FinancialActivityAccount createNew(final GLAccount glAccount, final Integer financialAccountType) {
         return new FinancialActivityAccount(glAccount, financialAccountType);
-    }
-
-    protected FinancialActivityAccount() {
-        //
-    }
-
-    private FinancialActivityAccount(final GLAccount glAccount, final int financialAccountType) {
-        this.glAccount = glAccount;
-        this.financialActivityType = financialAccountType;
-    }
-
-    public GLAccount getGlAccount() {
-        return this.glAccount;
-    }
-
-    public Integer getFinancialActivityType() {
-        return this.financialActivityType;
     }
 
     public void updateGlAccount(final GLAccount glAccount) {

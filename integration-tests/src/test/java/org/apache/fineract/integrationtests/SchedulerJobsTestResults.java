@@ -32,14 +32,20 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
@@ -67,7 +73,6 @@ import org.apache.fineract.portfolio.account.domain.AccountTransferType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer.MethodName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -95,6 +100,8 @@ public class SchedulerJobsTestResults {
     private JournalEntryHelper journalEntryHelper;
     private StandingInstructionsHelper standingInstructionsHelper;
 
+    private TimeZone systemTimeZone;
+
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
@@ -104,6 +111,8 @@ public class SchedulerJobsTestResults {
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.accountHelper = new AccountHelper(requestSpec, responseSpec);
         this.journalEntryHelper = new JournalEntryHelper(requestSpec, responseSpec);
+
+        this.systemTimeZone = TimeZone.getTimeZone(Utils.TENANT_TIME_ZONE);
     }
 
     @AfterEach
@@ -455,135 +464,25 @@ public class SchedulerJobsTestResults {
     }
 
     @Test
-    public void testUpdateLoanPaidInAdvanceJobOutcome() throws InterruptedException {
-        this.schedulerJobHelper = new SchedulerJobHelper(requestSpec);
-        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-
-        Calendar todayDate = Calendar.getInstance();
-
-        todayDate.add(Calendar.MONTH, -1);
-        final String LOAN_DISBURSEMENT_DATE = dateFormat.format(todayDate.getTime());
-
-        todayDate = Calendar.getInstance();
-        todayDate.add(Calendar.DATE, -5);
-        final String LOAN_FIRST_REPAYMENT_DATE = dateFormat.format(todayDate.getTime());
-
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
-        Assertions.assertNotNull(clientID);
-
-        final Integer loanProductID = createLoanProduct(null);
-        Assertions.assertNotNull(loanProductID);
-
-        final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null);
-        Assertions.assertNotNull(loanID);
-
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
-
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan(AccountTransferTest.LOAN_APPROVAL_DATE, loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(LOAN_DISBURSEMENT_DATE, loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
-
-        ArrayList<HashMap> loanScheduleBefore = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
-
-        Float totalDueForCurrentPeriod = (Float) loanScheduleBefore.get(1).get("totalDueForPeriod");
-
-        this.loanTransactionHelper.makeRepayment(LOAN_FIRST_REPAYMENT_DATE, totalDueForCurrentPeriod, loanID);
-
-        String JobName = "Update Loan Paid In Advance";
-        this.schedulerJobHelper.executeAndAwaitJob(JobName);
-        // Retrieving Loan Repayment Schedule after the successful
-        // completion of
-        // Update Loan Paid in Advance Scheduler Job
-        ArrayList<HashMap> loanScheduleAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
-
-        Float totalPaidInAdvance = (Float) loanScheduleAfter.get(1).get("totalPaidInAdvanceForPeriod");
-
-        Assertions.assertEquals(totalDueForCurrentPeriod, totalPaidInAdvance,
-                "Verifying Loan Repayment in Advance after Running Update Loan Paid in Advance Scheduler Job");
-    }
-
-    // Invalid test case as it won't affect summary (Loan summary is properly
-    // updated before running this job)
-    @Disabled
-    @Test
-    public void testUpdateLoanSummaryJobOutcome() throws InterruptedException {
-        this.schedulerJobHelper = new SchedulerJobHelper(requestSpec);
-        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-
-        Calendar todaysDate = Calendar.getInstance();
-
-        todaysDate.add(Calendar.MONTH, -1);
-        final String LOAN_DISBURSEMENT_DATE = dateFormat.format(todaysDate.getTime());
-
-        todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.DATE, -5);
-
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
-        Assertions.assertNotNull(clientID);
-
-        final Integer loanProductID = createLoanProduct(null);
-        Assertions.assertNotNull(loanProductID);
-
-        final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null);
-        Assertions.assertNotNull(loanID);
-
-        Integer disburseChargeId = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper.getLoanDisbursementJSON());
-        Assertions.assertNotNull(disburseChargeId);
-
-        this.loanTransactionHelper.addChargesForLoan(loanID,
-                LoanTransactionHelper.getDisbursementChargesForLoanAsJSON(disburseChargeId.toString()));
-        ArrayList<HashMap> chargesPendingState = this.loanTransactionHelper.getLoanCharges(loanID);
-        Assertions.assertEquals(1, chargesPendingState.size());
-
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
-
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan(AccountTransferTest.LOAN_APPROVAL_DATE, loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(LOAN_DISBURSEMENT_DATE, loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
-
-        HashMap loanSummaryBefore = this.loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, loanID);
-
-        String JobName = "Update loan Summary";
-        this.schedulerJobHelper.executeAndAwaitJob(JobName);
-        Float expectedSummaryAfterJob = (Float) loanSummaryBefore.get("totalExpectedRepayment")
-        /* - (Float) loanSummaryBefore.get("feeChargesPaid") */;
-        HashMap loanSummaryAfter = this.loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, loanID);
-        Assertions.assertEquals(expectedSummaryAfterJob, (Float) loanSummaryAfter.get("totalExpectedRepayment"),
-                "Verifying Loan Summary after Running Update Loan Summary Scheduler Job");
-    }
-
-    @Test
     public void testExecuteStandingInstructionsJobOutcome() throws InterruptedException {
         this.schedulerJobHelper = new SchedulerJobHelper(requestSpec);
         this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
         this.standingInstructionsHelper = new StandingInstructionsHelper(requestSpec, responseSpec);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        DateFormat monthDayFormat = new SimpleDateFormat("dd MMMM", Locale.US);
+        final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
+        final DateTimeFormatter monthDayFormat = DateTimeFormatter.ofPattern("dd MMMM", Locale.US);
 
-        Calendar todaysDate = Calendar.getInstance();
-
-        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
-
-        todaysDate.add(Calendar.WEEK_OF_YEAR, -1);
-        final String VALID_FROM = dateFormat.format(todaysDate.getTime());
-
-        todaysDate.add(Calendar.YEAR, 1);
-        final String VALID_TO = dateFormat.format(todaysDate.getTime());
+        // Create the LocalDate with the Zone used by default
+        final LocalDate localDate = LocalDate.now(this.systemTimeZone.toZoneId());
+        ZonedDateTime currentDate = ZonedDateTime.of(localDate, LocalTime.MIDNIGHT, this.systemTimeZone.toZoneId());
+        // When the Stanging Instruction will be applied
+        final String MONTH_DAY = monthDayFormat.format(currentDate.toLocalDate());
+        // Standing Instruction valid from (One week before today)
+        currentDate = currentDate.minus(Duration.ofDays(7));
+        final String VALID_FROM = dateFormat.format(currentDate);
+        // Standing Instruction valid to (One year after)
+        currentDate = currentDate.plus(1, ChronoUnit.YEARS);
+        final String VALID_TO = dateFormat.format(currentDate);
 
         final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientID);

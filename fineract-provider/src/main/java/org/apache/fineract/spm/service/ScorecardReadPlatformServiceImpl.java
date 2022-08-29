@@ -20,10 +20,8 @@ package org.apache.fineract.spm.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -91,11 +89,10 @@ public class ScorecardReadPlatformServiceImpl implements ScorecardReadPlatformSe
 
             final Long questionId = rs.getLong("questionId");
             final Long responseId = rs.getLong("responseId");
-            final LocalDate createdOn = JdbcSupport.getLocalDate(rs, "createdOn");
+            final LocalDateTime createdOn = JdbcSupport.getLocalDateTime(rs, "createdOn");
             final Integer value = rs.getInt("value");
 
-            return ScorecardValue.instance(questionId, responseId, value,
-                    Date.from(createdOn.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+            return ScorecardValue.instance(questionId, responseId, value, createdOn);
         }
     }
 

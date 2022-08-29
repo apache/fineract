@@ -19,7 +19,7 @@
 package org.apache.fineract.accounting.journalentry.service;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
 import org.apache.fineract.accounting.journalentry.data.ClientTransactionDTO;
@@ -36,7 +36,7 @@ public class CashBasedAccountingProcessorForClientTransactions implements Accoun
     public void createJournalEntriesForClientTransaction(ClientTransactionDTO clientTransactionDTO) {
         if (clientTransactionDTO.isAccountingEnabled()) {
             final GLClosure latestGLClosure = this.helper.getLatestClosureByBranch(clientTransactionDTO.getOfficeId());
-            final Date transactionDate = clientTransactionDTO.getTransactionDate();
+            final LocalDate transactionDate = clientTransactionDTO.getTransactionDate();
             final Office office = this.helper.getOfficeById(clientTransactionDTO.getOfficeId());
             this.helper.checkForBranchClosures(latestGLClosure, transactionDate);
 
@@ -60,7 +60,7 @@ public class CashBasedAccountingProcessorForClientTransactions implements Accoun
         // transaction properties
         final String currencyCode = clientTransactionDTO.getCurrencyCode();
         final Long transactionId = clientTransactionDTO.getTransactionId();
-        final Date transactionDate = clientTransactionDTO.getTransactionDate();
+        final LocalDate transactionDate = clientTransactionDTO.getTransactionDate();
         final BigDecimal amount = clientTransactionDTO.getAmount();
         final boolean isReversal = clientTransactionDTO.isReversed();
 

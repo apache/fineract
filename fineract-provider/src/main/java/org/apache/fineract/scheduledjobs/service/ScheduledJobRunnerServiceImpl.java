@@ -20,14 +20,10 @@ package org.apache.fineract.scheduledjobs.service;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.accounting.glaccount.domain.TrialBalance;
@@ -70,9 +66,6 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
     private static final Logger LOG = LoggerFactory.getLogger(ScheduledJobRunnerServiceImpl.class);
 
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private final DateTimeFormatter formatterWithTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
     private final RoutingDataSourceServiceFactory dataSourceServiceFactory;
     private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
     private final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService;
@@ -111,127 +104,6 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         this.fineractProperties = fineractProperties;
         this.sqlGenerator = sqlGenerator;
         this.databaseTypeResolver = databaseTypeResolver;
-    }
-
-    @Transactional
-    @Override
-    @CronTarget(jobName = JobName.UPDATE_LOAN_SUMMARY)
-    public void updateLoanSummaryDetails() {
-
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
-
-        boolean isMySQL = databaseTypeResolver.isMySQL();
-
-        String alias = isMySQL ? "l." : "";
-        final String selectPart = new StringBuilder().append(" (SELECT ml.id AS loan_id, ")
-                .append("SUM(mr.principal_amount) as principal_disbursed_derived, ")
-                .append("SUM(COALESCE(mr.principal_completed_derived,0)) as principal_repaid_derived, ")
-                .append("SUM(COALESCE(mr.principal_writtenoff_derived,0)) as principal_writtenoff_derived, ")
-                .append("SUM(COALESCE(mr.interest_amount,0)) as interest_charged_derived, ")
-                .append("SUM(COALESCE(mr.interest_completed_derived,0)) as interest_repaid_derived, ")
-                .append("SUM(COALESCE(mr.interest_waived_derived,0)) as interest_waived_derived, ")
-                .append("SUM(COALESCE(mr.interest_writtenoff_derived,0)) as interest_writtenoff_derived, ")
-                .append("SUM(COALESCE(mr.fee_charges_amount,0)) + ")
-                .append("COALESCE((select SUM(lc.amount) from m_loan_charge lc where lc.loan_id = ml.id and lc.is_active = true")
-                .append(" and lc.charge_time_enum=1),0) as fee_charges_charged_derived, ")
-                .append("SUM(COALESCE(mr.fee_charges_completed_derived,0)) + ")
-                .append("COALESCE((select SUM(lc.amount_paid_derived) from m_loan_charge lc where lc.loan_id = ml.id and lc.is_active = true")
-                .append(" and lc.charge_time_enum = 1), 0) as fee_charges_repaid_derived, ")
-                .append("SUM(COALESCE(mr.fee_charges_waived_derived,0)) as fee_charges_waived_derived, ")
-                .append("SUM(COALESCE(mr.fee_charges_writtenoff_derived,0)) as fee_charges_writtenoff_derived, ")
-                .append("SUM(COALESCE(mr.penalty_charges_amount,0)) as penalty_charges_charged_derived, ")
-                .append("SUM(COALESCE(mr.penalty_charges_completed_derived,0)) as penalty_charges_repaid_derived, ")
-                .append("SUM(COALESCE(mr.penalty_charges_waived_derived,0)) as penalty_charges_waived_derived, ")
-                .append("SUM(COALESCE(mr.penalty_charges_writtenoff_derived,0)) as penalty_charges_writtenoff_derived ")
-                .append("FROM m_loan ml ").append("INNER JOIN m_loan_repayment_schedule mr on mr.loan_id = ml.id ")
-                .append("WHERE ml.disbursedon_date is not null ").append("GROUP BY ml.id").append(") x").toString();
-
-        final String setPart = new StringBuilder().append(" SET ").append(alias)
-                .append("principal_disbursed_derived = x.principal_disbursed_derived, ").append(alias)
-                .append("principal_repaid_derived = x.principal_repaid_derived, ").append(alias)
-                .append("principal_writtenoff_derived = x.principal_writtenoff_derived, ").append(alias)
-                .append("principal_outstanding_derived = (x.principal_disbursed_derived - (x.principal_repaid_derived + x.principal_writtenoff_derived)), ")
-                .append(alias).append("interest_charged_derived = x.interest_charged_derived, ").append(alias)
-                .append("interest_repaid_derived = x.interest_repaid_derived, ").append(alias)
-                .append("interest_waived_derived = x.interest_waived_derived, ").append(alias)
-                .append("interest_writtenoff_derived = x.interest_writtenoff_derived, ").append(alias)
-                .append("interest_outstanding_derived = (x.interest_charged_derived - (x.interest_repaid_derived + x.interest_waived_derived + x.interest_writtenoff_derived)), ")
-                .append(alias).append("fee_charges_charged_derived = x.fee_charges_charged_derived, ").append(alias)
-                .append("fee_charges_repaid_derived = x.fee_charges_repaid_derived, ").append(alias)
-                .append("fee_charges_waived_derived = x.fee_charges_waived_derived, ").append(alias)
-                .append("fee_charges_writtenoff_derived = x.fee_charges_writtenoff_derived, ").append(alias)
-                .append("fee_charges_outstanding_derived = (x.fee_charges_charged_derived - (x.fee_charges_repaid_derived + x.fee_charges_waived_derived + x.fee_charges_writtenoff_derived)), ")
-                .append(alias).append("penalty_charges_charged_derived = x.penalty_charges_charged_derived, ").append(alias)
-                .append("penalty_charges_repaid_derived = x.penalty_charges_repaid_derived, ").append(alias)
-                .append("penalty_charges_waived_derived = x.penalty_charges_waived_derived, ").append(alias)
-                .append("penalty_charges_writtenoff_derived = x.penalty_charges_writtenoff_derived, ").append(alias)
-                .append("penalty_charges_outstanding_derived = (x.penalty_charges_charged_derived - (x.penalty_charges_repaid_derived + x.penalty_charges_waived_derived + x.penalty_charges_writtenoff_derived)), ")
-                .append(alias)
-                .append("total_expected_repayment_derived = (x.principal_disbursed_derived + x.interest_charged_derived + x.fee_charges_charged_derived + x.penalty_charges_charged_derived), ")
-                .append(alias)
-                .append("total_repayment_derived = (x.principal_repaid_derived + x.interest_repaid_derived + x.fee_charges_repaid_derived + x.penalty_charges_repaid_derived), ")
-                .append(alias)
-                .append("total_expected_costofloan_derived = (x.interest_charged_derived + x.fee_charges_charged_derived + x.penalty_charges_charged_derived), ")
-                .append(alias)
-                .append("total_costofloan_derived = (x.interest_repaid_derived + x.fee_charges_repaid_derived + x.penalty_charges_repaid_derived), ")
-                .append(alias)
-                .append("total_waived_derived = (x.interest_waived_derived + x.fee_charges_waived_derived + x.penalty_charges_waived_derived), ")
-                .append(alias)
-                .append("total_writtenoff_derived = (x.interest_writtenoff_derived +  x.fee_charges_writtenoff_derived + x.penalty_charges_writtenoff_derived), ")
-                .append(alias)
-                .append("total_outstanding_derived = (x.principal_disbursed_derived - (x.principal_repaid_derived + x.principal_writtenoff_derived)) + ")
-                .append("(x.interest_charged_derived - (x.interest_repaid_derived + x.interest_waived_derived + x.interest_writtenoff_derived)) + ")
-                .append("(x.fee_charges_charged_derived - (x.fee_charges_repaid_derived + x.fee_charges_waived_derived + x.fee_charges_writtenoff_derived)) + ")
-                .append("(x.penalty_charges_charged_derived - (x.penalty_charges_repaid_derived + x.penalty_charges_waived_derived + x.penalty_charges_writtenoff_derived))")
-                .toString();
-
-        String wherePart = " x.loan_id = l.id";
-
-        final StringBuilder updateSqlBuilder = new StringBuilder();
-        updateSqlBuilder.append("UPDATE m_loan l");
-        if (isMySQL) {
-            updateSqlBuilder.append(" JOIN").append(selectPart).append(" ON").append(wherePart).append(' ').append(setPart);
-        } else {
-            updateSqlBuilder.append(setPart).append(" FROM").append(selectPart).append(" WHERE").append(wherePart);
-        }
-        final int result = jdbcTemplate.update(updateSqlBuilder.toString());
-
-        LOG.info("{}: Records affected by updateLoanSummaryDetails: {}", ThreadLocalContextUtil.getTenant().getName(), result);
-    }
-
-    @Transactional
-    @Override
-    @CronTarget(jobName = JobName.UPDATE_LOAN_PAID_IN_ADVANCE)
-    public void updateLoanPaidInAdvance() {
-
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
-
-        jdbcTemplate.execute("truncate table m_loan_paid_in_advance");
-
-        final StringBuilder updateSqlBuilder = new StringBuilder(900);
-
-        updateSqlBuilder.append(
-                "INSERT INTO m_loan_paid_in_advance(loan_id, principal_in_advance_derived, interest_in_advance_derived, fee_charges_in_advance_derived, penalty_charges_in_advance_derived, total_in_advance_derived)");
-        updateSqlBuilder.append(" select ml.id as loanId,");
-        updateSqlBuilder.append(" SUM(coalesce(mr.principal_completed_derived, 0)) as principal_in_advance_derived,");
-        updateSqlBuilder.append(" SUM(coalesce(mr.interest_completed_derived, 0)) as interest_in_advance_derived,");
-        updateSqlBuilder.append(" SUM(coalesce(mr.fee_charges_completed_derived, 0)) as fee_charges_in_advance_derived,");
-        updateSqlBuilder.append(" SUM(coalesce(mr.penalty_charges_completed_derived, 0)) as penalty_charges_in_advance_derived,");
-        updateSqlBuilder.append(
-                " (SUM(coalesce(mr.principal_completed_derived, 0)) + SUM(coalesce(mr.interest_completed_derived, 0)) + SUM(coalesce(mr.fee_charges_completed_derived, 0)) + SUM(coalesce(mr.penalty_charges_completed_derived, 0))) as total_in_advance_derived");
-        updateSqlBuilder.append(" FROM m_loan ml ");
-        updateSqlBuilder.append(" INNER JOIN m_loan_repayment_schedule mr on mr.loan_id = ml.id ");
-        updateSqlBuilder.append(" WHERE ml.loan_status_id = 300 ");
-        updateSqlBuilder.append(" and mr.duedate >= " + sqlGenerator.currentDate() + " ");
-        updateSqlBuilder.append(" GROUP BY ml.id");
-        updateSqlBuilder
-                .append(" HAVING (SUM(coalesce(mr.principal_completed_derived, 0)) + SUM(coalesce(mr.interest_completed_derived, 0)) +");
-        updateSqlBuilder.append(
-                " SUM(coalesce(mr.fee_charges_completed_derived, 0)) + SUM(coalesce(mr.penalty_charges_completed_derived, 0))) > 0.0");
-
-        final int result = jdbcTemplate.update(updateSqlBuilder.toString());
-
-        LOG.info("{}: Records affected by updateLoanPaidInAdvance: {}", ThreadLocalContextUtil.getTenant().getName(), result);
     }
 
     @Override
@@ -316,7 +188,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         fromPart = " (select loan.id " + " FROM m_loan_arrears_aging laa" + " INNER JOIN  m_loan loan on laa.loan_id = loan.id "
                 + " INNER JOIN m_product_loan mpl on mpl.id = loan.product_id AND mpl.overdue_days_for_npa is not null "
                 + "WHERE loan.loan_status_id = 300 and " + "laa.overdue_since_date_derived < "
-                + sqlGenerator.subDate(sqlGenerator.currentDate(), "COALESCE(mpl.overdue_days_for_npa, 0)", "day")
+                + sqlGenerator.subDate(sqlGenerator.currentBusinessDate(), "COALESCE(mpl.overdue_days_for_npa, 0)", "day")
                 + " group by loan.id) as sl ";
         wherePart = " where ml.id=sl.id ";
         updateSqlBuilder.append("UPDATE m_loan as ml ");
@@ -363,7 +235,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         final Collection<Map<String, Object>> scheduleDetails = this.depositAccountReadPlatformService.retriveDataForRDScheduleCreation();
         String insertSql = "INSERT INTO m_mandatory_savings_schedule (savings_account_id, duedate, installment, deposit_amount, completed_derived, created_date, lastmodified_date) VALUES ";
         StringBuilder sb = new StringBuilder();
-        String currentDate = formatterWithTime.format(DateUtils.getLocalDateTimeOfTenant());
+        String currentDate = DateUtils.getLocalDateTimeOfTenant().format(DateUtils.DEFAULT_DATETIME_FORMATER);
         int iterations = 0;
         for (Map<String, Object> details : scheduleDetails) {
             Long count = (Long) details.get("futureInstallemts");
@@ -373,8 +245,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             final Long savingsId = (Long) details.get("savingsId");
             final BigDecimal amount = (BigDecimal) details.get("amount");
             final String recurrence = (String) details.get("recurrence");
-            Date date = (Date) details.get("dueDate");
-            LocalDate lastDepositDate = LocalDate.ofInstant(date.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+            LocalDate lastDepositDate = (LocalDate) details.get("dueDate");
             Integer installmentNumber = (Integer) details.get("installment");
             while (count < DepositAccountUtils.GENERATE_MINIMUM_NUMBER_OF_FUTURE_INSTALMENTS) {
                 count++;
@@ -387,7 +258,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
                 sb.append("(");
                 sb.append(savingsId);
                 sb.append(",'");
-                sb.append(formatter.format(lastDepositDate));
+                sb.append(lastDepositDate.format(DateUtils.DEFAULT_DATE_FORMATER));
                 sb.append("',");
                 sb.append(installmentNumber);
                 sb.append(",");
@@ -450,30 +321,28 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     }
 
     @Override
-    @CronTarget(jobName = JobName.UPDATE_TRAIL_BALANCE_DETAILS)
+    @CronTarget(jobName = JobName.UPDATE_TRIAL_BALANCE_DETAILS)
     public void updateTrialBalanceDetails() throws JobExecutionException {
         final JdbcTemplate jdbcTemplate = new JdbcTemplate(this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
         final StringBuilder tbGapSqlBuilder = new StringBuilder(500);
         tbGapSqlBuilder.append("select distinct(je.transaction_date) ").append("from acc_gl_journal_entry je ")
                 .append("where je.transaction_date > (select coalesce(MAX(created_date),'2010-01-01') from m_trial_balance)");
 
-        final List<Date> tbGaps = jdbcTemplate.queryForList(tbGapSqlBuilder.toString(), Date.class);
+        final List<LocalDate> tbGaps = jdbcTemplate.queryForList(tbGapSqlBuilder.toString(), LocalDate.class);
 
-        for (Date tbGap : tbGaps) {
-            LocalDate convDate = ZonedDateTime.ofInstant(tbGap.toInstant(), DateUtils.getDateTimeZoneOfTenant()).toLocalDate();
-            int days = Math.toIntExact(ChronoUnit.DAYS.between(convDate, DateUtils.getLocalDateOfTenant()));
+        for (LocalDate tbGap : tbGaps) {
+            int days = Math.toIntExact(ChronoUnit.DAYS.between(tbGap, DateUtils.getBusinessLocalDate()));
             if (days < 1) {
                 continue;
             }
-            final String formattedDate = new SimpleDateFormat("yyyy-MM-dd").format(tbGap);
             final StringBuilder sqlBuilder = new StringBuilder(600);
             sqlBuilder.append("Insert Into m_trial_balance(office_id, account_id, Amount, entry_date, created_date,closing_balance) ")
                     .append("Select je.office_id, je.account_id, SUM(CASE WHEN je.type_enum=1 THEN (-1) * je.amount ELSE je.amount END) ")
-                    .append("as Amount, Date(je.entry_date) as 'Entry_Date', je.transaction_date as 'Created_Date',sum(je.amount) as closing_balance ")
+                    .append("as Amount, Date(je.entry_date) as Entry_Date, je.transaction_date as Created_Date,sum(je.amount) as closing_balance ")
                     .append("from acc_gl_journal_entry je WHERE je.transaction_date = ? ")
                     .append("group by je.account_id, je.office_id, je.transaction_date, Date(je.entry_date)");
 
-            final int result = jdbcTemplate.update(sqlBuilder.toString(), formattedDate);
+            final int result = jdbcTemplate.update(sqlBuilder.toString(), tbGap);
             LOG.info("{}: Records affected by updateTrialBalanceDetails: {}", ThreadLocalContextUtil.getTenant().getName(), result);
         }
 

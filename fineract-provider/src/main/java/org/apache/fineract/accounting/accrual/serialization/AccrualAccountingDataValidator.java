@@ -69,7 +69,7 @@ public final class AccrualAccountingDataValidator {
                 .resource(PERIODIC_ACCRUAL_ACCOUNTING_RESOURCE_NAME);
 
         final LocalDate date = this.fromApiJsonHelper.extractLocalDateNamed(accrueTillParamName, element);
-        baseDataValidator.reset().parameter(accrueTillParamName).value(date).notNull().validateDateBefore(DateUtils.getLocalDateOfTenant());
+        baseDataValidator.reset().parameter(accrueTillParamName).value(date).notNull().validateDateBefore(DateUtils.getBusinessLocalDate());
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 

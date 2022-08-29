@@ -19,9 +19,7 @@
 package org.apache.fineract.portfolio.shareproducts.domain;
 
 import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.ZonedDateTime;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
@@ -37,8 +35,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -46,7 +42,6 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.shareproducts.data.ShareProductMarketPriceData;
-import org.apache.fineract.useradministration.domain.AppUser;
 
 @SuppressWarnings("serial")
 @Entity
@@ -63,12 +58,10 @@ public class ShareProduct extends AbstractAuditableCustom {
     private String description;
 
     @Column(name = "start_date")
-    @Temporal(TemporalType.DATE)
-    private Date startDate;
+    private LocalDate startDate;
 
     @Column(name = "end_date")
-    @Temporal(TemporalType.DATE)
-    private Date endDate;
+    private LocalDate endDate;
 
     @Column(name = "external_id", length = 100, nullable = true, unique = true)
     private String externalId;
@@ -137,8 +130,7 @@ public class ShareProduct extends AbstractAuditableCustom {
             final BigDecimal shareCapital, final Long minimumShares, final Long nominalShares, final Long maximumShares,
             Set<ShareProductMarketPrice> marketPrice, Set<Charge> charges, final Boolean allowDividendCalculationForInactiveClients,
             final Integer lockinPeriod, final PeriodFrequencyType lockPeriodType, final Integer minimumActivePeriod,
-            final PeriodFrequencyType minimumActivePeriodForDividendsType, AppUser createdBy, ZonedDateTime createdDate,
-            AppUser lastModifiedBy, ZonedDateTime lastModifiedDate, final AccountingRuleType accountingRuleType) {
+            final PeriodFrequencyType minimumActivePeriodForDividendsType, final AccountingRuleType accountingRuleType) {
 
         this.name = name;
         this.shortName = shortName;
@@ -159,12 +151,9 @@ public class ShareProduct extends AbstractAuditableCustom {
         this.lockPeriodType = lockPeriodType;
         this.minimumActivePeriod = minimumActivePeriod;
         this.minimumActivePeriodType = minimumActivePeriodForDividendsType;
-        setCreatedBy(createdBy);
-        setCreatedDate(Instant.ofEpochMilli(createdDate.toInstant().toEpochMilli()));
-        setLastModifiedBy(lastModifiedBy);
-        setLastModifiedDate(Instant.ofEpochMilli(lastModifiedDate.toInstant().toEpochMilli()));
-        startDate = DateUtils.getDateOfTenant();
-        endDate = DateUtils.getDateOfTenant();
+        // TODO: is this used at all?
+        this.startDate = DateUtils.getBusinessLocalDate();
+        this.endDate = DateUtils.getBusinessLocalDate();
         if (accountingRuleType != null) {
             this.accountingRule = accountingRuleType.getValue();
         }
@@ -402,12 +391,12 @@ public class ShareProduct extends AbstractAuditableCustom {
         return allowed;
     }
 
-    public BigDecimal deriveMarketPrice(final Date currentDate) {
+    public BigDecimal deriveMarketPrice(final LocalDate currentDate) {
         BigDecimal marketValue = this.unitPrice;
         if (this.marketPrice != null && !this.marketPrice.isEmpty()) {
             for (ShareProductMarketPrice data : this.marketPrice) {
-                Date futureDate = data.getStartDate();
-                if (currentDate.compareTo(futureDate) == 0 ? Boolean.TRUE : Boolean.FALSE || currentDate.after(futureDate)) {
+                LocalDate futureDate = data.getStartDate();
+                if (currentDate.compareTo(futureDate) == 0 ? Boolean.TRUE : Boolean.FALSE || currentDate.isAfter(futureDate)) {
                     marketValue = data.getPrice();
                 }
             }

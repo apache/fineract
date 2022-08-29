@@ -33,8 +33,9 @@ dependencies {
             'org.springframework.boot:spring-boot-starter-security',
             'org.springframework.boot:spring-boot-starter-cache',
             'org.springframework.boot:spring-boot-starter-oauth2-resource-server',
+            'org.springframework.boot:spring-boot-starter-actuator',
 
-            'org.glassfish.jersey.media:jersey-media-multipart:2.35',
+            'org.glassfish.jersey.media:jersey-media-multipart:2.36',
 
             'org.springframework:spring-jms',
             'org.springframework:spring-context-support',
@@ -82,7 +83,8 @@ dependencies {
             'org.springdoc:springdoc-openapi-security',
             fileTree('thirdparty') {
                 include '*.jar' },
-            'org.openjdk.nashorn:nashorn-core'
+            'org.openjdk.nashorn:nashorn-core',
+            'org.mapstruct:mapstruct',
             )
 
     implementation ('org.apache.commons:commons-email') {
@@ -138,7 +140,6 @@ dependencies {
         exclude group: 'xml-apis'
     }
 
-
     runtimeOnly('org.glassfish.jaxb:jaxb-runtime') {
         exclude group: 'com.sun.activation'
     }
@@ -146,7 +147,6 @@ dependencies {
     // runtimeOnly dependencies are things that Fineract code has no direct compile time dependency on, but which must be present at run-time
     runtimeOnly(
             'org.apache.bval:org.apache.bval.bundle',
-            'org.springframework.boot:spring-boot-starter-actuator',
 
             // Although fineract (at the time of writing) doesn't have any compile time dep. on httpclient,
             // it's useful to have this for the Spring Boot TestRestTemplate http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#boot-features-rest-templates-test-utility
@@ -155,6 +155,7 @@ dependencies {
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor 'org.mapstruct:mapstruct-processor'
 
     // testCompile dependencies are ONLY used in src/test, not src/main.
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!

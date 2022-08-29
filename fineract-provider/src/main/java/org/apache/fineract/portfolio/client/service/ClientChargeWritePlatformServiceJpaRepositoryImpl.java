@@ -207,7 +207,7 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
         try {
             final Client client = this.clientRepository.getActiveClientInUserScope(clientId);
             final ClientCharge clientCharge = this.clientChargeRepository.findOneWithNotFoundDetection(clientChargeId);
-            final LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
+            final LocalDate transactionDate = DateUtils.getBusinessLocalDate();
 
             // Validate business rules for payment
             validateWaiverTransaction(client, clientCharge);

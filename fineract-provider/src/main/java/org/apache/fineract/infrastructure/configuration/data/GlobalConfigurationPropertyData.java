@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.configuration.data;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 /**
  * Immutable data object for global configuration property.
@@ -32,7 +32,7 @@ public class GlobalConfigurationPropertyData {
     @SuppressWarnings("unused")
     private final Long value;
     @SuppressWarnings("unused")
-    private final Date dateValue;
+    private final LocalDate dateValue;
     private String stringValue;
     @SuppressWarnings("unused")
     private final Long id;
@@ -41,7 +41,7 @@ public class GlobalConfigurationPropertyData {
     @SuppressWarnings("unused")
     private final boolean trapDoor;
 
-    public GlobalConfigurationPropertyData(final String name, final boolean enabled, final Long value, final Date dateValue,
+    public GlobalConfigurationPropertyData(final String name, final boolean enabled, final Long value, final LocalDate dateValue,
             final String stringValue, final String description, final boolean trapDoor) {
         this.name = name;
         this.enabled = enabled;
@@ -53,7 +53,7 @@ public class GlobalConfigurationPropertyData {
         this.trapDoor = trapDoor;
     }
 
-    public GlobalConfigurationPropertyData(final String name, final boolean enabled, final Long value, Date dateValue,
+    public GlobalConfigurationPropertyData(final String name, final boolean enabled, final Long value, LocalDate dateValue,
             final String stringValue, final Long id, final String description, final boolean isTrapDoor) {
         this.name = name;
         this.enabled = enabled;
@@ -81,7 +81,7 @@ public class GlobalConfigurationPropertyData {
         return this.stringValue;
     }
 
-    public Date getDateValue() {
+    public LocalDate getDateValue() {
         return this.dateValue;
     }
 

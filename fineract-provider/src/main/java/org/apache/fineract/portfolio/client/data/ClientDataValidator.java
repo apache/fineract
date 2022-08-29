@@ -190,7 +190,7 @@ public final class ClientDataValidator {
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.dateOfBirthParamName, element)) {
             final LocalDate dateOfBirth = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.dateOfBirthParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.dateOfBirthParamName).value(dateOfBirth).notNull()
-                    .validateDateBefore(DateUtils.getLocalDateOfTenant()).validateDateBefore(submittedOnDate);
+                    .validateDateBefore(DateUtils.getBusinessLocalDate()).validateDateBefore(submittedOnDate);
         }
 
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.genderIdParamName, element)) {
@@ -497,7 +497,7 @@ public final class ClientDataValidator {
             atLeastOneParameterPassedForUpdate = true;
             final LocalDate dateOfBirth = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.dateOfBirthParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.dateOfBirthParamName).value(dateOfBirth).notNull()
-                    .validateDateBefore(DateUtils.getLocalDateOfTenant()).validateDateBefore(submittedDate);
+                    .validateDateBefore(DateUtils.getBusinessLocalDate()).validateDateBefore(submittedDate);
         }
 
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.legalFormIdParamName, element)) {
@@ -824,7 +824,7 @@ public final class ClientDataValidator {
 
         final LocalDate undoRejectionDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.reopenedDateParamName, element);
         baseDataValidator.reset().parameter(ClientApiConstants.reopenedDateParamName).value(undoRejectionDate).notNull()
-                .validateDateBeforeOrEqual(DateUtils.getLocalDateOfTenant());
+                .validateDateBeforeOrEqual(DateUtils.getBusinessLocalDate());
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
@@ -850,7 +850,7 @@ public final class ClientDataValidator {
 
         final LocalDate undoWithdrawnDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.reopenedDateParamName, element);
         baseDataValidator.reset().parameter(ClientApiConstants.reopenedDateParamName).value(undoWithdrawnDate).notNull()
-                .validateDateBeforeOrEqual(DateUtils.getLocalDateOfTenant());
+                .validateDateBeforeOrEqual(DateUtils.getBusinessLocalDate());
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 

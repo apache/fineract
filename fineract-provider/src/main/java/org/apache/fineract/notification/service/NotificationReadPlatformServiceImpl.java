@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
@@ -32,32 +33,24 @@ import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.notification.cache.CacheNotificationResponseHeader;
 import org.apache.fineract.notification.data.NotificationData;
 import org.apache.fineract.notification.data.NotificationMapperData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class NotificationReadPlatformServiceImpl implements NotificationReadPlatformService {
+
+    private HashMap<Long, HashMap<Long, CacheNotificationResponseHeader>> tenantNotificationResponseHeaderCache = new HashMap<>();
+
+    private final NotificationDataRow notificationDataRow = new NotificationDataRow();
+    private final NotificationMapperRow notificationMapperRow = new NotificationMapperRow();
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final ColumnValidator columnValidator;
     private final PaginationHelper paginationHelper;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
-    private final NotificationDataRow notificationDataRow = new NotificationDataRow();
-    private final NotificationMapperRow notificationMapperRow = new NotificationMapperRow();
-    private HashMap<Long, HashMap<Long, CacheNotificationResponseHeader>> tenantNotificationResponseHeaderCache = new HashMap<>();
-
-    @Autowired
-    public NotificationReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final PlatformSecurityContext context,
-            final ColumnValidator columnValidator, DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.context = context;
-        this.columnValidator = columnValidator;
-        this.paginationHelper = paginationHelper;
-        this.sqlGenerator = sqlGenerator;
-    }
 
     @Override
     public boolean hasUnreadNotifications(Long appUserId) {
@@ -204,10 +197,10 @@ public class NotificationReadPlatformServiceImpl implements NotificationReadPlat
             notificationData.setObjectType(objectType);
 
             final Long objectId = rs.getLong("objectId");
-            notificationData.entifier(objectId);
+            notificationData.setObjectId(objectId);
 
             final Long actorId = rs.getLong("actor");
-            notificationData.setActor(actorId);
+            notificationData.setActorId(actorId);
 
             final String action = rs.getString("action");
             notificationData.setAction(action);

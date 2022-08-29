@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <!--Client-->
+    <changeSet author="fineract" id="1" context="mysql">
+        <addColumn tableName="m_client">
+            <column name="created_on_utc" type="DATETIME"/>
+            <column name="created_by" type="BIGINT" valueComputed="submittedon_userid"/>
+            <column name="last_modified_by" type="BIGINT"/>
+            <column name="last_modified_on_utc" type="DATETIME"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="fineract" id="1" context="postgresql">
+        <addColumn tableName="m_client">
+            <column name="created_on_utc" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="created_by" type="BIGINT" valueComputed="submittedon_userid"/>
+            <column name="last_modified_by" type="BIGINT"/>
+            <column name="last_modified_on_utc" type="TIMESTAMP WITH TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="fineract" id="2">
+        <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_client"
+                                 constraintName="FK_client_created_by" deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="m_appuser" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_client"
+                                 constraintName="FK_client_last_modified_by" deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="m_appuser" validate="true"/>
+    </changeSet>
+    <changeSet id="3" author="fineract">
+        <dropColumn tableName="m_client">
+            <column name="submittedon_userid"/>
+        </dropColumn>
+    </changeSet>
+    <!--Loan-->
+    <changeSet author="fineract" id="4" context="mysql">
+        <addColumn tableName="m_loan">
+            <column name="created_on_utc" type="DATETIME"/>
+            <column name="created_by" type="BIGINT" valueComputed="submittedon_userid"/>
+            <column name="last_modified_by" type="BIGINT"/>
+            <column name="last_modified_on_utc" type="DATETIME"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="fineract" id="4" context="postgresql">
+        <addColumn tableName="m_loan">
+            <column name="created_on_utc" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="created_by" type="BIGINT" valueComputed="submittedon_userid"/>
+            <column name="last_modified_by" type="BIGINT"/>
+            <column name="last_modified_on_utc" type="TIMESTAMP WITH TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="fineract" id="5">
+        <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_loan"
+                                 constraintName="FK_loan_created_by" deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="m_appuser" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_loan"
+                                 constraintName="FK_loan_last_modified_by" deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="m_appuser" validate="true"/>
+    </changeSet>
+    <changeSet id="6" author="fineract">
+        <dropForeignKeyConstraint baseTableName="m_loan" constraintName="FK_submittedon_userid"/>
+        <dropColumn tableName="m_loan">
+            <column name="submittedon_userid"/>
+        </dropColumn>
+    </changeSet>
+    <!-- Loan transactions -->
+    <changeSet author="fineract" id="7" context="mysql">
+        <addColumn tableName="m_loan_transaction">
+            <column name="created_on_utc" type="DATETIME"/>
+            <column name="last_modified_on_utc" type="DATETIME"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="fineract" id="8" context="postgresql">
+        <addColumn tableName="m_loan_transaction">
+            <column name="created_on_utc" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="last_modified_on_utc" type="TIMESTAMP WITH TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="9" author="fineract">
+        <renameColumn tableName="m_loan_transaction" oldColumnName="createdby_id" newColumnName="created_by" columnDataType="BIGINT"/>
+        <renameColumn tableName="m_loan_transaction" oldColumnName="lastmodifiedby_id" newColumnName="last_modified_by" columnDataType="BIGINT"/>
+    </changeSet>
+    <changeSet author="fineract" id="10">
+        <addForeignKeyConstraint baseColumnNames="created_by" baseTableName="m_loan_transaction"
+                                 constraintName="FK_loan_transaction_created_by" deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="m_appuser" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="last_modified_by" baseTableName="m_loan_transaction"
+                                 constraintName="FK_loan_transaction_last_modified_by" deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="m_appuser" validate="true"/>
+    </changeSet>
+    <changeSet id="11" author="fineract" context="mysql">
+        <update tableName="stretchy_report">
+            <column name="report_sql"
+                    value="SELECT &#13;&#10;mc.id AS &quot;id&quot;, &#13;&#10;mc.firstname AS &quot;firstName&quot;,&#13;&#10;mc.middlename AS &quot;middleName&quot;,&#13;&#10;mc.lastname AS &quot;lastName&quot;,&#13;&#10;mc.display_name AS &quot;fullName&quot;,&#13;&#10;mc.mobile_no AS &quot;mobileNo&quot;, &#13;&#10;ml.principal_amount AS &quot;loanAmount&quot;, &#13;&#10;(IFNULL(ml.principal_outstanding_derived, 0) + IFNULL(ml.interest_outstanding_derived, 0) + IFNULL(ml.fee_charges_outstanding_derived, 0) + IFNULL(ml.penalty_charges_outstanding_derived, 0)) AS &quot;loanOutstanding&quot;,&#13;&#10;ounder.id AS &quot;officeNumber&quot;, &#13;&#10;ml.account_no AS &quot;loanAccountNumber&quot;,&#13;&#10;SUM(lt.amount) AS &quot;repaymentAmount&quot;&#13;&#10;FROM m_office mo&#13;&#10;JOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, '%')&#13;&#10;INNER JOIN m_client mc ON mc.office_id=ounder.id&#13;&#10;INNER JOIN m_loan ml ON ml.client_id = mc.id&#13;&#10;INNER JOIN r_enum_value rev ON rev.enum_id=ml.loan_status_id AND rev.enum_name = 'loan_status_id'&#13;&#10;INNER JOIN m_loan_transaction lt ON lt.loan_id = ml.id&#13;&#10;INNER JOIN m_appuser au ON au.id = lt.createdby_id&#13;&#10;LEFT JOIN m_loan_arrears_aging laa ON laa.loan_id=ml.id&#13;&#10;LEFT JOIN m_payment_detail mpd ON mpd.id=lt.payment_detail_id&#13;&#10;LEFT JOIN m_currency cur ON cur.code = ml.currency_code&#13;&#10;LEFT JOIN m_group_client gc ON gc.client_id = mc.id&#13;&#10;LEFT JOIN m_group g ON g.id = gc.group_id&#13;&#10;LEFT JOIN m_staff lo ON lo.id = ml.loan_officer_id&#13;&#10;LEFT JOIN m_guarantor gua ON gua.loan_id = ml.id&#13;&#10;WHERE ml.loan_status_id=300 AND mo.id=${officeId} AND (IFNULL(ml.loan_officer_id, -10) = ${loanOfficerId} OR &quot;-1&quot; = ${loanOfficerId}) AND (DATEDIFF(CURDATE(), lt.transaction_date) BETWEEN ${fromX} AND ${toY}) AND lt.is_reversed=0 AND lt.transaction_type_enum=2 AND laa.loan_id IS NULL&#13;&#10;GROUP BY ml.id&#13;&#10;ORDER BY ounder.hierarchy, ml.currency_code, mc.account_no, ml.account_no"/>
+            <where>report_name = 'Loan payments received (Active Loans)'</where>
+        </update>
+        <update tableName="stretchy_report">
+            <column name="report_sql"
+                    value="SELECT &#13;&#10;ml.id AS &quot;loanId&quot;, &#13;&#10;mc.id AS &quot;id&quot;, &#13;&#10;mc.firstname AS &quot;firstName&quot;,&#13;&#10;mc.middlename AS &quot;middleName&quot;,&#13;&#10;mc.lastname AS &quot;lastName&quot;,&#13;&#10;mc.display_name AS &quot;fullName&quot;,&#13;&#10;mc.mobile_no AS &quot;mobileNo&quot;, &#13;&#10;ml.principal_amount AS &quot;loanAmount&quot;, &#13;&#10;(IFNULL(ml.principal_outstanding_derived, 0) + IFNULL(ml.interest_outstanding_derived, 0) + IFNULL(ml.fee_charges_outstanding_derived, 0) + IFNULL(ml.penalty_charges_outstanding_derived, 0)) AS &quot;loanOutstanding&quot;,&#13;&#10;ounder.id AS &quot;officeNumber&quot;, &#13;&#10;ml.account_no AS &quot;loanAccountNumber&quot;,&#13;&#10;SUM(lt.amount) AS &quot;repaymentAmount&quot;&#13;&#10;FROM m_office mo&#13;&#10;JOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, '%')&#13;&#10;INNER JOIN m_client mc ON mc.office_id=ounder.id&#13;&#10;INNER JOIN m_loan ml ON ml.client_id = mc.id&#13;&#10;INNER JOIN r_enum_value rev ON rev.enum_id=ml.loan_status_id AND rev.enum_name = 'loan_status_id'&#13;&#10;INNER JOIN m_loan_arrears_aging laa ON laa.loan_id=ml.id&#13;&#10;INNER JOIN m_loan_transaction lt ON lt.loan_id = ml.id&#13;&#10;INNER JOIN m_appuser au ON au.id = lt.created_by&#13;&#10;LEFT JOIN m_payment_detail mpd ON mpd.id=lt.payment_detail_id&#13;&#10;LEFT JOIN m_currency cur ON cur.code = ml.currency_code&#13;&#10;LEFT JOIN m_group_client gc ON gc.client_id = mc.id&#13;&#10;LEFT JOIN m_group g ON g.id = gc.group_id&#13;&#10;LEFT JOIN m_staff lo ON lo.id = ml.loan_officer_id&#13;&#10;LEFT JOIN m_guarantor gua ON gua.loan_id = ml.id&#13;&#10;WHERE ml.loan_status_id=300 AND mo.id=${officeId} AND (IFNULL(ml.loan_officer_id, -10) = ${loanOfficerId} OR &quot;-1&quot; = ${loanOfficerId}) AND (DATEDIFF(CURDATE(), lt.transaction_date) BETWEEN ${fromX} AND ${toY}) AND (DATEDIFF(CURDATE(), laa.overdue_since_date_derived) BETWEEN ${overdueX} AND ${overdueY}) AND lt.is_reversed=0 AND lt.transaction_type_enum=2&#13;&#10;GROUP BY ml.id&#13;&#10;ORDER BY ounder.hierarchy, ml.currency_code, mc.account_no, ml.account_no"/>
+            <where>report_name = 'Loan payments received (Overdue Loans)'</where>
+        </update>
+    </changeSet>
+    <changeSet id="12" author="fineract" context="postgresql">
+        <update tableName="stretchy_report">
+            <column name="report_sql"
+                    value="SELECT mc.id AS id, mc.firstname AS firstName, mc.middlename AS middleName, mc.lastname AS lastName, mc.display_name AS fullName, mc.mobile_no AS mobileNo, ml.principal_amount AS loanAmount, (COALESCE(ml.principal_outstanding_derived, 0) + COALESCE(ml.interest_outstanding_derived, 0) + COALESCE(ml.fee_charges_outstanding_derived, 0) + COALESCE(ml.penalty_charges_outstanding_derived, 0)) AS loanOutstanding, ounder.id AS officeNumber, ml.account_no AS loanAccountNumber, SUM(lt.amount) AS repaymentAmount FROM m_office mo JOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, '%') INNER JOIN m_client mc ON mc.office_id = ounder.id INNER JOIN m_loan ml ON ml.client_id = mc.id INNER JOIN r_enum_value rev ON rev.enum_id = ml.loan_status_id AND rev.enum_name = 'loan_status_id' INNER JOIN m_loan_transaction lt ON lt.loan_id = ml.id INNER JOIN m_appuser au ON au.id = lt.created_by LEFT JOIN m_loan_arrears_aging laa ON laa.loan_id = ml.id LEFT JOIN m_payment_detail mpd ON mpd.id = lt.payment_detail_id LEFT JOIN m_currency cur ON cur.code = ml.currency_code LEFT JOIN m_group_client gc ON gc.client_id = mc.id LEFT JOIN m_group g ON g.id = gc.group_id LEFT JOIN m_staff lo ON lo.id = ml.loan_officer_id LEFT JOIN m_guarantor gua ON gua.loan_id = ml.id WHERE ml.loan_status_id = 300 AND mo.id = '${officeId}' AND (COALESCE(ml.loan_officer_id, -10) = ${loanOfficerId} OR '-1' = ${loanOfficerId}) AND (EXTRACT(DAY FROM (CURRENT_DATE - lt.transaction_date::TIMESTAMP)) BETWEEN 9${fromX} AND ${toY}) AND lt.is_reversed = false AND lt.transaction_type_enum = 2 AND laa.loan_id IS NULL GROUP BY ml.id, mc.id, ounder.id ORDER BY ounder.hierarchy, ml.currency_code, mc.account_no, ml.account_no"/>
+            <where>report_name = 'Loan payments received (Active Loans)'</where>
+        </update>
+        <update tableName="stretchy_report">
+            <column name="report_sql"
+                    value="SELECT ml.id AS loanId, mc.id AS id, mc.firstname AS firstName, mc.middlename AS middleName, mc.lastname AS lastName, mc.display_name AS fullName, mc.mobile_no AS mobileNo, ml.principal_amount AS loanAmount, (COALESCE(ml.principal_outstanding_derived, 0) + COALESCE(ml.interest_outstanding_derived, 0) + COALESCE(ml.fee_charges_outstanding_derived, 0) + COALESCE(ml.penalty_charges_outstanding_derived, 0)) AS loanOutstanding, ounder.id AS officeNumber, ml.account_no AS loanAccountNumber, SUM(lt.amount) AS repaymentAmount FROM m_office mo JOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, '%') INNER JOIN m_client mc ON mc.office_id = ounder.id INNER JOIN m_loan ml ON ml.client_id = mc.id INNER JOIN r_enum_value rev ON rev.enum_id = ml.loan_status_id AND rev.enum_name = 'loan_status_id' INNER JOIN m_loan_arrears_aging laa ON laa.loan_id = ml.id INNER JOIN m_loan_transaction lt ON lt.loan_id = ml.id INNER JOIN m_appuser au ON au.id = lt.created_by LEFT JOIN m_payment_detail mpd ON mpd.id = lt.payment_detail_id LEFT JOIN m_currency cur ON cur.code = ml.currency_code LEFT JOIN m_group_client gc ON gc.client_id = mc.id LEFT JOIN m_group g ON g.id = gc.group_id LEFT JOIN m_staff lo ON lo.id = ml.loan_officer_id LEFT JOIN m_guarantor gua ON gua.loan_id = ml.id WHERE ml.loan_status_id = 300 AND mo.id = '${officeId}' AND (COALESCE(ml.loan_officer_id, -10) = ${loanOfficerId} OR '-1' = ${loanOfficerId}) AND (EXTRACT(DAY FROM(CURRENT_DATE - lt.transaction_date::TIMESTAMP)) BETWEEN ${fromX} AND ${toY}) AND (EXTRACT(DAY FROM(CURRENT_DATE - laa.overdue_since_date_derived::TIMESTAMP)) BETWEEN ${overdueX} AND ${overdueY}) AND lt.is_reversed = false AND lt.transaction_type_enum = 2 GROUP BY ml.id, mc.id, ounder.id ORDER BY ounder.hierarchy, ml.currency_code, mc.account_no, ml.account_no"/>
+            <where>report_name = 'Loan payments received (Overdue Loans)'</where>
+        </update>
+    </changeSet>
+</databaseChangeLog>

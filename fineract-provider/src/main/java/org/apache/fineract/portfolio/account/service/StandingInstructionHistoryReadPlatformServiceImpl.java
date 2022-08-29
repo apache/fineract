@@ -23,13 +23,12 @@ import static org.apache.fineract.portfolio.account.service.AccountTransferEnume
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
@@ -126,9 +125,8 @@ public class StandingInstructionHistoryReadPlatformServiceImpl implements Standi
             if (addAndCaluse) {
                 sqlBuilder.append(" and ");
             }
-            final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
             sqlBuilder.append(" atsih.execution_time >= ? ");
-            paramObj.add(df.format(standingInstructionDTO.startDateRange()));
+            paramObj.add(DateUtils.DEFAULT_DATE_FORMATER.format(standingInstructionDTO.startDateRange()));
             addAndCaluse = true;
         }
 
@@ -136,9 +134,8 @@ public class StandingInstructionHistoryReadPlatformServiceImpl implements Standi
             if (addAndCaluse) {
                 sqlBuilder.append(" and ");
             }
-            final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
             sqlBuilder.append(" atsih.execution_time < ? ");
-            paramObj.add(df.format(standingInstructionDTO.endDateRange()));
+            paramObj.add(DateUtils.DEFAULT_DATE_FORMATER.format(standingInstructionDTO.endDateRange()));
             addAndCaluse = true;
         }
 

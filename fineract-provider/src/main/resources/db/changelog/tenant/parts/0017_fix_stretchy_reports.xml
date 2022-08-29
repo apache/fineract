@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet author="fineract" id="1">
+        <update tableName="stretchy_parameter">
+            <column name="parameter_sql" value="select p.id, p.name&#13;&#10;from m_product_loan p&#13;&#10;where (p.currency_code = '${currencyId}' or '-1'= '${currencyId}')&#13;&#10;order by 2"/>
+            <where>id='25' AND parameter_name='loanProductIdSelectAll'</where>
+        </update>
+    </changeSet>
+    <changeSet author="fineract" id="2" context="postgresql">
+        <update tableName="stretchy_parameter">
+            <column name="parameter_sql" value="select sp.parameter_name, sp.parameter_variable, sp.parameter_label, sp.&quot;parameter_displayType&quot;, sp.&quot;parameter_FormatType&quot;, sp.parameter_default, sp.&quot;selectOne&quot;,  sp.&quot;selectAll&quot;, spp.parameter_name as parentParameterName from stretchy_parameter sp  left join stretchy_parameter spp on spp.id = sp.parent_id  where sp.special is null  and exists     (select 'f'    from stretchy_report sr    join stretchy_report_parameter srp on srp.report_id = sr.id   and sr.self_service_user_report = ${isSelfServiceUser}    where sr.report_name in(${reportListing})    and srp.parameter_id = sp.id   ) order by sp.id"/>
+            <where>id='1002' AND parameter_name='FullParameterList'</where>
+        </update>
+    </changeSet>
+    <changeSet author="fineract" id="3" context="postgresql">
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="select  ml.id as loanId,  COALESCE(mc.id,mc2.id) as id,  COALESCE(mc.firstname,mc2.firstname) as firstname,   COALESCE(mc.middlename,mc2.middlename,(\'\')) as middlename, COALESCE(mc.lastname,mc2.lastname) as lastname,   COALESCE(mc.display_name,mc2.display_name) as display_name, COALESCE(mc.status_enum,mc2.status_enum) as status_enum,  COALESCE(mc.mobile_no,mc2.mobile_no) as mobile_no, COALESCE(mg.office_id,mc2.office_id) as office_id, COALESCE(mg.staff_id,mc2.staff_id) as staff_id,   mg.id as group_id, mg.display_name as group_name, COALESCE(mc.email_address,mc2.email_address) as emailAddress from m_loan ml left join m_group mg on mg.id = ml.group_id   left join m_group_client mgc on mgc.group_id = mg.id  left join m_client mc on mc.id = mgc.client_id   left join m_client mc2 on mc2.id = ml.client_id WHERE (mc.status_enum = 300 or mc2.status_enum = 300) and (mc.email_address is not null or mc2.email_address is not null) and ml.id = ${loanId}"/>
+            <where>id='190' AND report_name='Loan Approved - Email'</where>
+        </update>
+    </changeSet>
+    <changeSet author="fineract" id="4" context="postgresql">
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="select  ml.id as loanId,  COALESCE(mc.id,mc2.id) as id,  COALESCE(mc.firstname,mc2.firstname) as firstname,   COALESCE(mc.middlename,mc2.middlename,(\'\')) as middlename, COALESCE(mc.lastname,mc2.lastname) as lastname,   COALESCE(mc.display_name,mc2.display_name) as display_name, COALESCE(mc.status_enum,mc2.status_enum) as status_enum,  COALESCE(mc.mobile_no,mc2.mobile_no) as mobile_no, COALESCE(mg.office_id,mc2.office_id) as office_id, COALESCE(mg.staff_id,mc2.staff_id) as staff_id,   mg.id as group_id, mg.display_name as group_name, COALESCE(mc.email_address,mc2.email_address) as emailAddress from m_loan ml left join m_group mg on mg.id = ml.group_id   left join m_group_client mgc on mgc.group_id = mg.id  left join m_client mc on mc.id = mgc.client_id   left join m_client mc2 on mc2.id = ml.client_id WHERE (mc.status_enum = 300 or mc2.status_enum = 300) and (mc.email_address is not null or mc2.email_address is not null) and ml.id = ${loanId}"/>
+            <where>id='191' AND report_name='Loan Rejected - Email'</where>
+        </update>
+    </changeSet>
+    <changeSet author="fineract" id="5" context="postgresql">
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="select  ml.id as loanId,  COALESCE(mc.id,mc2.id) as id,  COALESCE(mc.firstname,mc2.firstname) as firstname,   COALESCE(mc.middlename,mc2.middlename,(\'\')) as middlename, COALESCE(mc.lastname,mc2.lastname) as lastname,   COALESCE(mc.display_name,mc2.display_name) as display_name,  COALESCE(mc.status_enum,mc2.status_enum) as status_enum,   COALESCE(mc.mobile_no,mc2.mobile_no) as mobile_no, COALESCE(mg.office_id,mc2.office_id) as office_id, COALESCE(mg.staff_id,mc2.staff_id) as staff_id,  mg.id as group_id, mg.display_name as group_name, COALESCE(mc.email_address,mc2.email_address) as emailAddress, lt.amount as repaymentAmount   from m_loan_transaction lt join m_loan ml on ml.id=lt.loan_id left join m_group mg on mg.id = ml.group_id  left join m_group_client mgc on mgc.group_id = mg.id   left join m_client mc on mc.id = mgc.client_id  left join m_client mc2 on mc2.id = ml.client_id  WHERE (mc.status_enum = 300 or mc2.status_enum = 300) and (mc.email_address is not null or mc2.email_address is not null) and ml.id = ${loanId} and lt.id = ${loanTransactionId} "/>
+            <where>id='192' AND report_name='Loan Repayment - Email'</where>
+        </update>
+    </changeSet>
+    <changeSet author="fineract" id="6">
+        <update tableName="stretchy_parameter">
+            <column name="parameter_sql" value="select  r.id as report_id, r.report_name, r.report_type, r.report_subtype, r.report_category,&#10;rp.id as parameter_id, rp.report_parameter_name, p.parameter_name&#10;  from stretchy_report r&#10;  left join stretchy_report_parameter rp on rp.report_id = r.id &#10;  left join stretchy_parameter p on p.id = rp.parameter_id&#10;  where r.use_report is true and r.self_service_user_report = ${isSelfServiceUser}&#10;  and exists&#10;  ( select 'f'&#10;  from m_appuser_role ur &#10;  join m_role rr on rr.id = ur.role_id&#10;  join m_role_permission rp on rp.role_id = rr.id&#10;  join m_permission p on p.id = rp.permission_id&#10;  where ur.appuser_id = ${currentUserId}&#10;  and (p.code in ('ALL_FUNCTIONS_READ', 'ALL_FUNCTIONS') or p.code = concat('READ', r.report_name)) )&#10;  order by r.report_category, r.report_name, rp.id"/>
+            <where>id='1001' AND parameter_name='FullReportList'</where>
+        </update>
+    </changeSet>
+    <changeSet author="fineract" id="7">
+        <update tableName="stretchy_parameter">
+            <column name="parameter_sql" value="select  r.id as report_id, r.report_name, r.report_type, r.report_subtype, r.report_category,&#10;  rp.id as parameter_id, rp.report_parameter_name, p.parameter_name&#10;  from stretchy_report r&#10;  left join stretchy_report_parameter rp on rp.report_id = r.id&#10;  left join stretchy_parameter p on p.id = rp.parameter_id&#10;  where r.report_category = '${reportCategory}'&#10;  and r.use_report is true and r.self_service_user_report = ${isSelfServiceUser}  &#10;  and exists&#10;  (select 'f'&#10;  from m_appuser_role ur &#10;  join m_role rr on rr.id = ur.role_id&#10;  join m_role_permission rp on rp.role_id = rr.id&#10;  join m_permission p on p.id = rp.permission_id&#10;  where ur.appuser_id = ${currentUserId}&#10;  and (p.code in ('ALL_FUNCTIONS_READ', 'ALL_FUNCTIONS') or p.code = concat('READ', r.report_name)) )&#10;  order by r.report_category, r.report_name, rp.id"/>
+            <where>id='1003' AND parameter_name='reportCategoryList'</where>
+        </update>
+    </changeSet>
+</databaseChangeLog>

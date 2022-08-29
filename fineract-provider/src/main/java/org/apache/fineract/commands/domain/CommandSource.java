@@ -18,15 +18,13 @@
  */
 package org.apache.fineract.commands.domain;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
-import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -75,16 +73,14 @@ public class CommandSource extends AbstractPersistableCustom {
     private AppUser maker;
 
     @Column(name = "made_on_date", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date madeOnDate;
+    private LocalDateTime madeOnDate;
 
     @ManyToOne
     @JoinColumn(name = "checker_id", nullable = true)
     private AppUser checker;
 
     @Column(name = "checked_on_date", nullable = true)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date checkedOnDate;
+    private LocalDateTime checkedOnDate;
 
     @Column(name = "processing_result_enum", nullable = false)
     private Integer processingResult;
@@ -119,7 +115,7 @@ public class CommandSource extends AbstractPersistableCustom {
         this.subresourceId = subresourceId;
         this.commandAsJson = commandSerializedAsJson;
         this.maker = maker;
-        this.madeOnDate = Date.from(madeOnDateTime.toInstant());
+        this.madeOnDate = madeOnDateTime != null ? madeOnDateTime.toLocalDateTime() : null;
         this.processingResult = CommandProcessingResultType.PROCESSED.getValue();
     }
 
@@ -141,13 +137,13 @@ public class CommandSource extends AbstractPersistableCustom {
 
     public void markAsChecked(final AppUser checker, final ZonedDateTime checkedOnDate) {
         this.checker = checker;
-        this.checkedOnDate = Date.from(checkedOnDate.toInstant());
+        this.checkedOnDate = checkedOnDate != null ? checkedOnDate.toLocalDateTime() : null;
         this.processingResult = CommandProcessingResultType.PROCESSED.getValue();
     }
 
     public void markAsRejected(final AppUser checker, final ZonedDateTime checkedOnDate) {
         this.checker = checker;
-        this.checkedOnDate = Date.from(checkedOnDate.toInstant());
+        this.checkedOnDate = checkedOnDate != null ? checkedOnDate.toLocalDateTime() : null;
         this.processingResult = CommandProcessingResultType.REJECTED.getValue();
     }
 

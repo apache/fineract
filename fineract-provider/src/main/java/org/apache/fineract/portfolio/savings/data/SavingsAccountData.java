@@ -24,7 +24,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -33,7 +32,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -118,6 +116,8 @@ public final class SavingsAccountData implements Serializable {
     private final BigDecimal minOverdraftForInterestCalculation;
     private transient List<SavingsAccountTransactionData> savingsAccountTransactionData = new ArrayList<>();
 
+    private transient SavingsAccountTransactionData lastSavingsAccountTransaction;
+
     private List<DatatableData> datatables = null;
 
     // import field
@@ -125,13 +125,13 @@ public final class SavingsAccountData implements Serializable {
     private String locale;
     private String dateFormat;
     private transient Integer rowIndex;
-    private transient Date startInterestCalculationDate;
+    private transient LocalDate startInterestCalculationDate;
     private LocalDate submittedOnDate;
     private transient SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
     private transient SavingsHelper savingsHelper;
 
     private transient SavingsAccountSummaryData savingsAccountSummaryData;
-    private transient Date activatedOnDate;
+    private transient LocalDate activatedOnDate;
     private transient LocalDate lockedInUntilDate;
     private transient ClientData clientData;
     private transient SavingsProductData savingsProductData;
@@ -180,7 +180,7 @@ public final class SavingsAccountData implements Serializable {
         this.reasonForBlock = null;
         this.timeline = null;
         this.currency = null;
-        this.nominalAnnualInterestRate = nominalAnnualInterestRate;
+        this.nominalAnnualInterestRate = nominalAnnualInterestRate != null ? nominalAnnualInterestRate : BigDecimal.ZERO;
         this.interestCompoundingPeriodType = interestCompoundingPeriodType;
         this.interestPostingPeriodType = interestPostingPeriodType;
         this.interestCalculationType = interestCalculationType;
@@ -267,7 +267,7 @@ public final class SavingsAccountData implements Serializable {
         this.lockedInUntilDate = lockedInUntilDate;
     }
 
-    public void setStartInterestCalculationDate(final Date startInterestCalculationDate) {
+    public void setStartInterestCalculationDate(final LocalDate startInterestCalculationDate) {
         this.startInterestCalculationDate = startInterestCalculationDate;
     }
 
@@ -368,10 +368,6 @@ public final class SavingsAccountData implements Serializable {
         return this.glAccountIdForInterestOnSavings;
     }
 
-    public SavingsAccountSummaryData getSavingsAccountSummaryData() {
-        return this.savingsAccountSummaryData;
-    }
-
     public List<SavingsAccountTransactionData> getSavingsAccountTransactionData() {
         return this.savingsAccountTransactionData;
     }
@@ -419,7 +415,7 @@ public final class SavingsAccountData implements Serializable {
         SavingsAccountTransactionData savingsTransaction = null;
         List<SavingsAccountTransactionData> trans = getTransactions();
         for (final SavingsAccountTransactionData transaction : trans) {
-            if (transaction.isNotReversed() && transaction.occursOn(date)) {
+            if (transaction.isNotReversed() && !transaction.isReversalTransaction() && transaction.occursOn(date)) {
                 savingsTransaction = transaction;
                 break;
             }
@@ -435,8 +431,7 @@ public final class SavingsAccountData implements Serializable {
     public LocalDate getStartInterestCalculationDate() {
         LocalDate startInterestCalculationLocalDate = null;
         if (this.startInterestCalculationDate != null) {
-            startInterestCalculationLocalDate = LocalDate.ofInstant(this.startInterestCalculationDate.toInstant(),
-                    DateUtils.getDateTimeZoneOfTenant());
+            startInterestCalculationLocalDate = this.startInterestCalculationDate;
         } else {
             startInterestCalculationLocalDate = getActivationLocalDate();
         }
@@ -537,7 +532,7 @@ public final class SavingsAccountData implements Serializable {
         this.reasonForBlock = null;
         this.timeline = null;
         this.currency = null;
-        this.nominalAnnualInterestRate = nominalAnnualInterestRate;
+        this.nominalAnnualInterestRate = nominalAnnualInterestRate == null ? BigDecimal.ZERO : nominalAnnualInterestRate;
         this.interestCompoundingPeriodType = interestCompoundingPeriodType;
         this.interestPostingPeriodType = interestPostingPeriodType;
         this.interestCalculationType = interestCalculationType;
@@ -959,7 +954,7 @@ public final class SavingsAccountData implements Serializable {
         this.reasonForBlock = reasonForBlock;
         this.timeline = timeline;
         this.currency = currency;
-        this.nominalAnnualInterestRate = nominalAnnualInterestRate;
+        this.nominalAnnualInterestRate = nominalAnnualInterestRate == null ? BigDecimal.ZERO : nominalAnnualInterestRate;
         this.interestCompoundingPeriodType = interestPeriodType;
         this.interestPostingPeriodType = interestPostingPeriodType;
         this.interestCalculationType = interestCalculationType;
@@ -1110,5 +1105,13 @@ public final class SavingsAccountData implements Serializable {
 
     public Set<Long> getExistingReversedTransactionIds() {
         return this.existingReversedTransactionIds;
+    }
+
+    public SavingsAccountTransactionData getLastSavingsAccountTransaction() {
+        return lastSavingsAccountTransaction;
+    }
+
+    public void setLastSavingsAccountTransaction(SavingsAccountTransactionData lastSavingsAccountTransaction) {
+        this.lastSavingsAccountTransaction = lastSavingsAccountTransaction;
     }
 }

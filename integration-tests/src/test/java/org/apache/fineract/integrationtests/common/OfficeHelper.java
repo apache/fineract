@@ -29,6 +29,8 @@ import java.io.InputStream;
 import java.util.HashMap;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import org.apache.fineract.client.models.GetOfficesResponse;
+import org.apache.fineract.client.util.JSON;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.slf4j.Logger;
@@ -36,8 +38,11 @@ import org.slf4j.LoggerFactory;
 
 public class OfficeHelper {
 
+    public static final long HEAD_OFFICE_ID = 1L; // The ID is hardcoded in the initial Liquibase migration script
+
     private static final Logger LOG = LoggerFactory.getLogger(OfficeHelper.class);
     private static final String OFFICE_URL = "/fineract-provider/api/v1/offices";
+    private static final Gson GSON = new JSON().getGson();
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
@@ -50,6 +55,12 @@ public class OfficeHelper {
         Object get = Utils.performServerGet(requestSpec, responseSpec, OFFICE_URL + "/" + id + "?" + Utils.TENANT_IDENTIFIER, "");
         final String json = new Gson().toJson(get);
         return new Gson().fromJson(json, new TypeToken<OfficeDomain>() {}.getType());
+    }
+
+    public static GetOfficesResponse getHeadOffice(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+        String response = Utils.performServerGet(requestSpec, responseSpec,
+                OFFICE_URL + "/" + HEAD_OFFICE_ID + "?" + Utils.TENANT_IDENTIFIER);
+        return GSON.fromJson(response, GetOfficesResponse.class);
     }
 
     public Integer createOffice(final String openingDate) {

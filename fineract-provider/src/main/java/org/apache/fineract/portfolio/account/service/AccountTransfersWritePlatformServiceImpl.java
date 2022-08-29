@@ -440,7 +440,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
 
             // if the savings account is GSIM, update its parent as well
             if (toSavingsAccount.getGsim() != null) {
-                GroupSavingsIndividualMonitoring gsim = gsimRepository.findById(toSavingsAccount.getGsim().getId()).get();
+                GroupSavingsIndividualMonitoring gsim = gsimRepository.findById(toSavingsAccount.getGsim().getId()).orElseThrow();
                 BigDecimal currentBalance = gsim.getParentDeposit();
                 BigDecimal newBalance = currentBalance.add(accountTransferDTO.getTransactionAmount());
                 gsim.setParentDeposit(newBalance);

@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
@@ -123,7 +122,7 @@ public interface LoanReadPlatformService {
 
     boolean isGuaranteeRequired(Long loanId);
 
-    Date retrieveMinimumDateOfRepaymentTransaction(Long loanId);
+    LocalDate retrieveMinimumDateOfRepaymentTransaction(Long loanId);
 
     PaidInAdvanceData retrieveTotalPaidInAdvance(Long loanId);
 

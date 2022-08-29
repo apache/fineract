@@ -21,9 +21,7 @@ package org.apache.fineract.accounting.closure.data;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 import org.apache.fineract.organisation.office.data.OfficeData;
 
 /**
@@ -31,8 +29,7 @@ import org.apache.fineract.organisation.office.data.OfficeData;
  *
  * Note: no getter/setters required as google-gson will produce json from fields of object.
  */
-@RequiredArgsConstructor
-@Getter
+@Data
 public class GLClosureData {
 
     private final Long id;
@@ -48,6 +45,5 @@ public class GLClosureData {
     private final String lastUpdatedByUsername;
     private final String comments;
 
-    @Setter
     private Collection<OfficeData> allowedOffices = new ArrayList<>();
 }

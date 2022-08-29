@@ -34,7 +34,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
-import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -104,8 +103,7 @@ public class LoanScheduleWritePlatformServiceImpl implements LoanScheduleWritePl
         loan.getLoanTermVariations().clear();
         final LocalDate recalculateFrom = null;
         ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
-        AppUser currentUser = this.context.getAuthenticatedUserIfPresent();
-        loan.regenerateRepaymentSchedule(scheduleGeneratorDTO, currentUser);
+        loan.regenerateRepaymentSchedule(scheduleGeneratorDTO);
         this.loanAccountDomainService.saveLoanWithDataIntegrityViolationChecks(loan);
         return new CommandProcessingResultBuilder() //
                 .withLoanId(loanId) //

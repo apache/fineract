@@ -88,8 +88,14 @@ public class ClientEntityImportHandler implements ImportHandler {
         String name = ImportHandlerUtils.readAsString(ClientEntityConstants.NAME_COL, row);
         String officeName = ImportHandlerUtils.readAsString(ClientEntityConstants.OFFICE_NAME_COL, row);
         Long officeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME), officeName);
+        if (officeId == 0L) {
+            officeId = null;
+        }
         String staffName = ImportHandlerUtils.readAsString(ClientEntityConstants.STAFF_NAME_COL, row);
         Long staffId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME), staffName);
+        if (staffId == 0L) {
+            staffId = null;
+        }
         LocalDate incorportionDate = ImportHandlerUtils.readAsDate(ClientEntityConstants.INCOPORATION_DATE_COL, row);
         LocalDate incorporationTill = ImportHandlerUtils.readAsDate(ClientEntityConstants.INCOPORATION_VALID_TILL_COL, row);
         String mobileNo = null;

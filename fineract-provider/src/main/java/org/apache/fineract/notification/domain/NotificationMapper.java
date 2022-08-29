@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.notification.domain;
 
+import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -42,11 +43,11 @@ public class NotificationMapper extends AbstractPersistableCustom {
     private boolean isRead;
 
     @Column(name = "created_at")
-    private String createdAt;
+    private LocalDateTime createdAt;
 
     public NotificationMapper() {}
 
-    public NotificationMapper(Notification notification, AppUser userId, boolean isRead, String createdAt) {
+    public NotificationMapper(Notification notification, AppUser userId, boolean isRead, LocalDateTime createdAt) {
         this.notification = notification;
         this.userId = userId;
         this.isRead = isRead;

@@ -19,8 +19,6 @@
 package org.apache.fineract.organisation.holiday.domain;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.List;
 import org.apache.fineract.organisation.holiday.exception.HolidayNotFoundException;
 import org.apache.fineract.organisation.holiday.service.HolidayUtil;
@@ -62,7 +60,7 @@ public class HolidayRepositoryWrapper {
         this.repository.delete(holiday);
     }
 
-    public List<Holiday> findByOfficeIdAndGreaterThanDate(final Long officeId, final Date date) {
+    public List<Holiday> findByOfficeIdAndGreaterThanDate(final Long officeId, final LocalDate date) {
         return this.repository.findByOfficeIdAndGreaterThanDate(officeId, date, HolidayStatusType.ACTIVE.getValue());
     }
 
@@ -71,8 +69,7 @@ public class HolidayRepositoryWrapper {
     }
 
     public boolean isHoliday(Long officeId, LocalDate transactionDate) {
-        final List<Holiday> holidays = findByOfficeIdAndGreaterThanDate(officeId,
-                Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        final List<Holiday> holidays = findByOfficeIdAndGreaterThanDate(officeId, transactionDate);
         return HolidayUtil.isHoliday(transactionDate, holidays);
     }
 }

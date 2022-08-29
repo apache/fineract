@@ -19,7 +19,7 @@
 package org.apache.fineract.accounting.journalentry.data;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,7 @@ public class LoanTransactionDTO {
     private final Long officeId;
     private final Long paymentTypeId;
     private final String transactionId;
-    private final Date transactionDate;
+    private final LocalDate transactionDate;
     private final LoanTransactionEnumData transactionType;
 
     private final BigDecimal amount;

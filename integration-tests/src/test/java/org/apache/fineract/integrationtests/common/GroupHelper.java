@@ -230,6 +230,15 @@ public class GroupHelper {
         assertTrue(list.toString().contains("id=" + groupMember.toString()), "ERROR IN GROUP MEMBER");
     }
 
+    public static void verifyOrphanGroupDetails(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            int officeId) {
+        LOG.info("------------------------------CHECK ORPHAN GROUP DETAILS------------------------------------\n");
+        final String GROUP_URL = "/fineract-provider/api/v1/groups" + "?officeId=" + officeId + "&orphansOnly=true&"
+                + Utils.TENANT_IDENTIFIER;
+        final String responseValue = Utils.performGetTextResponse(requestSpec, responseSpec, GROUP_URL);
+        assertEquals("[]", responseValue); // Since, all groups got center as Parent, OrphanGroups is null.
+    }
+
     public static void verifyEmptyGroupMembers(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID) {
         List<String> list = new ArrayList<>();

@@ -20,17 +20,12 @@ package org.apache.fineract.portfolio.savings.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 
@@ -45,13 +40,11 @@ public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom
     @Column(name = "installment", nullable = false)
     private Integer installmentNumber;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "fromdate", nullable = true)
-    private Date fromDate;
+    private LocalDate fromDate;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "duedate", nullable = false)
-    private Date dueDate;
+    private LocalDate dueDate;
 
     @Column(name = "deposit_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal depositAmount;
@@ -68,9 +61,8 @@ public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom
     @Column(name = "completed_derived", nullable = false)
     private boolean obligationsMet;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "obligations_met_on_date")
-    private Date obligationsMetOnDate;
+    private LocalDate obligationsMetOnDate;
 
     /**
      *
@@ -94,10 +86,10 @@ public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom
      * @param obligationsMet
      * @param obligationsMetOnDate
      */
-    private RecurringDepositScheduleInstallment(final RecurringDepositAccount account, final Integer installmentNumber, final Date fromDate,
-            final Date dueDate, final BigDecimal depositAmount, final BigDecimal depositAmountCompleted,
+    private RecurringDepositScheduleInstallment(final RecurringDepositAccount account, final Integer installmentNumber,
+            final LocalDate fromDate, final LocalDate dueDate, final BigDecimal depositAmount, final BigDecimal depositAmountCompleted,
             final BigDecimal totalPaidInAdvance, final BigDecimal totalPaidLate, final boolean obligationsMet,
-            final Date obligationsMetOnDate) {
+            final LocalDate obligationsMetOnDate) {
         this.account = account;
         this.installmentNumber = installmentNumber;
         this.fromDate = fromDate;
@@ -111,22 +103,22 @@ public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom
     }
 
     public static RecurringDepositScheduleInstallment from(final RecurringDepositAccount account, final Integer installmentNumber,
-            final Date fromDate, final Date dueDate, final BigDecimal depositAmount, final BigDecimal depositAmountCompleted,
+            final LocalDate fromDate, final LocalDate dueDate, final BigDecimal depositAmount, final BigDecimal depositAmountCompleted,
             final BigDecimal totalPaidInAdvance, final BigDecimal totalPaidLate, final boolean obligationsMet,
-            final Date obligationsMetOnDate) {
+            final LocalDate obligationsMetOnDate) {
         return new RecurringDepositScheduleInstallment(account, installmentNumber, fromDate, dueDate, depositAmount, depositAmountCompleted,
                 totalPaidInAdvance, totalPaidLate, obligationsMet, obligationsMetOnDate);
     }
 
     public static RecurringDepositScheduleInstallment installment(final RecurringDepositAccount account, final Integer installmentNumber,
-            final Date dueDate, final BigDecimal depositAmount) {
+            final LocalDate dueDate, final BigDecimal depositAmount) {
 
-        final Date fromDate = null;
+        final LocalDate fromDate = null;
         final BigDecimal depositAmountCompleted = null;
         final BigDecimal totalPaidInAdvance = null;
         final BigDecimal totalPaidLate = null;
         final boolean obligationsMet = false;
-        final Date obligationsMetOnDate = null;
+        final LocalDate obligationsMetOnDate = null;
 
         return new RecurringDepositScheduleInstallment(account, installmentNumber, fromDate, dueDate, depositAmount, depositAmountCompleted,
                 totalPaidInAdvance, totalPaidLate, obligationsMet, obligationsMetOnDate);
@@ -170,7 +162,7 @@ public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom
     }
 
     public LocalDate dueDate() {
-        return (this.dueDate == null) ? null : LocalDate.ofInstant(this.dueDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
+        return this.dueDate;
     }
 
     public Money payInstallment(final LocalDate transactionDate, final Money transactionAmountRemaining) {
@@ -199,7 +191,7 @@ public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom
     private void checkIfInstallmentObligationsAreMet(final LocalDate transactionDate, final MonetaryCurrency currency) {
         this.obligationsMet = getTotalOutstanding(currency).isZero();
         if (this.obligationsMet) {
-            this.obligationsMetOnDate = Date.from(transactionDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            this.obligationsMetOnDate = transactionDate;
         }
     }
 

@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.CenterDomain;
 import org.apache.fineract.integrationtests.common.CenterHelper;
+import org.apache.fineract.integrationtests.common.GroupHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
@@ -259,4 +260,28 @@ public class CenterIntegrationTest {
 
     }
 
+    @Test
+    public void testCentersOrphanGroups() {
+
+        int officeId = new OfficeHelper(requestSpec, responseSpec).createOffice("01 July 2007");
+
+        String name = "TestBasicCreation" + new Timestamp(new java.util.Date().getTime());
+        int resourceId = CenterHelper.createCenter(name, officeId, requestSpec, responseSpec);
+        CenterDomain center = CenterHelper.retrieveByID(resourceId, requestSpec, responseSpec);
+
+        Assertions.assertNotNull(center);
+
+        int id = CenterHelper.listCenters(requestSpec, responseSpec).get(0).getId();
+        Assertions.assertTrue(id > 0);
+
+        CenterDomain retrievedCenter = CenterHelper.retrieveByID(id, requestSpec, responseSpec);
+        Assertions.assertNotNull(retrievedCenter);
+        Assertions.assertNotNull(retrievedCenter.getName());
+        Assertions.assertNotNull(retrievedCenter.getHierarchy());
+        Assertions.assertNotNull(retrievedCenter.getOfficeName());
+
+        int[] groupMembers = generateGroupMembers(2, officeId);
+        CenterHelper.associateGroups(resourceId, groupMembers, requestSpec, responseSpec);
+        GroupHelper.verifyOrphanGroupDetails(requestSpec, responseSpec, officeId);
+    }
 }

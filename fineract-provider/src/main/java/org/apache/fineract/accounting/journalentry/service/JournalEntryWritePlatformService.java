@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.accounting.journalentry.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Map;
 import org.apache.fineract.accounting.provisioning.domain.ProvisioningEntry;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -39,12 +39,12 @@ public interface JournalEntryWritePlatformService {
 
     CommandProcessingResult defineOpeningBalance(JsonCommand command);
 
-    String revertProvisioningJournalEntries(Date reversalTransactionDate, Long entityId, Integer entityType);
+    String revertProvisioningJournalEntries(LocalDate reversalTransactionDate, Long entityId, Integer entityType);
 
     String createProvisioningJournalEntries(ProvisioningEntry entry);
 
     void createJournalEntriesForShares(Map<String, Object> accountingBridgeData);
 
-    void revertShareAccountJournalEntries(ArrayList<Long> transactionId, Date transactionDate);
+    void revertShareAccountJournalEntries(ArrayList<Long> transactionId, LocalDate transactionDate);
 
 }
