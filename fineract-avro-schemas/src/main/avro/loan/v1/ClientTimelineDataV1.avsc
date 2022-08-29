@@ -1,97 +1,90 @@
 {
-    "name": "CommandProcessingResultEventV1",
-    "namespace": "org.apache.fineract.avro.generic.v1",
+    "name": "ClientTimelineDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
     "type": "record",
     "fields": [
         {
-            "name": "commandId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "officeId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "groupId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "clientId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "loanId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "savingsId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "resourceId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "subResourceId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "transactionId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "resourceIdentifier",
+            "name": "submittedOnDate",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "productId",
+            "name": "submittedByUsername",
             "type": [
                 "null",
-                "long"
+                "string"
             ]
         },
         {
-            "name": "gsimId",
+            "name": "submittedByFirstname",
             "type": [
                 "null",
-                "long"
+                "string"
             ]
         },
         {
-            "name": "glimId",
+            "name": "submittedByLastname",
             "type": [
                 "null",
-                "long"
+                "string"
+            ]
+        },
+        {
+            "name": "activatedOnDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "activatedByUsername",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "activatedByFirstname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "activatedByLastname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "closedOnDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "closedByUsername",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "closedByFirstname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "closedByLastname",
+            "type": [
+                "null",
+                "string"
             ]
         }
     ]

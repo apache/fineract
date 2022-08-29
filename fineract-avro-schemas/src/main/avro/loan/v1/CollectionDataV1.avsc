@@ -1,62 +1,62 @@
 {
-    "name": "ClientEventV1",
-    "namespace": "org.apache.fineract.avro.client.v1",
+    "name": "CollectionDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
     "type": "record",
     "fields": [
         {
-            "name": "id",
+            "name": "availableDisbursementAmount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "pastDueDays",
             "type": [
                 "null",
                 "int"
             ]
         },
         {
-            "name": "accountNo",
+            "name": "nextPaymentDueDate",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "status",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.client.v1.ClientEventV1Status"
-            ]
-        },
-        {
-            "name": "active",
-            "type": [
-                "null",
-                "boolean"
-            ]
-        },
-        {
-            "name": "fullName",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "name": "displayName",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "name": "officeId",
+            "name": "delinquentDays",
             "type": [
                 "null",
                 "int"
             ]
         },
         {
-            "name": "officeName",
+            "name": "delinquentDate",
             "type": [
                 "null",
                 "string"
+            ]
+        },
+        {
+            "name": "delinquentAmount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "lastPaymentDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "lastPaymentAmount",
+            "type": [
+                "null",
+                "bigdecimal"
             ]
         }
     ]

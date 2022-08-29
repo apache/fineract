@@ -1,52 +1,45 @@
 {
-    "name": "FixedDepositAccountEventV1Currency",
-    "namespace": "org.apache.fineract.avro.fixeddeposit.v1",
+    "name": "LoanChargePaidByDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
     "type": "record",
     "fields": [
         {
-            "name": "code",
+            "name": "id",
             "type": [
                 "null",
-                "string"
+                "int"
+            ]
+        },
+        {
+            "name": "amount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "installmentNumber",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "chargeId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "transactionId",
+            "type": [
+                "null",
+                "long"
             ]
         },
         {
             "name": "name",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "name": "decimalPlaces",
-            "type": [
-                "null",
-                "int"
-            ]
-        },
-        {
-            "name": "inMultiplesOf",
-            "type": [
-                "null",
-                "int"
-            ]
-        },
-        {
-            "name": "displaySymbol",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "name": "nameCode",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "name": "displayLabel",
             "type": [
                 "null",
                 "string"

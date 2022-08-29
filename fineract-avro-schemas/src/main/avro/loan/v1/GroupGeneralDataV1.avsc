@@ -1,0 +1,139 @@
+{
+    "name": "GroupGeneralDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "name": "id",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "accountNo",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "name",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "externalId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "status",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "active",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "activationDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "officeId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "officeName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "centerId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "centerName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "staffId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "staffName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "hierarchy",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "groupLevel",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "groupRoles",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.loan.v1.GroupRoleDataV1"
+                }
+            ]
+        },
+        {
+            "name": "calendarsData",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.loan.v1.CalendarDataV1"
+                }
+            ]
+        },
+        {
+            "name": "collectionMeetingCalendar",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.CalendarDataV1"
+            ]
+        }
+    ]
+}

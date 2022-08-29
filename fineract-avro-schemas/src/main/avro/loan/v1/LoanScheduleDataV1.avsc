@@ -1,0 +1,126 @@
+{
+    "name": "LoanScheduleDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "name": "currency",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.CurrencyDataV1"
+            ]
+        },
+        {
+            "name": "loanTermInDays",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "totalPrincipalDisbursed",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "totalPrincipalExpected",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "totalPrincipalPaid",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "totalInterestCharged",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "totalFeeChargesCharged",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "totalPenaltyChargesCharged",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "totalWaived",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "totalWrittenOff",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "totalRepaymentExpected",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "totalRepayment",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "totalPaidInAdvance",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "totalPaidLate",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "totalOutstanding",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "periods",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.SchedulePeriodDataV1"
+            ]
+        },
+        {
+            "name": "futurePeriods",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.SchedulePeriodDataV1"
+            ]
+        }
+    ]
+}

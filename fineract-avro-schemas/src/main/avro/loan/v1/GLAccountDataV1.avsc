@@ -1,94 +1,87 @@
 {
-    "name": "CommandProcessingResultEventV1",
-    "namespace": "org.apache.fineract.avro.generic.v1",
+    "name": "GLAccountDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
     "type": "record",
     "fields": [
         {
-            "name": "commandId",
+            "name": "id",
             "type": [
                 "null",
                 "long"
             ]
         },
         {
-            "name": "officeId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "groupId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "clientId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "loanId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "savingsId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "resourceId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "subResourceId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "transactionId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "resourceIdentifier",
+            "name": "name",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "productId",
+            "name": "parentId",
             "type": [
                 "null",
                 "long"
             ]
         },
         {
-            "name": "gsimId",
+            "name": "glCode",
             "type": [
                 "null",
-                "long"
+                "string"
             ]
         },
         {
-            "name": "glimId",
+            "name": "disabled",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "manualEntriesAllowed",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "type",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "usage",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "description",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "nameDecorated",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "tagId",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.CodeValueDataV1"
+            ]
+        },
+        {
+            "name": "organizationRunningBalance",
             "type": [
                 "null",
                 "long"

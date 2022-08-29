@@ -1,62 +1,72 @@
 {
-    "name": "ClientEventV1",
-    "namespace": "org.apache.fineract.avro.client.v1",
+    "name": "OfficeDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
     "type": "record",
     "fields": [
         {
             "name": "id",
             "type": [
                 "null",
-                "int"
+                "long"
             ]
         },
         {
-            "name": "accountNo",
+            "name": "name",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "status",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.client.v1.ClientEventV1Status"
-            ]
-        },
-        {
-            "name": "active",
-            "type": [
-                "null",
-                "boolean"
-            ]
-        },
-        {
-            "name": "fullName",
+            "name": "nameDecorated",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "displayName",
+            "name": "externalId",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "officeId",
-            "type": [
-                "null",
-                "int"
-            ]
-        },
-        {
-            "name": "officeName",
+            "name": "openingDate",
             "type": [
                 "null",
                 "string"
+            ]
+        },
+        {
+            "name": "hierarchy",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "parentId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "parentName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "allowedParents",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.loan.v1.OfficeDataV1"
+                }
             ]
         }
     ]

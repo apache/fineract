@@ -1,59 +1,52 @@
 {
-    "name": "ClientEventV1",
-    "namespace": "org.apache.fineract.avro.client.v1",
+    "name": "ClientCollateralManagementDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
     "type": "record",
     "fields": [
+        {
+            "name": "quantity",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
         {
             "name": "id",
             "type": [
                 "null",
-                "int"
+                "long"
             ]
         },
         {
-            "name": "accountNo",
+            "name": "pctToBase",
             "type": [
                 "null",
-                "string"
+                "bigdecimal"
             ]
         },
         {
-            "name": "status",
+            "name": "unitPrice",
             "type": [
                 "null",
-                "org.apache.fineract.avro.client.v1.ClientEventV1Status"
+                "bigdecimal"
             ]
         },
         {
-            "name": "active",
+            "name": "total",
             "type": [
                 "null",
-                "boolean"
+                "bigdecimal"
             ]
         },
         {
-            "name": "fullName",
+            "name": "totalCollateral",
             "type": [
                 "null",
-                "string"
+                "bigdecimal"
             ]
         },
         {
-            "name": "displayName",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "name": "officeId",
-            "type": [
-                "null",
-                "int"
-            ]
-        },
-        {
-            "name": "officeName",
+            "name": "name",
             "type": [
                 "null",
                 "string"

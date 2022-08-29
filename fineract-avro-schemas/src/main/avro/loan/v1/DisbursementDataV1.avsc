@@ -1,6 +1,6 @@
 {
-    "name": "ClientEventV1",
-    "namespace": "org.apache.fineract.avro.client.v1",
+    "name": "DisbursementDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
     "type": "record",
     "fields": [
         {
@@ -11,52 +11,52 @@
             ]
         },
         {
-            "name": "accountNo",
+            "name": "expectedDisbursementDate",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "status",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.client.v1.ClientEventV1Status"
-            ]
-        },
-        {
-            "name": "active",
-            "type": [
-                "null",
-                "boolean"
-            ]
-        },
-        {
-            "name": "fullName",
+            "name": "actualDisbursementDate",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "displayName",
+            "name": "principal",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "netDisbursalAmount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "loanChargeId",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "officeId",
+            "name": "chargeAmount",
             "type": [
                 "null",
-                "int"
+                "bigdecimal"
             ]
         },
         {
-            "name": "officeName",
+            "name": "waivedChargeAmount",
             "type": [
                 "null",
-                "string"
+                "bigdecimal"
             ]
         }
     ]
