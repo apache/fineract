@@ -137,7 +137,7 @@ public class AdHocWritePlatformServiceJpaRepositoryImpl implements AdHocWritePla
              * Checking the adhocquery present in DB or not using adHocId
              */
             final AdHoc adHoc = this.adHocRepository.findById(adHocId).orElseThrow(() -> new AdHocNotFoundException(adHocId));
-            adHoc.disableActive();
+            adHoc.setActive(true);
             this.adHocRepository.save(adHoc);
             return new CommandProcessingResultBuilder().withEntityId(adHocId).build();
 
@@ -158,7 +158,7 @@ public class AdHocWritePlatformServiceJpaRepositoryImpl implements AdHocWritePla
              * Checking the adHoc present in DB or not using id
              */
             final AdHoc adHoc = this.adHocRepository.findById(adHocId).orElseThrow(() -> new AdHocNotFoundException(adHocId));
-            adHoc.enableActive();
+            adHoc.setActive(false);
             this.adHocRepository.save(adHoc);
             return new CommandProcessingResultBuilder().withEntityId(adHocId).build();
 
