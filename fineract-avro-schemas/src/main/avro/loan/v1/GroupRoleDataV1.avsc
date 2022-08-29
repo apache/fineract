@@ -1,24 +1,31 @@
 {
-    "name": "FixedDepositAccountEventV1InterestCompoundingPeriodType",
-    "namespace": "org.apache.fineract.avro.fixeddeposit.v1",
+    "name": "GroupRoleDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
     "type": "record",
     "fields": [
         {
             "name": "id",
             "type": [
                 "null",
-                "int"
+                "long"
             ]
         },
         {
             "name": "code",
             "type": [
                 "null",
-                "string"
+                "org.apache.fineract.avro.loan.v1.CodeValueDataV1"
             ]
         },
         {
-            "name": "description",
+            "name": "clientId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "clientName",
             "type": [
                 "null",
                 "string"

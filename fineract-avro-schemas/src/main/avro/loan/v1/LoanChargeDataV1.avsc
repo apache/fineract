@@ -1,0 +1,206 @@
+{
+    "name": "LoanChargeDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "name": "id",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "chargeId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "name",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "chargeTimeType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "dueDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "chargeCalculationType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "percentage",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "amountPercentageAppliedTo",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "currency",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.CurrencyDataV1"
+            ]
+        },
+        {
+            "name": "amount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "amountPaid",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "amountWaived",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "amountWrittenOff",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "amountOutstanding",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "amountOrPercentage",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "chargeOptions",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.loan.v1.ChargeDataV1"
+                }
+            ]
+        },
+        {
+            "name": "penalty",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "chargePaymentMode",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "paid",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "waived",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "chargePayable",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "loanId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "minCap",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "maxCap",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "installmentChargeData",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.LoanInstallmentChargeDataV1"
+            ]
+        },
+        {
+            "name": "amountAccrued",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "amountUnrecognized",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "externalId",
+            "type": [
+                "null",
+                "string"
+            ]
+        }
+    ]
+}

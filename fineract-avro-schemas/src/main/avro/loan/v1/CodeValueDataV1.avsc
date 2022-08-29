@@ -1,13 +1,13 @@
 {
-    "name": "FixedDepositAccountEventV1Currency",
-    "namespace": "org.apache.fineract.avro.fixeddeposit.v1",
+    "name": "CodeValueDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
     "type": "record",
     "fields": [
         {
-            "name": "code",
+            "name": "id",
             "type": [
                 "null",
-                "string"
+                "long"
             ]
         },
         {
@@ -18,38 +18,31 @@
             ]
         },
         {
-            "name": "decimalPlaces",
+            "name": "position",
             "type": [
                 "null",
                 "int"
             ]
         },
         {
-            "name": "inMultiplesOf",
-            "type": [
-                "null",
-                "int"
-            ]
-        },
-        {
-            "name": "displaySymbol",
+            "name": "description",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "nameCode",
+            "name": "active",
             "type": [
                 "null",
-                "string"
+                "boolean"
             ]
         },
         {
-            "name": "displayLabel",
+            "name": "mandatory",
             "type": [
                 "null",
-                "string"
+                "boolean"
             ]
         }
     ]

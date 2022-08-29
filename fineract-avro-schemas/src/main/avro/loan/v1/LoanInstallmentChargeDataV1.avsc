@@ -1,62 +1,69 @@
 {
-    "name": "ClientEventV1",
-    "namespace": "org.apache.fineract.avro.client.v1",
+    "name": "LoanInstallmentChargeDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
     "type": "record",
     "fields": [
         {
-            "name": "id",
+            "name": "installmentNumber",
             "type": [
                 "null",
                 "int"
             ]
         },
         {
-            "name": "accountNo",
+            "name": "dueDate",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "status",
+            "name": "amount",
             "type": [
                 "null",
-                "org.apache.fineract.avro.client.v1.ClientEventV1Status"
+                "bigdecimal"
             ]
         },
         {
-            "name": "active",
+            "name": "amountOutstanding",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "amountWaived",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "paid",
             "type": [
                 "null",
                 "boolean"
             ]
         },
         {
-            "name": "fullName",
+            "name": "waived",
             "type": [
                 "null",
-                "string"
+                "boolean"
             ]
         },
         {
-            "name": "displayName",
+            "name": "amountAccrued",
             "type": [
                 "null",
-                "string"
+                "bigdecimal"
             ]
         },
         {
-            "name": "officeId",
+            "name": "amountUnrecognized",
             "type": [
                 "null",
-                "int"
-            ]
-        },
-        {
-            "name": "officeName",
-            "type": [
-                "null",
-                "string"
+                "bigdecimal"
             ]
         }
     ]

@@ -1,34 +1,34 @@
 {
-    "name": "FixedDepositAccountEventV1Timeline",
-    "namespace": "org.apache.fineract.avro.fixeddeposit.v1",
+    "name": "DelinquencyRangeDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
     "type": "record",
     "fields": [
         {
-            "name": "submittedOnDate",
+            "name": "id",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "classification",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "submittedByUsername",
+            "name": "minimumAgeDays",
             "type": [
                 "null",
-                "string"
+                "int"
             ]
         },
         {
-            "name": "submittedByFirstname",
+            "name": "maximumAgeDays",
             "type": [
                 "null",
-                "string"
-            ]
-        },
-        {
-            "name": "submittedByLastname",
-            "type": [
-                "null",
-                "string"
+                "int"
             ]
         }
     ]

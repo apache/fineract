@@ -1,0 +1,133 @@
+{
+    "name": "LoanInterestRecalculationDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "name": "id",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "loanId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "interestRecalculationCompoundingType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "rescheduleStrategyType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "calendarData",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.CalendarDataV1"
+            ]
+        },
+        {
+            "name": "recalculationRestFrequencyType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "recalculationRestFrequencyInterval",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "recalculationRestFrequencyNthDay",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "recalculationRestFrequencyWeekday",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "recalculationRestFrequencyOnDay",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "recalculationCompoundingFrequencyType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "recalculationCompoundingFrequencyInterval",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "recalculationCompoundingFrequencyNthDay",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "recalculationCompoundingFrequencyWeekday",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "recalculationCompoundingFrequencyOnDay",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "isCompoundingToBePostedAsTransaction",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "compoundingCalendarData",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.CalendarDataV1"
+            ]
+        },
+        {
+            "name": "allowCompoundingOnEod",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        }
+    ]
+}

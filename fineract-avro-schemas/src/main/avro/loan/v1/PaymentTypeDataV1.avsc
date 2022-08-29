@@ -1,34 +1,41 @@
 {
-    "name": "FixedDepositAccountEventV1Timeline",
-    "namespace": "org.apache.fineract.avro.fixeddeposit.v1",
+    "name": "PaymentTypeDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
     "type": "record",
     "fields": [
         {
-            "name": "submittedOnDate",
+            "name": "id",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "name",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "submittedByUsername",
+            "name": "description",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "submittedByFirstname",
+            "name": "isCashPayment",
             "type": [
                 "null",
-                "string"
+                "boolean"
             ]
         },
         {
-            "name": "submittedByLastname",
+            "name": "position",
             "type": [
                 "null",
-                "string"
+                "long"
             ]
         }
     ]

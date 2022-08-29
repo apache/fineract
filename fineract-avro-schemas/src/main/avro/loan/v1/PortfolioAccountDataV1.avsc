@@ -1,20 +1,27 @@
 {
-    "name": "CommandProcessingResultEventV1",
-    "namespace": "org.apache.fineract.avro.generic.v1",
+    "name": "PortfolioAccountDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
     "type": "record",
     "fields": [
         {
-            "name": "commandId",
+            "name": "id",
             "type": [
                 "null",
                 "long"
             ]
         },
         {
-            "name": "officeId",
+            "name": "accountNo",
             "type": [
                 "null",
-                "long"
+                "string"
+            ]
+        },
+        {
+            "name": "externalId",
+            "type": [
+                "null",
+                "string"
             ]
         },
         {
@@ -25,6 +32,13 @@
             ]
         },
         {
+            "name": "groupName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
             "name": "clientId",
             "type": [
                 "null",
@@ -32,42 +46,7 @@
             ]
         },
         {
-            "name": "loanId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "savingsId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "resourceId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "subResourceId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "transactionId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "resourceIdentifier",
+            "name": "clientName",
             "type": [
                 "null",
                 "string"
@@ -81,17 +60,38 @@
             ]
         },
         {
-            "name": "gsimId",
+            "name": "productName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "fieldOfficerId",
             "type": [
                 "null",
                 "long"
             ]
         },
         {
-            "name": "glimId",
+            "name": "fieldOfficerName",
             "type": [
                 "null",
-                "long"
+                "string"
+            ]
+        },
+        {
+            "name": "currency",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.CurrencyDataV1"
+            ]
+        },
+        {
+            "name": "amtForTransfer",
+            "type": [
+                "null",
+                "bigdecimal"
             ]
         }
     ]

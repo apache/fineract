@@ -1,6 +1,6 @@
 {
-    "name": "FixedDepositAccountEventV1Status",
-    "namespace": "org.apache.fineract.avro.fixeddeposit.v1",
+    "name": "LoanStatusEnumDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
     "type": "record",
     "fields": [
         {
@@ -25,28 +25,14 @@
             ]
         },
         {
-            "name": "submittedAndPendingApproval",
+            "name": "pendingApproval",
             "type": [
                 "null",
                 "boolean"
             ]
         },
         {
-            "name": "approved",
-            "type": [
-                "null",
-                "boolean"
-            ]
-        },
-        {
-            "name": "rejected",
-            "type": [
-                "null",
-                "boolean"
-            ]
-        },
-        {
-            "name": "withdrawnByApplicant",
+            "name": "waitingForDisbursal",
             "type": [
                 "null",
                 "boolean"
@@ -60,6 +46,27 @@
             ]
         },
         {
+            "name": "closedObligationsMet",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "closedWrittenOff",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "closedRescheduled",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
             "name": "closed",
             "type": [
                 "null",
@@ -67,21 +74,7 @@
             ]
         },
         {
-            "name": "prematureClosed",
-            "type": [
-                "null",
-                "boolean"
-            ]
-        },
-        {
-            "name": "transferInProgress",
-            "type": [
-                "null",
-                "boolean"
-            ]
-        },
-        {
-            "name": "transferOnHold",
+            "name": "overpaid",
             "type": [
                 "null",
                 "boolean"

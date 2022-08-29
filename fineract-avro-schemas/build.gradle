@@ -19,20 +19,40 @@
 
 import com.github.davidmc24.gradle.plugin.avro.GenerateAvroJavaTask
 
+// TODO: @vidakovic we should publish this lib to Maven Central; do in separate PR
 description = 'Fineract Avro Schemas'
 
 apply plugin: 'com.github.davidmc24.gradle.plugin.avro-base'
 
 apply from: 'dependencies.gradle'
 
-// TODO: @vidakovic we should publish this lib to Maven Central; do in separate PR
+task preprocessAvroSchemas() {
+    doLast {
+        copy {
+            from "$projectDir/src/main/avro"
+            into "$buildDir/generated/avro/src/main/avro"
+            filter { line ->
+                line.replaceAll("\"bigdecimal\"", new File("$projectDir/src/main/resources/avro-templates/bigdecimal.avsc").getText("UTF-8"))
+            }
+        }
+    }
+}
+
 task buildJavaSdk(type: GenerateAvroJavaTask) {
-    source("$projectDir/src/main/avro")
+    source("$buildDir/generated/avro/src/main/avro")
     outputDir = file("$buildDir/generated/java/src/main/java")
 }
 
+spotless {
+    json {
+        target '**/*.avsc' // TODO: include generated AVSCs as well
+        targetExclude ''
+        simple()
+    }
+}
 
-compileJava.dependsOn(buildJavaSdk, licenseFormatMain, spotlessMiscApply)
+buildJavaSdk.dependsOn(preprocessAvroSchemas, spotlessJsonApply)
+compileJava.dependsOn(buildJavaSdk, licenseFormatMain)
 
 java {
     // keep this at Java 8, not 17

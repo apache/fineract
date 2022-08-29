@@ -1,0 +1,105 @@
+{
+    "name": "AccountTransferDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "name": "id",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "reversed",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "currency",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.CurrencyDataV1"
+            ]
+        },
+        {
+            "name": "transferAmount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "transferDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "transferDescription",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "fromOffice",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.OfficeDataV1"
+            ]
+        },
+        {
+            "name": "fromClient",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.ClientDataV1"
+            ]
+        },
+        {
+            "name": "fromAccountType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "fromAccount",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.PortfolioAccountDataV1"
+            ]
+        },
+        {
+            "name": "toOffice",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.OfficeDataV1"
+            ]
+        },
+        {
+            "name": "toClient",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.ClientDataV1"
+            ]
+        },
+        {
+            "name": "toAccountType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "toAccount",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.PortfolioAccountDataV1"
+            ]
+        }
+    ]
+}

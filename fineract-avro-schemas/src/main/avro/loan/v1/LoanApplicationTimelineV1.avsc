@@ -1,0 +1,217 @@
+{
+    "name": "LoanApplicationTimelineV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "name": "submittedOnDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "submittedByUsername",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "submittedByFirstname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "submittedByLastname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "rejectedOnDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "rejectedByUsername",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "rejectedByFirstname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "rejectedByLastname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "withdrawnOnDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "withdrawnByUsername",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "withdrawnByFirstname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "withdrawnByLastname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "approvedOnDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "approvedByUsername",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "approvedByFirstname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "approvedByLastname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "expectedDisbursementDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "actualDisbursementDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "disbursedByUsername",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "disbursedByFirstname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "disbursedByLastname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "closedOnDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "closedByUsername",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "closedByFirstname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "closedByLastname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "expectedMaturityDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "writeOffOnDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "writeOffByUsername",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "writeOffByFirstname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "writeOffByLastname",
+            "type": [
+                "null",
+                "string"
+            ]
+        }
+    ]
+}

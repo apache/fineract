@@ -1,0 +1,171 @@
+{
+    "name": "LoanTransactionDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "name": "id",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "officeId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "officeName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "type",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.LoanTransactionEnumDataV1"
+            ]
+        },
+        {
+            "name": "date",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "currency",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.CurrencyDataV1"
+            ]
+        },
+        {
+            "name": "paymentDetailData",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.PaymentDetailDataV1"
+            ]
+        },
+        {
+            "name": "amount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "netDisbursalAmount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "principalPortion",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "interestPortion",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "feeChargesPortion",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "penaltyChargesPortion",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "overpaymentPortion",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "unrecognizedIncomePortion",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "externalId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "transfer",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.AccountTransferDataV1"
+            ]
+        },
+        {
+            "name": "fixedEmiAmount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "outstandingLoanBalance",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "submittedOnDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "manuallyReversed",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "possibleNextRepaymentDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "loanChargePaidByList",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.loan.v1.LoanChargePaidByDataV1"
+                }
+            ]
+        }
+    ]
+}

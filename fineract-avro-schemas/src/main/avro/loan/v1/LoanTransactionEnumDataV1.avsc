@@ -1,0 +1,182 @@
+{
+    "name": "LoanTransactionEnumDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "name": "id",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "code",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "value",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "disbursement",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "repaymentAtDisbursement",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "repayment",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "merchantIssuedRefund",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "payoutRefund",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "goodwillCredit",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "chargeRefund",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "contra",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "waiveInterest",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "waiveCharges",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "accrual",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "writeOff",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "recoveryRepayment",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "initiateTransfer",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "approveTransfer",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "withdrawTransfer",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "rejectTransfer",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "chargePayment",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "refund",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "refundForActiveLoans",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "creditBalanceRefund",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "chargeback",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        }
+    ]
+}

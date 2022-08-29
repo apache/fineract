@@ -64,6 +64,7 @@ public final class ChargeData implements Comparable<ChargeData>, Serializable {
     private final GLAccountData incomeOrLiabilityAccount;
     private final TaxGroupData taxGroup;
 
+    // template attributes
     private final Collection<CurrencyData> currencyOptions;
     private final List<EnumOptionData> chargeCalculationTypeOptions;//
     private final List<EnumOptionData> chargeAppliesToOptions;//

@@ -249,6 +249,7 @@ allprojects  {
             "**/git.properties",
             ".mailmap",
             '**/images/diag-*.svg',
+            '**/*.avsc'
         ]
     }
 }

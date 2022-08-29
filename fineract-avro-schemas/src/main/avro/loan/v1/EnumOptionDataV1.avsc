@@ -1,6 +1,6 @@
 {
-    "name": "FixedDepositAccountEventV1InterestCompoundingPeriodType",
-    "namespace": "org.apache.fineract.avro.fixeddeposit.v1",
+    "name": "EnumOptionDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
     "type": "record",
     "fields": [
         {
@@ -18,7 +18,7 @@
             ]
         },
         {
-            "name": "description",
+            "name": "value",
             "type": [
                 "null",
                 "string"

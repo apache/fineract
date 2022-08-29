@@ -1,62 +1,55 @@
 {
-    "name": "ClientEventV1",
-    "namespace": "org.apache.fineract.avro.client.v1",
+    "name": "LoanTermVariationsDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
     "type": "record",
     "fields": [
         {
             "name": "id",
             "type": [
                 "null",
-                "int"
+                "long"
             ]
         },
         {
-            "name": "accountNo",
+            "name": "termType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "termVariationApplicableFrom",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "status",
+            "name": "decimalValue",
             "type": [
                 "null",
-                "org.apache.fineract.avro.client.v1.ClientEventV1Status"
+                "bigdecimal"
             ]
         },
         {
-            "name": "active",
+            "name": "dateValue",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "isSpecificToInstallment",
             "type": [
                 "null",
                 "boolean"
             ]
         },
         {
-            "name": "fullName",
+            "name": "isProcessed",
             "type": [
                 "null",
-                "string"
-            ]
-        },
-        {
-            "name": "displayName",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "name": "officeId",
-            "type": [
-                "null",
-                "int"
-            ]
-        },
-        {
-            "name": "officeName",
-            "type": [
-                "null",
-                "string"
+                "boolean"
             ]
         }
     ]
