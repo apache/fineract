@@ -95,9 +95,9 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
                     existingEntryData.getId(), PortfolioProductType.PROVISIONING.getValue());
         }
         if (requestedEntry.getLoanProductProvisioningEntries() == null || requestedEntry.getLoanProductProvisioningEntries().size() == 0) {
-            requestedEntry.setJournalEntryCreated(Boolean.FALSE);
+            requestedEntry.setIsJournalEntryCreated(Boolean.FALSE);
         } else {
-            requestedEntry.setJournalEntryCreated(Boolean.TRUE);
+            requestedEntry.setIsJournalEntryCreated(Boolean.TRUE);
         }
 
         this.provisioningEntryRepository.saveAndFlush(requestedEntry);
@@ -150,7 +150,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
             throw new ProvisioningEntryAlreadyCreatedException(existingEntry.getId(), existingEntry.getCreatedDate());
         }
         AppUser currentUser = this.platformSecurityContext.authenticatedUser();
-        ProvisioningEntry requestedEntry = new ProvisioningEntry(currentUser, date, null, null, null);
+        ProvisioningEntry requestedEntry = new ProvisioningEntry().setCreatedBy(currentUser).setCreatedDate(date);
         Collection<LoanProductProvisioningEntry> entries = generateLoanProvisioningEntry(requestedEntry, date);
         requestedEntry.setProvisioningEntries(entries);
         if (addJournalEntries) {
@@ -189,15 +189,16 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
             Money money = Money.of(currency, data.getBalance());
             Money amountToReserve = money.percentageOf(data.getPercentage(), MoneyHelper.getRoundingMode());
             Long criteraId = data.getCriteriaId();
-            LoanProductProvisioningEntry entry = new LoanProductProvisioningEntry(loanProduct, office, data.getCurrencyCode(),
-                    provisioningCategory, data.getOverdueInDays(), amountToReserve.getAmount(), liabilityAccount, expenseAccount,
-                    criteraId);
-            entry.setProvisioningEntry(parent);
+            LoanProductProvisioningEntry entry = new LoanProductProvisioningEntry().setLoanProduct(loanProduct).setOffice(office)
+                    .setCurrencyCode(data.getCurrencyCode()).setProvisioningCategory(provisioningCategory)
+                    .setOverdueInDays(data.getOverdueInDays()).setReservedAmount(amountToReserve.getAmount())
+                    .setLiabilityAccount(liabilityAccount).setExpenseAccount(expenseAccount).setCriteriaId(criteraId);
+            entry.setEntry(parent);
             if (!provisioningEntries.containsKey(entry.partialHashCode())) {
                 provisioningEntries.put(entry.partialHashCode(), entry);
             } else {
                 LoanProductProvisioningEntry entry1 = provisioningEntries.get(entry.partialHashCode());
-                entry1.addReservedAmount(entry.getReservedAmount());
+                entry1.setReservedAmount(entry1.getReservedAmount().add(entry.getReservedAmount()));
             }
         }
         return provisioningEntries.values();
