@@ -246,7 +246,8 @@ public class AccountingRuleApiResource {
             final Collection<CodeValueData> allowedCreditTagOptions = allowedTagOptions;
             final Collection<CodeValueData> allowedDebitTagOptions = allowedTagOptions;
 
-            accountingRuleData = new AccountingRuleData(allowedAccounts, allowedOffices, allowedCreditTagOptions, allowedDebitTagOptions);
+            accountingRuleData = new AccountingRuleData().setAllowedOffices(allowedOffices).setAllowedAccounts(allowedAccounts)
+                    .setAllowedCreditTagOptions(allowedCreditTagOptions).setAllowedDebitTagOptions(allowedDebitTagOptions);
 
         } else {
 
@@ -265,8 +266,14 @@ public class AccountingRuleApiResource {
                 allowedDebitTagOptions = allowedTagOptions;
             }
 
-            accountingRuleData = new AccountingRuleData(accountingRuleData, allowedAccounts, allowedOffices, allowedCreditTagOptions,
-                    allowedDebitTagOptions);
+            accountingRuleData = new AccountingRuleData().setId(accountingRuleData.getId()).setOfficeId(accountingRuleData.getOfficeId())
+                    .setOfficeName(accountingRuleData.getOfficeName()).setName(accountingRuleData.getName())
+                    .setDescription(accountingRuleData.getDescription()).setSystemDefined(accountingRuleData.isSystemDefined())
+                    .setAllowMultipleCreditEntries(accountingRuleData.isAllowMultipleCreditEntries())
+                    .setAllowMultipleDebitEntries(accountingRuleData.isAllowMultipleDebitEntries()).setAllowedAccounts(allowedAccounts)
+                    .setAllowedOffices(allowedOffices).setAllowedCreditTagOptions(allowedCreditTagOptions)
+                    .setAllowedDebitTagOptions(allowedDebitTagOptions);
+
         }
         return accountingRuleData;
     }
