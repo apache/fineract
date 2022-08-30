@@ -1,0 +1,384 @@
+{
+    "name": "RecurringDepositAccountDataV1",
+    "namespace": "org.apache.fineract.avro.recurringdeposit.v1",
+    "type": "record",
+    "fields": [
+        {
+            "name": "id",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "accountNo",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "externalId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "groupId",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "groupName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "clientId",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "clientName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "depositProductId",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "depositProductName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "fieldOfficerId",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "fieldOfficerName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "status",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.savings.v1.SavingsAccountStatusEnumDataV1"
+            ]
+        },
+        {
+            "name": "timeline",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.savings.v1.SavingsAccountApplicationTimelineDataV1"
+            ]
+        },
+        {
+            "name": "currency",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.CurrencyDataV1"
+            ]
+        },
+        {
+            "name": "nominalAnnualInterestRate",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "interestCompoundingPeriodType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "interestPostingPeriodType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "interestCalculationType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "interestCalculationDaysInYearType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "minRequiredOpeningBalance",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "lockinPeriodFrequency",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "lockinPeriodFrequencyType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "withdrawalFeeForTransfers",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "depositType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "minBalanceForInterestCalculation",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "withHoldTax",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "summary",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.savings.v1.SavingsAccountSummaryDataV1"
+            ]
+        },
+        {
+            "name": "transactions",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.savings.v1.SavingsAccountTransactionDataV1"
+                }
+            ]
+        },
+        {
+            "name": "charges",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.savings.v1.SavingsAccountChargeDataV1"
+                }
+            ]
+        },
+        {
+            "name": "preClosurePenalApplicable",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "preClosurePenalInterest",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "preClosurePenalInterestOnType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "minDepositTerm",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "maxDepositTerm",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "minDepositTermType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "maxDepositTermType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "inMultiplesOfDepositTerm",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "inMultiplesOfDepositTermType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "depositAmount",
+            "type": [
+                "null",
+                "float"
+            ]
+        },
+        {
+            "name": "maturityAmount",
+            "type": [
+                "null",
+                "float"
+            ]
+        },
+        {
+            "name": "maturityDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "depositPeriod",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "depositPeriodFrequency",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "mandatoryRecommendedDepositAmount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "totalOverdueAmount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "noOfOverdueInstallments",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "isMandatoryDeposit",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "allowWithdrawal",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "adjustAdvanceTowardsFuturePayments",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "expectedFirstDepositOnDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "isCalendarInherited",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "recurringFrequency",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "recurringFrequencyType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        }
+    ]
+}
