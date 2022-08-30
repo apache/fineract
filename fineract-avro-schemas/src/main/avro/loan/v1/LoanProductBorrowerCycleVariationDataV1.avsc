@@ -1,0 +1,56 @@
+{
+    "name": "LoanProductBorrowerCycleVariationDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "name": "id",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "borrowerCycleNumber",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "paramType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "valueConditionType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "minValue",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "maxValue",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "defaultValue",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        }
+    ]
+}

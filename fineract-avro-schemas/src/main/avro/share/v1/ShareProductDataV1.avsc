@@ -1,0 +1,153 @@
+{
+    "name": "ShareProductDataV1",
+    "namespace": "org.apache.fineract.avro.share.v1",
+    "type": "record",
+    "fields": [
+        {
+            "name": "id",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "name",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "shortName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "description",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "externalId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "currency",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.CurrencyDataV1"
+            ]
+        },
+        {
+            "name": "totalShares",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "totalSharesIssued",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "unitPrice",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "shareCapital",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "minimumShares",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "nominalShares",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "maximumShares",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "marketPrice",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.share.v1.ShareProductMarketPriceDataV1"
+                }
+            ]
+        },
+        {
+            "name": "charges",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.portfolio.v1.ChargeDataV1"
+                }
+            ]
+        },
+        {
+            "name": "allowDividendCalculationForInactiveClients",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "lockinPeriod",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "lockPeriodTypeEnum",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "minimumActivePeriod",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "minimumActivePeriodForDividendsTypeEnum",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        }
+    ]
+}
