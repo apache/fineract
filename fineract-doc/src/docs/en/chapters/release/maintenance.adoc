@@ -1,0 +1,13 @@
+= Maintenance Release Process
+
+IMPORTANT: This is a first attempt to introduce maintenance releases. Some details might change as soon as we get more experience with the process and feedback from the community. The numbers here are still more or less arbitrary, and we'll adapt as necessary.
+
+== Rules
+
+- hotfix releases are reserved for critical (BLOCKER) bugs and security issues. Probably we'll have some kind of voting process in place, e. g. "minimum 3 x +1 votes from PMC members"
+- we will support (for now to start) two minor versions back counting from the last release; this would mean that once 1.8.0 is out we would support 1.8.x and 1.7.x, but not 1.6.x and older; this rule is tentative, we'll see then what we do in the future when we have more feedback.
+- guaranteed backward compatibility with the last minor release; i. e. "1.6.1" is a drop-in replacement for "1.6.0"
+- NO new features, tables, data, REST endpoints
+- NO major (or "minor" framework upgrades); i. e. if we used Spring Boot "2.6.1" in version "1.6.0" of Fineract we can upgrade dependencies to "2.6.10" (unless it breaks something of course), but not to "2.7.2" of Spring Boot
+
+NOTE: The rest of the release process is the same as for normal releases. In the future we might have smaller time windows for reviews.

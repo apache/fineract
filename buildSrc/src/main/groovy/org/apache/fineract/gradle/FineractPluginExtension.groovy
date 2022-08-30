@@ -159,6 +159,6 @@ class FineractPluginExtension {
     }
 
     static class FineractPluginGpgParams {
-        String file
+        List<String> files
     }
 }

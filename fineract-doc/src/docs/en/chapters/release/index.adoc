@@ -12,4 +12,6 @@ include::configuration.adoc[leveloffset=+1]
 
 include::process.adoc[leveloffset=+1]
 
+include::maintenance.adoc[leveloffset=+1]
+
 include::publish.adoc[leveloffset=+1]
