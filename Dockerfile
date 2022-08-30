@@ -20,35 +20,28 @@ FROM azul/zulu-openjdk:17 AS builder
 RUN apt-get update -qq && apt-get install -y wget
 
 COPY . fineract
-WORKDIR fineract
+WORKDIR /fineract
 
 
 RUN ./gradlew --no-daemon -q  -x compileTestJava -x test -x spotlessJavaCheck -x spotlessJava bootJar
 RUN mv /fineract/fineract-provider/build/libs/*.jar /fineract/fineract-provider/build/libs/fineract-provider.jar
 
-#building pentaho reports
-#WORKDIR /fineract/fineract-pentaho
-#RUN chmod +x gradlew
-#RUN ./gradlew --no-daemon -q -x test build
 
 # https://issues.apache.org/jira/browse/LEGAL-462
 # https://issues.apache.org/jira/browse/FINERACT-762
 # We include an alternative JDBC driver (which is faster, but not allowed to be default in Apache distribution)
 # allowing implementations to switch the driver used by changing start-up parameters (for both tenants and each tenant DB)
 # The commented out lines in the docker-compose.yml illustrate how to do this.
-WORKDIR /app/libs
+WORKDIR /fineract/libs
 RUN wget -q https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.23/mysql-connector-java-8.0.23.jar
-#RUN cp /fineract/fineract-pentaho/build/dist/lib/*.jar /app/libs/
 # =========================================
 
 FROM azul/zulu-openjdk:17 as fineract
 
 #pentaho copy
-#COPY --from=builder /fineract/fineract-pentaho/pentahoReports/*.properties /root/.mifosx/pentahoReports/
-#COPY --from=builder /fineract/fineract-pentaho/pentahoReports/*.prpt /root/.mifosx/pentahoReports/
-#
-#COPY --from=builder /fineract/fineract-provider/build/libs/ /app
-#COPY --from=builder /app/libs /app/libs
+COPY --from=builder /fineract/fineract-provider/pentahoReports/*.properties /root/.mifosx/pentahoReports/
+COPY --from=builder /fineract/fineract-provider/pentahoReports/*.prpt /root/.mifosx/pentahoReports/
+
 
 ENV DRIVERCLASS_NAME=com.mysql.cj.jdbc.Driver
 ENV PROTOCOL=jdbc
