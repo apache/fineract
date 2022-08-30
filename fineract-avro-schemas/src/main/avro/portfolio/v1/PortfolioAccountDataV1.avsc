@@ -1,6 +1,6 @@
 {
-    "name": "LoanAccountSummaryDataV1",
-    "namespace": "org.apache.fineract.avro.loan.v1",
+    "name": "PortfolioAccountDataV1",
+    "namespace": "org.apache.fineract.avro.portfolio.v1",
     "type": "record",
     "fields": [
         {
@@ -18,14 +18,35 @@
             ]
         },
         {
-            "name": "parentAccountNumber",
+            "name": "externalId",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "externalId",
+            "name": "groupId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "groupName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "clientId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "clientName",
             "type": [
                 "null",
                 "string"
@@ -46,63 +67,28 @@
             ]
         },
         {
-            "name": "shortProductName",
+            "name": "fieldOfficerId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "fieldOfficerName",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "status",
+            "name": "currency",
             "type": [
                 "null",
-                "org.apache.fineract.avro.loan.v1.LoanStatusEnumDataV1"
+                "org.apache.fineract.avro.generic.v1.CurrencyDataV1"
             ]
         },
         {
-            "name": "loanType",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
-            ]
-        },
-        {
-            "name": "loanCycle",
-            "type": [
-                "null",
-                "int"
-            ]
-        },
-        {
-            "name": "timeline",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.loan.v1.LoanApplicationTimelineV1"
-            ]
-        },
-        {
-            "name": "inArrears",
-            "type": [
-                "null",
-                "boolean"
-            ]
-        },
-        {
-            "name": "originalLoan",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "name": "loanBalance",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "name": "amountPaid",
+            "name": "amtForTransfer",
             "type": [
                 "null",
                 "bigdecimal"

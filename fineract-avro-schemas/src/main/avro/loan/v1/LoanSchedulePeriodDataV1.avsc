@@ -1,17 +1,66 @@
 {
-    "name": "LoanSummaryDataV1",
+    "name": "LoanSchedulePeriodDataV1",
     "namespace": "org.apache.fineract.avro.loan.v1",
     "type": "record",
     "fields": [
         {
-            "name": "currency",
+            "name": "period",
             "type": [
                 "null",
-                "org.apache.fineract.avro.generic.v1.CurrencyDataV1"
+                "int"
+            ]
+        },
+        {
+            "name": "fromDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "dueDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "obligationsMetOnDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "complete",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "daysInPeriod",
+            "type": [
+                "null",
+                "int"
             ]
         },
         {
             "name": "principalDisbursed",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "principalOriginalDue",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "principalDue",
             "type": [
                 "null",
                 "bigdecimal"
@@ -39,14 +88,21 @@
             ]
         },
         {
-            "name": "principalOverdue",
+            "name": "principalLoanBalanceOutstanding",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "interestCharged",
+            "name": "interestOriginalDue",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "interestDue",
             "type": [
                 "null",
                 "bigdecimal"
@@ -81,21 +137,7 @@
             ]
         },
         {
-            "name": "interestOverdue",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "name": "feeChargesCharged",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "name": "feeChargesDueAtDisbursementCharged",
+            "name": "feeChargesDue",
             "type": [
                 "null",
                 "bigdecimal"
@@ -130,14 +172,7 @@
             ]
         },
         {
-            "name": "feeChargesOverdue",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "name": "penaltyChargesCharged",
+            "name": "penaltyChargesDue",
             "type": [
                 "null",
                 "bigdecimal"
@@ -172,56 +207,56 @@
             ]
         },
         {
-            "name": "penaltyChargesOverdue",
+            "name": "totalOriginalDueForPeriod",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "totalExpectedRepayment",
+            "name": "totalDueForPeriod",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "totalRepayment",
+            "name": "totalPaidForPeriod",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "totalExpectedCostOfLoan",
+            "name": "totalPaidInAdvanceForPeriod",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "totalCostOfLoan",
+            "name": "totalPaidLateForPeriod",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "totalWaived",
+            "name": "totalWaivedForPeriod",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "totalWrittenOff",
+            "name": "totalWrittenOffForPeriod",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "totalOutstanding",
+            "name": "totalOutstandingForPeriod",
             "type": [
                 "null",
                 "bigdecimal"
@@ -235,31 +270,17 @@
             ]
         },
         {
-            "name": "totalRecovered",
+            "name": "totalActualCostOfLoanForPeriod",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "overdueSinceDate",
+            "name": "totalInstallmentAmountForPeriod",
             "type": [
                 "null",
-                "string"
-            ]
-        },
-        {
-            "name": "writeoffReasonId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "writeoffReason",
-            "type": [
-                "null",
-                "string"
+                "bigdecimal"
             ]
         }
     ]

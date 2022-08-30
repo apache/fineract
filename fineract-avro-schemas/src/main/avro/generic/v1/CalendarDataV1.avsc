@@ -1,6 +1,6 @@
 {
-    "name": "LoanChargeDataV1",
-    "namespace": "org.apache.fineract.avro.loan.v1",
+    "name": "CalendarDataV1",
+    "namespace": "org.apache.fineract.avro.generic.v1",
     "type": "record",
     "fields": [
         {
@@ -11,195 +11,226 @@
             ]
         },
         {
-            "name": "chargeId",
+            "name": "calendarInstanceId",
             "type": [
                 "null",
                 "long"
             ]
         },
         {
-            "name": "name",
+            "name": "entityId",
             "type": [
                 "null",
-                "string"
+                "long"
             ]
         },
         {
-            "name": "chargeTimeType",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
-            ]
-        },
-        {
-            "name": "dueDate",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "name": "chargeCalculationType",
+            "name": "entityType",
             "type": [
                 "null",
                 "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
             ]
         },
         {
-            "name": "percentage",
+            "name": "title",
             "type": [
                 "null",
-                "bigdecimal"
+                "string"
             ]
         },
         {
-            "name": "amountPercentageAppliedTo",
+            "name": "description",
             "type": [
                 "null",
-                "bigdecimal"
+                "string"
             ]
         },
         {
-            "name": "currency",
+            "name": "location",
             "type": [
                 "null",
-                "org.apache.fineract.avro.generic.v1.CurrencyDataV1"
+                "string"
             ]
         },
         {
-            "name": "amount",
+            "name": "startDate",
             "type": [
                 "null",
-                "bigdecimal"
+                "string"
             ]
         },
         {
-            "name": "amountPaid",
+            "name": "endDate",
             "type": [
                 "null",
-                "bigdecimal"
+                "string"
             ]
         },
         {
-            "name": "amountWaived",
+            "name": "meetingTime",
             "type": [
                 "null",
-                "bigdecimal"
+                "string"
             ]
         },
         {
-            "name": "amountWrittenOff",
+            "name": "duration",
             "type": [
                 "null",
-                "bigdecimal"
+                "int"
             ]
         },
         {
-            "name": "amountOutstanding",
+            "name": "type",
             "type": [
                 "null",
-                "bigdecimal"
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
             ]
         },
         {
-            "name": "amountOrPercentage",
+            "name": "repeating",
             "type": [
                 "null",
-                "bigdecimal"
+                "boolean"
             ]
         },
         {
-            "name": "chargeOptions",
+            "name": "recurrence",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "frequency",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "interval",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "repeatsOnDay",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "repeatsOnNthDayOfMonth",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "remindBy",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "firstReminder",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "secondReminder",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "recurringDates",
             "type": [
                 "null",
                 {
                     "type": "array",
-                    "items": "org.apache.fineract.avro.portfolio.v1.ChargeDataV1"
+                    "items": "string"
                 }
             ]
         },
         {
-            "name": "penalty",
+            "name": "nextTenRecurringDates",
             "type": [
                 "null",
-                "boolean"
+                {
+                    "type": "array",
+                    "items": "string"
+                }
             ]
         },
         {
-            "name": "chargePaymentMode",
+            "name": "humanReadable",
             "type": [
                 "null",
-                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+                "string"
             ]
         },
         {
-            "name": "paid",
+            "name": "recentEligibleMeetingDate",
             "type": [
                 "null",
-                "boolean"
+                "string"
             ]
         },
         {
-            "name": "waived",
+            "name": "createdDate",
             "type": [
                 "null",
-                "boolean"
+                "string"
             ]
         },
         {
-            "name": "chargePayable",
+            "name": "lastUpdatedDate",
             "type": [
                 "null",
-                "boolean"
+                "string"
             ]
         },
         {
-            "name": "loanId",
+            "name": "createdByUserId",
             "type": [
                 "null",
                 "long"
             ]
         },
         {
-            "name": "minCap",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "name": "maxCap",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "name": "installmentChargeData",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.loan.v1.LoanInstallmentChargeDataV1"
-            ]
-        },
-        {
-            "name": "amountAccrued",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "name": "amountUnrecognized",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "name": "externalId",
+            "name": "createdByUsername",
             "type": [
                 "null",
                 "string"
+            ]
+        },
+        {
+            "name": "lastUpdatedByUserId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "lastUpdatedByUsername",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "repeatsOnDayOfMonth",
+            "type": [
+                "null",
+                "int"
             ]
         }
     ]

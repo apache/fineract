@@ -1,6 +1,6 @@
 {
-    "name": "LoanTermVariationsDataV1",
-    "namespace": "org.apache.fineract.avro.loan.v1",
+    "name": "CodeValueDataV1",
+    "namespace": "org.apache.fineract.avro.generic.v1",
     "type": "record",
     "fields": [
         {
@@ -11,42 +11,35 @@
             ]
         },
         {
-            "name": "termType",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
-            ]
-        },
-        {
-            "name": "termVariationApplicableFrom",
+            "name": "name",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "decimalValue",
+            "name": "position",
             "type": [
                 "null",
-                "bigdecimal"
+                "int"
             ]
         },
         {
-            "name": "dateValue",
+            "name": "description",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "isSpecificToInstallment",
+            "name": "active",
             "type": [
                 "null",
                 "boolean"
             ]
         },
         {
-            "name": "isProcessed",
+            "name": "mandatory",
             "type": [
                 "null",
                 "boolean"

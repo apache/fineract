@@ -1,125 +1,139 @@
 {
-    "name": "LoanScheduleDataV1",
-    "namespace": "org.apache.fineract.avro.loan.v1",
+    "name": "SavingsAccountTransactionEnumDataV1",
+    "namespace": "org.apache.fineract.avro.savings.v1",
     "type": "record",
     "fields": [
         {
-            "name": "currency",
+            "name": "id",
             "type": [
                 "null",
-                "org.apache.fineract.avro.generic.v1.CurrencyDataV1"
+                "long"
             ]
         },
         {
-            "name": "loanTermInDays",
+            "name": "code",
             "type": [
                 "null",
-                "int"
+                "string"
             ]
         },
         {
-            "name": "totalPrincipalDisbursed",
+            "name": "value",
             "type": [
                 "null",
-                "bigdecimal"
+                "string"
             ]
         },
         {
-            "name": "totalPrincipalExpected",
+            "name": "deposit",
             "type": [
                 "null",
-                "bigdecimal"
+                "boolean"
             ]
         },
         {
-            "name": "totalPrincipalPaid",
+            "name": "dividendPayout",
             "type": [
                 "null",
-                "bigdecimal"
+                "boolean"
             ]
         },
         {
-            "name": "totalInterestCharged",
+            "name": "withdrawal",
             "type": [
                 "null",
-                "bigdecimal"
+                "boolean"
             ]
         },
         {
-            "name": "totalFeeChargesCharged",
+            "name": "interestPosting",
             "type": [
                 "null",
-                "bigdecimal"
+                "boolean"
             ]
         },
         {
-            "name": "totalPenaltyChargesCharged",
+            "name": "feeDeduction",
             "type": [
                 "null",
-                "bigdecimal"
+                "boolean"
             ]
         },
         {
-            "name": "totalWaived",
+            "name": "initiateTransfer",
             "type": [
                 "null",
-                "bigdecimal"
+                "boolean"
             ]
         },
         {
-            "name": "totalWrittenOff",
+            "name": "approveTransfer",
             "type": [
                 "null",
-                "bigdecimal"
+                "boolean"
             ]
         },
         {
-            "name": "totalRepaymentExpected",
+            "name": "withdrawTransfer",
             "type": [
                 "null",
-                "bigdecimal"
+                "boolean"
             ]
         },
         {
-            "name": "totalRepayment",
+            "name": "rejectTransfer",
             "type": [
                 "null",
-                "bigdecimal"
+                "boolean"
             ]
         },
         {
-            "name": "totalPaidInAdvance",
+            "name": "overdraftInterest",
             "type": [
                 "null",
-                "bigdecimal"
+                "boolean"
             ]
         },
         {
-            "name": "totalPaidLate",
+            "name": "writtenoff",
             "type": [
                 "null",
-                "bigdecimal"
+                "boolean"
             ]
         },
         {
-            "name": "totalOutstanding",
+            "name": "overdraftFee",
             "type": [
                 "null",
-                "bigdecimal"
+                "boolean"
             ]
         },
         {
-            "name": "periods",
+            "name": "withholdTax",
             "type": [
                 "null",
-                "org.apache.fineract.avro.loan.v1.LoanSchedulePeriodDataV1"
+                "boolean"
             ]
         },
         {
-            "name": "futurePeriods",
+            "name": "escheat",
             "type": [
                 "null",
-                "org.apache.fineract.avro.loan.v1.LoanSchedulePeriodDataV1"
+                "boolean"
+            ]
+        },
+        {
+            "name": "amountHold",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "amountRelease",
+            "type": [
+                "null",
+                "boolean"
             ]
         }
     ]

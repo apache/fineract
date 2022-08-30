@@ -1,6 +1,6 @@
 {
-    "name": "LoanAccountSummaryDataV1",
-    "namespace": "org.apache.fineract.avro.loan.v1",
+    "name": "GroupGeneralDataV1",
+    "namespace": "org.apache.fineract.avro.group.v1",
     "type": "record",
     "fields": [
         {
@@ -18,7 +18,7 @@
             ]
         },
         {
-            "name": "parentAccountNumber",
+            "name": "name",
             "type": [
                 "null",
                 "string"
@@ -32,80 +32,107 @@
             ]
         },
         {
-            "name": "productId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "productName",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "name": "shortProductName",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
             "name": "status",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.loan.v1.LoanStatusEnumDataV1"
-            ]
-        },
-        {
-            "name": "loanType",
             "type": [
                 "null",
                 "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
             ]
         },
         {
-            "name": "loanCycle",
-            "type": [
-                "null",
-                "int"
-            ]
-        },
-        {
-            "name": "timeline",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.loan.v1.LoanApplicationTimelineV1"
-            ]
-        },
-        {
-            "name": "inArrears",
+            "name": "active",
             "type": [
                 "null",
                 "boolean"
             ]
         },
         {
-            "name": "originalLoan",
+            "name": "activationDate",
             "type": [
                 "null",
-                "bigdecimal"
+                "string"
             ]
         },
         {
-            "name": "loanBalance",
+            "name": "officeId",
             "type": [
                 "null",
-                "bigdecimal"
+                "long"
             ]
         },
         {
-            "name": "amountPaid",
+            "name": "officeName",
             "type": [
                 "null",
-                "bigdecimal"
+                "string"
+            ]
+        },
+        {
+            "name": "centerId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "centerName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "staffId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "staffName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "hierarchy",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "groupLevel",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "groupRoles",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.group.v1.GroupRoleDataV1"
+                }
+            ]
+        },
+        {
+            "name": "calendarsData",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.generic.v1.CalendarDataV1"
+                }
+            ]
+        },
+        {
+            "name": "collectionMeetingCalendar",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.CalendarDataV1"
             ]
         }
     ]

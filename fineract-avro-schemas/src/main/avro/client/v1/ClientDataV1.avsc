@@ -1,0 +1,251 @@
+{
+    "name": "ClientDataV1",
+    "namespace": "org.apache.fineract.avro.client.v1",
+    "type": "record",
+    "fields": [
+        {
+            "name": "id",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "accountNo",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "externalId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "status",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "subStatus",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.CodeValueDataV1"
+            ]
+        },
+        {
+            "name": "active",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "activationDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "firstname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "middlename",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "lastname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "fullname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "displayName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "mobileNo",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "emailAddress",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "dateOfBirth",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "gender",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.CodeValueDataV1"
+            ]
+        },
+        {
+            "name": "clientType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.CodeValueDataV1"
+            ]
+        },
+        {
+            "name": "clientClassification",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.CodeValueDataV1"
+            ]
+        },
+        {
+            "name": "isStaff",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "officeId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "officeName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "transferToOfficeId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "transferToOfficeName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "imageId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "imagePresent",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "staffId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "staffName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "timeline",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.client.v1.ClientTimelineDataV1"
+            ]
+        },
+        {
+            "name": "savingsProductId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "savingsProductName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "savingsAccountId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "legalForm",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "clientCollateralManagements",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.client.v1.ClientCollateralManagementDataV1"
+                }
+            ]
+        },
+        {
+            "name": "groups",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.group.v1.GroupGeneralDataV1"
+                }
+            ]
+        }
+    ]
+}

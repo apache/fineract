@@ -1,111 +1,97 @@
 {
-    "name": "LoanAccountSummaryDataV1",
-    "namespace": "org.apache.fineract.avro.loan.v1",
+    "name": "SavingsAccountStatusEnumDataV1",
+    "namespace": "org.apache.fineract.avro.savings.v1",
     "type": "record",
     "fields": [
         {
             "name": "id",
             "type": [
                 "null",
-                "long"
-            ]
-        },
-        {
-            "name": "accountNo",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "name": "parentAccountNumber",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "name": "externalId",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "name": "productId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "productName",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "name": "shortProductName",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "name": "status",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.loan.v1.LoanStatusEnumDataV1"
-            ]
-        },
-        {
-            "name": "loanType",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
-            ]
-        },
-        {
-            "name": "loanCycle",
-            "type": [
-                "null",
                 "int"
             ]
         },
         {
-            "name": "timeline",
+            "name": "code",
             "type": [
                 "null",
-                "org.apache.fineract.avro.loan.v1.LoanApplicationTimelineV1"
+                "string"
             ]
         },
         {
-            "name": "inArrears",
+            "name": "value",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "submittedAndPendingApproval",
             "type": [
                 "null",
                 "boolean"
             ]
         },
         {
-            "name": "originalLoan",
+            "name": "approved",
             "type": [
                 "null",
-                "bigdecimal"
+                "boolean"
             ]
         },
         {
-            "name": "loanBalance",
+            "name": "rejected",
             "type": [
                 "null",
-                "bigdecimal"
+                "boolean"
             ]
         },
         {
-            "name": "amountPaid",
+            "name": "withdrawnByApplicant",
             "type": [
                 "null",
-                "bigdecimal"
+                "boolean"
+            ]
+        },
+        {
+            "name": "active",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "closed",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "prematureClosed",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "transferInProgress",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "transferOnHold",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "matured",
+            "type": [
+                "null",
+                "boolean"
             ]
         }
     ]

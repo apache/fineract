@@ -1,6 +1,6 @@
 {
-    "name": "LoanTransactionDataV1",
-    "namespace": "org.apache.fineract.avro.loan.v1",
+    "name": "SavingsAccountTransactionDataV1",
+    "namespace": "org.apache.fineract.avro.savings.v1",
     "type": "record",
     "fields": [
         {
@@ -11,24 +11,24 @@
             ]
         },
         {
-            "name": "officeId",
+            "name": "transactionType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.savings.v1.SavingsAccountTransactionEnumDataV1"
+            ]
+        },
+        {
+            "name": "accountId",
             "type": [
                 "null",
                 "long"
             ]
         },
         {
-            "name": "officeName",
+            "name": "accountNo",
             "type": [
                 "null",
                 "string"
-            ]
-        },
-        {
-            "name": "type",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.loan.v1.LoanTransactionEnumDataV1"
             ]
         },
         {
@@ -60,59 +60,24 @@
             ]
         },
         {
-            "name": "netDisbursalAmount",
+            "name": "outstandingChargeAmount",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "principalPortion",
+            "name": "runningBalance",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "interestPortion",
+            "name": "reversed",
             "type": [
                 "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "name": "feeChargesPortion",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "name": "penaltyChargesPortion",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "name": "overpaymentPortion",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "name": "unrecognizedIncomePortion",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "name": "externalId",
-            "type": [
-                "null",
-                "string"
+                "boolean"
             ]
         },
         {
@@ -123,20 +88,6 @@
             ]
         },
         {
-            "name": "fixedEmiAmount",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "name": "outstandingLoanBalance",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
             "name": "submittedOnDate",
             "type": [
                 "null",
@@ -144,26 +95,75 @@
             ]
         },
         {
-            "name": "manuallyReversed",
+            "name": "interestedPostedAsOn",
             "type": [
                 "null",
                 "boolean"
             ]
         },
         {
-            "name": "possibleNextRepaymentDate",
+            "name": "submittedByUsername",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "loanChargePaidByList",
+            "name": "note",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "isManualTransaction",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "isReversal",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "originalTransactionId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "lienTransaction",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "releaseTransactionId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "reasonForBlock",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "chargesPaidByData",
             "type": [
                 "null",
                 {
                     "type": "array",
-                    "items": "org.apache.fineract.avro.loan.v1.LoanChargePaidByDataV1"
+                    "items": "org.apache.fineract.avro.savings.v1.SavingsAccountChargesPaidByDataV1"
                 }
             ]
         }

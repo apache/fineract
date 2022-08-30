@@ -1,0 +1,28 @@
+{
+    "name": "SavingsAccountChargesPaidByDataV1",
+    "namespace": "org.apache.fineract.avro.savings.v1",
+    "type": "record",
+    "fields": [
+        {
+            "name": "chargeId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "amount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "savingsAccountChargeData",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.savings.v1.SavingsAccountChargeDataV1"
+            ]
+        }
+    ]
+}
