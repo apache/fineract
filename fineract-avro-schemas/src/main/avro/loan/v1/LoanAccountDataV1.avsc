@@ -1,0 +1,630 @@
+{
+    "name": "LoanAccountDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "name": "id",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "accountNo",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "externalId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "status",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.LoanStatusEnumDataV1"
+            ]
+        },
+        {
+            "name": "subStatus",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "clientId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "clientAccountNo",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "clientName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "clientOfficeId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "loanProductId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "loanProductName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "loanProductDescription",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "isLoanProductLinkedToFloatingRate",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "fundId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "fundName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "loanPurposeId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "loanPurposeName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "loanOfficerId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "loanOfficerName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "loanType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "principal",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "approvedPrincipal",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "proposedPrincipal",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "netDisbursalAmount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "termFrequency",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "termPeriodFrequencyType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "numberOfRepayments",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "repaymentEvery",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "repaymentFrequencyType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "repaymentFrequencyNthDayType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "repaymentFrequencyDayOfWeekType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "interestRatePerPeriod",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "interestRateFrequencyType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "annualInterestRate",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "isFloatingInterestRate",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "interestRateDifferential",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "amortizationType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "interestType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "interestCalculationPeriodType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "allowPartialPeriodInterestCalculation",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "inArrearsTolerance",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "transactionProcessingStrategyId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "transactionProcessingStrategyName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "graceOnPrincipalPayment",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "recurringMoratoriumOnPrincipalPeriods",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "graceOnInterestPayment",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "graceOnInterestCharged",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "graceOnArrearsAgeing",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "interestChargedFromDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "expectedFirstRepaymentOnDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "syncDisbursementWithMeeting",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "timeline",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "summary",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.LoanSummaryDataV1"
+            ]
+        },
+        {
+            "name": "repaymentSchedule",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.LoanScheduleDataV1"
+            ]
+        },
+        {
+            "name": "transactions",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.loan.v1.LoanTransactionDataV1"
+                }
+            ]
+        },
+        {
+            "name": "charges",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.loan.v1.LoanChargeDataV1"
+                }
+            ]
+        },
+        {
+            "name": "meeting",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.CalendarDataV1"
+            ]
+        },
+        {
+            "name": "disbursementDetails",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.loan.v1.DisbursementDataV1"
+                }
+            ]
+        },
+        {
+            "name": "originalSchedule",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.LoanScheduleDataV1"
+            ]
+        },
+        {
+            "name": "totalOverpaid",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "loanCounter",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "loanProductCounter",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "linkedAccount",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.portfolio.v1.PortfolioAccountDataV1"
+            ]
+        },
+        {
+            "name": "accountLinkingOptions",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.portfolio.v1.PortfolioAccountDataV1"
+                }
+            ]
+        },
+        {
+            "name": "multiDisburseLoan",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "canDefineInstallmentAmount",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "fixedEmiAmount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "maxOutstandingLoanBalance",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "canDisburse",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "emiAmountVariations",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.loan.v1.LoanTermVariationsDataV1"
+                }
+            ]
+        },
+        {
+            "name": "clientActiveLoanOptions",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.loan.v1.LoanAccountSummaryDataV1"
+                }
+            ]
+        },
+        {
+            "name": "canUseForTopup",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "isTopup",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "closureLoanId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "closureLoanAccountNo",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "topupAmount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "inArrears",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "isNPA",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "overdueCharges",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.portfolio.v1.ChargeDataV1"
+                }
+            ]
+        },
+        {
+            "name": "daysInMonthType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "daysInYearType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "isInterestRecalculationEnabled",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "interestRecalculationData",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.LoanInterestRecalculationDataV1"
+            ]
+        },
+        {
+            "name": "createStandingInstructionAtDisbursement",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "delinquent",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.CollectionDataV1"
+            ]
+        },
+        {
+            "name": "delinquencyRange",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.DelinquencyRangeDataV1"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,91 @@
+{
+    "name": "ClientTimelineDataV1",
+    "namespace": "org.apache.fineract.avro.client.v1",
+    "type": "record",
+    "fields": [
+        {
+            "name": "submittedOnDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "submittedByUsername",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "submittedByFirstname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "submittedByLastname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "activatedOnDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "activatedByUsername",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "activatedByFirstname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "activatedByLastname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "closedOnDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "closedByUsername",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "closedByFirstname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "closedByLastname",
+            "type": [
+                "null",
+                "string"
+            ]
+        }
+    ]
+}

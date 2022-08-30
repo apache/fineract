@@ -1,0 +1,28 @@
+{
+    "name": "EnumOptionDataV1",
+    "namespace": "org.apache.fineract.avro.generic.v1",
+    "type": "record",
+    "fields": [
+        {
+            "name": "id",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "code",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "value",
+            "type": [
+                "null",
+                "string"
+            ]
+        }
+    ]
+}

@@ -1,6 +1,6 @@
 {
-    "name": "LoanScheduleDataV1",
-    "namespace": "org.apache.fineract.avro.loan.v1",
+    "name": "SavingsAccountSummaryDataV1",
+    "namespace": "org.apache.fineract.avro.savings.v1",
     "type": "record",
     "fields": [
         {
@@ -11,115 +11,115 @@
             ]
         },
         {
-            "name": "loanTermInDays",
-            "type": [
-                "null",
-                "int"
-            ]
-        },
-        {
-            "name": "totalPrincipalDisbursed",
+            "name": "totalDeposits",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "totalPrincipalExpected",
+            "name": "totalWithdrawals",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "totalPrincipalPaid",
+            "name": "totalWithdrawalFees",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "totalInterestCharged",
+            "name": "totalAnnualFees",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "totalFeeChargesCharged",
+            "name": "totalInterestEarned",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "totalPenaltyChargesCharged",
+            "name": "totalInterestPosted",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "totalWaived",
+            "name": "accountBalance",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "totalWrittenOff",
+            "name": "totalFeeCharge",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "totalRepaymentExpected",
+            "name": "totalPenaltyCharge",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "totalRepayment",
+            "name": "totalOverdraftInterestDerived",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "totalPaidInAdvance",
+            "name": "totalWithholdTax",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "totalPaidLate",
+            "name": "interestNotPosted",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "totalOutstanding",
+            "name": "lastInterestCalculationDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "availableBalance",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "periods",
+            "name": "interestPostedTillDate",
             "type": [
                 "null",
-                "org.apache.fineract.avro.loan.v1.LoanSchedulePeriodDataV1"
+                "string"
             ]
         },
         {
-            "name": "futurePeriods",
+            "name": "prevInterestPostedTillDate",
             "type": [
                 "null",
-                "org.apache.fineract.avro.loan.v1.LoanSchedulePeriodDataV1"
+                "string"
             ]
         }
     ]

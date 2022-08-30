@@ -1,6 +1,6 @@
 {
-    "name": "LoanAccountSummaryDataV1",
-    "namespace": "org.apache.fineract.avro.loan.v1",
+    "name": "GLAccountDataV1",
+    "namespace": "org.apache.fineract.avro.gl.v1",
     "type": "record",
     "fields": [
         {
@@ -11,101 +11,80 @@
             ]
         },
         {
-            "name": "accountNo",
+            "name": "name",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "parentAccountNumber",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "name": "externalId",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "name": "productId",
+            "name": "parentId",
             "type": [
                 "null",
                 "long"
             ]
         },
         {
-            "name": "productName",
+            "name": "glCode",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "shortProductName",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "name": "status",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.loan.v1.LoanStatusEnumDataV1"
-            ]
-        },
-        {
-            "name": "loanType",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
-            ]
-        },
-        {
-            "name": "loanCycle",
-            "type": [
-                "null",
-                "int"
-            ]
-        },
-        {
-            "name": "timeline",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.loan.v1.LoanApplicationTimelineV1"
-            ]
-        },
-        {
-            "name": "inArrears",
+            "name": "disabled",
             "type": [
                 "null",
                 "boolean"
             ]
         },
         {
-            "name": "originalLoan",
+            "name": "manualEntriesAllowed",
             "type": [
                 "null",
-                "bigdecimal"
+                "boolean"
             ]
         },
         {
-            "name": "loanBalance",
+            "name": "type",
             "type": [
                 "null",
-                "bigdecimal"
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
             ]
         },
         {
-            "name": "amountPaid",
+            "name": "usage",
             "type": [
                 "null",
-                "bigdecimal"
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "name": "description",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "nameDecorated",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "tagId",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.CodeValueDataV1"
+            ]
+        },
+        {
+            "name": "organizationRunningBalance",
+            "type": [
+                "null",
+                "long"
             ]
         }
     ]

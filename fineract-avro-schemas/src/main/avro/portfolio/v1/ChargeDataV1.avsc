@@ -1,6 +1,6 @@
 {
-    "name": "LoanTransactionDataV1",
-    "namespace": "org.apache.fineract.avro.loan.v1",
+    "name": "ChargeDataV1",
+    "namespace": "org.apache.fineract.avro.portfolio.v1",
     "type": "record",
     "fields": [
         {
@@ -11,31 +11,66 @@
             ]
         },
         {
-            "name": "officeId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "officeName",
+            "name": "name",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "type",
+            "name": "active",
             "type": [
                 "null",
-                "org.apache.fineract.avro.loan.v1.LoanTransactionEnumDataV1"
+                "boolean"
             ]
         },
         {
-            "name": "date",
+            "name": "penalty",
             "type": [
                 "null",
-                "string"
+                "boolean"
+            ]
+        },
+        {
+            "name": "freeWithdrawal",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "freeWithdrawalChargeFrequency",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "restartFrequency",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "restartFrequencyEnum",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "name": "isPaymentType",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "name": "paymentTypeOptions",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.payment.v1.PaymentTypeDataV1"
             ]
         },
         {
@@ -46,13 +81,6 @@
             ]
         },
         {
-            "name": "paymentDetailData",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.payment.v1.PaymentDetailDataV1"
-            ]
-        },
-        {
             "name": "amount",
             "type": [
                 "null",
@@ -60,111 +88,73 @@
             ]
         },
         {
-            "name": "netDisbursalAmount",
+            "name": "chargeTimeType",
             "type": [
                 "null",
-                "bigdecimal"
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
             ]
         },
         {
-            "name": "principalPortion",
+            "name": "chargeAppliesTo",
             "type": [
                 "null",
-                "bigdecimal"
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
             ]
         },
         {
-            "name": "interestPortion",
+            "name": "chargeCalculationType",
             "type": [
                 "null",
-                "bigdecimal"
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
             ]
         },
         {
-            "name": "feeChargesPortion",
+            "name": "chargePaymentMode",
             "type": [
                 "null",
-                "bigdecimal"
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
             ]
         },
         {
-            "name": "penaltyChargesPortion",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "name": "overpaymentPortion",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "name": "unrecognizedIncomePortion",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "name": "externalId",
+            "name": "feeOnMonthDay",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "transfer",
+            "name": "feeInterval",
             "type": [
                 "null",
-                "org.apache.fineract.avro.savings.v1.AccountTransferDataV1"
+                "int"
             ]
         },
         {
-            "name": "fixedEmiAmount",
+            "name": "minCap",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "outstandingLoanBalance",
+            "name": "maxCap",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "submittedOnDate",
+            "name": "feeFrequency",
             "type": [
                 "null",
-                "string"
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
             ]
         },
         {
-            "name": "manuallyReversed",
+            "name": "incomeOrLiabilityAccount",
             "type": [
                 "null",
-                "boolean"
-            ]
-        },
-        {
-            "name": "possibleNextRepaymentDate",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "name": "loanChargePaidByList",
-            "type": [
-                "null",
-                {
-                    "type": "array",
-                    "items": "org.apache.fineract.avro.loan.v1.LoanChargePaidByDataV1"
-                }
+                "org.apache.fineract.avro.gl.v1.GLAccountDataV1"
             ]
         }
     ]

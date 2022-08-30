@@ -1,6 +1,6 @@
 {
-    "name": "LoanChargeDataV1",
-    "namespace": "org.apache.fineract.avro.loan.v1",
+    "name": "SavingsAccountChargeDataV1",
+    "namespace": "org.apache.fineract.avro.savings.v1",
     "type": "record",
     "fields": [
         {
@@ -12,6 +12,13 @@
         },
         {
             "name": "chargeId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "name": "accountId",
             "type": [
                 "null",
                 "long"
@@ -36,6 +43,20 @@
             "type": [
                 "null",
                 "string"
+            ]
+        },
+        {
+            "name": "feeOnMonthDay",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "feeInterval",
+            "type": [
+                "null",
+                "int"
             ]
         },
         {
@@ -109,16 +130,6 @@
             ]
         },
         {
-            "name": "chargeOptions",
-            "type": [
-                "null",
-                {
-                    "type": "array",
-                    "items": "org.apache.fineract.avro.portfolio.v1.ChargeDataV1"
-                }
-            ]
-        },
-        {
             "name": "penalty",
             "type": [
                 "null",
@@ -126,80 +137,52 @@
             ]
         },
         {
-            "name": "chargePaymentMode",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
-            ]
-        },
-        {
-            "name": "paid",
+            "name": "isActive",
             "type": [
                 "null",
                 "boolean"
             ]
         },
         {
-            "name": "waived",
+            "name": "isFreeWithdrawal",
             "type": [
                 "null",
                 "boolean"
             ]
         },
         {
-            "name": "chargePayable",
+            "name": "freeWithdrawalChargeFrequency",
             "type": [
                 "null",
-                "boolean"
+                "int"
             ]
         },
         {
-            "name": "loanId",
+            "name": "restartFrequency",
             "type": [
                 "null",
-                "long"
+                "int"
             ]
         },
         {
-            "name": "minCap",
+            "name": "restartFrequencyEnum",
             "type": [
                 "null",
-                "bigdecimal"
+                "int"
             ]
         },
         {
-            "name": "maxCap",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "name": "installmentChargeData",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.loan.v1.LoanInstallmentChargeDataV1"
-            ]
-        },
-        {
-            "name": "amountAccrued",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "name": "amountUnrecognized",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "name": "externalId",
+            "name": "inactivationDate",
             "type": [
                 "null",
                 "string"
+            ]
+        },
+        {
+            "name": "chargeData",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.portfolio.v1.ChargeDataV1"
             ]
         }
     ]

@@ -1,55 +1,55 @@
 {
-    "name": "LoanTermVariationsDataV1",
-    "namespace": "org.apache.fineract.avro.loan.v1",
+    "name": "CurrencyDataV1",
+    "namespace": "org.apache.fineract.avro.generic.v1",
     "type": "record",
     "fields": [
         {
-            "name": "id",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "termType",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
-            ]
-        },
-        {
-            "name": "termVariationApplicableFrom",
+            "name": "code",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "decimalValue",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "name": "dateValue",
+            "name": "name",
             "type": [
                 "null",
                 "string"
             ]
         },
         {
-            "name": "isSpecificToInstallment",
+            "name": "decimalPlaces",
             "type": [
                 "null",
-                "boolean"
+                "int"
             ]
         },
         {
-            "name": "isProcessed",
+            "name": "inMultiplesOf",
             "type": [
                 "null",
-                "boolean"
+                "int"
+            ]
+        },
+        {
+            "name": "displaySymbol",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "nameCode",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "name": "displayLabel",
+            "type": [
+                "null",
+                "string"
             ]
         }
     ]

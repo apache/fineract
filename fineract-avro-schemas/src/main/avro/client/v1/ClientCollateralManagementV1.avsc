@@ -1,8 +1,15 @@
 {
-    "name": "LoanTermVariationsDataV1",
-    "namespace": "org.apache.fineract.avro.loan.v1",
+    "name": "ClientCollateralManagementDataV1",
+    "namespace": "org.apache.fineract.avro.client.v1",
     "type": "record",
     "fields": [
+        {
+            "name": "quantity",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
         {
             "name": "id",
             "type": [
@@ -11,45 +18,38 @@
             ]
         },
         {
-            "name": "termType",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
-            ]
-        },
-        {
-            "name": "termVariationApplicableFrom",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "name": "decimalValue",
+            "name": "pctToBase",
             "type": [
                 "null",
                 "bigdecimal"
             ]
         },
         {
-            "name": "dateValue",
+            "name": "unitPrice",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "total",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "totalCollateral",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "name": "name",
             "type": [
                 "null",
                 "string"
-            ]
-        },
-        {
-            "name": "isSpecificToInstallment",
-            "type": [
-                "null",
-                "boolean"
-            ]
-        },
-        {
-            "name": "isProcessed",
-            "type": [
-                "null",
-                "boolean"
             ]
         }
     ]
