@@ -25,4 +25,9 @@ public class LoanUndoWrittenOffBusinessEvent extends LoanTransactionBusinessEven
     public LoanUndoWrittenOffBusinessEvent(LoanTransaction value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "LoanUndoWrittenOffBusinessEvent";
+    }
 }

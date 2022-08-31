@@ -25,4 +25,9 @@ public class GroupsCreateBusinessEvent extends GroupsBusinessEvent {
     public GroupsCreateBusinessEvent(CommandProcessingResult value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "GroupsCreateBusinessEvent";
+    }
 }

@@ -26,4 +26,9 @@ public class LoanWrittenOffPreBusinessEvent extends LoanBusinessEvent {
     public LoanWrittenOffPreBusinessEvent(Loan value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "LoanWrittenOffPreBusinessEvent";
+    }
 }

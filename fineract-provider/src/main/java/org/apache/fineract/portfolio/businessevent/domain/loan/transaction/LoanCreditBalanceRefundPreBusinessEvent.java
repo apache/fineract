@@ -26,4 +26,9 @@ public class LoanCreditBalanceRefundPreBusinessEvent extends LoanBusinessEvent {
     public LoanCreditBalanceRefundPreBusinessEvent(Loan value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "LoanCreditBalanceRefundPreBusinessEvent";
+    }
 }

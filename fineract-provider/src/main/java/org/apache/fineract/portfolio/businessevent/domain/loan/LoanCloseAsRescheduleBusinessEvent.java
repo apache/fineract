@@ -25,4 +25,9 @@ public class LoanCloseAsRescheduleBusinessEvent extends LoanBusinessEvent {
     public LoanCloseAsRescheduleBusinessEvent(Loan value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "LoanCloseAsRescheduleBusinessEvent";
+    }
 }

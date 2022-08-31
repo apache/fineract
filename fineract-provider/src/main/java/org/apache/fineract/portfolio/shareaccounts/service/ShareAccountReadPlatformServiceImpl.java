@@ -46,7 +46,7 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.products.constants.ProductsApiConstants;
 import org.apache.fineract.portfolio.products.data.ProductData;
-import org.apache.fineract.portfolio.products.service.ProductReadPlatformService;
+import org.apache.fineract.portfolio.products.service.ShareProductReadPlatformService;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
@@ -108,7 +108,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
     public ShareAccountData retrieveTemplate(Long clientId, Long productId) {
         ShareAccountData toReturn = null;
         String serviceName = "share" + ProductsApiConstants.READPLATFORM_NAME;
-        ProductReadPlatformService service = (ProductReadPlatformService) this.applicationContext.getBean(serviceName);
+        ShareProductReadPlatformService service = (ShareProductReadPlatformService) this.applicationContext.getBean(serviceName);
         ClientData client = this.clientReadPlatformService.retrieveOne(clientId);
 
         if (productId != null) {
@@ -157,7 +157,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         String query = "select " + mapper.schema() + "where sa.id=?";
         ShareAccountData data = (ShareAccountData) this.jdbcTemplate.queryForObject(query, mapper, new Object[] { id }); // NOSONAR
         String serviceName = "share" + ProductsApiConstants.READPLATFORM_NAME;
-        ProductReadPlatformService service = (ProductReadPlatformService) this.applicationContext.getBean(serviceName);
+        ShareProductReadPlatformService service = (ShareProductReadPlatformService) this.applicationContext.getBean(serviceName);
         final ShareProductData productData = (ShareProductData) service.retrieveOne(data.getProductId(), false);
         final BigDecimal currentMarketPrice = deriveMarketPrice(productData);
         data.setCurrentMarketPrice(currentMarketPrice);

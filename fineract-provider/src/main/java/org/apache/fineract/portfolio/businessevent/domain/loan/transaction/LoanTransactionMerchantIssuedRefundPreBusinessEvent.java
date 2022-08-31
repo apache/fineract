@@ -26,4 +26,9 @@ public class LoanTransactionMerchantIssuedRefundPreBusinessEvent extends LoanBus
     public LoanTransactionMerchantIssuedRefundPreBusinessEvent(Loan value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "LoanTransactionMerchantIssuedRefundPreBusinessEvent";
+    }
 }

@@ -22,16 +22,35 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.event.external.service.ExternalEventService;
 import org.apache.fineract.portfolio.businessevent.BusinessEventListener;
 import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
 @Service
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierService {
+@RequiredArgsConstructor
+@Slf4j
+public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierService, InitializingBean {
 
     private final Map<Class, List<BusinessEventListener>> preListeners = new HashMap<>();
     private final Map<Class, List<BusinessEventListener>> postListeners = new HashMap<>();
+
+    private final ExternalEventService externalEventService;
+    private final FineractProperties fineractProperties;
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if (isExternalEventPostingEnabled()) {
+            log.info("External event posting is enabled");
+        } else {
+            log.info("External event posting is disabled");
+        }
+    }
 
     @Override
     public void notifyPreBusinessEvent(BusinessEvent<?> businessEvent) {
@@ -61,6 +80,14 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
                 eventListener.onBusinessEvent(businessEvent);
             }
         }
+        if (isExternalEventPostingEnabled()) {
+            // we only want to create external events for operations that were successful, hence the post listener
+            externalEventService.postEvent(businessEvent);
+        }
+    }
+
+    private boolean isExternalEventPostingEnabled() {
+        return fineractProperties.getEvents().getExternal().isEnabled();
     }
 
     @Override
@@ -72,5 +99,4 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
         }
         businessEventListeners.add(listener);
     }
-
 }

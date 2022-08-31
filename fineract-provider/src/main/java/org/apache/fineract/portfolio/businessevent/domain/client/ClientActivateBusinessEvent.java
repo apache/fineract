@@ -25,4 +25,9 @@ public class ClientActivateBusinessEvent extends ClientBusinessEvent {
     public ClientActivateBusinessEvent(Client value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "ClientActivateBusinessEvent";
+    }
 }

@@ -52,7 +52,7 @@ import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.client.exception.ClientNotFoundException;
 import org.apache.fineract.portfolio.products.data.ProductData;
-import org.apache.fineract.portfolio.products.service.ProductReadPlatformService;
+import org.apache.fineract.portfolio.products.service.ShareProductReadPlatformService;
 import org.apache.fineract.portfolio.self.client.service.AppuserClientMapperReadService;
 import org.apache.fineract.portfolio.self.shareaccounts.data.SelfShareAccountsDataValidator;
 import org.apache.fineract.portfolio.self.shareaccounts.service.AppUserShareAccountsMapperReadPlatformService;
@@ -78,7 +78,7 @@ public class SelfShareAccountsApiResource {
     private final DefaultToApiJsonSerializer<AccountData> toApiJsonSerializer;
     private final AppuserClientMapperReadService appuserClientMapperReadService;
     private final SelfShareAccountsDataValidator selfShareAccountsDataValidator;
-    private final ProductReadPlatformService productReadPlatformService;
+    private final ShareProductReadPlatformService shareProductReadPlatformService;
     private final ChargeReadPlatformService chargeReadPlatformService;
     private final AppUserShareAccountsMapperReadPlatformService appUserShareAccountsMapperReadPlatformService;
 
@@ -87,7 +87,8 @@ public class SelfShareAccountsApiResource {
             final ShareAccountReadPlatformService readPlatformService, final DefaultToApiJsonSerializer<AccountData> toApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper, final AppuserClientMapperReadService appuserClientMapperReadService,
             final SelfShareAccountsDataValidator selfShareAccountsDataValidator,
-            final ProductReadPlatformService productReadPlatformService, final ChargeReadPlatformService chargeReadPlatformService,
+            final ShareProductReadPlatformService shareProductReadPlatformService,
+            final ChargeReadPlatformService chargeReadPlatformService,
             final AppUserShareAccountsMapperReadPlatformService appUserShareAccountsMapperReadPlatformService) {
         this.context = context;
         this.accountsApiResource = accountsApiResource;
@@ -96,7 +97,7 @@ public class SelfShareAccountsApiResource {
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.selfShareAccountsDataValidator = selfShareAccountsDataValidator;
         this.appuserClientMapperReadService = appuserClientMapperReadService;
-        this.productReadPlatformService = productReadPlatformService;
+        this.shareProductReadPlatformService = shareProductReadPlatformService;
         this.chargeReadPlatformService = chargeReadPlatformService;
         this.appUserShareAccountsMapperReadPlatformService = appUserShareAccountsMapperReadPlatformService;
     }
@@ -120,9 +121,9 @@ public class SelfShareAccountsApiResource {
         Collection<ProductData> productOptions = new ArrayList<ProductData>();
         if (productId != null) {
             final boolean includeTemplate = true;
-            productOptions.add(productReadPlatformService.retrieveOne(productId, includeTemplate));
+            productOptions.add(shareProductReadPlatformService.retrieveOne(productId, includeTemplate));
         } else {
-            productOptions = productReadPlatformService.retrieveAllForLookup();
+            productOptions = shareProductReadPlatformService.retrieveAllForLookup();
         }
 
         String clientName = null;

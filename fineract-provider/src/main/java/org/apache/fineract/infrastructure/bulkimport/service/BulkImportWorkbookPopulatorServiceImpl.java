@@ -93,7 +93,7 @@ import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatform
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
 import org.apache.fineract.portfolio.products.data.ProductData;
-import org.apache.fineract.portfolio.products.service.ProductReadPlatformService;
+import org.apache.fineract.portfolio.products.service.ShareProductReadPlatformService;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.data.DepositProductData;
 import org.apache.fineract.portfolio.savings.data.FixedDepositProductData;
@@ -132,7 +132,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final SavingsProductReadPlatformService savingsProductReadPlatformService;
-    private final ProductReadPlatformService productReadPlatformService;
+    private final ShareProductReadPlatformService shareProductReadPlatformService;
     private final ChargeReadPlatformService chargeReadPlatformService;
     private final DepositProductReadPlatformService depositProductReadPlatformService;
     private final RoleReadPlatformService roleReadPlatformService;
@@ -149,7 +149,8 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
             final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
             final CodeValueReadPlatformService codeValueReadPlatformService,
             final SavingsProductReadPlatformService savingsProductReadPlatformService,
-            final ProductReadPlatformService productReadPlatformService, final ChargeReadPlatformService chargeReadPlatformService,
+            final ShareProductReadPlatformService shareProductReadPlatformService,
+            final ChargeReadPlatformService chargeReadPlatformService,
             final DepositProductReadPlatformService depositProductReadPlatformService,
             final RoleReadPlatformService roleReadPlatformService) {
         this.officeReadPlatformService = officeReadPlatformService;
@@ -167,7 +168,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         this.savingsAccountReadPlatformService = savingsAccountReadPlatformService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.savingsProductReadPlatformService = savingsProductReadPlatformService;
-        this.productReadPlatformService = productReadPlatformService;
+        this.shareProductReadPlatformService = shareProductReadPlatformService;
         this.chargeReadPlatformService = chargeReadPlatformService;
         this.depositProductReadPlatformService = depositProductReadPlatformService;
         this.roleReadPlatformService = roleReadPlatformService;
@@ -536,7 +537,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
     }
 
     private List<ShareProductData> fetchSharedProducts() {
-        List<ProductData> productDataList = productReadPlatformService.retrieveAllProducts(0, 50).getPageItems();
+        List<ProductData> productDataList = shareProductReadPlatformService.retrieveAllProducts(0, 50).getPageItems();
         List<ShareProductData> sharedProductDataList = new ArrayList<>();
         if (productDataList != null) {
             for (ProductData data : productDataList) {

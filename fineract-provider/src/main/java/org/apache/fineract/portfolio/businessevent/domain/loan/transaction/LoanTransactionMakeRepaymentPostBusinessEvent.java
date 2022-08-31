@@ -25,4 +25,9 @@ public class LoanTransactionMakeRepaymentPostBusinessEvent extends LoanTransacti
     public LoanTransactionMakeRepaymentPostBusinessEvent(LoanTransaction value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "LoanTransactionMakeRepaymentPostBusinessEvent";
+    }
 }

@@ -25,4 +25,9 @@ public class LoanUndoLastDisbursalBusinessEvent extends LoanBusinessEvent {
     public LoanUndoLastDisbursalBusinessEvent(Loan value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "LoanUndoLastDisbursalBusinessEvent";
+    }
 }

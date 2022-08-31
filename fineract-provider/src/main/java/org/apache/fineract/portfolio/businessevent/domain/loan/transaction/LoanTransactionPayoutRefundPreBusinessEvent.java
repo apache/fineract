@@ -26,4 +26,9 @@ public class LoanTransactionPayoutRefundPreBusinessEvent extends LoanBusinessEve
     public LoanTransactionPayoutRefundPreBusinessEvent(Loan value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "LoanTransactionPayoutRefundPreBusinessEvent";
+    }
 }

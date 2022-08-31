@@ -25,4 +25,9 @@ public class LoanRejectTransferBusinessEvent extends LoanBusinessEvent {
     public LoanRejectTransferBusinessEvent(Loan value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "LoanRejectTransferBusinessEvent";
+    }
 }

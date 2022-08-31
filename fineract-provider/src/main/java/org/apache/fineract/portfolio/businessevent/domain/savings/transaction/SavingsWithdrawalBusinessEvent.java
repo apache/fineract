@@ -25,4 +25,9 @@ public class SavingsWithdrawalBusinessEvent extends SavingsAccountTransactionBus
     public SavingsWithdrawalBusinessEvent(SavingsAccountTransaction value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "SavingsWithdrawalBusinessEvent";
+    }
 }

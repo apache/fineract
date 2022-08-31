@@ -25,4 +25,9 @@ public class LoanWaiveChargeBusinessEvent extends LoanChargeBusinessEvent {
     public LoanWaiveChargeBusinessEvent(LoanCharge value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "LoanWaiveChargeBusinessEvent";
+    }
 }
