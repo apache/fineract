@@ -1,19 +1,11 @@
 {
-    "name": "ShareProductDataV1",
+    "name": "ShareAccountApplicationTimelineDataV1",
     "namespace": "org.apache.fineract.avro.share.v1",
     "type": "record",
     "fields": [
         {
             "default": null,
-            "name": "id",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "default": null,
-            "name": "name",
+            "name": "submittedOnDate",
             "type": [
                 "null",
                 "string"
@@ -21,7 +13,7 @@
         },
         {
             "default": null,
-            "name": "shortName",
+            "name": "submittedByUsername",
             "type": [
                 "null",
                 "string"
@@ -29,7 +21,7 @@
         },
         {
             "default": null,
-            "name": "description",
+            "name": "submittedByFirstname",
             "type": [
                 "null",
                 "string"
@@ -37,7 +29,7 @@
         },
         {
             "default": null,
-            "name": "externalId",
+            "name": "submittedByLastname",
             "type": [
                 "null",
                 "string"
@@ -45,126 +37,130 @@
         },
         {
             "default": null,
-            "name": "currency",
+            "name": "rejectedOnDate",
             "type": [
                 "null",
-                "org.apache.fineract.avro.generic.v1.CurrencyDataV1"
+                "string"
             ]
         },
         {
             "default": null,
-            "name": "totalShares",
+            "name": "rejectedByUsername",
             "type": [
                 "null",
-                "long"
+                "string"
             ]
         },
         {
             "default": null,
-            "name": "totalSharesIssued",
+            "name": "rejectedByFirstname",
             "type": [
                 "null",
-                "long"
+                "string"
             ]
         },
         {
             "default": null,
-            "name": "unitPrice",
+            "name": "rejectedByLastname",
             "type": [
                 "null",
-                "bigdecimal"
+                "string"
             ]
         },
         {
             "default": null,
-            "name": "shareCapital",
+            "name": "approvedOnDate",
             "type": [
                 "null",
-                "bigdecimal"
+                "string"
             ]
         },
         {
             "default": null,
-            "name": "minimumShares",
+            "name": "approvedByUsername",
             "type": [
                 "null",
-                "long"
+                "string"
             ]
         },
         {
             "default": null,
-            "name": "nominalShares",
+            "name": "approvedByFirstname",
             "type": [
                 "null",
-                "long"
+                "string"
             ]
         },
         {
             "default": null,
-            "name": "maximumShares",
+            "name": "approvedByLastname",
             "type": [
                 "null",
-                "long"
-            ]
-        },
-        {
-            "name": "marketPrice",
-            "type": [
-                "null",
-                {
-                    "type": "array",
-                    "items": "org.apache.fineract.avro.share.v1.ShareProductMarketPriceDataV1"
-                }
-            ]
-        },
-        {
-            "name": "charges",
-            "type": [
-                "null",
-                {
-                    "type": "array",
-                    "items": "org.apache.fineract.avro.portfolio.v1.ChargeDataV1"
-                }
+                "string"
             ]
         },
         {
             "default": null,
-            "name": "allowDividendCalculationForInactiveClients",
+            "name": "activatedOnDate",
             "type": [
                 "null",
-                "boolean"
+                "string"
             ]
         },
         {
             "default": null,
-            "name": "lockinPeriod",
+            "name": "activatedByUsername",
             "type": [
                 "null",
-                "int"
+                "string"
             ]
         },
         {
             "default": null,
-            "name": "lockPeriodTypeEnum",
+            "name": "activatedByFirstname",
             "type": [
                 "null",
-                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+                "string"
             ]
         },
         {
             "default": null,
-            "name": "minimumActivePeriod",
+            "name": "activatedByLastname",
             "type": [
                 "null",
-                "int"
+                "string"
             ]
         },
         {
             "default": null,
-            "name": "minimumActivePeriodForDividendsTypeEnum",
+            "name": "closedOnDate",
             "type": [
                 "null",
-                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "closedByUsername",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "closedByFirstname",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "closedByLastname",
+            "type": [
+                "null",
+                "string"
             ]
         }
     ]

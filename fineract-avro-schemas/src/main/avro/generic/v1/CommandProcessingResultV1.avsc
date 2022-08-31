@@ -1,9 +1,10 @@
 {
-    "name": "CommandProcessingResultEventV1",
+    "name": "CommandProcessingResultV1",
     "namespace": "org.apache.fineract.avro.generic.v1",
     "type": "record",
     "fields": [
         {
+            "default": null,
             "name": "commandId",
             "type": [
                 "null",
@@ -11,6 +12,7 @@
             ]
         },
         {
+            "default": null,
             "name": "officeId",
             "type": [
                 "null",
@@ -18,6 +20,7 @@
             ]
         },
         {
+            "default": null,
             "name": "groupId",
             "type": [
                 "null",
@@ -25,6 +28,7 @@
             ]
         },
         {
+            "default": null,
             "name": "clientId",
             "type": [
                 "null",
@@ -32,6 +36,7 @@
             ]
         },
         {
+            "default": null,
             "name": "loanId",
             "type": [
                 "null",
@@ -39,6 +44,7 @@
             ]
         },
         {
+            "default": null,
             "name": "savingsId",
             "type": [
                 "null",
@@ -46,6 +52,7 @@
             ]
         },
         {
+            "default": null,
             "name": "resourceId",
             "type": [
                 "null",
@@ -53,6 +60,7 @@
             ]
         },
         {
+            "default": null,
             "name": "subResourceId",
             "type": [
                 "null",
@@ -60,6 +68,7 @@
             ]
         },
         {
+            "default": null,
             "name": "transactionId",
             "type": [
                 "null",
@@ -67,6 +76,7 @@
             ]
         },
         {
+            "default": null,
             "name": "resourceIdentifier",
             "type": [
                 "null",
@@ -74,6 +84,7 @@
             ]
         },
         {
+            "default": null,
             "name": "productId",
             "type": [
                 "null",
@@ -81,6 +92,7 @@
             ]
         },
         {
+            "default": null,
             "name": "gsimId",
             "type": [
                 "null",
@@ -88,6 +100,7 @@
             ]
         },
         {
+            "default": null,
             "name": "glimId",
             "type": [
                 "null",

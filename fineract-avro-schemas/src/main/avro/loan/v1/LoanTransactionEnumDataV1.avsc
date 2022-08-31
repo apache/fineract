@@ -4,6 +4,7 @@
     "type": "record",
     "fields": [
         {
+            "default": null,
             "name": "id",
             "type": [
                 "null",
@@ -11,6 +12,7 @@
             ]
         },
         {
+            "default": null,
             "name": "code",
             "type": [
                 "null",
@@ -18,6 +20,7 @@
             ]
         },
         {
+            "default": null,
             "name": "value",
             "type": [
                 "null",
@@ -25,6 +28,7 @@
             ]
         },
         {
+            "default": null,
             "name": "disbursement",
             "type": [
                 "null",
@@ -32,6 +36,7 @@
             ]
         },
         {
+            "default": null,
             "name": "repaymentAtDisbursement",
             "type": [
                 "null",
@@ -39,6 +44,7 @@
             ]
         },
         {
+            "default": null,
             "name": "repayment",
             "type": [
                 "null",
@@ -46,6 +52,7 @@
             ]
         },
         {
+            "default": null,
             "name": "merchantIssuedRefund",
             "type": [
                 "null",
@@ -53,6 +60,7 @@
             ]
         },
         {
+            "default": null,
             "name": "payoutRefund",
             "type": [
                 "null",
@@ -60,6 +68,7 @@
             ]
         },
         {
+            "default": null,
             "name": "goodwillCredit",
             "type": [
                 "null",
@@ -67,6 +76,7 @@
             ]
         },
         {
+            "default": null,
             "name": "chargeRefund",
             "type": [
                 "null",
@@ -74,6 +84,7 @@
             ]
         },
         {
+            "default": null,
             "name": "contra",
             "type": [
                 "null",
@@ -81,6 +92,7 @@
             ]
         },
         {
+            "default": null,
             "name": "waiveInterest",
             "type": [
                 "null",
@@ -88,6 +100,7 @@
             ]
         },
         {
+            "default": null,
             "name": "waiveCharges",
             "type": [
                 "null",
@@ -95,6 +108,7 @@
             ]
         },
         {
+            "default": null,
             "name": "accrual",
             "type": [
                 "null",
@@ -102,6 +116,7 @@
             ]
         },
         {
+            "default": null,
             "name": "writeOff",
             "type": [
                 "null",
@@ -109,6 +124,7 @@
             ]
         },
         {
+            "default": null,
             "name": "recoveryRepayment",
             "type": [
                 "null",
@@ -116,6 +132,7 @@
             ]
         },
         {
+            "default": null,
             "name": "initiateTransfer",
             "type": [
                 "null",
@@ -123,6 +140,7 @@
             ]
         },
         {
+            "default": null,
             "name": "approveTransfer",
             "type": [
                 "null",
@@ -130,6 +148,7 @@
             ]
         },
         {
+            "default": null,
             "name": "withdrawTransfer",
             "type": [
                 "null",
@@ -137,6 +156,7 @@
             ]
         },
         {
+            "default": null,
             "name": "rejectTransfer",
             "type": [
                 "null",
@@ -144,6 +164,7 @@
             ]
         },
         {
+            "default": null,
             "name": "chargePayment",
             "type": [
                 "null",
@@ -151,6 +172,7 @@
             ]
         },
         {
+            "default": null,
             "name": "refund",
             "type": [
                 "null",
@@ -158,6 +180,7 @@
             ]
         },
         {
+            "default": null,
             "name": "refundForActiveLoans",
             "type": [
                 "null",
@@ -165,6 +188,7 @@
             ]
         },
         {
+            "default": null,
             "name": "creditBalanceRefund",
             "type": [
                 "null",
@@ -172,6 +196,7 @@
             ]
         },
         {
+            "default": null,
             "name": "chargeback",
             "type": [
                 "null",

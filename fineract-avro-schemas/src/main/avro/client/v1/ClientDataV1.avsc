@@ -4,6 +4,7 @@
     "type": "record",
     "fields": [
         {
+            "default": null,
             "name": "id",
             "type": [
                 "null",
@@ -11,6 +12,7 @@
             ]
         },
         {
+            "default": null,
             "name": "accountNo",
             "type": [
                 "null",
@@ -18,6 +20,7 @@
             ]
         },
         {
+            "default": null,
             "name": "externalId",
             "type": [
                 "null",
@@ -25,6 +28,7 @@
             ]
         },
         {
+            "default": null,
             "name": "status",
             "type": [
                 "null",
@@ -32,6 +36,7 @@
             ]
         },
         {
+            "default": null,
             "name": "subStatus",
             "type": [
                 "null",
@@ -39,6 +44,7 @@
             ]
         },
         {
+            "default": null,
             "name": "active",
             "type": [
                 "null",
@@ -46,6 +52,7 @@
             ]
         },
         {
+            "default": null,
             "name": "activationDate",
             "type": [
                 "null",
@@ -53,6 +60,7 @@
             ]
         },
         {
+            "default": null,
             "name": "firstname",
             "type": [
                 "null",
@@ -60,6 +68,7 @@
             ]
         },
         {
+            "default": null,
             "name": "middlename",
             "type": [
                 "null",
@@ -67,6 +76,7 @@
             ]
         },
         {
+            "default": null,
             "name": "lastname",
             "type": [
                 "null",
@@ -74,6 +84,7 @@
             ]
         },
         {
+            "default": null,
             "name": "fullname",
             "type": [
                 "null",
@@ -81,6 +92,7 @@
             ]
         },
         {
+            "default": null,
             "name": "displayName",
             "type": [
                 "null",
@@ -88,6 +100,7 @@
             ]
         },
         {
+            "default": null,
             "name": "mobileNo",
             "type": [
                 "null",
@@ -95,6 +108,7 @@
             ]
         },
         {
+            "default": null,
             "name": "emailAddress",
             "type": [
                 "null",
@@ -102,6 +116,7 @@
             ]
         },
         {
+            "default": null,
             "name": "dateOfBirth",
             "type": [
                 "null",
@@ -109,6 +124,7 @@
             ]
         },
         {
+            "default": null,
             "name": "gender",
             "type": [
                 "null",
@@ -116,6 +132,7 @@
             ]
         },
         {
+            "default": null,
             "name": "clientType",
             "type": [
                 "null",
@@ -123,6 +140,7 @@
             ]
         },
         {
+            "default": null,
             "name": "clientClassification",
             "type": [
                 "null",
@@ -130,6 +148,7 @@
             ]
         },
         {
+            "default": null,
             "name": "isStaff",
             "type": [
                 "null",
@@ -137,6 +156,7 @@
             ]
         },
         {
+            "default": null,
             "name": "officeId",
             "type": [
                 "null",
@@ -144,6 +164,7 @@
             ]
         },
         {
+            "default": null,
             "name": "officeName",
             "type": [
                 "null",
@@ -151,6 +172,7 @@
             ]
         },
         {
+            "default": null,
             "name": "transferToOfficeId",
             "type": [
                 "null",
@@ -158,6 +180,7 @@
             ]
         },
         {
+            "default": null,
             "name": "transferToOfficeName",
             "type": [
                 "null",
@@ -165,6 +188,7 @@
             ]
         },
         {
+            "default": null,
             "name": "imageId",
             "type": [
                 "null",
@@ -172,6 +196,7 @@
             ]
         },
         {
+            "default": null,
             "name": "imagePresent",
             "type": [
                 "null",
@@ -179,6 +204,7 @@
             ]
         },
         {
+            "default": null,
             "name": "staffId",
             "type": [
                 "null",
@@ -186,6 +212,7 @@
             ]
         },
         {
+            "default": null,
             "name": "staffName",
             "type": [
                 "null",
@@ -193,6 +220,7 @@
             ]
         },
         {
+            "default": null,
             "name": "timeline",
             "type": [
                 "null",
@@ -200,6 +228,7 @@
             ]
         },
         {
+            "default": null,
             "name": "savingsProductId",
             "type": [
                 "null",
@@ -207,6 +236,7 @@
             ]
         },
         {
+            "default": null,
             "name": "savingsProductName",
             "type": [
                 "null",
@@ -214,6 +244,7 @@
             ]
         },
         {
+            "default": null,
             "name": "savingsAccountId",
             "type": [
                 "null",
@@ -221,6 +252,7 @@
             ]
         },
         {
+            "default": null,
             "name": "legalForm",
             "type": [
                 "null",
@@ -228,6 +260,7 @@
             ]
         },
         {
+            "default": null,
             "name": "clientCollateralManagements",
             "type": [
                 "null",
@@ -238,6 +271,7 @@
             ]
         },
         {
+            "default": null,
             "name": "groups",
             "type": [
                 "null",

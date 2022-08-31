@@ -4,6 +4,7 @@
     "type": "record",
     "fields": [
         {
+            "default": null,
             "name": "id",
             "type": [
                 "null",
@@ -11,6 +12,7 @@
             ]
         },
         {
+            "default": null,
             "name": "calendarInstanceId",
             "type": [
                 "null",
@@ -18,6 +20,7 @@
             ]
         },
         {
+            "default": null,
             "name": "entityId",
             "type": [
                 "null",
@@ -25,6 +28,7 @@
             ]
         },
         {
+            "default": null,
             "name": "entityType",
             "type": [
                 "null",
@@ -32,6 +36,7 @@
             ]
         },
         {
+            "default": null,
             "name": "title",
             "type": [
                 "null",
@@ -39,6 +44,7 @@
             ]
         },
         {
+            "default": null,
             "name": "description",
             "type": [
                 "null",
@@ -46,6 +52,7 @@
             ]
         },
         {
+            "default": null,
             "name": "location",
             "type": [
                 "null",
@@ -53,6 +60,7 @@
             ]
         },
         {
+            "default": null,
             "name": "startDate",
             "type": [
                 "null",
@@ -60,6 +68,7 @@
             ]
         },
         {
+            "default": null,
             "name": "endDate",
             "type": [
                 "null",
@@ -67,6 +76,7 @@
             ]
         },
         {
+            "default": null,
             "name": "meetingTime",
             "type": [
                 "null",
@@ -74,6 +84,7 @@
             ]
         },
         {
+            "default": null,
             "name": "duration",
             "type": [
                 "null",
@@ -81,6 +92,7 @@
             ]
         },
         {
+            "default": null,
             "name": "type",
             "type": [
                 "null",
@@ -88,6 +100,7 @@
             ]
         },
         {
+            "default": null,
             "name": "repeating",
             "type": [
                 "null",
@@ -95,6 +108,7 @@
             ]
         },
         {
+            "default": null,
             "name": "recurrence",
             "type": [
                 "null",
@@ -102,6 +116,7 @@
             ]
         },
         {
+            "default": null,
             "name": "frequency",
             "type": [
                 "null",
@@ -109,6 +124,7 @@
             ]
         },
         {
+            "default": null,
             "name": "interval",
             "type": [
                 "null",
@@ -116,6 +132,7 @@
             ]
         },
         {
+            "default": null,
             "name": "repeatsOnDay",
             "type": [
                 "null",
@@ -123,6 +140,7 @@
             ]
         },
         {
+            "default": null,
             "name": "repeatsOnNthDayOfMonth",
             "type": [
                 "null",
@@ -130,6 +148,7 @@
             ]
         },
         {
+            "default": null,
             "name": "remindBy",
             "type": [
                 "null",
@@ -137,6 +156,7 @@
             ]
         },
         {
+            "default": null,
             "name": "firstReminder",
             "type": [
                 "null",
@@ -144,6 +164,7 @@
             ]
         },
         {
+            "default": null,
             "name": "secondReminder",
             "type": [
                 "null",
@@ -171,6 +192,7 @@
             ]
         },
         {
+            "default": null,
             "name": "humanReadable",
             "type": [
                 "null",
@@ -178,6 +200,7 @@
             ]
         },
         {
+            "default": null,
             "name": "recentEligibleMeetingDate",
             "type": [
                 "null",
@@ -185,6 +208,7 @@
             ]
         },
         {
+            "default": null,
             "name": "createdDate",
             "type": [
                 "null",
@@ -192,6 +216,7 @@
             ]
         },
         {
+            "default": null,
             "name": "lastUpdatedDate",
             "type": [
                 "null",
@@ -199,6 +224,7 @@
             ]
         },
         {
+            "default": null,
             "name": "createdByUserId",
             "type": [
                 "null",
@@ -206,6 +232,7 @@
             ]
         },
         {
+            "default": null,
             "name": "createdByUsername",
             "type": [
                 "null",
@@ -213,6 +240,7 @@
             ]
         },
         {
+            "default": null,
             "name": "lastUpdatedByUserId",
             "type": [
                 "null",
@@ -220,6 +248,7 @@
             ]
         },
         {
+            "default": null,
             "name": "lastUpdatedByUsername",
             "type": [
                 "null",
@@ -227,6 +256,7 @@
             ]
         },
         {
+            "default": null,
             "name": "repeatsOnDayOfMonth",
             "type": [
                 "null",

@@ -4,6 +4,7 @@
     "type": "record",
     "fields": [
         {
+            "default": null,
             "name": "id",
             "type": [
                 "null",
@@ -11,6 +12,7 @@
             ]
         },
         {
+            "default": null,
             "name": "accountNo",
             "type": [
                 "null",
@@ -18,6 +20,7 @@
             ]
         },
         {
+            "default": null,
             "name": "name",
             "type": [
                 "null",
@@ -25,6 +28,7 @@
             ]
         },
         {
+            "default": null,
             "name": "externalId",
             "type": [
                 "null",
@@ -32,6 +36,7 @@
             ]
         },
         {
+            "default": null,
             "name": "status",
             "type": [
                 "null",
@@ -39,6 +44,7 @@
             ]
         },
         {
+            "default": null,
             "name": "active",
             "type": [
                 "null",
@@ -46,6 +52,7 @@
             ]
         },
         {
+            "default": null,
             "name": "activationDate",
             "type": [
                 "null",
@@ -53,6 +60,7 @@
             ]
         },
         {
+            "default": null,
             "name": "officeId",
             "type": [
                 "null",
@@ -60,6 +68,7 @@
             ]
         },
         {
+            "default": null,
             "name": "officeName",
             "type": [
                 "null",
@@ -67,6 +76,7 @@
             ]
         },
         {
+            "default": null,
             "name": "centerId",
             "type": [
                 "null",
@@ -74,6 +84,7 @@
             ]
         },
         {
+            "default": null,
             "name": "centerName",
             "type": [
                 "null",
@@ -81,6 +92,7 @@
             ]
         },
         {
+            "default": null,
             "name": "staffId",
             "type": [
                 "null",
@@ -88,6 +100,7 @@
             ]
         },
         {
+            "default": null,
             "name": "staffName",
             "type": [
                 "null",
@@ -95,6 +108,7 @@
             ]
         },
         {
+            "default": null,
             "name": "hierarchy",
             "type": [
                 "null",
@@ -102,6 +116,7 @@
             ]
         },
         {
+            "default": null,
             "name": "groupLevel",
             "type": [
                 "null",
@@ -129,6 +144,7 @@
             ]
         },
         {
+            "default": null,
             "name": "collectionMeetingCalendar",
             "type": [
                 "null",
