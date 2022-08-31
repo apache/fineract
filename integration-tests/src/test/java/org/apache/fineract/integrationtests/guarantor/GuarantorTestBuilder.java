@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests.guarantor;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gson.Gson;
 import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -64,6 +65,7 @@ public class GuarantorTestBuilder {
         return new Gson().toJson(map);
     }
 
+    @CanIgnoreReturnValue
     public GuarantorTestBuilder existingCustomerWithGuaranteeAmount(final String entityId, final String savingsId,
             final String guaranteeAmount) {
         this.entityId = entityId;
@@ -73,6 +75,7 @@ public class GuarantorTestBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public GuarantorTestBuilder existingCustomerWithoutGuaranteeAmount(final String entityId) {
         this.entityId = entityId;
         this.savingsId = null;
@@ -81,6 +84,7 @@ public class GuarantorTestBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public GuarantorTestBuilder externalCustomer() {
         this.guarantorTypeId = GUARANTOR_TYPE_EXTERNAL;
         return this;

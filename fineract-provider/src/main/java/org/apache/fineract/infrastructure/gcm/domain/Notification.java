@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.gcm.domain;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
@@ -90,6 +91,7 @@ public final class Notification implements Serializable {
         /**
          * Sets the title property.
          */
+        @CanIgnoreReturnValue
         public Builder title(String value) {
             title = value;
             return this;
@@ -98,6 +100,7 @@ public final class Notification implements Serializable {
         /**
          * Sets the body property.
          */
+        @CanIgnoreReturnValue
         public Builder body(String value) {
             body = value;
             return this;
@@ -106,6 +109,7 @@ public final class Notification implements Serializable {
         /**
          * Sets the sound property (default value is {@literal default}).
          */
+        @CanIgnoreReturnValue
         public Builder sound(String value) {
             sound = value;
             return this;
@@ -114,6 +118,7 @@ public final class Notification implements Serializable {
         /**
          * Sets the badge property.
          */
+        @CanIgnoreReturnValue
         public Builder badge(int value) {
             badge = value;
             return this;
@@ -122,6 +127,7 @@ public final class Notification implements Serializable {
         /**
          * Sets the tag property.
          */
+        @CanIgnoreReturnValue
         public Builder tag(String value) {
             tag = value;
             return this;
@@ -130,6 +136,7 @@ public final class Notification implements Serializable {
         /**
          * Sets the color property in {@literal #rrggbb} format.
          */
+        @CanIgnoreReturnValue
         public Builder color(String value) {
             color = value;
             return this;
@@ -138,6 +145,7 @@ public final class Notification implements Serializable {
         /**
          * Sets the click action property.
          */
+        @CanIgnoreReturnValue
         public Builder clickAction(String value) {
             clickAction = value;
             return this;
@@ -146,6 +154,7 @@ public final class Notification implements Serializable {
         /**
          * Sets the body localization key property.
          */
+        @CanIgnoreReturnValue
         public Builder bodyLocKey(String value) {
             bodyLocKey = value;
             return this;
@@ -154,6 +163,7 @@ public final class Notification implements Serializable {
         /**
          * Sets the body localization values property.
          */
+        @CanIgnoreReturnValue
         public Builder bodyLocArgs(List<String> value) {
             bodyLocArgs = Collections.unmodifiableList(value);
             return this;
@@ -162,6 +172,7 @@ public final class Notification implements Serializable {
         /**
          * Sets the title localization key property.
          */
+        @CanIgnoreReturnValue
         public Builder titleLocKey(String value) {
             titleLocKey = value;
             return this;
@@ -170,6 +181,7 @@ public final class Notification implements Serializable {
         /**
          * Sets the title localization values property.
          */
+        @CanIgnoreReturnValue
         public Builder titleLocArgs(List<String> value) {
             titleLocArgs = Collections.unmodifiableList(value);
             return this;

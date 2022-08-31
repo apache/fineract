@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.gcm.domain;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.Serializable;
 import java.util.List;
 
@@ -67,36 +68,43 @@ public final class Result implements Serializable {
         private List<String> failedRegistrationIds;
         private int status;
 
+        @CanIgnoreReturnValue
         public Builder canonicalRegistrationId(String value) {
             canonicalRegistrationId = value;
             return this;
         }
 
+        @CanIgnoreReturnValue
         public Builder messageId(String value) {
             messageId = value;
             return this;
         }
 
+        @CanIgnoreReturnValue
         public Builder errorCode(String value) {
             errorCode = value;
             return this;
         }
 
+        @CanIgnoreReturnValue
         public Builder success(Integer value) {
             success = value;
             return this;
         }
 
+        @CanIgnoreReturnValue
         public Builder failure(Integer value) {
             failure = value;
             return this;
         }
 
+        @CanIgnoreReturnValue
         public Builder status(int value) {
             status = value;
             return this;
         }
 
+        @CanIgnoreReturnValue
         public Builder failedRegistrationIds(List<String> value) {
             failedRegistrationIds = value;
             return this;

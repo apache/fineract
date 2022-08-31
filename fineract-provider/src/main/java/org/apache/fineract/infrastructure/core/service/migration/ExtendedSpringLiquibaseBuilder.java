@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.core.service.migration;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import com.google.common.base.Joiner;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
@@ -74,11 +75,13 @@ public class ExtendedSpringLiquibaseBuilder {
         this.tag = liquibaseProperties.getTag();
     }
 
+    @CanIgnoreReturnValue
     public ExtendedSpringLiquibaseBuilder withDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public ExtendedSpringLiquibaseBuilder withContext(String context) {
         if (isNotBlank(context)) {
             this.contexts.add(context);
@@ -86,15 +89,18 @@ public class ExtendedSpringLiquibaseBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public ExtendedSpringLiquibaseBuilder withContexts(String... contexts) {
         return withContexts(Arrays.asList(contexts));
     }
 
+    @CanIgnoreReturnValue
     public ExtendedSpringLiquibaseBuilder withContexts(Collection<String> contexts) {
         this.contexts.addAll(contexts);
         return this;
     }
 
+    @CanIgnoreReturnValue
     public ExtendedSpringLiquibaseBuilder withResourceLoader(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
         return this;

@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.batch.command;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+
 /**
  * Provides an object to {@link org.apache.fineract.batch.service.BatchApiService} to get the proper commandStrategy for
  * each request in BatchRequest. It uses Builder pattern to create object of this type.
@@ -42,6 +44,7 @@ public final class CommandContext {
             this.resource = resource;
         }
 
+        @CanIgnoreReturnValue
         public Builder method(final String method) {
             this.method = method;
             return this;

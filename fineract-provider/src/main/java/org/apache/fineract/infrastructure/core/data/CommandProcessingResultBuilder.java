@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.core.data;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.util.Map;
 
 /**
@@ -48,81 +49,97 @@ public class CommandProcessingResultBuilder {
                 this.changes, this.productId, this.rollbackTransaction, this.subEntityId);
     }
 
+    @CanIgnoreReturnValue
     public CommandProcessingResultBuilder withCommandId(final Long withCommandId) {
         this.commandId = withCommandId;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandProcessingResultBuilder with(final Map<String, Object> withChanges) {
         this.changes = withChanges;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandProcessingResultBuilder withResourceIdAsString(final String withResourceIdentifier) {
         this.resourceIdentifier = withResourceIdentifier;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandProcessingResultBuilder withEntityId(final Long withEntityId) {
         this.entityId = withEntityId;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandProcessingResultBuilder withSubEntityId(final Long withSubEntityId) {
         this.subEntityId = withSubEntityId;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandProcessingResultBuilder withOfficeId(final Long withOfficeId) {
         this.officeId = withOfficeId;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandProcessingResultBuilder withClientId(final Long withClientId) {
         this.clientId = withClientId;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandProcessingResultBuilder withGroupId(final Long withGroupId) {
         this.groupId = withGroupId;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandProcessingResultBuilder withLoanId(final Long withLoanId) {
         this.loanId = withLoanId;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandProcessingResultBuilder withSavingsId(final Long withSavingsId) {
         this.savingsId = withSavingsId;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandProcessingResultBuilder withTransactionId(final String withTransactionId) {
         this.transactionId = withTransactionId;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandProcessingResultBuilder withProductId(final Long productId) {
         this.productId = productId;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandProcessingResultBuilder withGsimId(final Long gsimId) {
         this.gsimId = gsimId;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandProcessingResultBuilder withGlimId(final Long glimId) {
         this.glimId = glimId;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandProcessingResultBuilder withCreditReport(final Map<String, Object> withCreditReport) {
         this.creditBureauReportData = withCreditReport;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandProcessingResultBuilder setRollbackTransaction(final boolean rollbackTransaction) {
         this.rollbackTransaction = this.rollbackTransaction || rollbackTransaction;
         return this;

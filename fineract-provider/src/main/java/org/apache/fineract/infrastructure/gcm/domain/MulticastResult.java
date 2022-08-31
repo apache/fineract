@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.gcm.domain;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,11 +56,13 @@ public final class MulticastResult implements Serializable {
             this.multicastId = multicastId;
         }
 
+        @CanIgnoreReturnValue
         public Builder addResult(Result result) {
             results.add(result);
             return this;
         }
 
+        @CanIgnoreReturnValue
         public Builder retryMulticastIds(List<Long> retryMulticastIds) {
             this.retryMulticastIds = retryMulticastIds;
             return this;

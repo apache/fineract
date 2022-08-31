@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.commands.service;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.infrastructure.accountnumberformat.service.AccountNumberFormatConstants;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
@@ -51,6 +52,7 @@ public class CommandWrapperBuilder {
                 this.creditBureauId, this.organisationCreditBureauId);
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateCreditBureau() {
         this.actionName = "UPDATE";
         this.entityName = "ORGANISATIONCREDITBUREAU";
@@ -59,6 +61,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateCreditBureauLoanProductMapping() {
         this.actionName = "UPDATE";
         this.entityName = "CREDITBUREAU_LOANPRODUCT_MAPPING";
@@ -67,6 +70,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder addOrganisationCreditBureau(final long organisationCreditBureauId) {
         this.actionName = "CREATE";
         this.entityName = "ORGANISATIONCREDITBUREAU";
@@ -76,6 +80,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder getCreditReport() {
         this.actionName = "GET";
         this.entityName = "CREDITREPORT";
@@ -84,6 +89,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder saveCreditReport(final long creditBureauId, final String nationalId) {
         this.actionName = "SAVE";
         this.entityName = "CREDITREPORT";
@@ -93,6 +99,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteCreditReport(final Long creditBureauId) {
         this.actionName = "DELETE";
         this.entityName = "CREDITREPORT";
@@ -101,6 +108,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createCreditBureauLoanProductMapping(final long organisationCreditBureauId) {
         this.actionName = "CREATE";
         this.entityName = "CREDITBUREAU_LOANPRODUCT_MAPPING";
@@ -110,6 +118,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder addCreditBureauConfiguration(final long creditBureauId) {
         this.actionName = "CREATE";
         this.entityName = "CREDITBUREAU_CONFIGURATION";
@@ -118,6 +127,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateCreditBureauConfiguration(final long configurationId) {
         this.actionName = "UPDATE";
         this.entityName = "CREDITBUREAU_CONFIGURATION";
@@ -126,6 +136,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder addClientAddress(final long clientId, final long addressTypeId) {
         this.actionName = "CREATE";
         this.entityName = "ADDRESS";
@@ -135,6 +146,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateClientAddress(final long clientId) {
         this.actionName = "UPDATE";
         this.entityName = "ADDRESS";
@@ -143,6 +155,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder addFamilyMembers(final long clientId) {
         this.actionName = "CREATE";
         this.entityName = "FAMILYMEMBERS";
@@ -151,6 +164,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateFamilyMembers(final long familyMemberId) {
         this.actionName = "UPDATE";
         this.entityName = "FAMILYMEMBERS";
@@ -159,6 +173,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteFamilyMembers(final long familyMemberId) {
         this.actionName = "DELETE";
         this.entityName = "FAMILYMEMBERS";
@@ -167,46 +182,55 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder withLoanId(final Long withLoanId) {
         this.loanId = withLoanId;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder withSavingsId(final Long withSavingsId) {
         this.savingsId = withSavingsId;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder withClientId(final Long withClientId) {
         this.clientId = withClientId;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder withGroupId(final Long withGroupId) {
         this.groupId = withGroupId;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder withEntityName(final String withEntityName) {
         this.entityName = withEntityName;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder withSubEntityId(final Long withSubEntityId) {
         this.subentityId = withSubEntityId;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder withJson(final String withJson) {
         this.json = withJson;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder withNoJsonBody() {
         this.json = null;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateGlobalConfiguration(final Long configId) {
         this.actionName = "UPDATE";
         this.entityName = "CONFIGURATION";
@@ -216,6 +240,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updatePermissions() {
         this.actionName = "UPDATE";
         this.entityName = "PERMISSION";
@@ -224,6 +249,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createRole() {
         this.actionName = "CREATE";
         this.entityName = "ROLE";
@@ -231,6 +257,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateRole(final Long roleId) {
         this.actionName = "UPDATE";
         this.entityName = "ROLE";
@@ -239,6 +266,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateRolePermissions(final Long roleId) {
         this.actionName = "PERMISSIONS";
         this.entityName = "ROLE";
@@ -247,6 +275,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createUser() {
         this.actionName = "CREATE";
         this.entityName = "USER";
@@ -255,6 +284,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateUser(final Long userId) {
         this.actionName = "UPDATE";
         this.entityName = "USER";
@@ -263,6 +293,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteUser(final Long userId) {
         this.actionName = "DELETE";
         this.entityName = "USER";
@@ -271,6 +302,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createOffice() {
         this.actionName = "CREATE";
         this.entityName = "OFFICE";
@@ -279,6 +311,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateOffice(final Long officeId) {
         this.actionName = "UPDATE";
         this.entityName = "OFFICE";
@@ -287,6 +320,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createOfficeTransaction() {
         this.actionName = "CREATE";
         this.entityName = "OFFICETRANSACTION";
@@ -294,6 +328,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteOfficeTransaction(final Long transactionId) {
         this.actionName = "DELETE";
         this.entityName = "OFFICETRANSACTION";
@@ -302,6 +337,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createStaff() {
         this.actionName = "CREATE";
         this.entityName = "STAFF";
@@ -310,6 +346,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateStaff(final Long staffId) {
         this.actionName = "UPDATE";
         this.entityName = "STAFF";
@@ -318,6 +355,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createGuarantor(final Long loanId) {
         this.actionName = "CREATE";
         this.entityName = "GUARANTOR";
@@ -327,6 +365,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder recoverFromGuarantor(final Long loanId) {
         this.actionName = "RECOVERGUARANTEES";
         this.entityName = "LOAN";
@@ -336,6 +375,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateGuarantor(final Long loanId, final Long guarantorId) {
         this.actionName = "UPDATE";
         this.entityName = "GUARANTOR";
@@ -345,6 +385,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteGuarantor(final Long loanId, final Long guarantorId, final Long guarantorFundingId) {
         this.actionName = "DELETE";
         this.entityName = "GUARANTOR";
@@ -355,6 +396,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createFund() {
         this.actionName = "CREATE";
         this.entityName = "FUND";
@@ -363,6 +405,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateFund(final Long fundId) {
         this.actionName = "UPDATE";
         this.entityName = "FUND";
@@ -371,6 +414,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createReport() {
         this.actionName = "CREATE";
         this.entityName = "REPORT";
@@ -379,6 +423,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateReport(final Long id) {
         this.actionName = "UPDATE";
         this.entityName = "REPORT";
@@ -387,6 +432,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteReport(final Long id) {
         this.actionName = "DELETE";
         this.entityName = "REPORT";
@@ -395,6 +441,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateCurrencies() {
         this.actionName = "UPDATE";
         this.entityName = "CURRENCY";
@@ -402,6 +449,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createSms() {
         this.actionName = "CREATE";
         this.entityName = "SMS";
@@ -410,6 +458,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateSms(final Long resourceId) {
         this.actionName = "UPDATE";
         this.entityName = "SMS";
@@ -418,6 +467,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteSms(final Long resourceId) {
         this.actionName = "DELETE";
         this.entityName = "SMS";
@@ -426,6 +476,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createCode() {
         this.actionName = "CREATE";
         this.entityName = "CODE";
@@ -434,6 +485,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateCode(final Long codeId) {
         this.actionName = "UPDATE";
         this.entityName = "CODE";
@@ -442,6 +494,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteCode(final Long codeId) {
         this.actionName = "DELETE";
         this.entityName = "CODE";
@@ -450,6 +503,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createHook() {
         this.actionName = "CREATE";
         this.entityName = "HOOK";
@@ -458,6 +512,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateHook(final Long hookId) {
         this.actionName = "UPDATE";
         this.entityName = "HOOK";
@@ -466,6 +521,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteHook(final Long hookId) {
         this.actionName = "DELETE";
         this.entityName = "HOOK";
@@ -474,6 +530,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createCharge() {
         this.actionName = "CREATE";
         this.entityName = "CHARGE";
@@ -482,6 +539,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createCollateral() {
         this.actionName = "CREATE";
         this.entityId = null;
@@ -490,6 +548,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateCharge(final Long chargeId) {
         this.actionName = "UPDATE";
         this.entityName = "CHARGE";
@@ -498,6 +557,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteCharge(final Long chargeId) {
         this.actionName = "DELETE";
         this.entityName = "CHARGE";
@@ -506,6 +566,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createLoanProduct() {
         this.actionName = "CREATE";
         this.entityName = "LOANPRODUCT";
@@ -514,6 +575,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateLoanProduct(final Long productId) {
         this.actionName = "UPDATE";
         this.entityName = "LOANPRODUCT";
@@ -522,6 +584,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createClientIdentifier(final Long clientId) {
         this.actionName = "CREATE";
         this.entityName = "CLIENTIDENTIFIER";
@@ -531,6 +594,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateClientIdentifier(final Long clientId, final Long clientIdentifierId) {
         this.actionName = "UPDATE";
         this.entityName = "CLIENTIDENTIFIER";
@@ -540,6 +604,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteClientIdentifier(final Long clientId, final Long clientIdentifierId) {
         this.actionName = "DELETE";
         this.entityName = "CLIENTIDENTIFIER";
@@ -549,6 +614,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createClient() {
         this.actionName = "CREATE";
         this.entityName = "CLIENT";
@@ -556,6 +622,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder activateClient(final Long clientId) {
         this.actionName = "ACTIVATE";
         this.entityName = "CLIENT";
@@ -565,6 +632,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder closeClient(final Long clientId) {
         this.actionName = "CLOSE";
         this.entityName = "CLIENT";
@@ -574,6 +642,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder rejectClient(final Long clientId) {
         this.actionName = "REJECT";
         this.entityName = "CLIENT";
@@ -583,6 +652,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder withdrawClient(final Long clientId) {
         this.actionName = "WITHDRAW";
         this.entityName = "CLIENT";
@@ -592,6 +662,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder reActivateClient(final Long clientId) {
         this.actionName = "REACTIVATE";
         this.entityName = "CLIENT";
@@ -601,6 +672,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder proposeClientTransfer(final Long clientId) {
         this.actionName = "PROPOSETRANSFER";
         this.entityName = "CLIENT";
@@ -610,6 +682,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder proposeAndAcceptClientTransfer(final Long clientId) {
         this.actionName = "PROPOSEANDACCEPTTRANSFER";
         this.entityName = "CLIENT";
@@ -619,6 +692,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder withdrawClientTransferRequest(final Long clientId) {
         this.actionName = "WITHDRAWTRANSFER";
         this.entityName = "CLIENT";
@@ -628,6 +702,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder acceptClientTransfer(final Long clientId) {
         this.actionName = "ACCEPTTRANSFER";
         this.entityName = "CLIENT";
@@ -637,6 +712,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder rejectClientTransfer(final Long clientId) {
         this.actionName = "REJECTTRANSFER";
         this.entityName = "CLIENT";
@@ -646,6 +722,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateClient(final Long clientId) {
         this.actionName = "UPDATE";
         this.entityName = "CLIENT";
@@ -655,6 +732,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteClient(final Long clientId) {
         this.actionName = "DELETE";
         this.entityName = "CLIENT";
@@ -665,6 +743,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createDBDatatable(final String json) {
         this.actionName = "CREATE";
         this.entityName = "DATATABLE";
@@ -674,6 +753,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateDBDatatable(final String datatable, final String json) {
         this.actionName = "UPDATE";
         this.entityName = "DATATABLE";
@@ -683,6 +763,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteDBDatatable(final String datatable, final String json) {
         this.actionName = "DELETE";
         this.entityName = "DATATABLE";
@@ -692,6 +773,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder undoRejection(final Long clientId) {
         this.actionName = "UNDOREJECT";
         this.entityName = "CLIENT";
@@ -701,6 +783,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder undoWithdrawal(final Long clientId) {
         this.actionName = "UNDOWITHDRAWAL";
         this.entityName = "CLIENT";
@@ -710,18 +793,21 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createDatatable(final String datatable, final Long apptableId, final Long datatableId) {
         this.actionName = "CREATE";
         commonDatatableSettings(datatable, apptableId, datatableId);
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateDatatable(final String datatable, final Long apptableId, final Long datatableId) {
         this.actionName = "UPDATE";
         commonDatatableSettings(datatable, apptableId, datatableId);
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteDatatable(final String datatable, final Long apptableId, final Long datatableId) {
         this.actionName = "DELETE";
         commonDatatableSettings(datatable, apptableId, datatableId);
@@ -740,6 +826,7 @@ public class CommandWrapperBuilder {
         }
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createLoanCharge(final Long loanId) {
         this.actionName = "CREATE";
         this.entityName = "LOANCHARGE";
@@ -748,6 +835,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateLoanCharge(final Long loanId, final Long loanChargeId) {
         this.actionName = "UPDATE";
         this.entityName = "LOANCHARGE";
@@ -757,6 +845,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder waiveLoanCharge(final Long loanId, final Long loanChargeId) {
         this.actionName = "WAIVE";
         this.entityName = "LOANCHARGE";
@@ -766,6 +855,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder payLoanCharge(final Long loanId, final Long loanChargeId) {
         this.actionName = "PAY";
         this.entityName = "LOANCHARGE";
@@ -779,6 +869,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteLoanCharge(final Long loanId, final Long loanChargeId) {
         this.actionName = "DELETE";
         this.entityName = "LOANCHARGE";
@@ -788,6 +879,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder loanRepaymentTransaction(final Long loanId) {
         this.actionName = "REPAYMENT";
         this.entityName = "LOAN";
@@ -797,6 +889,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder loanMerchantIssuedRefundTransaction(final Long loanId) {
         this.actionName = "MERCHANTISSUEDREFUND";
         this.entityName = "LOAN";
@@ -806,6 +899,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder loanPayoutRefundTransaction(final Long loanId) {
         this.actionName = "PAYOUTREFUND";
         this.entityName = "LOAN";
@@ -815,6 +909,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder loanGoodwillCreditTransaction(final Long loanId) {
         this.actionName = "GOODWILLCREDIT";
         this.entityName = "LOAN";
@@ -824,6 +919,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder refundLoanCharge(final Long loanId) {
         this.actionName = "CHARGEREFUND";
         this.entityName = "LOAN";
@@ -833,6 +929,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder loanRecoveryPaymentTransaction(final Long loanId) {
         this.actionName = "RECOVERYPAYMENT";
         this.entityName = "LOAN";
@@ -842,6 +939,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder waiveInterestPortionTransaction(final Long loanId) {
         this.actionName = "WAIVEINTERESTPORTION";
         this.entityName = "LOAN";
@@ -851,6 +949,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder writeOffLoanTransaction(final Long loanId) {
         this.actionName = "WRITEOFF";
         this.entityName = "LOAN";
@@ -860,6 +959,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder undoWriteOffLoanTransaction(final Long loanId) {
         this.actionName = "UNDOWRITEOFF";
         this.entityName = "LOAN";
@@ -869,6 +969,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder closeLoanAsRescheduledTransaction(final Long loanId) {
         this.actionName = "CLOSEASRESCHEDULED";
         this.entityName = "LOAN";
@@ -878,6 +979,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder closeLoanTransaction(final Long loanId) {
         this.actionName = "CLOSE";
         this.entityName = "LOAN";
@@ -887,6 +989,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder adjustTransaction(final Long loanId, final Long transactionId) {
         this.actionName = "ADJUST";
         this.entityName = "LOAN";
@@ -896,6 +999,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder refundLoanTransactionByCash(final Long loanId) {
         this.actionName = "REFUNDBYCASH";
         this.entityName = "LOAN";
@@ -905,6 +1009,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder loanForeclosure(final Long loanId) {
         this.actionName = "FORECLOSURE";
         this.entityName = "LOAN";
@@ -914,6 +1019,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder creditBalanceRefund(final Long loanId) {
         this.actionName = "CREDITBALANCEREFUND";
         this.entityName = "LOAN";
@@ -923,6 +1029,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder undoWaiveChargeTransaction(final Long loanId, final Long transactionId) {
         this.actionName = "UNDO";
         this.entityName = "WAIVECHARGE";
@@ -932,6 +1039,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createLoanApplication() {
         this.actionName = "CREATE";
         this.entityName = "LOAN";
@@ -941,6 +1049,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updatePostDatedCheck(final Long id, final Long loanId) {
         this.actionName = "UPDATE";
         this.entityName = "REPAYMENT_WITH_POSTDATEDCHECKS";
@@ -950,6 +1059,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder bouncedCheck(final Long id, final Long loanId) {
         this.actionName = "BOUNCE";
         this.entityName = "REPAYMENT_WITH_POSTDATEDCHECKS";
@@ -959,6 +1069,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deletePostDatedCheck(final Long id, final Long loanId) {
         this.actionName = "DELETE";
         this.entityName = "REPAYMENT_WITH_POSTDATEDCHECKS";
@@ -968,6 +1079,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateLoanApplication(final Long loanId) {
         this.actionName = "UPDATE";
         this.entityName = "LOAN";
@@ -977,6 +1089,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateDisbusementDate(final Long loanId, final Long disbursementId) {
         this.actionName = "UPDATE";
         this.entityName = "DISBURSEMENTDETAIL";
@@ -986,6 +1099,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder addAndDeleteDisbursementDetails(final Long loanId) {
         this.actionName = "UPDATE";
         this.entityName = "DISBURSEMENTDETAIL";
@@ -995,6 +1109,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteLoanApplication(final Long loanId) {
         this.actionName = "DELETE";
         this.entityName = "LOAN";
@@ -1004,6 +1119,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder rejectLoanApplication(final Long loanId) {
         this.actionName = "REJECT";
         this.entityName = "LOAN";
@@ -1013,6 +1129,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder rejectGLIMApplication(final Long glimId) {
         this.actionName = "REJECT";
         this.entityName = "GLIMLOAN";
@@ -1022,6 +1139,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder withdrawLoanApplication(final Long loanId) {
         this.actionName = "WITHDRAW";
         this.entityName = "LOAN";
@@ -1031,6 +1149,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder approveLoanApplication(final Long loanId) {
         this.actionName = "APPROVE";
         this.entityName = "LOAN";
@@ -1040,6 +1159,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder approveGLIMLoanApplication(final Long glimId) {
         this.actionName = "APPROVE";
         this.entityName = "GLIMLOAN";
@@ -1049,6 +1169,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder disburseGlimLoanApplication(final Long glimId) {
         this.actionName = "DISBURSE";
         this.entityName = "GLIMLOAN";
@@ -1058,6 +1179,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder repaymentGlimLoanApplication(final Long glimId) {
         this.actionName = "REPAYMENT";
         this.entityName = "GLIMLOAN";
@@ -1067,6 +1189,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder undoGLIMLoanDisbursal(final Long glimId) {
         this.actionName = "UNDODISBURSAL";
         this.entityName = "GLIMLOAN";
@@ -1076,6 +1199,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder undoGLIMLoanApproval(final Long glimId) {
         this.actionName = "UNDOAPPROVAL";
         this.entityName = "GLIMLOAN";
@@ -1085,6 +1209,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder disburseLoanApplication(final Long loanId) {
         this.actionName = "DISBURSE";
         this.entityName = "LOAN";
@@ -1094,6 +1219,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder disburseLoanToSavingsApplication(final Long loanId) {
         this.actionName = "DISBURSETOSAVINGS";
         this.entityName = "LOAN";
@@ -1103,6 +1229,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder undoLoanApplicationApproval(final Long loanId) {
         this.actionName = "APPROVALUNDO";
         this.entityName = "LOAN";
@@ -1112,6 +1239,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder undoLoanApplicationDisbursal(final Long loanId) {
         this.actionName = "DISBURSALUNDO";
         this.entityName = "LOAN";
@@ -1121,6 +1249,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder undoLastDisbursalLoanApplication(final Long loanId) {
         this.actionName = "DISBURSALLASTUNDO";
         this.entityName = "LOAN";
@@ -1130,6 +1259,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder assignLoanOfficer(final Long loanId) {
         this.actionName = "UPDATELOANOFFICER";
         this.entityName = "LOAN";
@@ -1139,6 +1269,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder unassignLoanOfficer(final Long loanId) {
         this.actionName = "REMOVELOANOFFICER";
         this.entityName = "LOAN";
@@ -1148,6 +1279,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder assignLoanOfficersInBulk() {
         this.actionName = "BULKREASSIGN";
         this.entityName = "LOAN";
@@ -1155,6 +1287,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder assignDelinquency(final Long loanId) {
         this.actionName = "UPDATEDELINQUENCY";
         this.entityName = "LOAN";
@@ -1164,6 +1297,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createCodeValue(final Long codeId) {
         this.actionName = "CREATE";
         this.entityName = "CODEVALUE";
@@ -1172,6 +1306,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateCodeValue(final Long codeId, final Long codeValueId) {
         this.actionName = "UPDATE";
         this.entityName = "CODEVALUE";
@@ -1181,6 +1316,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteCodeValue(final Long codeId, final Long codeValueId) {
         this.actionName = "DELETE";
         this.entityName = "CODEVALUE";
@@ -1190,6 +1326,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createGLClosure() {
         this.actionName = "CREATE";
         this.entityName = "GLCLOSURE";
@@ -1198,6 +1335,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateGLClosure(final Long glClosureId) {
         this.actionName = "UPDATE";
         this.entityName = "GLCLOSURE";
@@ -1206,6 +1344,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteGLClosure(final Long glClosureId) {
         this.actionName = "DELETE";
         this.entityName = "GLCLOSURE";
@@ -1214,6 +1353,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder excuteAccrualAccounting() {
         this.actionName = "EXECUTE";
         this.entityName = "PERIODICACCRUALACCOUNTING";
@@ -1222,6 +1362,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createGLAccount() {
         this.actionName = "CREATE";
         this.entityName = "GLACCOUNT";
@@ -1230,6 +1371,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateGLAccount(final Long glAccountId) {
         this.actionName = "UPDATE";
         this.entityName = "GLACCOUNT";
@@ -1238,6 +1380,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteGLAccount(final Long glAccountId) {
         this.actionName = "DELETE";
         this.entityName = "GLACCOUNT";
@@ -1246,6 +1389,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createJournalEntry() {
         this.actionName = "CREATE";
         this.entityName = "JOURNALENTRY";
@@ -1254,6 +1398,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder reverseJournalEntry(final String transactionId) {
         this.actionName = "REVERSE";
         this.entityName = "JOURNALENTRY";
@@ -1263,6 +1408,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateRunningBalanceForJournalEntry() {
         this.actionName = "UPDATERUNNINGBALANCE";
         this.entityName = "JOURNALENTRY";
@@ -1271,6 +1417,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder defineOpeningBalanceForJournalEntry() {
         this.actionName = "DEFINEOPENINGBALANCE";
         this.entityName = "JOURNALENTRY";
@@ -1279,6 +1426,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateOpeningBalanceForJournalEntry() {
         this.actionName = "UPDATEOPENINGBALANCE";
         this.entityName = "JOURNALENTRY";
@@ -1287,6 +1435,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createSavingProduct() {
         this.actionName = "CREATE";
         this.entityName = "SAVINGSPRODUCT";
@@ -1295,6 +1444,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateSavingProduct(final Long productId) {
         this.actionName = "UPDATE";
         this.entityName = "SAVINGSPRODUCT";
@@ -1303,6 +1453,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteSavingProduct(final Long productId) {
         this.actionName = "DELETE";
         this.entityName = "SAVINGSPRODUCT";
@@ -1311,6 +1462,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createSavingsAccount() {
         this.actionName = "CREATE";
         this.entityName = "SAVINGSACCOUNT";
@@ -1319,6 +1471,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createGSIMAccount() {
         this.actionName = "CREATE";
         this.entityName = "GSIMACCOUNT";
@@ -1327,6 +1480,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateSavingsAccount(final Long accountId) {
         this.actionName = "UPDATE";
         this.entityName = "SAVINGSACCOUNT";
@@ -1335,6 +1489,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateGSIMAccount(final Long accountId) {
         this.actionName = "UPDATE";
         this.entityName = "GSIMACCOUNT";
@@ -1343,6 +1498,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteSavingsAccount(final Long accountId) {
         this.actionName = "DELETE";
         this.entityName = "SAVINGSACCOUNT";
@@ -1351,6 +1507,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder rejectSavingsAccountApplication(final Long accountId) {
         this.actionName = "REJECT";
         this.entityName = "SAVINGSACCOUNT";
@@ -1360,6 +1517,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder rejectGSIMAccountApplication(final Long accountId) {
         this.actionName = "REJECT";
         this.entityName = "GSIMACCOUNT";
@@ -1369,6 +1527,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder withdrawSavingsAccountApplication(final Long accountId) {
         this.actionName = "WITHDRAW";
         this.entityName = "SAVINGSACCOUNT";
@@ -1378,6 +1537,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder approveSavingsAccountApplication(final Long accountId) {
         this.actionName = "APPROVE";
         this.entityName = "SAVINGSACCOUNT";
@@ -1387,6 +1547,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder approveGSIMAccountApplication(final Long accountId) {
         this.actionName = "APPROVE";
         this.entityName = "GSIMACCOUNT";
@@ -1396,6 +1557,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder undoSavingsAccountApplication(final Long accountId) {
         this.actionName = "APPROVALUNDO";
         this.entityName = "SAVINGSACCOUNT";
@@ -1405,6 +1567,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder undoGSIMApplicationApproval(final Long accountId) {
         this.actionName = "APPROVALUNDO";
         this.entityName = "GSIMACCOUNT";
@@ -1414,6 +1577,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder savingsAccountActivation(final Long accountId) {
         this.actionName = "ACTIVATE";
         this.entityName = "SAVINGSACCOUNT";
@@ -1423,6 +1587,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder gsimAccountActivation(final Long accountId) {
         this.actionName = "ACTIVATE";
         this.entityName = "GSIMACCOUNT";
@@ -1432,6 +1597,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder closeSavingsAccountApplication(final Long accountId) {
         this.actionName = "CLOSE";
         this.entityName = "SAVINGSACCOUNT";
@@ -1441,6 +1607,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder closeGSIMApplication(final Long accountId) {
         this.actionName = "CLOSE";
         this.entityName = "GSIMACCOUNT";
@@ -1450,6 +1617,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createAccountTransfer() {
         this.actionName = "CREATE";
         this.entityName = "ACCOUNTTRANSFER";
@@ -1458,6 +1626,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createStandingInstruction() {
         this.actionName = "CREATE";
         this.entityName = "STANDINGINSTRUCTION";
@@ -1466,6 +1635,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateStandingInstruction(final Long standingInstructionId) {
         this.actionName = "UPDATE";
         this.entityName = "STANDINGINSTRUCTION";
@@ -1474,6 +1644,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteStandingInstruction(final Long standingInstructionId) {
         this.actionName = "DELETE";
         this.entityName = "STANDINGINSTRUCTION";
@@ -1482,6 +1653,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder savingsAccountDeposit(final Long accountId) {
         this.actionName = "DEPOSIT";
         this.entityName = "SAVINGSACCOUNT";
@@ -1491,6 +1663,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder gsimSavingsAccountDeposit(final Long accountId) {
         this.actionName = "DEPOSIT";
         this.entityName = "GSIMACCOUNT";
@@ -1500,6 +1673,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder savingsAccountWithdrawal(final Long accountId) {
         this.actionName = "WITHDRAWAL";
         this.entityName = "SAVINGSACCOUNT";
@@ -1509,6 +1683,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder undoSavingsAccountTransaction(final Long accountId, final Long transactionId) {
         this.actionName = "UNDOTRANSACTION";
         this.entityName = "SAVINGSACCOUNT";
@@ -1520,6 +1695,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder reverseSavingsAccountTransaction(final Long accountId, final Long transactionId) {
         this.actionName = "REVERSETRANSACTION";
         this.entityName = "SAVINGSACCOUNT";
@@ -1531,6 +1707,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder adjustSavingsAccountTransaction(final Long accountId, final Long transactionId) {
         this.actionName = "ADJUSTTRANSACTION";
         this.entityName = "SAVINGSACCOUNT";
@@ -1542,6 +1719,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder savingsAccountInterestCalculation(final Long accountId) {
         this.actionName = "CALCULATEINTEREST";
         this.entityName = "SAVINGSACCOUNT";
@@ -1551,6 +1729,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder savingsAccountInterestPosting(final Long accountId) {
         this.actionName = "POSTINTEREST";
         this.entityName = "SAVINGSACCOUNT";
@@ -1560,6 +1739,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder savingsAccountApplyAnnualFees(final Long accountId) {
         this.actionName = "APPLYANNUALFEE";
         this.entityName = "SAVINGSACCOUNT";
@@ -1569,6 +1749,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createSavingsAccountCharge(final Long savingsAccountId) {
         this.actionName = "CREATE";
         this.entityName = "SAVINGSACCOUNTCHARGE";
@@ -1577,6 +1758,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateSavingsAccountCharge(final Long savingsAccountId, final Long savingsAccountChargeId) {
         this.actionName = "UPDATE";
         this.entityName = "SAVINGSACCOUNTCHARGE";
@@ -1586,6 +1768,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder waiveSavingsAccountCharge(final Long savingsAccountId, final Long savingsAccountChargeId) {
         this.actionName = "WAIVE";
         this.entityName = "SAVINGSACCOUNTCHARGE";
@@ -1596,6 +1779,7 @@ public class CommandWrapperBuilder {
 
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder paySavingsAccountCharge(final Long savingsAccountId, final Long savingsAccountChargeId) {
         this.actionName = "PAY";
         this.entityName = "SAVINGSACCOUNTCHARGE";
@@ -1606,6 +1790,7 @@ public class CommandWrapperBuilder {
 
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder inactivateSavingsAccountCharge(final Long savingsAccountId, final Long savingsAccountChargeId) {
         this.actionName = "INACTIVATE";
         this.entityName = "SAVINGSACCOUNTCHARGE";
@@ -1616,6 +1801,7 @@ public class CommandWrapperBuilder {
 
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteSavingsAccountCharge(final Long savingsAccountId, final Long savingsAccountChargeId) {
         this.actionName = "DELETE";
         this.entityName = "SAVINGSACCOUNTCHARGE";
@@ -1625,6 +1811,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createFixedDepositProduct() {
         this.actionName = "CREATE";
         this.entityName = "FIXEDDEPOSITPRODUCT";
@@ -1633,6 +1820,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateFixedDepositProduct(final Long productId) {
         this.actionName = "UPDATE";
         this.entityName = "FIXEDDEPOSITPRODUCT";
@@ -1641,6 +1829,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteFixedDepositProduct(final Long productId) {
         this.actionName = "DELETE";
         this.entityName = "FIXEDDEPOSITPRODUCT";
@@ -1649,6 +1838,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createRecurringDepositProduct() {
         this.actionName = "CREATE";
         this.entityName = "RECURRINGDEPOSITPRODUCT";
@@ -1657,6 +1847,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateRecurringDepositProduct(final Long productId) {
         this.actionName = "UPDATE";
         this.entityName = "RECURRINGDEPOSITPRODUCT";
@@ -1665,6 +1856,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteRecurringDepositProduct(final Long productId) {
         this.actionName = "DELETE";
         this.entityName = "RECURRINGDEPOSITPRODUCT";
@@ -1673,6 +1865,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createInterestRateChart() {
         this.actionName = "CREATE";
         this.entityName = "INTERESTRATECHART";
@@ -1681,6 +1874,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateInterestRateChart(final Long interestRateChartId) {
         this.actionName = "UPDATE";
         this.entityName = "INTERESTRATECHART";
@@ -1689,6 +1883,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteInterestRateChart(final Long interestRateChartId) {
         this.actionName = "DELETE";
         this.entityName = "INTERESTRATECHART";
@@ -1697,6 +1892,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createInterestRateChartSlab(final Long chartId) {
         this.actionName = "CREATE";
         this.entityName = "CHARTSLAB";
@@ -1706,6 +1902,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateInterestRateChartSlab(final Long chartId, final Long chartSlabId) {
         this.actionName = "UPDATE";
         this.entityName = "CHARTSLAB";
@@ -1715,6 +1912,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteInterestRateChartSlab(final Long chartId, final Long chartSlabId) {
         this.actionName = "DELETE";
         this.entityName = "CHARTSLAB";
@@ -1724,6 +1922,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createCalendar(final CommandWrapper resourceDetails, final String supportedEntityType,
             final Long supportedEntityId) {
         this.actionName = "CREATE";
@@ -1735,6 +1934,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateCalendar(final String supportedEntityType, final Long supportedEntityId, final Long calendarId) {
         this.actionName = "UPDATE";
         this.entityName = "CALENDAR";
@@ -1744,6 +1944,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteCalendar(final String supportedEntityType, final Long supportedEntityId, final Long calendarId) {
         this.actionName = "DELETE";
         this.entityName = "CALENDAR";
@@ -1752,6 +1953,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createNote(final CommandWrapper resourceDetails, final String resourceType, final Long resourceId) {
         this.actionName = "CREATE";
         this.entityName = resourceDetails.entityName();// Note supports multiple
@@ -1767,6 +1969,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateNote(final CommandWrapper resourceDetails, final String resourceType, final Long resourceId,
             final Long noteId) {
         this.actionName = "UPDATE";
@@ -1784,6 +1987,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteNote(final CommandWrapper resourceDetails, final String resourceType, final Long resourceId,
             final Long noteId) {
         this.actionName = "DELETE";
@@ -1801,6 +2005,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createGroup() {
         this.actionName = "CREATE";
         this.entityName = "GROUP";
@@ -1808,6 +2013,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateGroup(final Long groupId) {
         this.actionName = "UPDATE";
         this.entityName = "GROUP";
@@ -1817,6 +2023,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder activateGroup(final Long groupId) {
         this.actionName = "ACTIVATE";
         this.entityName = "GROUP";
@@ -1826,6 +2033,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder saveGroupCollectionSheet(final Long groupId) {
         this.actionName = "SAVECOLLECTIONSHEET";
         this.entityName = "GROUP";
@@ -1835,6 +2043,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder saveIndividualCollectionSheet() {
         this.actionName = "SAVE";
         this.entityName = "COLLECTIONSHEET";
@@ -1842,6 +2051,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteGroup(final Long groupId) {
         this.actionName = "DELETE";
         this.entityName = "GROUP";
@@ -1851,6 +2061,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder associateClientsToGroup(final Long groupId) {
         this.actionName = "ASSOCIATECLIENTS";
         this.entityName = "GROUP";
@@ -1860,6 +2071,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder disassociateClientsFromGroup(final Long groupId) {
         this.actionName = "DISASSOCIATECLIENTS";
         this.entityName = "GROUP";
@@ -1869,6 +2081,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder transferClientsBetweenGroups(final Long sourceGroupId) {
         this.actionName = "TRANSFERCLIENTS";
         this.entityName = "GROUP";
@@ -1878,6 +2091,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder unassignGroupStaff(final Long groupId) {
         this.actionName = "UNASSIGNSTAFF";
         this.entityName = "GROUP";
@@ -1887,6 +2101,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder assignGroupStaff(final Long groupId) {
         this.actionName = "ASSIGNSTAFF";
         this.entityName = "GROUP";
@@ -1896,6 +2111,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder closeGroup(final Long groupId) {
         this.actionName = "CLOSE";
         this.entityName = "GROUP";
@@ -1905,6 +2121,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createCollateral(final Long loanId) {
         this.actionName = "CREATE";
         this.entityName = "COLLATERAL";
@@ -1914,6 +2131,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateCollateral(final Long loanId, final Long collateralId) {
         this.actionName = "UPDATE";
         this.entityName = "COLLATERAL";
@@ -1923,6 +2141,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateCollateralProduct(final Long collateralId) {
         this.actionName = "UPDATE";
         this.entityName = "COLLATERAL_PRODUCT";
@@ -1931,6 +2150,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateClientCollateralProduct(final Long clientId, final Long collateralId) {
         this.actionName = "UPDATE";
         this.entityName = "CLIENT_COLLATERAL_PRODUCT";
@@ -1940,6 +2160,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteLoanCollateral(final Long loanId, final Long collateralId) {
         this.actionName = "DELETE";
         this.entityName = "LOAN_COLLATERAL_PRODUCT";
@@ -1949,6 +2170,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteCollateral(final Long loanId, final Long collateralId) {
         this.actionName = "DELETE";
         this.entityName = "COLLATERAL";
@@ -1958,6 +2180,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteCollateralProduct(final Long collateralId) {
         this.actionName = "DELETE";
         this.entityName = "COLLATERAL_PRODUCT";
@@ -1966,6 +2189,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteClientCollateralProduct(final Long collateralId, final Long clientId) {
         this.actionName = "DELETE";
         this.entityName = "CLIENT_COLLATERAL_PRODUCT";
@@ -1975,6 +2199,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder addClientCollateralProduct(final Long clientId) {
         this.actionName = "CREATE";
         this.entityName = "CLIENT_COLLATERAL_PRODUCT";
@@ -1983,6 +2208,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateCollectionSheet(final Long groupId) {
         this.actionName = "UPDATE";
         this.entityName = "COLLECTIONSHEET";
@@ -1991,6 +2217,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createCenter() {
         this.actionName = "CREATE";
         this.entityName = "CENTER";
@@ -1998,6 +2225,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateCenter(final Long centerId) {
         this.actionName = "UPDATE";
         this.entityName = "CENTER";
@@ -2006,6 +2234,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteCenter(final Long centerId) {
         this.actionName = "DELETE";
         this.entityName = "CENTER";
@@ -2014,6 +2243,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder activateCenter(final Long centerId) {
         this.actionName = "ACTIVATE";
         this.entityName = "CENTER";
@@ -2023,6 +2253,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder saveCenterCollectionSheet(final Long centerId) {
         this.actionName = "SAVECOLLECTIONSHEET";
         this.entityName = "CENTER";
@@ -2032,6 +2263,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder closeCenter(final Long centerId) {
         this.actionName = "CLOSE";
         this.entityName = "CENTER";
@@ -2041,6 +2273,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder associateGroupsToCenter(final Long centerId) {
         this.actionName = "ASSOCIATEGROUPS";
         this.entityName = "CENTER";
@@ -2050,6 +2283,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder disassociateGroupsFromCenter(final Long centerId) {
         this.actionName = "DISASSOCIATEGROUPS";
         this.entityName = "CENTER";
@@ -2059,6 +2293,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createAccountingRule() {
         this.actionName = "CREATE";
         this.entityName = "ACCOUNTINGRULE";
@@ -2067,6 +2302,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateAccountingRule(final Long accountingRuleId) {
         this.actionName = "UPDATE";
         this.entityName = "ACCOUNTINGRULE";
@@ -2075,6 +2311,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteAccountingRule(final Long accountingRuleId) {
         this.actionName = "DELETE";
         this.entityName = "ACCOUNTINGRULE";
@@ -2083,6 +2320,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateTaxonomyMapping(final Long mappingId) {
         this.actionName = "UPDATE";
         this.entityName = "XBRLMAPPING";
@@ -2091,6 +2329,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createHoliday() {
         this.actionName = "CREATE";
         this.entityName = "HOLIDAY";
@@ -2099,6 +2338,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder activateHoliday(final Long holidayId) {
         this.actionName = "ACTIVATE";
         this.entityName = "HOLIDAY";
@@ -2107,6 +2347,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateHoliday(final Long holidayId) {
         this.actionName = "UPDATE";
         this.entityName = "HOLIDAY";
@@ -2115,6 +2356,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteHoliday(final Long holidayId) {
         this.actionName = "DELETE";
         this.entityName = "HOLIDAY";
@@ -2123,6 +2365,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder assignRole(final Long groupId) {
         this.actionName = "ASSIGNROLE";
         this.entityName = "GROUP";
@@ -2132,6 +2375,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder unassignRole(final Long groupId, final Long roleId) {
         this.actionName = "UNASSIGNROLE";
         this.entityName = "GROUP";
@@ -2141,6 +2385,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateRole(final Long groupId, final Long roleId) {
         this.actionName = "UPDATEROLE";
         this.entityName = "GROUP";
@@ -2150,6 +2395,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder unassignClientStaff(final Long clientId) {
         this.actionName = "UNASSIGNSTAFF";
         this.entityName = "CLIENT";
@@ -2159,6 +2405,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createTemplate() {
         this.actionName = "CREATE";
         this.entityName = "TEMPLATE";
@@ -2167,6 +2414,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateTemplate(final Long templateId) {
         this.actionName = "UPDATE";
         this.entityName = "TEMPLATE";
@@ -2175,6 +2423,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteTemplate(final Long templateId) {
         this.actionName = "DELETE";
         this.entityName = "TEMPLATE";
@@ -2183,6 +2432,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder assignClientStaff(final Long clientId) {
         this.actionName = "ASSIGNSTAFF";
         this.entityName = "CLIENT";
@@ -2192,6 +2442,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateClientSavingsAccount(final Long clientId) {
         this.actionName = "UPDATESAVINGSACCOUNT";
         this.entityName = "CLIENT";
@@ -2201,6 +2452,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createProductMix(final Long productId) {
         this.actionName = "CREATE";
         this.entityName = "PRODUCTMIX";
@@ -2210,6 +2462,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateProductMix(final Long productId) {
         this.actionName = "UPDATE";
         this.entityName = "PRODUCTMIX";
@@ -2219,6 +2472,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteProductMix(final Long productId) {
         this.actionName = "DELETE";
         this.entityName = "PRODUCTMIX";
@@ -2228,11 +2482,13 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder withProduct(final Long productId) {
         this.productId = productId;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateJobDetail(final Long jobId) {
         this.actionName = "UPDATE";
         this.entityName = "SCHEDULER";
@@ -2241,6 +2497,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createMeeting(final CommandWrapper resourceDetails, final String supportedEntityType,
             final Long supportedEntityId) {
         this.actionName = "CREATE";
@@ -2252,6 +2509,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateMeeting(final String supportedEntityType, final Long supportedEntityId, final Long meetingId) {
         this.actionName = "UPDATE";
         this.entityName = "MEETING";
@@ -2260,6 +2518,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteMeeting(final String supportedEntityType, final Long supportedEntityId, final Long meetingId) {
         this.actionName = "DELETE";
         this.entityName = "MEETING";
@@ -2268,6 +2527,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder saveOrUpdateAttendance(final Long entityId, final String supportedEntityType,
             final Long supportedEntityId) {
         this.actionName = "SAVEORUPDATEATTENDANCE";
@@ -2277,6 +2537,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateCache() {
         this.actionName = "UPDATE";
         this.entityName = "CACHE";
@@ -2288,6 +2549,7 @@ public class CommandWrapperBuilder {
      * Deposit account mappings
      */
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createFixedDepositAccount() {
         this.actionName = "CREATE";
         this.entityName = "FIXEDDEPOSITACCOUNT";
@@ -2296,6 +2558,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateFixedDepositAccount(final Long accountId) {
         this.actionName = "UPDATE";
         this.entityName = "FIXEDDEPOSITACCOUNT";
@@ -2304,6 +2567,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteFixedDepositAccount(final Long accountId) {
         this.actionName = "DELETE";
         this.entityName = "FIXEDDEPOSITACCOUNT";
@@ -2312,6 +2576,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder rejectFixedDepositAccountApplication(final Long accountId) {
         this.actionName = "REJECT";
         this.entityName = "FIXEDDEPOSITACCOUNT";
@@ -2321,6 +2586,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder withdrawFixedDepositAccountApplication(final Long accountId) {
         this.actionName = "WITHDRAW";
         this.entityName = "FIXEDDEPOSITACCOUNT";
@@ -2330,6 +2596,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder approveFixedDepositAccountApplication(final Long accountId) {
         this.actionName = "APPROVE";
         this.entityName = "FIXEDDEPOSITACCOUNT";
@@ -2339,6 +2606,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder undoFixedDepositAccountApplication(final Long accountId) {
         this.actionName = "APPROVALUNDO";
         this.entityName = "FIXEDDEPOSITACCOUNT";
@@ -2348,6 +2616,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder fixedDepositAccountActivation(final Long accountId) {
         this.actionName = "ACTIVATE";
         this.entityName = "FIXEDDEPOSITACCOUNT";
@@ -2357,6 +2626,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder closeFixedDepositAccount(final Long accountId) {
         this.actionName = "CLOSE";
         this.entityName = "FIXEDDEPOSITACCOUNT";
@@ -2366,6 +2636,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder prematureCloseFixedDepositAccount(final Long accountId) {
         this.actionName = "PREMATURECLOSE";
         this.entityName = "FIXEDDEPOSITACCOUNT";
@@ -2375,6 +2646,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder fixedDepositAccountInterestCalculation(final Long accountId) {
         this.actionName = "CALCULATEINTEREST";
         this.entityName = "FIXEDDEPOSITACCOUNT";
@@ -2384,6 +2656,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder fixedDepositAccountInterestPosting(final Long accountId) {
         this.actionName = "POSTINTEREST";
         this.entityName = "FIXEDDEPOSITACCOUNT";
@@ -2393,6 +2666,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder fixedDepositAccountDeposit(final Long accountId) {
         this.actionName = "DEPOSIT";
         this.entityName = "FIXEDDEPOSITACCOUNT";
@@ -2402,6 +2676,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder fixedDepositAccountWithdrawal(final Long accountId) {
         this.actionName = "WITHDRAWAL";
         this.entityName = "FIXEDDEPOSITACCOUNT";
@@ -2411,6 +2686,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createRecurringDepositAccount() {
         this.actionName = "CREATE";
         this.entityName = "RECURRINGDEPOSITACCOUNT";
@@ -2419,6 +2695,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateRecurringDepositAccount(final Long accountId) {
         this.actionName = "UPDATE";
         this.entityName = "RECURRINGDEPOSITACCOUNT";
@@ -2427,6 +2704,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder recurringAccountDeposit(final Long accountId) {
         this.actionName = "DEPOSIT";
         this.entityName = "RECURRINGDEPOSITACCOUNT";
@@ -2436,6 +2714,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder recurringAccountWithdrawal(final Long accountId) {
         this.actionName = "WITHDRAWAL";
         this.entityName = "RECURRINGDEPOSITACCOUNT";
@@ -2445,6 +2724,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder adjustRecurringAccountTransaction(final Long accountId, final Long transactionId) {
         this.actionName = "ADJUSTTRANSACTION";
         this.entityName = "RECURRINGDEPOSITACCOUNT";
@@ -2456,6 +2736,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder undoRecurringAccountTransaction(final Long accountId, final Long transactionId) {
         this.actionName = "UNDOTRANSACTION";
         this.entityName = "RECURRINGDEPOSITACCOUNT";
@@ -2467,6 +2748,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteRecurringDepositAccount(final Long accountId) {
         this.actionName = "DELETE";
         this.entityName = "RECURRINGDEPOSITACCOUNT";
@@ -2475,6 +2757,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder rejectRecurringDepositAccountApplication(final Long accountId) {
         this.actionName = "REJECT";
         this.entityName = "RECURRINGDEPOSITACCOUNT";
@@ -2484,6 +2767,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder withdrawRecurringDepositAccountApplication(final Long accountId) {
         this.actionName = "WITHDRAW";
         this.entityName = "RECURRINGDEPOSITACCOUNT";
@@ -2493,6 +2777,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder approveRecurringDepositAccountApplication(final Long accountId) {
         this.actionName = "APPROVE";
         this.entityName = "RECURRINGDEPOSITACCOUNT";
@@ -2502,6 +2787,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder undoRecurringDepositAccountApplication(final Long accountId) {
         this.actionName = "APPROVALUNDO";
         this.entityName = "RECURRINGDEPOSITACCOUNT";
@@ -2511,6 +2797,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder recurringDepositAccountActivation(final Long accountId) {
         this.actionName = "ACTIVATE";
         this.entityName = "RECURRINGDEPOSITACCOUNT";
@@ -2520,6 +2807,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder closeRecurringDepositAccount(final Long accountId) {
         this.actionName = "CLOSE";
         this.entityName = "RECURRINGDEPOSITACCOUNT";
@@ -2529,6 +2817,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateDepositAmountForRecurringDepositAccount(final Long accountId) {
         this.actionName = DepositsApiConstants.UPDATE_DEPOSIT_AMOUNT.toUpperCase();
         this.entityName = "RECURRINGDEPOSITACCOUNT";
@@ -2538,6 +2827,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder prematureCloseRecurringDepositAccount(final Long accountId) {
         this.actionName = "PREMATURECLOSE";
         this.entityName = "RECURRINGDEPOSITACCOUNT";
@@ -2547,6 +2837,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder recurringDepositAccountInterestCalculation(final Long accountId) {
         this.actionName = "CALCULATEINTEREST";
         this.entityName = "RECURRINGDEPOSITACCOUNT";
@@ -2556,6 +2847,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder recurringDepositAccountInterestPosting(final Long accountId) {
         this.actionName = "POSTINTEREST";
         this.entityName = "RECURRINGDEPOSITACCOUNT";
@@ -2565,6 +2857,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createOfficeToGLAccountMapping() {
         this.actionName = "CREATE";
         this.entityName = "FINANCIALACTIVITYACCOUNT";
@@ -2573,6 +2866,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateOfficeToGLAccountMapping(final Long mappingId) {
         this.actionName = "UPDATE";
         this.entityName = "FINANCIALACTIVITYACCOUNT";
@@ -2581,6 +2875,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteOfficeToGLAccountMapping(final Long mappingId) {
         this.actionName = "DELETE";
         this.entityName = "FINANCIALACTIVITYACCOUNT";
@@ -2589,6 +2884,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder registerDBDatatable(final String datatable, final String apptable) {
         this.actionName = "REGISTER";
         this.entityName = "DATATABLE";
@@ -2597,6 +2893,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder registerSurvey(final String datatable, final String apptable) {
         this.actionName = "REGISTER";
         this.entityName = "SURVEY";
@@ -2605,6 +2902,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder fullFilSurvey(final String datatable, final Long apptableId) {
         this.entityName = datatable;
         this.entityId = apptableId;
@@ -2613,6 +2911,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateLikelihood(final Long entityId) {
         this.actionName = "UPDATE";
         this.entityName = "LIKELIHOOD";
@@ -2621,6 +2920,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder assignSavingsOfficer(final Long accountId) {
         this.actionName = "UPDATESAVINGSOFFICER";
         this.entityName = "SAVINGSACCOUNT";
@@ -2629,6 +2929,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder unassignSavingsOfficer(final Long accountId) {
         this.actionName = "REMOVESAVINGSOFFICER";
         this.entityName = "SAVINGSACCOUNT";
@@ -2637,6 +2938,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder savingsInterestPostingAsOnDate(final Long accountId) {
         this.actionName = "POSTINTERESTASONDATE";
         this.entityName = "SAVINGSACCOUNT";
@@ -2646,6 +2948,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createLoanRescheduleRequest(final String entityName) {
         this.actionName = "CREATE";
         this.entityName = entityName;
@@ -2654,6 +2957,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder approveLoanRescheduleRequest(final String entityName, final Long requestId) {
         this.actionName = "APPROVE";
         this.entityName = entityName;
@@ -2662,6 +2966,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder rejectLoanRescheduleRequest(final String entityName, final Long requestId) {
         this.actionName = "REJECT";
         this.entityName = entityName;
@@ -2670,6 +2975,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createAccountNumberFormat() {
         this.actionName = "CREATE";
         this.entityName = AccountNumberFormatConstants.ENTITY_NAME.toUpperCase();
@@ -2677,6 +2983,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateAccountNumberFormat(final Long accountNumberFormatId) {
         this.actionName = "UPDATE";
         this.entityName = AccountNumberFormatConstants.ENTITY_NAME.toUpperCase();
@@ -2685,6 +2992,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteAccountNumberFormat(final Long accountNumberFormatId) {
         this.actionName = "DELETE";
         this.entityName = AccountNumberFormatConstants.ENTITY_NAME.toUpperCase();
@@ -2694,6 +3002,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder refundByTransfer() {
         this.actionName = "REFUNDBYTRANSFER";
         this.entityName = "ACCOUNTTRANSFER";
@@ -2702,6 +3011,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createTeller() {
         this.actionName = "CREATE";
         this.entityName = "TELLER";
@@ -2710,6 +3020,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateTeller(final Long tellerId) {
         this.actionName = "UPDATE";
         this.entityName = "TELLER";
@@ -2718,6 +3029,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteTeller(final Long tellerId) {
         this.actionName = "DELETE";
         this.entityName = "TELLER";
@@ -2726,6 +3038,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder allocateTeller(final long tellerId) {
         this.actionName = "ALLOCATECASHIER";
         this.entityName = "TELLER";
@@ -2734,6 +3047,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateAllocationTeller(final Long tellerId, final Long cashierId) {
         this.actionName = "UPDATECASHIERALLOCATION";
         this.entityName = "TELLER";
@@ -2743,6 +3057,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteAllocationTeller(final Long tellerId, final Long cashierId) {
         this.actionName = "DELETECASHIERALLOCATION";
         this.entityName = "TELLER";
@@ -2752,6 +3067,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder allocateCashToCashier(final Long tellerId, final Long cashierId) {
         this.actionName = "ALLOCATECASHTOCASHIER";
         this.entityName = "TELLER";
@@ -2761,6 +3077,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder settleCashFromCashier(final Long tellerId, final Long cashierId) {
         this.actionName = "SETTLECASHFROMCASHIER";
         this.entityName = "TELLER";
@@ -2770,6 +3087,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteRole(Long roleId) {
         this.actionName = "DELETE";
         this.entityName = "ROLE";
@@ -2779,6 +3097,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder disableRole(Long roleId) {
         this.actionName = "DISABLE";
         this.entityName = "ROLE";
@@ -2788,6 +3107,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder enableRole(Long roleId) {
         this.actionName = "ENABLE";
         this.entityName = "ROLE";
@@ -2797,6 +3117,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createMap(Long relId) {
         this.actionName = "CREATE";
         this.entityName = "ENTITYMAPPING";
@@ -2805,6 +3126,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateMap(Long mapId) {
         this.actionName = "UPDATE";
         this.entityName = "ENTITYMAPPING";
@@ -2813,6 +3135,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteMap(final Long mapId) {
         this.actionName = "DELETE";
         this.entityName = "ENTITYMAPPING";
@@ -2821,6 +3144,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateWorkingDays() {
         this.actionName = "UPDATE";
         this.entityName = "WORKINGDAYS";
@@ -2828,6 +3152,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updatePasswordPreferences() {
         this.actionName = "UPDATE";
         this.entityName = PasswordPreferencesApiConstants.ENTITY_NAME;
@@ -2835,6 +3160,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createPaymentType() {
         this.actionName = "CREATE";
         this.entityName = PaymentTypeApiResourceConstants.ENTITY_NAME;
@@ -2843,6 +3169,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updatePaymentType(final Long paymentTypeId) {
         this.actionName = "UPDATE";
         this.entityName = PaymentTypeApiResourceConstants.ENTITY_NAME;
@@ -2851,6 +3178,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deletePaymentType(final Long paymentTypeId) {
         this.actionName = "DELETE";
         this.entityName = "PAYMENTTYPE";
@@ -2859,6 +3187,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateExternalServiceProperties(final String externalServiceName) {
         this.actionName = "UPDATE";
         this.entityName = "EXTERNALSERVICES";
@@ -2867,6 +3196,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createClientCharge(final Long clientId) {
         this.actionName = ClientApiConstants.CLIENT_CHARGE_ACTION_CREATE;
         this.entityName = ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME;
@@ -2875,6 +3205,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteClientCharge(final Long clientId, final Long chargeId) {
         this.actionName = ClientApiConstants.CLIENT_CHARGE_ACTION_DELETE;
         this.entityName = ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME;
@@ -2884,6 +3215,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder waiveClientCharge(final Long clientId, final Long chargeId) {
         this.actionName = ClientApiConstants.CLIENT_CHARGE_ACTION_WAIVE;
         this.entityName = ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME;
@@ -2893,6 +3225,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder payClientCharge(final Long clientId, final Long chargeId) {
         this.actionName = ClientApiConstants.CLIENT_CHARGE_ACTION_PAY;
         this.entityName = ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME;
@@ -2902,6 +3235,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder inactivateClientCharge(final Long clientId, final Long chargeId) {
         this.actionName = "INACTIVATE";
         this.entityName = ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME;
@@ -2911,6 +3245,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder undoClientTransaction(final Long clientId, final Long transactionId) {
         this.actionName = ClientApiConstants.CLIENT_TRANSACTION_ACTION_UNDO;
         this.entityName = ClientApiConstants.CLIENT_RESOURCE_NAME;
@@ -2920,6 +3255,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createProvisioningCategory() {
         this.actionName = "CREATE";
         this.entityName = "PROVISIONCATEGORY";
@@ -2928,6 +3264,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateProvisioningCategory(final Long cateoryId) {
         this.actionName = "UPDATE";
         this.entityName = "PROVISIONCATEGORY";
@@ -2936,6 +3273,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteProvisioningCategory(final Long categoryId) {
         this.actionName = "DELETE";
         this.entityName = "PROVISIONCATEGORY";
@@ -2944,6 +3282,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createProvisioningCriteria() {
         this.actionName = "CREATE";
         this.entityName = "PROVISIONCRITERIA";
@@ -2952,6 +3291,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateProvisioningCriteria(final Long criteriaId) {
         this.actionName = "UPDATE";
         this.entityName = "PROVISIONCRITERIA";
@@ -2960,6 +3300,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteProvisioningCriteria(final Long criteriaId) {
         this.actionName = "DELETE";
         this.entityName = "PROVISIONCRITERIA";
@@ -2968,6 +3309,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createProvisioningEntries() {
         this.actionName = "CREATE";
         this.entityName = "PROVISIONENTRIES";
@@ -2976,6 +3318,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createProvisioningJournalEntries(final Long entryId) {
         this.actionName = "CREATE";
         this.entityName = "PROVISIONJOURNALENTRIES";
@@ -2984,6 +3327,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder reCreateProvisioningEntries(final Long entryId) {
         this.actionName = "RECREATE";
         this.entityName = "PROVISIONENTRIES";
@@ -2992,6 +3336,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createFloatingRate() {
         this.actionName = "CREATE";
         this.entityName = "FLOATINGRATE";
@@ -3000,6 +3345,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateFloatingRate(final Long floatingRateId) {
         this.actionName = "UPDATE";
         this.entityName = "FLOATINGRATE";
@@ -3008,6 +3354,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createScheduleExceptions(final Long loanId) {
         this.actionName = "CREATESCHEDULEEXCEPTIONS";
         this.entityName = "LOAN";
@@ -3017,6 +3364,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteScheduleExceptions(final Long loanId) {
         this.actionName = "DELETESCHEDULEEXCEPTIONS";
         this.entityName = "LOAN";
@@ -3026,6 +3374,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createProduct(String productType) {
         this.entityName = productType.toUpperCase() + "PRODUCT"; // To Support
                                                                  // different
@@ -3037,6 +3386,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateProduct(String productType, final Long productId) {
         this.entityName = productType.toUpperCase() + "PRODUCT";
         this.actionName = "UPDATE";
@@ -3045,6 +3395,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createAccount(String accountType) {
         this.entityName = accountType.toUpperCase() + "ACCOUNT"; // To Support
                                                                  // different
@@ -3056,6 +3407,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateAccount(String accountType, final Long accountId) {
         this.entityName = accountType.toUpperCase() + "ACCOUNT";
         this.actionName = "UPDATE";
@@ -3064,6 +3416,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createProductCommand(String productType, String command, final Long productId) {
         this.entityName = productType.toUpperCase() + "PRODUCT";
         this.actionName = "CREATE" + "_" + command.toUpperCase();
@@ -3072,6 +3425,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createShareProductDividendPayoutCommand(final Long productId) {
         this.entityName = "SHAREPRODUCT";
         this.actionName = "CREATE_DIVIDEND";
@@ -3080,6 +3434,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder approveShareProductDividendPayoutCommand(final Long productId, final Long dividendId) {
         this.entityName = "SHAREPRODUCT";
         this.actionName = "APPROVE_DIVIDEND";
@@ -3088,6 +3443,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteShareProductDividendPayoutCommand(final Long productId, final Long dividendId) {
         this.entityName = "SHAREPRODUCT";
         this.actionName = "DELETE_DIVIDEND";
@@ -3096,6 +3452,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createAccountCommand(String accountType, final Long accountId, String command) {
         this.entityName = accountType.toUpperCase() + "ACCOUNT";
         this.actionName = command.toUpperCase();
@@ -3104,6 +3461,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createTaxComponent() {
         this.actionName = "CREATE";
         this.entityName = "TAXCOMPONENT";
@@ -3112,6 +3470,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateTaxComponent(final Long taxComponentId) {
         this.actionName = "UPDATE";
         this.entityName = "TAXCOMPONENT";
@@ -3120,6 +3479,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createTaxGroup() {
         this.actionName = "CREATE";
         this.entityName = "TAXGROUP";
@@ -3128,6 +3488,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateTaxGroup(final Long taxGroupId) {
         this.actionName = "UPDATE";
         this.entityName = "TAXGROUP";
@@ -3136,6 +3497,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateWithHoldTax(final Long accountId) {
         this.actionName = "UPDATEWITHHOLDTAX";
         this.entityName = "SAVINGSACCOUNT";
@@ -3144,6 +3506,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createEntityDatatableChecks(final String json) {
         this.actionName = "CREATE";
         this.entityName = "ENTITY_DATATABLE_CHECK";
@@ -3153,6 +3516,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteEntityDatatableChecks(final long entityDatatableCheckId, final String json) {
         this.actionName = "DELETE";
         this.entityName = "ENTITY_DATATABLE_CHECK";
@@ -3162,6 +3526,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder addSelfServiceBeneficiaryTPT() {
         this.actionName = "CREATE";
         this.entityName = "SSBENEFICIARYTPT";
@@ -3170,6 +3535,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateSelfServiceBeneficiaryTPT(final Long beneficiaryId) {
         this.actionName = "UPDATE";
         this.entityName = "SSBENEFICIARYTPT";
@@ -3178,6 +3544,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteSelfServiceBeneficiaryTPT(final Long beneficiaryId) {
         this.actionName = "DELETE";
         this.entityName = "SSBENEFICIARYTPT";
@@ -3186,6 +3553,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createReportMailingJob(final String entityName) {
         this.actionName = "CREATE";
         this.entityName = entityName;
@@ -3194,6 +3562,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateReportMailingJob(final String entityName, final Long entityId) {
         this.actionName = "UPDATE";
         this.entityName = entityName;
@@ -3202,6 +3571,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteReportMailingJob(final String entityName, final Long entityId) {
         this.actionName = "DELETE";
         this.entityName = entityName;
@@ -3210,6 +3580,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createSmsCampaign() {
         this.actionName = "CREATE";
         this.entityName = "SMSCAMPAIGN";
@@ -3218,6 +3589,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateSmsCampaign(final Long resourceId) {
         this.actionName = "UPDATE";
         this.entityName = "SMSCAMPAIGN";
@@ -3226,6 +3598,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder activateSmsCampaign(final Long resourceId) {
         this.actionName = "ACTIVATE";
         this.entityName = "SMSCAMPAIGN";
@@ -3234,6 +3607,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder closeSmsCampaign(final Long resourceId) {
         this.actionName = "CLOSE";
         this.entityName = "SMSCAMPAIGN";
@@ -3242,6 +3616,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder reactivateSmsCampaign(final Long resourceId) {
         this.actionName = "REACTIVATE";
         this.entityName = "SMSCAMPAIGN";
@@ -3250,6 +3625,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteSmsCampaign(final Long resourceId) {
         this.actionName = "DELETE";
         this.entityName = "SMSCAMPAIGN";
@@ -3258,6 +3634,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder holdAmount(final Long accountId) {
         this.actionName = "HOLDAMOUNT";
         this.entityName = "SAVINGSACCOUNT";
@@ -3267,6 +3644,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder releaseAmount(final Long accountId, final Long transactionId) {
         this.actionName = "RELEASEAMOUNT";
         this.entityName = "SAVINGSACCOUNT";
@@ -3277,6 +3655,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder blockDebitsFromSavingsAccount(final Long accountId) {
         this.actionName = "BLOCKDEBIT";
         this.entityName = "SAVINGSACCOUNT";
@@ -3286,6 +3665,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder unblockDebitsFromSavingsAccount(final Long accountId) {
         this.actionName = "UNBLOCKDEBIT";
         this.entityName = "SAVINGSACCOUNT";
@@ -3295,6 +3675,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder blockCreditsToSavingsAccount(final Long accountId) {
         this.actionName = "BLOCKCREDIT";
         this.entityName = "SAVINGSACCOUNT";
@@ -3304,6 +3685,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder unblockCreditsToSavingsAccount(final Long accountId) {
         this.actionName = "UNBLOCKCREDIT";
         this.entityName = "SAVINGSACCOUNT";
@@ -3313,6 +3695,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder blockSavingsAccount(final Long accountId) {
         this.actionName = "BLOCK";
         this.entityName = "SAVINGSACCOUNT";
@@ -3322,6 +3705,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder unblockSavingsAccount(final Long accountId) {
         this.actionName = "UNBLOCK";
         this.entityName = "SAVINGSACCOUNT";
@@ -3331,6 +3715,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder disableAdHoc(Long adHocId) {
         this.actionName = "DISABLE";
         this.entityName = "ADHOC";
@@ -3340,6 +3725,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder enableAdHoc(Long adHocId) {
         this.actionName = "ENABLE";
         this.entityName = "ADHOC";
@@ -3349,6 +3735,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createAdHoc() {
         this.actionName = "CREATE";
         this.entityName = "ADHOC";
@@ -3356,6 +3743,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateAdHoc(final Long adHocId) {
         this.actionName = "UPDATE";
         this.entityName = "ADHOC";
@@ -3364,6 +3752,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteAdHoc(Long adHocId) {
         this.actionName = "DELETE";
         this.entityName = "ADHOC";
@@ -3373,6 +3762,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createEmail() {
         this.actionName = "CREATE";
         this.entityName = "EMAIL";
@@ -3381,6 +3771,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateEmail(final Long resourceId) {
         this.actionName = "UPDATE";
         this.entityName = "EMAIL";
@@ -3389,6 +3780,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteEmail(final Long resourceId) {
         this.actionName = "DELETE";
         this.entityName = "EMAIL";
@@ -3397,6 +3789,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createEmailCampaign() {
         this.actionName = "CREATE";
         this.entityName = "EMAIL_CAMPAIGN";
@@ -3405,6 +3798,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateEmailCampaign(final Long resourceId) {
         this.actionName = "UPDATE";
         this.entityName = "EMAIL_CAMPAIGN";
@@ -3413,6 +3807,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteEmailCampaign(final Long resourceId) {
         this.actionName = "DELETE";
         this.entityName = "EMAIL_CAMPAIGN";
@@ -3421,6 +3816,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder activateEmailCampaign(final Long resourceId) {
         this.actionName = "ACTIVATE";
         this.entityName = "EMAIL_CAMPAIGN";
@@ -3429,6 +3825,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder closeEmailCampaign(final Long resourceId) {
         this.actionName = "CLOSE";
         this.entityName = "EMAIL_CAMPAIGN";
@@ -3437,6 +3834,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder reactivateEmailCampaign(final Long resourceId) {
         this.actionName = "REACTIVATE";
         this.entityName = "EMAIL_CAMPAIGN";
@@ -3445,6 +3843,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateEmailConfiguration() {
         this.actionName = "UPDATE";
         this.entityName = "EMAIL_CONFIGURATION";
@@ -3452,6 +3851,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder invalidateTwoFactorAccessToken() {
         this.actionName = "INVALIDATE";
         this.entityName = "TWOFACTOR_ACCESSTOKEN";
@@ -3459,6 +3859,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateTwoFactorConfiguration() {
         this.actionName = "UPDATE";
         this.entityName = "TWOFACTOR_CONFIGURATION";
@@ -3466,6 +3867,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder linkAccountsToPocket() {
         this.actionName = PocketApiConstants.linkAccountsActionName;
         this.entityName = PocketApiConstants.pocketEntityName;
@@ -3473,6 +3875,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder delinkAccountsFromPocket() {
         this.actionName = PocketApiConstants.delinkAccountsActionName;
         this.entityName = PocketApiConstants.pocketEntityName;
@@ -3480,6 +3883,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createRate() {
         this.actionName = "CREATE";
         this.entityName = "RATE";
@@ -3488,6 +3892,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateRate(final Long rateId) {
         this.actionName = "UPDATE";
         this.entityName = "RATE";
@@ -3496,6 +3901,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateBusinessDate() {
         this.actionName = "UPDATE";
         this.entityName = "BUSINESS_DATE";
@@ -3503,6 +3909,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createDelinquencyRange() {
         this.actionName = "CREATE";
         this.entityName = "DELINQUENCY_RANGE";
@@ -3510,6 +3917,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateDelinquencyRange(final Long delinquencyRangeId) {
         this.actionName = "UPDATE";
         this.entityName = "DELINQUENCY_RANGE";
@@ -3518,6 +3926,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteDelinquencyRange(final Long delinquencyRangeId) {
         this.actionName = "DELETE";
         this.entityName = "DELINQUENCY_RANGE";
@@ -3526,6 +3935,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder createDelinquencyBucket() {
         this.actionName = "CREATE";
         this.entityName = "DELINQUENCY_BUCKET";
@@ -3533,6 +3943,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateDelinquencyBucket(final Long delinquencyBucketId) {
         this.actionName = "UPDATE";
         this.entityName = "DELINQUENCY_BUCKET";
@@ -3541,6 +3952,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder deleteDelinquencyBucket(final Long delinquencyBucketId) {
         this.actionName = "DELETE";
         this.entityName = "DELINQUENCY_BUCKET";
@@ -3549,6 +3961,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CommandWrapperBuilder updateBusinessStepConfig(String jobName) {
         this.actionName = "UPDATE";
         this.entityName = "BATCH_BUSINESS_STEP";

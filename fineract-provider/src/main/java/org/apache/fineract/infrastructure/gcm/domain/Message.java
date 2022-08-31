@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.gcm.domain;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -109,6 +110,7 @@ public final class Message implements Serializable {
         /**
          * Sets the collapseKey property.
          */
+        @CanIgnoreReturnValue
         public Builder collapseKey(String value) {
             collapseKey = value;
             return this;
@@ -117,6 +119,7 @@ public final class Message implements Serializable {
         /**
          * Sets the delayWhileIdle property (default value is {@literal false}).
          */
+        @CanIgnoreReturnValue
         public Builder delayWhileIdle(boolean value) {
             delayWhileIdle = value;
             return this;
@@ -125,6 +128,7 @@ public final class Message implements Serializable {
         /**
          * Sets the time to live, in seconds.
          */
+        @CanIgnoreReturnValue
         public Builder timeToLive(int value) {
             timeToLive = value;
             return this;
@@ -133,6 +137,7 @@ public final class Message implements Serializable {
         /**
          * Adds a key/value pair to the payload data.
          */
+        @CanIgnoreReturnValue
         public Builder addData(String key, String value) {
             data.put(key, value);
             return this;
@@ -141,6 +146,7 @@ public final class Message implements Serializable {
         /**
          * Sets the dryRun property (default value is {@literal false}).
          */
+        @CanIgnoreReturnValue
         public Builder dryRun(boolean value) {
             dryRun = value;
             return this;
@@ -149,6 +155,7 @@ public final class Message implements Serializable {
         /**
          * Sets the restrictedPackageName property.
          */
+        @CanIgnoreReturnValue
         public Builder restrictedPackageName(String value) {
             restrictedPackageName = value;
             return this;
@@ -157,6 +164,7 @@ public final class Message implements Serializable {
         /**
          * Sets the priority property.
          */
+        @CanIgnoreReturnValue
         public Builder priority(Priority value) {
             switch (value) {
                 case NORMAL:
@@ -172,6 +180,7 @@ public final class Message implements Serializable {
         /**
          * Sets the notification property.
          */
+        @CanIgnoreReturnValue
         public Builder notification(Notification value) {
             notification = value;
             return this;
@@ -180,6 +189,7 @@ public final class Message implements Serializable {
         /**
          * Sets the contentAvailable property
          */
+        @CanIgnoreReturnValue
         public Builder contentAvailable(Boolean value) {
             contentAvailable = value;
             return this;

@@ -24,6 +24,7 @@ import static org.apache.fineract.interoperation.util.InteropUtil.ENTITY_NAME_RE
 import static org.apache.fineract.interoperation.util.InteropUtil.ENTITY_NAME_TRANSFER;
 import static org.apache.fineract.interoperation.util.InteropUtil.ROOT_PATH;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.interoperation.domain.InteropIdentifierType;
 import org.apache.fineract.interoperation.domain.InteropTransferActionType;
@@ -40,11 +41,13 @@ public class InteropWrapperBuilder {
                 null);
     }
 
+    @CanIgnoreReturnValue
     public InteropWrapperBuilder withJson(final String json) {
         this.json = json;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public InteropWrapperBuilder registerAccountIdentifier(InteropIdentifierType idType, String idValue, String subIdOrType) {
         this.actionName = "CREATE";
         this.entityName = ENTITY_NAME_IDENTIFIER;
@@ -52,6 +55,7 @@ public class InteropWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public InteropWrapperBuilder deleteAccountIdentifier(InteropIdentifierType idType, String idValue, String subIdOrType) {
         this.actionName = "DELETE";
         this.entityName = ENTITY_NAME_IDENTIFIER;
@@ -59,6 +63,7 @@ public class InteropWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public InteropWrapperBuilder createTransactionRequest() {
         this.actionName = "CREATE";
         this.entityName = ENTITY_NAME_REQUEST;
@@ -66,6 +71,7 @@ public class InteropWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public InteropWrapperBuilder createQuotes() {
         this.actionName = "CREATE";
         this.entityName = ENTITY_NAME_QUOTE;
@@ -73,6 +79,7 @@ public class InteropWrapperBuilder {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public InteropWrapperBuilder performTransfer(InteropTransferActionType action) {
         this.actionName = action.name();
         this.entityName = ENTITY_NAME_TRANSFER;

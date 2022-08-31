@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests.common.shares;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gson.Gson;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -98,11 +99,13 @@ public class ShareProductHelper {
         return shareProductCreateJson;
     }
 
+    @CanIgnoreReturnValue
     public ShareProductHelper withCashBasedAccounting() {
         this.accountingRule = CASH_BASED;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public ShareProductHelper withMarketPrice() {
         this.marketPrices = new ArrayList<>();
         LocalDate currentDate = Utils.getLocalDateOfTenant();
@@ -118,6 +121,7 @@ public class ShareProductHelper {
         return this;
     }
 
+    @CanIgnoreReturnValue
     public ShareProductHelper withCharges(final ArrayList<Long> charges) {
         if (charges != null && !charges.isEmpty()) {
             this.charges = new ArrayList<>();
