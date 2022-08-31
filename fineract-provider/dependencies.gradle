@@ -27,6 +27,9 @@ dependencies {
     // implementation dependencies are directly used (compiled against) in src/main (and src/test)
     //
     implementation(
+            project(path: ':fineract-avro-schemas')
+            )
+    implementation(
             'org.springframework.boot:spring-boot-starter-web',
             'org.springframework.boot:spring-boot-starter-security',
             'org.springframework.boot:spring-boot-starter-cache',
@@ -38,7 +41,7 @@ dependencies {
             'org.springframework.integration:spring-integration-event',
             'org.springframework.integration:spring-integration-jms',
 
-
+            'org.apache.avro:avro',
             'jakarta.ws.rs:jakarta.ws.rs-api',
             'org.glassfish.jersey.media:jersey-media-multipart',
 

@@ -30,6 +30,11 @@ public class LoanAdjustTransactionBusinessEvent extends AbstractBusinessEvent<Lo
         super(value);
     }
 
+    @Override
+    public String getType() {
+        return "LoanAdjustTransactionBusinessEvent";
+    }
+
     @RequiredArgsConstructor
     @Getter
     public static class Data {

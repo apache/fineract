@@ -25,4 +25,9 @@ public class SavingsActivateBusinessEvent extends SavingsAccountBusinessEvent {
     public SavingsActivateBusinessEvent(SavingsAccount value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "SavingsActivateBusinessEvent";
+    }
 }

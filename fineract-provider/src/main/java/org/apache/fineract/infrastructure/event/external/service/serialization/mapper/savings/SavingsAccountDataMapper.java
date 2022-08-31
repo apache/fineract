@@ -16,22 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.products.service;
+package org.apache.fineract.infrastructure.event.external.service.serialization.mapper.savings;
 
-import java.util.Collection;
-import java.util.Set;
-import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.portfolio.products.data.ProductData;
+import org.apache.fineract.avro.savings.v1.SavingsAccountDataV1;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
+import org.mapstruct.Mapper;
 
-public interface ProductReadPlatformService {
+@Mapper(componentModel = "spring")
+public interface SavingsAccountDataMapper {
 
-    Page<ProductData> retrieveAllProducts(Integer offSet, Integer limit);
-
-    ProductData retrieveOne(Long productId, boolean includeTemplate);
-
-    ProductData retrieveTemplate();
-
-    Set<String> getResponseDataParams();
-
-    Collection<ProductData> retrieveAllForLookup();
+    SavingsAccountDataV1 map(SavingsAccountData source);
 }

@@ -41,6 +41,8 @@ public class FineractProperties {
 
     private FineractRemoteJobMessageHandlerProperties remoteJobMessageHandler;
 
+    private FineractEventsProperties events;
+
     @Getter
     @Setter
     public static class FineractTenantProperties {
@@ -118,5 +120,19 @@ public class FineractProperties {
         private boolean enabled;
         private String requestQueueName;
         private String brokerUrl;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractEventsProperties {
+
+        private FineractExternalEventsProperties external;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractExternalEventsProperties {
+
+        private boolean enabled;
     }
 }

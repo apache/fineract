@@ -25,4 +25,9 @@ public class ClientRejectBusinessEvent extends ClientBusinessEvent {
     public ClientRejectBusinessEvent(Client value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "ClientRejectBusinessEvent";
+    }
 }

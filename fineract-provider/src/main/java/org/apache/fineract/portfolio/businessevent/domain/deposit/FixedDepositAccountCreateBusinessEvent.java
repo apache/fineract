@@ -25,4 +25,9 @@ public class FixedDepositAccountCreateBusinessEvent extends FixedDepositAccountB
     public FixedDepositAccountCreateBusinessEvent(FixedDepositAccount value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "FixedDepositAccountCreateBusinessEvent";
+    }
 }

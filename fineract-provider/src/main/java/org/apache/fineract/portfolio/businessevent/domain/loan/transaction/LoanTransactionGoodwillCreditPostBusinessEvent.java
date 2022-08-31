@@ -25,4 +25,9 @@ public class LoanTransactionGoodwillCreditPostBusinessEvent extends LoanTransact
     public LoanTransactionGoodwillCreditPostBusinessEvent(LoanTransaction value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "LoanTransactionGoodwillCreditPostBusinessEvent";
+    }
 }

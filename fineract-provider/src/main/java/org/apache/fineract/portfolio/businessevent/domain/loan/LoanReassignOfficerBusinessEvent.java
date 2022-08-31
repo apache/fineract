@@ -25,4 +25,9 @@ public class LoanReassignOfficerBusinessEvent extends LoanBusinessEvent {
     public LoanReassignOfficerBusinessEvent(Loan value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "LoanReassignOfficerBusinessEvent";
+    }
 }

@@ -25,4 +25,9 @@ public class ShareProductDividentsCreateBusinessEvent extends AbstractBusinessEv
     public ShareProductDividentsCreateBusinessEvent(Long value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "ShareProductDividentsCreateBusinessEvent";
+    }
 }

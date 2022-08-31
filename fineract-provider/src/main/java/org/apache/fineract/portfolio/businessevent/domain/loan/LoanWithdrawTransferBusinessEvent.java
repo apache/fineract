@@ -25,4 +25,9 @@ public class LoanWithdrawTransferBusinessEvent extends LoanBusinessEvent {
     public LoanWithdrawTransferBusinessEvent(Loan value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "LoanWithdrawTransferBusinessEvent";
+    }
 }

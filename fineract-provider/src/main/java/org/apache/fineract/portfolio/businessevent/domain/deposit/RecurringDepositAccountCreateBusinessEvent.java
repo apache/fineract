@@ -25,4 +25,9 @@ public class RecurringDepositAccountCreateBusinessEvent extends RecurringDeposit
     public RecurringDepositAccountCreateBusinessEvent(RecurringDepositAccount value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "RecurringDepositAccountCreateBusinessEvent";
+    }
 }

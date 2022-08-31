@@ -25,4 +25,9 @@ public class ShareAccountApproveBusinessEvent extends ShareAccountBusinessEvent 
     public ShareAccountApproveBusinessEvent(ShareAccount value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "ShareAccountApproveBusinessEvent";
+    }
 }

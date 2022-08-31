@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
-import org.apache.fineract.portfolio.products.service.ProductReadPlatformService;
+import org.apache.fineract.portfolio.products.service.ShareProductReadPlatformService;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountData;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionData;
 import org.apache.fineract.portfolio.shareaccounts.domain.PurchasedSharesStatusType;
@@ -41,7 +41,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ShareProductDividendAssembler {
 
-    private final ProductReadPlatformService shareProductReadPlatformService;
+    private final ShareProductReadPlatformService shareProductReadPlatformService;
     private final ShareAccountReadPlatformService shareAccountReadPlatformService;
 
     @Autowired

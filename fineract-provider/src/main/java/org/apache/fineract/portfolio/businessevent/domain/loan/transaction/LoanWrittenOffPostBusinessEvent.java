@@ -25,4 +25,9 @@ public class LoanWrittenOffPostBusinessEvent extends LoanTransactionBusinessEven
     public LoanWrittenOffPostBusinessEvent(LoanTransaction value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "LoanWrittenOffPostBusinessEvent";
+    }
 }

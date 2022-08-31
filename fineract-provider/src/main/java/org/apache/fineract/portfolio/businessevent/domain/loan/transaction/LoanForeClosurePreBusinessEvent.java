@@ -26,4 +26,9 @@ public class LoanForeClosurePreBusinessEvent extends LoanBusinessEvent {
     public LoanForeClosurePreBusinessEvent(Loan value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "LoanForeClosurePreBusinessEvent";
+    }
 }

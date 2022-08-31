@@ -26,4 +26,9 @@ public class LoanTransactionGoodwillCreditPreBusinessEvent extends LoanBusinessE
     public LoanTransactionGoodwillCreditPreBusinessEvent(Loan value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "LoanTransactionGoodwillCreditPreBusinessEvent";
+    }
 }

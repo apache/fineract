@@ -25,4 +25,9 @@ public class LoanApplyOverdueChargeBusinessEvent extends LoanBusinessEvent {
     public LoanApplyOverdueChargeBusinessEvent(Loan value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "LoanApplyOverdueChargeBusinessEvent";
+    }
 }

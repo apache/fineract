@@ -25,4 +25,9 @@ public class LoanUndoApprovalBusinessEvent extends LoanBusinessEvent {
     public LoanUndoApprovalBusinessEvent(Loan value) {
         super(value);
     }
+
+    @Override
+    public String getType() {
+        return "LoanUndoApprovalBusinessEvent";
+    }
 }
