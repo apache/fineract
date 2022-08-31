@@ -4,6 +4,7 @@
     "type": "record",
     "fields": [
         {
+            "default": null,
             "name": "id",
             "type": [
                 "null",
@@ -11,6 +12,7 @@
             ]
         },
         {
+            "default": null,
             "name": "name",
             "type": [
                 "null",
@@ -18,6 +20,7 @@
             ]
         },
         {
+            "default": null,
             "name": "shortName",
             "type": [
                 "null",
@@ -25,6 +28,7 @@
             ]
         },
         {
+            "default": null,
             "name": "description",
             "type": [
                 "null",
@@ -32,6 +36,7 @@
             ]
         },
         {
+            "default": null,
             "name": "fundId",
             "type": [
                 "null",
@@ -39,6 +44,7 @@
             ]
         },
         {
+            "default": null,
             "name": "fundName",
             "type": [
                 "null",
@@ -46,6 +52,7 @@
             ]
         },
         {
+            "default": null,
             "name": "includeInBorrowerCycle",
             "type": [
                 "null",
@@ -53,6 +60,7 @@
             ]
         },
         {
+            "default": null,
             "name": "useBorrowerCycle",
             "type": [
                 "null",
@@ -60,6 +68,7 @@
             ]
         },
         {
+            "default": null,
             "name": "startDate",
             "type": [
                 "null",
@@ -67,6 +76,7 @@
             ]
         },
         {
+            "default": null,
             "name": "closeDate",
             "type": [
                 "null",
@@ -74,6 +84,7 @@
             ]
         },
         {
+            "default": null,
             "name": "status",
             "type": [
                 "null",
@@ -81,6 +92,7 @@
             ]
         },
         {
+            "default": null,
             "name": "externalId",
             "type": [
                 "null",
@@ -88,6 +100,7 @@
             ]
         },
         {
+            "default": null,
             "name": "currency",
             "type": [
                 "null",
@@ -95,6 +108,7 @@
             ]
         },
         {
+            "default": null,
             "name": "principal",
             "type": [
                 "null",
@@ -102,6 +116,7 @@
             ]
         },
         {
+            "default": null,
             "name": "minPrincipal",
             "type": [
                 "null",
@@ -109,6 +124,7 @@
             ]
         },
         {
+            "default": null,
             "name": "maxPrincipal",
             "type": [
                 "null",
@@ -116,6 +132,7 @@
             ]
         },
         {
+            "default": null,
             "name": "numberOfRepayments",
             "type": [
                 "null",
@@ -123,6 +140,7 @@
             ]
         },
         {
+            "default": null,
             "name": "minNumberOfRepayments",
             "type": [
                 "null",
@@ -130,6 +148,7 @@
             ]
         },
         {
+            "default": null,
             "name": "maxNumberOfRepayments",
             "type": [
                 "null",
@@ -137,6 +156,7 @@
             ]
         },
         {
+            "default": null,
             "name": "repaymentEvery",
             "type": [
                 "null",
@@ -144,6 +164,7 @@
             ]
         },
         {
+            "default": null,
             "name": "repaymentFrequencyType",
             "type": [
                 "null",
@@ -151,6 +172,7 @@
             ]
         },
         {
+            "default": null,
             "name": "interestRatePerPeriod",
             "type": [
                 "null",
@@ -158,6 +180,7 @@
             ]
         },
         {
+            "default": null,
             "name": "minInterestRatePerPeriod",
             "type": [
                 "null",
@@ -165,6 +188,7 @@
             ]
         },
         {
+            "default": null,
             "name": "maxInterestRatePerPeriod",
             "type": [
                 "null",
@@ -172,6 +196,7 @@
             ]
         },
         {
+            "default": null,
             "name": "interestRateFrequencyType",
             "type": [
                 "null",
@@ -179,6 +204,7 @@
             ]
         },
         {
+            "default": null,
             "name": "annualInterestRate",
             "type": [
                 "null",
@@ -186,6 +212,7 @@
             ]
         },
         {
+            "default": null,
             "name": "isLinkedToFloatingInterestRates",
             "type": [
                 "null",
@@ -193,6 +220,7 @@
             ]
         },
         {
+            "default": null,
             "name": "floatingRateId",
             "type": [
                 "null",
@@ -200,6 +228,7 @@
             ]
         },
         {
+            "default": null,
             "name": "floatingRateName",
             "type": [
                 "null",
@@ -207,6 +236,7 @@
             ]
         },
         {
+            "default": null,
             "name": "interestRateDifferential",
             "type": [
                 "null",
@@ -214,6 +244,7 @@
             ]
         },
         {
+            "default": null,
             "name": "minDifferentialLendingRate",
             "type": [
                 "null",
@@ -221,6 +252,7 @@
             ]
         },
         {
+            "default": null,
             "name": "defaultDifferentialLendingRate",
             "type": [
                 "null",
@@ -228,6 +260,7 @@
             ]
         },
         {
+            "default": null,
             "name": "maxDifferentialLendingRate",
             "type": [
                 "null",
@@ -235,6 +268,7 @@
             ]
         },
         {
+            "default": null,
             "name": "isFloatingInterestRateCalculationAllowed",
             "type": [
                 "null",
@@ -242,6 +276,7 @@
             ]
         },
         {
+            "default": null,
             "name": "allowVariableInstallments",
             "type": [
                 "null",
@@ -249,6 +284,7 @@
             ]
         },
         {
+            "default": null,
             "name": "minimumGap",
             "type": [
                 "null",
@@ -256,6 +292,7 @@
             ]
         },
         {
+            "default": null,
             "name": "maximumGap",
             "type": [
                 "null",
@@ -263,6 +300,7 @@
             ]
         },
         {
+            "default": null,
             "name": "amortizationType",
             "type": [
                 "null",
@@ -270,6 +308,7 @@
             ]
         },
         {
+            "default": null,
             "name": "interestType",
             "type": [
                 "null",
@@ -277,6 +316,7 @@
             ]
         },
         {
+            "default": null,
             "name": "interestCalculationPeriodType",
             "type": [
                 "null",
@@ -284,6 +324,7 @@
             ]
         },
         {
+            "default": null,
             "name": "allowPartialPeriodInterestCalcualtion",
             "type": [
                 "null",
@@ -291,6 +332,7 @@
             ]
         },
         {
+            "default": null,
             "name": "inArrearsTolerance",
             "type": [
                 "null",
@@ -298,6 +340,7 @@
             ]
         },
         {
+            "default": null,
             "name": "transactionProcessingStrategyId",
             "type": [
                 "null",
@@ -305,6 +348,7 @@
             ]
         },
         {
+            "default": null,
             "name": "transactionProcessingStrategyName",
             "type": [
                 "null",
@@ -312,6 +356,7 @@
             ]
         },
         {
+            "default": null,
             "name": "graceOnPrincipalPayment",
             "type": [
                 "null",
@@ -319,6 +364,7 @@
             ]
         },
         {
+            "default": null,
             "name": "recurringMoratoriumOnPrincipalPeriods",
             "type": [
                 "null",
@@ -326,6 +372,7 @@
             ]
         },
         {
+            "default": null,
             "name": "graceOnInterestPayment",
             "type": [
                 "null",
@@ -333,6 +380,7 @@
             ]
         },
         {
+            "default": null,
             "name": "graceOnInterestCharged",
             "type": [
                 "null",
@@ -340,6 +388,7 @@
             ]
         },
         {
+            "default": null,
             "name": "graceOnArrearsAgeing",
             "type": [
                 "null",
@@ -347,6 +396,7 @@
             ]
         },
         {
+            "default": null,
             "name": "overdueDaysForNPA",
             "type": [
                 "null",
@@ -354,6 +404,7 @@
             ]
         },
         {
+            "default": null,
             "name": "daysInMonthType",
             "type": [
                 "null",
@@ -361,6 +412,7 @@
             ]
         },
         {
+            "default": null,
             "name": "daysInYearType",
             "type": [
                 "null",
@@ -368,6 +420,7 @@
             ]
         },
         {
+            "default": null,
             "name": "isInterestRecalculationEnabled",
             "type": [
                 "null",
@@ -375,6 +428,7 @@
             ]
         },
         {
+            "default": null,
             "name": "interestRecalculationData",
             "type": [
                 "null",
@@ -382,6 +436,7 @@
             ]
         },
         {
+            "default": null,
             "name": "minimumDaysBetweenDisbursalAndFirstRepayment",
             "type": [
                 "null",
@@ -389,6 +444,7 @@
             ]
         },
         {
+            "default": null,
             "name": "canDefineInstallmentAmount",
             "type": [
                 "null",
@@ -396,6 +452,7 @@
             ]
         },
         {
+            "default": null,
             "name": "installmentAmountInMultiplesOf",
             "type": [
                 "null",
@@ -443,6 +500,7 @@
             ]
         },
         {
+            "default": null,
             "name": "isRatesEnabled",
             "type": [
                 "null",
@@ -460,6 +518,7 @@
             ]
         },
         {
+            "default": null,
             "name": "multiDisburseLoan",
             "type": [
                 "null",
@@ -467,6 +526,7 @@
             ]
         },
         {
+            "default": null,
             "name": "maxTrancheCount",
             "type": [
                 "null",
@@ -474,6 +534,7 @@
             ]
         },
         {
+            "default": null,
             "name": "outstandingLoanBalance",
             "type": [
                 "null",
@@ -481,6 +542,7 @@
             ]
         },
         {
+            "default": null,
             "name": "disallowExpectedDisbursements",
             "type": [
                 "null",
@@ -488,6 +550,7 @@
             ]
         },
         {
+            "default": null,
             "name": "allowApprovedDisbursedAmountsOverApplied",
             "type": [
                 "null",
@@ -495,6 +558,7 @@
             ]
         },
         {
+            "default": null,
             "name": "overAppliedCalculationType",
             "type": [
                 "null",
@@ -502,6 +566,7 @@
             ]
         },
         {
+            "default": null,
             "name": "overAppliedNumber",
             "type": [
                 "null",
@@ -509,6 +574,7 @@
             ]
         },
         {
+            "default": null,
             "name": "principalThresholdForLastInstallment",
             "type": [
                 "null",
@@ -516,6 +582,7 @@
             ]
         },
         {
+            "default": null,
             "name": "holdGuaranteeFunds",
             "type": [
                 "null",
@@ -523,6 +590,7 @@
             ]
         },
         {
+            "default": null,
             "name": "productGuaranteeData",
             "type": [
                 "null",
@@ -530,6 +598,7 @@
             ]
         },
         {
+            "default": null,
             "name": "accountMovesOutOfNPAOnlyOnArrearsCompletion",
             "type": [
                 "null",
@@ -537,6 +606,7 @@
             ]
         },
         {
+            "default": null,
             "name": "syncExpectedWithDisbursementDate",
             "type": [
                 "null",
@@ -544,6 +614,7 @@
             ]
         },
         {
+            "default": null,
             "name": "isEqualAmortization",
             "type": [
                 "null",
@@ -551,6 +622,7 @@
             ]
         },
         {
+            "default": null,
             "name": "fixedPrincipalPercentagePerInstallment",
             "type": [
                 "null",
@@ -558,6 +630,7 @@
             ]
         },
         {
+            "default": null,
             "name": "delinquencyBucket",
             "type": [
                 "null",

@@ -1,19 +1,11 @@
 {
-    "name": "CollectionDataV1",
-    "namespace": "org.apache.fineract.avro.loan.v1",
+    "name": "SavingsAccountSubStatusEnumDataV1",
+    "namespace": "org.apache.fineract.avro.savings.v1",
     "type": "record",
     "fields": [
         {
             "default": null,
-            "name": "availableDisbursementAmount",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "default": null,
-            "name": "pastDueDays",
+            "name": "id",
             "type": [
                 "null",
                 "int"
@@ -21,7 +13,7 @@
         },
         {
             "default": null,
-            "name": "nextPaymentDueDate",
+            "name": "code",
             "type": [
                 "null",
                 "string"
@@ -29,15 +21,7 @@
         },
         {
             "default": null,
-            "name": "delinquentDays",
-            "type": [
-                "null",
-                "int"
-            ]
-        },
-        {
-            "default": null,
-            "name": "delinquentDate",
+            "name": "value",
             "type": [
                 "null",
                 "string"
@@ -45,26 +29,58 @@
         },
         {
             "default": null,
-            "name": "delinquentAmount",
+            "name": "none",
             "type": [
                 "null",
-                "bigdecimal"
+                "boolean"
             ]
         },
         {
             "default": null,
-            "name": "lastPaymentDate",
+            "name": "inactive",
             "type": [
                 "null",
-                "string"
+                "boolean"
             ]
         },
         {
             "default": null,
-            "name": "lastPaymentAmount",
+            "name": "dormant",
             "type": [
                 "null",
-                "bigdecimal"
+                "boolean"
+            ]
+        },
+        {
+            "default": null,
+            "name": "escheat",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "default": null,
+            "name": "block",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "default": null,
+            "name": "blockCredit",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "default": null,
+            "name": "blockDebit",
+            "type": [
+                "null",
+                "boolean"
             ]
         }
     ]

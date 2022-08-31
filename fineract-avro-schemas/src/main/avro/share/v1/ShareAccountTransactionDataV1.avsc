@@ -1,11 +1,43 @@
 {
-    "name": "CollectionDataV1",
-    "namespace": "org.apache.fineract.avro.loan.v1",
+    "name": "ShareAccountTransactionDataV1",
+    "namespace": "org.apache.fineract.avro.share.v1",
     "type": "record",
     "fields": [
         {
             "default": null,
-            "name": "availableDisbursementAmount",
+            "name": "id",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "accountId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "purchasedDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "numberOfShares",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "purchasedPrice",
             "type": [
                 "null",
                 "bigdecimal"
@@ -13,39 +45,23 @@
         },
         {
             "default": null,
-            "name": "pastDueDays",
+            "name": "status",
             "type": [
                 "null",
-                "int"
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
             ]
         },
         {
             "default": null,
-            "name": "nextPaymentDueDate",
+            "name": "type",
             "type": [
                 "null",
-                "string"
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
             ]
         },
         {
             "default": null,
-            "name": "delinquentDays",
-            "type": [
-                "null",
-                "int"
-            ]
-        },
-        {
-            "default": null,
-            "name": "delinquentDate",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "default": null,
-            "name": "delinquentAmount",
+            "name": "amount",
             "type": [
                 "null",
                 "bigdecimal"
@@ -53,15 +69,15 @@
         },
         {
             "default": null,
-            "name": "lastPaymentDate",
+            "name": "chargeAmount",
             "type": [
                 "null",
-                "string"
+                "bigdecimal"
             ]
         },
         {
             "default": null,
-            "name": "lastPaymentAmount",
+            "name": "amountPaid",
             "type": [
                 "null",
                 "bigdecimal"

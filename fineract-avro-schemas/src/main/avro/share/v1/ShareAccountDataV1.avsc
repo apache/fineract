@@ -1,5 +1,5 @@
 {
-    "name": "ShareProductDataV1",
+    "name": "ShareAccountDataV1",
     "namespace": "org.apache.fineract.avro.share.v1",
     "type": "record",
     "fields": [
@@ -13,23 +13,7 @@
         },
         {
             "default": null,
-            "name": "name",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "default": null,
-            "name": "shortName",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "default": null,
-            "name": "description",
+            "name": "accountNo",
             "type": [
                 "null",
                 "string"
@@ -45,6 +29,70 @@
         },
         {
             "default": null,
+            "name": "savingsAccountNumber",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "clientId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "clientName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "defaultShares",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "productId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "productName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "status",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.share.v1.ShareAccountStatusEnumDataV1"
+            ]
+        },
+        {
+            "default": null,
+            "name": "timeline",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.share.v1.ShareAccountApplicationTimelineDataV1"
+            ]
+        },
+        {
+            "default": null,
             "name": "currency",
             "type": [
                 "null",
@@ -53,86 +101,35 @@
         },
         {
             "default": null,
-            "name": "totalShares",
+            "name": "summary",
             "type": [
                 "null",
-                "long"
+                "org.apache.fineract.avro.share.v1.ShareAccountSummaryDataV1"
             ]
         },
         {
-            "default": null,
-            "name": "totalSharesIssued",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "default": null,
-            "name": "unitPrice",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "default": null,
-            "name": "shareCapital",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "default": null,
-            "name": "minimumShares",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "default": null,
-            "name": "nominalShares",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "default": null,
-            "name": "maximumShares",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "name": "marketPrice",
+            "name": "purchasedShares",
             "type": [
                 "null",
                 {
                     "type": "array",
-                    "items": "org.apache.fineract.avro.share.v1.ShareProductMarketPriceDataV1"
+                    "items": "org.apache.fineract.avro.share.v1.ShareAccountTransactionDataV1"
                 }
             ]
         },
         {
-            "name": "charges",
+            "name": "savingsAccountId",
             "type": [
                 "null",
-                {
-                    "type": "array",
-                    "items": "org.apache.fineract.avro.portfolio.v1.ChargeDataV1"
-                }
+                "long"
             ]
         },
         {
             "default": null,
-            "name": "allowDividendCalculationForInactiveClients",
+            "name": "currentMarketPrice",
             "type": [
                 "null",
-                "boolean"
+                "bigdecimal"
             ]
         },
         {
@@ -161,10 +158,18 @@
         },
         {
             "default": null,
-            "name": "minimumActivePeriodForDividendsTypeEnum",
+            "name": "minimumActivePeriodTypeEnum",
             "type": [
                 "null",
                 "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "default": null,
+            "name": "allowDividendCalculationForInactiveClients",
+            "type": [
+                "null",
+                "boolean"
             ]
         }
     ]

@@ -1,6 +1,6 @@
 {
-    "name": "FixedDepositAccountDataV1",
-    "namespace": "org.apache.fineract.avro.fixeddeposit.v1",
+    "name": "SavingsAccountDataV1",
+    "namespace": "org.apache.fineract.avro.savings.v1",
     "type": "record",
     "fields": [
         {
@@ -17,6 +17,14 @@
             "type": [
                 "null",
                 "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "depositType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
             ]
         },
         {
@@ -61,7 +69,7 @@
         },
         {
             "default": null,
-            "name": "depositProductId",
+            "name": "savingsProductId",
             "type": [
                 "null",
                 "int"
@@ -69,7 +77,7 @@
         },
         {
             "default": null,
-            "name": "depositProductName",
+            "name": "savingsProductName",
             "type": [
                 "null",
                 "string"
@@ -96,6 +104,22 @@
             "type": [
                 "null",
                 "org.apache.fineract.avro.savings.v1.SavingsAccountStatusEnumDataV1"
+            ]
+        },
+        {
+            "default": null,
+            "name": "subStatus",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.savings.v1.SavingsAccountSubStatusEnumDataV1"
+            ]
+        },
+        {
+            "default": null,
+            "name": "reasonForBlock",
+            "type": [
+                "null",
+                "string"
             ]
         },
         {
@@ -188,10 +212,50 @@
         },
         {
             "default": null,
-            "name": "depositType",
+            "name": "allowOverdraft",
             "type": [
                 "null",
-                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+                "boolean"
+            ]
+        },
+        {
+            "default": null,
+            "name": "overdraftLimit",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "minRequiredBalance",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "enforceMinRequiredBalance",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "default": null,
+            "name": "maxAllowedLienLimit",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "lienAllowed",
+            "type": [
+                "null",
+                "boolean"
             ]
         },
         {
@@ -204,10 +268,66 @@
         },
         {
             "default": null,
+            "name": "onHoldFunds",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
             "name": "withHoldTax",
             "type": [
                 "null",
                 "boolean"
+            ]
+        },
+        {
+            "default": null,
+            "name": "lastActiveTransactionDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "isDormancyTrackingActive",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "default": null,
+            "name": "daysToInactive",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "default": null,
+            "name": "daysToDormancy",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "default": null,
+            "name": "daysToEscheat",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "default": null,
+            "name": "savingsAmountOnHold",
+            "type": [
+                "null",
+                "bigdecimal"
             ]
         },
         {
@@ -240,15 +360,23 @@
         },
         {
             "default": null,
-            "name": "preClosurePenalApplicable",
+            "name": "withdrawalFee",
             "type": [
                 "null",
-                "boolean"
+                "org.apache.fineract.avro.savings.v1.SavingsAccountChargeDataV1"
             ]
         },
         {
             "default": null,
-            "name": "preClosurePenalInterest",
+            "name": "annualFee",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.savings.v1.SavingsAccountChargeDataV1"
+            ]
+        },
+        {
+            "default": null,
+            "name": "nominalAnnualInterestRateOverdraft",
             "type": [
                 "null",
                 "bigdecimal"
@@ -256,146 +384,10 @@
         },
         {
             "default": null,
-            "name": "preClosurePenalInterestOnType",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
-            ]
-        },
-        {
-            "default": null,
-            "name": "minDepositTerm",
-            "type": [
-                "null",
-                "int"
-            ]
-        },
-        {
-            "default": null,
-            "name": "maxDepositTerm",
-            "type": [
-                "null",
-                "int"
-            ]
-        },
-        {
-            "default": null,
-            "name": "minDepositTermType",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
-            ]
-        },
-        {
-            "default": null,
-            "name": "maxDepositTermType",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
-            ]
-        },
-        {
-            "default": null,
-            "name": "inMultiplesOfDepositTerm",
-            "type": [
-                "null",
-                "int"
-            ]
-        },
-        {
-            "default": null,
-            "name": "inMultiplesOfDepositTermType",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
-            ]
-        },
-        {
-            "default": null,
-            "name": "depositAmount",
-            "type": [
-                "null",
-                "float"
-            ]
-        },
-        {
-            "default": null,
-            "name": "maturityAmount",
-            "type": [
-                "null",
-                "float"
-            ]
-        },
-        {
-            "default": null,
-            "name": "maturityDate",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "default": null,
-            "name": "depositPeriod",
-            "type": [
-                "null",
-                "int"
-            ]
-        },
-        {
-            "default": null,
-            "name": "depositPeriodFrequency",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
-            ]
-        },
-        {
-            "default": null,
-            "name": "activationCharge",
+            "name": "minOverdraftForInterestCalculation",
             "type": [
                 "null",
                 "bigdecimal"
-            ]
-        },
-        {
-            "default": null,
-            "name": "transferToSavingsId",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "default": null,
-            "name": "onAccountClosure",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
-            ]
-        },
-        {
-            "default": null,
-            "name": "linkedAccount",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.portfolio.v1.PortfolioAccountDataV1"
-            ]
-        },
-        {
-            "default": null,
-            "name": "transferInterestToSavings",
-            "type": [
-                "null",
-                "boolean"
-            ]
-        },
-        {
-            "default": null,
-            "name": "transferToSavingsAccount",
-            "type": [
-                "null",
-                "org.apache.fineract.avro.portfolio.v1.PortfolioAccountDataV1"
             ]
         }
     ]

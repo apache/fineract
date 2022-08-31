@@ -1,6 +1,6 @@
 {
-    "name": "LoanStatusEnumDataV1",
-    "namespace": "org.apache.fineract.avro.loan.v1",
+    "name": "ShareAccountSummaryDataV1",
+    "namespace": "org.apache.fineract.avro.share.v1",
     "type": "record",
     "fields": [
         {
@@ -8,12 +8,12 @@
             "name": "id",
             "type": [
                 "null",
-                "int"
+                "long"
             ]
         },
         {
             "default": null,
-            "name": "code",
+            "name": "accountNo",
             "type": [
                 "null",
                 "string"
@@ -21,7 +21,23 @@
         },
         {
             "default": null,
-            "name": "description",
+            "name": "totalApprovedShares",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "totalPendingForApprovalShares",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "externalId",
             "type": [
                 "null",
                 "string"
@@ -29,66 +45,50 @@
         },
         {
             "default": null,
-            "name": "pendingApproval",
+            "name": "productId",
             "type": [
                 "null",
-                "boolean"
+                "long"
             ]
         },
         {
             "default": null,
-            "name": "waitingForDisbursal",
+            "name": "productName",
             "type": [
                 "null",
-                "boolean"
+                "string"
             ]
         },
         {
             "default": null,
-            "name": "active",
+            "name": "shortProductName",
             "type": [
                 "null",
-                "boolean"
+                "string"
             ]
         },
         {
             "default": null,
-            "name": "closedObligationsMet",
+            "name": "status",
             "type": [
                 "null",
-                "boolean"
+                "org.apache.fineract.avro.share.v1.ShareAccountStatusEnumDataV1"
             ]
         },
         {
             "default": null,
-            "name": "closedWrittenOff",
+            "name": "currency",
             "type": [
                 "null",
-                "boolean"
+                "org.apache.fineract.avro.generic.v1.CurrencyDataV1"
             ]
         },
         {
             "default": null,
-            "name": "closedRescheduled",
+            "name": "timeline",
             "type": [
                 "null",
-                "boolean"
-            ]
-        },
-        {
-            "default": null,
-            "name": "closed",
-            "type": [
-                "null",
-                "boolean"
-            ]
-        },
-        {
-            "default": null,
-            "name": "overpaid",
-            "type": [
-                "null",
-                "boolean"
+                "org.apache.fineract.avro.share.v1.ShareAccountApplicationTimelineDataV1"
             ]
         }
     ]

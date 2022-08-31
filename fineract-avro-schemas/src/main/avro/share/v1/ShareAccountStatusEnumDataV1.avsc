@@ -1,8 +1,16 @@
 {
-    "name": "CurrencyDataV1",
-    "namespace": "org.apache.fineract.avro.generic.v1",
+    "name": "ShareAccountStatusEnumDataV1",
+    "namespace": "org.apache.fineract.avro.share.v1",
     "type": "record",
     "fields": [
+        {
+            "default": null,
+            "name": "id",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
         {
             "default": null,
             "name": "code",
@@ -13,7 +21,7 @@
         },
         {
             "default": null,
-            "name": "name",
+            "name": "value",
             "type": [
                 "null",
                 "string"
@@ -21,42 +29,42 @@
         },
         {
             "default": null,
-            "name": "decimalPlaces",
+            "name": "submittedAndPendingApproval",
             "type": [
                 "null",
-                "int"
+                "boolean"
             ]
         },
         {
             "default": null,
-            "name": "inMultiplesOf",
+            "name": "approved",
             "type": [
                 "null",
-                "int"
+                "boolean"
             ]
         },
         {
             "default": null,
-            "name": "displaySymbol",
+            "name": "rejected",
             "type": [
                 "null",
-                "string"
+                "boolean"
             ]
         },
         {
             "default": null,
-            "name": "nameCode",
+            "name": "active",
             "type": [
                 "null",
-                "string"
+                "boolean"
             ]
         },
         {
             "default": null,
-            "name": "displayLabel",
+            "name": "closed",
             "type": [
                 "null",
-                "string"
+                "boolean"
             ]
         }
     ]
