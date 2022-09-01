@@ -202,7 +202,10 @@
             "name": "installmentChargeData",
             "type": [
                 "null",
-                "org.apache.fineract.avro.loan.v1.LoanInstallmentChargeDataV1"
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.loan.v1.LoanInstallmentChargeDataV1"
+                }
             ]
         },
         {
