@@ -360,6 +360,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             final boolean isSpecificToInstallment, final BigDecimal decimalValue, LoanTermVariations parent) {
         LoanTermVariations loanTermVariation = new LoanTermVariations(termType, rescheduleFromDate, decimalValue, adjustedDueDate,
                 isSpecificToInstallment, loan, loan.status().getValue(), isActive, parent);
+        loan.getLoanTermVariations().add(loanTermVariation);
         loanRescheduleRequestToTermVariationMappings
                 .add(LoanRescheduleRequestToTermVariationMapping.createNew(loanRescheduleRequest, loanTermVariation));
         return loanTermVariation;
