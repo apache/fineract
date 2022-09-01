@@ -386,23 +386,44 @@ public final class SavingsAccountData implements Serializable {
         return this.minOverdraftForInterestCalculation;
     }
 
-    public Integer getInterestPostingPeriodType() {
+    public EnumOptionData getInterestPostingPeriodType() {
+        return this.interestPostingPeriodType;
+    }
+
+    public Integer getInterestPostingPeriodTypeId() {
         return this.interestPostingPeriodType.getId().intValue();
     }
 
-    public Integer getDepositType() {
+    public EnumOptionData getDepositType() {
+        return this.depositType;
+    }
+
+    public Integer getDepositTypeId() {
         return this.depositType.getId().intValue();
     }
 
-    public Integer getInterestCompoundingPeriodType() {
+    public EnumOptionData getInterestCompoundingPeriodType() {
+        return this.interestCompoundingPeriodType;
+    }
+
+
+    public Integer getInterestCompoundingPeriodTypeId() {
         return this.interestCompoundingPeriodType.getId().intValue();
     }
 
-    public Integer getInterestCalculationType() {
+    public EnumOptionData getInterestCalculationType() {
+        return this.interestCalculationType;
+    }
+
+    public Integer getInterestCalculationTypeId() {
         return this.interestCalculationType.getId().intValue();
     }
 
-    public Integer getInterestCalculationDaysInYearType() {
+    public EnumOptionData getInterestCalculationDaysInYearType() {
+        return this.interestCalculationDaysInYearType;
+    }
+
+    public Integer getInterestCalculationDaysInYearTypeId() {
         return this.interestCalculationDaysInYearType.getId().intValue();
     }
 
@@ -446,7 +467,11 @@ public final class SavingsAccountData implements Serializable {
         return activationLocalDate;
     }
 
-    public Integer getLockinPeriodFrequencyType() {
+    public EnumOptionData getLockinPeriodFrequencyType() {
+        return this.lockinPeriodFrequencyType;
+    }
+
+    public Integer getLockinPeriodFrequencyTypeId() {
         return this.lockinPeriodFrequencyType.getId().intValue();
     }
 
