@@ -108,6 +108,7 @@
             ]
         },
         {
+            "default": null,
             "name": "marketPrice",
             "type": [
                 "null",
@@ -118,6 +119,7 @@
             ]
         },
         {
+            "default": null,
             "name": "charges",
             "type": [
                 "null",

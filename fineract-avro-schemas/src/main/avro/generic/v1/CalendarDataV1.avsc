@@ -172,6 +172,7 @@
             ]
         },
         {
+            "default": null,
             "name": "recurringDates",
             "type": [
                 "null",
@@ -182,6 +183,7 @@
             ]
         },
         {
+            "default": null,
             "name": "nextTenRecurringDates",
             "type": [
                 "null",

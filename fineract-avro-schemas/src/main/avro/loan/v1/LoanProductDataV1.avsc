@@ -460,6 +460,7 @@
             ]
         },
         {
+            "default": null,
             "name": "charges",
             "type": [
                 "null",
@@ -470,6 +471,7 @@
             ]
         },
         {
+            "default": null,
             "name": "principalVariationsForBorrowerCycle",
             "type": [
                 "null",
@@ -480,6 +482,7 @@
             ]
         },
         {
+            "default": null,
             "name": "interestRateVariationsForBorrowerCycle",
             "type": [
                 "null",
@@ -490,6 +493,7 @@
             ]
         },
         {
+            "default": null,
             "name": "numberOfRepaymentVariationsForBorrowerCycle",
             "type": [
                 "null",
@@ -508,6 +512,7 @@
             ]
         },
         {
+            "default": null,
             "name": "rates",
             "type": [
                 "null",
