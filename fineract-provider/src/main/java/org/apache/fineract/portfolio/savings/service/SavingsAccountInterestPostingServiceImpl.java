@@ -225,13 +225,13 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
         // A generate list of EndOfDayBalances (not including interest postings)
 
         final SavingsPostingInterestPeriodType postingPeriodType = SavingsPostingInterestPeriodType
-                .fromInt(savingsAccountData.getInterestPostingPeriodType());
+                .fromInt(savingsAccountData.getInterestPostingPeriodTypeId());
 
         final SavingsCompoundingInterestPeriodType compoundingPeriodType = SavingsCompoundingInterestPeriodType
-                .fromInt(savingsAccountData.getInterestCompoundingPeriodType());
+                .fromInt(savingsAccountData.getInterestCompoundingPeriodTypeId());
 
         final SavingsInterestCalculationDaysInYearType daysInYearType = SavingsInterestCalculationDaysInYearType
-                .fromInt(savingsAccountData.getInterestCalculationDaysInYearType());
+                .fromInt(savingsAccountData.getInterestCalculationDaysInYearTypeId());
 
         List<LocalDate> postedAsOnDates = getManualPostingDates(savingsAccountData);
         if (postInterestOnDate != null) {
@@ -260,7 +260,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
         }
 
         final SavingsInterestCalculationType interestCalculationType = SavingsInterestCalculationType
-                .fromInt(savingsAccountData.getInterestCalculationType());
+                .fromInt(savingsAccountData.getInterestCalculationTypeId());
         final BigDecimal interestRateAsFraction = getEffectiveInterestRateAsFraction(mc, upToInterestCalculationDate, savingsAccountData);
         final BigDecimal overdraftInterestRateAsFraction = getEffectiveOverdraftInterestRateAsFraction(mc, savingsAccountData);
         final Collection<Long> interestPostTransactions = this.savingsHelper.fetchPostInterestTransactionIds(savingsAccountData.getId());

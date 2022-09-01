@@ -26,7 +26,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.Lob;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -44,8 +43,7 @@ public class ExternalEvent extends AbstractPersistableCustom {
     private String type;
 
     @Basic(fetch = FetchType.LAZY)
-    @Lob
-    @Column(name = "data", nullable = false, columnDefinition = "BLOB NOT NULL")
+    @Column(name = "data", nullable = false)
     private byte[] data;
 
     @Column(name = "created_at", nullable = false)
