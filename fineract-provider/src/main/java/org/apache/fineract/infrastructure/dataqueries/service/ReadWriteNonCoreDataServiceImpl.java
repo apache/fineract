@@ -1540,7 +1540,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final String key = pColumnHeader.getColumnName();
             if (affectedColumns.containsKey(key)) {
                 pValue = String.valueOf(affectedColumns.get(key));
-                if (StringUtils.isEmpty(pValue)) {
+                if (StringUtils.isEmpty(pValue) || "null".equalsIgnoreCase(pValue)) {
                     pValueWrite = "null";
                 } else {
                     if ("bit".equalsIgnoreCase(pColumnHeader.getColumnType())) {
@@ -1605,7 +1605,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         for (final String key : affectedColumns.keySet()) {
             pValue = String.valueOf(affectedColumns.get(key));
 
-            if (StringUtils.isEmpty(pValue)) {
+            if (StringUtils.isEmpty(pValue) || "null".equalsIgnoreCase(pValue)) {
                 pValueWrite = "null";
             } else {
                 pValueWrite = singleQuote + this.genericDataService.replace(pValue, singleQuote, singleQuote + singleQuote) + singleQuote;
@@ -1860,6 +1860,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                             dataValidationErrors);
                 }
             }
+        } else {
+            paramValue = null;
         }
         return paramValue;
     }

@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -253,6 +254,130 @@ public class DatatableIntegrationTest {
         // deleting the datatable
         String deletedDataTableName = this.datatableHelper.deleteDatatable(datatableName);
         assertEquals(datatableName, deletedDataTableName, "ERROR IN DELETING THE DATATABLE");
+    }
+
+    @Test
+    public void validateInsertNullValues() {
+        // Fetch / Create TST code
+        HashMap<String, Object> codeResponse = CodeHelper.getCodeByName(this.requestSpec, this.responseSpec, "TST_TST_TST");
+
+        // creating datatable for client entity
+        final HashMap<String, Object> columnMap = new HashMap<>();
+        final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
+        columnMap.put("datatableName", Utils.randomNameGenerator(LOAN_APP_TABLE_NAME + "_", 5));
+        columnMap.put("apptableName", LOAN_APP_TABLE_NAME);
+        columnMap.put("entitySubType", "");
+        columnMap.put("multiRow", true);
+        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsABoolean", "Boolean", false, null, null);
+        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsADate", "Date", false, null, null);
+        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsADatetime", "Datetime", false, null, null);
+        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsADecimal", "Decimal", false, null, null);
+        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsADropdown", "Dropdown", false, null, "TST_TST_TST");
+        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsANumber", "Number", false, null, null);
+        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsAString", "String", false, 10, null);
+        DatatableHelper.addDatatableColumns(datatableColumnsList, "itsAText", "Text", false, null, null);
+        columnMap.put("columns", datatableColumnsList);
+        String datatabelRequestJsonString = new Gson().toJson(columnMap);
+        LOG.info("map : {}", datatabelRequestJsonString);
+
+        HashMap<String, Object> datatableResponse = this.datatableHelper.createDatatable(datatabelRequestJsonString, "");
+        String datatableName = (String) datatableResponse.get("resourceIdentifier");
+        DatatableHelper.verifyDatatableCreatedOnServer(this.requestSpec, this.responseSpec, datatableName);
+
+        // try to create with the same name
+        ResponseSpecification responseSpecError400 = new ResponseSpecBuilder().expectStatusCode(400).build();
+        this.datatableHelper = new DatatableHelper(this.requestSpec, responseSpecError400);
+        HashMap<String, Object> response = this.datatableHelper.createDatatable(datatabelRequestJsonString, "");
+        assertEquals("validation.msg.validation.errors.exist", ((Map) response).get("userMessageGlobalisationCode"));
+        this.datatableHelper = new DatatableHelper(this.requestSpec, this.responseSpec);
+
+        // creating client with datatables
+        final Integer clientID = ClientHelper.createClientAsPerson(requestSpec, responseSpec);
+        final Integer loanProductID = createLoanProductWithPeriodicAccrualAccountingEnabled();
+        final Integer loanID = applyForLoanApplication(clientID, loanProductID);
+
+        // creating new client datatable entry
+        final boolean genericResultSet = true;
+
+        HashMap<String, Object> datatableEntryMap = new HashMap<>();
+        datatableEntryMap.put("itsABoolean", null);
+        datatableEntryMap.put("itsADate", null);
+        datatableEntryMap.put("itsADatetime", null);
+        datatableEntryMap.put("itsADecimal", null);
+        datatableEntryMap.put("TST_TST_TST_cd_itsADropdown", null);
+        datatableEntryMap.put("itsANumber", null);
+        datatableEntryMap.put("itsAString", null);
+        datatableEntryMap.put("itsAText", null);
+
+        datatableEntryMap.put("locale", "en");
+        datatableEntryMap.put("dateFormat", "yyyy-MM-dd");
+
+        String datatableEntryRequestJsonString = new GsonBuilder().serializeNulls().create().toJson(datatableEntryMap);
+        LOG.info("map : {}", datatableEntryRequestJsonString);
+
+        HashMap<String, Object> datatableEntryResponseFirst = this.datatableHelper.createDatatableEntry(datatableName, loanID,
+                genericResultSet, datatableEntryRequestJsonString);
+
+        datatableEntryMap = new HashMap<>();
+        datatableEntryMap.put("itsABoolean", "");
+        datatableEntryMap.put("itsADate", "");
+        datatableEntryMap.put("itsADatetime", "");
+        datatableEntryMap.put("itsADecimal", "");
+        datatableEntryMap.put("TST_TST_TST_cd_itsADropdown", "");
+        datatableEntryMap.put("itsANumber", "");
+        datatableEntryMap.put("itsAString", "");
+        datatableEntryMap.put("itsAText", "");
+
+        datatableEntryMap.put("locale", "en");
+        datatableEntryMap.put("dateFormat", "yyyy-MM-dd");
+
+        datatableEntryRequestJsonString = new GsonBuilder().serializeNulls().create().toJson(datatableEntryMap);
+        HashMap<String, Object> datatableEntryResponseSecond = this.datatableHelper.createDatatableEntry(datatableName, loanID,
+                genericResultSet, datatableEntryRequestJsonString);
+        assertNotNull(datatableEntryResponseFirst.get("resourceId"), "ERROR IN CREATING THE ENTITY DATATABLE RECORD");
+        assertNotNull(datatableEntryResponseSecond.get("resourceId"), "ERROR IN CREATING THE ENTITY DATATABLE RECORD");
+
+        // Read the Datatable entry generated with genericResultSet in true (default)
+        HashMap<String, Object> items = this.datatableHelper.readDatatableEntry(datatableName, loanID, genericResultSet, null, "");
+        assertNotNull(items);
+        assertEquals(2, ((List) items.get("data")).size());
+
+        assertEquals("id", ((Map) ((List) items.get("columnHeaders")).get(0)).get("columnName"));
+        assertEquals(1, ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(0));
+        assertEquals("loan_id", ((Map) ((List) items.get("columnHeaders")).get(1)).get("columnName"));
+        assertEquals(loanID, ((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(1));
+        assertEquals("itsABoolean", ((Map) ((List) items.get("columnHeaders")).get(2)).get("columnName"));
+        assertNull(((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(2));
+        assertEquals("itsADate", ((Map) ((List) items.get("columnHeaders")).get(3)).get("columnName"));
+        assertNull(((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(3));
+        assertEquals("itsADatetime", ((Map) ((List) items.get("columnHeaders")).get(4)).get("columnName"));
+        assertNull(((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(4));
+        assertEquals("itsADecimal", ((Map) ((List) items.get("columnHeaders")).get(5)).get("columnName"));
+        assertNull(((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(5));
+        assertEquals("TST_TST_TST_cd_itsADropdown", ((Map) ((List) items.get("columnHeaders")).get(6)).get("columnName"));
+        assertNull(((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(6));
+        assertEquals("itsANumber", ((Map) ((List) items.get("columnHeaders")).get(7)).get("columnName"));
+        assertNull(((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(7));
+        assertEquals("itsAString", ((Map) ((List) items.get("columnHeaders")).get(8)).get("columnName"));
+        assertNull(((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(8));
+        assertEquals("itsAText", ((Map) ((List) items.get("columnHeaders")).get(9)).get("columnName"));
+        assertNull(((List) ((Map) ((List) items.get("data")).get(0)).get("row")).get(9));
+
+        assertEquals(2, ((List) ((Map) ((List) items.get("data")).get(1)).get("row")).get(0));
+        assertEquals(loanID, ((List) ((Map) ((List) items.get("data")).get(1)).get("row")).get(1));
+        assertNull(((List) ((Map) ((List) items.get("data")).get(1)).get("row")).get(2));
+        assertNull(((List) ((Map) ((List) items.get("data")).get(1)).get("row")).get(3));
+        assertNull(((List) ((Map) ((List) items.get("data")).get(1)).get("row")).get(4));
+        assertNull(((List) ((Map) ((List) items.get("data")).get(1)).get("row")).get(5));
+        assertNull(((List) ((Map) ((List) items.get("data")).get(1)).get("row")).get(6));
+        assertNull(((List) ((Map) ((List) items.get("data")).get(1)).get("row")).get(7));
+        assertNull(((List) ((Map) ((List) items.get("data")).get(1)).get("row")).get(8));
+        assertNull(((List) ((Map) ((List) items.get("data")).get(1)).get("row")).get(9));
+
+        HashMap<String, Object> updatedDatatableEntryResponse = this.datatableHelper.updateDatatableEntry(datatableName, loanID, 1, false,
+                datatableEntryRequestJsonString);
+
+        assertEquals(null, updatedDatatableEntryResponse.get("changes"));
     }
 
     @Test
