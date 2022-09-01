@@ -124,6 +124,7 @@
             ]
         },
         {
+            "default": null,
             "name": "chargeOptions",
             "type": [
                 "null",

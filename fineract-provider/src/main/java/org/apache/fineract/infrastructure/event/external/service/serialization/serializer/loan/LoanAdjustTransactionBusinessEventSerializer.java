@@ -50,13 +50,18 @@ public class LoanAdjustTransactionBusinessEventSerializer implements BusinessEve
     public <T> byte[] serialize(BusinessEvent<T> rawEvent) throws IOException {
         LoanAdjustTransactionBusinessEvent event = (LoanAdjustTransactionBusinessEvent) rawEvent;
         LoanTransaction transactionToAdjust = event.get().getTransactionToAdjust();
-        LoanTransaction newTransactionDetail = event.get().getNewTransactionDetail();
         LoanTransactionData transactionToAdjustData = service.retrieveLoanTransaction(transactionToAdjust.getLoan().getId(),
                 transactionToAdjust.getId());
-        LoanTransactionData newTransactionDetailData = service.retrieveLoanTransaction(newTransactionDetail.getLoan().getId(),
-                newTransactionDetail.getId());
         LoanTransactionDataV1 transactionToAdjustAvroDto = mapper.map(transactionToAdjustData);
-        LoanTransactionDataV1 newTransactionDetailAvroDto = mapper.map(newTransactionDetailData);
+
+        LoanTransaction newTransactionDetail = event.get().getNewTransactionDetail();
+        LoanTransactionDataV1 newTransactionDetailAvroDto = null;
+        if (newTransactionDetail != null) {
+            LoanTransactionData newTransactionDetailData = service.retrieveLoanTransaction(newTransactionDetail.getLoan().getId(),
+                    newTransactionDetail.getId());
+            newTransactionDetailAvroDto = mapper.map(newTransactionDetailData);
+
+        }
         LoanTransactionAdjustmentDataV1 avroDto = new LoanTransactionAdjustmentDataV1(transactionToAdjustAvroDto,
                 newTransactionDetailAvroDto);
         ByteBuffer buffer = avroDto.toByteBuffer();

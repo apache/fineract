@@ -84,6 +84,7 @@
             ]
         },
         {
+            "default": null,
             "name": "fieldOfficerName",
             "type": [
                 "null",
@@ -219,6 +220,7 @@
             ]
         },
         {
+            "default": null,
             "name": "transactions",
             "type": [
                 "null",
@@ -229,6 +231,7 @@
             ]
         },
         {
+            "default": null,
             "name": "charges",
             "type": [
                 "null",

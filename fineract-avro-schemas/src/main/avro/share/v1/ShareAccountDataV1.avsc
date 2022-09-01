@@ -108,6 +108,7 @@
             ]
         },
         {
+            "default": null,
             "name": "purchasedShares",
             "type": [
                 "null",
@@ -118,6 +119,7 @@
             ]
         },
         {
+            "default": null,
             "name": "savingsAccountId",
             "type": [
                 "null",

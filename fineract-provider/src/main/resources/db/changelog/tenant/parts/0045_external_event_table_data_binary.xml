@@ -24,17 +24,16 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     <changeSet author="fineract" id="1">
         <delete tableName="m_external_event"/>
+        <dropColumn tableName="m_external_event" columnName="data"/>
     </changeSet>
     <changeSet author="fineract" id="2-mysql" context="mysql">
-        <dropColumn tableName="m_external_event" columnName="data"/>
         <addColumn tableName="m_external_event">
-            <column name="data" type="VARBINARY">
+            <column name="data" type="BLOB">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
     </changeSet>
     <changeSet author="fineract" id="2-postgresql" context="postgresql">
-        <dropColumn tableName="m_external_event" columnName="data"/>
         <addColumn tableName="m_external_event">
             <column name="data" type="BYTEA">
                 <constraints nullable="false"/>

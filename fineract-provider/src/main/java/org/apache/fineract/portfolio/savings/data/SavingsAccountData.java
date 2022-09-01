@@ -406,7 +406,6 @@ public final class SavingsAccountData implements Serializable {
         return this.interestCompoundingPeriodType;
     }
 
-
     public Integer getInterestCompoundingPeriodTypeId() {
         return this.interestCompoundingPeriodType.getId().intValue();
     }

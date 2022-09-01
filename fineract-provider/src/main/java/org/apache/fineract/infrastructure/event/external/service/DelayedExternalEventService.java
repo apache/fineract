@@ -45,6 +45,14 @@ public class DelayedExternalEventService {
         return !localEventStorage.get().isEmpty();
     }
 
+    public void clearEnqueuedEvents() {
+        localEventStorage.get().clear();
+    }
+
+    public List<BusinessEvent<?>> getEnqueuedEvents() {
+        return List.copyOf(localEventStorage.get());
+    }
+
     public void postEnqueuedEvents() {
         List<BusinessEvent<?>> enqueuedEvents = localEventStorage.get();
         if (enqueuedEvents.isEmpty()) {

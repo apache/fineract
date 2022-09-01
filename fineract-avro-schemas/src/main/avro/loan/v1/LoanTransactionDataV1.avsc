@@ -180,6 +180,7 @@
             ]
         },
         {
+            "default": null,
             "name": "loanChargePaidByList",
             "type": [
                 "null",

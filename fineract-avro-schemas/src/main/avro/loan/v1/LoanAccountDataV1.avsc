@@ -436,6 +436,7 @@
             ]
         },
         {
+            "default": null,
             "name": "transactions",
             "type": [
                 "null",
@@ -446,6 +447,7 @@
             ]
         },
         {
+            "default": null,
             "name": "charges",
             "type": [
                 "null",
@@ -464,6 +466,7 @@
             ]
         },
         {
+            "default": null,
             "name": "disbursementDetails",
             "type": [
                 "null",
@@ -514,6 +517,7 @@
             ]
         },
         {
+            "default": null,
             "name": "accountLinkingOptions",
             "type": [
                 "null",
@@ -564,6 +568,7 @@
             ]
         },
         {
+            "default": null,
             "name": "emiAmountVariations",
             "type": [
                 "null",
@@ -574,6 +579,7 @@
             ]
         },
         {
+            "default": null,
             "name": "clientActiveLoanOptions",
             "type": [
                 "null",
@@ -640,6 +646,7 @@
             ]
         },
         {
+            "default": null,
             "name": "overdueCharges",
             "type": [
                 "null",

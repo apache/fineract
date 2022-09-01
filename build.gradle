@@ -279,6 +279,8 @@ configure(project.fineractJavaProjects) {
     sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir
     sourceSets.test.output.resourcesDir = sourceSets.test.java.outputDir
 
+    check.dependsOn('cucumber')
+
     configurations {
         implementation.setCanBeResolved(true)
         api.setCanBeResolved(true)
@@ -536,7 +538,6 @@ configure(project.fineractJavaProjects) {
 
     test {
         useJUnitPlatform()
-        dependsOn 'cucumber'
 
         if (project.hasProperty('excludeTests')) {
             filter {

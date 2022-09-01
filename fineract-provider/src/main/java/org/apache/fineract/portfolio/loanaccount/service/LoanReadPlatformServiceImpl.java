@@ -212,8 +212,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     public LoanAccountData retrieveOne(final Long loanId) {
 
         try {
-            final AppUser currentUser = this.context.authenticatedUser();
-            final String hierarchy = currentUser.getOffice().getHierarchy();
+            final String hierarchy = getHierarchyString();
             final String hierarchySearchString = hierarchy + "%";
 
             final LoanMapper rm = new LoanMapper(sqlGenerator, delinquencyReadPlatformService);
@@ -229,6 +228,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         } catch (final EmptyResultDataAccessException e) {
             throw new LoanNotFoundException(loanId, e);
         }
+    }
+
+    private String getHierarchyString() {
+        AppUser currentUser = null;
+        if (this.context != null) {
+            currentUser = this.context.getAuthenticatedUserIfPresent();
+        }
+        return Optional.ofNullable(currentUser).map(appUser -> appUser.getOffice().getHierarchy()).orElse(".");
     }
 
     @Override

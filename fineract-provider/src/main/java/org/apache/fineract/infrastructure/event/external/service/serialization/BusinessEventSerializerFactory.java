@@ -19,18 +19,16 @@
 package org.apache.fineract.infrastructure.event.external.service.serialization;
 
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
 import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class BusinessEventSerializerFactory {
 
     private final List<BusinessEventSerializer> serializers;
-
-    public BusinessEventSerializerFactory(List<BusinessEventSerializer> serializers) {
-        this.serializers = serializers.stream().sorted(new BusinessEventSerializerComparator()).toList();
-    }
 
     public <T> BusinessEventSerializer create(BusinessEvent<T> event) {
         for (BusinessEventSerializer serializer : serializers) {

@@ -124,6 +124,7 @@
             ]
         },
         {
+            "default": null,
             "name": "groupRoles",
             "type": [
                 "null",
@@ -134,6 +135,7 @@
             ]
         },
         {
+            "default": null,
             "name": "calendarsData",
             "type": [
                 "null",

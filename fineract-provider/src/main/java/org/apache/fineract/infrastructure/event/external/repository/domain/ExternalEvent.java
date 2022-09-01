@@ -54,7 +54,7 @@ public class ExternalEvent extends AbstractPersistableCustom {
     @Setter
     private ExternalEventStatus status;
 
-    @Column(name = "sent_at", nullable = false)
+    @Column(name = "sent_at", nullable = true)
     @Setter
     private OffsetDateTime sentAt;
 
