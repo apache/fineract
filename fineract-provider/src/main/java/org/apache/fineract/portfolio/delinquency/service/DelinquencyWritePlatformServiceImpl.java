@@ -167,9 +167,26 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
     @Override
     public void applyDelinquencyTagToLoan(Long loanId, Long ageDays) {
         final Loan loan = this.loanRepository.findOneWithNotFoundDetection(loanId);
-        final DelinquencyBucket delinquencyBucket = loan.getLoanProduct().getDelinquencyBucket();
-        if (delinquencyBucket != null) {
-            lookUpDelinquencyRange(loan, delinquencyBucket, ageDays);
+        applyDelinquencyTagToLoan(loan, ageDays);
+    }
+
+    @Override
+    public void applyDelinquencyTagToLoan(final Loan loan, Long ageDays) {
+        if (loan.hasDelinquencyBucket()) {
+            lookUpDelinquencyRange(loan, loan.getLoanProduct().getDelinquencyBucket(), ageDays);
+        }
+    }
+
+    @Override
+    public void removeDelinquencyTagToLoan(final Loan loan) {
+        setLoanDelinquencyTag(loan, null);
+    }
+
+    @Override
+    public void cleanLoanDelinquencyTags(Loan loan) {
+        List<LoanDelinquencyTagHistory> loanDelinquencyTags = this.loanDelinquencyTagRepository.findByLoan(loan);
+        if (loanDelinquencyTags != null && loanDelinquencyTags.size() > 0) {
+            this.loanDelinquencyTagRepository.deleteAll(loanDelinquencyTags);
         }
     }
 

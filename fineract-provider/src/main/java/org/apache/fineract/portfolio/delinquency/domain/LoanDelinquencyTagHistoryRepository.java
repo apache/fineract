@@ -38,4 +38,6 @@ public interface LoanDelinquencyTagHistoryRepository
 
     Long countByDelinquencyRange(DelinquencyRange delinquencyRange);
 
+    List<LoanDelinquencyTagHistory> findByLoan(Loan loan);
+
 }

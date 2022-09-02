@@ -143,8 +143,6 @@ import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.rate.domain.Rate;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Entity
@@ -152,8 +150,6 @@ import org.springframework.stereotype.Component;
 @Table(name = "m_loan", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "loan_account_no_UNIQUE"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "loan_externalid_UNIQUE") })
 public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
-
-    private static final Logger LOG = LoggerFactory.getLogger(Loan.class);
 
     /** Disable optimistic locking till batch jobs failures can be fixed **/
     @Version
@@ -6863,5 +6859,22 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         // In that case, fetch loan (before commit) will return null for the charges.
         // Return empty set instead of null to avoid NPE
         return Optional.ofNullable(this.charges).orElse(new HashSet<>());
+    }
+
+    public boolean hasDelinquencyBucket() {
+        return (getLoanProduct().getDelinquencyBucket() != null);
+    }
+
+    public Long getAgeOfOverdueDays(LocalDate baseDate) {
+        Long ageOfOverdueDays = 0L;
+
+        List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
+        for (final LoanRepaymentScheduleInstallment installment : installments) {
+            if (!installment.isObligationsMet()) {
+                ageOfOverdueDays = DateUtils.getDifferenceInDays(installment.getDueDate(), baseDate);
+                break;
+            }
+        }
+        return ageOfOverdueDays;
     }
 }
