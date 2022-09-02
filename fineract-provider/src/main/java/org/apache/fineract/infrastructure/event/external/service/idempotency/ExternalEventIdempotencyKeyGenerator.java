@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.event.external.service.idempotency;
 
-import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 
 public interface ExternalEventIdempotencyKeyGenerator {
 

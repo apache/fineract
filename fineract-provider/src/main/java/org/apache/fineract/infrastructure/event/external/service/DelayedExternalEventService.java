@@ -21,8 +21,8 @@ package org.apache.fineract.infrastructure.event.external.service;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.portfolio.businessevent.domain.BulkBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.BulkBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.springframework.stereotype.Service;
 
 @Service

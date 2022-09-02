@@ -24,8 +24,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.util.List;
-import org.apache.fineract.portfolio.businessevent.domain.BulkBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.BulkBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
