@@ -20,11 +20,11 @@ package org.apache.fineract.infrastructure.event.external.service;
 
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.external.repository.ExternalEventRepository;
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEvent;
 import org.apache.fineract.infrastructure.event.external.service.idempotency.ExternalEventIdempotencyKeyGenerator;
 import org.apache.fineract.infrastructure.event.external.service.serialization.BusinessEventSerializerFactory;
-import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

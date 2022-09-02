@@ -279,8 +279,6 @@ configure(project.fineractJavaProjects) {
     sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir
     sourceSets.test.output.resourcesDir = sourceSets.test.java.outputDir
 
-    check.dependsOn('cucumber')
-
     configurations {
         implementation.setCanBeResolved(true)
         api.setCanBeResolved(true)
@@ -422,6 +420,8 @@ configure(project.fineractJavaProjects) {
                     "InvalidBlockTag",
                     "JavaUtilDate", // TODO FINERACT-1298
                     "ReturnValueIgnored",
+                    "DirectInvocationOnMock",
+                    "CanIgnoreReturnValueSuggester",
                     "SameNameButDifferent", // Until errorprone recognizes Lombok
                     "MultiVariableDeclaration" // Until errorprone recognizes Lombok
                     )

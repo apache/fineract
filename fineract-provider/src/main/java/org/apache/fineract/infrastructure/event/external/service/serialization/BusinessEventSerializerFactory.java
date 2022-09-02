@@ -20,8 +20,8 @@ package org.apache.fineract.infrastructure.event.external.service.serialization;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
-import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
 import org.springframework.stereotype.Component;
 
 @Component

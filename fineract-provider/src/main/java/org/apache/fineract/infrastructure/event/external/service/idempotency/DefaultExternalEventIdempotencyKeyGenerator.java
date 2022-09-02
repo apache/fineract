@@ -19,7 +19,7 @@
 package org.apache.fineract.infrastructure.event.external.service.idempotency;
 
 import java.util.UUID;
-import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.springframework.stereotype.Component;
 
 @Component
