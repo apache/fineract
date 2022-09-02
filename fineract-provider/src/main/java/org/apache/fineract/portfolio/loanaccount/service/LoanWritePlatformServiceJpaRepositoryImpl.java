@@ -522,6 +522,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         updateRecurringCalendarDatesForInterestRecalculation(loan);
         this.loanAccountDomainService.recalculateAccruals(loan);
+        this.loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
 
         // Post Dated Checks
         if (command.parameterExists("postDatedChecks")) {
@@ -784,6 +785,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             }
             updateRecurringCalendarDatesForInterestRecalculation(loan);
             loanAccountDomainService.recalculateAccruals(loan);
+            loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
             businessEventNotifierService.notifyPostBusinessEvent(new LoanDisbursalBusinessEvent(loan));
         }
 
@@ -1148,6 +1150,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
         this.loanAccountDomainService.recalculateAccruals(loan);
+
+        this.loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
+
         LoanAdjustTransactionBusinessEvent.Data eventData = new LoanAdjustTransactionBusinessEvent.Data(transactionToAdjust);
         if (newTransactionDetail.isRepaymentType() && newTransactionDetail.isGreaterThanZero(loan.getPrincipal().getCurrency())) {
             eventData.setNewTransactionDetail(newTransactionDetail);
@@ -1227,6 +1232,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         loanAccountDomainService.recalculateAccruals(loan);
+        loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
+
         businessEventNotifierService.notifyPostBusinessEvent(new LoanWaiveInterestBusinessEvent(waiveInterestTransaction));
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(waiveInterestTransaction.getId())
                 .withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId()).withGroupId(loan.getGroupId()).withLoanId(loanId)
@@ -1244,6 +1251,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         if (command.hasParameter("writeoffReasonId")) {
             Long writeoffReasonId = command.longValueOfParameterNamed("writeoffReasonId");
@@ -1290,6 +1298,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         loanAccountDomainService.recalculateAccruals(loan);
+        loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
         businessEventNotifierService.notifyPostBusinessEvent(new LoanWrittenOffPostBusinessEvent(writeOff));
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(writeOff.getId())
                 .withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId()).withGroupId(loan.getGroupId()).withLoanId(loanId)
@@ -1310,6 +1319,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
 
         final List<Long> existingTransactionIds = new ArrayList<>();
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
@@ -1345,6 +1355,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         }
         loanAccountDomainService.recalculateAccruals(loan);
+
+        loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanCloseBusinessEvent(loan));
 
@@ -2731,6 +2743,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     && loan.isFeeCompoundingEnabledForInterestRecalculation()) {
                 this.loanAccountDomainService.recalculateAccruals(loan);
             }
+            this.loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
             businessEventNotifierService.notifyPostBusinessEvent(new LoanApplyOverdueChargeBusinessEvent(loan));
         }
     }
@@ -2860,6 +2873,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (writeOffTransaction != null) {
             businessEventNotifierService.notifyPostBusinessEvent(new LoanUndoWrittenOffBusinessEvent(writeOffTransaction));
         }
+        this.loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
         return new CommandProcessingResultBuilder() //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
@@ -3004,6 +3018,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         this.loanAccountDomainService.recalculateAccruals(loan);
+        this.loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
         return new CommandProcessingResultBuilder() //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
