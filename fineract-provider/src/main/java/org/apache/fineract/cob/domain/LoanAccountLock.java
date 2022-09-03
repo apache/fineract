@@ -28,11 +28,15 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
 @Entity
 @Table(name = "m_loan_account_locks")
 @NoArgsConstructor
 @Getter
+@Setter
+@Accessors(chain = true)
 public class LoanAccountLock {
 
     @Id

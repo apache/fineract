@@ -20,8 +20,12 @@ package org.apache.fineract.cob.data;
 
 import java.util.List;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 @Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class JobBusinessStepConfigData {
 
     private String jobName;

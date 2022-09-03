@@ -24,12 +24,15 @@ import javax.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_batch_business_steps")
-@NoArgsConstructor
 @Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public class BatchBusinessStep extends AbstractPersistableCustom {
 
     @Column(name = "job_name", nullable = false)
