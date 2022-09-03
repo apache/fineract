@@ -19,9 +19,9 @@
 package org.apache.fineract.batch.domain;
 
 import java.util.Set;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * Provides an object for separate HTTP requests in the Batch Request for Batch API. A requestId is also included as
@@ -34,8 +34,8 @@ import lombok.NoArgsConstructor;
  * @see Header
  */
 @NoArgsConstructor
-@AllArgsConstructor
 @Data
+@Accessors(chain = true)
 public class BatchRequest {
 
     private Long requestId;
