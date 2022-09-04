@@ -47,4 +47,7 @@ public interface BusinessEventNotifierService {
      */
     <T extends BusinessEvent<?>> void addPostBusinessEventListener(Class<T> eventType, BusinessEventListener<T> listener);
 
+    void startExternalEventRecording();
+
+    void stopExternalEventRecording();
 }
