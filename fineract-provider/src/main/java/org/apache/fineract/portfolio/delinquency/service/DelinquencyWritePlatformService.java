@@ -30,8 +30,6 @@ public interface DelinquencyWritePlatformService {
 
     CommandProcessingResult deleteDelinquencyRange(Long delinquencyRangeId, JsonCommand command);
 
-    CommandProcessingResult setLoanDelinquencyTag(Long loanId, Long delinquencyRangeId, JsonCommand command);
-
     CommandProcessingResult createDelinquencyBucket(JsonCommand command);
 
     CommandProcessingResult updateDelinquencyBucket(Long delinquencyBucketId, JsonCommand command);
