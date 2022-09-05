@@ -56,7 +56,7 @@ public class OfficeWorkbookPopulator extends AbstractWorkbookPopulator {
         int rowIndex = 1;
         for (OfficeData office : offices) {
             Row row = officeSheet.createRow(rowIndex);
-            writeString(OfficeConstants.LOOKUP_OFFICE_COL, row, office.name());
+            writeString(OfficeConstants.LOOKUP_OFFICE_COL, row, office.getName());
             writeLong(OfficeConstants.LOOKUP_OFFICE_ID_COL, row, office.getId());
             rowIndex++;
         }

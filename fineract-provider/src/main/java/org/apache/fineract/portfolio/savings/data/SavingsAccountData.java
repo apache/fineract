@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.Getter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -46,6 +47,7 @@ import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 /**
  * Immutable data object representing a savings account.
  */
+@Getter
 public final class SavingsAccountData implements Serializable {
 
     private final Long id;
@@ -108,9 +110,7 @@ public final class SavingsAccountData implements Serializable {
     private final Collection<EnumOptionData> withdrawalFeeTypeOptions;
     private final Collection<ChargeData> chargeOptions;
 
-    @SuppressWarnings("unused")
     private final SavingsAccountChargeData withdrawalFee;
-    @SuppressWarnings("unused")
     private final SavingsAccountChargeData annualFee;
     private final BigDecimal nominalAnnualInterestRateOverdraft;
     private final BigDecimal minOverdraftForInterestCalculation;
@@ -243,10 +243,6 @@ public final class SavingsAccountData implements Serializable {
         this.newSavingsAccountTransactionData.add(savingsAccountTransactionData);
     }
 
-    public List<SavingsAccountTransactionData> getNewSavingsAccountTransactionData() {
-        return this.newSavingsAccountTransactionData;
-    }
-
     public void setSavingsAccountSummaryData(final SavingsAccountSummaryData savingsAccountSummaryData) {
         this.savingsAccountSummaryData = savingsAccountSummaryData;
     }
@@ -271,10 +267,6 @@ public final class SavingsAccountData implements Serializable {
         this.startInterestCalculationDate = startInterestCalculationDate;
     }
 
-    public CurrencyData getCurrency() {
-        return this.currency;
-    }
-
     public void setClientData(final ClientData clientData) {
         this.clientData = clientData;
     }
@@ -292,60 +284,8 @@ public final class SavingsAccountData implements Serializable {
         this.officeId = officeId;
     }
 
-    public Long getOfficeId() {
-        return this.officeId;
-    }
-
-    public String getClientName() {
-        return clientName;
-    }
-
-    public String getAccountNo() {
-        return accountNo;
-    }
-
-    public BigDecimal getNominalAnnualInterestRate() {
-        return this.nominalAnnualInterestRate;
-    }
-
-    public BigDecimal getNominalAnnualInterestRateOverdraft() {
-        return this.nominalAnnualInterestRateOverdraft;
-    }
-
-    public boolean isAllowOverdraft() {
-        return this.allowOverdraft;
-    }
-
-    public TaxGroupData getTaxGroupData() {
-        return this.taxGroup;
-    }
-
-    public Long getClientId() {
-        return clientId;
-    }
-
-    public String getSavingsProductName() {
-        return savingsProductName;
-    }
-
-    public BigDecimal getMinRequiredOpeningBalance() {
-        return minRequiredOpeningBalance;
-    }
-
-    public SavingsAccountApplicationTimelineData getTimeline() {
-        return timeline;
-    }
-
-    public Long getId() {
-        return this.id;
-    }
-
     public void updateTransactions(final SavingsAccountTransactionData savingsAccountTransactionData) {
         this.savingsAccountTransactionData.add(savingsAccountTransactionData);
-    }
-
-    public boolean withHoldTax() {
-        return this.withHoldTax;
     }
 
     public DepositAccountType depositAccountType() {
@@ -360,80 +300,36 @@ public final class SavingsAccountData implements Serializable {
         this.glAccountIdForInterestOnSavings = glAccountIdForInterestOnSavings;
     }
 
-    public Long getGlAccountIdForSavingsControl() {
-        return this.glAccountIdForSavingsControl;
-    }
-
-    public Long getGlAccountIdForInterestOnSavings() {
-        return this.glAccountIdForInterestOnSavings;
-    }
-
-    public List<SavingsAccountTransactionData> getSavingsAccountTransactionData() {
-        return this.savingsAccountTransactionData;
-    }
-
     public void setHelpers(final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
             final SavingsHelper savingsHelper) {
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.savingsHelper = savingsHelper;
     }
 
-    public BigDecimal getMinBalanceForInterestCalculation() {
-        return this.minBalanceForInterestCalculation;
-    }
-
-    public BigDecimal getMinOverdraftForInterestCalculation() {
-        return this.minOverdraftForInterestCalculation;
-    }
-
-    public EnumOptionData getInterestPostingPeriodType() {
-        return this.interestPostingPeriodType;
-    }
-
     public Integer getInterestPostingPeriodTypeId() {
         return this.interestPostingPeriodType.getId().intValue();
-    }
-
-    public EnumOptionData getDepositType() {
-        return this.depositType;
     }
 
     public Integer getDepositTypeId() {
         return this.depositType.getId().intValue();
     }
 
-    public EnumOptionData getInterestCompoundingPeriodType() {
-        return this.interestCompoundingPeriodType;
-    }
-
     public Integer getInterestCompoundingPeriodTypeId() {
         return this.interestCompoundingPeriodType.getId().intValue();
-    }
-
-    public EnumOptionData getInterestCalculationType() {
-        return this.interestCalculationType;
     }
 
     public Integer getInterestCalculationTypeId() {
         return this.interestCalculationType.getId().intValue();
     }
 
-    public EnumOptionData getInterestCalculationDaysInYearType() {
-        return this.interestCalculationDaysInYearType;
-    }
-
     public Integer getInterestCalculationDaysInYearTypeId() {
         return this.interestCalculationDaysInYearType.getId().intValue();
-    }
-
-    public LocalDate getLockedInUntilDate() {
-        return this.lockedInUntilDate;
     }
 
     public SavingsAccountTransactionData findLastTransaction(final LocalDate date) {
 
         SavingsAccountTransactionData savingsTransaction = null;
-        List<SavingsAccountTransactionData> trans = getTransactions();
+        List<SavingsAccountTransactionData> trans = getSavingsAccountTransactionData();
         for (final SavingsAccountTransactionData transaction : trans) {
             if (transaction.isNotReversed() && !transaction.isReversalTransaction() && transaction.occursOn(date)) {
                 savingsTransaction = transaction;
@@ -442,10 +338,6 @@ public final class SavingsAccountData implements Serializable {
         }
 
         return savingsTransaction;
-    }
-
-    public List<SavingsAccountTransactionData> getTransactions() {
-        return this.savingsAccountTransactionData;
     }
 
     public LocalDate getStartInterestCalculationDate() {
@@ -464,10 +356,6 @@ public final class SavingsAccountData implements Serializable {
             activationLocalDate = this.timeline.getActivatedOnDate();
         }
         return activationLocalDate;
-    }
-
-    public EnumOptionData getLockinPeriodFrequencyType() {
-        return this.lockinPeriodFrequencyType;
     }
 
     public Integer getLockinPeriodFrequencyTypeId() {
@@ -499,7 +387,7 @@ public final class SavingsAccountData implements Serializable {
     public Long officeId() {
         Long officeId = null;
         if (this.clientData != null) {
-            officeId = this.clientData.officeId();
+            officeId = this.clientData.getOfficeId();
         } else if (this.groupId != null) {
             officeId = this.groupGeneralData.officeId();
         }
@@ -603,10 +491,6 @@ public final class SavingsAccountData implements Serializable {
         this.rowIndex = rowIndex;
         this.submittedOnDate = submittedOnDate;
         this.savingsAmountOnHold = null;
-    }
-
-    public Integer getRowIndex() {
-        return rowIndex;
     }
 
     public static SavingsAccountData instance(final Long id, final String accountNo, final EnumOptionData depositType,
@@ -746,12 +630,7 @@ public final class SavingsAccountData implements Serializable {
         final BigDecimal minRequiredOpeningBalance = null;
         final Integer lockinPeriodFrequency = null;
         final EnumOptionData lockinPeriodFrequencyType = null;
-        // final BigDecimal withdrawalFeeAmount = null;
-        // final EnumOptionData withdrawalFeeType = null;
         final boolean withdrawalFeeForTransfers = false;
-        // final BigDecimal annualFeeAmount = null;
-        // final MonthDay annualFeeOnMonthDay = null;
-        // final LocalDate annualFeeNextDueDate = null;
         final boolean allowOverdraft = false;
         final BigDecimal overdraftLimit = null;
         final BigDecimal nominalAnnualInterestRateOverdraft = null;
@@ -885,12 +764,7 @@ public final class SavingsAccountData implements Serializable {
         final BigDecimal minRequiredOpeningBalance = null;
         final Integer lockinPeriodFrequency = null;
         final EnumOptionData lockinPeriodFrequencyType = null;
-        // final BigDecimal withdrawalFeeAmount = null;
-        // final EnumOptionData withdrawalFeeType = null;
         final boolean withdrawalFeeForTransfers = false;
-        // final BigDecimal annualFeeAmount = null;
-        // final MonthDay annualFeeOnMonthDay = null;
-        // final LocalDate annualFeeNextDueDate = null;
         final boolean allowOverdraft = false;
         final BigDecimal overdraftLimit = null;
         final BigDecimal nominalAnnualInterestRateOverdraft = null;
@@ -986,12 +860,7 @@ public final class SavingsAccountData implements Serializable {
         this.minRequiredOpeningBalance = minRequiredOpeningBalance;
         this.lockinPeriodFrequency = lockinPeriodFrequency;
         this.lockinPeriodFrequencyType = lockinPeriodFrequencyType;
-        // this.withdrawalFeeAmount = withdrawalFeeAmount;
-        // this.withdrawalFeeType = withdrawalFeeType;
         this.withdrawalFeeForTransfers = withdrawalFeeForTransfers;
-        // this.annualFeeAmount = annualFeeAmount;
-        // this.annualFeeOnMonthDay = annualFeeOnMonthDay;
-        // this.annualFeeNextDueDate = annualFeeNextDueDate;
 
         this.summary = summary;
         this.transactions = transactions;
@@ -1009,9 +878,9 @@ public final class SavingsAccountData implements Serializable {
         // charges available for adding to Savings account
         this.chargeOptions = chargeOptions;
 
-        this.withdrawalFee = getWithdrawalFee();
+        this.withdrawalFee = calculateWithdrawalFee();
 
-        this.annualFee = getAnnualFee();
+        this.annualFee = calculateAnnualFee();
         this.allowOverdraft = allowOverdraft;
         this.overdraftLimit = overdraftLimit;
         this.nominalAnnualInterestRateOverdraft = nominalAnnualInterestRateOverdraft;
@@ -1032,7 +901,7 @@ public final class SavingsAccountData implements Serializable {
         this.savingsAmountOnHold = savingsAmountOnHold;
     }
 
-    private SavingsAccountChargeData getWithdrawalFee() {
+    private SavingsAccountChargeData calculateWithdrawalFee() {
         for (SavingsAccountChargeData charge : this.charges()) {
             if (charge.isWithdrawalFee()) {
                 return charge;
@@ -1041,37 +910,13 @@ public final class SavingsAccountData implements Serializable {
         return null;
     }
 
-    private SavingsAccountChargeData getAnnualFee() {
+    private SavingsAccountChargeData calculateAnnualFee() {
         for (SavingsAccountChargeData charge : this.charges()) {
             if (charge.isAnnualFee()) {
                 return charge;
             }
         }
         return null;
-    }
-
-    public Long id() {
-        return this.id;
-    }
-
-    public Long clientId() {
-        return this.clientId;
-    }
-
-    public Long groupId() {
-        return this.groupId;
-    }
-
-    public Long productId() {
-        return this.savingsProductId;
-    }
-
-    public CurrencyData currency() {
-        return this.currency;
-    }
-
-    public SavingsAccountTransactionSummaryWrapper getSavingsAccountTransactionSummaryWrapper() {
-        return this.savingsAccountTransactionSummaryWrapper;
     }
 
     public void setExistingTransactionIds(final Set<Long> existingTransactionIds) {
@@ -1084,10 +929,6 @@ public final class SavingsAccountData implements Serializable {
         if (existingReversedTransactionIds != null) {
             this.existingReversedTransactionIds.addAll(existingReversedTransactionIds);
         }
-    }
-
-    public SavingsHelper getSavingsHelper() {
-        return this.savingsHelper;
     }
 
     @Override
@@ -1119,23 +960,11 @@ public final class SavingsAccountData implements Serializable {
         this.datatables = datatables;
     }
 
-    public SavingsAccountSummaryData getSummary() {
-        return this.summary;
-    }
-
-    public Set<Long> getExistingTransactionIds() {
-        return this.existingTransactionIds;
-    }
-
-    public Set<Long> getExistingReversedTransactionIds() {
-        return this.existingReversedTransactionIds;
-    }
-
-    public SavingsAccountTransactionData getLastSavingsAccountTransaction() {
-        return lastSavingsAccountTransaction;
-    }
-
     public void setLastSavingsAccountTransaction(SavingsAccountTransactionData lastSavingsAccountTransaction) {
         this.lastSavingsAccountTransaction = lastSavingsAccountTransaction;
+    }
+
+    public boolean isIsDormancyTrackingActive() {
+        return this.isDormancyTrackingActive;
     }
 }

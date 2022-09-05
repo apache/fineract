@@ -19,10 +19,11 @@
 package org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan;
 
 import org.apache.fineract.avro.loan.v1.LoanTransactionDataV1;
+import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroMapperConfig;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring")
+@Mapper(config = AvroMapperConfig.class)
 public interface LoanTransactionDataMapper {
 
     LoanTransactionDataV1 map(LoanTransactionData source);

@@ -19,11 +19,14 @@
 package org.apache.fineract.organisation.monetary.data;
 
 import java.io.Serializable;
-import java.util.Objects;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 /**
  * Immutable data object representing currency.
  */
+@Getter
+@EqualsAndHashCode
 public class CurrencyData implements Serializable {
 
     private final String code;
@@ -31,9 +34,7 @@ public class CurrencyData implements Serializable {
     private final int decimalPlaces;
     private final Integer inMultiplesOf;
     private final String displaySymbol;
-    @SuppressWarnings("unused")
     private final String nameCode;
-    @SuppressWarnings("unused")
     private final String displayLabel;
 
     public static CurrencyData blank() {
@@ -71,18 +72,6 @@ public class CurrencyData implements Serializable {
         this.displayLabel = null;
     }
 
-    public String code() {
-        return this.code;
-    }
-
-    public int decimalPlaces() {
-        return this.decimalPlaces;
-    }
-
-    public Integer currencyInMultiplesOf() {
-        return this.inMultiplesOf;
-    }
-
     private String generateDisplayLabel() {
 
         final StringBuilder builder = new StringBuilder(this.name).append(' ');
@@ -94,40 +83,5 @@ public class CurrencyData implements Serializable {
         }
 
         return builder.toString();
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof CurrencyData)) {
-            return false;
-        }
-        CurrencyData that = (CurrencyData) o;
-        return (decimalPlaces == that.decimalPlaces) && Objects.equals(code, that.code) && Objects.equals(name, that.name)
-                && Objects.equals(inMultiplesOf, that.inMultiplesOf) && Objects.equals(displaySymbol, that.displaySymbol)
-                && Objects.equals(nameCode, that.nameCode) && Objects.equals(displayLabel, that.displayLabel);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(code, name, decimalPlaces, inMultiplesOf, displaySymbol, nameCode, displayLabel);
-    }
-
-    public String getCode() {
-        return this.code;
-    }
-
-    public int getDecimalPlaces() {
-        return this.decimalPlaces;
-    }
-
-    public Integer getInMultiplesOf() {
-        return this.inMultiplesOf;
     }
 }

@@ -378,13 +378,13 @@ public class LoansApiResource {
                         : LoanAccountData.populateGroupDefaults(newLoanAccount, loanAccountGroupData);
                 if (productId != null) {
                     Map<Long, Integer> memberLoanCycle = new HashMap<>();
-                    Collection<ClientData> members = loanAccountGroupData.groupData().clientMembers();
+                    Collection<ClientData> members = loanAccountGroupData.getGroup().clientMembers();
                     accountLinkingOptions = new ArrayList<>();
                     if (members != null) {
                         for (ClientData clientData : members) {
-                            Integer loanCounter = this.loanReadPlatformService.retriveLoanCounter(clientData.id(), productId);
-                            memberLoanCycle.put(clientData.id(), loanCounter);
-                            accountLinkingOptions.addAll(getaccountLinkingOptions(newLoanAccount, clientData.id(), groupId));
+                            Integer loanCounter = this.loanReadPlatformService.retriveLoanCounter(clientData.getId(), productId);
+                            memberLoanCycle.put(clientData.getId(), loanCounter);
+                            accountLinkingOptions.addAll(getaccountLinkingOptions(newLoanAccount, clientData.getId(), groupId));
                         }
                     }
 
@@ -417,10 +417,10 @@ public class LoansApiResource {
 
     private Collection<PortfolioAccountData> getaccountLinkingOptions(final LoanAccountData newLoanAccount, final Long clientId,
             final Long groupId) {
-        final CurrencyData currencyData = newLoanAccount.currency();
+        final CurrencyData currencyData = newLoanAccount.getCurrency();
         String currencyCode = null;
         if (currencyData != null) {
-            currencyCode = currencyData.code();
+            currencyCode = currencyData.getCode();
         }
         final long[] accountStatus = { SavingsAccountStatusType.ACTIVE.getValue() };
         final PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(PortfolioAccountType.SAVINGS.getValue(), clientId,
@@ -630,7 +630,7 @@ public class LoansApiResource {
         final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
         if (template) {
             productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
-            product = this.loanProductReadPlatformService.retrieveLoanProduct(loanBasicDetails.loanProductId());
+            product = this.loanProductReadPlatformService.retrieveLoanProduct(loanBasicDetails.getLoanProductId());
             loanBasicDetails.setProduct(product);
             loanTermFrequencyTypeOptions = this.dropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
             repaymentFrequencyTypeOptions = this.dropdownReadPlatformService.retrieveRepaymentFrequencyTypeOptions();
@@ -662,14 +662,14 @@ public class LoansApiResource {
 
             loanPurposeOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("LoanPurpose");
             loanCollateralOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("LoanCollateral");
-            final CurrencyData currencyData = loanBasicDetails.currency();
+            final CurrencyData currencyData = loanBasicDetails.getCurrency();
             String currencyCode = null;
             if (currencyData != null) {
-                currencyCode = currencyData.code();
+                currencyCode = currencyData.getCode();
             }
             final long[] accountStatus = { SavingsAccountStatusType.ACTIVE.getValue() };
             PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(PortfolioAccountType.SAVINGS.getValue(),
-                    loanBasicDetails.clientId(), currencyCode, accountStatus, DepositAccountType.SAVINGS_DEPOSIT.getValue());
+                    loanBasicDetails.getClientId(), currencyCode, accountStatus, DepositAccountType.SAVINGS_DEPOSIT.getValue());
             accountLinkingOptions = this.portfolioAccountReadPlatformService.retrieveAllForLookup(portfolioAccountDTO);
 
             if (!associationParameters.contains(DataTableApiConstant.linkedAccountAssociateParamName)) {
@@ -680,15 +680,15 @@ public class LoansApiResource {
                 calendarOptions = this.loanReadPlatformService.retrieveCalendars(loanBasicDetails.groupId());
             }
 
-            if (loanBasicDetails.product().canUseForTopup() && loanBasicDetails.clientId() != null) {
+            if (loanBasicDetails.getProduct().isCanUseForTopup() && loanBasicDetails.getClientId() != null) {
                 clientActiveLoanOptions = this.accountDetailsReadPlatformService
-                        .retrieveClientActiveLoanAccountSummary(loanBasicDetails.clientId());
+                        .retrieveClientActiveLoanAccountSummary(loanBasicDetails.getClientId());
             }
 
         }
 
-        Collection<ChargeData> overdueCharges = this.chargeReadPlatformService.retrieveLoanProductCharges(loanBasicDetails.loanProductId(),
-                ChargeTimeType.OVERDUE_INSTALLMENT);
+        Collection<ChargeData> overdueCharges = this.chargeReadPlatformService
+                .retrieveLoanProductCharges(loanBasicDetails.getLoanProductId(), ChargeTimeType.OVERDUE_INSTALLMENT);
 
         paidInAdvanceTemplate = this.loanReadPlatformService.retrieveTotalPaidInAdvance(loanId);
 

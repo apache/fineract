@@ -21,7 +21,7 @@
         },
         {
             "default": null,
-            "name": "description",
+            "name": "value",
             "type": [
                 "null",
                 "string"

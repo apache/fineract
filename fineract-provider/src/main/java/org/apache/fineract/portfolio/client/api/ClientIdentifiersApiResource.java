@@ -159,8 +159,8 @@ public class ClientIdentifiersApiResource {
                 // need to fetch client info
                 final ClientData clientInfo = this.clientReadPlatformService.retrieveClientByIdentifier(e.getDocumentTypeId(),
                         e.getIdentifierKey());
-                rethrowas = new DuplicateClientIdentifierException(clientInfo.displayName(), clientInfo.officeName(), e.getIdentifierType(),
-                        e.getIdentifierKey());
+                rethrowas = new DuplicateClientIdentifierException(clientInfo.getDisplayName(), clientInfo.getOfficeName(),
+                        e.getIdentifierType(), e.getIdentifierKey());
             }
             throw rethrowas;
         }
@@ -216,8 +216,8 @@ public class ClientIdentifiersApiResource {
             if (e.getDocumentTypeId() != null) {
                 final ClientData clientInfo = this.clientReadPlatformService.retrieveClientByIdentifier(e.getDocumentTypeId(),
                         e.getIdentifierKey());
-                reThrowAs = new DuplicateClientIdentifierException(clientInfo.displayName(), clientInfo.officeName(), e.getIdentifierType(),
-                        e.getIdentifierKey());
+                reThrowAs = new DuplicateClientIdentifierException(clientInfo.getDisplayName(), clientInfo.getOfficeName(),
+                        e.getIdentifierType(), e.getIdentifierKey());
             }
             throw reThrowAs;
         }

@@ -273,7 +273,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                     .depositAccountOnClosureType(DepositAccountOnClosureType.values());
             final Collection<PaymentTypeData> paymentTypeOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
             final Collection<SavingsAccountData> savingsAccountDatas = this.savingsAccountReadPlatformService
-                    .retrieveActiveForLookup(account.clientId(), DepositAccountType.SAVINGS_DEPOSIT);
+                    .retrieveActiveForLookup(account.getClientId(), DepositAccountType.SAVINGS_DEPOSIT);
             if (depositAccountType.isFixedDeposit()) {
                 account = FixedDepositAccountData.withClosureTemplateDetails((FixedDepositAccountData) account, onAccountClosureOptions,
                         paymentTypeOptions, savingsAccountDatas);
@@ -299,8 +299,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         } else if (depositAccountType.isRecurringDeposit()) {
             CalendarData calendar = this.calendarReadPlatformService.retrieveCollctionCalendarByEntity(accountId,
                     CalendarEntityType.SAVINGS.getValue());
-            final Integer frequency = calendar.interval() == -1 ? 1 : calendar.interval();
-            final CalendarFrequencyType calendarFrequencyType = CalendarFrequencyType.fromInt(calendar.frequencyType().getId().intValue());
+            final Integer frequency = calendar.getInterval() == -1 ? 1 : calendar.getInterval();
+            final CalendarFrequencyType calendarFrequencyType = CalendarFrequencyType.fromInt(calendar.getFrequency().getId().intValue());
             final PeriodFrequencyType periodFrequencyType = CalendarFrequencyType.from(calendarFrequencyType);
             final EnumOptionData frequencyType = CommonEnumerations.termFrequencyType(periodFrequencyType, "recurring.deposit.frequency.");
             depositAccount = RecurringDepositAccountData.withInterestChartAndRecurringDetails((RecurringDepositAccountData) depositAccount,
@@ -331,7 +331,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         Collection<SavingsAccountData> savingsAccountDatas = null;
         if (clientId != null) {
             client = this.clientReadPlatformService.retrieveOne(clientId);
-            officeId = client.officeId();
+            officeId = client.getOfficeId();
             savingsAccountDatas = this.savingsAccountReadPlatformService.retrieveActiveForLookup(clientId,
                     DepositAccountType.SAVINGS_DEPOSIT);
         }
@@ -440,7 +440,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
             String clientName = null;
             if (client != null) {
-                clientName = client.displayName();
+                clientName = client.getDisplayName();
             }
 
             String groupName = null;
@@ -1181,8 +1181,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             Long clientId = null;
             String clientName = null;
             if (this.client != null) {
-                clientId = this.client.id();
-                clientName = this.client.displayName();
+                clientId = this.client.getId();
+                clientName = this.client.getDisplayName();
             }
 
             Long groupId = null;

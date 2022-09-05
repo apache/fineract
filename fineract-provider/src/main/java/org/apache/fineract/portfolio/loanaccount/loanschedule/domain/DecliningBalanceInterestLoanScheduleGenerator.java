@@ -74,7 +74,7 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
         for (LoanTermVariationsData loanTermVariation : termVariations) {
             if (loanTermVariation.getTermVariationType().isInterestRateVariation()
                     && loanTermVariation.isApplicable(periodStartDate, periodEndDate)) {
-                LocalDate fromDate = loanTermVariation.getTermApplicableFrom();
+                LocalDate fromDate = loanTermVariation.getTermVariationApplicableFrom();
                 if (fromDate == null) {
                     fromDate = periodStartDate;
                 }

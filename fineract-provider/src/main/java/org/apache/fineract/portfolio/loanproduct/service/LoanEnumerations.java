@@ -294,9 +294,9 @@ public final class LoanEnumerations {
 
     public static EnumOptionData status(final LoanStatusEnumData status) {
 
-        Long id = status.id();
-        String code = status.code();
-        String value = status.value();
+        Long id = status.getId();
+        String code = status.getCode();
+        String value = status.getValue();
 
         return new EnumOptionData(id, code, value);
     }

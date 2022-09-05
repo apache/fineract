@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import lombok.Getter;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 /**
@@ -31,7 +32,7 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
  * (both fees and penalties)</li>
  * </ul>
  */
-@SuppressWarnings("unused")
+@Getter
 public class LoanScheduleData {
 
     /**
@@ -104,10 +105,6 @@ public class LoanScheduleData {
         this.totalPaidInAdvance = null;
         this.totalPaidLate = null;
         this.totalOutstanding = null;
-    }
-
-    public Collection<LoanSchedulePeriodData> getPeriods() {
-        return this.periods;
     }
 
     public void updateFuturePeriods(Collection<LoanSchedulePeriodData> futurePeriods) {

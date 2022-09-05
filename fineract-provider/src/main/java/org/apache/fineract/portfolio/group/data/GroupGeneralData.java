@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import lombok.Getter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -35,18 +36,16 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 /**
  * Immutable data object representing a general group (so may or may not have a parent).
  */
+@Getter
 public class GroupGeneralData implements Serializable {
 
     private final Long id;
     private final String accountNo;
     private final String name;
     private final String externalId;
-
     private final EnumOptionData status;
-    @SuppressWarnings("unused")
     private final Boolean active;
     private final LocalDate activationDate;
-
     private final Long officeId;
     private final String officeName;
     private final Long centerId;

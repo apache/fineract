@@ -62,7 +62,7 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
     private void setClientNameToClientIdMap() {
         clientNameToClientId = new HashMap<>();
         for (ClientData clientData : allClients) {
-            clientNameToClientId.put(clientData.displayName().trim() + "(" + clientData.id() + ")", clientData.id());
+            clientNameToClientId.put(clientData.getDisplayName().trim() + "(" + clientData.getId() + ")", clientData.getId());
         }
     }
 
@@ -82,14 +82,14 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
         officeToClients = new HashMap<>();
         for (ClientData person : allClients) {
             addToOfficeClientMap(person.getOfficeName().trim().replaceAll("[ )(]", "_"),
-                    person.displayName().trim() + "(" + person.id() + ")");
+                    person.getDisplayName().trim() + "(" + person.getId() + ")");
         }
     }
 
     private void setClientNameToSavingsAccountsIdsMap() {
         clientNameToSavingsAccountIds = new HashMap<>();
         for (ClientData client : allClients) {
-            clientNameToSavingsAccountIds.put(client.displayName().trim() + "(" + client.id() + ")", client.getSavingsAccountId());
+            clientNameToSavingsAccountIds.put(client.getDisplayName().trim() + "(" + client.getId() + ")", client.getSavingsAccountId());
         }
 
     }
@@ -112,10 +112,10 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
         Row row = clientSheet.createRow(rowIndex);
         for (OfficeData office : officesDataList) {
             startIndex = rowIndex + 1;
-            writeString(OFFICE_NAME_COL, row, office.name());
+            writeString(OFFICE_NAME_COL, row, office.getName());
             ArrayList<String> clientList = new ArrayList<String>();
-            if (officeToClients.containsKey(office.name().trim().replaceAll("[ )(]", "_"))) {
-                clientList = officeToClients.get(office.name().trim().replaceAll("[ )(]", "_"));
+            if (officeToClients.containsKey(office.getName().trim().replaceAll("[ )(]", "_"))) {
+                clientList = officeToClients.get(office.getName().trim().replaceAll("[ )(]", "_"));
             }
             if (!clientList.isEmpty()) {
                 for (String clientName : clientList) {

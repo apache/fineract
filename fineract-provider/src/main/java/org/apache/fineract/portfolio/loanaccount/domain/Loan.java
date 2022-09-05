@@ -6772,7 +6772,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         if (this.isMultiDisburmentLoan()) {
             List<DisbursementData> disbursementData = getDisbursmentData();
             Collections.sort(disbursementData);
-            firstDisbursalAmount = disbursementData.get(disbursementData.size() - 1).amount();
+            firstDisbursalAmount = disbursementData.get(disbursementData.size() - 1).getPrincipal();
         } else {
             firstDisbursalAmount = this.getLoanRepaymentScheduleDetail().getPrincipal().getAmount();
         }

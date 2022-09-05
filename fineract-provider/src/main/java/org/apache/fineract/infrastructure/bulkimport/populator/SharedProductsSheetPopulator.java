@@ -76,9 +76,9 @@ public class SharedProductsSheetPopulator extends AbstractWorkbookPopulator {
             writeLong(PRODUCT_ID, row, productData.getId());
             writeString(PRODUCT_NAME_COL, row, productData.getName().replaceAll("[ ]", "_"));
             writeString(CURRENCY_COL, row, productData.getCurrency().getName().replaceAll("[ ]", "_"));
-            writeInt(DECIMAL_PLACES_COL, row, productData.getCurrency().decimalPlaces());
+            writeInt(DECIMAL_PLACES_COL, row, productData.getCurrency().getDecimalPlaces());
             writeBigDecimal(TODAYS_PRICE_COL, row, deriveMarketPrice(productData));
-            writeInt(CURRENCY_IN_MULTIPLES_COL, row, productData.getCurrency().currencyInMultiplesOf());
+            writeInt(CURRENCY_IN_MULTIPLES_COL, row, productData.getCurrency().getInMultiplesOf());
             if (chargesForSharedProducts != null) {
                 int chargeRowIndex = 0;
                 for (ChargeData chargeData : chargesForSharedProducts) {
@@ -101,7 +101,7 @@ public class SharedProductsSheetPopulator extends AbstractWorkbookPopulator {
         if (marketDataSet != null && !marketDataSet.isEmpty()) {
             LocalDate currentDate = DateUtils.getBusinessLocalDate();
             for (ShareProductMarketPriceData data : marketDataSet) {
-                LocalDate futureDate = data.getStartDate();
+                LocalDate futureDate = data.getFromDate();
                 if (currentDate.isAfter(futureDate)) {
                     marketValue = data.getShareValue();
                 }

@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.savings.data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
+import lombok.Getter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -36,6 +37,7 @@ import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 /**
  * Immutable data object representing a Fixed Deposit account.
  */
+@Getter
 public final class FixedDepositAccountData extends DepositAccountData {
 
     private boolean preClosurePenalApplicable;
@@ -127,10 +129,6 @@ public final class FixedDepositAccountData extends DepositAccountData {
         this.submittedOnDate = submittedOnDate;
         this.depositPeriodFrequencyId = depositPeriodFrequencyId;
         this.maturityInstructionOptions = null;
-    }
-
-    public Integer getRowIndex() {
-        return rowIndex;
     }
 
     public static FixedDepositAccountData instance(final DepositAccountData depositAccountData, final boolean preClosurePenalApplicable,
@@ -540,15 +538,7 @@ public final class FixedDepositAccountData extends DepositAccountData {
         return new HashCodeBuilder(17, 37).append(this.id).append(this.accountNo).toHashCode();
     }
 
-    public BigDecimal getActivationCharge() {
-        return this.activationCharge;
-    }
-
     public void setActivationCharge(BigDecimal activationCharge) {
         this.activationCharge = activationCharge;
-    }
-
-    public Long getTransferToSavingsId() {
-        return transferToSavingsId;
     }
 }

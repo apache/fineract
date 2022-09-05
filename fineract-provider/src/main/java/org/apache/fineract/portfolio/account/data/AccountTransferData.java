@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.office.data.OfficeData;
@@ -30,7 +31,7 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 /**
  * Immutable data object representing a savings account.
  */
-@SuppressWarnings("unused")
+@Getter
 public final class AccountTransferData implements Serializable {
 
     private final Long id;
@@ -69,7 +70,7 @@ public final class AccountTransferData implements Serializable {
         CurrencyData currency = null;
         BigDecimal transferAmount = BigDecimal.ZERO;
         if (fromAccount != null) {
-            currency = fromAccount.currency();
+            currency = fromAccount.getCurrency();
             if (fromAccount.getAmtForTransfer() != null) {
                 transferAmount = fromAccount.getAmtForTransfer();
             }

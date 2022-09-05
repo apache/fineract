@@ -277,7 +277,7 @@ public class LoanProductsApiResource {
         Collection<ChargeToGLAccountMapper> penaltyToGLAccountMappings = null;
         if (loanProduct.hasAccountingEnabled()) {
             accountingMappings = this.accountMappingReadPlatformService.fetchAccountMappingDetailsForLoanProduct(productId,
-                    loanProduct.accountingRuleType().getId().intValue());
+                    loanProduct.getAccountingRule().getId().intValue());
             paymentChannelToFundSourceMappings = this.accountMappingReadPlatformService
                     .fetchPaymentTypeToFundSourceMappingsForLoanProduct(productId);
             feeToGLAccountMappings = this.accountMappingReadPlatformService.fetchFeeToGLAccountMappingsForLoanProduct(productId);

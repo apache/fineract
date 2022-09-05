@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.savings.data;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashSet;
+import lombok.Getter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -32,6 +33,7 @@ import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 /**
  * Immutable data object representing abstract for Fixed and Recurring Deposit Accounts Accounts.
  */
+@Getter
 public class DepositAccountData {
 
     protected final Long id;
@@ -309,26 +311,6 @@ public class DepositAccountData {
         return null;
     }
 
-    public Long id() {
-        return this.id;
-    }
-
-    public Long clientId() {
-        return this.clientId;
-    }
-
-    public Long groupId() {
-        return this.groupId;
-    }
-
-    public Long productId() {
-        return this.depositProductId;
-    }
-
-    public CurrencyData currency() {
-        return this.currency;
-    }
-
     @Override
     public boolean equals(final Object obj) {
 
@@ -352,13 +334,5 @@ public class DepositAccountData {
 
     public Collection<SavingsAccountChargeData> charges() {
         return (this.charges == null) ? new HashSet<SavingsAccountChargeData>() : this.charges;
-    }
-
-    public EnumOptionData depositType() {
-        return depositType;
-    }
-
-    public String accountNo() {
-        return accountNo;
     }
 }

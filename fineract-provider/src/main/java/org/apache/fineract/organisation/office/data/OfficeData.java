@@ -22,10 +22,12 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import lombok.Getter;
 
 /**
  * Immutable data object for office data.
  */
+@Getter
 public class OfficeData implements Serializable {
 
     private final Long id;
@@ -36,7 +38,6 @@ public class OfficeData implements Serializable {
     private final String hierarchy;
     private final Long parentId;
     private final String parentName;
-    @SuppressWarnings("unused")
     private final Collection<OfficeData> allowedParents;
 
     // import fields
@@ -56,18 +57,6 @@ public class OfficeData implements Serializable {
 
     public static OfficeData testInstance(final Long id, final String name) {
         return new OfficeData(id, name, null, null, null, null, null, null, null);
-    }
-
-    public LocalDate getOpeningDate() {
-        return openingDate;
-    }
-
-    public Integer getRowIndex() {
-        return rowIndex;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public static OfficeData dropdown(final Long id, final String name, final String nameDecorated) {
@@ -98,13 +87,5 @@ public class OfficeData implements Serializable {
 
     public boolean hasIdentifyOf(final Long officeId) {
         return this.id.equals(officeId);
-    }
-
-    public String name() {
-        return this.name;
-    }
-
-    public String getHierarchy() {
-        return this.hierarchy;
     }
 }

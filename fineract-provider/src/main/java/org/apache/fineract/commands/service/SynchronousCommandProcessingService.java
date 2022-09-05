@@ -91,7 +91,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         } else {
             commandSourceResult = CommandSource.fullEntryFrom(wrapper, command, maker);
         }
-        commandSourceResult.updateResourceId(result.resourceId());
+        commandSourceResult.updateResourceId(result.getResourceId());
         commandSourceResult.updateForAudit(result.getOfficeId(), result.getGroupId(), result.getClientId(), result.getLoanId(),
                 result.getSavingsId(), result.getProductId(), result.getTransactionId());
 

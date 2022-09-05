@@ -21,11 +21,12 @@ package org.apache.fineract.portfolio.shareaccounts.data;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 
-@SuppressWarnings("unused")
+@Getter
 public class ShareAccountChargeData implements Serializable {
 
     private final Long id;
@@ -104,9 +105,5 @@ public class ShareAccountChargeData implements Serializable {
         this.amountOrPercentage = chargeamountorpercentage;
         this.chargeOptions = chargeOptions;
         this.isActive = isActive;
-    }
-
-    private BigDecimal getAmountOrPercentage() {
-        return this.chargeCalculationType != null && this.chargeCalculationType.getId().intValue() > 1 ? this.percentage : this.amount;
     }
 }

@@ -416,7 +416,7 @@
             "name": "timeline",
             "type": [
                 "null",
-                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+                "org.apache.fineract.avro.loan.v1.LoanApplicationTimelineDataV1"
             ]
         },
         {

@@ -105,7 +105,7 @@ public class UserWorkbookPopulator extends AbstractWorkbookPopulator {
             Name userOfficeName = userWorkbook.createName();
 
             if (officeNameToBeginEndIndexesOfStaff != null) {
-                setSanitized(userOfficeName, "Staff_" + offices.get(i).name());
+                setSanitized(userOfficeName, "Staff_" + offices.get(i).getName());
                 userOfficeName.setRefersToFormula(TemplatePopulateImportConstants.STAFF_SHEET_NAME + "!$B$"
                         + officeNameToBeginEndIndexesOfStaff[0] + ":$B$" + officeNameToBeginEndIndexesOfStaff[1]);
             }
