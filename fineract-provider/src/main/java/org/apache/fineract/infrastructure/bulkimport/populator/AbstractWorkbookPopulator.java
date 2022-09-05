@@ -100,7 +100,7 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
             int rowIndex = 0;
             for (OfficeData office : offices) {
                 Row row = sheet.createRow(++rowIndex);
-                writeString(officeNameCol, row, office.name().trim().replaceAll("[ )(]", "_"));
+                writeString(officeNameCol, row, office.getName().trim().replaceAll("[ )(]", "_"));
                 writeDate(activationDateCol, row, "" + office.getOpeningDate().getDayOfMonth() + "/"
                         + office.getOpeningDate().getMonthValue() + "/" + office.getOpeningDate().getYear(), dateCellStyle, dateFormat);
 
@@ -123,7 +123,7 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
                     if (row == null) {
                         row = sheet.createRow(rowIndex);
                     }
-                    writeString(nameCol, row, client.displayName().replaceAll("[ )(] ", "_") + "(" + client.id() + ")");
+                    writeString(nameCol, row, client.getDisplayName().replaceAll("[ )(] ", "_") + "(" + client.getId() + ")");
 
                     if (client.getActivationDate() != null) {
                         writeDate(activationDateCol, row, outputFormat.format(client.getActivationDate()), dateCellStyle, dateFormat);

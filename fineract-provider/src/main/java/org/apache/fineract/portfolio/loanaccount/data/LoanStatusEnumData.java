@@ -18,10 +18,12 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
+import lombok.Getter;
+
 /**
  * Immutable data object represent loan status enumerations.
  */
-@SuppressWarnings("unused")
+@Getter
 public class LoanStatusEnumData {
 
     private final Long id;
@@ -48,17 +50,5 @@ public class LoanStatusEnumData {
         this.closedRescheduled = Long.valueOf(602).equals(this.id);
         this.closed = this.closedObligationsMet || this.closedWrittenOff || this.closedRescheduled;
         this.overpaid = Long.valueOf(700).equals(this.id);
-    }
-
-    public Long id() {
-        return this.id;
-    }
-
-    public String code() {
-        return this.code;
-    }
-
-    public String value() {
-        return this.value;
     }
 }

@@ -23,16 +23,16 @@ import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.rescheduleStrategyType;
 
 import java.io.Serializable;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanPreClosureInterestCalculationStrategy;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
 
+@Getter
 public class LoanProductInterestRecalculationData implements Serializable {
 
-    @SuppressWarnings("unused")
     private final Long id;
-    @SuppressWarnings("unused")
     private final Long productId;
     private final EnumOptionData interestRecalculationCompoundingType;
     private final EnumOptionData rescheduleStrategyType;
@@ -46,10 +46,8 @@ public class LoanProductInterestRecalculationData implements Serializable {
     private final EnumOptionData recalculationCompoundingFrequencyNthDay;
     private final EnumOptionData recalculationCompoundingFrequencyWeekday;
     private final Integer recalculationCompoundingFrequencyOnDay;
-    @SuppressWarnings("unused")
     private final boolean isArrearsBasedOnOriginalSchedule;
     private final boolean isCompoundingToBePostedAsTransaction;
-    @SuppressWarnings("unused")
     private final EnumOptionData preClosureInterestCalculationStrategy;
     private final boolean allowCompoundingOnEod;
 
@@ -111,60 +109,19 @@ public class LoanProductInterestRecalculationData implements Serializable {
                 isCompoundingToBePostedAsTransaction, preCloseInterestCalculationStrategy, allowCompoundingOnEod);
     }
 
-    public EnumOptionData getInterestRecalculationCompoundingType() {
-        return this.interestRecalculationCompoundingType;
-    }
-
-    public EnumOptionData getRescheduleStrategyType() {
-        return this.rescheduleStrategyType;
-
-    }
-
-    public EnumOptionData getRecalculationRestFrequencyType() {
-        return this.recalculationRestFrequencyType;
-    }
-
-    public Integer getRecalculationRestFrequencyInterval() {
-        return this.recalculationRestFrequencyInterval;
-    }
-
-    public EnumOptionData getRecalculationCompoundingFrequencyType() {
-        return this.recalculationCompoundingFrequencyType;
-    }
-
-    public Integer getRecalculationCompoundingFrequencyInterval() {
-        return this.recalculationCompoundingFrequencyInterval;
-    }
-
-    public EnumOptionData getRecalculationRestFrequencyNthDay() {
-        return this.recalculationRestFrequencyNthDay;
-    }
-
-    public EnumOptionData getRecalculationRestFrequencyWeekday() {
-        return this.recalculationRestFrequencyWeekday;
-    }
-
-    public Integer getRecalculationRestFrequencyOnDay() {
-        return this.recalculationRestFrequencyOnDay;
-    }
-
-    public EnumOptionData getRecalculationCompoundingFrequencyNthDay() {
-        return this.recalculationCompoundingFrequencyNthDay;
-    }
-
-    public EnumOptionData getRecalculationCompoundingFrequencyWeekday() {
-        return this.recalculationCompoundingFrequencyWeekday;
-    }
-
-    public Integer getRecalculationCompoundingFrequencyOnDay() {
-        return this.recalculationCompoundingFrequencyOnDay;
+    public boolean isArrearsBasedOnOriginalSchedule() {
+        return isArrearsBasedOnOriginalSchedule;
     }
 
     public boolean isCompoundingToBePostedAsTransaction() {
-        return this.isCompoundingToBePostedAsTransaction;
+        return isCompoundingToBePostedAsTransaction;
     }
 
-    public boolean allowCompoundingOnEod() {
-        return this.allowCompoundingOnEod;
+    public boolean isIsArrearsBasedOnOriginalSchedule() {
+        return isArrearsBasedOnOriginalSchedule;
+    }
+
+    public boolean isIsCompoundingToBePostedAsTransaction() {
+        return isCompoundingToBePostedAsTransaction;
     }
 }

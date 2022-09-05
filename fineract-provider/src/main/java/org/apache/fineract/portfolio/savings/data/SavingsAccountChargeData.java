@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.MonthDay;
 import java.util.Collection;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
@@ -31,61 +32,35 @@ import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 /**
  * Immutable data object for Savings Account charge data.
  */
-@SuppressWarnings("unused")
+@Getter
 public class SavingsAccountChargeData implements Serializable {
 
     private final Long id;
-
     private final Long chargeId;
-
     private final Long accountId;
-
     private final String name;
-
     private final EnumOptionData chargeTimeType;
-
     private final LocalDate dueDate;
-
     private final MonthDay feeOnMonthDay;
-
     private final Integer feeInterval;
-
     private final EnumOptionData chargeCalculationType;
-
     private final BigDecimal percentage;
-
     private final BigDecimal amountPercentageAppliedTo;
-
     private final CurrencyData currency;
-
     private final BigDecimal amount;
-
     private final BigDecimal amountPaid;
-
     private final BigDecimal amountWaived;
-
     private final BigDecimal amountWrittenOff;
-
     private final BigDecimal amountOutstanding;
-
     private final BigDecimal amountOrPercentage;
-
     private final boolean penalty;
-
     private final Boolean isActive;
-
     private final Boolean isFreeWithdrawal;
-
     private final Integer freeWithdrawalChargeFrequency;
-
     private final Integer restartFrequency;
-
     private final Integer restartFrequencyEnum;
-
     private final LocalDate inactivationDate;
-
     private final Collection<ChargeData> chargeOptions;
-
     private ChargeData chargeData;
 
     public SavingsAccountChargeData(Long chargeId, BigDecimal amount, LocalDate dueDate) {
@@ -221,7 +196,7 @@ public class SavingsAccountChargeData implements Serializable {
         this.amountWaived = amountWaived;
         this.amountWrittenOff = amountWrittenOff;
         this.amountOutstanding = amountOutstanding;
-        this.amountOrPercentage = getAmountOrPercentage();
+        this.amountOrPercentage = calculateAmountOrPercentage();
         this.chargeOptions = chargeOptions;
         this.penalty = penalty;
         this.feeOnMonthDay = feeOnMonthDay;
@@ -234,7 +209,7 @@ public class SavingsAccountChargeData implements Serializable {
         this.restartFrequencyEnum = restartFrequencyEnum;
     }
 
-    private BigDecimal getAmountOrPercentage() {
+    private BigDecimal calculateAmountOrPercentage() {
         return (this.chargeCalculationType != null) && (this.chargeCalculationType.getId().intValue() > 1) ? this.percentage : this.amount;
     }
 
@@ -248,30 +223,6 @@ public class SavingsAccountChargeData implements Serializable {
 
     public boolean isSavingsActivation() {
         return ChargeTimeType.fromInt(this.chargeTimeType.getId().intValue()).isSavingsActivation();
-    }
-
-    public BigDecimal getAmountOutstanding() {
-        return this.amountOutstanding;
-    }
-
-    public long getAccountId() {
-        return this.accountId;
-    }
-
-    public boolean isPenaltyCharge() {
-        return this.penalty;
-    }
-
-    public ChargeData getCharge() {
-        return this.chargeData;
-    }
-
-    public Long getId() {
-        return this.id;
-    }
-
-    public boolean isPenalty() {
-        return this.penalty;
     }
 
 }

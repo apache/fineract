@@ -19,6 +19,8 @@
 package org.apache.fineract.portfolio.accountdetails.data;
 
 import java.math.BigDecimal;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApplicationTimelineData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanStatusEnumData;
@@ -26,7 +28,8 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanStatusEnumData;
 /**
  * Immutable data object for loan accounts.
  */
-@SuppressWarnings("unused")
+@Getter
+@RequiredArgsConstructor
 public class LoanAccountSummaryData {
 
     private final Long id;
@@ -66,24 +69,4 @@ public class LoanAccountSummaryData {
         this.amountPaid = amountPaid;
     }
 
-    public LoanAccountSummaryData(final Long id, final String accountNo, final String parentAccountNumber, final String externalId,
-            final Long productId, final String loanProductName, final String shortLoanProductName, final LoanStatusEnumData loanStatus,
-            final EnumOptionData loanType, final Integer loanCycle, final LoanApplicationTimelineData timeline, final Boolean inArrears,
-            final BigDecimal originalLoan, final BigDecimal loanBalance, final BigDecimal amountPaid) {
-        this.id = id;
-        this.accountNo = accountNo;
-        this.parentAccountNumber = parentAccountNumber;
-        this.externalId = externalId;
-        this.productId = productId;
-        this.productName = loanProductName;
-        this.shortProductName = shortLoanProductName;
-        this.status = loanStatus;
-        this.loanType = loanType;
-        this.loanCycle = loanCycle;
-        this.timeline = timeline;
-        this.inArrears = inArrears;
-        this.loanBalance = loanBalance;
-        this.originalLoan = originalLoan;
-        this.amountPaid = amountPaid;
-    }
 }

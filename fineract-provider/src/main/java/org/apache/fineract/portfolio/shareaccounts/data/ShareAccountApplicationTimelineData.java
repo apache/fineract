@@ -20,8 +20,11 @@ package org.apache.fineract.portfolio.shareaccounts.data;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-@SuppressWarnings("unused")
+@RequiredArgsConstructor
+@Getter
 public class ShareAccountApplicationTimelineData implements Serializable {
 
     private final LocalDate submittedOnDate;
@@ -76,34 +79,5 @@ public class ShareAccountApplicationTimelineData implements Serializable {
                 rejectedOnDate, rejectedByUsername, rejectedByFirstname, rejectedByLastname, approvedOnDate, approvedByUsername,
                 approvedByFirstname, approvedByLastname, activatedOnDate, activatedByUsername, activatedByFirstname, activatedByLastname,
                 closedOnDate, closedByUsername, closedByFirstname, closedByLastname);
-    }
-
-    public ShareAccountApplicationTimelineData(final LocalDate submittedOnDate, final String submittedByUsername,
-            final String submittedByFirstname, final String submittedByLastname, final LocalDate rejectedOnDate,
-            final String rejectedByUsername, final String rejectedByFirstname, final String rejectedByLastname,
-            final LocalDate approvedOnDate, final String approvedByUsername, final String approvedByFirstname,
-            final String approvedByLastname, final LocalDate activatedOnDate, final String activatedByUsername,
-            final String activatedByFirstname, final String activatedByLastname, final LocalDate closedOnDate,
-            final String closedByUsername, final String closedByFirstname, final String closedByLastname) {
-        this.submittedOnDate = submittedOnDate;
-        this.submittedByUsername = submittedByUsername;
-        this.submittedByFirstname = submittedByFirstname;
-        this.submittedByLastname = submittedByLastname;
-        this.rejectedDate = rejectedOnDate;
-        this.rejectedByUsername = rejectedByUsername;
-        this.rejectedByFirstname = rejectedByFirstname;
-        this.rejectedByLastname = rejectedByLastname;
-        this.approvedDate = approvedOnDate;
-        this.approvedByUsername = approvedByUsername;
-        this.approvedByFirstname = approvedByFirstname;
-        this.approvedByLastname = approvedByLastname;
-        this.activatedDate = activatedOnDate;
-        this.activatedByUsername = activatedByUsername;
-        this.activatedByFirstname = activatedByFirstname;
-        this.activatedByLastname = activatedByLastname;
-        this.closedDate = closedOnDate;
-        this.closedByUsername = closedByUsername;
-        this.closedByFirstname = closedByFirstname;
-        this.closedByLastname = closedByLastname;
     }
 }

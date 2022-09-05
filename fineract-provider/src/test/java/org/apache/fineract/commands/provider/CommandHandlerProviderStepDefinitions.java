@@ -46,7 +46,7 @@ public class CommandHandlerProviderStepDefinitions implements En {
         });
 
         Then("The command ID matches {long}", (Long id) -> {
-            assertEquals(id, result.commandId());
+            assertEquals(id, result.getCommandId());
         });
     }
 }

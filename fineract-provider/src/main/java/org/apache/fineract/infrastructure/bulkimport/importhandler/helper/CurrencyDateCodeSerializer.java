@@ -29,6 +29,6 @@ public class CurrencyDateCodeSerializer implements JsonSerializer<CurrencyData> 
 
     @Override
     public JsonElement serialize(CurrencyData src, Type typeOfSrc, JsonSerializationContext context) {
-        return new JsonPrimitive(src.code());
+        return new JsonPrimitive(src.getCode());
     }
 }

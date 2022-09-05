@@ -37,7 +37,7 @@
         },
         {
             "default": null,
-            "name": "rejectedOnDate",
+            "name": "rejectedDate",
             "type": [
                 "null",
                 "string"
@@ -69,7 +69,7 @@
         },
         {
             "default": null,
-            "name": "approvedOnDate",
+            "name": "approvedDate",
             "type": [
                 "null",
                 "string"
@@ -101,7 +101,7 @@
         },
         {
             "default": null,
-            "name": "activatedOnDate",
+            "name": "activatedDate",
             "type": [
                 "null",
                 "string"
@@ -133,7 +133,7 @@
         },
         {
             "default": null,
-            "name": "closedOnDate",
+            "name": "closedDate",
             "type": [
                 "null",
                 "string"

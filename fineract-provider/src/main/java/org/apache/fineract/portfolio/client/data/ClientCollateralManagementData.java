@@ -20,22 +20,18 @@ package org.apache.fineract.portfolio.client.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import lombok.Getter;
 import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement;
 
+@Getter
 public final class ClientCollateralManagementData implements Serializable {
 
     private final BigDecimal quantity;
-
     private final Long id;
-
     private final BigDecimal pctToBase;
-
     private final BigDecimal unitPrice;
-
     private final BigDecimal total;
-
     private final BigDecimal totalCollateral;
-
     private final String name;
 
     private ClientCollateralManagementData(final BigDecimal quantity, final Long id, final BigDecimal pctToBase, final BigDecimal unitPrice,
@@ -54,29 +50,5 @@ public final class ClientCollateralManagementData implements Serializable {
         return new ClientCollateralManagementData(clientCollateralManagements.getQuantity(), clientCollateralManagements.getId(),
                 clientCollateralManagements.getCollaterals().getPctToBase(), clientCollateralManagements.getCollaterals().getBasePrice(),
                 total, totalCollateral, clientCollateralManagements.getCollaterals().getName());
-    }
-
-    public BigDecimal getQuantity() {
-        return this.quantity;
-    }
-
-    public BigDecimal getTotal() {
-        return this.total;
-    }
-
-    public BigDecimal getPctToBase() {
-        return this.pctToBase;
-    }
-
-    public BigDecimal getTotalCollateral() {
-        return this.totalCollateral;
-    }
-
-    public BigDecimal getUnitPrice() {
-        return this.unitPrice;
-    }
-
-    public Long getId() {
-        return this.id;
     }
 }

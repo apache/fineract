@@ -19,10 +19,11 @@
 package org.apache.fineract.infrastructure.event.external.service.serialization.mapper.fixeddeposit;
 
 import org.apache.fineract.avro.fixeddeposit.v1.FixedDepositAccountDataV1;
+import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroMapperConfig;
 import org.apache.fineract.portfolio.savings.data.FixedDepositAccountData;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring")
+@Mapper(config = AvroMapperConfig.class)
 public interface FixedDepositAccountDataMapper {
 
     FixedDepositAccountDataV1 map(FixedDepositAccountData source);

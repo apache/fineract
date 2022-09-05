@@ -1,5 +1,5 @@
 {
-    "name": "LoanApplicationTimelineV1",
+    "name": "LoanApplicationTimelineDataV1",
     "namespace": "org.apache.fineract.avro.loan.v1",
     "type": "record",
     "fields": [

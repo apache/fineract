@@ -276,7 +276,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             if (StringUtils.isNotBlank(officeIdStr)) {
                 officeId = Long.valueOf(officeIdStr);
                 final OfficeData office = this.officeReadPlatformService.retrieveOffice(officeId);
-                commandAsJsonMap.put("officeName", office.name());
+                commandAsJsonMap.put("officeName", office.getName());
             } else {
                 commandAsJsonMap.put("officeName", "");
             }
@@ -290,7 +290,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             if (StringUtils.isNotBlank(clientIdStr)) {
                 clientId = Long.valueOf(clientIdStr);
                 final ClientData client = this.clientReadPlatformService.retrieveOne(clientId);
-                commandAsJsonMap.put("clientName", client.displayName());
+                commandAsJsonMap.put("clientName", client.getDisplayName());
             } else {
                 commandAsJsonMap.put("clientName", "");
             }

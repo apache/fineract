@@ -20,9 +20,10 @@ package org.apache.fineract.infrastructure.event.external.service.serialization.
 
 import org.apache.fineract.avro.generic.v1.CommandProcessingResultV1;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroMapperConfig;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring")
+@Mapper(config = AvroMapperConfig.class)
 public interface CommandProcessingResultMapper {
 
     CommandProcessingResultV1 map(CommandProcessingResult source);

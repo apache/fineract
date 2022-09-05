@@ -358,7 +358,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final Collection<LoanProductBorrowerCycleVariationData> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
             if (this.borrowerCycleVariationDatas != null) {
                 for (final LoanProductBorrowerCycleVariationData borrowerCycleVariationData : this.borrowerCycleVariationDatas) {
-                    final LoanProductParamType loanProductParamType = borrowerCycleVariationData.getParamType();
+                    final LoanProductParamType loanProductParamType = borrowerCycleVariationData.getLoanProductParamType();
                     if (loanProductParamType.isParamTypePrincipal()) {
                         principalVariationsForBorrowerCycle.add(borrowerCycleVariationData);
                     } else if (loanProductParamType.isParamTypeInterestTate()) {

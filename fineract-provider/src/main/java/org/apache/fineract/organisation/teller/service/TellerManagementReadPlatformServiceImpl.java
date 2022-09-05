@@ -369,7 +369,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         final OfficeData officeData = this.officeReadPlatformService.retrieveOffice(defaultOfficeId);
         String officeName = "";
         if (officeData != null) {
-            officeName = officeData.name();
+            officeName = officeData.getName();
         }
 
         TellerData tellerData = findTeller(tellerId);

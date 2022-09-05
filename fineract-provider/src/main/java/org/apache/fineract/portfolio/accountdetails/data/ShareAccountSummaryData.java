@@ -19,11 +19,12 @@
 package org.apache.fineract.portfolio.accountdetails.data;
 
 import java.io.Serializable;
+import lombok.Getter;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountApplicationTimelineData;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountStatusEnumData;
 
-@SuppressWarnings("unused")
+@Getter
 public class ShareAccountSummaryData implements Serializable {
 
     private final Long id;
@@ -60,10 +61,6 @@ public class ShareAccountSummaryData implements Serializable {
         this.status = status;
         this.currency = currency;
         this.timeline = timeline;
-    }
-
-    public String getAccountNo() {
-        return this.accountNo;
     }
 
 }

@@ -20,12 +20,13 @@ package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.Getter;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 /**
  * Immutable data object representing loan summary information.
  */
-@SuppressWarnings("unused")
+@Getter
 public class LoanSummaryData {
 
     private final CurrencyData currency;
@@ -115,13 +116,5 @@ public class LoanSummaryData {
         this.writeoffReasonId = writeoffReasonId;
         this.writeoffReason = writeoffReason;
         this.totalRecovered = totalRecovered;
-    }
-
-    public BigDecimal getTotalOutstanding() {
-        return this.totalOutstanding;
-    }
-
-    public BigDecimal getTotalPaidFeeCharges() {
-        return feeChargesPaid;
     }
 }

@@ -212,7 +212,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                 if (PortfolioAccountType.fromInt(entityTypeId).isLoanAccount()) {
                     final LoanTransactionEnumData loanTransactionType = LoanEnumerations
                             .transactionType(JdbcSupport.getInteger(rs, "loanTransactionType"));
-                    transactionTypeEnumData = new TransactionTypeEnumData(loanTransactionType.id(), loanTransactionType.getCode(),
+                    transactionTypeEnumData = new TransactionTypeEnumData(loanTransactionType.getId(), loanTransactionType.getCode(),
                             loanTransactionType.getValue());
                 } else if (PortfolioAccountType.fromInt(entityTypeId).isSavingsAccount()) {
                     final SavingsAccountTransactionEnumData savingsTransactionType = SavingsEnumerations
@@ -444,8 +444,9 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
         final LocalDate transactionDate = DateUtils.getBusinessLocalDate();
 
-        return OfficeOpeningBalancesData.createNew(officeId, officeData.name(), transactionDate, contraAccount, assetAccountOpeningBalances,
-                liabilityAccountOpeningBalances, incomeAccountOpeningBalances, equityAccountOpeningBalances, expenseAccountOpeningBalances);
+        return OfficeOpeningBalancesData.createNew(officeId, officeData.getName(), transactionDate, contraAccount,
+                assetAccountOpeningBalances, liabilityAccountOpeningBalances, incomeAccountOpeningBalances, equityAccountOpeningBalances,
+                expenseAccountOpeningBalances);
     }
 
     private List<JournalEntryData> populateOpeningBalances(final List<JournalEntryData> existingOpeningBalanceTransactions,

@@ -128,7 +128,10 @@
             "name": "periods",
             "type": [
                 "null",
-                "org.apache.fineract.avro.loan.v1.LoanSchedulePeriodDataV1"
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.loan.v1.LoanSchedulePeriodDataV1"
+                }
             ]
         },
         {
@@ -136,7 +139,10 @@
             "name": "futurePeriods",
             "type": [
                 "null",
-                "org.apache.fineract.avro.loan.v1.LoanSchedulePeriodDataV1"
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.loan.v1.LoanSchedulePeriodDataV1"
+                }
             ]
         }
     ]

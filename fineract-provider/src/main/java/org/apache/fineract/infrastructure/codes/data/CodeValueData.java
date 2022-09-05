@@ -19,20 +19,17 @@
 package org.apache.fineract.infrastructure.codes.data;
 
 import java.io.Serializable;
+import lombok.Getter;
 
 /**
  * Immutable data object represent code-value data in system.
  */
+@Getter
 public class CodeValueData implements Serializable {
 
     private final Long id;
-
     private final String name;
-
-    @SuppressWarnings("unused")
     private final Integer position;
-
-    @SuppressWarnings("unused")
     private final String description;
     private final boolean active;
     private final boolean mandatory;
@@ -87,27 +84,5 @@ public class CodeValueData implements Serializable {
         this.description = description;
         this.active = active;
         this.mandatory = mandatory;
-    }
-
-    public Long getId() {
-        return this.id;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    /**
-     * @return the mandatory
-     */
-    public boolean isMandatory() {
-        return mandatory;
-    }
-
-    /**
-     * @return the active
-     */
-    public boolean isActive() {
-        return active;
     }
 }

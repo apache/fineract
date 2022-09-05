@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import lombok.Getter;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
@@ -52,10 +53,10 @@ import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.rate.data.RateData;
 import org.springframework.util.CollectionUtils;
 
-@SuppressWarnings("unused")
 /**
  * Immutable data object to represent loan products.
  */
+@Getter
 public class LoanProductData implements Serializable {
 
     private final Long id;
@@ -104,7 +105,7 @@ public class LoanProductData implements Serializable {
     private final EnumOptionData amortizationType;
     private final EnumOptionData interestType;
     private final EnumOptionData interestCalculationPeriodType;
-    private final Boolean allowPartialPeriodInterestCalcualtion;
+    private final Boolean allowPartialPeriodInterestCalculation;
     private final BigDecimal inArrearsTolerance;
     private final Long transactionProcessingStrategyId;
     private final String transactionProcessingStrategyName;
@@ -636,7 +637,7 @@ public class LoanProductData implements Serializable {
             final Integer repaymentEvery, final BigDecimal interestRatePerPeriod, final BigDecimal minInterestRatePerPeriod,
             final BigDecimal maxInterestRatePerPeriod, final BigDecimal annualInterestRate, final EnumOptionData repaymentFrequencyType,
             final EnumOptionData interestRateFrequencyType, final EnumOptionData amortizationType, final EnumOptionData interestType,
-            final EnumOptionData interestCalculationPeriodType, final Boolean allowPartialPeriodInterestCalcualtion, final Long fundId,
+            final EnumOptionData interestCalculationPeriodType, final Boolean allowPartialPeriodInterestCalculation, final Long fundId,
             final String fundName, final Long transactionProcessingStrategyId, final String transactionProcessingStrategyName,
             final Integer graceOnPrincipalPayment, final Integer recurringMoratoriumOnPrincipalPeriods,
             final Integer graceOnInterestPayment, final Integer graceOnInterestCharged, final Collection<ChargeData> charges,
@@ -699,7 +700,7 @@ public class LoanProductData implements Serializable {
         this.amortizationType = amortizationType;
         this.interestType = interestType;
         this.interestCalculationPeriodType = interestCalculationPeriodType;
-        this.allowPartialPeriodInterestCalcualtion = allowPartialPeriodInterestCalcualtion;
+        this.allowPartialPeriodInterestCalculation = allowPartialPeriodInterestCalculation;
         this.fundId = fundId;
         this.fundName = fundName;
         this.transactionProcessingStrategyId = transactionProcessingStrategyId;
@@ -829,7 +830,7 @@ public class LoanProductData implements Serializable {
         this.amortizationType = productData.amortizationType;
         this.interestType = productData.interestType;
         this.interestCalculationPeriodType = productData.interestCalculationPeriodType;
-        this.allowPartialPeriodInterestCalcualtion = productData.allowPartialPeriodInterestCalcualtion;
+        this.allowPartialPeriodInterestCalculation = productData.allowPartialPeriodInterestCalculation;
         this.startDate = productData.startDate;
         this.closeDate = productData.closeDate;
         this.status = productData.status;
@@ -944,144 +945,8 @@ public class LoanProductData implements Serializable {
         return chargesLocal;
     }
 
-    public EnumOptionData accountingRuleType() {
-        return this.accountingRule;
-    }
-
     public boolean hasAccountingEnabled() {
         return this.accountingRule.getId() > AccountingRuleType.NONE.getValue();
-    }
-
-    public Long getId() {
-        return this.id;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public String getDescription() {
-        return this.description;
-    }
-
-    public Long getFundId() {
-        return this.fundId;
-    }
-
-    public String getFundName() {
-        return this.fundName;
-    }
-
-    public Long getTransactionProcessingStrategyId() {
-        return this.transactionProcessingStrategyId;
-    }
-
-    public String getTransactionProcessingStrategyName() {
-        return this.transactionProcessingStrategyName;
-    }
-
-    public CurrencyData getCurrency() {
-        return this.currency;
-    }
-
-    public BigDecimal getPrincipal() {
-        return this.principal;
-    }
-
-    public BigDecimal getMinPrincipal() {
-        return this.minPrincipal;
-    }
-
-    public BigDecimal getMaxPrincipal() {
-        return this.maxPrincipal;
-    }
-
-    public BigDecimal getInArrearsTolerance() {
-        return this.inArrearsTolerance;
-    }
-
-    public Integer getNumberOfRepayments() {
-        return this.numberOfRepayments;
-    }
-
-    public Integer getRepaymentEvery() {
-        return this.repaymentEvery;
-    }
-
-    public BigDecimal getInterestRatePerPeriod() {
-        return this.interestRatePerPeriod;
-    }
-
-    public BigDecimal getAnnualInterestRate() {
-        return this.annualInterestRate;
-    }
-
-    public EnumOptionData getRepaymentFrequencyType() {
-        return this.repaymentFrequencyType;
-    }
-
-    public Integer getGraceOnPrincipalPayment() {
-        return this.graceOnPrincipalPayment;
-    }
-
-    public Integer getRecurringMoratoriumOnPrincipalPeriods() {
-        return this.recurringMoratoriumOnPrincipalPeriods;
-    }
-
-    public Integer getGraceOnInterestPayment() {
-        return this.graceOnInterestPayment;
-    }
-
-    public Integer getGraceOnInterestCharged() {
-        return this.graceOnInterestCharged;
-    }
-
-    public EnumOptionData getInterestRateFrequencyType() {
-        return this.interestRateFrequencyType;
-    }
-
-    public EnumOptionData getAmortizationType() {
-        return this.amortizationType;
-    }
-
-    public EnumOptionData getInterestType() {
-        return this.interestType;
-    }
-
-    public EnumOptionData getInterestCalculationPeriodType() {
-        return this.interestCalculationPeriodType;
-    }
-
-    public Collection<FundData> getFundOptions() {
-        return this.fundOptions;
-    }
-
-    public Collection<DelinquencyBucketData> getDelinquencyBucketOptions() {
-        return delinquencyBucketOptions;
-    }
-
-    public List<EnumOptionData> getAmortizationTypeOptions() {
-        return this.amortizationTypeOptions;
-    }
-
-    public List<EnumOptionData> getInterestTypeOptions() {
-        return this.interestTypeOptions;
-    }
-
-    public List<EnumOptionData> getInterestCalculationPeriodTypeOptions() {
-        return this.interestCalculationPeriodTypeOptions;
-    }
-
-    public List<EnumOptionData> getRepaymentFrequencyTypeOptions() {
-        return this.repaymentFrequencyTypeOptions;
-    }
-
-    public List<EnumOptionData> getInterestRateFrequencyTypeOptions() {
-        return this.interestRateFrequencyTypeOptions;
-    }
-
-    public Collection<ChargeData> getChargeOptions() {
-        return this.chargeOptions;
     }
 
     @Override
@@ -1098,48 +963,12 @@ public class LoanProductData implements Serializable {
         return this.id.hashCode();
     }
 
-    public boolean useBorrowerCycle() {
-        return this.useBorrowerCycle;
-    }
-
-    public Collection<LoanProductBorrowerCycleVariationData> getPrincipalVariationsForBorrowerCycle() {
-        return this.principalVariationsForBorrowerCycle;
-    }
-
-    public Collection<LoanProductBorrowerCycleVariationData> getInterestRateVariationsForBorrowerCycle() {
-        return this.interestRateVariationsForBorrowerCycle;
-    }
-
-    public Collection<LoanProductBorrowerCycleVariationData> getNumberOfRepaymentVariationsForBorrowerCycle() {
-        return this.numberOfRepaymentVariationsForBorrowerCycle;
-    }
-
-    public Boolean getMultiDisburseLoan() {
-        return this.multiDisburseLoan;
-    }
-
-    public BigDecimal getOutstandingLoanBalance() {
-        return this.outstandingLoanBalance;
-    }
-
-    public Integer getGraceOnArrearsAgeing() {
-        return this.graceOnArrearsAgeing;
-    }
-
-    public EnumOptionData getDaysInMonthType() {
-        return this.daysInMonthType;
-    }
-
-    public EnumOptionData getDaysInYearType() {
-        return this.daysInYearType;
-    }
-
     public boolean isInterestRecalculationEnabled() {
         return this.isInterestRecalculationEnabled;
     }
 
-    public LoanProductInterestRecalculationData getInterestRecalculationData() {
-        return this.interestRecalculationData;
+    public boolean isIsInterestRecalculationEnabled() {
+        return this.isInterestRecalculationEnabled;
     }
 
     public Collection<ChargeData> overdueFeeCharges() {
@@ -1258,98 +1087,50 @@ public class LoanProductData implements Serializable {
 
     @SuppressFBWarnings("NP_BOOLEAN_RETURN_NULL")
     public Boolean allowCompoundingOnEod() {
-        return isInterestRecalculationEnabled() ? this.interestRecalculationData.allowCompoundingOnEod() : null;
-    }
-
-    public boolean canDefineInstallmentAmount() {
-        return this.canDefineInstallmentAmount;
-    }
-
-    public LoanProductConfigurableAttributes getLoanProductConfigurableAttributes() {
-        return this.allowAttributeOverrides;
+        return isInterestRecalculationEnabled() ? this.interestRecalculationData.isAllowCompoundingOnEod() : null;
     }
 
     public void setLoanProductConfigurableAttributes(LoanProductConfigurableAttributes loanProductConfigurableAttributes) {
         this.allowAttributeOverrides = loanProductConfigurableAttributes;
     }
 
-    public boolean isLinkedToFloatingInterestRates() {
+    public boolean isIsLinkedToFloatingInterestRates() {
         return this.isLinkedToFloatingInterestRates;
     }
 
-    public BigDecimal getMinDifferentialLendingRate() {
-        return this.minDifferentialLendingRate;
-    }
-
-    public BigDecimal getDefaultDifferentialLendingRate() {
-        return this.defaultDifferentialLendingRate;
-    }
-
-    public BigDecimal getMaxDifferentialLendingRate() {
-        return this.maxDifferentialLendingRate;
+    public boolean isLinkedToFloatingInterestRates() {
+        return this.isLinkedToFloatingInterestRates;
     }
 
     public boolean isFloatingInterestRateCalculationAllowed() {
         return this.isFloatingInterestRateCalculationAllowed;
     }
 
-    public boolean isVariableInstallmentsAllowed() {
-        return this.allowVariableInstallments;
+    public boolean isIsFloatingInterestRateCalculationAllowed() {
+        return this.isFloatingInterestRateCalculationAllowed;
     }
 
-    public Integer getMinimumGapBetweenInstallments() {
-        return this.minimumGap;
-    }
-
-    public Integer getMaximumGapBetweenInstallments() {
-        return this.maximumGap;
-    }
-
-    public Boolean getAllowPartialPeriodInterestCalcualtion() {
-        return this.allowPartialPeriodInterestCalcualtion;
-    }
-
-    public boolean syncExpectedWithDisbursementDate() {
-        return syncExpectedWithDisbursementDate;
-    }
-
-    public boolean canUseForTopup() {
-        return this.canUseForTopup;
-    }
-
-    public BigDecimal getInterestRateDifferential() {
-        return this.interestRateDifferential;
+    public boolean isIsEqualAmortization() {
+        return isEqualAmortization;
     }
 
     public boolean isEqualAmortization() {
         return isEqualAmortization;
     }
 
-    public LocalDate getStartDate() {
-        return startDate;
+    public Boolean isAllowPartialPeriodInterestCalculation() {
+        return allowPartialPeriodInterestCalculation;
     }
 
-    public LocalDate getCloseDate() {
-        return closeDate;
+    public Boolean isIsAllowPartialPeriodInterestCalculation() {
+        return allowPartialPeriodInterestCalculation;
     }
 
-    public Integer getMinNumberOfRepayments() {
-        return minNumberOfRepayments;
+    public boolean isRatesEnabled() {
+        return isRatesEnabled;
     }
 
-    public Integer getMaxNumberOfRepayments() {
-        return maxNumberOfRepayments;
-    }
-
-    public BigDecimal getMinInterestRatePerPeriod() {
-        return minInterestRatePerPeriod;
-    }
-
-    public BigDecimal getMaxInterestRatePerPeriod() {
-        return maxInterestRatePerPeriod;
-    }
-
-    public BigDecimal getFixedPrincipalPercentagePerInstallment() {
-        return fixedPrincipalPercentagePerInstallment;
+    public boolean isIsRatesEnabled() {
+        return isRatesEnabled;
     }
 }
