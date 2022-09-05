@@ -25,10 +25,13 @@ import org.apache.fineract.cob.COBPropertyService;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.job.builder.FlowBuilder;
+import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.integration.partition.RemotePartitioningWorkerStepBuilderFactory;
 import org.springframework.batch.item.ItemProcessor;
@@ -57,17 +60,40 @@ public class LoanCOBWorkerConfiguration {
     private QueueChannel inboundRequests;
     @Autowired
     private COBBusinessStepService cobBusinessStepService;
+    @Autowired
+    private AppUserRepositoryWrapper userRepository;
 
-    @Bean(name = "Loan COB worker")
-    public Step loanCOBWorkerStep() {
+    @Bean
+    public Step loanBusinessStep() {
         return stepBuilderFactory.get("Loan COB worker").inputChannel(inboundRequests)
                 .<Loan, Loan>chunk(cobPropertyService.getChunkSize(JobName.LOAN_COB.name())).reader(itemReader(null))
                 .processor(itemProcessor()).writer(itemWriter()).build();
     }
 
+    @Bean(name = "Loan COB worker")
+    public Step loanCOBWorkerStep() {
+        return stepBuilderFactory.get("Loan COB worker - Step").inputChannel(inboundRequests).flow(flow()).build();
+    }
+
     @Bean
     public Job loanCOBWorkerJob() {
         return jobBuilderFactory.get("Loan COB worker").start(loanCOBWorkerStep()).incrementer(new RunIdIncrementer()).build();
+    }
+
+    @Bean
+    public Flow flow() {
+        return new FlowBuilder<Flow>("cobFlow").start(initialisationStep()).next(loanBusinessStep()).next(loanBusinessStep()).build();
+    }
+
+    @Bean
+    public Step initialisationStep() {
+        return stepBuilderFactory.get("Initalisation - Step").inputChannel(inboundRequests).tasklet(initialiseContext()).build();
+    }
+
+    @Bean
+    @StepScope
+    public InitialisationTasklet initialiseContext() {
+        return new InitialisationTasklet(userRepository);
     }
 
     @Bean

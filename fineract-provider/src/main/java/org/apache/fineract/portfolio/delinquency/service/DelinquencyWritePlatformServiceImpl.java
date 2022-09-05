@@ -105,12 +105,6 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
     }
 
     @Override
-    public CommandProcessingResult setLoanDelinquencyTag(Long loanId, Long delinquencyRangeId, JsonCommand command) {
-        setLoanDelinquencyTag(loanId, delinquencyRangeId);
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(loanId).build();
-    }
-
-    @Override
     public CommandProcessingResult createDelinquencyBucket(JsonCommand command) {
         DelinquencyBucketData data = dataValidatorBucket.validateAndParseUpdate(command);
         Map<String, Object> changes = new HashMap<>();
@@ -326,11 +320,6 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
         }
         changes.put("ageDays", ageDays);
         return changes;
-    }
-
-    public Map<String, Object> setLoanDelinquencyTag(Long loanId, Long delinquencyRangeId) {
-        final Loan loan = this.loanRepository.findOneWithNotFoundDetection(loanId);
-        return setLoanDelinquencyTag(loan, delinquencyRangeId);
     }
 
     public Map<String, Object> setLoanDelinquencyTag(Loan loan, Long delinquencyRangeId) {

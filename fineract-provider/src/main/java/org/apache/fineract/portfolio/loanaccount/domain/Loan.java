@@ -27,7 +27,6 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -3770,7 +3769,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 throw new InvalidLoanStateTransitionException("writeoff", "cannot.be.a.future.date", errorMessage, writtenOffOnLocalDate);
             }
 
-            LocalDateTime createdDate = DateUtils.getLocalDateTimeOfTenant();
             loanTransaction = LoanTransaction.writeoff(this, getOffice(), writtenOffOnLocalDate, txnExternalId);
             LocalDate lastTransactionDate = getLastUserTransactionDate();
             if (lastTransactionDate.isAfter(writtenOffOnLocalDate)) {
@@ -6877,4 +6875,5 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         }
         return ageOfOverdueDays;
     }
+
 }

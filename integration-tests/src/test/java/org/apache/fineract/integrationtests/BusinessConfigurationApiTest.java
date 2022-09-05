@@ -41,9 +41,10 @@ public class BusinessConfigurationApiTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
-    private static final String LOAN_JOB_NAME = "LOAN_CLOSE_OF_BUSINESS";
-    private static final String LOAN_CATEGORY_NAME = "loan";
-    private static final String APPLY_CHARGE_TO_OVERDUE_LOANS = "APPLY_CHARGE_TO_OVERDUE_LOANS";
+    public static final String LOAN_JOB_NAME = "LOAN_CLOSE_OF_BUSINESS";
+    public static final String LOAN_CATEGORY_NAME = "loan";
+    public static final String APPLY_CHARGE_TO_OVERDUE_LOANS = "APPLY_CHARGE_TO_OVERDUE_LOANS";
+    public static final String LOAN_DELINQUENCY_CLASSIFICATION = "LOAN_DELINQUENCY_CLASSIFICATION";
 
     @BeforeEach
     public void setup() {
