@@ -46,9 +46,10 @@ public class CommandWrapperBuilder {
     private Long organisationCreditBureauId;
 
     public CommandWrapper build() {
-        return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName, this.entityName,
-                this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId,
-                this.creditBureauId, this.organisationCreditBureauId);
+        return new CommandWrapper().setOfficeId(officeId).setGroupId(groupId).setClientId(clientId).setLoanId(loanId)
+                .setSavingsId(savingsId).setActionName(actionName).setEntityName(entityName).setEntityId(entityId)
+                .setSubentityId(subentityId).setHref(href).setJson(json).setTransactionId(transactionId).setProductId(productId)
+                .setTemplateId(templateId).setCreditBureauId(creditBureauId).setOrganisationCreditBureauId(organisationCreditBureauId);
     }
 
     public CommandWrapperBuilder updateCreditBureau() {
@@ -1754,15 +1755,15 @@ public class CommandWrapperBuilder {
 
     public CommandWrapperBuilder createNote(final CommandWrapper resourceDetails, final String resourceType, final Long resourceId) {
         this.actionName = "CREATE";
-        this.entityName = resourceDetails.entityName();// Note supports multiple
-                                                       // resources. Note
-                                                       // Permissions are set
-                                                       // for each resource.
+        this.entityName = resourceDetails.getEntityName();// Note supports multiple
+                                                          // resources. Note
+                                                          // Permissions are set
+                                                          // for each resource.
         this.clientId = resourceDetails.getClientId();
         this.loanId = resourceDetails.getLoanId();
         this.savingsId = resourceDetails.getSavingsId();
         this.groupId = resourceDetails.getGroupId();
-        this.subentityId = resourceDetails.subresourceId();
+        this.subentityId = resourceDetails.getSubentityId();
         this.href = "/" + resourceType + "/" + resourceId + "/notes/template";
         return this;
     }
@@ -1770,16 +1771,16 @@ public class CommandWrapperBuilder {
     public CommandWrapperBuilder updateNote(final CommandWrapper resourceDetails, final String resourceType, final Long resourceId,
             final Long noteId) {
         this.actionName = "UPDATE";
-        this.entityName = resourceDetails.entityName();// Note supports multiple
-                                                       // resources. Note
-                                                       // Permissions are set
-                                                       // for each resource.
+        this.entityName = resourceDetails.getEntityName();// Note supports multiple
+                                                          // resources. Note
+                                                          // Permissions are set
+                                                          // for each resource.
         this.entityId = noteId;
         this.clientId = resourceDetails.getClientId();
         this.loanId = resourceDetails.getLoanId();
         this.savingsId = resourceDetails.getSavingsId();
         this.groupId = resourceDetails.getGroupId();
-        this.subentityId = resourceDetails.subresourceId();
+        this.subentityId = resourceDetails.getSubentityId();
         this.href = "/" + resourceType + "/" + resourceId + "/notes";
         return this;
     }
@@ -1787,16 +1788,16 @@ public class CommandWrapperBuilder {
     public CommandWrapperBuilder deleteNote(final CommandWrapper resourceDetails, final String resourceType, final Long resourceId,
             final Long noteId) {
         this.actionName = "DELETE";
-        this.entityName = resourceDetails.entityName();// Note supports multiple
-                                                       // resources. Note
-                                                       // Permissions are set
-                                                       // for each resource.
+        this.entityName = resourceDetails.getEntityName();// Note supports multiple
+                                                          // resources. Note
+                                                          // Permissions are set
+                                                          // for each resource.
         this.entityId = noteId;
         this.clientId = resourceDetails.getClientId();
         this.loanId = resourceDetails.getLoanId();
         this.savingsId = resourceDetails.getSavingsId();
         this.groupId = resourceDetails.getGroupId();
-        this.subentityId = resourceDetails.subresourceId();
+        this.subentityId = resourceDetails.getSubentityId();
         this.href = "/" + resourceType + "/" + resourceId + "/calendars/" + noteId;
         return this;
     }

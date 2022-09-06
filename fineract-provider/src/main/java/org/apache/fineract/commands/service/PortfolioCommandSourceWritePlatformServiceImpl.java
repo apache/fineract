@@ -126,15 +126,15 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         validateIsUpdateAllowed();
 
         final CommandWrapper wrapper = CommandWrapper.fromExistingCommand(makerCheckerId, commandSourceInput.getActionName(),
-                commandSourceInput.getEntityName(), commandSourceInput.resourceId(), commandSourceInput.subresourceId(),
+                commandSourceInput.getEntityName(), commandSourceInput.getResourceId(), commandSourceInput.getSubresourceId(),
                 commandSourceInput.getResourceGetUrl(), commandSourceInput.getProductId(), commandSourceInput.getOfficeId(),
                 commandSourceInput.getGroupId(), commandSourceInput.getClientId(), commandSourceInput.getLoanId(),
                 commandSourceInput.getSavingsId(), commandSourceInput.getTransactionId(), commandSourceInput.getCreditBureauId(),
                 commandSourceInput.getOrganisationCreditBureauId());
-        final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSourceInput.json());
-        final JsonCommand command = JsonCommand.fromExistingCommand(makerCheckerId, commandSourceInput.json(), parsedCommand,
-                this.fromApiJsonHelper, commandSourceInput.getEntityName(), commandSourceInput.resourceId(),
-                commandSourceInput.subresourceId(), commandSourceInput.getGroupId(), commandSourceInput.getClientId(),
+        final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSourceInput.getCommandAsJson());
+        final JsonCommand command = JsonCommand.fromExistingCommand(makerCheckerId, commandSourceInput.getCommandAsJson(), parsedCommand,
+                this.fromApiJsonHelper, commandSourceInput.getEntityName(), commandSourceInput.getResourceId(),
+                commandSourceInput.getSubresourceId(), commandSourceInput.getGroupId(), commandSourceInput.getClientId(),
                 commandSourceInput.getLoanId(), commandSourceInput.getSavingsId(), commandSourceInput.getTransactionId(),
                 commandSourceInput.getResourceGetUrl(), commandSourceInput.getProductId(), commandSourceInput.getCreditBureauId(),
                 commandSourceInput.getOrganisationCreditBureauId());
@@ -163,7 +163,8 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
             throw new CommandNotAwaitingApprovalException(makerCheckerId);
         }
 
-        this.context.authenticatedUser().validateHasCheckerPermissionTo(commandSourceInput.getPermissionCode());
+        String permissionCode = commandSourceInput.getActionName() + "_" + commandSourceInput.getEntityName();
+        this.context.authenticatedUser().validateHasCheckerPermissionTo(permissionCode);
 
         return commandSourceInput;
     }

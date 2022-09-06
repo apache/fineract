@@ -106,7 +106,7 @@ public class NotesApiResource {
             throw new NoteResourceNotSupportedException(resourceType);
         }
 
-        this.context.authenticatedUser().validateHasReadPermission(getResourceDetails(noteType, resourceId).entityName());
+        this.context.authenticatedUser().validateHasReadPermission(getResourceDetails(noteType, resourceId).getEntityName());
 
         final Integer noteTypeId = noteType.getValue();
 
@@ -136,7 +136,7 @@ public class NotesApiResource {
             throw new NoteResourceNotSupportedException(resourceType);
         }
 
-        this.context.authenticatedUser().validateHasReadPermission(getResourceDetails(noteType, resourceId).entityName());
+        this.context.authenticatedUser().validateHasReadPermission(getResourceDetails(noteType, resourceId).getEntityName());
 
         final Integer noteTypeId = noteType.getValue();
 

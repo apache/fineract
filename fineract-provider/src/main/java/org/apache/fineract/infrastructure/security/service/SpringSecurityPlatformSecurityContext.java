@@ -162,7 +162,7 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
 
     private boolean shouldCheckForPasswordForceReset(CommandWrapper commandWrapper) {
         for (CommandWrapper commandItem : EXEMPT_FROM_PASSWORD_RESET_CHECK) {
-            if (commandItem.actionName().equals(commandWrapper.actionName())
+            if (commandItem.getActionName().equals(commandWrapper.getActionName())
                     && commandItem.getEntityName().equals(commandWrapper.getEntityName())) {
                 return false;
             }

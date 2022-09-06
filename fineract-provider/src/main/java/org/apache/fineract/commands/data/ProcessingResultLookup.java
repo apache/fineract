@@ -18,17 +18,19 @@
  */
 package org.apache.fineract.commands.data;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * Immutable data object for application user data.
  */
-@RequiredArgsConstructor
-@Getter
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class ProcessingResultLookup {
 
-    private final Long id;
-    private final String processingResult;
+    private Long id;
+    private String processingResult;
 
 }

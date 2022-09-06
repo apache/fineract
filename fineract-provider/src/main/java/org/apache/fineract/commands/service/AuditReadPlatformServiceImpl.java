@@ -162,9 +162,12 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             ZonedDateTime madeOnDate = madeOnDateUTC != null ? madeOnDateUTC.toZonedDateTime() : madeOnDateTenant;
             ZonedDateTime checkedOnDate = checkedOnDateUTC != null ? checkedOnDateUTC.toZonedDateTime() : checkedOnDateTenant;
 
-            return new AuditData(id, actionName, entityName, resourceId, subresourceId, maker, madeOnDate, checker, checkedOnDate,
-                    processingResult, commandAsJson, officeName, groupLevelName, groupName, clientName, loanAccountNo, savingsAccountNo,
-                    clientId, loanId, resourceGetUrl);
+            return new AuditData().setId(id).setActionName(actionName).setEntityName(entityName).setResourceId(resourceId)
+                    .setSubresourceId(subresourceId).setMaker(maker).setMadeOnDate(madeOnDate).setChecker(checker)
+                    .setCheckedOnDate(checkedOnDate).setProcessingResult(processingResult).setCommandAsJson(commandAsJson)
+                    .setOfficeName(officeName).setGroupLevelName(groupLevelName).setGroupName(groupName).setClientName(clientName)
+                    .setLoanAccountNo(loanAccountNo).setSavingsAccountNo(savingsAccountNo).setClientId(clientId).setLoanId(loanId)
+                    .setUrl(resourceGetUrl);
         }
     }
 
@@ -443,7 +446,8 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             processingResults = this.jdbcTemplate.query(mapper3.schema(), mapper3);
         }
 
-        return new AuditSearchData(appUsers, actionNames, entityNames, processingResults);
+        return new AuditSearchData().setAppUsers(appUsers).setActionNames(actionNames).setEntityNames(entityNames)
+                .setProcessingResults(processingResults);
     }
 
     private String makercheckerCapabilityOnly(final String useType, final AppUser currentUser) {
@@ -493,7 +497,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             final Long id = JdbcSupport.getLong(rs, "id");
             final String processingResult = rs.getString("processingResult");
 
-            return new ProcessingResultLookup(id, processingResult);
+            return new ProcessingResultLookup().setId(id).setProcessingResult(processingResult);
         }
 
         public String schema() {
