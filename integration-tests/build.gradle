@@ -51,11 +51,11 @@ cargo {
 
     local {
         logLevel = 'low'
-        outputFile = file("$buildDir/cargo/output.log")
+        outputFile = file("$buildDir/cargo/integration-tests-output.log")
         installer {
             installConfiguration = configurations.tomcat
             downloadDir = file("$buildDir/download")
-            extractDir = file("$buildDir/tomcat")
+            extractDir = file("$buildDir/tomcat-integration-tests")
         }
         startStopTimeout = 240000
         sharedClasspath = configurations.driver

@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.event.external.service.serialization.
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import lombok.RequiredArgsConstructor;
+import org.apache.avro.generic.GenericContainer;
 import org.apache.fineract.avro.loan.v1.LoanAccountDataV1;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBusinessEvent;
@@ -51,5 +52,10 @@ public class LoanBusinessEventSerializer implements BusinessEventSerializer {
         LoanAccountDataV1 avroDto = mapper.map(data);
         ByteBuffer buffer = avroDto.toByteBuffer();
         return byteBufferConverter.convert(buffer);
+    }
+
+    @Override
+    public Class<? extends GenericContainer> getSupportedSchema() {
+        return LoanAccountDataV1.class;
     }
 }

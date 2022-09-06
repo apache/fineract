@@ -42,6 +42,9 @@ public class ExternalEvent extends AbstractPersistableCustom {
     @Column(name = "type", nullable = false)
     private String type;
 
+    @Column(name = "schema", nullable = false)
+    private String schema;
+
     @Basic(fetch = FetchType.LAZY)
     @Column(name = "data", nullable = false)
     private byte[] data;
@@ -64,8 +67,9 @@ public class ExternalEvent extends AbstractPersistableCustom {
     @Column(name = "business_date", nullable = false)
     private LocalDate businessDate;
 
-    public ExternalEvent(String type, byte[] data, String idempotencyKey) {
+    public ExternalEvent(String type, String schema, byte[] data, String idempotencyKey) {
         this.type = type;
+        this.schema = schema;
         this.data = data;
         this.idempotencyKey = idempotencyKey;
         this.createdAt = DateUtils.getOffsetDateTimeOfTenant();
