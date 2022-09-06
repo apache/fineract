@@ -25,6 +25,7 @@ import org.apache.fineract.infrastructure.event.external.repository.ExternalEven
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEvent;
 import org.apache.fineract.infrastructure.event.external.service.idempotency.ExternalEventIdempotencyKeyGenerator;
 import org.apache.fineract.infrastructure.event.external.service.serialization.BusinessEventSerializerFactory;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,8 +46,10 @@ public class ExternalEventService {
         String eventType = event.getType();
         String idempotencyKey = idempotencyKeyGenerator.generate(event);
         try {
-            byte[] data = serializerFactory.create(event).serialize(event);
-            ExternalEvent externalEvent = new ExternalEvent(eventType, data, idempotencyKey);
+            BusinessEventSerializer serializer = serializerFactory.create(event);
+            String schema = serializer.getSupportedSchema().getName();
+            byte[] data = serializer.serialize(event);
+            ExternalEvent externalEvent = new ExternalEvent(eventType, schema, data, idempotencyKey);
 
             repository.save(externalEvent);
         } catch (IOException e) {

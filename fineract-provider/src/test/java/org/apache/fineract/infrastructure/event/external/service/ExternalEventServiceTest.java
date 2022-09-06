@@ -29,6 +29,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.fineract.avro.loan.v1.LoanAccountDataV1;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -83,6 +84,7 @@ class ExternalEventServiceTest {
 
         given(idempotencyKeyGenerator.generate(event)).willReturn("");
         given(serializerFactory.create(event)).willReturn(eventSerializer);
+        given(eventSerializer.getSupportedSchema()).will(invocation -> LoanAccountDataV1.class);
         given(eventSerializer.serialize(event)).willThrow(IOException.class);
         // when & then
         assertThatThrownBy(() -> underTest.postEvent(event)).isExactlyInstanceOf(RuntimeException.class);
@@ -93,6 +95,7 @@ class ExternalEventServiceTest {
         // given
         ArgumentCaptor<ExternalEvent> externalEventArgumentCaptor = ArgumentCaptor.forClass(ExternalEvent.class);
 
+        String eventSchema = "org.apache.fineract.avro.loan.v1.LoanAccountDataV1";
         String eventType = "TestType";
         String idempotencyKey = "key";
         BusinessEvent event = mock(BusinessEvent.class);
@@ -102,6 +105,7 @@ class ExternalEventServiceTest {
         given(event.getType()).willReturn(eventType);
         given(idempotencyKeyGenerator.generate(event)).willReturn(idempotencyKey);
         given(serializerFactory.create(event)).willReturn(eventSerializer);
+        given(eventSerializer.getSupportedSchema()).will(invocation -> LoanAccountDataV1.class);
         given(eventSerializer.serialize(event)).willReturn(data);
         // when
         underTest.postEvent(event);
@@ -111,5 +115,6 @@ class ExternalEventServiceTest {
         assertThat(externalEvent.getIdempotencyKey()).isEqualTo(idempotencyKey);
         assertThat(externalEvent.getData()).isEqualTo(data);
         assertThat(externalEvent.getType()).isEqualTo(eventType);
+        assertThat(externalEvent.getSchema()).isEqualTo(eventSchema);
     }
 }
