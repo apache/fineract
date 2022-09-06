@@ -93,7 +93,7 @@ class AvroDateTimeMapperTest {
         String result = underTest.mapLocalDate(source);
         // then
         assertThat(result).isEqualTo(expected);
-        LocalDate parsedDateTime = LocalDate.parse(result, DateTimeFormatter.ISO_LOCAL_DATE);
-        assertThat(parsedDateTime).isEqualTo(source);
+        LocalDate parsedDate = LocalDate.parse(result, DateTimeFormatter.ISO_LOCAL_DATE);
+        assertThat(parsedDate).isEqualTo(source);
     }
 }
