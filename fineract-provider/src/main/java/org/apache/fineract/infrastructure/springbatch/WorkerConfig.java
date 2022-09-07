@@ -16,11 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.infrastructure.springbatch;
 
-import java.util.List;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.integration.channel.QueueChannel;
 
-public interface RetrieveLoanIdService {
+@Configuration
+@ConditionalOnProperty(value = "fineract.mode.batch-worker-enabled", havingValue = "true")
+public class WorkerConfig {
 
-    List<Long> retrieveLoanIds();
+    @Bean
+    public QueueChannel inboundRequests() {
+        return new QueueChannel();
+    }
+
+    @Bean
+    public InputChannelInterceptor inputInterceptor() {
+        return new InputChannelInterceptor();
+    }
 }

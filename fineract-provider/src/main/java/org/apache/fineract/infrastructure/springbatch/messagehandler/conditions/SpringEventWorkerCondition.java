@@ -16,11 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.infrastructure.springbatch.messagehandler.conditions;
 
-import java.util.List;
+import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
-public interface RetrieveLoanIdService {
+public class SpringEventWorkerCondition extends AllNestedConditions {
 
-    List<Long> retrieveLoanIds();
+    public SpringEventWorkerCondition() {
+        super(ConfigurationPhase.PARSE_CONFIGURATION);
+    }
+
+    @ConditionalOnProperty(value = "fineract.mode.batch-worker-enabled", havingValue = "true")
+    static class WorkerCondition {}
+
+    @ConditionalOnProperty(value = "fineract.remote-job-message-handler.spring-events.enabled", havingValue = "true")
+    static class SpringEventCondition {}
 }

@@ -18,9 +18,15 @@
  */
 package org.apache.fineract.cob.loan;
 
-import java.util.List;
+public final class LoanCOBConstant {
 
-public interface RetrieveLoanIdService {
+    public static final String JOB_NAME = "LOAN_COB";
+    public static final String LOAN_COB_JOB_NAME = "LOAN_CLOSE_OF_BUSINESS";
+    public static final String LOAN_IDS = "loanIds";
+    public static final String BUSINESS_STEP_MAP = "businessStepMap";
+    public static final String LOAN_COB_WORKER_STEP = "loanCOBWorkerStep";
 
-    List<Long> retrieveLoanIds();
+    private LoanCOBConstant() {
+
+    }
 }

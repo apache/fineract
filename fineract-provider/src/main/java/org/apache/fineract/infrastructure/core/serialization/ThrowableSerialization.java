@@ -16,11 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.infrastructure.core.serialization;
 
-import java.util.List;
+import com.google.common.io.CharStreams;
+import java.io.PrintWriter;
+import java.io.Writer;
 
-public interface RetrieveLoanIdService {
+public final class ThrowableSerialization {
 
-    List<Long> retrieveLoanIds();
+    private ThrowableSerialization() {
+
+    }
+
+    @SuppressWarnings("RegexpSinglelineJava")
+    public static String serialize(Throwable e) {
+        StringBuilder sb = new StringBuilder();
+        Writer w = CharStreams.asWriter(sb);
+        e.printStackTrace(new PrintWriter(w, true));
+        return sb.toString();
+    }
 }

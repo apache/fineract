@@ -16,11 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.infrastructure.springbatch.messagehandler.conditions;
 
-import java.util.List;
+import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
-public interface RetrieveLoanIdService {
+public class JmsManagerCondition extends AllNestedConditions {
 
-    List<Long> retrieveLoanIds();
+    public JmsManagerCondition() {
+        super(ConfigurationPhase.PARSE_CONFIGURATION);
+    }
+
+    @ConditionalOnProperty(value = "fineract.mode.batch-manager-enabled", havingValue = "true")
+    static class ManagerCondition {}
+
+    @ConditionalOnProperty(value = "fineract.remote-job-message-handler.jms.enabled", havingValue = "true")
+    static class JmsCondition {}
 }

@@ -65,7 +65,7 @@ public class LoanAccountLockApiResource {
     @Operation(summary = "List locked loan accounts", description = "Returns the locked loan IDs")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = LoanAccountLockApiResourceSwagger.GetLoanAccountLockResponse.class)))) })
-    public String retrieveAllConfiguredBusinessStep(@Context final UriInfo uriInfo, @QueryParam("page") String page,
+    public String retrieveLockedAccounts(@Context final UriInfo uriInfo, @QueryParam("page") String page,
             @QueryParam("limit") String limit) {
 
         List<LoanAccountLock> lockedLoanAccounts = loanAccountLockService.getLockedLoanAccountByPage(Integer.parseInt(page),

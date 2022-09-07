@@ -23,8 +23,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.TreeMap;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.domain.BatchBusinessStep;
 import org.apache.fineract.cob.domain.BatchBusinessStepRepository;
+import org.apache.fineract.cob.exceptions.BusinessStepException;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -34,6 +36,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class COBBusinessStepServiceImpl implements COBBusinessStepService {
 
@@ -43,10 +46,15 @@ public class COBBusinessStepServiceImpl implements COBBusinessStepService {
 
     @Override
     public <T extends COBBusinessStep<S>, S extends AbstractPersistableCustom> S run(TreeMap<Long, String> executionMap, S item) {
+        if (executionMap == null || executionMap.isEmpty()) {
+            throw new BusinessStepException("Execution map is empty! COB Business step execution skipped!");
+        }
         for (String businessStep : executionMap.values()) {
             try {
                 COBBusinessStep<S> businessStepBean = (COBBusinessStep<S>) applicationContext.getBean(businessStep);
                 item = businessStepBean.execute(item);
+            } catch (Exception e) {
+                throw new BusinessStepException("Error happened during business step execution", e);
             } finally {
                 // Fallback to COB action context after each business step
                 ThreadLocalContextUtil.setActionContext(ActionContext.COB);
