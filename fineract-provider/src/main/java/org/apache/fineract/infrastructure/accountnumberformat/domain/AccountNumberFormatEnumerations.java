@@ -26,8 +26,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
+@Getter
+@Setter
+@Accessors(chain = true)
 public final class AccountNumberFormatEnumerations {
 
     private AccountNumberFormatEnumerations() {
@@ -52,6 +58,7 @@ public final class AccountNumberFormatEnumerations {
     public static final Set<AccountNumberPrefixType> accountNumberPrefixesForGroups = Collections
             .unmodifiableSet(new HashSet<>(Collections.singletonList(AccountNumberPrefixType.OFFICE_NAME)));
 
+    @Getter
     public enum AccountNumberPrefixType {
 
         OFFICE_NAME(1, "accountNumberPrefixType.officeName"), CLIENT_TYPE(101,
@@ -66,14 +73,6 @@ public final class AccountNumberFormatEnumerations {
         AccountNumberPrefixType(final Integer value, final String code) {
             this.value = value;
             this.code = code;
-        }
-
-        public Integer getValue() {
-            return this.value;
-        }
-
-        public String getCode() {
-            return this.code;
         }
 
         private static final Map<Integer, AccountNumberPrefixType> intToEnumMap = new HashMap<>();
@@ -98,16 +97,8 @@ public final class AccountNumberFormatEnumerations {
         }
 
         public static AccountNumberPrefixType fromInt(final int i) {
-            final AccountNumberPrefixType type = intToEnumMap.get(Integer.valueOf(i));
+            final AccountNumberPrefixType type = intToEnumMap.get(i);
             return type;
-        }
-
-        public static int getMinValue() {
-            return minValue;
-        }
-
-        public static int getMaxValue() {
-            return maxValue;
         }
 
     }
