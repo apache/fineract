@@ -19,11 +19,6 @@
             "type": "string"
         },
         {
-            "name": "version",
-            "doc": "The version of the type of event. For example 1, 2, 3, etc",
-            "type": "string"
-        },
-        {
             "name": "category",
             "doc": "The category of event the payload refers to. For example LOAN",
             "type": "string"
