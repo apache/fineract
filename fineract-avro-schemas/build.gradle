@@ -76,4 +76,4 @@ test {
 sourceSets.main.java.srcDir new File(buildDir, "generated/java/src/main/java")
 
 licenseFormatMain.dependsOn buildJavaSdk
-licenseMain.dependsOn buildJavaSdk
+licenseMain.dependsOn licenseFormatMain

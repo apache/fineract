@@ -157,4 +157,4 @@ sourceSets.main.java.srcDir new File(buildDir, "generated/java/src/main/java")
 
 // NOTE: Gradle suggested these dependencies
 licenseFormatMain.dependsOn buildJavaSdk
-licenseMain.dependsOn buildJavaSdk
+licenseMain.dependsOn licenseFormatMain

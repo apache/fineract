@@ -77,6 +77,14 @@
         },
         {
             "default": null,
+            "name": "clientExternalId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
             "name": "loanProductId",
             "type": [
                 "null",
