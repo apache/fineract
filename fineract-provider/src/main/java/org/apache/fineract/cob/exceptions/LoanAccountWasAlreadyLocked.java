@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.cob.exceptions;
 
-import java.util.List;
+public class LoanAccountWasAlreadyLocked extends Exception {
 
-public interface RetrieveLoanIdService {
-
-    List<Long> retrieveLoanIds();
+    public LoanAccountWasAlreadyLocked(Long loanId) {
+        super(String.format("Loan is in already locked state! loanId: %d", loanId));
+    }
 }

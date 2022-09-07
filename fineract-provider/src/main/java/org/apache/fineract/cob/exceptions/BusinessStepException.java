@@ -16,11 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.cob.exceptions;
 
-import java.util.List;
+public class BusinessStepException extends RuntimeException {
 
-public interface RetrieveLoanIdService {
+    public BusinessStepException(String message) {
+        super(message);
+    }
 
-    List<Long> retrieveLoanIds();
+    public BusinessStepException(String message, Throwable t) {
+        super(message, t);
+    }
 }

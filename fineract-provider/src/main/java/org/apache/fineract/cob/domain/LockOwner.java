@@ -19,5 +19,5 @@
 package org.apache.fineract.cob.domain;
 
 public enum LockOwner {
-    LOAN_COB, LOAN_INLINE_COB;
+    LOAN_COB_PARTITIONING, LOAN_COB_CHUNK_PROCESSING, LOAN_INLINE_COB_PROCESSING;
 }

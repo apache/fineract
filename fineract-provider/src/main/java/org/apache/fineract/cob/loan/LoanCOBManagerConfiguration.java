@@ -19,9 +19,9 @@
 package org.apache.fineract.cob.loan;
 
 import org.apache.fineract.cob.COBBusinessStepService;
-import org.apache.fineract.cob.COBPropertyService;
 import org.apache.fineract.cob.listener.COBExecutionListenerRunner;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
+import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -47,7 +47,7 @@ public class LoanCOBManagerConfiguration {
     @Autowired
     private RemotePartitioningManagerStepBuilderFactory stepBuilderFactory;
     @Autowired
-    private COBPropertyService cobPropertyService;
+    private PropertyService propertyService;
     @Autowired
     private DirectChannel outboundRequests;
     @Autowired
@@ -63,13 +63,13 @@ public class LoanCOBManagerConfiguration {
 
     @Bean
     public LoanCOBPartitioner partitioner() {
-        return new LoanCOBPartitioner(cobPropertyService, cobBusinessStepService, jobOperator, jobExplorer, retrieveLoanIdService);
+        return new LoanCOBPartitioner(propertyService, cobBusinessStepService, jobOperator, jobExplorer, retrieveLoanIdService);
     }
 
     @Bean
     public Step loanCOBStep() {
-        return stepBuilderFactory.get(JobName.LOAN_COB.name()).partitioner("Loan COB worker", partitioner()).outputChannel(outboundRequests)
-                .build();
+        return stepBuilderFactory.get(JobName.LOAN_COB.name()).partitioner(LoanCOBConstant.LOAN_COB_WORKER_STEP, partitioner())
+                .outputChannel(outboundRequests).build();
     }
 
     @Bean(name = "loanCOBJob")

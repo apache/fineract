@@ -18,7 +18,16 @@
  */
 package org.apache.fineract.cob.domain;
 
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface LoanAccountLockRepository extends JpaRepository<LoanAccountLock, Long>, JpaSpecificationExecutor<LoanAccountLock> {}
+public interface LoanAccountLockRepository extends JpaRepository<LoanAccountLock, Long>, JpaSpecificationExecutor<LoanAccountLock> {
+
+    Optional<LoanAccountLock> findByLoanIdAndLockOwner(Long loanId, LockOwner lockOwner);
+
+    void deleteByLoanIdInAndLockOwner(List<Long> loanIds, LockOwner lockOwner);
+
+    List<LoanAccountLock> findAllByLoanIdIn(List<Long> loanIds);
+}

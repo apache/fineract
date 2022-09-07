@@ -18,42 +18,37 @@
  */
 package org.apache.fineract.cob.loan;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.fineract.cob.COBBusinessStepService;
-import org.apache.fineract.cob.COBPropertyService;
+import org.apache.fineract.cob.common.InitialisationTasklet;
+import org.apache.fineract.cob.domain.LoanAccountLockRepository;
+import org.apache.fineract.cob.listener.LoanItemListener;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
+import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
-import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.flow.Flow;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
 import org.springframework.batch.integration.partition.RemotePartitioningWorkerStepBuilderFactory;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.data.RepositoryItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.channel.QueueChannel;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Configuration
 @ConditionalOnProperty(value = "fineract.mode.batch-worker-enabled", havingValue = "true")
 public class LoanCOBWorkerConfiguration {
 
-    @Autowired
-    private JobBuilderFactory jobBuilderFactory;
+    public static final String ALREADY_LOCKED_LOAN_IDS = "alreadyLockedLoanIds";
     @Autowired
     private RemotePartitioningWorkerStepBuilderFactory stepBuilderFactory;
     @Autowired
-    private COBPropertyService cobPropertyService;
+    private PropertyService propertyService;
     @Autowired
     private LoanRepository loanRepository;
     @Autowired
@@ -61,33 +56,40 @@ public class LoanCOBWorkerConfiguration {
     @Autowired
     private COBBusinessStepService cobBusinessStepService;
     @Autowired
+    private LoanAccountLockRepository accountLockRepository;
+    @Autowired
     private AppUserRepositoryWrapper userRepository;
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
-    @Bean
-    public Step loanBusinessStep() {
-        return stepBuilderFactory.get("Loan COB worker").inputChannel(inboundRequests)
-                .<Loan, Loan>chunk(cobPropertyService.getChunkSize(JobName.LOAN_COB.name())).reader(itemReader(null))
-                .processor(itemProcessor()).writer(itemWriter()).build();
-    }
-
-    @Bean(name = "Loan COB worker")
+    @Bean(name = LoanCOBConstant.LOAN_COB_WORKER_STEP)
     public Step loanCOBWorkerStep() {
         return stepBuilderFactory.get("Loan COB worker - Step").inputChannel(inboundRequests).flow(flow()).build();
     }
 
     @Bean
-    public Job loanCOBWorkerJob() {
-        return jobBuilderFactory.get("Loan COB worker").start(loanCOBWorkerStep()).incrementer(new RunIdIncrementer()).build();
-    }
-
-    @Bean
     public Flow flow() {
-        return new FlowBuilder<Flow>("cobFlow").start(initialisationStep()).next(loanBusinessStep()).build();
+        return new FlowBuilder<Flow>("cobFlow").start(initialisationStep()).next(applyLockStep()).next(loanBusinessStep()).build();
     }
 
     @Bean
     public Step initialisationStep() {
-        return stepBuilderFactory.get("Initalisation - Step").inputChannel(inboundRequests).tasklet(initialiseContext()).build();
+        return stepBuilderFactory.get("Initialisation - Step").inputChannel(inboundRequests).tasklet(initialiseContext()).build();
+    }
+
+    @Bean
+    public Step loanBusinessStep() {
+        return stepBuilderFactory.get("Loan COB worker - Step").inputChannel(inboundRequests)
+                .<Loan, Loan>chunk(propertyService.getChunkSize(JobName.LOAN_COB.name())).reader(cobWorkerItemReader())
+                .processor(cobWorkerItemProcessor()).writer(cobWorkerItemWriter()).faultTolerant().skip(Exception.class)
+                .skipLimit(propertyService.getChunkSize(JobName.LOAN_COB.name()) + 1).listener(loanItemListener())
+                .listener(promotionListener()).build();
+    }
+
+    @Bean
+    public Step applyLockStep() {
+        return stepBuilderFactory.get("Apply lock - Step").inputChannel(inboundRequests).tasklet(applyLock()).listener(promotionListener())
+                .build();
     }
 
     @Bean
@@ -97,27 +99,40 @@ public class LoanCOBWorkerConfiguration {
     }
 
     @Bean
-    @StepScope
-    public ItemReader<Loan> itemReader(@Value("#{stepExecutionContext['loanIds']}") List<Integer> data) {
-        List<Integer> remainingData = new ArrayList<>(data);
-        return () -> {
-            if (remainingData.size() > 0) {
-                return loanRepository.findById(remainingData.remove(0).longValue()).orElse(null);
-            }
-            return null;
-        };
+    public LoanItemListener loanItemListener() {
+        return new LoanItemListener(accountLockRepository, transactionTemplate);
     }
 
     @Bean
-    public ItemProcessor<Loan, Loan> itemProcessor() {
+    @StepScope
+    public ApplyLoanLockTasklet applyLock() {
+        return new ApplyLoanLockTasklet(accountLockRepository);
+    }
+
+    @Bean
+    @StepScope
+    public LoanItemReader cobWorkerItemReader() {
+        return new LoanItemReader(loanRepository);
+    }
+
+    @Bean
+    @StepScope
+    public LoanItemProcessor cobWorkerItemProcessor() {
         return new LoanItemProcessor(cobBusinessStepService);
     }
 
     @Bean
-    public RepositoryItemWriter<Loan> itemWriter() {
-        RepositoryItemWriter<Loan> writer = new RepositoryItemWriter<>();
-        writer.setRepository(loanRepository);
-        writer.setMethodName("save");
-        return writer;
+    @StepScope
+    public LoanItemWriter cobWorkerItemWriter() {
+        LoanItemWriter repositoryItemWriter = new LoanItemWriter(accountLockRepository);
+        repositoryItemWriter.setRepository(loanRepository);
+        return repositoryItemWriter;
+    }
+
+    @Bean
+    public ExecutionContextPromotionListener promotionListener() {
+        ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
+        listener.setKeys(new String[] { ALREADY_LOCKED_LOAN_IDS });
+        return listener;
     }
 }

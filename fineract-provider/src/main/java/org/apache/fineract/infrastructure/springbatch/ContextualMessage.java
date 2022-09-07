@@ -16,11 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.infrastructure.springbatch;
 
-import java.util.List;
+import java.io.Serializable;
+import lombok.Data;
+import org.apache.fineract.infrastructure.core.domain.FineractContext;
+import org.springframework.batch.integration.partition.StepExecutionRequest;
 
-public interface RetrieveLoanIdService {
+@Data
+public class ContextualMessage implements Serializable {
 
-    List<Long> retrieveLoanIds();
+    private StepExecutionRequest stepExecutionRequest;
+    private FineractContext context;
 }

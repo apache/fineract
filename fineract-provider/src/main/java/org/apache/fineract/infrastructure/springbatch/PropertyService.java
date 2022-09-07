@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.infrastructure.springbatch;
 
-import java.util.List;
+public interface PropertyService {
 
-public interface RetrieveLoanIdService {
+    Integer getPartitionSize(String jobName);
 
-    List<Long> retrieveLoanIds();
+    Integer getChunkSize(String jobName);
 }
