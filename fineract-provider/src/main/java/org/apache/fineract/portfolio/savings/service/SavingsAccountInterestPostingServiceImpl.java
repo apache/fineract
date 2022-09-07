@@ -68,9 +68,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
 
         if (backdatedTxnsAllowedTill && savingsAccountData.getSummary().getInterestPostedTillDate() != null) {
             interestPostedToDate = Money.of(savingsAccountData.getCurrency(), savingsAccountData.getSummary().getTotalInterestPosted());
-            SavingsAccountTransactionData savingsAccountTransactionData = retrieveLastTransactions(savingsAccountData);
-            LocalDate lastTransactionDate = savingsAccountTransactionData.getTransactionDate();
-            savingsAccountData.setStartInterestCalculationDate(lastTransactionDate.plusDays(1));
+            savingsAccountData.setStartInterestCalculationDate(savingsAccountData.getSummary().getInterestPostedTillDate());
         } else {
             savingsAccountData.setStartInterestCalculationDate(startInterestDate);
         }
