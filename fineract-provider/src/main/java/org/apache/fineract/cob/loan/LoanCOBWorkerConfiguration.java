@@ -82,7 +82,7 @@ public class LoanCOBWorkerConfiguration {
 
     @Bean
     public Flow flow() {
-        return new FlowBuilder<Flow>("cobFlow").start(initialisationStep()).next(loanBusinessStep()).next(loanBusinessStep()).build();
+        return new FlowBuilder<Flow>("cobFlow").start(initialisationStep()).next(loanBusinessStep()).build();
     }
 
     @Bean
