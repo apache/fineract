@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.cob.service;
 
+import java.util.List;
 import org.apache.fineract.cob.data.JobBusinessStepConfigData;
 import org.apache.fineract.cob.data.JobBusinessStepDetail;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -30,4 +31,7 @@ public interface ConfigJobParameterService {
     CommandProcessingResult updateStepConfigByJobName(JsonCommand command, String jobName);
 
     JobBusinessStepDetail getAvailableBusinessStepsByJobName(String jobName);
+
+    List<String> getAllConfiguredJobNames();
+
 }

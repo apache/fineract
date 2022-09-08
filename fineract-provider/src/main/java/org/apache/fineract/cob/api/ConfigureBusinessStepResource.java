@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.cob.api;
 
+import com.google.gson.Gson;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -29,6 +30,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -68,6 +70,20 @@ public class ConfigureBusinessStepResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final ConfigJobParameterService configJobParameterService;
     private final PortfolioCommandSourceWritePlatformService commandWritePlatformService;
+
+    @GET
+    @Path("/names")
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "List Business Jobs", description = "Returns the configured Business Jobs")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConfigureBusinessStepResourceSwagger.GetBusinessJobConfigResponse.class)))) })
+    public String retrieveAllConfiguredBusinessJobs(@Context final UriInfo uriInfo) {
+
+        List<String> businessJobNames = configJobParameterService.getAllConfiguredJobNames();
+        final Gson gson = new Gson();
+
+        return gson.toJson(businessJobNames);
+    }
 
     @GET
     @Path("{jobName}/steps")
