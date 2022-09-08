@@ -91,4 +91,10 @@ public class ConfigJobParameterServiceImpl implements ConfigJobParameterService 
         jobBusinessStepDetail.setAvailableBusinessSteps(availableBusinessSteps);
         return jobBusinessStepDetail;
     }
+
+    @Override
+    public List<String> getAllConfiguredJobNames() {
+        return batchBusinessStepRepository.findConfiguredJobNames();
+    }
+
 }
