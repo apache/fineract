@@ -18,26 +18,20 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.data;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class Count {
 
     private Integer successCount;
     private Integer errorCount;
 
     public static Count instance(final Integer successCount, final Integer errorCount) {
-        return new Count(successCount, errorCount);
-    }
-
-    private Count(final Integer successCount, final Integer errorCount) {
-        this.successCount = successCount;
-        this.errorCount = errorCount;
-    }
-
-    public Integer getSuccessCount() {
-        return successCount;
-    }
-
-    public Integer getErrorCount() {
-        return errorCount;
+        return new Count().setSuccessCount(successCount).setErrorCount(errorCount);
     }
 
 }
