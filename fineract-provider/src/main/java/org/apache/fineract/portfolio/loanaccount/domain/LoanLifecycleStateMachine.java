@@ -20,5 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 public interface LoanLifecycleStateMachine {
 
-    LoanStatus transition(LoanEvent loanEvent, LoanStatus from);
+    LoanStatus dryTransition(LoanEvent loanEvent, Loan loan);
+
+    void transition(LoanEvent loanEvent, Loan loan);
 }
