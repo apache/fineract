@@ -18,6 +18,13 @@
  */
 package org.apache.fineract.infrastructure.campaigns.sms.data;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class SmsProviderData {
 
     private Long id;
@@ -32,41 +39,4 @@ public class SmsProviderData {
 
     private String providerDescription;
 
-    public SmsProviderData(final Long id, final String providerAppKey, final String providerName, final String providerDescription,
-            final String tenantId, final String phoneNo) {
-        this.id = id;
-        this.providerAppKey = providerAppKey;
-        this.providerName = providerName;
-        this.providerDescription = providerDescription;
-        this.tenantId = tenantId;
-        this.phoneNo = phoneNo;
-    }
-
-    public SmsProviderData() {
-
-    }
-
-    public Long getId() {
-        return this.id;
-    }
-
-    public String getProviderAppKey() {
-        return this.providerAppKey;
-    }
-
-    public String getProviderName() {
-        return this.providerName;
-    }
-
-    public String getProviderDescription() {
-        return this.providerDescription;
-    }
-
-    public String getTenantId() {
-        return this.tenantId;
-    }
-
-    public String getPhoneNo() {
-        return this.phoneNo;
-    }
 }

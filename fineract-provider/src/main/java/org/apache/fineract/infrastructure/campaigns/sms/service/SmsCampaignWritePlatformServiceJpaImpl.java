@@ -141,7 +141,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
             if (changes.containsKey(SmsCampaignValidator.runReportId)) {
                 final Long newValue = command.longValueOfParameterNamed(SmsCampaignValidator.runReportId);
                 final Report reportId = this.reportRepository.findById(newValue).orElseThrow(() -> new ReportNotFoundException(newValue));
-                smsCampaign.updateBusinessRuleId(reportId);
+                smsCampaign.setBusinessRuleId(reportId);
             }
 
             if (!changes.isEmpty()) {
@@ -386,7 +386,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
              * next trigger date when activating
              */
             LocalDateTime nextTriggerDate = null;
-            if (smsCampaign.getRecurrenceStartDateTime().isBefore(tenantDateTime())) {
+            if (smsCampaign.getRecurrenceStartDate().isBefore(tenantDateTime())) {
                 nextTriggerDate = CalendarUtils.getNextRecurringDate(smsCampaign.getRecurrence(), smsCampaign.getRecurrenceStartDate(),
                         DateUtils.getLocalDateTimeOfTenant());
             } else {
@@ -501,12 +501,12 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                     String textMessage = this.compileSmsTemplate(textMessageTemplate, "SmsCampaign", entry);
                     if (!textMessage.isEmpty()) {
                         final Integer totalMessage = runReportObject.size();
-                        campaignMessage = new CampaignPreviewData(textMessage, totalMessage);
+                        campaignMessage = new CampaignPreviewData().setCampaignMessage(textMessage).setTotalNumberOfMessages(totalMessage);
                         break;
                     }
                 }
             } else {
-                campaignMessage = new CampaignPreviewData(textMessageTemplate, 0);
+                campaignMessage = new CampaignPreviewData().setCampaignMessage(textMessageTemplate).setTotalNumberOfMessages(0);
             }
         } catch (final IOException e) {
             // TODO throw something here
@@ -538,14 +538,14 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
              * next trigger date when activating
              */
             LocalDateTime nextTriggerDate = null;
-            if (smsCampaign.getRecurrenceStartDateTime().isBefore(tenantDateTime())) {
+            if (smsCampaign.getRecurrenceStartDate().isBefore(tenantDateTime())) {
                 nextTriggerDate = CalendarUtils.getNextRecurringDate(smsCampaign.getRecurrence(), smsCampaign.getRecurrenceStartDate(),
                         DateUtils.getLocalDateTimeOfTenant());
             } else {
                 nextTriggerDate = smsCampaign.getRecurrenceStartDate();
             }
             // to get time of tenant
-            final LocalDateTime getTime = smsCampaign.getRecurrenceStartDateTime();
+            final LocalDateTime getTime = smsCampaign.getRecurrenceStartDate();
 
             smsCampaign.setNextTriggerDate(nextTriggerDate);
         }
