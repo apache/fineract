@@ -28,6 +28,10 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.exception.SystemDefinedCodeCannotBeChangedException;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -35,6 +39,10 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_code", uniqueConstraints = { @UniqueConstraint(columnNames = { "code_name" }, name = "code_name") })
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public class Code extends AbstractPersistableCustom {
 
     @Column(name = "code_name", length = 100)
@@ -48,28 +56,11 @@ public class Code extends AbstractPersistableCustom {
 
     public static Code fromJson(final JsonCommand command) {
         final String name = command.stringValueOfParameterNamed("name");
-        return new Code(name);
+        return new Code().setName(name);
     }
 
     public static Code createNew(final String name) {
-        return new Code(name);
-    }
-
-    protected Code() {
-        this.systemDefined = false;
-    }
-
-    private Code(final String name) {
-        this.name = name;
-        this.systemDefined = false;
-    }
-
-    public String name() {
-        return this.name;
-    }
-
-    public boolean isSystemDefined() {
-        return this.systemDefined;
+        return new Code().setName(name);
     }
 
     public Map<String, Object> update(final JsonCommand command) {

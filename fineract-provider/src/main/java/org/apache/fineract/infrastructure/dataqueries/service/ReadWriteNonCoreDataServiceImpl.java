@@ -538,7 +538,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         if (StringUtils.isNotBlank(code)) {
             if (isConstraintApproach) {
-                codeMappings.put(dataTableNameAlias + "_" + name, this.codeReadPlatformService.retriveCode(code).getCodeId());
+                codeMappings.put(dataTableNameAlias + "_" + name, this.codeReadPlatformService.retriveCode(code).getId());
                 String fkName = "fk_" + dataTableNameAlias + "_" + name;
                 constrainBuilder.append(", CONSTRAINT ").append(sqlGenerator.escape(fkName)).append(" ")
                         .append("FOREIGN KEY (" + sqlGenerator.escape(name) + ") ").append("REFERENCES ")
@@ -750,7 +750,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                         }
                     }
                     if (newCode != null) {
-                        codeMappings.put(dataTableNameAlias + "_" + newName, this.codeReadPlatformService.retriveCode(newCode).getCodeId());
+                        codeMappings.put(dataTableNameAlias + "_" + newName, this.codeReadPlatformService.retriveCode(newCode).getId());
                         if (code == null || !StringUtils.equalsIgnoreCase(name, newName)) {
                             constrainBuilder.append(",ADD CONSTRAINT  ").append(sqlGenerator.escape(newFkName)).append(" ")
                                     .append("FOREIGN KEY (" + sqlGenerator.escape(newName) + ") ").append("REFERENCES ")
@@ -824,7 +824,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         if (StringUtils.isNotBlank(code)) {
             if (isConstraintApproach) {
                 String fkName = "fk_" + dataTableNameAlias + "_" + name;
-                codeMappings.put(dataTableNameAlias + "_" + name, this.codeReadPlatformService.retriveCode(code).getCodeId());
+                codeMappings.put(dataTableNameAlias + "_" + name, this.codeReadPlatformService.retriveCode(code).getId());
                 constrainBuilder.append(",ADD CONSTRAINT  ").append(sqlGenerator.escape(fkName)).append(" ")
                         .append("FOREIGN KEY (" + sqlGenerator.escape(name) + ") ").append("REFERENCES ")
                         .append(sqlGenerator.escape(CODE_VALUES_TABLE)).append(" (id)");
