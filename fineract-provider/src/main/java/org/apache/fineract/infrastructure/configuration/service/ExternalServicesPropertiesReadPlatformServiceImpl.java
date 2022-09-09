@@ -136,7 +136,8 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
                     tenantAppKey = rs.getString("value");
                 }
             }
-            return new MessageGatewayConfigurationData(null, null, host, port, endPoint, null, null, false, tenantAppKey);
+            return new MessageGatewayConfigurationData().setHostName(host).setPortNumber(port).setEndPoint(endPoint)
+                    .setTenantAppKey(tenantAppKey);
         }
     }
 

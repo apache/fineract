@@ -21,86 +21,49 @@ package org.apache.fineract.infrastructure.campaigns.sms.data;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Collection;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 @SuppressWarnings("unused")
 public final class SmsCampaignData {
 
     private Long id;
-    private final String campaignName;
-    private final EnumOptionData campaignType;
-    private final Long runReportId;
-    private final String reportName;
-    private final String paramValue;
-    private final EnumOptionData campaignStatus;
-    private final EnumOptionData triggerType;
-    private final String campaignMessage;
-    private final ZonedDateTime nextTriggerDate;
-    private final LocalDate lastTriggerDate;
-    private final SmsCampaignTimeLine smsCampaignTimeLine;
-    private final ZonedDateTime recurrenceStartDate;
-    private final String recurrence;
-    private final Long providerId;
-    private final boolean isNotification;
+    private String campaignName;
+    private EnumOptionData campaignType;
+    private Long runReportId;
+    private String reportName;
+    private String paramValue;
+    private EnumOptionData campaignStatus;
+    private EnumOptionData triggerType;
+    private String campaignMessage;
+    private ZonedDateTime nextTriggerDate;
+    private LocalDate lastTriggerDate;
+    private SmsCampaignTimeLine smsCampaignTimeLine;
+    private ZonedDateTime recurrenceStartDate;
+    private String recurrence;
+    private Long providerId;
+    private boolean isNotification;
 
-    private final Collection<SmsProviderData> smsProviderOptions;
+    private Collection<SmsProviderData> smsProviderOptions;
 
-    private final Collection<EnumOptionData> campaignTypeOptions;
+    private Collection<EnumOptionData> campaignTypeOptions;
 
-    private final Collection<EnumOptionData> triggerTypeOptions;
+    private Collection<EnumOptionData> triggerTypeOptions;
 
-    private final Collection<SmsBusinessRulesData> businessRulesOptions;
+    private Collection<SmsBusinessRulesData> businessRulesOptions;
 
-    private final Collection<EnumOptionData> months;
+    private Collection<EnumOptionData> months;
 
-    private final Collection<EnumOptionData> weekDays;
+    private Collection<EnumOptionData> weekDays;
 
-    private final Collection<EnumOptionData> frequencyTypeOptions;
+    private Collection<EnumOptionData> frequencyTypeOptions;
 
-    private final Collection<EnumOptionData> periodFrequencyOptions;
-
-    private SmsCampaignData(final Long id, final String campaignName, final EnumOptionData campaignType, final EnumOptionData triggerType,
-            final Long runReportId, final String reportName, final String paramValue, final EnumOptionData campaignStatus,
-            final String message, final ZonedDateTime nextTriggerDate, final LocalDate lastTriggerDate,
-            final SmsCampaignTimeLine smsCampaignTimeLine, final ZonedDateTime recurrenceStartDate, final String recurrence,
-            final Long providerId, final Collection<SmsBusinessRulesData> businessRulesOptions,
-            final Collection<SmsProviderData> smsProviderOptions, final Collection<EnumOptionData> campaignTypeOptions,
-            final Collection<EnumOptionData> triggerTypeOptions, final Collection<EnumOptionData> months,
-            final Collection<EnumOptionData> weekDays, final Collection<EnumOptionData> frequencyTypeOptions,
-            final Collection<EnumOptionData> periodFrequencyOptions, final boolean isNotification) {
-        this.id = id;
-        this.campaignName = campaignName;
-        this.campaignType = campaignType;
-        this.triggerType = triggerType;
-        this.runReportId = runReportId;
-        this.reportName = reportName;
-        this.paramValue = paramValue;
-        this.campaignStatus = campaignStatus;
-        this.campaignMessage = message;
-        if (nextTriggerDate != null) {
-            this.nextTriggerDate = nextTriggerDate;
-        } else {
-            this.nextTriggerDate = null;
-        }
-        if (lastTriggerDate != null) {
-            this.lastTriggerDate = lastTriggerDate;
-        } else {
-            this.lastTriggerDate = null;
-        }
-        this.isNotification = isNotification;
-        this.smsCampaignTimeLine = smsCampaignTimeLine;
-        this.recurrenceStartDate = recurrenceStartDate;
-        this.recurrence = recurrence;
-        this.providerId = providerId;
-        this.businessRulesOptions = businessRulesOptions;
-        this.smsProviderOptions = smsProviderOptions;
-        this.campaignTypeOptions = campaignTypeOptions;
-        this.triggerTypeOptions = triggerTypeOptions;
-        this.months = months;
-        this.weekDays = weekDays;
-        this.frequencyTypeOptions = frequencyTypeOptions;
-        this.periodFrequencyOptions = periodFrequencyOptions;
-    }
+    private Collection<EnumOptionData> periodFrequencyOptions;
 
     public static SmsCampaignData instance(final Long id, final String campaignName, final EnumOptionData campaignType,
             final EnumOptionData triggerType, final Long runReportId, final String reportName, final String paramValue,
@@ -116,10 +79,14 @@ public final class SmsCampaignData {
         final Collection<EnumOptionData> frequencyTypeOptions = null;
         final Collection<EnumOptionData> periodFrequencyOptions = null;
 
-        return new SmsCampaignData(id, campaignName, campaignType, triggerType, runReportId, reportName, paramValue, campaignStatus,
-                message, nextTriggerDate, lastTriggerDate, smsCampaignTimeLine, recurrenceStartDate, recurrence, providerId,
-                businessRulesOptions, smsProviderOptions, campaignTypeOptions, triggerTypeOptions, months, weekDays, frequencyTypeOptions,
-                periodFrequencyOptions, isNotification);
+        return new SmsCampaignData().setId(id).setCampaignName(campaignName).setCampaignType(campaignType).setTriggerType(triggerType)
+                .setRunReportId(runReportId).setReportName(reportName).setParamValue(paramValue).setCampaignStatus(campaignStatus)
+                .setCampaignMessage(message).setNextTriggerDate(nextTriggerDate).setLastTriggerDate(lastTriggerDate)
+                .setSmsCampaignTimeLine(smsCampaignTimeLine).setRecurrenceStartDate(recurrenceStartDate).setRecurrence(recurrence)
+                .setProviderId(providerId).setBusinessRulesOptions(businessRulesOptions).setSmsProviderOptions(smsProviderOptions)
+                .setCampaignTypeOptions(campaignTypeOptions).setTriggerTypeOptions(triggerTypeOptions).setMonths(months)
+                .setWeekDays(weekDays).setFrequencyTypeOptions(frequencyTypeOptions).setPeriodFrequencyOptions(periodFrequencyOptions)
+                .setNotification(isNotification);
     }
 
     public static SmsCampaignData template(final Collection<SmsProviderData> smsProviderOptions,
@@ -127,6 +94,7 @@ public final class SmsCampaignData {
             final Collection<EnumOptionData> triggerTypeOptions, final Collection<EnumOptionData> months,
             final Collection<EnumOptionData> weekDays, final Collection<EnumOptionData> frequencyTypeOptions,
             final Collection<EnumOptionData> periodFrequencyOptions) {
+
         final Long id = null;
         final String campaignName = null;
         final EnumOptionData campaignType = null;
@@ -143,66 +111,15 @@ public final class SmsCampaignData {
         final String reportName = null;
         final Long providerId = null;
         final boolean isNotification = false;
-        return new SmsCampaignData(id, campaignName, campaignType, triggerType, runReportId, reportName, paramValue, campaignStatus,
-                message, nextTriggerDate, lastTriggerDate, smsCampaignTimeLine, recurrenceStartDate, recurrence, providerId,
-                businessRulesOptions, smsProviderOptions, campaignTypeOptions, triggerTypeOptions, months, weekDays, frequencyTypeOptions,
-                periodFrequencyOptions, isNotification);
-    }
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getCampaignName() {
-        return this.campaignName;
-    }
-
-    public EnumOptionData getCampaignType() {
-        return this.campaignType;
-    }
-
-    public Long getRunReportId() {
-        return this.runReportId;
-    }
-
-    public String getParamValue() {
-        return this.paramValue;
-    }
-
-    public EnumOptionData getCampaignStatus() {
-        return this.campaignStatus;
-    }
-
-    public String getMessage() {
-        return this.campaignMessage;
-    }
-
-    public ZonedDateTime getNextTriggerDate() {
-        return this.nextTriggerDate;
-    }
-
-    public LocalDate getLastTriggerDate() {
-        return this.lastTriggerDate;
-    }
-
-    public String getRecurrence() {
-        return this.recurrence;
-    }
-
-    public ZonedDateTime getRecurrenceStartDate() {
-        return this.recurrenceStartDate;
-    }
-
-    public String getReportName() {
-        return this.reportName;
-    }
-
-    public Long providerId() {
-        return this.providerId;
-    }
-
-    public boolean isNotification() {
-        return this.isNotification;
+        return new SmsCampaignData().setId(id).setCampaignName(campaignName).setCampaignType(campaignType).setTriggerType(triggerType)
+                .setRunReportId(runReportId).setReportName(reportName).setParamValue(paramValue).setCampaignStatus(campaignStatus)
+                .setCampaignMessage(message).setNextTriggerDate(nextTriggerDate).setLastTriggerDate(lastTriggerDate)
+                .setSmsCampaignTimeLine(smsCampaignTimeLine).setRecurrenceStartDate(recurrenceStartDate).setRecurrence(recurrence)
+                .setProviderId(providerId).setBusinessRulesOptions(businessRulesOptions).setSmsProviderOptions(smsProviderOptions)
+                .setCampaignTypeOptions(campaignTypeOptions).setTriggerTypeOptions(triggerTypeOptions).setMonths(months)
+                .setWeekDays(weekDays).setFrequencyTypeOptions(frequencyTypeOptions).setPeriodFrequencyOptions(periodFrequencyOptions)
+                .setNotification(isNotification);
     }
 
 }
