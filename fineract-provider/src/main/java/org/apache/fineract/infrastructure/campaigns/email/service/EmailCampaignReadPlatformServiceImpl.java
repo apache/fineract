@@ -150,8 +150,9 @@ public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPl
             final String activatedByUsername = rs.getString("activatedByUsername");
             final String recurrence = rs.getString("recurrence");
             final ZonedDateTime recurrenceStartDate = JdbcSupport.getDateTime(rs, "recurrenceStartDate");
-            final EmailCampaignTimeLine emailCampaignTimeLine = new EmailCampaignTimeLine(submittedOnDate, submittedByUsername,
-                    activatedOnDate, activatedByUsername, closedOnDate, closedByUsername);
+            final EmailCampaignTimeLine emailCampaignTimeLine = new EmailCampaignTimeLine().setSubmittedOnDate(submittedOnDate)
+                    .setActivatedByUsername(submittedByUsername).setActivatedOnDate(activatedOnDate)
+                    .setActivatedByUsername(activatedByUsername).setClosedOnDate(closedOnDate).setClosedByUsername(closedByUsername);
 
             return EmailCampaignData.instance(id, campaignName, campaignType, businessRuleId, paramValue, status, emailSubject,
                     emailMessage, emailAttachmentFileFormatString, reportId, stretchyReportParamMap, nextTriggerDate, lastTriggerDate,

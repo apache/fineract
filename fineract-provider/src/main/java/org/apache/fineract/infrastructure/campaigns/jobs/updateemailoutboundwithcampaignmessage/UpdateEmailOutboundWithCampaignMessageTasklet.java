@@ -75,7 +75,7 @@ public class UpdateEmailOutboundWithCampaignMessageTasklet implements Tasklet {
                 log.debug("tenant time {} trigger time {}", tenantDateNow, nextTriggerDate);
                 if (nextTriggerDate.isBefore(tenantDateNow)) {
                     insertDirectCampaignIntoEmailOutboundTable(emailCampaignData.getParamValue(), emailCampaignData.getEmailSubject(),
-                            emailCampaignData.getMessage(), emailCampaignData.getCampaignName(), emailCampaignData.getId());
+                            emailCampaignData.getEmailMessage(), emailCampaignData.getCampaignName(), emailCampaignData.getId());
                     updateTriggerDates(emailCampaignData.getId());
                 }
             }

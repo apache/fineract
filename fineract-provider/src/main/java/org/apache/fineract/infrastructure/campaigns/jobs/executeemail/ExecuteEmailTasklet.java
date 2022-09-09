@@ -150,7 +150,7 @@ public class ExecuteEmailTasklet implements Tasklet {
                         emailMessage.setStatusType(EmailMessageStatusType.SENT.getValue());
                         emailMessageRepository.save(emailMessage);
                     } catch (Exception e) {
-                        emailMessage.updateErrorMessage(e.getMessage());
+                        emailMessage.setErrorMessage(e.getMessage());
                         emailMessage.setStatusType(EmailMessageStatusType.FAILED.getValue());
                         emailMessageRepository.save(emailMessage);
                     }

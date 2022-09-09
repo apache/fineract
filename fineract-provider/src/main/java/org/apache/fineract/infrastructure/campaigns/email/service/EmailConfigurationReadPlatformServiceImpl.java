@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.campaigns.email.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailConfigurationData;
 import org.apache.fineract.infrastructure.campaigns.email.exception.EmailConfigurationNotFoundException;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -31,6 +32,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class EmailConfigurationReadPlatformServiceImpl implements EmailConfigurationReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;

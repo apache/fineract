@@ -31,6 +31,10 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.campaigns.email.ScheduledEmailConstants;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailCampaignValidator;
@@ -45,6 +49,10 @@ import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "scheduled_email_campaign")
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public class EmailCampaign extends AbstractPersistableCustom {
 
     @Column(name = "campaign_name", nullable = false)
@@ -124,36 +132,6 @@ public class EmailCampaign extends AbstractPersistableCustom {
     @Column(name = "previous_run_error_message", nullable = true)
     private String previousRunErrorMessage;
 
-    public EmailCampaign() {}
-
-    private EmailCampaign(final String campaignName, final Integer campaignType, final Report businessRuleId, final String paramValue,
-            final String emailSubject, final String emailMessage, final LocalDate submittedOnDate, final AppUser submittedBy,
-            final Report stretchyReport, final String stretchyReportParamMap,
-            final ScheduledEmailAttachmentFileFormat emailAttachmentFileFormat, final String recurrence,
-            final LocalDateTime localDateTime) {
-        this.campaignName = campaignName;
-        this.campaignType = EmailCampaignType.fromInt(campaignType).getValue();
-        this.businessRuleId = businessRuleId;
-        this.paramValue = paramValue;
-        this.status = EmailCampaignStatus.PENDING.getValue();
-        this.emailSubject = emailSubject;
-        this.emailMessage = emailMessage;
-        this.emailAttachmentFileFormat = emailAttachmentFileFormat.getValue();
-        this.stretchyReport = stretchyReport;
-        this.stretchyReportParamMap = stretchyReportParamMap;
-        this.submittedOnDate = submittedOnDate;
-        this.submittedBy = submittedBy;
-        this.recurrence = recurrence;
-        LocalDateTime recurrenceStartDate = LocalDateTime.now(DateUtils.getDateTimeZoneOfTenant());
-        this.isVisible = true;
-        if (localDateTime != null) {
-            this.recurrenceStartDate = localDateTime;
-        } else {
-            this.recurrenceStartDate = recurrenceStartDate;
-        }
-
-    }
-
     public static EmailCampaign instance(final AppUser submittedBy, final Report businessRuleId, final Report stretchyReport,
             final JsonCommand command) {
 
@@ -192,9 +170,11 @@ public class EmailCampaign extends AbstractPersistableCustom {
             recurrenceStartDate = null;
         }
 
-        return new EmailCampaign(campaignName, campaignType.intValue(), businessRuleId, paramValue, emailSubject, emailMessage,
-                submittedOnDate, submittedBy, stretchyReport, stretchyReportParamMap, emailAttachmentFileFormat, recurrence,
-                recurrenceStartDate);
+        return new EmailCampaign().setCampaignName(campaignName).setCampaignType(campaignType.intValue()).setBusinessRuleId(businessRuleId)
+                .setParamValue(paramValue).setStatus(EmailCampaignStatus.PENDING.getValue()).setEmailSubject(emailSubject)
+                .setEmailMessage(emailMessage).setSubmittedOnDate(submittedOnDate).setSubmittedBy(submittedBy)
+                .setStretchyReport(stretchyReport).setEmailAttachmentFileFormat(emailAttachmentFileFormat.getValue())
+                .setRecurrence(recurrence).setRecurrenceStartDate(recurrenceStartDate).setStretchyReportParamMap(stretchyReportParamMap);
     }
 
     public Map<String, Object> update(JsonCommand command) {
@@ -236,7 +216,7 @@ public class EmailCampaign extends AbstractPersistableCustom {
         final Locale locale = command.extractLocale();
         final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
 
-        if (command.isChangeInLocalDateTimeParameterNamed(EmailCampaignValidator.recurrenceStartDate, getRecurrenceStartDateTime())) {
+        if (command.isChangeInLocalDateTimeParameterNamed(EmailCampaignValidator.recurrenceStartDate, getRecurrenceStartDate())) {
             final String valueAsInput = command.stringValueOfParameterNamed(EmailCampaignValidator.recurrenceStartDate);
             actualChanges.put(EmailCampaignValidator.recurrenceStartDate, valueAsInput);
             actualChanges.put(ClientApiConstants.dateFormatParamName, dateFormatAsInput);
@@ -307,9 +287,7 @@ public class EmailCampaign extends AbstractPersistableCustom {
         this.approvedOnDate = reactivateLocalDate;
         this.status = EmailCampaignStatus.ACTIVE.getValue();
         this.approvedBy = currentUser;
-        this.closureDate = null;
         this.isVisible = true;
-        this.closedBy = null;
 
         validateReactivate();
     }
@@ -384,7 +362,7 @@ public class EmailCampaign extends AbstractPersistableCustom {
             dataValidationErrors.add(error);
         }
 
-        if (getActivationLocalDate() != null && getSubmittedOnDate() != null && getSubmittedOnDate().isAfter(getActivationLocalDate())) {
+        if (getApprovedOnDate() != null && getSubmittedOnDate() != null && getSubmittedOnDate().isAfter(getApprovedOnDate())) {
 
             final String defaultUserMessage = "submitted date cannot be after the activation date";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.campaign.submittedOnDate.after.activation.date",
@@ -393,11 +371,11 @@ public class EmailCampaign extends AbstractPersistableCustom {
             dataValidationErrors.add(error);
         }
 
-        if (getActivationLocalDate() != null && isDateInTheFuture(getActivationLocalDate())) {
+        if (getApprovedOnDate() != null && isDateInTheFuture(getApprovedOnDate())) {
 
             final String defaultUserMessage = "Activation date cannot be in the future.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.campaign.activationDate.in.the.future",
-                    defaultUserMessage, EmailCampaignValidator.activationDateParamName, getActivationLocalDate());
+                    defaultUserMessage, EmailCampaignValidator.activationDateParamName, getApprovedOnDate());
 
             dataValidationErrors.add(error);
         }
@@ -405,15 +383,15 @@ public class EmailCampaign extends AbstractPersistableCustom {
     }
 
     private void validateReactivationDate(final List<ApiParameterError> dataValidationErrors) {
-        if (getActivationLocalDate() != null && isDateInTheFuture(getActivationLocalDate())) {
+        if (getApprovedOnDate() != null && isDateInTheFuture(getApprovedOnDate())) {
 
             final String defaultUserMessage = "Activation date cannot be in the future.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.campaign.activationDate.in.the.future",
-                    defaultUserMessage, EmailCampaignValidator.activationDateParamName, getActivationLocalDate());
+                    defaultUserMessage, EmailCampaignValidator.activationDateParamName, getApprovedOnDate());
 
             dataValidationErrors.add(error);
         }
-        if (getActivationLocalDate() != null && getSubmittedOnDate() != null && getSubmittedOnDate().isAfter(getActivationLocalDate())) {
+        if (getApprovedOnDate() != null && getSubmittedOnDate() != null && getSubmittedOnDate().isAfter(getApprovedOnDate())) {
 
             final String defaultUserMessage = "submitted date cannot be after the activation date";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.campaign.submittedOnDate.after.activation.date",
@@ -442,100 +420,8 @@ public class EmailCampaign extends AbstractPersistableCustom {
         }
     }
 
-    public LocalDate getSubmittedOnDate() {
-        return this.submittedOnDate;
-
-    }
-
-    public LocalDate getClosureDate() {
-        return this.closureDate;
-    }
-
-    public LocalDate getActivationLocalDate() {
-        return this.approvedOnDate;
-    }
-
     private boolean isDateInTheFuture(final LocalDate localDate) {
         return localDate.isAfter(DateUtils.getBusinessLocalDate());
     }
 
-    public Report getBusinessRuleId() {
-        return this.businessRuleId;
-    }
-
-    public String getCampaignName() {
-        return this.campaignName;
-    }
-
-    public String getEmailSubject() {
-        return this.emailSubject;
-    }
-
-    public String getEmailMessage() {
-        return this.emailMessage;
-    }
-
-    public String getParamValue() {
-        return this.paramValue;
-    }
-
-    public String getRecurrence() {
-        return this.recurrence;
-    }
-
-    public LocalDateTime getRecurrenceStartDateTime() {
-        return this.recurrenceStartDate;
-    }
-
-    public void setLastTriggerDate(LocalDateTime lastTriggerDate) {
-        this.lastTriggerDate = lastTriggerDate;
-    }
-
-    public void setNextTriggerDate(LocalDateTime nextTriggerDate) {
-        this.nextTriggerDate = nextTriggerDate;
-    }
-
-    public LocalDateTime getNextTriggerDate() {
-        return this.nextTriggerDate;
-    }
-
-    public LocalDateTime getNextTriggerDateInDate() {
-        return this.nextTriggerDate;
-    }
-
-    public LocalDateTime getLastTriggerDate() {
-        return this.lastTriggerDate;
-    }
-
-    public void updateIsVisible(boolean isVisible) {
-        this.isVisible = isVisible;
-    }
-
-    public void updateBusinessRuleId(final Report report) {
-        this.businessRuleId = report;
-    }
-
-    public String getEmailAttachmentFileFormat() {
-        return this.emailAttachmentFileFormat;
-    }
-
-    public Report getStretchyReport() {
-        return this.stretchyReport;
-    }
-
-    public String getStretchyReportParamMap() {
-        return this.stretchyReportParamMap;
-    }
-
-    public void setStretchyReportParamMap(String stretchyReportParamMap) {
-        this.stretchyReportParamMap = stretchyReportParamMap;
-    }
-
-    public AppUser getApprovedBy() {
-        return this.approvedBy;
-    }
-
-    public AppUser getClosedBy() {
-        return this.closedBy;
-    }
 }
