@@ -19,60 +19,37 @@
 package org.apache.fineract.infrastructure.campaigns.email.data;
 
 import java.util.Map;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class EmailBusinessRulesData {
 
     @SuppressWarnings("unused")
-    private final Long reportId;
+    private Long reportId;
 
     @SuppressWarnings("unused")
-    private final String reportName;
+    private String reportName;
 
     @SuppressWarnings("unused")
-    private final String reportType;
+    private String reportType;
 
     @SuppressWarnings("unused")
-    private final String reportSubType;
+    private String reportSubType;
 
     @SuppressWarnings("unused")
-    private final String reportDescription;
+    private String reportDescription;
 
     @SuppressWarnings("unused")
-    private final Map<String, Object> reportParamName;
-
-    public EmailBusinessRulesData(final Long reportId, final String reportName, final String reportType,
-            final Map<String, Object> reportParamName, final String reportSubType, final String reportDescription) {
-        this.reportId = reportId;
-        this.reportName = reportName;
-        this.reportType = reportType;
-        this.reportParamName = reportParamName;
-        this.reportDescription = reportDescription;
-        this.reportSubType = reportSubType;
-    }
+    private Map<String, Object> reportParamName;
 
     public static EmailBusinessRulesData instance(final Long reportId, final String reportName, final String reportType,
             final Map<String, Object> reportParamName, final String reportSubType, final String reportDescription) {
-        return new EmailBusinessRulesData(reportId, reportName, reportType, reportParamName, reportSubType, reportDescription);
-    }
-
-    public Map<String, Object> getReportParamName() {
-        return reportParamName;
-    }
-
-    public String getReportType() {
-        return reportType;
-    }
-
-    public String getReportName() {
-        return reportName;
-    }
-
-    public Long getReportId() {
-        return reportId;
-    }
-
-    public String getReportDescription() {
-        return reportDescription;
+        return new EmailBusinessRulesData().setReportId(reportId).setReportName(reportName).setReportType(reportType)
+                .setReportParamName(reportParamName).setReportSubType(reportSubType).setReportDescription(reportDescription);
     }
 
     @Override

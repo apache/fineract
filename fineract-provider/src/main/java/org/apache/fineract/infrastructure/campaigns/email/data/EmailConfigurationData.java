@@ -18,47 +18,31 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.data;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+
 /**
  * Immutable data object representing an Email configuration.
  */
+
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class EmailConfigurationData {
 
     @SuppressWarnings("unused")
-    private final Long id;
+    private Long id;
 
-    private final String name;
+    private String name;
 
-    private final String value;
+    private String value;
 
     /**
      * @return an instance of the EmailConfigurationData class
      **/
     public static EmailConfigurationData instance(Long id, String name, String value) {
-        return new EmailConfigurationData(id, name, value);
-    }
-
-    /**
-     * EmailConfigurationData constructor
-     **/
-    private EmailConfigurationData(Long id, String name, String value) {
-        this.id = id;
-        this.name = name;
-        this.value = value;
-    }
-
-    /**
-     * @return the id
-     */
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getValue() {
-        return value;
+        return new EmailConfigurationData().setId(id).setName(name).setValue(value);
     }
 
 }

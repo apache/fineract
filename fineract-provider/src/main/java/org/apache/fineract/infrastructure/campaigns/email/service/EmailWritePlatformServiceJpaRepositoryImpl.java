@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.campaigns.email.service;
 
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailDataValidator;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessage;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessageAssembler;
@@ -29,7 +30,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -37,6 +37,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class EmailWritePlatformServiceJpaRepositoryImpl implements EmailWritePlatformService {
 
     private static final Logger LOG = LoggerFactory.getLogger(EmailWritePlatformServiceJpaRepositoryImpl.class);
@@ -44,14 +45,6 @@ public class EmailWritePlatformServiceJpaRepositoryImpl implements EmailWritePla
     private final EmailMessageAssembler assembler;
     private final EmailMessageRepository repository;
     private final EmailDataValidator validator;
-
-    @Autowired
-    public EmailWritePlatformServiceJpaRepositoryImpl(final EmailMessageAssembler assembler, final EmailMessageRepository repository,
-            final EmailDataValidator validator) {
-        this.assembler = assembler;
-        this.repository = repository;
-        this.validator = validator;
-    }
 
     @Transactional
     @Override
