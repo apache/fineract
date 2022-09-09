@@ -29,6 +29,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
+import javax.persistence.EntityManager;
 import org.apache.fineract.avro.loan.v1.LoanAccountDataV1;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
@@ -43,7 +44,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -57,12 +57,15 @@ class ExternalEventServiceTest {
     private ExternalEventIdempotencyKeyGenerator idempotencyKeyGenerator;
     @Mock
     private BusinessEventSerializerFactory serializerFactory;
+    @Mock
+    private EntityManager entityManager;
 
-    @InjectMocks
     private ExternalEventService underTest;
 
     @BeforeEach
     public void setUp() {
+        underTest = new ExternalEventService(repository, idempotencyKeyGenerator, serializerFactory);
+        underTest.setEntityManager(entityManager);
         FineractPlatformTenant tenant = new FineractPlatformTenant(1L, "default", "Default Tenant", "Europe/Budapest", null);
         ThreadLocalContextUtil.setTenant(tenant);
         ThreadLocalContextUtil

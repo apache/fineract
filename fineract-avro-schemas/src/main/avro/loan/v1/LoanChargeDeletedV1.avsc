@@ -1,0 +1,23 @@
+{
+    "name": "LoanChargeDeletedV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "default": null,
+            "name": "id",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "chargeId",
+            "type": [
+                "null",
+                "long"
+            ]
+        }
+    ]
+}

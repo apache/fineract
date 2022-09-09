@@ -22,50 +22,41 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.generic.GenericContainer;
-import org.apache.fineract.avro.loan.v1.LoanAccountDataV1;
-import org.apache.fineract.avro.loan.v1.LoanTransactionDataV1;
-import org.apache.fineract.avro.loan.v1.LoanTransactionWithLoanV1;
+import org.apache.fineract.avro.loan.v1.LoanChargeDeletedV1;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionBusinessEvent;
-import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanAccountDataMapper;
-import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanTransactionDataMapper;
+import org.apache.fineract.infrastructure.event.business.domain.loan.charge.LoanDeleteChargeBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
 import org.apache.fineract.infrastructure.event.external.service.support.ByteBufferConverter;
-import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
-import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class LoanTransactionBusinessEventSerializer implements BusinessEventSerializer {
+@Order(Ordered.LOWEST_PRECEDENCE - 1)
+public class LoanChargeDeletedBusinessEventSerializer implements BusinessEventSerializer {
 
-    private final LoanReadPlatformService service;
-    private final LoanAccountDataMapper loanMapper;
-    private final LoanTransactionDataMapper loanTransactionMapper;
     private final ByteBufferConverter byteBufferConverter;
 
     @Override
     public <T> boolean canSerialize(BusinessEvent<T> event) {
-        return event instanceof LoanTransactionBusinessEvent;
+        return event instanceof LoanDeleteChargeBusinessEvent;
     }
 
     @Override
     public <T> byte[] serialize(BusinessEvent<T> rawEvent) throws IOException {
-        LoanTransactionBusinessEvent event = (LoanTransactionBusinessEvent) rawEvent;
-        Long loanId = event.get().getLoan().getId();
-        LoanAccountData loanData = service.retrieveOne(loanId);
-        LoanAccountDataV1 loanAvroDto = loanMapper.map(loanData);
-        Long loanTransactionId = event.get().getId();
-        LoanTransactionData transactionData = service.retrieveLoanTransaction(loanId, loanTransactionId);
-        LoanTransactionDataV1 loanTransactionAvroDto = loanTransactionMapper.map(transactionData);
-        LoanTransactionWithLoanV1 avroDto = new LoanTransactionWithLoanV1(loanAvroDto, loanTransactionAvroDto);
+        LoanDeleteChargeBusinessEvent event = (LoanDeleteChargeBusinessEvent) rawEvent;
+        LoanCharge loanCharge = event.get();
+        Long id = loanCharge.getId();
+        Long chargeId = loanCharge.getCharge().getId();
+        LoanChargeDeletedV1 avroDto = new LoanChargeDeletedV1(id, chargeId);
         ByteBuffer buffer = avroDto.toByteBuffer();
         return byteBufferConverter.convert(buffer);
     }
 
     @Override
     public Class<? extends GenericContainer> getSupportedSchema() {
-        return LoanTransactionDataV1.class;
+        return LoanChargeDeletedV1.class;
     }
 }

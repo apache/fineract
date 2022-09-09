@@ -122,12 +122,10 @@ import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementData
 import org.apache.fineract.portfolio.loanaccount.exception.UndoLastTrancheDisbursementException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculator;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.DefaultScheduledDateGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelPeriod;
-import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
@@ -2406,11 +2404,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     public ChangedTransactionDetail disburse(final AppUser currentUser, final JsonCommand command, final Map<String, Object> actualChanges,
             final ScheduleGeneratorDTO scheduleGeneratorDTO, final PaymentDetail paymentDetail) {
 
-        this.loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSED, this);
-
         final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
-
-        actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
 
         this.disbursedBy = currentUser;
         updateLoanScheduleDependentDerivedFields();
@@ -2446,7 +2440,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             addLoanTransaction(interestAppliedTransaction);
         }
 
-        return reprocessTransactionForDisbursement();
+        ChangedTransactionDetail result = reprocessTransactionForDisbursement();
+        this.loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSED, this);
+        actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
+        return result;
 
     }
 
@@ -4595,82 +4592,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         }
         return dueRepaymentPeriodDate.minusDays(1);// get 2n-1 range date from
                                                    // startDate
-    }
-
-    public void applyHolidayToRepaymentScheduleDates(final Holiday holiday, final LoanUtilService loanUtilService) {
-        final DefaultScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
-        ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(this, holiday.getFromDateLocalDate());
-        final LoanApplicationTerms loanApplicationTerms = this.constructLoanApplicationTerms(scheduleGeneratorDTO);
-
-        // LocalDate rescheduleFromDate = holiday.getFromDateLocalDate();
-        LocalDate adjustedRescheduleToDate = null;
-
-        if (holiday.getReScheduleType().isResheduleToNextRepaymentDate()) {
-            final LocalDate rescheduleToDate = holiday.getToDateLocalDate();
-            for (final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : this.getRepaymentScheduleInstallments()) {
-                if (rescheduleToDate.isEqual(loanRepaymentScheduleInstallment.getDueDate())) {
-                    adjustedRescheduleToDate = rescheduleToDate;
-                    break;
-                } else {
-                    // Account for a Bimonthly Loan Product
-                    // if (loanApplicationTerms.getRepaymentPeriodFrequencyType().isSemiMonthly()) {
-                    // if (rescheduleToDate.isAfter(loanRepaymentScheduleInstallment.getDueDate())
-                    // && rescheduleToDate.isBefore(loanRepaymentScheduleInstallment.getDueDate().plusDays(15))) {
-                    // adjustedRescheduleToDate = loanRepaymentScheduleInstallment.getDueDate();
-                    // break;
-                    // }
-                    // } else {
-                    // // Once Bimonthly product implemented, Replace the `Standard Monthly Loan Holiday check` below
-                    // HERE
-                    // if (rescheduleToDate.isAfter(loanRepaymentScheduleInstallment.getDueDate())
-                    // && rescheduleToDate.isBefore(loanRepaymentScheduleInstallment.getDueDate().plusDays(30))) {
-                    // adjustedRescheduleToDate = loanRepaymentScheduleInstallment.getDueDate();
-                    // break;
-                    // }
-                    // }
-
-                    // Standard Monthly Loan Holiday check
-                    if (rescheduleToDate.isAfter(loanRepaymentScheduleInstallment.getDueDate())
-                            && rescheduleToDate.isBefore(loanRepaymentScheduleInstallment.getDueDate().plusDays(30))) {
-                        adjustedRescheduleToDate = loanRepaymentScheduleInstallment.getDueDate();
-                        break;
-                    }
-                }
-            }
-        } else {
-            adjustedRescheduleToDate = holiday.getRepaymentsRescheduledToLocalDate();
-        }
-
-        // first repayment's from date is same as disbursement date.
-        LocalDate tmpFromDate = getDisbursementDate();
-
-        // Loop through all loanRepayments
-        List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
-        for (final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : installments) {
-
-            if (adjustedRescheduleToDate == null) {
-                break;
-            }
-
-            final LocalDate oldDueDate = loanRepaymentScheduleInstallment.getDueDate();
-
-            // update from date if it's not same as previous installament's due
-            // date.
-            if (!loanRepaymentScheduleInstallment.getFromDate().isEqual(tmpFromDate)) {
-                loanRepaymentScheduleInstallment.updateFromDate(tmpFromDate);
-            }
-
-            if (oldDueDate.equals(holiday.getFromDateLocalDate()) || oldDueDate.isAfter(holiday.getFromDateLocalDate())) {
-                // FIXME: AA do we need to apply non-working days.
-                // Assuming holiday's repayment reschedule to date cannot be
-                // created on a non-working day.
-
-                adjustedRescheduleToDate = scheduledDateGenerator.generateNextRepaymentDate(adjustedRescheduleToDate, loanApplicationTerms,
-                        false);
-                loanRepaymentScheduleInstallment.updateDueDate(adjustedRescheduleToDate);
-            }
-            tmpFromDate = loanRepaymentScheduleInstallment.getDueDate();
-        }
     }
 
     private void validateDisbursementDateIsOnNonWorkingDay(final WorkingDays workingDays, final boolean allowTransactionsOnNonWorkingDay) {

@@ -18,13 +18,22 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.event.business.domain.loan.LoanStatusChangedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 
+// TODO: introduce tests for the state machine
 @RequiredArgsConstructor
 public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachine {
 
     private final List<LoanStatus> allowedLoanStatuses;
+    private final BusinessEventNotifierService businessEventNotifierService;
+
+    public DefaultLoanLifecycleStateMachine(LoanStatus[] allowedLoanStatuses, BusinessEventNotifierService businessEventNotifierService) {
+        this(Arrays.asList(allowedLoanStatuses), businessEventNotifierService);
+    }
 
     @Override
     public LoanStatus dryTransition(final LoanEvent loanEvent, final Loan loan) {
@@ -35,6 +44,15 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
     public void transition(final LoanEvent loanEvent, final Loan loan) {
         LoanStatus newState = getNextState(loanEvent, loan);
         loan.setLoanStatus(newState.getValue());
+
+        if (isNotLoanCreation(loanEvent)) {
+            // in case of Loan creation, a LoanCreatedBusinessEvent is also raised, no need to send a status change
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanStatusChangedBusinessEvent(loan));
+        }
+    }
+
+    private boolean isNotLoanCreation(LoanEvent loanEvent) {
+        return !LoanEvent.LOAN_CREATED.equals(loanEvent);
     }
 
     private LoanStatus getNextState(LoanEvent loanEvent, Loan loan) {
