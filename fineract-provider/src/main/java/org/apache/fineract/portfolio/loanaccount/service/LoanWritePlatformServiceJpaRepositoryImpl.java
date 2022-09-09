@@ -2260,7 +2260,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final LoanTransaction newTransferTransaction = LoanTransaction.initiateTransfer(loan.getOffice(), loan, transferDate);
         loan.addLoanTransaction(newTransferTransaction);
-        loan.setLoanStatus(LoanStatus.TRANSFER_IN_PROGRESS.getValue());
+        LoanLifecycleStateMachine loanLifecycleStateMachine = defaultLoanLifecycleStateMachine();
+        LoanStatus loanStatusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_INITIATE_TRANSFER, loan.status());
+        loan.setLoanStatus(loanStatusEnum.getValue());
 
         this.loanTransactionRepository.saveAndFlush(newTransferTransaction);
         saveLoanWithDataIntegrityViolationChecks(loan);
@@ -2281,11 +2283,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final LoanTransaction newTransferAcceptanceTransaction = LoanTransaction.approveTransfer(acceptedInOffice, loan, transferDate);
         loan.addLoanTransaction(newTransferAcceptanceTransaction);
+        LoanLifecycleStateMachine loanLifecycleStateMachine = defaultLoanLifecycleStateMachine();
+        LoanStatus loanStatusEnum;
         if (loan.getTotalOverpaid() != null) {
-            loan.setLoanStatus(LoanStatus.OVERPAID.getValue());
+            loanStatusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_OVERPAYMENT, loan.status());
         } else {
-            loan.setLoanStatus(LoanStatus.ACTIVE.getValue());
+            loanStatusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, loan.status());
         }
+        loan.setLoanStatus(loanStatusEnum.getValue());
         if (loanOfficer != null) {
             loan.reassignLoanOfficer(loanOfficer, transferDate);
         }
@@ -2310,7 +2315,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final LoanTransaction newTransferAcceptanceTransaction = LoanTransaction.withdrawTransfer(loan.getOffice(), loan, transferDate);
         loan.addLoanTransaction(newTransferAcceptanceTransaction);
-        loan.setLoanStatus(LoanStatus.ACTIVE.getValue());
+        LoanLifecycleStateMachine loanLifecycleStateMachine = defaultLoanLifecycleStateMachine();
+        LoanStatus loanStatusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_WITHDRAW_TRANSFER, loan.status());
+        loan.setLoanStatus(loanStatusEnum.getValue());
 
         this.loanTransactionRepository.saveAndFlush(newTransferAcceptanceTransaction);
         saveLoanWithDataIntegrityViolationChecks(loan);
@@ -2326,7 +2333,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public void rejectLoanTransfer(final Loan loan) {
         this.loanAssembler.setHelpers(loan);
         businessEventNotifierService.notifyPreBusinessEvent(new LoanRejectTransferBusinessEvent(loan));
-        loan.setLoanStatus(LoanStatus.TRANSFER_ON_HOLD.getValue());
+        LoanLifecycleStateMachine loanLifecycleStateMachine = defaultLoanLifecycleStateMachine();
+        LoanStatus loanStatusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REJECT_TRANSFER, loan.status());
+        loan.setLoanStatus(loanStatusEnum.getValue());
         saveLoanWithDataIntegrityViolationChecks(loan);
         businessEventNotifierService.notifyPostBusinessEvent(new LoanRejectTransferBusinessEvent(loan));
     }
@@ -2857,8 +2866,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
 
-        ChangedTransactionDetail changedTransactionDetail = loan.undoWrittenOff(existingTransactionIds, existingReversedTransactionIds,
-                scheduleGeneratorDTO);
+        ChangedTransactionDetail changedTransactionDetail = loan.undoWrittenOff(defaultLoanLifecycleStateMachine(), existingTransactionIds,
+                existingReversedTransactionIds, scheduleGeneratorDTO);
         if (changedTransactionDetail != null) {
             for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
                 this.loanTransactionRepository.save(mapEntry.getValue());

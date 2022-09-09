@@ -3635,7 +3635,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         }
 
         if (isClosedObligationsMet() || isClosedWrittenOff() || isClosedWithOutsandingAmountMarkedForReschedule()) {
-            this.loanStatus = LoanStatus.ACTIVE.getValue();
+            LoanStatus loanStatusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_ADJUST_TRANSACTION,
+                    LoanStatus.fromInt(this.loanStatus));
+            this.loanStatus = loanStatusEnum.getValue();
         }
 
         if (newTransactionDetail.isRepaymentType() || newTransactionDetail.isInterestWaiver()) {
@@ -3646,7 +3648,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return changedTransactionDetail;
     }
 
-    public ChangedTransactionDetail undoWrittenOff(final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
+    public ChangedTransactionDetail undoWrittenOff(LoanLifecycleStateMachine loanLifecycleStateMachine,
+            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
             final ScheduleGeneratorDTO scheduleGeneratorDTO) {
 
         validateAccountStatus(LoanEvent.WRITE_OFF_OUTSTANDING_UNDO);
@@ -3654,7 +3657,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
         final LoanTransaction writeOffTransaction = findWriteOffTransaction();
         writeOffTransaction.reverse();
-        this.loanStatus = LoanStatus.ACTIVE.getValue();
+        LoanStatus loanStatusEnum = loanLifecycleStateMachine.transition(LoanEvent.WRITE_OFF_OUTSTANDING_UNDO,
+                LoanStatus.fromInt(this.loanStatus));
+        this.loanStatus = loanStatusEnum.getValue();
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
                 .determineProcessor(this.transactionProcessingStrategy);
         final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
@@ -6068,7 +6073,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         updateLoanSummaryDerivedFields();
 
         if (this.totalOverpaid == null || BigDecimal.ZERO.compareTo(this.totalOverpaid) == 0) {
-            this.loanStatus = LoanStatus.CLOSED_OBLIGATIONS_MET.getValue();
+            LoanStatus statusEnum = defaultLoanLifecycleStateMachine.transition(LoanEvent.LOAN_CREDIT_BALANCE_REFUND,
+                    LoanStatus.fromInt(this.loanStatus));
+            this.loanStatus = statusEnum.getValue();
         }
 
     }
