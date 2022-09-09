@@ -2261,8 +2261,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final LoanTransaction newTransferTransaction = LoanTransaction.initiateTransfer(loan.getOffice(), loan, transferDate);
         loan.addLoanTransaction(newTransferTransaction);
         LoanLifecycleStateMachine loanLifecycleStateMachine = defaultLoanLifecycleStateMachine();
-        LoanStatus loanStatusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_INITIATE_TRANSFER, loan.status());
-        loan.setLoanStatus(loanStatusEnum.getValue());
+        loanLifecycleStateMachine.transition(LoanEvent.LOAN_INITIATE_TRANSFER, loan);
 
         this.loanTransactionRepository.saveAndFlush(newTransferTransaction);
         saveLoanWithDataIntegrityViolationChecks(loan);
@@ -2284,13 +2283,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final LoanTransaction newTransferAcceptanceTransaction = LoanTransaction.approveTransfer(acceptedInOffice, loan, transferDate);
         loan.addLoanTransaction(newTransferAcceptanceTransaction);
         LoanLifecycleStateMachine loanLifecycleStateMachine = defaultLoanLifecycleStateMachine();
-        LoanStatus loanStatusEnum;
         if (loan.getTotalOverpaid() != null) {
-            loanStatusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_OVERPAYMENT, loan.status());
+            loanLifecycleStateMachine.transition(LoanEvent.LOAN_OVERPAYMENT, loan);
         } else {
-            loanStatusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, loan.status());
+            loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, loan);
         }
-        loan.setLoanStatus(loanStatusEnum.getValue());
         if (loanOfficer != null) {
             loan.reassignLoanOfficer(loanOfficer, transferDate);
         }
@@ -2316,8 +2313,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final LoanTransaction newTransferAcceptanceTransaction = LoanTransaction.withdrawTransfer(loan.getOffice(), loan, transferDate);
         loan.addLoanTransaction(newTransferAcceptanceTransaction);
         LoanLifecycleStateMachine loanLifecycleStateMachine = defaultLoanLifecycleStateMachine();
-        LoanStatus loanStatusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_WITHDRAW_TRANSFER, loan.status());
-        loan.setLoanStatus(loanStatusEnum.getValue());
+        loanLifecycleStateMachine.transition(LoanEvent.LOAN_WITHDRAW_TRANSFER, loan);
 
         this.loanTransactionRepository.saveAndFlush(newTransferAcceptanceTransaction);
         saveLoanWithDataIntegrityViolationChecks(loan);
@@ -2334,8 +2330,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanAssembler.setHelpers(loan);
         businessEventNotifierService.notifyPreBusinessEvent(new LoanRejectTransferBusinessEvent(loan));
         LoanLifecycleStateMachine loanLifecycleStateMachine = defaultLoanLifecycleStateMachine();
-        LoanStatus loanStatusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REJECT_TRANSFER, loan.status());
-        loan.setLoanStatus(loanStatusEnum.getValue());
+        loanLifecycleStateMachine.transition(LoanEvent.LOAN_REJECT_TRANSFER, loan);
         saveLoanWithDataIntegrityViolationChecks(loan);
         businessEventNotifierService.notifyPostBusinessEvent(new LoanRejectTransferBusinessEvent(loan));
     }

@@ -700,9 +700,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 chargesPayment.getAmount(getCurrency()).getAmount(), installmentNumber);
         chargesPayment.getLoanChargesPaid().add(loanChargePaidBy);
         addLoanTransaction(chargesPayment);
-        final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_CHARGE_PAYMENT,
-                LoanStatus.fromInt(this.loanStatus));
-        this.loanStatus = statusEnum.getValue();
+        loanLifecycleStateMachine.transition(LoanEvent.LOAN_CHARGE_PAYMENT, this);
 
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
                 .determineProcessor(this.transactionProcessingStrategy);
@@ -2025,13 +2023,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
         updateLoanSchedule(loanSchedule);
 
-        LoanStatus from = null;
-        if (this.loanStatus != null) {
-            from = LoanStatus.fromInt(this.loanStatus);
-        }
-
-        final LoanStatus statusEnum = lifecycleStateMachine.transition(LoanEvent.LOAN_CREATED, from);
-        this.loanStatus = statusEnum.getValue();
+        lifecycleStateMachine.transition(LoanEvent.LOAN_CREATED, this);
 
         this.externalId = externalId;
         this.termFrequency = loanApplicationTerms.getLoanTermFrequency();
@@ -2114,9 +2106,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
 
-        final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REJECTED, LoanStatus.fromInt(this.loanStatus));
+        final LoanStatus statusEnum = loanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_REJECTED, this);
         if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
-            this.loanStatus = statusEnum.getValue();
+            loanLifecycleStateMachine.transition(LoanEvent.LOAN_REJECTED, this);
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
 
             final LocalDate rejectedOn = command.localDateValueOfParameterNamed("rejectedOnDate");
@@ -2160,9 +2152,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
 
-        final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_WITHDRAWN, LoanStatus.fromInt(this.loanStatus));
+        final LoanStatus statusEnum = loanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_WITHDRAWN, this);
         if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
-            this.loanStatus = statusEnum.getValue();
+            loanLifecycleStateMachine.transition(LoanEvent.LOAN_WITHDRAWN, this);
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
 
             LocalDate withdrawnOn = command.localDateValueOfParameterNamed("withdrawnOnDate");
@@ -2215,7 +2207,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
          * statusEnum is holding the possible new status derived from loanLifecycleStateMachine.transition.
          */
 
-        final LoanStatus newStatusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_APPROVED, LoanStatus.fromInt(this.loanStatus));
+        final LoanStatus newStatusEnum = loanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_APPROVED, this);
 
         /*
          * FIXME: There is no need to check below condition, if loanLifecycleStateMachine.transition is doing it's
@@ -2225,7 +2217,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
          */
 
         if (!newStatusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
-            this.loanStatus = newStatusEnum.getValue();
+            loanLifecycleStateMachine.transition(LoanEvent.LOAN_APPROVED, this);
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
 
             // only do below if status has changed in the 'approval' case
@@ -2363,9 +2355,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
 
         final LoanStatus currentStatus = LoanStatus.fromInt(this.loanStatus);
-        final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_APPROVAL_UNDO, currentStatus);
+        final LoanStatus statusEnum = loanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_APPROVAL_UNDO, this);
         if (!statusEnum.hasStateOf(currentStatus)) {
-            this.loanStatus = statusEnum.getValue();
+            loanLifecycleStateMachine.transition(LoanEvent.LOAN_APPROVAL_UNDO, this);
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
 
             this.approvedOnDate = null;
@@ -2414,12 +2406,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     public ChangedTransactionDetail disburse(final AppUser currentUser, final JsonCommand command, final Map<String, Object> actualChanges,
             final ScheduleGeneratorDTO scheduleGeneratorDTO, final PaymentDetail paymentDetail) {
 
-        final LoanStatus statusEnum = this.loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSED,
-                LoanStatus.fromInt(this.loanStatus));
+        this.loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSED, this);
 
         final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
 
-        this.loanStatus = statusEnum.getValue();
         actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
 
         this.disbursedBy = currentUser;
@@ -2526,8 +2516,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public boolean canDisburse(final LocalDate actualDisbursementDate) {
         LocalDate lastDisburseDate = this.actualDisbursementDate;
-        final LoanStatus statusEnum = this.loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSED,
-                LoanStatus.fromInt(this.loanStatus));
+        final LoanStatus statusEnum = this.loanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_DISBURSED, this);
 
         boolean isMultiTrancheDisburse = false;
         LoanStatus actualLoanStatus = LoanStatus.fromInt(this.loanStatus);
@@ -2921,12 +2910,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
         final LoanStatus currentStatus = LoanStatus.fromInt(this.loanStatus);
-        final LoanStatus statusEnum = this.loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSAL_UNDO, currentStatus);
+        final LoanStatus statusEnum = this.loanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_DISBURSAL_UNDO, this);
         validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_DISBURSAL_UNDO, getDisbursementDate());
         existingTransactionIds.addAll(findExistingTransactionIds());
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
         if (!statusEnum.hasStateOf(currentStatus)) {
-            this.loanStatus = statusEnum.getValue();
+            this.loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSAL_UNDO, this);
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
 
             final LocalDate actualDisbursementDate = getDisbursementDate();
@@ -3162,9 +3151,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         }
 
         if (loanTransaction.isRecoveryRepayment()) {
-            statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_RECOVERY_PAYMENT, LoanStatus.fromInt(this.loanStatus));
+            loanLifecycleStateMachine.transition(LoanEvent.LOAN_RECOVERY_PAYMENT, this);
         } else {
-            statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, LoanStatus.fromInt(this.loanStatus));
+            loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, this);
         }
 
         if (loanTransaction.isRecoveryRepayment()
@@ -3172,8 +3161,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             final String errorMessage = "The transaction amount cannot greater than the remaining written off amount.";
             throw new InvalidLoanStateTransitionException("transaction", "cannot.be.greater.than.total.written.off", errorMessage);
         }
-
-        this.loanStatus = statusEnum.getValue();
 
         loanTransaction.updateLoan(this);
 
@@ -3392,16 +3379,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             }
         }
         if (isAllChargesPaid) {
-            final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL,
-                    LoanStatus.fromInt(this.loanStatus));
-            this.loanStatus = statusEnum.getValue();
+            loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL, this);
 
             this.closedOnDate = transactionDate;
             this.actualMaturityDate = transactionDate;
         } else if (LoanStatus.fromInt(this.loanStatus).isOverpaid()) {
-            final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT_OR_WAIVER,
-                    LoanStatus.fromInt(this.loanStatus));
-            this.loanStatus = statusEnum.getValue();
+            loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, this);
         }
         processIncomeAccrualTransactionOnLoanClosure();
     }
@@ -3473,8 +3456,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     private void handleLoanOverpayment(final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
-        final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_OVERPAYMENT, LoanStatus.fromInt(this.loanStatus));
-        this.loanStatus = statusEnum.getValue();
+        loanLifecycleStateMachine.transition(LoanEvent.LOAN_OVERPAYMENT, this);
 
         this.closedOnDate = null;
         this.actualMaturityDate = null;
@@ -3635,9 +3617,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         }
 
         if (isClosedObligationsMet() || isClosedWrittenOff() || isClosedWithOutsandingAmountMarkedForReschedule()) {
-            LoanStatus loanStatusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_ADJUST_TRANSACTION,
-                    LoanStatus.fromInt(this.loanStatus));
-            this.loanStatus = loanStatusEnum.getValue();
+            loanLifecycleStateMachine.transition(LoanEvent.LOAN_ADJUST_TRANSACTION, this);
         }
 
         if (newTransactionDetail.isRepaymentType() || newTransactionDetail.isInterestWaiver()) {
@@ -3657,9 +3637,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
         final LoanTransaction writeOffTransaction = findWriteOffTransaction();
         writeOffTransaction.reverse();
-        LoanStatus loanStatusEnum = loanLifecycleStateMachine.transition(LoanEvent.WRITE_OFF_OUTSTANDING_UNDO,
-                LoanStatus.fromInt(this.loanStatus));
-        this.loanStatus = loanStatusEnum.getValue();
+        loanLifecycleStateMachine.transition(LoanEvent.WRITE_OFF_OUTSTANDING_UNDO, this);
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
                 .determineProcessor(this.transactionProcessingStrategy);
         final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
@@ -3740,12 +3718,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
         validateAccountStatus(LoanEvent.WRITE_OFF_OUTSTANDING);
 
-        final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.WRITE_OFF_OUTSTANDING,
-                LoanStatus.fromInt(this.loanStatus));
+        final LoanStatus statusEnum = loanLifecycleStateMachine.dryTransition(LoanEvent.WRITE_OFF_OUTSTANDING, this);
 
         LoanTransaction loanTransaction = null;
         if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
-            this.loanStatus = statusEnum.getValue();
+            loanLifecycleStateMachine.transition(LoanEvent.WRITE_OFF_OUTSTANDING, this);
             changes.put("status", LoanEnumerations.status(this.loanStatus));
 
             existingTransactionIds.addAll(findExistingTransactionIds());
@@ -3866,10 +3843,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             final Money totalOutstanding = this.summary.getTotalOutstanding(loanCurrency());
             if (totalOutstanding.isGreaterThanZero() && getInArrearsTolerance().isGreaterThanOrEqualTo(totalOutstanding)) {
 
-                final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL,
-                        LoanStatus.fromInt(this.loanStatus));
+                final LoanStatus statusEnum = loanLifecycleStateMachine.dryTransition(LoanEvent.REPAID_IN_FULL, this);
                 if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
-                    this.loanStatus = statusEnum.getValue();
+                    loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL, this);
                     changes.put("status", LoanEnumerations.status(this.loanStatus));
                 }
                 this.closedOnDate = closureDate;
@@ -3899,10 +3875,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 // TODO - KW - technically should set somewhere that this loan
                 // has
                 // 'overpaid' amount
-                final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL,
-                        LoanStatus.fromInt(this.loanStatus));
+                final LoanStatus statusEnum = loanLifecycleStateMachine.dryTransition(LoanEvent.REPAID_IN_FULL, this);
                 if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
-                    this.loanStatus = statusEnum.getValue();
+                    loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL, this);
                     changes.put("status", LoanEnumerations.status(this.loanStatus));
                 }
                 this.closedOnDate = closureDate;
@@ -3928,9 +3903,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
         final LocalDate rescheduledOn = command.localDateValueOfParameterNamed("transactionDate");
 
-        final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_RESCHEDULE, LoanStatus.fromInt(this.loanStatus));
+        final LoanStatus statusEnum = loanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_RESCHEDULE, this);
         if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
-            this.loanStatus = statusEnum.getValue();
+            loanLifecycleStateMachine.transition(LoanEvent.LOAN_RESCHEDULE, this);
             changes.put("status", LoanEnumerations.status(this.loanStatus));
         }
 
@@ -3959,6 +3934,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public LoanStatus status() {
         return LoanStatus.fromInt(this.loanStatus);
+    }
+
+    public Integer getPlainStatus() {
+        return this.loanStatus;
     }
 
     public boolean isSubmittedAndPendingApproval() {
@@ -4793,7 +4772,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         this.loanTransactions.remove(loanTransaction);
     }
 
-    public void setLoanStatus(final Integer loanStatus) {
+    // Intentionally kept as package-private. Nobody should set the status directly but use the
+    // DefaultLoanLifecycleStateMachine to transition
+    void setLoanStatus(final Integer loanStatus) {
         this.loanStatus = loanStatus;
     }
 
@@ -6073,9 +6054,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         updateLoanSummaryDerivedFields();
 
         if (this.totalOverpaid == null || BigDecimal.ZERO.compareTo(this.totalOverpaid) == 0) {
-            LoanStatus statusEnum = defaultLoanLifecycleStateMachine.transition(LoanEvent.LOAN_CREDIT_BALANCE_REFUND,
-                    LoanStatus.fromInt(this.loanStatus));
-            this.loanStatus = statusEnum.getValue();
+            defaultLoanLifecycleStateMachine.transition(LoanEvent.LOAN_CREDIT_BALANCE_REFUND, this);
         }
 
     }
@@ -6116,14 +6095,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
         ChangedTransactionDetail changedTransactionDetail = null;
 
-        final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REFUND, LoanStatus.fromInt(this.loanStatus));
-        this.loanStatus = statusEnum.getValue();
+        loanLifecycleStateMachine.transition(LoanEvent.LOAN_REFUND, this);
 
         loanTransaction.updateLoan(this);
-
-        // final boolean isTransactionChronologicallyLatest =
-        // isChronologicallyLatestRefund(loanTransaction,
-        // this.loanTransactions);
 
         if (status().isOverpaid() || status().isClosed()) {
 

@@ -27,16 +27,26 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
     private final List<LoanStatus> allowedLoanStatuses;
 
     @Override
-    public LoanStatus transition(final LoanEvent loanEvent, final LoanStatus from) {
+    public LoanStatus dryTransition(final LoanEvent loanEvent, final Loan loan) {
+        return getNextState(loanEvent, loan);
+    }
 
+    @Override
+    public void transition(final LoanEvent loanEvent, final Loan loan) {
+        LoanStatus newState = getNextState(loanEvent, loan);
+        loan.setLoanStatus(newState.getValue());
+    }
+
+    private LoanStatus getNextState(LoanEvent loanEvent, Loan loan) {
+        Integer plainFrom = loan.getPlainStatus();
+        if (loanEvent.equals(LoanEvent.LOAN_CREATED) && plainFrom == null) {
+            return submittedTransition();
+        }
+
+        LoanStatus from = loan.status();
         LoanStatus newState = from;
 
         switch (loanEvent) {
-            case LOAN_CREATED:
-                if (from == null) {
-                    newState = submittedTransition();
-                }
-            break;
             case LOAN_REJECTED:
                 if (from.hasStateOf(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL)) {
                     newState = rejectedTransition();
@@ -126,7 +136,6 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
             default:
             break;
         }
-
         return newState;
     }
 
