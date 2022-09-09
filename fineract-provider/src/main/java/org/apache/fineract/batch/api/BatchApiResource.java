@@ -29,8 +29,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.HttpMethod;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -43,7 +45,9 @@ import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.batch.serialization.BatchRequestJsonHelper;
 import org.apache.fineract.batch.service.BatchApiService;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.apache.fineract.infrastructure.security.exception.InvalidInstanceTypeMethodException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -78,6 +82,7 @@ public class BatchApiResource {
     private final ToApiJsonSerializer<BatchResponse> toApiJsonSerializer;
     private final BatchApiService service;
     private final BatchRequestJsonHelper batchRequestJsonHelper;
+    private final FineractProperties fineractProperties;
 
     /**
      * Rest assured POST method to get {@link BatchRequest} and returns back the consolidated {@link BatchResponse}
@@ -106,6 +111,8 @@ public class BatchApiResource {
         // Converts request array into BatchRequest List
         final List<BatchRequest> requestList = this.batchRequestJsonHelper.extractList(jsonRequestString);
 
+        validateRequestMethodsAllowedOnInstanceType(requestList);
+
         // Gets back the consolidated BatchResponse from BatchApiservice
         List<BatchResponse> result = new ArrayList<>();
 
@@ -120,4 +127,22 @@ public class BatchApiResource {
         return this.toApiJsonSerializer.serialize(result);
 
     }
+
+    /**
+     * Validates to make sure the request methods are allowed on currently running instance mode (type).
+     *
+     * @param requestList
+     *            the list of {@link BatchRequest}s
+     */
+    private void validateRequestMethodsAllowedOnInstanceType(final List<BatchRequest> requestList) {
+        // Throw exception if instance is read only and any of the batch requests are trying to write/update data.
+        if (fineractProperties.getMode().isReadOnlyMode()) {
+            final Optional<BatchRequest> nonGetRequest = requestList.stream()
+                    .filter(batchRequest -> !HttpMethod.GET.equals(batchRequest.getMethod())).findFirst();
+            if (nonGetRequest.isPresent()) {
+                throw new InvalidInstanceTypeMethodException(nonGetRequest.get().getMethod());
+            }
+        }
+    }
+
 }
