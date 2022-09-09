@@ -18,11 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.jobs.applyholidaystoloans;
 
-import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
-import org.apache.fineract.organisation.holiday.domain.HolidayRepositoryWrapper;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
-import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -40,28 +36,15 @@ public class ApplyHolidaysToLoansConfig {
 
     @Autowired
     private StepBuilderFactory steps;
-    @Autowired
-    private ConfigurationDomainService configurationDomainService;
-    @Autowired
-    private HolidayRepositoryWrapper holidayRepository;
-    @Autowired
-    private LoanRepositoryWrapper loanRepositoryWrapper;
-    @Autowired
-    private LoanUtilService loanUtilService;
 
     @Bean
-    protected Step applyHolidaysToLoansStep() {
-        return steps.get(JobName.APPLY_HOLIDAYS_TO_LOANS.name()).tasklet(applyHolidaysToLoansTasklet()).build();
+    protected Step applyHolidaysToLoansStep(ApplyHolidaysToLoansTasklet applyHolidaysToLoansTasklet) {
+        return steps.get(JobName.APPLY_HOLIDAYS_TO_LOANS.name()).tasklet(applyHolidaysToLoansTasklet).build();
     }
 
     @Bean
-    public Job applyHolidaysToLoansJob() {
-        return jobs.get(JobName.APPLY_HOLIDAYS_TO_LOANS.name()).start(applyHolidaysToLoansStep()).incrementer(new RunIdIncrementer())
-                .build();
-    }
-
-    @Bean
-    public ApplyHolidaysToLoansTasklet applyHolidaysToLoansTasklet() {
-        return new ApplyHolidaysToLoansTasklet(configurationDomainService, holidayRepository, loanRepositoryWrapper, loanUtilService);
+    public Job applyHolidaysToLoansJob(ApplyHolidaysToLoansTasklet applyHolidaysToLoansTasklet) {
+        return jobs.get(JobName.APPLY_HOLIDAYS_TO_LOANS.name()).start(applyHolidaysToLoansStep(applyHolidaysToLoansTasklet))
+                .incrementer(new RunIdIncrementer()).build();
     }
 }

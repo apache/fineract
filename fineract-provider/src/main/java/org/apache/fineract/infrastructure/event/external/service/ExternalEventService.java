@@ -19,6 +19,8 @@
 package org.apache.fineract.infrastructure.event.external.service;
 
 import java.io.IOException;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.external.repository.ExternalEventRepository;
@@ -38,6 +40,8 @@ public class ExternalEventService {
     private final ExternalEventIdempotencyKeyGenerator idempotencyKeyGenerator;
     private final BusinessEventSerializerFactory serializerFactory;
 
+    private EntityManager entityManager;
+
     public <T> void postEvent(BusinessEvent<T> event) {
         if (event == null) {
             throw new IllegalArgumentException("event cannot be null");
@@ -48,6 +52,7 @@ public class ExternalEventService {
         try {
             BusinessEventSerializer serializer = serializerFactory.create(event);
             String schema = serializer.getSupportedSchema().getName();
+            flushChangesBeforeSerialization();
             byte[] data = serializer.serialize(event);
             ExternalEvent externalEvent = new ExternalEvent(eventType, schema, data, idempotencyKey);
 
@@ -56,5 +61,14 @@ public class ExternalEventService {
             throw new RuntimeException("Error while serializing event " + event.getClass().getSimpleName(), e);
         }
 
+    }
+
+    private void flushChangesBeforeSerialization() {
+        entityManager.flush();
+    }
+
+    @PersistenceContext
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 }
