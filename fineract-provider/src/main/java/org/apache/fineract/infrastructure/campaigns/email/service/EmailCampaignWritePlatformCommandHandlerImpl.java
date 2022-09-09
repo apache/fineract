@@ -151,7 +151,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
             if (changes.containsKey(EmailCampaignValidator.businessRuleId)) {
                 final Long newValue = command.longValueOfParameterNamed(EmailCampaignValidator.businessRuleId);
                 final Report reportId = this.reportRepository.findById(newValue).orElseThrow(() -> new ReportNotFoundException(newValue));
-                emailCampaign.updateBusinessRuleId(reportId);
+                emailCampaign.setBusinessRuleId(reportId);
 
             }
 
@@ -294,11 +294,11 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
                  * date us next trigger date when activating
                  */
                 LocalDateTime nextTriggerDateWithTime;
-                if (emailCampaign.getRecurrenceStartDateTime().isBefore(tenantDateTime())) {
+                if (emailCampaign.getRecurrenceStartDate().isBefore(tenantDateTime())) {
                     nextTriggerDateWithTime = CalendarUtils.getNextRecurringDate(emailCampaign.getRecurrence(),
-                            emailCampaign.getRecurrenceStartDateTime(), DateUtils.getLocalDateTimeOfTenant());
+                            emailCampaign.getRecurrenceStartDate(), DateUtils.getLocalDateTimeOfTenant());
                 } else {
-                    nextTriggerDateWithTime = emailCampaign.getRecurrenceStartDateTime();
+                    nextTriggerDateWithTime = emailCampaign.getRecurrenceStartDate();
                 }
 
                 emailCampaign.setNextTriggerDate(nextTriggerDateWithTime);
@@ -403,7 +403,8 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
                     String textMessage = this.compileEmailTemplate(textMessageTemplate, "EmailCampaign", entry);
                     if (!textMessage.isEmpty()) {
                         final Integer totalMessage = runReportObject.size();
-                        campaignMessage = new PreviewCampaignMessage(textMessage, totalMessage);
+                        campaignMessage = new PreviewCampaignMessage().setCampaignMessage(textMessage)
+                                .setTotalNumberOfMessages(totalMessage);
                         break;
                     }
                 }
@@ -438,14 +439,14 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
              * next trigger date when activating
              */
             LocalDateTime nextTriggerDate = null;
-            if (emailCampaign.getRecurrenceStartDateTime().isBefore(tenantDateTime())) {
-                nextTriggerDate = CalendarUtils.getNextRecurringDate(emailCampaign.getRecurrence(),
-                        emailCampaign.getRecurrenceStartDateTime(), DateUtils.getLocalDateTimeOfTenant());
+            if (emailCampaign.getRecurrenceStartDate().isBefore(tenantDateTime())) {
+                nextTriggerDate = CalendarUtils.getNextRecurringDate(emailCampaign.getRecurrence(), emailCampaign.getRecurrenceStartDate(),
+                        DateUtils.getLocalDateTimeOfTenant());
             } else {
-                nextTriggerDate = emailCampaign.getRecurrenceStartDateTime();
+                nextTriggerDate = emailCampaign.getRecurrenceStartDate();
             }
             // to get time of tenant
-            final LocalDateTime getTime = emailCampaign.getRecurrenceStartDateTime();
+            final LocalDateTime getTime = emailCampaign.getRecurrenceStartDate();
 
             final String dateString = nextTriggerDate.toString() + " " + getTime.getHour() + ":" + getTime.getMinute() + ":"
                     + getTime.getSecond();
