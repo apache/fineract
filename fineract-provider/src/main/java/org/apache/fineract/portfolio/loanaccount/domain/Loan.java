@@ -5992,6 +5992,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return this.accountNumber;
     }
 
+    public String getExternalId() {
+        return this.externalId;
+    }
+
     public Client getClient() {
         return this.client;
     }

@@ -244,4 +244,44 @@ class FineractInstanceModeApiFilterTest {
         // then
         verify(filterChain).doFilter(request, response);
     }
+
+    @Test
+    void testDoFilterInternal_ShouldLetBatchesApisThrough_WhenFineractIsInReadMode() throws ServletException, IOException {
+        // given
+        FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(true, false, false, false);
+        given(fineractProperties.getMode()).willReturn(modeProperties);
+        given(request.getMethod()).willReturn(HttpMethod.POST.name());
+        given(request.getPathInfo()).willReturn("/batches");
+        // when
+        underTest.doFilterInternal(request, response, filterChain);
+        // then
+        verify(filterChain).doFilter(request, response);
+    }
+
+    @Test
+    void testDoFilterInternal_ShouldLetBatchesApisThrough_WhenFineractIsInWriteMode() throws ServletException, IOException {
+        // given
+        FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, true, false, false);
+        given(fineractProperties.getMode()).willReturn(modeProperties);
+        given(request.getMethod()).willReturn(HttpMethod.POST.name());
+        given(request.getPathInfo()).willReturn("/batches");
+        // when
+        underTest.doFilterInternal(request, response, filterChain);
+        // then
+        verify(filterChain).doFilter(request, response);
+    }
+
+    @Test
+    void testDoFilterInternal_ShouldLetBatchesApisThrough_WhenFineractIsInBatchMode() throws ServletException, IOException {
+        // given
+        FineractProperties.FineractModeProperties modeProperties = InstanceModeMock.createModeProps(false, false, true, true);
+        given(fineractProperties.getMode()).willReturn(modeProperties);
+        given(request.getMethod()).willReturn(HttpMethod.POST.name());
+        given(request.getPathInfo()).willReturn("/batches");
+        // when
+        underTest.doFilterInternal(request, response, filterChain);
+        // then
+        verify(filterChain).doFilter(request, response);
+    }
+
 }
