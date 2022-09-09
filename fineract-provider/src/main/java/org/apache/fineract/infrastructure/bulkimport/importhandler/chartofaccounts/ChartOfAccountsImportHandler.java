@@ -134,7 +134,7 @@ public class ChartOfAccountsImportHandler implements ImportHandler {
         CodeValueData tagIdCodeValueData = null;
         if (ImportHandlerUtils.readAsString(ChartOfAcountsConstants.TAG_ID_COL, row) != null) {
             tagId = Long.parseLong(ImportHandlerUtils.readAsString(ChartOfAcountsConstants.TAG_ID_COL, row));
-            tagIdCodeValueData = new CodeValueData(tagId);
+            tagIdCodeValueData = new CodeValueData().setId(tagId);
         }
         String description = ImportHandlerUtils.readAsString(ChartOfAcountsConstants.DESCRIPTION_COL, row);
         if (ImportHandlerUtils.readAsString(ChartOfAcountsConstants.OFFICE_COL, row) != null) {

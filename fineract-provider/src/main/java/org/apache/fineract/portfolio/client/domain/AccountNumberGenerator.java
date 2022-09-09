@@ -79,7 +79,7 @@ public class AccountNumberGenerator {
         propertyMap.put(ENTITY_TYPE, "client");
         CodeValue clientType = client.clientType();
         if (clientType != null) {
-            propertyMap.put(CLIENT_TYPE, clientType.label());
+            propertyMap.put(CLIENT_TYPE, clientType.getLabel());
         }
         return generateAccountNumber(propertyMap, accountNumberFormat);
     }

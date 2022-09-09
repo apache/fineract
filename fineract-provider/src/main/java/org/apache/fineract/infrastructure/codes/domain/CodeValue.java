@@ -26,6 +26,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.CodeConstants.CodevalueJSONinputParams;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
@@ -35,6 +39,10 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Entity
 @Table(name = "m_code_value", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "code_id", "code_value" }, name = "code_value_duplicate") })
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public class CodeValue extends AbstractPersistableCustom {
 
     @Column(name = "code_value", length = 100)
@@ -58,29 +66,8 @@ public class CodeValue extends AbstractPersistableCustom {
 
     public static CodeValue createNew(final Code code, final String label, final int position, final String description,
             final boolean isActive, final boolean mandatory) {
-        return new CodeValue(code, label, position, description, isActive, mandatory);
-    }
-
-    protected CodeValue() {
-        //
-    }
-
-    private CodeValue(final Code code, final String label, final int position, final String description, final boolean isActive,
-            final boolean mandatory) {
-        this.code = code;
-        this.label = StringUtils.defaultIfEmpty(label, null);
-        this.position = position;
-        this.description = description;
-        this.isActive = isActive;
-        this.mandatory = mandatory;
-    }
-
-    public String label() {
-        return this.label;
-    }
-
-    public int position() {
-        return this.position;
+        return new CodeValue().setCode(code).setLabel(StringUtils.defaultIfEmpty(label, null)).setPosition(position)
+                .setDescription(description).setActive(isActive).setMandatory(mandatory);
     }
 
     public static CodeValue fromJson(final Code code, final JsonCommand command) {
@@ -99,7 +86,8 @@ public class CodeValue extends AbstractPersistableCustom {
 
         Boolean mandatory = command.booleanPrimitiveValueOfParameterNamed(CodevalueJSONinputParams.IS_MANDATORY.getValue());
 
-        return new CodeValue(code, label, position, description, isActive, mandatory);
+        return new CodeValue().setCode(code).setLabel(StringUtils.defaultIfEmpty(label, null)).setPosition(position)
+                .setDescription(description).setActive(isActive).setMandatory(mandatory);
     }
 
     public Map<String, Object> update(final JsonCommand command) {
