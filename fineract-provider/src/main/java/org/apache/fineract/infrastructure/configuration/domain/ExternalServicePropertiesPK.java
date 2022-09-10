@@ -21,34 +21,26 @@ package org.apache.fineract.infrastructure.configuration.domain;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @Embeddable
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public class ExternalServicePropertiesPK implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     @Column(name = "name", length = 150)
     private String name;
 
     @Column(name = "external_service_id")
     private Long externalServiceId;
-
-    public ExternalServicePropertiesPK() {
-
-    }
-
-    public ExternalServicePropertiesPK(Long externalServiceId, String name) {
-        this.externalServiceId = externalServiceId;
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Long getExternalService() {
-        return externalServiceId;
-    }
 
     @Override
     public boolean equals(Object obj) {
