@@ -215,7 +215,7 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
         String subscriptionKey = getCreditBureauConfiguration(creditBureauId, CreditBureauConfigurations.SUBSCRIPTIONKEY.toString());
 
         CreditBureauToken creditbureautoken = createToken(creditBureauId.longValue());
-        token = creditbureautoken.getCurrentToken();
+        token = creditbureautoken.getAccessToken();
 
         // will use only "NRC" part of code from common http method to get data based on nrc
         String process = "NRC";
@@ -304,7 +304,7 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
         String subscriptionKey = this.getCreditBureauConfiguration(creditBureauId, CreditBureauConfigurations.SUBSCRIPTIONKEY.toString());
 
         CreditBureauToken creditbureautoken = this.createToken(creditBureauId.longValue());
-        String token = creditbureautoken.getCurrentToken();
+        String token = creditbureautoken.getAccessToken();
 
         CreditBureauConfiguration addReportURL = this.configDataRepository.getCreditBureauConfigData(creditBureauId, "addCreditReporturl");
         String url = addReportURL.getValue();
@@ -414,7 +414,7 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
         // check the expiry date of the previous token.
         if (creditBureauToken != null) {
             LocalDate current = DateUtils.getLocalDateOfTenant();
-            LocalDate getExpiryDate = creditBureauToken.getTokenExpiryDate();
+            LocalDate getExpiryDate = creditBureauToken.getExpires();
 
             if (getExpiryDate.isBefore(current)) {
                 this.tokenRepositoryWrapper.delete(creditBureauToken);

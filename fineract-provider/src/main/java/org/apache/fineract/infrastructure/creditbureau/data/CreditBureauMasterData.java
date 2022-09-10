@@ -18,35 +18,22 @@
  */
 package org.apache.fineract.infrastructure.creditbureau.data;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class CreditBureauMasterData {
 
-    private final long creditBureauId;
+    private long creditBureauId;
 
-    private final String creditBureauName;
+    private String creditBureauName;
 
-    private final String country;
+    private String country;
 
     public static CreditBureauMasterData instance(final Long creditBureauId, final String creditBureauName, final String country) {
-        return new CreditBureauMasterData(creditBureauId, creditBureauName, country);
+        return new CreditBureauMasterData().setCreditBureauId(creditBureauId).setCreditBureauName(creditBureauName).setCountry(country);
     }
-
-    private CreditBureauMasterData(final Long creditBureauId, final String creditBureauName, final String country) {
-        this.creditBureauId = creditBureauId;
-        this.creditBureauName = creditBureauName;
-        this.country = country;
-
-    }
-
-    public String getCreditBureauName() {
-        return this.creditBureauName;
-    }
-
-    public String getCountry() {
-        return this.country;
-    }
-
-    public Long getCreditBureauId() {
-        return this.creditBureauId;
-    }
-
 }
