@@ -25,6 +25,10 @@ import java.time.format.DateTimeFormatterBuilder;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.slf4j.Logger;
@@ -32,6 +36,10 @@ import org.slf4j.LoggerFactory;
 
 @Entity
 @Table(name = "m_creditbureau_token")
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public class CreditBureauToken extends AbstractPersistableCustom {
 
     private static final Logger LOG = LoggerFactory.getLogger(CreditBureauToken.class);
@@ -66,45 +74,7 @@ public class CreditBureauToken extends AbstractPersistableCustom {
 
         LocalDate expires = LocalDate.parse(expiry, dateformat);
 
-        return new CreditBureauToken(userName, accessToken, tokenType, expiresIn, issued, expires);
+        return new CreditBureauToken().setUserName(userName).setAccessToken(accessToken).setTokenType(tokenType).setExpiresIn(expiresIn)
+                .setIssued(issued).setExpires(expires);
     }
-
-    public CreditBureauToken(String userName, String accessToken, String tokenType, String expiresIn, String issued, LocalDate expires) {
-        this.userName = userName;
-        this.accessToken = accessToken;
-        this.tokenType = tokenType;
-        this.expiresIn = expiresIn;
-        this.issued = issued;
-        this.expires = expires;
-    }
-
-    public CreditBureauToken() {
-        this.userName = null;
-        this.accessToken = null;
-        this.tokenType = null;
-        this.expiresIn = null;
-        this.issued = null;
-        this.expires = null;
-    }
-
-    public String getUserName() {
-        return this.userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getCurrentToken() {
-        return this.accessToken;
-    }
-
-    public void setTokens(String tokens) {
-        this.accessToken = tokens;
-    }
-
-    public LocalDate getTokenExpiryDate() {
-        return this.expires;
-    }
-
 }

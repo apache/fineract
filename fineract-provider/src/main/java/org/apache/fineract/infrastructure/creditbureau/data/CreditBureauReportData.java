@@ -20,65 +20,35 @@
 package org.apache.fineract.infrastructure.creditbureau.data;
 
 import java.io.Serializable;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class CreditBureauReportData implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     @SuppressWarnings("unused")
-    private final String name;
+    private String name;
 
-    private final String gender;
+    private String gender;
 
-    private final String address;
+    private String address;
 
-    private final String creditScore;
+    private String creditScore;
 
-    private final String borrowerInfo;
+    private String borrowerInfo;
 
-    private final String[] openAccounts;
+    private String[] openAccounts;
 
-    private final String[] closedAccounts;
+    private String[] closedAccounts;
 
     public static CreditBureauReportData instance(final String name, final String gender, final String address, final String creditScore,
             final String borrowerInfo, final String[] openAccounts, final String[] closedAccounts) {
-        return new CreditBureauReportData(name, gender, address, creditScore, borrowerInfo, openAccounts, closedAccounts);
+        return new CreditBureauReportData().setName(name).setGender(gender).setAddress(address).setCreditScore(creditScore)
+                .setBorrowerInfo(borrowerInfo).setOpenAccounts(openAccounts).setClosedAccounts(closedAccounts);
     }
 
-    public CreditBureauReportData(final String name, final String gender, final String address, final String creditScore,
-            final String borrowerInfo, final String[] openAccounts, final String[] closedAccounts) {
-        this.name = name;
-        this.gender = gender;
-        this.address = address;
-        this.creditScore = creditScore;
-        this.borrowerInfo = borrowerInfo;
-        this.openAccounts = openAccounts;
-        this.closedAccounts = closedAccounts;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getGender() {
-        return gender;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public String getCreditScore() {
-        return creditScore;
-    }
-
-    public String getBorrowerInfo() {
-        return borrowerInfo;
-    }
-
-    public String[] getOpenAccounts() {
-        return openAccounts;
-    }
-
-    public String[] getClosedAccounts() {
-        return closedAccounts;
-    }
 }
