@@ -1203,11 +1203,11 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         final GenericResultsetData grs = retrieveDataTableGenericResultSetForUpdate(appTable, dataTableName, appTableId, datatableId);
 
-        if (grs.hasNoEntries()) {
+        if (grs.getData().isEmpty()) {
             throw new DatatableNotFoundException(dataTableName, appTableId);
         }
 
-        if (grs.hasMoreThanOneEntry()) {
+        if (grs.getData().size() > 1) {
             throw new PlatformDataIntegrityException("error.msg.attempting.multiple.update",
                     "Application table: " + dataTableName + " Foreign key id: " + appTableId);
         }
@@ -1310,7 +1310,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         final List<ResultsetRowData> result = fillDatatableResultSetDataRows(sql, columnHeaders);
 
-        return new GenericResultsetData(columnHeaders, result);
+        return new GenericResultsetData().setColumnHeaders(columnHeaders).setData(result);
     }
 
     private GenericResultsetData retrieveDataTableGenericResultSetForUpdate(final String appTable, final String dataTableName,
@@ -1331,7 +1331,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         final List<ResultsetRowData> result = fillDatatableResultSetDataRows(sql, columnHeaders);
 
-        return new GenericResultsetData(columnHeaders, result);
+        return new GenericResultsetData().setColumnHeaders(columnHeaders).setData(result);
     }
 
     private CommandProcessingResult checkMainResourceExistsWithinScope(final String appTable, final Long appTableId) {
@@ -1471,7 +1471,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     private List<ResultsetRowData> fillDatatableResultSetDataRows(final String sql, final List<ResultsetColumnHeaderData> columnHeaders) {
         final List<ResultsetRowData> resultsetDataRows = new ArrayList<>();
-        final GenericResultsetData genericResultsetData = new GenericResultsetData(columnHeaders, null);
+        final GenericResultsetData genericResultsetData = new GenericResultsetData().setColumnHeaders(columnHeaders);
 
         final SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql); // NOSONAR
         final SqlRowSetMetaData rsmd = rowSet.getMetaData();
@@ -1793,7 +1793,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }
 
         if (StringUtils.isNotEmpty(paramValue)) {
-            if (columnHeader.hasColumnValues()) {
+            if (!columnHeader.hasColumnValues()) {
                 if (columnHeader.isCodeValueDisplayType()) {
 
                     if (columnHeader.isColumnValueNotAllowed(paramValue)) {
@@ -1881,7 +1881,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private boolean isMultirowDatatable(final List<ResultsetColumnHeaderData> columnHeaders) {
         boolean multiRow = false;
         for (ResultsetColumnHeaderData column : columnHeaders) {
-            if (column.isNamed("id")) {
+            if (column.getColumnName().equalsIgnoreCase("id")) {
                 multiRow = true;
                 break;
             }

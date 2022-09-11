@@ -33,6 +33,10 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -43,6 +47,10 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 
 @Entity
 @Table(name = "stretchy_report", uniqueConstraints = { @UniqueConstraint(columnNames = { "report_name" }, name = "unq_report_name") })
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class Report extends AbstractPersistableCustom {
 
     @Column(name = "report_name", nullable = false, unique = true)
@@ -109,10 +117,6 @@ public final class Report extends AbstractPersistableCustom {
         }
 
         return new Report(reportName, reportType, reportSubType, reportCategory, description, useReport, reportSql, reportTypes);
-    }
-
-    Report() {
-        //
     }
 
     public Report(final String reportName, final String reportType, final String reportSubType, final String reportCategory,
@@ -199,14 +203,10 @@ public final class Report extends AbstractPersistableCustom {
         return actualChanges;
     }
 
-    public boolean isCoreReport() {
-        return this.coreReport;
-    }
-
     public ReportParameterUsage findReportParameterById(final Long reportParameterId) {
         ReportParameterUsage reportParameterUsage = null;
         for (final ReportParameterUsage rpu : this.reportParameterUsages) {
-            if (rpu.hasIdOf(reportParameterId)) {
+            if (rpu.getId().equals(reportParameterId)) {
                 reportParameterUsage = rpu;
                 break;
             }
@@ -256,10 +256,6 @@ public final class Report extends AbstractPersistableCustom {
         }
     }
 
-    public String getReportName() {
-        return this.reportName;
-    }
-
     public boolean update(final Set<ReportParameterUsage> newReportParameterUsages) {
         if (newReportParameterUsages == null) {
             return false;
@@ -282,10 +278,6 @@ public final class Report extends AbstractPersistableCustom {
         }
 
         return false;
-    }
-
-    public Set<ReportParameterUsage> getReportParameterUsages() {
-        return this.reportParameterUsages;
     }
 
 }

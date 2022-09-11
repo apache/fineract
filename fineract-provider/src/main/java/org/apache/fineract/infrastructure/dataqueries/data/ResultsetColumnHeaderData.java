@@ -21,22 +21,30 @@ package org.apache.fineract.infrastructure.dataqueries.data;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 
 /**
  * Immutable data object representing a resultset column.
  */
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class ResultsetColumnHeaderData implements Serializable {
 
-    private final String columnName;
-    private String columnType;
-    private final Long columnLength;
-    private final String columnDisplayType;
-    private final boolean isColumnNullable;
-    private final boolean isColumnPrimaryKey;
+    private static final long serialVersionUID = 1L;
 
-    private final List<ResultsetColumnValueData> columnValues;
-    private final String columnCode;
+    private String columnName;
+    private String columnType;
+    private Long columnLength;
+    private String columnDisplayType;
+    private boolean isColumnNullable;
+    private boolean isColumnPrimaryKey;
+
+    private List<ResultsetColumnValueData> columnValues;
+    private String columnCode;
 
     public static ResultsetColumnHeaderData basic(final String columnName, final String columnType) {
 
@@ -45,8 +53,9 @@ public final class ResultsetColumnHeaderData implements Serializable {
         final boolean columnIsPrimaryKey = false;
         final List<ResultsetColumnValueData> columnValues = new ArrayList<>();
         final String columnCode = null;
-        return new ResultsetColumnHeaderData(columnName, columnType, columnLength, columnNullable, columnIsPrimaryKey, columnValues,
-                columnCode);
+        return new ResultsetColumnHeaderData().setColumnName(columnName).setColumnType(columnType).setColumnLength(columnLength)
+                .setColumnNullable(columnNullable).setColumnPrimaryKey(columnIsPrimaryKey).setColumnValues(columnValues)
+                .setColumnCode(columnCode);
     }
 
     public static ResultsetColumnHeaderData detailed(final String columnName, final String columnType, final Long columnLength,
@@ -133,10 +142,6 @@ public final class ResultsetColumnHeaderData implements Serializable {
             default:
             break;
         }
-    }
-
-    public boolean isNamed(final String columnName) {
-        return this.columnName.equalsIgnoreCase(columnName);
     }
 
     private boolean isAnyText() {
@@ -231,30 +236,6 @@ public final class ResultsetColumnHeaderData implements Serializable {
         return "bit".equalsIgnoreCase(this.columnType);
     }
 
-    public String getColumnName() {
-        return this.columnName;
-    }
-
-    public String getColumnType() {
-        return this.columnType;
-    }
-
-    public Long getColumnLength() {
-        return this.columnLength;
-    }
-
-    public boolean getIsColumnNullable() {
-        return isColumnNullable;
-    }
-
-    public boolean getIsColumnPrimaryKey() {
-        return isColumnPrimaryKey;
-    }
-
-    public String getColumnDisplayType() {
-        return this.columnDisplayType;
-    }
-
     public boolean isDateDisplayType() {
         return "DATE".equalsIgnoreCase(this.columnDisplayType);
     }
@@ -279,10 +260,6 @@ public final class ResultsetColumnHeaderData implements Serializable {
         return "CODEVALUE".equalsIgnoreCase(this.columnDisplayType);
     }
 
-    public boolean isCodeLookupDisplayType() {
-        return "CODELOOKUP".equalsIgnoreCase(this.columnDisplayType);
-    }
-
     public boolean isMandatory() {
         return !isOptional();
     }
@@ -293,6 +270,10 @@ public final class ResultsetColumnHeaderData implements Serializable {
 
     public boolean hasColumnValues() {
         return !this.columnValues.isEmpty();
+    }
+
+    public boolean isCodeLookupDisplayType() {
+        return "CODELOOKUP".equalsIgnoreCase(this.columnDisplayType);
     }
 
     public boolean isColumnValueAllowed(final String match) {
@@ -321,13 +302,5 @@ public final class ResultsetColumnHeaderData implements Serializable {
             }
         }
         return allowed;
-    }
-
-    public String getColumnCode() {
-        return this.columnCode;
-    }
-
-    public List<ResultsetColumnValueData> getColumnValues() {
-        return this.columnValues;
     }
 }

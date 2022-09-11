@@ -47,7 +47,7 @@ public enum StatusEnum {
         List<DatatableCheckStatusData> data = new ArrayList<DatatableCheckStatusData>();
 
         for (StatusEnum status : StatusEnum.values()) {
-            data.add(new DatatableCheckStatusData(status.name, status.code));
+            data.add(new DatatableCheckStatusData().setName(status.name).setCode(status.code));
         }
 
         return data;

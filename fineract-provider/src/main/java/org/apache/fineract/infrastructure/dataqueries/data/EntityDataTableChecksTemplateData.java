@@ -22,6 +22,9 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
@@ -29,31 +32,22 @@ import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 /**
  * Immutable data object for role data.
  */
+
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class EntityDataTableChecksTemplateData implements Serializable {
 
-    private final List<String> entities;
-    private final List<DatatableCheckStatusData> statusClient;
-    private final List<DatatableCheckStatusData> statusGroup;
-    private final List<DatatableCheckStatusData> statusSavings;
-    private final List<DatatableCheckStatusData> statusLoans;
-    private final List<DatatableChecksData> datatables;
-    private final Collection<LoanProductData> loanProductDatas;
-    private final Collection<SavingsProductData> savingsProductDatas;
+    private static final long serialVersionUID = 1L;
 
-    public EntityDataTableChecksTemplateData(final List<String> entities, List<DatatableCheckStatusData> statusClient,
-            List<DatatableCheckStatusData> statusGroup, List<DatatableCheckStatusData> statusSavings,
-            List<DatatableCheckStatusData> statusLoans, List<DatatableChecksData> datatables, Collection<LoanProductData> loanProductDatas,
-            Collection<SavingsProductData> savingsProductDatas) {
-
-        this.entities = entities;
-        this.statusClient = statusClient;
-        this.statusGroup = statusGroup;
-        this.statusSavings = statusSavings;
-        this.statusLoans = statusLoans;
-        this.datatables = datatables;
-        this.loanProductDatas = loanProductDatas;
-        this.savingsProductDatas = savingsProductDatas;
-    }
+    private List<String> entities;
+    private List<DatatableCheckStatusData> statusClient;
+    private List<DatatableCheckStatusData> statusGroup;
+    private List<DatatableCheckStatusData> statusSavings;
+    private List<DatatableCheckStatusData> statusLoans;
+    private List<DatatableChecksData> datatables;
+    private Collection<LoanProductData> loanProductDatas;
+    private Collection<SavingsProductData> savingsProductDatas;
 
     @Override
     public boolean equals(Object o) {

@@ -195,8 +195,9 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
             final boolean coreReport = rs.getBoolean("coreReport");
             final boolean useReport = rs.getBoolean("useReport");
 
-            final ReportData stretchyReport = new ReportData(reportId, reportName, reportType, reportSubType, reportCategory,
-                    reportDescription, reportSql, coreReport, useReport, null);
+            final ReportData stretchyReport = new ReportData().setId(reportId).setReportName(reportName).setReportType(reportType)
+                    .setReportSubType(reportSubType).setReportCategory(reportCategory).setDescription(reportDescription)
+                    .setReportSql(reportSql).setCoreReport(coreReport).setUseReport(useReport);
 
             return ReportMailingJobData.newInstance(id, name, description, startDateTime, recurrence, timeline, emailRecipients,
                     emailSubject, emailMessage, emailAttachmentFileFormat, stretchyReport, stretchyReportParamMap, previousRunDateTime,

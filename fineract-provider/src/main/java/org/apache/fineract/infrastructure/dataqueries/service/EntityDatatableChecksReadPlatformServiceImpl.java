@@ -152,8 +152,9 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
         Collection<LoanProductData> loanProductDatas = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup(true);
         Collection<SavingsProductData> savingsProductDatas = this.savingsProductReadPlatformService.retrieveAllForLookup();
 
-        return new EntityDataTableChecksTemplateData(entities, statusClient, statusGroup, statusSavings, statusLoan, dataTables,
-                loanProductDatas, savingsProductDatas);
+        return new EntityDataTableChecksTemplateData().setEntities(entities).setStatusClient(statusClient).setStatusGroup(statusGroup)
+                .setStatusSavings(statusSavings).setStatusLoans(statusLoan).setDatatables(dataTables).setLoanProductDatas(loanProductDatas)
+                .setSavingsProductDatas(savingsProductDatas);
 
     }
 
@@ -162,7 +163,7 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
         if (statuses != null) {
             for (Integer status : statuses) {
                 StatusEnum statusEnum = StatusEnum.fromInt(status);
-                ret.add(new DatatableCheckStatusData(statusEnum.name(), statusEnum.getCode()));
+                ret.add(new DatatableCheckStatusData().setName(statusEnum.name()).setCode(statusEnum.getCode()));
             }
         }
         return ret;
@@ -182,7 +183,7 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
             final String entity = rs.getString("entity");
             final String tableName = rs.getString("tableName");
 
-            return new DatatableChecksData(entity, tableName);
+            return new DatatableChecksData().setEntity(entity).setDataTableName(tableName);
         }
 
         public String schema() {
@@ -208,7 +209,8 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
             final Long productId = JdbcSupport.getLong(rs, "productId");
             final String productName = rs.getString("productName");
 
-            return new EntityDataTableChecksData(id, entity, statusEnum, datatableName, systemDefined, productId, productName);
+            return new EntityDataTableChecksData().setId(id).setEntity(entity).setStatus(statusEnum).setDatatableName(datatableName)
+                    .setSystemDefined(systemDefined).setProductId(productId).setProductName(productName);
         }
 
         public String schema() {

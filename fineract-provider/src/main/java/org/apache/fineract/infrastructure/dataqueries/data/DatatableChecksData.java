@@ -19,15 +19,17 @@
 package org.apache.fineract.infrastructure.dataqueries.data;
 
 import java.io.Serializable;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class DatatableChecksData implements Serializable {
 
     private static final long serialVersionUID = 3113568562509206452L;
-    private final String entity;
-    private final String dataTableName;
+    private String entity;
+    private String dataTableName;
 
-    public DatatableChecksData(final String entity, final String dataTableName) {
-        this.entity = entity;
-        this.dataTableName = dataTableName;
-    }
 }

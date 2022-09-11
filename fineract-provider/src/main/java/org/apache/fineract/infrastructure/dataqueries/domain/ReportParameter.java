@@ -20,17 +20,18 @@ package org.apache.fineract.infrastructure.dataqueries.domain;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "stretchy_parameter")
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public class ReportParameter extends AbstractPersistableCustom {
 
-    protected ReportParameter() {
-        //
-    }
-
-    public boolean hasIdOf(final Long id) {
-        return getId().equals(id);
-    }
 }

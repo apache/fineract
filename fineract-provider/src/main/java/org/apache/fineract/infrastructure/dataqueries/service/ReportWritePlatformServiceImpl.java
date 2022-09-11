@@ -237,7 +237,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
 
                         if (jsonObject.has("reportParameterName")) {
                             reportParameterName = jsonObject.get("reportParameterName").getAsString();
-                            reportParameterUsageItem.updateParameterName(reportParameterName);
+                            reportParameterUsageItem.setReportParameterName(reportParameterName);
                         }
                     } else {
                         // new report parameter usage
@@ -254,7 +254,8 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
                             reportParameterName = jsonObject.get("reportParameterName").getAsString();
                         }
 
-                        reportParameterUsageItem = new ReportParameterUsage(report, reportParameter, reportParameterName);
+                        reportParameterUsageItem = new ReportParameterUsage().setReport(report).setParameter(reportParameter)
+                                .setReportParameterName(reportParameterName);
                     }
 
                     reportParameterUsages.add(reportParameterUsageItem);

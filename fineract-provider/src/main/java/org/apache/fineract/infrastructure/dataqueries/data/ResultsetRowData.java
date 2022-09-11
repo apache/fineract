@@ -19,20 +19,18 @@
 package org.apache.fineract.infrastructure.dataqueries.data;
 
 import java.util.List;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class ResultsetRowData {
 
-    private final List<Object> row;
+    private List<Object> row;
 
     public static ResultsetRowData create(final List<Object> rowValues) {
-        return new ResultsetRowData(rowValues);
-    }
-
-    private ResultsetRowData(final List<Object> rowValues) {
-        this.row = rowValues;
-    }
-
-    public List<Object> getRow() {
-        return this.row;
+        return new ResultsetRowData().setRow(rowValues);
     }
 }

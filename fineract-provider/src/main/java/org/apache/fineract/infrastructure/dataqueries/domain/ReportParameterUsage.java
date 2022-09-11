@@ -23,10 +23,18 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "stretchy_report_parameter")
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class ReportParameterUsage extends AbstractPersistableCustom {
 
     @ManyToOne(optional = false)
@@ -39,17 +47,6 @@ public final class ReportParameterUsage extends AbstractPersistableCustom {
 
     @Column(name = "report_parameter_name")
     private String reportParameterName;
-
-    ReportParameterUsage() {
-        //
-    }
-
-    public ReportParameterUsage(final Report report, final ReportParameter parameter, final String reportParameterName) {
-        this.report = report;
-        this.parameter = parameter;
-        this.reportParameterName = reportParameterName;
-    }
-
     /*
      * @Override public boolean equals(final Object obj) { if (obj == null) { return false; } if (obj == this) { return
      * true; } if (obj.getClass() != getClass()) { return false; } final ReportParameterUsage rhs =
@@ -62,19 +59,7 @@ public final class ReportParameterUsage extends AbstractPersistableCustom {
      * .toHashCode(); }
      */
 
-    public boolean hasIdOf(final Long id) {
-        return getId().equals(id);
-    }
-
     public boolean hasParameterIdOf(final Long parameterId) {
-        return this.parameter != null && this.parameter.hasIdOf(parameterId);
-    }
-
-    public void updateParameterName(final String parameterName) {
-        this.reportParameterName = parameterName;
-    }
-
-    public String getReportParameterName() {
-        return this.reportParameterName;
+        return this.parameter != null && this.parameter.getId().equals(parameterId);
     }
 }

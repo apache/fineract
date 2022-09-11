@@ -19,49 +19,31 @@
 package org.apache.fineract.infrastructure.dataqueries.data;
 
 import java.util.List;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * Immutable data object for generic resultset data.
  */
+
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class GenericResultsetData {
 
-    private final List<ResultsetColumnHeaderData> columnHeaders;
-    private final List<ResultsetRowData> data;
-
-    public GenericResultsetData(final List<ResultsetColumnHeaderData> columnHeaders, final List<ResultsetRowData> resultsetDataRows) {
-        this.columnHeaders = columnHeaders;
-        this.data = resultsetDataRows;
-    }
-
-    public List<ResultsetColumnHeaderData> getColumnHeaders() {
-        return this.columnHeaders;
-    }
-
-    public List<ResultsetRowData> getData() {
-        return this.data;
-    }
+    private List<ResultsetColumnHeaderData> columnHeaders;
+    private List<ResultsetRowData> data;
 
     public String getColTypeOfColumnNamed(final String columnName) {
 
         String colType = null;
         for (final ResultsetColumnHeaderData columnHeader : this.columnHeaders) {
-            if (columnHeader.isNamed(columnName)) {
+            if (columnHeader.getColumnName().equalsIgnoreCase(columnName)) {
                 colType = columnHeader.getColumnType();
             }
         }
 
         return colType;
-    }
-
-    public boolean hasNoEntries() {
-        return this.data.isEmpty();
-    }
-
-    public boolean hasEntries() {
-        return !hasNoEntries();
-    }
-
-    public boolean hasMoreThanOneEntry() {
-        return this.data.size() > 1;
     }
 }

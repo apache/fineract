@@ -21,29 +21,35 @@ package org.apache.fineract.infrastructure.dataqueries.data;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class ReportData {
 
     @SuppressWarnings("unused")
-    private final Long id;
+    private Long id;
     @SuppressWarnings("unused")
-    private final String reportName;
+    private String reportName;
     @SuppressWarnings("unused")
-    private final String reportType;
+    private String reportType;
     @SuppressWarnings("unused")
-    private final String reportSubType;
+    private String reportSubType;
     @SuppressWarnings("unused")
-    private final String reportCategory;
+    private String reportCategory;
     @SuppressWarnings("unused")
-    private final String description;
+    private String description;
     @SuppressWarnings("unused")
-    private final String reportSql;
+    private String reportSql;
     @SuppressWarnings("unused")
-    private final Boolean coreReport;
+    private Boolean coreReport;
     @SuppressWarnings("unused")
-    private final Boolean useReport;
+    private Boolean useReport;
     @SuppressWarnings("unused")
-    private final Collection<ReportParameterData> reportParameters;
+    private Collection<ReportParameterData> reportParameters;
 
     @SuppressWarnings("unused")
     private List<String> allowedReportTypes;
@@ -51,40 +57,6 @@ public final class ReportData {
     private List<String> allowedReportSubTypes;
     @SuppressWarnings("unused")
     private Collection<ReportParameterData> allowedParameters;
-
-    public ReportData(final Long id, final String reportName, final String reportType, final String reportSubType,
-            final String reportCategory, final String description, final String reportSql, final Boolean coreReport,
-            final Boolean useReport, final Collection<ReportParameterData> reportParameters) {
-        this.id = id;
-        this.reportName = reportName;
-        this.reportType = reportType;
-        this.reportSubType = reportSubType;
-        this.reportCategory = reportCategory;
-        this.description = description;
-        this.reportParameters = reportParameters;
-        this.reportSql = reportSql;
-        this.coreReport = coreReport;
-        this.useReport = useReport;
-        this.allowedReportTypes = null;
-        this.allowedReportSubTypes = null;
-        this.allowedParameters = null;
-    }
-
-    public ReportData() {
-        this.id = null;
-        this.reportName = null;
-        this.reportType = null;
-        this.reportSubType = null;
-        this.reportCategory = null;
-        this.description = null;
-        this.reportParameters = null;
-        this.reportSql = null;
-        this.coreReport = null;
-        this.useReport = null;
-        this.allowedReportTypes = null;
-        this.allowedReportSubTypes = null;
-        this.allowedParameters = null;
-    }
 
     public void appendedTemplate(final Collection<ReportParameterData> allowedParameters, final Collection<String> allowedReportTypes) {
 

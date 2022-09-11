@@ -20,33 +20,33 @@ package org.apache.fineract.infrastructure.dataqueries.data;
 
 import java.io.Serializable;
 import java.util.List;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * Immutable data object representing datatable data.
  */
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class DatatableData implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     @SuppressWarnings("unused")
-    private final String applicationTableName;
+    private String applicationTableName;
     @SuppressWarnings("unused")
-    private final String registeredTableName;
+    private String registeredTableName;
     @SuppressWarnings("unused")
-    private final String entitySubType;
+    private String entitySubType;
     @SuppressWarnings("unused")
-    private final List<ResultsetColumnHeaderData> columnHeaderData;
+    private List<ResultsetColumnHeaderData> columnHeaderData;
 
     public static DatatableData create(final String applicationTableName, final String registeredTableName, final String entitySubType,
             final List<ResultsetColumnHeaderData> columnHeaderData) {
-        return new DatatableData(applicationTableName, registeredTableName, entitySubType, columnHeaderData);
-    }
-
-    private DatatableData(final String applicationTableName, final String registeredTableName, final String entitySubType,
-            final List<ResultsetColumnHeaderData> columnHeaderData) {
-        this.applicationTableName = applicationTableName;
-        this.registeredTableName = registeredTableName;
-        this.entitySubType = entitySubType;
-        this.columnHeaderData = columnHeaderData;
-
+        return new DatatableData().setApplicationTableName(applicationTableName).setRegisteredTableName(registeredTableName)
+                .setEntitySubType(entitySubType).setColumnHeaderData(columnHeaderData);
     }
 
     public boolean hasColumn(final String columnName) {
@@ -59,10 +59,6 @@ public final class DatatableData implements Serializable {
         }
 
         return false;
-    }
-
-    public String getRegisteredTableName() {
-        return registeredTableName;
     }
 
 }

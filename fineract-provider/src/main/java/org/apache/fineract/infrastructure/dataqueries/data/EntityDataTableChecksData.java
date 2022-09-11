@@ -19,32 +19,29 @@
 package org.apache.fineract.infrastructure.dataqueries.data;
 
 import java.io.Serializable;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 /**
  * Immutable data object for role data.
  */
+
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class EntityDataTableChecksData implements Serializable {
 
-    private final long id;
-    private final String entity;
-    private final EnumOptionData status;
-    private final String datatableName;
-    private final boolean systemDefined;
-    private final Long order;
-    private final Long productId;
-    private final String productName;
+    private static final long serialVersionUID = 1L;
 
-    public EntityDataTableChecksData(final long id, final String entity, final EnumOptionData status, final String datatableName,
-            final boolean systemDefined, final Long loanProductId, final String productName) {
-        this.id = id;
-        this.entity = entity;
-        this.status = status;
-        this.datatableName = datatableName;
-        this.systemDefined = systemDefined;
-        this.order = id;
-        this.productId = loanProductId;
-        this.productName = productName;
-    }
+    private long id;
+    private String entity;
+    private EnumOptionData status;
+    private String datatableName;
+    private boolean systemDefined;
+    private Long order;
+    private Long productId;
+    private String productName;
 
 }
