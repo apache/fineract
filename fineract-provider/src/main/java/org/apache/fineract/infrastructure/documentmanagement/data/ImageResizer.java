@@ -45,16 +45,16 @@ public class ImageResizer {
             return fileData;
         }
         try (InputStream is = fileData.getByteSource().openBufferedStream()) {
-            Optional<InputStream> optResizedIS = resizeImage(ContentRepositoryUtils.imageExtensionFromFileName(fileData.name()), is,
+            Optional<InputStream> optResizedIS = resizeImage(ContentRepositoryUtils.imageExtensionFromFileName(fileData.getFileName()), is,
                     maxWidth != null ? maxWidth : Integer.MAX_VALUE, maxHeight != null ? maxHeight : Integer.MAX_VALUE);
             if (optResizedIS.isPresent()) {
-                FileData resizedImage = new FileData(new ByteSource() {
+                FileData resizedImage = new FileData().setByteSource(new ByteSource() {
 
                     @Override
                     public InputStream openStream() throws IOException {
                         return optResizedIS.get(); // NOSONAR
                     }
-                }, fileData.name(), fileData.contentType());
+                }).setFileName(fileData.getFileName()).setContentType(fileData.getContentType());
                 return resizedImage;
             }
             return fileData;

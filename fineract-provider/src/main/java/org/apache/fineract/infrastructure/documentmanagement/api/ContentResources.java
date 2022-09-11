@@ -47,7 +47,7 @@ final class ContentResources {
             response = Response.ok(is);
             response.header("Content-Disposition", dispositionType + "; filename=\"" + fileName + "\"");
             response.header("Content-Length", byteSource.sizeIfKnown().or(-1L));
-            response.header("Content-Type", fileData.contentType());
+            response.header("Content-Type", fileData.getContentType());
         } catch (IOException e) {
             LOG.error("resizedImage.getByteSource().openBufferedStream() failed", e);
             response = Response.serverError();
@@ -56,6 +56,6 @@ final class ContentResources {
     }
 
     static Response fileDataToResponse(FileData fileData, String dispositionType) {
-        return fileDataToResponse(fileData, fileData.name(), dispositionType);
+        return fileDataToResponse(fileData, fileData.getFileName(), dispositionType);
     }
 }

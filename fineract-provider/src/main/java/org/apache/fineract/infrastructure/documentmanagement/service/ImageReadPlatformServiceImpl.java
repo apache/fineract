@@ -79,7 +79,7 @@ public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
             final String location = rs.getString("location");
             final Integer storageTypeInt = JdbcSupport.getInteger(rs, "storageType");
             StorageType storageType = storageTypeInt != null ? StorageType.fromInt(storageTypeInt) : null;
-            return new ImageData(location, storageType, this.entityDisplayName);
+            return new ImageData().setLocation(location).setStorageType(storageType).setEntityDisplayName(this.entityDisplayName);
         }
     }
 
@@ -101,7 +101,7 @@ public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
             final String sql = "select " + imageMapper.schema(entityType);
 
             final ImageData imageData = this.jdbcTemplate.queryForObject(sql, imageMapper, entityId); // NOSONAR
-            final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(imageData.storageType());
+            final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(imageData.getStorageType());
             return contentRepository.fetchImage(imageData);
         } catch (final EmptyResultDataAccessException e) {
             throw new ImageNotFoundException("clients", entityId, e);

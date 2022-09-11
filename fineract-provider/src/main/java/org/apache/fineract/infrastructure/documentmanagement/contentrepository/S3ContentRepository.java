@@ -104,26 +104,26 @@ public class S3ContentRepository implements ContentRepository {
 
     @Override
     public FileData fetchFile(final DocumentData documentData) throws DocumentNotFoundException {
-        return new FileData(new ByteSource() {
+        return new FileData().setByteSource(new ByteSource() {
 
             @Override
             public InputStream openStream() throws IOException {
-                final S3Object s3object = getObject(documentData.fileLocation());
+                final S3Object s3object = getObject(documentData.getLocation());
                 return s3object.getObjectContent();
             }
-        }, documentData.fileName(), documentData.contentType());
+        }).setFileName(documentData.getFileName()).setContentType(documentData.getType());
     }
 
     @Override
     public FileData fetchImage(final ImageData imageData) {
-        return new FileData(new ByteSource() {
+        return new FileData().setByteSource(new ByteSource() {
 
             @Override
             public InputStream openStream() throws IOException {
-                final S3Object s3object = getObject(imageData.location());
+                final S3Object s3object = getObject(imageData.getLocation());
                 return s3object.getObjectContent();
             }
-        }, imageData.getEntityDisplayName(), imageData.contentType().getValue());
+        }).setFileName(imageData.getEntityDisplayName()).setContentType(imageData.getContentType().getValue());
     }
 
     @Override

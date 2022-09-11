@@ -98,14 +98,16 @@ public class FileSystemContentRepository implements ContentRepository {
 
     @Override
     public FileData fetchFile(final DocumentData documentData) {
-        final File file = new File(documentData.fileLocation());
-        return new FileData(Files.asByteSource(file), documentData.fileName(), documentData.contentType());
+        final File file = new File(documentData.getLocation());
+        return new FileData().setByteSource(Files.asByteSource(file)).setFileName(documentData.getFileName())
+                .setContentType(documentData.getType());
     }
 
     @Override
     public FileData fetchImage(final ImageData imageData) {
-        final File file = new File(imageData.location());
-        return new FileData(Files.asByteSource(file), imageData.getEntityDisplayName(), imageData.contentType().getValue());
+        final File file = new File(imageData.getLocation());
+        return new FileData().setByteSource(Files.asByteSource(file)).setFileName(imageData.getEntityDisplayName())
+                .setContentType(imageData.getContentType().getValue());
     }
 
     @Override

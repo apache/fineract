@@ -116,7 +116,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
                     .orElseThrow(() -> new DocumentNotFoundException(documentCommand.getParentEntityType(),
                             documentCommand.getParentEntityId(), documentCommand.getId()));
 
-            final StorageType documentStoreType = documentForUpdate.storageType();
+            final StorageType documentStoreType = StorageType.fromInt(documentForUpdate.getStorageType());
             oldLocation = documentForUpdate.getLocation();
             if (inputStream != null && documentCommand.isFileNameChanged()) {
                 final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository();
@@ -156,7 +156,8 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
                         documentCommand.getId()));
         this.documentRepository.delete(document);
 
-        final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(document.storageType());
+        final ContentRepository contentRepository = this.contentRepositoryFactory
+                .getRepository(StorageType.fromInt(document.getStorageType()));
         contentRepository.deleteFile(document.getLocation());
         return new CommandProcessingResult(document.getId());
     }

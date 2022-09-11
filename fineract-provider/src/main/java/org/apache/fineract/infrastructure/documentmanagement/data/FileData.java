@@ -19,28 +19,16 @@
 package org.apache.fineract.infrastructure.documentmanagement.data;
 
 import com.google.common.io.ByteSource;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class FileData {
 
-    private final String fileName;
-    private final String contentType;
-    private final ByteSource byteSource;
-
-    public FileData(final ByteSource byteSource, final String fileName, final String contentType) {
-        this.fileName = fileName;
-        this.contentType = contentType;
-        this.byteSource = byteSource;
-    }
-
-    public String contentType() {
-        return this.contentType;
-    }
-
-    public String name() {
-        return this.fileName;
-    }
-
-    public ByteSource getByteSource() {
-        return this.byteSource;
-    }
+    private String fileName;
+    private String contentType;
+    private ByteSource byteSource;
 }

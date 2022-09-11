@@ -153,16 +153,16 @@ public class ImagesApiResource {
         // text
         if ("application/octet-stream".equalsIgnoreCase(acceptHeader)
                 || (output != null && (output.equals("octet") || output.equals("inline_octet")))) {
-            return ContentResources.fileDataToResponse(resizedImage, resizedImage.name() + ImageFileExtension.JPEG,
+            return ContentResources.fileDataToResponse(resizedImage, resizedImage.getFileName() + ImageFileExtension.JPEG,
                     "inline_octet".equals(output) ? "inline" : "attachment");
         }
 
         // Else return response with Base64 encoded
         // TODO: Need a better way of determining image type
         String imageDataURISuffix = ContentRepositoryUtils.ImageDataURIsuffix.JPEG.getValue();
-        if (StringUtils.endsWith(imageData.name(), ContentRepositoryUtils.ImageFileExtension.GIF.getValue())) {
+        if (StringUtils.endsWith(imageData.getFileName(), ContentRepositoryUtils.ImageFileExtension.GIF.getValue())) {
             imageDataURISuffix = ContentRepositoryUtils.ImageDataURIsuffix.GIF.getValue();
-        } else if (StringUtils.endsWith(imageData.name(), ContentRepositoryUtils.ImageFileExtension.PNG.getValue())) {
+        } else if (StringUtils.endsWith(imageData.getFileName(), ContentRepositoryUtils.ImageFileExtension.PNG.getValue())) {
             imageDataURISuffix = ContentRepositoryUtils.ImageDataURIsuffix.PNG.getValue();
         }
 
@@ -177,7 +177,7 @@ public class ImagesApiResource {
                 return Response.serverError().build();
             }
         } catch (IOException e) {
-            throw new ContentManagementException(imageData.name(), e.getMessage(), e);
+            throw new ContentManagementException(imageData.getFileName(), e.getMessage(), e);
         }
     }
 
