@@ -16,22 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.service.support;
+package org.apache.fineract.infrastructure.event.external.service.message.domain;
 
-import java.nio.ByteBuffer;
-import org.springframework.stereotype.Component;
+import java.util.Objects;
+import lombok.Getter;
 
-@Component
-public class ByteBufferConverter {
+@Getter
+public class MessageIdempotencyKey {
 
-    public byte[] convert(ByteBuffer buffer) {
-        byte[] bytes = new byte[buffer.remaining()];
-        buffer.get(bytes);
-        buffer.position(buffer.position() - bytes.length);
-        return bytes;
-    }
+    private final String idempotencyKey;
 
-    public ByteBuffer convert(byte[] buffer) {
-        return ByteBuffer.wrap(buffer);
+    public MessageIdempotencyKey(String idempotencyKey) {
+        this.idempotencyKey = Objects.requireNonNull(idempotencyKey, "idempotencyKey cannot be null");
     }
 }

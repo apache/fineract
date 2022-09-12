@@ -16,22 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.service.support;
+package org.apache.fineract.infrastructure.event.external.service.message.domain;
 
-import java.nio.ByteBuffer;
-import org.springframework.stereotype.Component;
+import java.util.Objects;
+import lombok.Getter;
+import org.apache.fineract.avro.BulkMessagePayloadV1;
 
-@Component
-public class ByteBufferConverter {
+@Getter
+public class BulkMessageData {
 
-    public byte[] convert(ByteBuffer buffer) {
-        byte[] bytes = new byte[buffer.remaining()];
-        buffer.get(bytes);
-        buffer.position(buffer.position() - bytes.length);
-        return bytes;
-    }
+    private final BulkMessagePayloadV1 data;
 
-    public ByteBuffer convert(byte[] buffer) {
-        return ByteBuffer.wrap(buffer);
+    public BulkMessageData(BulkMessagePayloadV1 data) {
+        this.data = Objects.requireNonNull(data, "data cannot be null");
     }
 }

@@ -16,22 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.service.support;
+package org.apache.fineract.infrastructure.event.external.service.serialization.serializer;
 
-import java.nio.ByteBuffer;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ByteBufferConverter {
+@RequiredArgsConstructor
+public class BusinessEventSerializerFactory {
 
-    public byte[] convert(ByteBuffer buffer) {
-        byte[] bytes = new byte[buffer.remaining()];
-        buffer.get(bytes);
-        buffer.position(buffer.position() - bytes.length);
-        return bytes;
+    private final List<BusinessEventSerializer> serializers;
+
+    public <T> BusinessEventSerializer create(BusinessEvent<T> event) {
+        for (BusinessEventSerializer serializer : serializers) {
+            if (serializer.canSerialize(event)) {
+                return serializer;
+            }
+        }
+        throw new IllegalStateException("There's no serializer that's capable of serializing a " + event.getClass().getSimpleName());
     }
 
-    public ByteBuffer convert(byte[] buffer) {
-        return ByteBuffer.wrap(buffer);
-    }
 }
