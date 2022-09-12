@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.google.gson.Gson;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -52,9 +53,11 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.BusinessStepConfigurationHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
@@ -508,6 +511,92 @@ public class DelinquencyBucketsIntegrationTest {
     }
 
     @Test
+    public void testLoanClassificationRealtimeWithCharges() {
+        // Given
+        final LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+
+        ArrayList<Integer> rangeIds = new ArrayList<>();
+        // First Range
+        String jsonRange = DelinquencyRangesHelper.getAsJSON(1, 3);
+        PostDelinquencyRangeResponse delinquencyRangeResponse = DelinquencyRangesHelper.createDelinquencyRange(requestSpec, responseSpec,
+                jsonRange);
+        rangeIds.add(delinquencyRangeResponse.getResourceId());
+        jsonRange = DelinquencyRangesHelper.getAsJSON(4, 60);
+
+        GetDelinquencyRangesResponse range = DelinquencyRangesHelper.getDelinquencyRange(requestSpec, responseSpec,
+                delinquencyRangeResponse.getResourceId());
+
+        // Second Range
+        delinquencyRangeResponse = DelinquencyRangesHelper.createDelinquencyRange(requestSpec, responseSpec, jsonRange);
+        rangeIds.add(delinquencyRangeResponse.getResourceId());
+
+        range = DelinquencyRangesHelper.getDelinquencyRange(requestSpec, responseSpec, delinquencyRangeResponse.getResourceId());
+        final String classificationExpected = range.getClassification();
+        log.info("Expected Delinquency Range classification after Disbursement {}", classificationExpected);
+
+        String jsonBucket = DelinquencyBucketsHelper.getAsJSON(rangeIds);
+        PostDelinquencyBucketResponse delinquencyBucketResponse = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec,
+                responseSpec, jsonBucket);
+        assertNotNull(delinquencyBucketResponse);
+        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+                delinquencyBucketResponse.getResourceId());
+
+        // Client and Loan account creation
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
+                delinquencyBucket.getId());
+        assertNotNull(getLoanProductsProductResponse);
+        log.info("Loan Product Bucket Name: {}", getLoanProductsProductResponse.getDelinquencyBucket().getName());
+        assertEquals(getLoanProductsProductResponse.getDelinquencyBucket().getName(), delinquencyBucket.getName());
+
+        final LocalDate todaysDate = Utils.getLocalDateOfTenant();
+        // Older date to have more than one overdue installment
+        LocalDate transactionDate = todaysDate.minusDays(45);
+        String operationDate = Utils.dateFormatter.format(transactionDate);
+
+        // Create Loan Account
+        final Integer loanId = createLoanAccount(loanTransactionHelper, clientId.toString(),
+                getLoanProductsProductResponse.getId().toString(), operationDate);
+
+        GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        log.info("Loan Delinquency Range after Disbursement {}", getLoansLoanIdResponse.getDelinquencyRange().getClassification());
+        assertNotNull(getLoansLoanIdResponse);
+        // First Loan Delinquency Classification after Disbursement command
+        assertEquals(getLoansLoanIdResponse.getDelinquencyRange().getClassification(), classificationExpected);
+        printRepaymentSchedule(getLoansLoanIdResponse);
+
+        // Apply a repayment to get a full paid installment
+        operationDate = Utils.dateFormatter.format(todaysDate);
+        loanTransactionHelper.makeLoanRepayment(operationDate, 1033.33f, loanId);
+
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        log.info("Loan Delinquency Range after Repayment {}", getLoansLoanIdResponse.getDelinquencyRange());
+        assertNotNull(getLoansLoanIdResponse);
+        // The Loan Delinquency Classification after Repayment command must be null
+        assertNull(getLoansLoanIdResponse.getDelinquencyRange());
+        printRepaymentSchedule(getLoansLoanIdResponse);
+
+        transactionDate = todaysDate.minusDays(18);
+        operationDate = Utils.dateFormatter.format(transactionDate);
+
+        // Create and apply Charge for Specific Due Date
+        final Integer chargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
+                ChargesHelper.getLoanSpecifiedDueDateJSON(1, "30", false));
+        assertNotNull(chargeId);
+        final Integer loanChargeId = loanTransactionHelper.addChargesForLoan(loanId, getChargeApplyJSON(chargeId, operationDate),
+                responseSpec);
+        assertNotNull(loanChargeId);
+
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        printRepaymentSchedule(getLoansLoanIdResponse);
+
+        log.info("Loan Delinquency Range after add Loan Charge {}", getLoansLoanIdResponse.getDelinquencyRange());
+        assertNotNull(getLoansLoanIdResponse.getDelinquencyRange());
+        // Evaluate a Delinquency Tag set after add charge to the Loan
+        assertEquals(getLoansLoanIdResponse.getDelinquencyRange().getClassification(), classificationExpected);
+    }
+
+    @Test
     public void testLoanClassificationRealtimeOlderLoan() {
         // Given
         final LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
@@ -739,6 +828,18 @@ public class DelinquencyBucketsIntegrationTest {
                         period.getTotalOutstandingForPeriod());
             }
         }
+    }
+
+    private String getChargeApplyJSON(final Integer chargeId, final String dueDate) {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("chargeId", chargeId);
+        map.put("amount", 12.0f);
+        map.put("dueDate", dueDate);
+        map.put("dateFormat", Utils.DATE_FORMAT);
+        map.put("locale", CommonConstants.LOCALE);
+        final String chargeApplyJSON = new Gson().toJson(map);
+        log.info("{}", chargeApplyJSON);
+        return chargeApplyJSON;
     }
 
 }
