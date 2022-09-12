@@ -16,27 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.service.serialization;
+package org.apache.fineract.infrastructure.event.external.service.message.domain;
 
-import java.util.List;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
-import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
-import org.springframework.stereotype.Component;
 
-@Component
 @RequiredArgsConstructor
-public class BusinessEventSerializerFactory {
+@Getter
+public class MessageId {
 
-    private final List<BusinessEventSerializer> serializers;
-
-    public <T> BusinessEventSerializer create(BusinessEvent<T> event) {
-        for (BusinessEventSerializer serializer : serializers) {
-            if (serializer.canSerialize(event)) {
-                return serializer;
-            }
-        }
-        throw new IllegalStateException("There's no serializer that's capable of serializing a " + event.getClass().getSimpleName());
-    }
-
+    private final int id;
 }

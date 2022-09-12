@@ -19,15 +19,22 @@
 package org.apache.fineract.infrastructure.event.external.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.avro.BulkMessageItemV1;
+import org.apache.fineract.avro.BulkMessagePayloadV1;
+import org.apache.fineract.infrastructure.event.business.domain.BulkBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.external.repository.ExternalEventRepository;
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEvent;
 import org.apache.fineract.infrastructure.event.external.service.idempotency.ExternalEventIdempotencyKeyGenerator;
-import org.apache.fineract.infrastructure.event.external.service.serialization.BusinessEventSerializerFactory;
+import org.apache.fineract.infrastructure.event.external.service.message.BulkMessageItemFactory;
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializerFactory;
+import org.apache.fineract.infrastructure.event.external.service.support.ByteBufferConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +46,8 @@ public class ExternalEventService {
     private final ExternalEventRepository repository;
     private final ExternalEventIdempotencyKeyGenerator idempotencyKeyGenerator;
     private final BusinessEventSerializerFactory serializerFactory;
+    private final ByteBufferConverter byteBufferConverter;
+    private final BulkMessageItemFactory bulkMessageItemFactory;
 
     private EntityManager entityManager;
 
@@ -47,20 +56,45 @@ public class ExternalEventService {
             throw new IllegalArgumentException("event cannot be null");
         }
 
-        String eventType = event.getType();
-        String idempotencyKey = idempotencyKeyGenerator.generate(event);
         try {
-            BusinessEventSerializer serializer = serializerFactory.create(event);
-            String schema = serializer.getSupportedSchema().getName();
             flushChangesBeforeSerialization();
-            byte[] data = serializer.serialize(event);
-            ExternalEvent externalEvent = new ExternalEvent(eventType, schema, data, idempotencyKey);
-
+            ExternalEvent externalEvent;
+            if (event instanceof BulkBusinessEvent) {
+                externalEvent = handleBulkBusinessEvent((BulkBusinessEvent) event);
+            } else {
+                externalEvent = handleRegularBusinessEvent(event);
+            }
             repository.save(externalEvent);
         } catch (IOException e) {
             throw new RuntimeException("Error while serializing event " + event.getClass().getSimpleName(), e);
         }
 
+    }
+
+    private ExternalEvent handleBulkBusinessEvent(BulkBusinessEvent bulkBusinessEvent) throws IOException {
+        List<BulkMessageItemV1> messages = new ArrayList<>();
+        List<BusinessEvent<?>> events = bulkBusinessEvent.get();
+        for (int i = 0; i < events.size(); i++) {
+            BusinessEvent<?> event = events.get(i);
+            int id = i + 1;
+            BulkMessageItemV1 message = bulkMessageItemFactory.createBulkMessageItem(id, event);
+            messages.add(message);
+        }
+        String idempotencyKey = idempotencyKeyGenerator.generate(bulkBusinessEvent);
+        BulkMessagePayloadV1 avroDto = new BulkMessagePayloadV1(messages);
+        byte[] data = byteBufferConverter.convert(avroDto.toByteBuffer());
+
+        return new ExternalEvent(bulkBusinessEvent.getType(), BulkMessagePayloadV1.class.getName(), data, idempotencyKey);
+    }
+
+    private <T> ExternalEvent handleRegularBusinessEvent(BusinessEvent<T> event) throws IOException {
+        String eventType = event.getType();
+        String idempotencyKey = idempotencyKeyGenerator.generate(event);
+        BusinessEventSerializer serializer = serializerFactory.create(event);
+        String schema = serializer.getSupportedSchema().getName();
+        byte[] data = serializer.serialize(event);
+
+        return new ExternalEvent(eventType, schema, data, idempotencyKey);
     }
 
     private void flushChangesBeforeSerialization() {
