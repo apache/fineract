@@ -26,7 +26,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import io.cucumber.java8.En;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,9 +46,9 @@ public class LoanCOBPartitionerStepDefinitions implements En {
     COBBusinessStepService cobBusinessStepService = mock(COBBusinessStepService.class);
     JobOperator jobOperator = mock(JobOperator.class);
     JobExplorer jobExplorer = mock(JobExplorer.class);
-    RetrieveLoanIdService retrieveLoanIdService = mock(RetrieveLoanIdService.class);
-    private LoanCOBPartitioner loanCOBPartitioner = new LoanCOBPartitioner(propertyService, cobBusinessStepService, jobOperator,
-            jobExplorer, retrieveLoanIdService);
+
+    List<Long> loanIds;
+    private LoanCOBPartitioner loanCOBPartitioner;
 
     private TreeMap<Long, String> cobBusinessMap = new TreeMap<>();
 
@@ -69,14 +69,15 @@ public class LoanCOBPartitionerStepDefinitions implements En {
                 cobBusinessMap.put(1L, "Business step");
                 lenient().when(cobBusinessStepService.getCOBBusinessStepMap(LoanCOBBusinessStep.class, LoanCOBConstant.LOAN_COB_JOB_NAME))
                         .thenReturn(cobBusinessMap);
-                lenient().when(retrieveLoanIdService.retrieveLoanIds()).thenReturn(Collections.emptyList());
+                loanIds = new ArrayList<>();
                 lenient().when(jobExplorer.findRunningJobExecutions(JobName.LOAN_COB.name())).thenThrow(new RuntimeException("fail"));
             } else if ("good".equals(action)) {
                 cobBusinessMap.put(1L, "Business step");
                 lenient().when(cobBusinessStepService.getCOBBusinessStepMap(LoanCOBBusinessStep.class, LoanCOBConstant.LOAN_COB_JOB_NAME))
                         .thenReturn(cobBusinessMap);
-                lenient().when(retrieveLoanIdService.retrieveLoanIds()).thenReturn(List.of(1L, 2L, 3L));
+                loanIds = List.of(1L, 2L, 3L);
             }
+            loanCOBPartitioner = new LoanCOBPartitioner(propertyService, cobBusinessStepService, jobOperator, jobExplorer, loanIds);
         });
 
         When("LoanCOBPartitioner.partition method executed", () -> {

@@ -57,7 +57,7 @@ public class LoanItemReaderStepDefinitions implements En {
                 List<String> splitLockedAccountsStr = Splitter.on(',').splitToList(lockedAccounts);
                 splitLockedAccounts = splitLockedAccountsStr.stream().map(Long::parseLong).toList();
             }
-            jobExecutionContext.put(LoanCOBWorkerConfiguration.ALREADY_LOCKED_LOAN_IDS, new ArrayList<>(splitLockedAccounts));
+            jobExecutionContext.put(LoanCOBConstant.ALREADY_LOCKED_LOAN_IDS, new ArrayList<>(splitLockedAccounts));
             jobExecution.setExecutionContext(jobExecutionContext);
             StepExecution stepExecution = new StepExecution("test", jobExecution);
             ExecutionContext stepExecutionContext = new ExecutionContext();
