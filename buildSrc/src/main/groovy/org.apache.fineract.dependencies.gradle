@@ -42,8 +42,8 @@ dependencyManagement {
         dependency 'org.slf4j:jcl-over-slf4j:1.7.36'
         dependency 'org.slf4j:jul-to-slf4j:1.7.36'
         dependency 'org.slf4j:log4j-over-slf4j:1.7.36'
-        dependency 'ch.qos.logback:logback-core:1.4.0'
-        dependency 'ch.qos.logback:logback-classic:1.4.0'
+        dependency 'ch.qos.logback:logback-core:1.2.11'
+        dependency 'ch.qos.logback:logback-classic:1.2.11'
 
         dependency 'org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.10'
         dependency 'com.google.guava:guava:31.1-jre'
