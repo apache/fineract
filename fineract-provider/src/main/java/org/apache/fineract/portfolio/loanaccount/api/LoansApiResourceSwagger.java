@@ -902,6 +902,8 @@ final class LoansApiResourceSwagger {
         @Schema(example = "000000001")
         public Long accountNo;
         public GetLoansLoanIdStatus status;
+        @Schema(example = "false")
+        public boolean disallowExpectedDisbursements;
         @Schema(example = "1")
         public Integer clientId;
         @Schema(example = "Kampala first Client")

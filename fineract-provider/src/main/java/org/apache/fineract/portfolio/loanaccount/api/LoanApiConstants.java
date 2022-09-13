@@ -146,4 +146,7 @@ public interface LoanApiConstants {
     // Reversal Transation Data
     String REVERSAL_EXTERNAL_ID_PARAMNAME = "reversalExternalId";
     String REVERSED_ON_DATE_PARAMNAME = "reversedOnDate";
+
+    String DISALLOW_EXPECTED_DISBURSEMENTS = "disallowExpectedDisbursements";
+
 }

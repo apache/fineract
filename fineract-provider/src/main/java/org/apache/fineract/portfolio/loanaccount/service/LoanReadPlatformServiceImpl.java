@@ -610,7 +610,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " lp.id as loanProductId, lp.name as loanProductName, lp.description as loanProductDescription,"
                     + " lp.is_linked_to_floating_interest_rates as isLoanProductLinkedToFloatingRate, "
                     + " lp.allow_variabe_installments as isvariableInstallmentsAllowed, "
-                    + " lp.allow_multiple_disbursals as multiDisburseLoan,"
+                    + " lp.allow_multiple_disbursals as multiDisburseLoan, lp.disallow_expected_disbursements as disallowExpectedDisbursements, "
                     + " lp.can_define_fixed_emi_amount as canDefineInstallmentAmount,"
                     + " c.id as clientId, c.account_no as clientAccountNo, c.display_name as clientName, c.office_id as clientOfficeId, c.external_id as clientExternalId,"
                     + " g.id as groupId, g.account_no as groupAccountNo, g.display_name as groupName,"
@@ -1007,6 +1007,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final Long closureLoanId = rs.getLong("closureLoanId");
             final String closureLoanAccountNo = rs.getString("closureLoanAccountNo");
             final BigDecimal topupAmount = rs.getBigDecimal("topupAmount");
+            final boolean disallowExpectedDisbursements = rs.getBoolean("disallowExpectedDisbursements");
             // Current Delinquency Range Data
             DelinquencyRangeData delinquencyRange = this.delinquencyReadPlatformService.retrieveCurrentDelinquencyTag(id);
 
@@ -1024,7 +1025,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     isNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled, interestRecalculationData,
                     createStandingInstructionAtDisbursement, isvariableInstallmentsAllowed, minimumGap, maximumGap, loanSubStatus,
                     canUseForTopup, isTopup, closureLoanId, closureLoanAccountNo, topupAmount, isEqualAmortization,
-                    fixedPrincipalPercentagePerInstallment, delinquencyRange);
+                    fixedPrincipalPercentagePerInstallment, delinquencyRange, disallowExpectedDisbursements);
         }
     }
 
