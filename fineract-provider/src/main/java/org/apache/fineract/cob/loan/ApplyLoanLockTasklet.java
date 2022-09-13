@@ -67,7 +67,7 @@ public class ApplyLoanLockTasklet implements Tasklet {
             accountLockRepository.save(loanAccountLock);
         }
 
-        executionContext.put(LoanCOBWorkerConfiguration.ALREADY_LOCKED_LOAN_IDS, new ArrayList<>(alreadyUnderProcessingAccountIds));
+        executionContext.put(LoanCOBConstant.ALREADY_LOCKED_LOAN_IDS, new ArrayList<>(alreadyUnderProcessingAccountIds));
         return RepeatStatus.FINISHED;
     }
 

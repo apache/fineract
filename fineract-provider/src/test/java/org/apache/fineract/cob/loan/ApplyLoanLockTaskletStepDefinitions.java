@@ -73,8 +73,8 @@ public class ApplyLoanLockTaskletStepDefinitions implements En {
 
         Then("ApplyLoanLockTasklet.execute result should match", () -> {
             assertEquals(RepeatStatus.FINISHED, resultItem);
-            assertEquals(3L, ((List) stepContribution.getStepExecution().getExecutionContext()
-                    .get(LoanCOBWorkerConfiguration.ALREADY_LOCKED_LOAN_IDS)).get(0));
+            assertEquals(3L,
+                    ((List) stepContribution.getStepExecution().getExecutionContext().get(LoanCOBConstant.ALREADY_LOCKED_LOAN_IDS)).get(0));
             verify(this.accountLockRepository, Mockito.times(2)).save(valueCaptor.capture());
             List<LoanAccountLock> values = valueCaptor.getAllValues();
             assertEquals(2L, values.get(0).getLoanId());

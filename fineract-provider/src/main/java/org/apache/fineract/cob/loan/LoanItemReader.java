@@ -49,7 +49,7 @@ public class LoanItemReader implements ItemReader<Loan> {
         ExecutionContext executionContext = stepExecution.getExecutionContext();
         ExecutionContext jobExecutionContext = stepExecution.getJobExecution().getExecutionContext();
         List<Long> loanIds = (List<Long>) executionContext.get(LoanCOBConstant.LOAN_IDS);
-        alreadyLockedAccounts = (List<Long>) jobExecutionContext.get(LoanCOBWorkerConfiguration.ALREADY_LOCKED_LOAN_IDS);
+        alreadyLockedAccounts = (List<Long>) jobExecutionContext.get(LoanCOBConstant.ALREADY_LOCKED_LOAN_IDS);
         remainingData = new ArrayList<>(loanIds);
     }
 

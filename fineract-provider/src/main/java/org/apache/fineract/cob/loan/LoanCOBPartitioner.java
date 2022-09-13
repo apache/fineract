@@ -37,6 +37,7 @@ import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.partition.support.Partitioner;
 import org.springframework.batch.item.ExecutionContext;
+import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -48,7 +49,8 @@ public class LoanCOBPartitioner implements Partitioner {
     private final COBBusinessStepService cobBusinessStepService;
     private final JobOperator jobOperator;
     private final JobExplorer jobExplorer;
-    private final RetrieveLoanIdService retrieveLoanIdService;
+
+    private final List<Long> loanIds;
 
     @NotNull
     @Override
@@ -65,15 +67,15 @@ public class LoanCOBPartitioner implements Partitioner {
 
     private Map<String, ExecutionContext> getPartitions(int partitionSize, TreeMap<Long, String> cobBusinessStepMap) {
         Map<String, ExecutionContext> partitions = new HashMap<>();
-        List<Long> allNonClosedLoanIds = retrieveLoanIdService.retrieveLoanIds();
-        if (allNonClosedLoanIds.isEmpty()) {
+
+        if (CollectionUtils.isEmpty(loanIds)) {
             stopJobExecution();
             return Map.of();
         }
         int partitionIndex = 1;
         int remainingSpace = 0;
         createNewPartition(partitions, partitionIndex, cobBusinessStepMap);
-        for (Long allNonClosedLoanId : allNonClosedLoanIds) {
+        for (Long loanId : loanIds) {
             if (remainingSpace == partitionSize) {
                 partitionIndex++;
                 createNewPartition(partitions, partitionIndex, cobBusinessStepMap);
@@ -82,7 +84,7 @@ public class LoanCOBPartitioner implements Partitioner {
             String key = PARTITION_PREFIX + partitionIndex;
             ExecutionContext executionContext = partitions.get(key);
             List<Long> data = (List<Long>) executionContext.get(LoanCOBConstant.LOAN_IDS);
-            data.add(allNonClosedLoanId);
+            data.add(loanId);
             remainingSpace++;
         }
         return partitions;
@@ -93,6 +95,7 @@ public class LoanCOBPartitioner implements Partitioner {
         ExecutionContext executionContext = new ExecutionContext();
         executionContext.put(LoanCOBConstant.LOAN_IDS, new ArrayList<Long>());
         executionContext.put(LoanCOBConstant.BUSINESS_STEP_MAP, cobBusinessStepMap);
+        executionContext.put("partition", PARTITION_PREFIX + partitionIndex);
         partitions.put(PARTITION_PREFIX + partitionIndex, executionContext);
     }
 
