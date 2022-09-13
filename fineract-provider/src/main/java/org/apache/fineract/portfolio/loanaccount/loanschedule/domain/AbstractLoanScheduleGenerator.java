@@ -2219,7 +2219,17 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                                 .adjustRepaymentDate(actualRepaymentDate, loanApplicationTerms, holidayDetailDTO).getChangedScheduleDate();
                         LocalDate modifiedLastInstDate = null;
                         LoanTermVariationsData variation1 = null;
+
+                        /*
+                         * while (loanApplicationTerms.getLoanTermVariations().hasDueDateVariation(lastInstallmentDate))
+                         * { LoanTermVariationsData variation =
+                         * loanApplicationTerms.getLoanTermVariations().nextDueDateVariation(); if
+                         * (!variation.isSpecificToInstallment()) { actualRepaymentDate = variation.getDateValue();
+                         * lastInstallmentDate = actualRepaymentDate; } dueDateVariationsDataList.add(variation); }
+                         */
+                        boolean flag = false;
                         while (loanApplicationTerms.getLoanTermVariations().hasDueDateVariation(lastInstallmentDate)) {
+                            flag = true;
                             LoanTermVariationsData variation = loanApplicationTerms.getLoanTermVariations().nextDueDateVariation();
                             if (!variation.isSpecificToInstallment()) {
                                 modifiedLastInstDate = variation.getDateValue();
@@ -2227,8 +2237,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                             }
                         }
 
-                        if (!lastInstallmentDate.isEqual(installment.getDueDate())
-                                && !installment.getDueDate().equals(modifiedLastInstDate)) {
+                        if (!lastInstallmentDate.isEqual(installment.getDueDate()) && !installment.getDueDate().equals(modifiedLastInstDate)
+                                && flag) {
                             lastInstallmentDate = prevLastInstDate;
                             actualRepaymentDate = lastInstallmentDate;
                             if (modifiedLastInstDate != null) {

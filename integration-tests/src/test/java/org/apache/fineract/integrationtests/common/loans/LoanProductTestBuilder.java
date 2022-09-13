@@ -130,6 +130,7 @@ public class LoanProductTestBuilder {
     private boolean syncExpectedWithDisbursementDate = false;
     private String fixedPrincipalPercentagePerInstallment;
     private String installmentAmountInMultiplesOf;
+    private boolean allowFixingOfInstallmentsAmount;
 
     public String build(final String chargeId) {
         final HashMap<String, Object> map = build(chargeId, null);
@@ -384,6 +385,11 @@ public class LoanProductTestBuilder {
 
     public LoanProductTestBuilder withMultiDisburse() {
         this.multiDisburseLoan = true;
+        return this;
+    }
+
+    public LoanProductTestBuilder withAllowFixingOfInstallmentsAmount() {
+        this.allowFixingOfInstallmentsAmount = true;
         return this;
     }
 
