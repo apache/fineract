@@ -130,6 +130,7 @@ public class LoanProductTestBuilder {
     private boolean syncExpectedWithDisbursementDate = false;
     private String fixedPrincipalPercentagePerInstallment;
     private String installmentAmountInMultiplesOf;
+    private boolean canDefineInstallmentAmount;
 
     public String build(final String chargeId) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -179,6 +180,9 @@ public class LoanProductTestBuilder {
             }
         }
 
+        if (this.canDefineInstallmentAmount) {
+            map.put("canDefineInstallmentAmount", this.canDefineInstallmentAmount);
+        }
         if (multiDisburseLoan) {
             map.put("multiDisburseLoan", this.multiDisburseLoan);
             map.put("maxTrancheCount", this.maxTrancheCount);
@@ -473,6 +477,11 @@ public class LoanProductTestBuilder {
 
     public LoanProductTestBuilder withDaysInYear(final String daysInYearType) {
         this.daysInYearType = daysInYearType;
+        return this;
+    }
+
+    public LoanProductTestBuilder withDefineInstallmentAmount(final boolean canDefineInstallmentAmount) {
+        this.canDefineInstallmentAmount = canDefineInstallmentAmount;
         return this;
     }
 
