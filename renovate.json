@@ -47,6 +47,14 @@
     "allowedVersions": "<=2.36"
   },
   {
+    "matchPackageNames": ["ch.qos.logback:logback-core"],
+    "allowedVersions": "<=1.2.11"
+  },
+  {
+    "matchPackageNames": ["ch.qos.logback:logback-classic"],
+    "allowedVersions": "<=1.2.11"
+  },
+  {
     "depTypeList": ["dependencies"],
     "updateTypes": ["patch", "minor"],
     "groupName": "non-major"
