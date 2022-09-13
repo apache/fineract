@@ -31,6 +31,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.documentmanagement.domain.Image;
@@ -62,6 +64,9 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
     @Column(name = "nin")
     private String nin;
 
+    @Column(name = "middlename")
+    private String middleName;
+
     @Column(name = "mobile_number", length = 50, unique = true)
     private String mobileNumber;
 
@@ -74,6 +79,12 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
 
     @Column(name = "business_owner_number")
     private String businessOwnerNumber;
+
+    @Column(name = "alter_mobile_number")
+    private String alterMobileNumber;
+
+    @Column(name = "username", unique = true)
+    private String username;
 
     @Column(name = "street")
     private String streetNumberAndName;
@@ -94,6 +105,11 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
     @JoinColumn(name = "city_id")
     private CodeValue city;
 
+
+    @Column(name = "lga")
+    private String lga;
+
+
     @ManyToOne
     @JoinColumn(name = "state_province_id")
     private CodeValue stateProvince;
@@ -104,6 +120,11 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
 
     @Column(name = "postal_code")
     private String postalCode;
+
+    @Column(name = "date_of_birth", nullable = true)
+    @Temporal(TemporalType.DATE)
+    private Date dateOfBirth;
+
 
     @Column(name = "created_by")
     private String createdBy;
@@ -125,11 +146,11 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
     private Boolean isActive;
 
     private ClientBusinessOwners(final Client client, final String firstName, final CodeValue title, final String lastName,
-            final BigDecimal ownership, final String email, final String mobileNumber, final String landmark, final CodeValue type,
-            final CodeValue city, final CodeValue stateProvince, final CodeValue country, final String bvn, final String nin,
-            final String businessOwnerNumber, final String createdBy, final LocalDate createdOn, final String updatedBy,
-            final LocalDate updatedOn, final String street, final String address1, final String address2, final String address3,
-            final String postalCode, final Boolean isActive) {
+                                 final BigDecimal ownership, final String email, final String mobileNumber, final String landmark, final CodeValue type,
+                                 final CodeValue city, final CodeValue stateProvince, final CodeValue country, final String bvn, final String nin,
+                                 final String businessOwnerNumber, final String createdBy, final LocalDate createdOn, final String updatedBy,
+                                 final LocalDate updatedOn, final String street, final String address1, final String address2, final String address3,
+                                 final String postalCode, final Boolean isActive) {
 
         this.client = client;
         this.firstName = firstName;
@@ -169,7 +190,7 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
     }
 
     public static ClientBusinessOwners fromJsonObject(final JsonObject jsonObject, final Client client, final CodeValue title,
-            final CodeValue type, final CodeValue city, final CodeValue stateProvince, final CodeValue country) {
+                                                      final CodeValue type, final CodeValue city, final CodeValue stateProvince, final CodeValue country) {
         String firstName = "";
         String lastName = "";
         BigDecimal ownership = null;
@@ -270,6 +291,7 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
                 stateProvince, country, bvn, nin, businessOwnerNumber, createdBy, createdOnDate, updatedBy, updatedOnDate,
                 streetNumberAndName, address1, address2, address3, postalCode, isActive);
     }
+
 
     public Client getClient() {
         return client;
@@ -485,5 +507,25 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
 
     public void setActive(Boolean active) {
         isActive = active;
+    }
+
+    public void setMiddleName(String middleName) {
+        this.middleName = middleName;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setDateOfBirth(Date dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public void setAlterMobileNumber(String alterMobileNumber) {
+        this.alterMobileNumber = alterMobileNumber;
+    }
+
+    public void setLga(String lga) {
+        this.lga = lga;
     }
 }

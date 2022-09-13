@@ -21,6 +21,9 @@ package org.apache.fineract.portfolio.client.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -54,7 +57,7 @@ public class ClientBusinessOwnerReadPlatformServiceImpl implements ClientBusines
     private static final class ClientBusinessOwnerMapper implements RowMapper<ClientBusinessOwnerData> {
 
         public String schema() {
-            return "fmb.id AS id, fmb.client_id AS clientId, fmb.firstname AS firstName, fmb.title_id AS title_id, tc.code_value as title_name,"
+            return "fmb.id AS id, fmb.client_id AS clientId, fmb.firstname AS firstName, fmb.title_id AS title_id,fmb.middlename AS middleName, tc.code_value as title_name,"
                     + "fmb.lastname AS lastName, fmb.ownership AS ownership, fmb.email AS email, fmb.mobile_number as mobileNumber,"
                     + "fmb.business_owner_number as businessOwnerNumber, fmb.city_id as city_id, cc.code_value as city_name, "
                     + "fmb.address1 as address1, fmb.address2 as address2, fmb.address3 as address3, fmb.type_id as type_id, type_code.code_value as type_name, "
@@ -80,6 +83,8 @@ public class ClientBusinessOwnerReadPlatformServiceImpl implements ClientBusines
             final String mobileNumber = rs.getString("mobileNumber");
             final String businessOwnerNumber = rs.getString("businessOwnerNumber");
             final String landmark = rs.getString("landmark");
+            final String middleName = rs.getString("middleName");
+
             final long stateProvinceId = rs.getLong("state_province_id");
             final String stateName = rs.getString("state_name");
             final long countryId = rs.getLong("country_id");
@@ -88,6 +93,7 @@ public class ClientBusinessOwnerReadPlatformServiceImpl implements ClientBusines
             final String typeName = rs.getString("type_name");
             final long cityId = rs.getLong("city_id");
             final String cityName = rs.getString("city_name");
+            final LocalDate dateOfBirth = JdbcSupport.getLocalDate(rs, "dateOfBirth");
             final String createdBy = rs.getString("created_by");
             final Date createdOn = rs.getDate("created_on");
             final String updatedBy = rs.getString("updated_by");
@@ -102,8 +108,8 @@ public class ClientBusinessOwnerReadPlatformServiceImpl implements ClientBusines
             final Long imageId = JdbcSupport.getLong(rs, "imageId");
             final boolean isActive = rs.getBoolean("isActive");
 
-            return ClientBusinessOwnerData.instance(id, clientId, firstName, titleName, titleId, lastName, ownership, typeId, typeName,
-                    cityId, cityName, mobileNumber, businessOwnerNumber, stateProvinceId, stateName, countryId, countryName, createdBy,
+            return ClientBusinessOwnerData.instance(id, clientId, firstName,middleName, titleName, titleId, lastName, ownership, typeId, typeName,
+                    cityId, cityName, mobileNumber, businessOwnerNumber, stateProvinceId, stateName, countryId, countryName,dateOfBirth, createdBy,
                     createdOn, updatedBy, updatedOn, email, street, address1, address2, address3, postalCode, bvn, nin, landmark, null,
                     null, null, null, null, imageId, isActive);
 

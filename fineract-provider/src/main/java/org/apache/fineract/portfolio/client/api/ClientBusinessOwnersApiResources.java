@@ -35,9 +35,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -61,8 +58,8 @@ import org.springframework.stereotype.Component;
 public class ClientBusinessOwnersApiResources {
 
     private final Set<String> responseDataParameters = new HashSet<>(
-            Arrays.asList("id", "clientId", "firstName", "title", "lastName", "email", "mobileNumber", "alterMobileNumber", "isActive",
-                    "city", "username", "streetNumberAndName", "dateOfBirth", "lga", "stateProvince", "country", "bvn", "isActive"));
+            Arrays.asList("id", "clientId", "firstName", "title", "lastName", "middleName","email", "mobileNumber", "alterMobileNumber", "isActive",
+                    "city", "username", "streetNumberAndName", "dateOfBirth", "lga", "stateProvince", "country", "bvn"));
     private final String resourceNameForPermissions = "BusinessOwners";
     private final PlatformSecurityContext context;
     private final ClientBusinessOwnerReadPlatformService readPlatformService;

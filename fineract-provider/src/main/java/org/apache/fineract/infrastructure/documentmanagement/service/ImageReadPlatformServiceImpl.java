@@ -80,6 +80,9 @@ public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
                 builder.append("from m_image image , m_business_owners businessOwner "
                         + " where businessOwner.image_id = image.id and businessOwner.id=?");
             }
+            else if (EntityTypeForImages.BUSINESSOWNER.toString().equalsIgnoreCase(entityType)) {
+                builder.append("from m_image image , m_business_owners businessOwner " + " where businessOwner.image_id = image.id and businessOwner.id=?");
+            }
             return builder.toString();
         }
 

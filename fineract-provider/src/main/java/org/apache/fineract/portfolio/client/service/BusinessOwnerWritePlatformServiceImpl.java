@@ -22,6 +22,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
@@ -129,7 +130,12 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
 
         String firstName = "";
         BigDecimal ownership = null;
+        String middleName = "";
+        Date dateOfBirth = null;
+        String username = null;
+        String alterMobileNumber;
         String email = "";
+        String lga = "";
         String mobileNumber = "";
         String businessOwnerNumber = "";
         String streetNumberAndName = "";
@@ -179,8 +185,15 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
         if (command.stringValueOfParameterNamed("ownership") != null) {
             ownership = command.bigDecimalValueOfParameterNamed("ownership");
             clientBusinessOwner.setOwnership(ownership);
+        }
+
+        if (command.stringValueOfParameterNamed("middleName") != null) {
+            middleName = command.stringValueOfParameterNamed("middleName");
+            clientBusinessOwner.setMiddleName(middleName);
             is_owner_update = true;
         }
+
+
 
         if (command.stringValueOfParameterNamed("email") != null) {
             email = command.stringValueOfParameterNamed("email");
@@ -197,6 +210,17 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
         if (command.stringValueOfParameterNamed("businessOwnerNumber") != null) {
             businessOwnerNumber = command.stringValueOfParameterNamed("businessOwnerNumber");
             clientBusinessOwner.setBusinessOwnerNumber(businessOwnerNumber);
+        }
+
+        if (command.stringValueOfParameterNamed("alterMobileNumber") != null) {
+            alterMobileNumber = command.stringValueOfParameterNamed("alterMobileNumber");
+            clientBusinessOwner.setAlterMobileNumber(alterMobileNumber);
+            is_owner_update = true;
+        }
+
+        if (command.booleanObjectValueOfParameterNamed("isActive") != null) {
+            isActive = command.booleanObjectValueOfParameterNamed("isActive");
+            clientBusinessOwner.setActive(isActive);
             is_owner_update = true;
         }
 
@@ -233,6 +257,24 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
         if (command.stringValueOfParameterNamed("landmark") != null) {
             landmark = command.stringValueOfParameterNamed("landmark");
             clientBusinessOwner.setlandmark(landmark);
+        }
+
+        if (command.stringValueOfParameterNamed("username") != null) {
+            username = command.stringValueOfParameterNamed("username");
+            clientBusinessOwner.setUsername(username);
+            is_owner_update = true;
+        }
+
+        if (command.dateValueOfParameterNamed("dateOfBirth") != null) {
+            dateOfBirth = command.dateValueOfParameterNamedFromLocalDate("dateOfBirth");
+            clientBusinessOwner.setDateOfBirth(dateOfBirth);
+            is_owner_update = true;
+
+        }
+
+        if (command.stringValueOfParameterNamed("lga") != null) {
+            lga = command.stringValueOfParameterNamed("lga");
+            clientBusinessOwner.setLga(lga);
             is_owner_update = true;
         }
 
