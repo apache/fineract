@@ -223,7 +223,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     public CommandProcessingResult createClient(final JsonCommand command) {
 
         try {
-            businessEventNotifierService.startExternalEventRecording();
             final AppUser currentUser = this.context.authenticatedUser();
 
             this.fromApiJsonDeserializer.validateForCreate(command.json());
@@ -301,9 +300,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             }
 
             this.clientRepository.saveAndFlush(newClient);
-            if (newClient.isActive()) {
-                businessEventNotifierService.notifyPostBusinessEvent(new ClientActivateBusinessEvent(newClient));
-            }
             if (newClient.isAccountNumberRequiresAutoGeneration()) {
                 AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.CLIENT);
                 newClient.updateAccountNo(accountNumberGenerator.generate(newClient, accountNumberFormat));
@@ -336,11 +332,12 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                         command.arrayOfParameterNamed(ClientApiConstants.datatables));
             }
 
-            businessEventNotifierService.notifyPostBusinessEvent(new ClientCreateBusinessEvent(newClient));
-
             entityDatatableChecksWritePlatformService.runTheCheck(newClient.getId(), EntityTables.CLIENT.getName(),
                     StatusEnum.CREATE.getCode().longValue(), EntityTables.CLIENT.getForeignKeyColumnNameOnDatatable());
-            businessEventNotifierService.stopExternalEventRecording();
+            businessEventNotifierService.notifyPostBusinessEvent(new ClientCreateBusinessEvent(newClient));
+            if (newClient.isActive()) {
+                businessEventNotifierService.notifyPostBusinessEvent(new ClientActivateBusinessEvent(newClient));
+            }
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withOfficeId(clientOffice.getId()) //
