@@ -16,15 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.repository;
+package org.apache.fineract.infrastructure.event.external.producer;
 
-import java.util.List;
-import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEvent;
-import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventStatus;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.apache.fineract.avro.MessageV1;
+import org.apache.fineract.infrastructure.event.external.exception.AcknowledgementTimeoutException;
+import org.springframework.stereotype.Service;
 
-public interface ExternalEventRepository extends JpaRepository<ExternalEvent, Long> {
+@Service
+public class ExternalEventProducerImpl implements ExternalEventProducer {
 
-    List<ExternalEvent> findByStatusOrderById(ExternalEventStatus status, Pageable batchSize);
+    @Override
+    public void sendEvent(MessageV1 message) throws AcknowledgementTimeoutException {
+        return;
+    }
 }

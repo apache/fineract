@@ -134,5 +134,22 @@ public class FineractProperties {
     public static class FineractExternalEventsProperties {
 
         private boolean enabled;
+        private FineractExternalEventsProducerProperties producer;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractExternalEventsProducerProperties {
+
+        private int readBatchSize;
+        private FineractExternalEventsProducerJmsProperties jms;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractExternalEventsProducerJmsProperties {
+
+        private boolean enabled;
+        private String eventQueueName;
     }
 }
