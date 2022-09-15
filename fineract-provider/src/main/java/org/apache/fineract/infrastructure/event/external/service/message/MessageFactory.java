@@ -21,10 +21,14 @@ package org.apache.fineract.infrastructure.event.external.service.message;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.avro.BulkMessageV1;
 import org.apache.fineract.avro.MessageV1;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEvent;
 import org.apache.fineract.infrastructure.event.external.service.message.domain.BulkMessageData;
 import org.apache.fineract.infrastructure.event.external.service.message.domain.MessageCategory;
 import org.apache.fineract.infrastructure.event.external.service.message.domain.MessageData;
@@ -33,10 +37,17 @@ import org.apache.fineract.infrastructure.event.external.service.message.domain.
 import org.apache.fineract.infrastructure.event.external.service.message.domain.MessageIdempotencyKey;
 import org.apache.fineract.infrastructure.event.external.service.message.domain.MessageSource;
 import org.apache.fineract.infrastructure.event.external.service.message.domain.MessageType;
+import org.apache.fineract.infrastructure.event.external.service.support.ByteBufferConverter;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
-public class MessageFactory {
+@RequiredArgsConstructor
+public class MessageFactory implements InitializingBean {
+
+    private final ByteBufferConverter byteBufferConverter;
+    private static final String SOURCE_UUID = UUID.randomUUID().toString();
 
     public MessageV1 createMessage(MessageId id, MessageSource source, MessageType type, MessageCategory category,
             MessageIdempotencyKey idempotencyKey, MessageDataSchema dataSchema, MessageData data) {
@@ -65,6 +76,19 @@ public class MessageFactory {
         return result;
     }
 
+    public MessageV1 createMessage(ExternalEvent event) {
+        MessageId id = new MessageId(event.getId().intValue());
+        MessageSource source = new MessageSource(SOURCE_UUID);
+        MessageType type = new MessageType(event.getType());
+        String messageCategory = "nocategory";
+        MessageCategory category = new MessageCategory(messageCategory);
+        MessageIdempotencyKey idempotencyKey = new MessageIdempotencyKey(event.getIdempotencyKey());
+        MessageDataSchema dataSchema = new MessageDataSchema(event.getSchema());
+        MessageData data = new MessageData(byteBufferConverter.convert(event.getData()));
+        MessageV1 message = createMessage(id, source, type, category, idempotencyKey, dataSchema, data);
+        return message;
+    }
+
     private String getTenantId() {
         return ThreadLocalContextUtil.getTenant().getName();
     }
@@ -72,5 +96,10 @@ public class MessageFactory {
     private String getMessageCreatedAt() {
         OffsetDateTime createdAt = DateUtils.getOffsetDateTimeOfTenant();
         return createdAt.withOffsetSameInstant(ZoneOffset.UTC).toLocalDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        log.info("Message source set to {}", SOURCE_UUID);
     }
 }
