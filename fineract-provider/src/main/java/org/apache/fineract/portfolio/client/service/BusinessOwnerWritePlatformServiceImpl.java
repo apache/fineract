@@ -196,7 +196,7 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
         }
 
         if (command.dateValueOfParameterNamed("dateOfBirth") != null) {
-            dateOfBirth = command.dateValueOfParameterNamed("dateOfBirth");
+            dateOfBirth = command.dateValueOfParameterNamedFromLocalDate("dateOfBirth");
             clientBusinessOwner.setDateOfBirth(dateOfBirth);
             is_owner_update = true;
 

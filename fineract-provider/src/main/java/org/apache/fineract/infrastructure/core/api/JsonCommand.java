@@ -29,10 +29,13 @@ import java.time.LocalTime;
 import java.time.MonthDay;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.Date;
+
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -416,6 +419,14 @@ public final class JsonCommand {
 
     public LocalDate dateValueOfParameterNamed(final String parameterName) {
         return this.fromApiJsonHelper.extractLocalDateNamed(parameterName, this.parsedCommand);
+    }
+
+    public Date dateValueOfParameterNamedFromLocalDate(final String parameterName) {
+        final LocalDate localDate = this.fromApiJsonHelper.extractLocalDateNamed(parameterName, this.parsedCommand);
+        if (localDate == null) {
+            return null;
+        }
+        return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     public boolean isChangeInStringParameterNamed(final String parameterName, final String existingValue) {
