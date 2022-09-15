@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.account.data.AccountTransferData;
@@ -31,7 +32,7 @@ import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 /**
  * Immutable data object representing a loan transaction.
  */
-@SuppressWarnings("unused")
+@Getter
 public class LoanTransactionData {
 
     private final Long id;
@@ -186,14 +187,6 @@ public class LoanTransactionData {
         this.loanRepaymentScheduleInstallments = loanRepaymentScheduleInstallments;
     }
 
-    public Long getAccountId() {
-        return accountId;
-    }
-
-    public Integer getRowIndex() {
-        return rowIndex;
-    }
-
     public static LoanTransactionData templateOnTop(final LoanTransactionData loanTransactionData,
             final Collection<PaymentTypeData> paymentTypeOptions) {
         return new LoanTransactionData(loanTransactionData.id, loanTransactionData.officeId, loanTransactionData.officeName,
@@ -344,36 +337,12 @@ public class LoanTransactionData {
         this.possibleNextRepaymentDate = possibleNextRepaymentDate;
     }
 
-    public LocalDate dateOf() {
-        return this.date;
-    }
-
     public boolean isNotDisbursement() {
-        return type.id() == 1;
-    }
-
-    public BigDecimal getAmount() {
-        return this.amount;
-    }
-
-    public BigDecimal getNetDisbursalAmount() {
-        return netDisbursalAmount;
-    }
-
-    public BigDecimal getUnrecognizedIncomePortion() {
-        return this.unrecognizedIncomePortion;
-    }
-
-    public BigDecimal getInterestPortion() {
-        return this.interestPortion;
+        return type.getId() == 1;
     }
 
     public void setWriteOffReasonOptions(Collection<CodeValueData> writeOffReasonOptions) {
         this.writeOffReasonOptions = writeOffReasonOptions;
-    }
-
-    public Collection<LoanChargePaidByData> getLoanChargePaidByList() {
-        return loanChargePaidByList;
     }
 
     public void setLoanChargePaidByList(Collection<LoanChargePaidByData> loanChargePaidByList) {

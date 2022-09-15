@@ -62,6 +62,15 @@ public interface LoanAccountDomainService {
      */
     void recalculateAccruals(Loan loan);
 
+    /**
+     * This method is to set a Delinquency Tag If the loan is overdue, If the loan after the repayment transaction is
+     * not overdue and It has a Delinquency Tag, It is removed
+     *
+     * @param loan
+     * @param transactionDate
+     */
+    void setLoanDelinquencyTag(Loan loan, LocalDate transactionDate);
+
     LoanTransaction makeRepayment(LoanTransactionType repaymentTransactionType, Loan loan, CommandProcessingResultBuilder builderResult,
             LocalDate transactionDate, BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId,
             boolean isRecoveryRepayment, String chargeRefundChargeType, boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto,

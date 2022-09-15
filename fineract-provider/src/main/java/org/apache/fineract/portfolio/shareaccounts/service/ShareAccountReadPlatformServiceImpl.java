@@ -121,14 +121,14 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
             final Collection<EnumOptionData> minimumActivePeriodFrequencyTypeOptions = this.shareProductDropdownReadPlatformService
                     .retrieveMinimumActivePeriodFrequencyTypeOptions();
             final Collection<SavingsAccountData> clientSavingsAccounts = this.savingsAccountReadPlatformService
-                    .retrieveActiveForLookup(clientId, DepositAccountType.SAVINGS_DEPOSIT, productData.getCurrency().code());
-            toReturn = new ShareAccountData(client.id(), client.displayName(), productData.getCurrency(), charges, marketPrice,
+                    .retrieveActiveForLookup(clientId, DepositAccountType.SAVINGS_DEPOSIT, productData.getCurrency().getCode());
+            toReturn = new ShareAccountData(client.getId(), client.getDisplayName(), productData.getCurrency(), charges, marketPrice,
                     minimumActivePeriodFrequencyTypeOptions, lockinPeriodFrequencyTypeOptions, clientSavingsAccounts,
-                    productData.getNominaltShares());
+                    productData.getNominalShares());
         } else {
             Collection<ProductData> productOptions = service.retrieveAllForLookup();
             final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveSharesApplicableCharges();
-            toReturn = new ShareAccountData(client.id(), client.displayName(), productOptions, chargeOptions);
+            toReturn = new ShareAccountData(client.getId(), client.getDisplayName(), productOptions, chargeOptions);
         }
         return toReturn;
     }
@@ -139,7 +139,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         if (marketDataSet != null && !marketDataSet.isEmpty()) {
             LocalDate currentDate = DateUtils.getBusinessLocalDate();
             for (ShareProductMarketPriceData data : marketDataSet) {
-                LocalDate futureDate = data.getStartDate();
+                LocalDate futureDate = data.getFromDate();
                 if (currentDate.isAfter(futureDate)) {
                     marketValue = data.getShareValue();
                 }
@@ -170,7 +170,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
                     .retrieveLockinPeriodFrequencyTypeOptions();
             final Collection<EnumOptionData> minimumActivePeriodFrequencyTypeOptions = lockinPeriodFrequencyTypeOptions;
             final Collection<SavingsAccountData> clientSavingsAccounts = this.savingsAccountReadPlatformService
-                    .retrieveActiveForLookup(data.getClientId(), DepositAccountType.SAVINGS_DEPOSIT, productData.getCurrency().code());
+                    .retrieveActiveForLookup(data.getClientId(), DepositAccountType.SAVINGS_DEPOSIT, productData.getCurrency().getCode());
             Collection<ProductData> productOptions = service.retrieveAllForLookup();
             final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveSharesApplicableCharges();
             data = ShareAccountData.template(data, productOptions, chargeOptions, clientSavingsAccounts, lockinPeriodFrequencyTypeOptions,

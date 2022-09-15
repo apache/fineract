@@ -146,7 +146,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
         } else {
             interestPortion = BigDecimal.valueOf(interestPerDay * daysToBeAccrued);
         }
-        interestPortion = interestPortion.setScale(accrualData.getCurrencyData().decimalPlaces(), MoneyHelper.getRoundingMode());
+        interestPortion = interestPortion.setScale(accrualData.getCurrencyData().getDecimalPlaces(), MoneyHelper.getRoundingMode());
 
         BigDecimal totalAccInterest = accrualData.getAccruedInterestIncome();
         BigDecimal totalAccPenalty = accrualData.getAccruedPenaltyIncome();
@@ -421,10 +421,10 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
             Collection<LoanTransactionData> loanTransactionDatas = new ArrayList<>();
 
             for (LoanTransactionData loanTransactionData : loanWaiverTransactions) {
-                if (!loanTransactionData.dateOf().isAfter(accrualData.getFromDateAsLocaldate())
-                        || (loanTransactionData.dateOf().isAfter(accrualData.getFromDateAsLocaldate())
-                                && !loanTransactionData.dateOf().isAfter(accrualData.getDueDateAsLocaldate())
-                                && !loanTransactionData.dateOf().isAfter(tillDate))) {
+                if (!loanTransactionData.getDate().isAfter(accrualData.getFromDateAsLocaldate())
+                        || (loanTransactionData.getDate().isAfter(accrualData.getFromDateAsLocaldate())
+                                && !loanTransactionData.getDate().isAfter(accrualData.getDueDateAsLocaldate())
+                                && !loanTransactionData.getDate().isAfter(tillDate))) {
                     loanTransactionDatas.add(loanTransactionData);
                 }
             }
@@ -436,8 +436,8 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
                     recognized = recognized.add(loanTransactionData.getInterestPortion());
                     unrecognized = unrecognized.add(loanTransactionData.getUnrecognizedIncomePortion());
                 }
-                if (loanSchedulePeriodData.periodDueDate().isBefore(accrualData.getDueDateAsLocaldate())) {
-                    remainingAmt = remainingAmt.add(loanSchedulePeriodData.interestWaived());
+                if (loanSchedulePeriodData.getDueDate().isBefore(accrualData.getDueDateAsLocaldate())) {
+                    remainingAmt = remainingAmt.add(loanSchedulePeriodData.getInterestWaived());
                     if (recognized.compareTo(remainingAmt) > 0) {
                         recognized = recognized.subtract(remainingAmt);
                         remainingAmt = BigDecimal.ZERO;

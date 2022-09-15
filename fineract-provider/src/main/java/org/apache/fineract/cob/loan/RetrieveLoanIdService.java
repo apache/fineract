@@ -22,5 +22,5 @@ import java.util.List;
 
 public interface RetrieveLoanIdService {
 
-    List<Integer> retrieveLoanIds();
+    List<Long> retrieveLoanIds();
 }

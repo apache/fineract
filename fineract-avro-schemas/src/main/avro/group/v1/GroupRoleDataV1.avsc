@@ -13,7 +13,7 @@
         },
         {
             "default": null,
-            "name": "code",
+            "name": "role",
             "type": [
                 "null",
                 "org.apache.fineract.avro.generic.v1.CodeValueDataV1"

@@ -71,7 +71,7 @@ public class TransferFeeChargeForLoansTasklet implements Tasklet {
                             final boolean isExceptionForBalanceCheck = false;
                             final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(DateUtils.getBusinessLocalDate(),
                                     installmentChargeData.getAmountOutstanding(), PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN,
-                                    portfolioAccountData.accountId(), chargeData.getLoanId(), "Loan Charge Payment", null, null, null, null,
+                                    portfolioAccountData.getId(), chargeData.getLoanId(), "Loan Charge Payment", null, null, null, null,
                                     LoanTransactionType.CHARGE_PAYMENT.getValue(), chargeData.getId(),
                                     installmentChargeData.getInstallmentNumber(), AccountTransferType.CHARGE_PAYMENT.getValue(), null, null,
                                     null, null, null, null, isRegularTransaction, isExceptionForBalanceCheck);
@@ -84,7 +84,7 @@ public class TransferFeeChargeForLoansTasklet implements Tasklet {
                     final boolean isExceptionForBalanceCheck = false;
                     final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(DateUtils.getBusinessLocalDate(),
                             chargeData.getAmountOutstanding(), PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN,
-                            portfolioAccountData.accountId(), chargeData.getLoanId(), "Loan Charge Payment", null, null, null, null,
+                            portfolioAccountData.getId(), chargeData.getLoanId(), "Loan Charge Payment", null, null, null, null,
                             LoanTransactionType.CHARGE_PAYMENT.getValue(), chargeData.getId(), null,
                             AccountTransferType.CHARGE_PAYMENT.getValue(), null, null, null, null, null, null, isRegularTransaction,
                             isExceptionForBalanceCheck);

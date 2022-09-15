@@ -19,10 +19,11 @@
 package org.apache.fineract.infrastructure.event.external.service.serialization.mapper.recurringdeposit;
 
 import org.apache.fineract.avro.recurringdeposit.v1.RecurringDepositAccountDataV1;
+import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroMapperConfig;
 import org.apache.fineract.portfolio.savings.data.RecurringDepositAccountData;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring")
+@Mapper(config = AvroMapperConfig.class)
 public interface RecurringDepositAccountDataMapper {
 
     RecurringDepositAccountDataV1 map(RecurringDepositAccountData source);

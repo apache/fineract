@@ -19,10 +19,11 @@
 package org.apache.fineract.infrastructure.event.external.service.serialization.mapper.client;
 
 import org.apache.fineract.avro.client.v1.ClientDataV1;
+import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroMapperConfig;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring")
+@Mapper(config = AvroMapperConfig.class)
 public interface ClientDataMapper {
 
     ClientDataV1 map(ClientData source);

@@ -1693,7 +1693,7 @@ public final class LoanApplicationTerms {
         if (isMultiDisburseLoan()) {
             for (DisbursementData disbursement : getDisbursementDatas()) {
                 if (disbursement.isDisbursed()) {
-                    disbursedAmount = disbursedAmount.plus(disbursement.amount());
+                    disbursedAmount = disbursedAmount.plus(disbursement.getPrincipal());
                 }
             }
         } else {

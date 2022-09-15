@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -30,6 +31,7 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.loanaccount.guarantor.domain.GuarantorType;
 import org.apache.fineract.portfolio.loanaccount.guarantor.service.GuarantorEnumerations;
 
+@Getter
 public class GuarantorData {
 
     private final Long id;
@@ -122,14 +124,6 @@ public class GuarantorData {
         this.accountLinkingOptions = null;
     }
 
-    public Long getAccountId() {
-        return accountId;
-    }
-
-    public Integer getRowIndex() {
-        return rowIndex;
-    }
-
     public static GuarantorData template(final List<EnumOptionData> guarantorTypeOptions,
             final Collection<CodeValueData> allowedClientRelationshipTypes, Collection<PortfolioAccountData> accountLinkingOptions) {
         final Collection<GuarantorFundingData> guarantorFundingDetails = null;
@@ -152,8 +146,8 @@ public class GuarantorData {
     public static GuarantorData mergeClientData(final ClientData clientData, final GuarantorData guarantorData) {
         return new GuarantorData(guarantorData.id, guarantorData.loanId, guarantorData.clientRelationshipType, guarantorData.entityId,
                 guarantorData.guarantorType, clientData.getFirstname(), clientData.getLastname(), null, null, null, null, null, null, null,
-                null, null, null, clientData.officeName(), clientData.getActivationDate(), clientData.getExternalId(), guarantorData.status,
-                guarantorData.guarantorFundingDetails, null, guarantorData.allowedClientRelationshipTypes,
+                null, null, null, clientData.getOfficeName(), clientData.getActivationDate(), clientData.getExternalId(),
+                guarantorData.status, guarantorData.guarantorFundingDetails, null, guarantorData.allowedClientRelationshipTypes,
                 guarantorData.accountLinkingOptions);
     }
 
@@ -209,9 +203,4 @@ public class GuarantorData {
     public boolean isStaffMember() {
         return GuarantorType.STAFF.getValue().equals(this.guarantorType.getId().intValue());
     }
-
-    public Long getEntityId() {
-        return this.entityId;
-    }
-
 }

@@ -20,23 +20,19 @@ package org.apache.fineract.infrastructure.configuration.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.data.ExternalServicesData;
 import org.apache.fineract.infrastructure.configuration.exception.ExternalServiceConfigurationNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class ExternalServicesReadPlatformServiceImpl implements ExternalServicesReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    public ExternalServicesReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public ExternalServicesData getExternalServiceDetailsByServiceName(String serviceName) {
@@ -80,7 +76,8 @@ public class ExternalServicesReadPlatformServiceImpl implements ExternalServices
                 id = rs.getLong("id");
             }
 
-            return new ExternalServicesData(id, name);
+            return new ExternalServicesData().setId(id).setName(name);
+
         }
 
     }

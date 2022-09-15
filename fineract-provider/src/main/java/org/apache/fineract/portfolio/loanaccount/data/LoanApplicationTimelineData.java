@@ -20,12 +20,15 @@ package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 /**
  * Immutable data object represent the important time-line events of a loan application and loan.
  */
-@SuppressWarnings("unused")
+@Getter
+@RequiredArgsConstructor
 public class LoanApplicationTimelineData {
 
     private final LocalDate submittedOnDate;
@@ -97,48 +100,6 @@ public class LoanApplicationTimelineData {
                 expectedDisbursementDate, actualDisbursementDate, disbursedByUsername, disbursedByFirstname, disbursedByLastname,
                 closedOnDate, closedByUsername, closedByFirstname, closedByLastname, expectedMaturityDate, writeOffOnDate,
                 writeOffByUsername, writeOffByFirstname, writeOffByLastname);
-    }
-
-    public LoanApplicationTimelineData(final LocalDate submittedOnDate, final String submittedByUsername, final String submittedByFirstname,
-            final String submittedByLastname, final LocalDate rejectedOnDate, final String rejectedByUsername,
-            final String rejectedByFirstname, final String rejectedByLastname, final LocalDate withdrawnOnDate,
-            final String withdrawnByUsername, final String withdrawnByFirstname, final String withdrawnByLastname,
-            final LocalDate approvedOnDate, final String approvedByUsername, final String approvedByFirstname,
-            final String approvedByLastname, final LocalDate expectedDisbursementDate, final LocalDate actualDisbursementDate,
-            final String disbursedByUsername, final String disbursedByFirstname, final String disbursedByLastname,
-            final LocalDate closedOnDate, final String closedByUsername, final String closedByFirstname, final String closedByLastname,
-            final LocalDate expectedMaturityDate, final LocalDate writeOffOnDate, final String writeOffByUsername,
-            final String writeOffByFirstname, final String writeOffByLastname) {
-        this.submittedOnDate = submittedOnDate;
-        this.submittedByUsername = submittedByUsername;
-        this.submittedByFirstname = submittedByFirstname;
-        this.submittedByLastname = submittedByLastname;
-        this.rejectedOnDate = rejectedOnDate;
-        this.rejectedByUsername = rejectedByUsername;
-        this.rejectedByFirstname = rejectedByFirstname;
-        this.rejectedByLastname = rejectedByLastname;
-        this.withdrawnOnDate = withdrawnOnDate;
-        this.withdrawnByUsername = withdrawnByUsername;
-        this.withdrawnByFirstname = withdrawnByFirstname;
-        this.withdrawnByLastname = withdrawnByLastname;
-        this.approvedOnDate = approvedOnDate;
-        this.approvedByUsername = approvedByUsername;
-        this.approvedByFirstname = approvedByFirstname;
-        this.approvedByLastname = approvedByLastname;
-        this.expectedDisbursementDate = expectedDisbursementDate;
-        this.actualDisbursementDate = actualDisbursementDate;
-        this.disbursedByUsername = disbursedByUsername;
-        this.disbursedByFirstname = disbursedByFirstname;
-        this.disbursedByLastname = disbursedByLastname;
-        this.closedOnDate = closedOnDate;
-        this.closedByUsername = closedByUsername;
-        this.closedByFirstname = closedByFirstname;
-        this.closedByLastname = closedByLastname;
-        this.expectedMaturityDate = expectedMaturityDate;
-        this.writeOffOnDate = writeOffOnDate;
-        this.writeOffByUsername = writeOffByUsername;
-        this.writeOffByFirstname = writeOffByFirstname;
-        this.writeOffByLastname = writeOffByLastname;
     }
 
     public RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData(final CurrencyData currency, final BigDecimal principal,

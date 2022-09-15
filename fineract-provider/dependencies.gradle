@@ -173,6 +173,6 @@ dependencies {
         exclude group: 'javax.activation'
         exclude group: 'org.skyscreamer'
     }
-    testImplementation ('org.mockito:mockito-inline:4.7.0')
+    testImplementation ('org.mockito:mockito-inline:4.8.0')
 
 }

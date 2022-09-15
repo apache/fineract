@@ -25,13 +25,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.PersistenceException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
@@ -87,7 +88,6 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement;
-import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagementRepository;
 import org.apache.fineract.portfolio.collateralmanagement.service.LoanCollateralAssembler;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.fund.domain.Fund;
@@ -104,10 +104,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonit
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagementRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
@@ -144,9 +142,6 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.service.GSIMReadPlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
@@ -154,9 +149,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements LoanApplicationWritePlatformService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(LoanApplicationWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final FromJsonHelper fromJsonHelper;
@@ -181,7 +176,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final SavingsAccountAssembler savingsAccountAssembler;
     private final AccountAssociationsRepository accountAssociationsRepository;
     private final LoanReadPlatformService loanReadPlatformService;
-    private final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository;
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final ConfigurationDomainService configurationDomainService;
@@ -190,7 +184,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final CalendarReadPlatformService calendarReadPlatformService;
     private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
-    private final FineractEntityToEntityMappingRepository repository;
+    private final FineractEntityToEntityMappingRepository entityMappingRepository;
     private final FineractEntityRelationRepository fineractEntityRelationRepository;
     private final LoanProductReadPlatformService loanProductReadPlatformService;
 
@@ -199,84 +193,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final GLIMAccountInfoRepository glimRepository;
     private final LoanRepository loanRepository;
     private final GSIMReadPlatformService gsimReadPlatformService;
-    private final LoanCollateralManagementRepository loanCollateralManagementRepository;
-    private final ClientCollateralManagementRepository clientCollateralManagementRepository;
-
-    @Autowired
-    public LoanApplicationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper,
-            final LoanApplicationTransitionApiJsonValidator loanApplicationTransitionApiJsonValidator,
-            final LoanApplicationCommandFromApiJsonHelper fromApiJsonDeserializer,
-            final LoanProductDataValidator loanProductCommandFromApiJsonDeserializer, final AprCalculator aprCalculator,
-            final LoanAssembler loanAssembler, final LoanChargeAssembler loanChargeAssembler,
-            final LoanCollateralAssembler loanCollateralAssembler, final LoanRepositoryWrapper loanRepositoryWrapper,
-            final NoteRepository noteRepository, final LoanScheduleCalculationPlatformService calculationPlatformService,
-            final ClientRepositoryWrapper clientRepository, final LoanProductRepository loanProductRepository,
-            final AccountNumberGenerator accountNumberGenerator, final LoanSummaryWrapper loanSummaryWrapper,
-            final GroupRepositoryWrapper groupRepository,
-            final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
-            final CalendarRepository calendarRepository, final CalendarInstanceRepository calendarInstanceRepository,
-            final SavingsAccountAssembler savingsAccountAssembler, final AccountAssociationsRepository accountAssociationsRepository,
-            final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository,
-            final LoanReadPlatformService loanReadPlatformService, final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
-            final BusinessEventNotifierService businessEventNotifierService, final ConfigurationDomainService configurationDomainService,
-            final LoanScheduleAssembler loanScheduleAssembler, final LoanUtilService loanUtilService,
-            final CalendarReadPlatformService calendarReadPlatformService,
-            final GlobalConfigurationRepositoryWrapper globalConfigurationRepository,
-            final FineractEntityToEntityMappingRepository repository,
-            final FineractEntityRelationRepository fineractEntityRelationRepository,
-            final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
-            final GLIMAccountInfoWritePlatformService glimAccountInfoWritePlatformService, final GLIMAccountInfoRepository glimRepository,
-            final LoanRepository loanRepository, final GSIMReadPlatformService gsimReadPlatformService, final RateAssembler rateAssembler,
-            final LoanProductReadPlatformService loanProductReadPlatformService,
-            final LoanCollateralManagementRepository loanCollateralManagementRepository,
-            final ClientCollateralManagementRepository clientCollateralManagementRepository) {
-        this.context = context;
-        this.fromJsonHelper = fromJsonHelper;
-        this.loanApplicationTransitionApiJsonValidator = loanApplicationTransitionApiJsonValidator;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.loanProductCommandFromApiJsonDeserializer = loanProductCommandFromApiJsonDeserializer;
-        this.aprCalculator = aprCalculator;
-        this.loanAssembler = loanAssembler;
-        this.loanChargeAssembler = loanChargeAssembler;
-        this.loanCollateralAssembler = loanCollateralAssembler;
-        this.loanRepositoryWrapper = loanRepositoryWrapper;
-        this.noteRepository = noteRepository;
-        this.calculationPlatformService = calculationPlatformService;
-        this.clientRepository = clientRepository;
-        this.loanProductRepository = loanProductRepository;
-        this.accountNumberGenerator = accountNumberGenerator;
-        this.loanSummaryWrapper = loanSummaryWrapper;
-        this.groupRepository = groupRepository;
-        this.loanRepaymentScheduleTransactionProcessorFactory = loanRepaymentScheduleTransactionProcessorFactory;
-        this.calendarRepository = calendarRepository;
-        this.calendarInstanceRepository = calendarInstanceRepository;
-        this.savingsAccountAssembler = savingsAccountAssembler;
-        this.accountAssociationsRepository = accountAssociationsRepository;
-        this.repaymentScheduleInstallmentRepository = repaymentScheduleInstallmentRepository;
-        this.loanReadPlatformService = loanReadPlatformService;
-        this.accountNumberFormatRepository = accountNumberFormatRepository;
-        this.businessEventNotifierService = businessEventNotifierService;
-        this.configurationDomainService = configurationDomainService;
-        this.loanScheduleAssembler = loanScheduleAssembler;
-        this.loanUtilService = loanUtilService;
-        this.calendarReadPlatformService = calendarReadPlatformService;
-        this.entityDatatableChecksWritePlatformService = entityDatatableChecksWritePlatformService;
-        this.globalConfigurationRepository = globalConfigurationRepository;
-        this.repository = repository;
-        this.fineractEntityRelationRepository = fineractEntityRelationRepository;
-        this.loanProductReadPlatformService = loanProductReadPlatformService;
-        this.rateAssembler = rateAssembler;
-        this.glimAccountInfoWritePlatformService = glimAccountInfoWritePlatformService;
-        this.glimRepository = glimRepository;
-        this.loanRepository = loanRepository;
-        this.gsimReadPlatformService = gsimReadPlatformService;
-        this.loanCollateralManagementRepository = loanCollateralManagementRepository;
-        this.clientCollateralManagementRepository = clientCollateralManagementRepository;
-    }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
-        final List<LoanStatus> allowedLoanStatuses = Arrays.asList(LoanStatus.values());
-        return new DefaultLoanLifecycleStateMachine(allowedLoanStatuses);
+        return new DefaultLoanLifecycleStateMachine(LoanStatus.values(), businessEventNotifierService);
     }
 
     @Transactional
@@ -829,7 +748,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     isChargeModified = true;
                 } else {
                     LoanChargeData chargeData = chargesMap.get(loanCharge.getId());
-                    if (loanCharge.amountOrPercentage().compareTo(chargeData.amountOrPercentage()) != 0
+                    if (loanCharge.amountOrPercentage().compareTo(chargeData.getAmountOrPercentage()) != 0
                             || (loanCharge.isSpecifiedDueDate() && !loanCharge.getDueLocalDate().equals(chargeData.getDueDate()))) {
                         isChargeModified = true;
                     }
@@ -1287,7 +1206,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
-        LOG.error("Error occured.", dve);
+        log.error("Error occured.", dve);
     }
 
     @Transactional
@@ -1775,8 +1694,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         if (restrictToUserOfficeProperty.isEnabled()) {
             FineractEntityRelation fineractEntityRelation = fineractEntityRelationRepository
                     .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS.toStr());
-            FineractEntityToEntityMapping officeToLoanProductMappingList = this.repository.findListByProductId(fineractEntityRelation,
-                    productId, officeId);
+            FineractEntityToEntityMapping officeToLoanProductMappingList = this.entityMappingRepository
+                    .findListByProductId(fineractEntityRelation, productId, officeId);
             if (officeToLoanProductMappingList == null) {
                 throw new NotOfficeSpecificProductException(productId, officeId);
             }

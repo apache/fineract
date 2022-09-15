@@ -25,6 +25,7 @@ import java.time.MonthDay;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import lombok.Getter;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -38,6 +39,7 @@ import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 /**
  * Immutable data object for charge data.
  */
+@Getter
 public final class ChargeData implements Comparable<ChargeData>, Serializable {
 
     private final Long id;
@@ -354,10 +356,6 @@ public final class ChargeData implements Comparable<ChargeData>, Serializable {
                 amountPercentageAppliedTo, chargeOptions, isActive, chargeAmountOrPercentage);
     }
 
-    public boolean isPenalty() {
-        return this.penalty;
-    }
-
     public boolean isOverdueInstallmentCharge() {
         boolean isOverdueInstallmentCharge = false;
         if (this.chargeTimeType != null) {
@@ -366,27 +364,7 @@ public final class ChargeData implements Comparable<ChargeData>, Serializable {
         return isOverdueInstallmentCharge;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public EnumOptionData getChargeCalculationType() {
-        return chargeCalculationType;
-    }
-
-    public EnumOptionData getChargeTimeType() {
-        return chargeTimeType;
-    }
-
-    public BigDecimal getAmount() {
-        return this.amount;
-    }
-
-    public CurrencyData getCurrency() {
-        return currency;
+    public boolean isIsPaymentType() {
+        return this.isPaymentType;
     }
 }

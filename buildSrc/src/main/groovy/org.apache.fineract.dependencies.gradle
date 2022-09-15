@@ -26,10 +26,10 @@ dependencyManagement {
         mavenBom 'org.springframework.boot:spring-boot-dependencies:2.7.3'
         mavenBom 'org.jetbrains.kotlin:kotlin-bom:1.7.10'
         mavenBom 'org.junit:junit-bom:5.9.0'
-        mavenBom 'com.fasterxml.jackson:jackson-bom:2.13.3'
-        mavenBom 'io.cucumber:cucumber-bom:7.6.0'
-        mavenBom 'io.netty:netty-bom:4.1.79.Final'
-        mavenBom 'org.mockito:mockito-bom:4.7.0'
+        mavenBom 'com.fasterxml.jackson:jackson-bom:2.13.4'
+        mavenBom 'io.cucumber:cucumber-bom:7.7.0'
+        mavenBom 'io.netty:netty-bom:4.1.81.Final'
+        mavenBom 'org.mockito:mockito-bom:4.8.0'
     }
 
     dependencies {
@@ -61,8 +61,8 @@ dependencyManagement {
             exclude 'com.sun.mail:javax.mail'
         }
         dependency 'org.quartz-scheduler:quartz:2.3.2'
-        dependency 'com.amazonaws:aws-java-sdk-s3:1.12.286'
-        dependency 'org.ehcache:ehcache:3.10.0'
+        dependency 'com.amazonaws:aws-java-sdk-s3:1.12.301'
+        dependency 'org.ehcache:ehcache:3.10.1'
         dependency 'com.github.spullara.mustache.java:compiler:0.9.10'
         dependency 'com.jayway.jsonpath:json-path:2.7.0'
         dependency 'org.apache.tika:tika-core:2.4.1'
@@ -73,13 +73,13 @@ dependencyManagement {
         dependency 'org.glassfish.jersey.media:jersey-media-multipart:2.36'
         dependency 'org.glassfish.jaxb:jaxb-runtime:2.3.6' // Swagger needs exactly this version
         dependency 'org.apache.bval:org.apache.bval.bundle:2.0.6'
-        dependency 'joda-time:joda-time:2.11.0'
+        dependency 'joda-time:joda-time:2.11.1'
 
         dependency 'io.github.classgraph:classgraph:4.8.149'
         dependency 'org.awaitility:awaitility:4.2.0'
-        dependency 'com.github.spotbugs:spotbugs-annotations:4.7.1'
+        dependency 'com.github.spotbugs:spotbugs-annotations:4.7.2'
         dependency 'javax.cache:cache-api:1.1.1'
-        dependency 'org.mock-server:mockserver-junit-jupiter:5.13.2'
+        dependency 'org.mock-server:mockserver-junit-jupiter:5.14.0'
         dependency 'org.webjars:webjars-locator-core:0.52'
         dependency 'com.icegreen:greenmail-junit5:1.6.10'
         dependency 'com.intuit.karate:karate-junit5:1.2.0'
@@ -119,10 +119,10 @@ dependencyManagement {
         dependency 'org.bouncycastle:bcprov-jdk15on:1.70'
         dependency 'org.bouncycastle:bcpg-jdk15on:1.70'
 
-        dependency 'org.eclipse.jgit:org.eclipse.jgit:6.2.0.202206071550-r'
-        dependency 'org.eclipse.jgit:org.eclipse.jgit.ssh.apache:6.2.0.202206071550-r'
+        dependency 'org.eclipse.jgit:org.eclipse.jgit:6.3.0.202209071007-r'
+        dependency 'org.eclipse.jgit:org.eclipse.jgit.ssh.apache:6.3.0.202209071007-r'
 
-        dependency 'org.tmatesoft.svnkit:svnkit:1.10.7'
+        dependency 'org.tmatesoft.svnkit:svnkit:1.10.8'
         dependency 'com.vdurmont:semver4j:3.1.0'
         dependency 'org.beryx:text-io:3.4.1'
 
@@ -132,9 +132,9 @@ dependencyManagement {
         dependency 'org.springdoc:springdoc-openapi-security:1.6.11'
         dependency 'org.springdoc:springdoc-openapi-javadoc:1.6.11'
 
-        dependency 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.6.3'
+        dependency 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.7.0'
 
-        dependency ('org.apache.activemq:activemq-broker:5.17.1') {
+        dependency ('org.apache.activemq:activemq-broker:5.17.2') {
             exclude 'javax.annotation:javax.annotation-api'
         }
 
@@ -157,7 +157,7 @@ dependencyManagement {
             exclude 'jakarta.activation:jakarta.activation-api'
         }
 
-        dependency ('org.liquibase:liquibase-core:4.15.0') {
+        dependency ('org.liquibase:liquibase-core:4.16.0') {
             exclude 'javax.xml.bind:jaxb-api'
         }
 
@@ -186,6 +186,6 @@ dependencyManagement {
         dependency 'org.mapstruct:mapstruct:1.5.2.Final'
         dependency 'org.mapstruct:mapstruct-processor:1.5.2.Final'
 
-        dependency "org.apache.avro:avro:1.11.0"
+        dependency "org.apache.avro:avro:1.11.1"
     }
 }

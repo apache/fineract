@@ -77,9 +77,9 @@ public class PersonnelSheetPopulator extends AbstractWorkbookPopulator {
         Row row = staffSheet.createRow(rowIndex);
         for (OfficeData office : offices) {
             startIndex = rowIndex + 1;
-            writeString(OFFICE_NAME_COL, row, office.name().trim().replaceAll("[ )(]", "_"));
+            writeString(OFFICE_NAME_COL, row, office.getName().trim().replaceAll("[ )(]", "_"));
 
-            List<StaffData> staffList = officeToPersonnel.get(office.name().trim().replaceAll("[ )(]", "_"));
+            List<StaffData> staffList = officeToPersonnel.get(office.getName().trim().replaceAll("[ )(]", "_"));
 
             if (staffList != null) {
                 if (!staffList.isEmpty()) {

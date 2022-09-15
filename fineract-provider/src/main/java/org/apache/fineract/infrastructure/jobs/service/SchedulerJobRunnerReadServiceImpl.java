@@ -125,7 +125,7 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
     public boolean isUpdatesAllowed() {
         final String sql = "select job.display_name from job job where job.currently_running=true and job.updates_allowed=false";
         final List<String> names = this.jdbcTemplate.queryForList(sql, String.class);
-        if (names != null && names.size() > 0) {
+        if (names.size() > 0) {
             final String listVals = names.toString();
             final String jobNames = listVals.substring(listVals.indexOf("[") + 1, listVals.indexOf("]"));
             throw new OperationNotAllowedException(jobNames);

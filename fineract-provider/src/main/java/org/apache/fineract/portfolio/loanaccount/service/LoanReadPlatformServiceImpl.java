@@ -387,8 +387,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         final ClientData clientAccount = this.clientReadPlatformService.retrieveOne(clientId);
         final LocalDate expectedDisbursementDate = DateUtils.getBusinessLocalDate();
-        LoanAccountData loanTemplateDetails = LoanAccountData.clientDefaults(clientAccount.id(), clientAccount.accountNo(),
-                clientAccount.displayName(), clientAccount.officeId(), expectedDisbursementDate);
+        LoanAccountData loanTemplateDetails = LoanAccountData.clientDefaults(clientAccount.getId(), clientAccount.getAccountNo(),
+                clientAccount.getDisplayName(), clientAccount.getOfficeId(), clientAccount.getExternalId(), expectedDisbursementDate);
 
         if (productId != null) {
             final LoanProductData selectedProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);
@@ -612,7 +612,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " lp.allow_variabe_installments as isvariableInstallmentsAllowed, "
                     + " lp.allow_multiple_disbursals as multiDisburseLoan,"
                     + " lp.can_define_fixed_emi_amount as canDefineInstallmentAmount,"
-                    + " c.id as clientId, c.account_no as clientAccountNo, c.display_name as clientName, c.office_id as clientOfficeId,"
+                    + " c.id as clientId, c.account_no as clientAccountNo, c.display_name as clientName, c.office_id as clientOfficeId, c.external_id as clientExternalId,"
                     + " g.id as groupId, g.account_no as groupAccountNo, g.display_name as groupName,"
                     + " g.office_id as groupOfficeId, g.staff_id As groupStaffId , g.parent_id as groupParentId, (select mg.display_name from m_group mg where mg.id = g.parent_id) as centerName, "
                     + " g.hierarchy As groupHierarchy , g.level_id as groupLevel, g.external_id As groupExternalId, "
@@ -725,6 +725,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final Long clientId = JdbcSupport.getLong(rs, "clientId");
             final String clientAccountNo = rs.getString("clientAccountNo");
             final Long clientOfficeId = JdbcSupport.getLong(rs, "clientOfficeId");
+            final String clientExternalId = rs.getString("clientExternalId");
             final String clientName = rs.getString("clientName");
 
             final Long groupId = JdbcSupport.getLong(rs, "groupId");
@@ -869,7 +870,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     "feeChargesDueAtDisbursementCharged");
             LoanSummaryData loanSummary = null;
             Boolean inArrears = false;
-            if (status.id().intValue() >= 300) {
+            if (status.getId().intValue() >= 300) {
 
                 // loan summary
                 final BigDecimal principalDisbursed = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalDisbursed");
@@ -1010,7 +1011,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             DelinquencyRangeData delinquencyRange = this.delinquencyReadPlatformService.retrieveCurrentDelinquencyTag(id);
 
             return LoanAccountData.basicLoanDetails(id, accountNo, status, externalId, clientId, clientAccountNo, clientName,
-                    clientOfficeId, groupData, loanType, loanProductId, loanProductName, loanProductDescription,
+                    clientOfficeId, clientExternalId, groupData, loanType, loanProductId, loanProductName, loanProductDescription,
                     isLoanProductLinkedToFloatingRate, fundId, fundName, loanPurposeId, loanPurposeName, loanOfficerId, loanOfficerName,
                     currencyData, proposedPrincipal, principal, approvedPrincipal, netDisbursalAmount, totalOverpaid, inArrearsTolerance,
                     termFrequency, termPeriodFrequencyType, numberOfRepayments, repaymentEvery, repaymentFrequencyType, null, null,
@@ -1090,7 +1091,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             this.disbursement = repaymentScheduleRelatedLoanData.disbursementData();
             this.totalFeeChargesDueAtDisbursement = repaymentScheduleRelatedLoanData.getTotalFeeChargesAtDisbursement();
             this.lastDueDate = this.disbursement.disbursementDate();
-            this.outstandingLoanPrincipalBalance = this.disbursement.amount();
+            this.outstandingLoanPrincipalBalance = this.disbursement.getPrincipal();
             this.disbursementData = disbursementData;
             this.excludePastUndisbursed = isInterestRecalculationEnabled;
             this.totalPaidFeeCharges = totalPaidFeeCharges;
@@ -1114,17 +1115,17 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 waivedChargeAmount = waivedChargeAmount.add(disbursementDetail.getWaivedChargeAmount());
             }
             final LoanSchedulePeriodData disbursementPeriod = LoanSchedulePeriodData.disbursementOnlyPeriod(
-                    this.disbursement.disbursementDate(), this.disbursement.amount(), this.totalFeeChargesDueAtDisbursement,
+                    this.disbursement.disbursementDate(), this.disbursement.getPrincipal(), this.totalFeeChargesDueAtDisbursement,
                     this.disbursement.isDisbursed());
 
             final Collection<LoanSchedulePeriodData> periods = new ArrayList<>();
-            final MonetaryCurrency monCurrency = new MonetaryCurrency(this.currency.code(), this.currency.decimalPlaces(),
-                    this.currency.currencyInMultiplesOf());
+            final MonetaryCurrency monCurrency = new MonetaryCurrency(this.currency.getCode(), this.currency.getDecimalPlaces(),
+                    this.currency.getInMultiplesOf());
             BigDecimal totalPrincipalDisbursed = BigDecimal.ZERO;
             BigDecimal disbursementChargeAmount = this.totalFeeChargesDueAtDisbursement;
             if (disbursementData.isEmpty()) {
                 periods.add(disbursementPeriod);
-                totalPrincipalDisbursed = Money.of(monCurrency, this.disbursement.amount()).getAmount();
+                totalPrincipalDisbursed = Money.of(monCurrency, this.disbursement.getPrincipal()).getAmount();
             } else {
                 if (!this.disbursement.isDisbursed()) {
                     excludePastUndisbursed = false;
@@ -1151,10 +1152,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             Money totalOutstanding = Money.zero(monCurrency);
 
             // update totals with details of fees charged during disbursement
-            totalFeeChargesCharged = totalFeeChargesCharged.plus(disbursementPeriod.feeChargesDue().subtract(waivedChargeAmount));
-            totalRepaymentExpected = totalRepaymentExpected.plus(disbursementPeriod.feeChargesDue()).minus(waivedChargeAmount);
-            totalRepayment = totalRepayment.plus(disbursementPeriod.feeChargesPaid()).minus(waivedChargeAmount);
-            totalOutstanding = totalOutstanding.plus(disbursementPeriod.feeChargesDue()).minus(disbursementPeriod.feeChargesPaid());
+            totalFeeChargesCharged = totalFeeChargesCharged.plus(disbursementPeriod.getFeeChargesDue().subtract(waivedChargeAmount));
+            totalRepaymentExpected = totalRepaymentExpected.plus(disbursementPeriod.getFeeChargesDue()).minus(waivedChargeAmount);
+            totalRepayment = totalRepayment.plus(disbursementPeriod.getFeeChargesPaid()).minus(waivedChargeAmount);
+            totalOutstanding = totalOutstanding.plus(disbursementPeriod.getFeeChargesDue()).minus(disbursementPeriod.getFeeChargesPaid());
 
             Integer loanTermInDays = 0;
             while (rs.next()) {
@@ -1168,31 +1169,31 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 BigDecimal principal = BigDecimal.ZERO;
                 for (final DisbursementData data : disbursementData) {
                     if (fromDate.equals(this.disbursement.disbursementDate()) && data.disbursementDate().equals(fromDate)) {
-                        principal = principal.add(data.amount());
+                        principal = principal.add(data.getPrincipal());
                         LoanSchedulePeriodData periodData = null;
                         if (data.getChargeAmount() == null) {
-                            periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.amount(),
+                            periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.getPrincipal(),
                                     disbursementChargeAmount, data.isDisbursed());
                         } else {
-                            periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.amount(),
+                            periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.getPrincipal(),
                                     disbursementChargeAmount.add(data.getChargeAmount()).subtract(waivedChargeAmount), data.isDisbursed());
                         }
                         periods.add(periodData);
-                        this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(data.amount());
+                        this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(data.getPrincipal());
                     } else if (data.isDueForDisbursement(fromDate, dueDate)) {
                         if (!excludePastUndisbursed || data.isDisbursed()
                                 || !data.disbursementDate().isBefore(DateUtils.getBusinessLocalDate())) {
-                            principal = principal.add(data.amount());
+                            principal = principal.add(data.getPrincipal());
                             LoanSchedulePeriodData periodData;
                             if (data.getChargeAmount() == null) {
-                                periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.amount(),
+                                periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.getPrincipal(),
                                         BigDecimal.ZERO, data.isDisbursed());
                             } else {
-                                periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.amount(),
+                                periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.getPrincipal(),
                                         data.getChargeAmount(), data.isDisbursed());
                             }
                             periods.add(periodData);
-                            this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(data.amount());
+                            this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(data.getPrincipal());
                         }
                     }
                 }
@@ -1452,7 +1453,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         }
 
         Integer loanCycleCounter = null;
-        if (loanProduct.useBorrowerCycle()) {
+        if (loanProduct.isUseBorrowerCycle()) {
             if (clientId == null) {
                 loanCycleCounter = retriveLoanCounter(groupId, AccountType.GROUP.getValue(), loanProduct.getId());
             } else {
@@ -1461,9 +1462,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         }
 
         Collection<LoanAccountSummaryData> activeLoanOptions = null;
-        if (loanProduct.canUseForTopup() && clientId != null) {
+        if (loanProduct.isCanUseForTopup() && clientId != null) {
             activeLoanOptions = this.accountDetailsReadPlatformService.retrieveClientActiveLoanAccountSummary(clientId);
-        } else if (loanProduct.canUseForTopup() && groupId != null) {
+        } else if (loanProduct.isCanUseForTopup() && groupId != null) {
             activeLoanOptions = this.accountDetailsReadPlatformService.retrieveGroupActiveLoanAccountSummary(groupId);
         }
 
@@ -1481,8 +1482,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final ClientData clientAccount = this.clientReadPlatformService.retrieveOne(clientId);
         final LocalDate expectedDisbursementDate = DateUtils.getBusinessLocalDate();
 
-        return LoanAccountData.clientDefaults(clientAccount.id(), clientAccount.accountNo(), clientAccount.displayName(),
-                clientAccount.officeId(), expectedDisbursementDate);
+        return LoanAccountData.clientDefaults(clientAccount.getId(), clientAccount.getAccountNo(), clientAccount.getDisplayName(),
+                clientAccount.getOfficeId(), clientAccount.getExternalId(), expectedDisbursementDate);
     }
 
     @Override
@@ -1935,7 +1936,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final BigDecimal unrecognizedIncomePortion = null;
         final List<CodeValueData> writeOffReasonOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(LoanApiConstants.WRITEOFFREASONS));
-        LoanTransactionData loanTransactionData = new LoanTransactionData(null, null, null, transactionType, null, loan.currency(),
+        LoanTransactionData loanTransactionData = new LoanTransactionData(null, null, null, transactionType, null, loan.getCurrency(),
                 DateUtils.getBusinessLocalDate(), loan.getTotalOutstandingAmount(), loan.getNetDisbursalAmount(), null, null, null, null,
                 null, null, null, null, outstandingLoanBalance, unrecognizedIncomePortion, false);
         loanTransactionData.setWriteOffReasonOptions(writeOffReasonOptions);
@@ -2241,7 +2242,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         if (loanData.isLoanProductLinkedToFloatingRate()) {
             final Collection<InterestRatePeriodData> intRatePeriodData = new ArrayList<>();
             final Collection<InterestRatePeriodData> intRates = this.floatingRatesReadPlatformService
-                    .retrieveInterestRatePeriods(loanData.loanProductId());
+                    .retrieveInterestRatePeriods(loanData.getLoanProductId());
             for (final InterestRatePeriodData rate : intRates) {
                 if (rate.getFromDate().compareTo(loanData.getDisbursementDate()) > 0 && loanData.isFloatingInterestRate()) {
                     updateInterestRatePeriodData(rate, loanData);
@@ -2259,7 +2260,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     private void updateInterestRatePeriodData(InterestRatePeriodData rate, LoanAccountData loan) {
-        LoanProductData loanProductData = loanProductReadPlatformService.retrieveLoanProductFloatingDetails(loan.loanProductId());
+        LoanProductData loanProductData = loanProductReadPlatformService.retrieveLoanProductFloatingDetails(loan.getLoanProductId());
         rate.setLoanProductDifferentialInterestRate(loanProductData.getInterestRateDifferential());
         rate.setLoanDifferentialInterestRate(loan.getInterestRateDifferential());
 

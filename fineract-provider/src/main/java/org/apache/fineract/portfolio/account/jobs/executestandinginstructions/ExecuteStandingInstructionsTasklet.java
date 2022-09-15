@@ -91,7 +91,7 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
             if (data.toAccountType().isLoanAccount()
                     && (recurrenceType.isDuesRecurrence() || (isDueForTransfer && instructionType.isDuesAmoutTransfer()))) {
                 StandingInstructionDuesData standingInstructionDuesData = standingInstructionReadPlatformService
-                        .retriveLoanDuesData(data.toAccount().accountId());
+                        .retriveLoanDuesData(data.toAccount().getId());
                 if (data.instructionType().isDuesAmoutTransfer()) {
                     transactionAmount = standingInstructionDuesData.totalDueAmount();
                 }
@@ -105,7 +105,7 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
                 final boolean isRegularTransaction = true;
                 final boolean isExceptionForBalanceCheck = false;
                 AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, transactionAmount, data.fromAccountType(),
-                        data.toAccountType(), data.fromAccount().accountId(), data.toAccount().accountId(),
+                        data.toAccountType(), data.fromAccount().getId(), data.toAccount().getId(),
                         data.name() + " Standing instruction trasfer ", null, null, null, null, data.toTransferType(), null, null,
                         data.transferType().getValue(), null, null, null, null, null, fromSavingsAccount, isRegularTransaction,
                         isExceptionForBalanceCheck);

@@ -64,7 +64,7 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
         final List<GlobalConfigurationPropertyData> globalConfiguration = this.jdbcTemplate.query(sql, this.rm,
                 survey ? new Object[] { DataTableApiConstant.CATEGORY_PPI } : new Object[] {});
 
-        return new GlobalConfigurationData(globalConfiguration);
+        return new GlobalConfigurationData().setGlobalConfiguration(globalConfiguration);
     }
 
     @Override
@@ -107,7 +107,8 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
             final Long id = rs.getLong("id");
             final boolean isTrapDoor = rs.getBoolean("is_trap_door");
             final LocalDate localDate = dateValue != null ? dateValue.toLocalDate() : null;
-            return new GlobalConfigurationPropertyData(name, enabled, value, localDate, stringValue, id, description, isTrapDoor);
+            return new GlobalConfigurationPropertyData().setName(name).setEnabled(enabled).setValue(value).setDateValue(localDate)
+                    .setStringValue(stringValue).setId(id).setDescription(description).setTrapDoor(isTrapDoor);
         }
     }
 

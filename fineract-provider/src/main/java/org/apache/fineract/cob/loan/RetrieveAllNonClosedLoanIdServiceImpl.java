@@ -28,7 +28,7 @@ public class RetrieveAllNonClosedLoanIdServiceImpl implements RetrieveLoanIdServ
     private final LoanRepository loanRepository;
 
     @Override
-    public List<Integer> retrieveLoanIds() {
+    public List<Long> retrieveLoanIds() {
         return loanRepository.findAllNonClosedLoanIds();
     }
 }

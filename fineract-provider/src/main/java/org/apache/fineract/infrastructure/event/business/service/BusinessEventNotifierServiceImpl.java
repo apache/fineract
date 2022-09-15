@@ -26,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
+import org.apache.fineract.infrastructure.event.business.domain.BulkBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.ExternalEventService;
 import org.springframework.beans.factory.InitializingBean;
@@ -39,6 +40,9 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
 
     private final Map<Class, List<BusinessEventListener>> preListeners = new HashMap<>();
     private final Map<Class, List<BusinessEventListener>> postListeners = new HashMap<>();
+
+    private final ThreadLocal<Boolean> eventRecordingEnabled = ThreadLocal.withInitial(() -> false);
+    private final ThreadLocal<List<BusinessEvent<?>>> recordedEvents = ThreadLocal.withInitial(ArrayList::new);
 
     private final ExternalEventService externalEventService;
     private final FineractProperties fineractProperties;
@@ -54,6 +58,7 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
 
     @Override
     public void notifyPreBusinessEvent(BusinessEvent<?> businessEvent) {
+        throwExceptionIfBulkEvent(businessEvent);
         List<BusinessEventListener> businessEventListeners = preListeners.get(businessEvent.getClass());
         if (businessEventListeners != null) {
             for (BusinessEventListener eventListener : businessEventListeners) {
@@ -74,6 +79,7 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
 
     @Override
     public void notifyPostBusinessEvent(BusinessEvent<?> businessEvent) {
+        throwExceptionIfBulkEvent(businessEvent);
         List<BusinessEventListener> businessEventListeners = postListeners.get(businessEvent.getClass());
         if (businessEventListeners != null) {
             for (BusinessEventListener eventListener : businessEventListeners) {
@@ -82,12 +88,12 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
         }
         if (isExternalEventPostingEnabled()) {
             // we only want to create external events for operations that were successful, hence the post listener
-            externalEventService.postEvent(businessEvent);
+            if (isExternalEventRecordingEnabled()) {
+                recordedEvents.get().add(businessEvent);
+            } else {
+                externalEventService.postEvent(businessEvent);
+            }
         }
-    }
-
-    private boolean isExternalEventPostingEnabled() {
-        return fineractProperties.getEvents().getExternal().isEnabled();
     }
 
     @Override
@@ -98,5 +104,38 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
             postListeners.put(eventType, businessEventListeners);
         }
         businessEventListeners.add(listener);
+    }
+
+    private boolean isExternalEventRecordingEnabled() {
+        return eventRecordingEnabled.get();
+    }
+
+    private boolean isExternalEventPostingEnabled() {
+        return fineractProperties.getEvents().getExternal().isEnabled();
+    }
+
+    private void throwExceptionIfBulkEvent(BusinessEvent<?> businessEvent) {
+        if (businessEvent instanceof BulkBusinessEvent) {
+            throw new IllegalArgumentException("BulkBusinessEvent cannot be raised directly");
+        }
+    }
+
+    @Override
+    public void startExternalEventRecording() {
+        eventRecordingEnabled.set(true);
+    }
+
+    @Override
+    public void stopExternalEventRecording() {
+        eventRecordingEnabled.set(false);
+        try {
+            List<BusinessEvent<?>> recordedBusinessEvents = recordedEvents.get();
+            if (isExternalEventPostingEnabled()) {
+                log.debug("Posting the BulkBusinessEvent for the recorded {} events", recordedBusinessEvents.size());
+                externalEventService.postEvent(new BulkBusinessEvent(recordedBusinessEvents));
+            }
+        } finally {
+            recordedEvents.remove();
+        }
     }
 }

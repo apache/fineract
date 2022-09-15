@@ -277,13 +277,13 @@ public class ShareProduct extends AbstractAuditableCustom {
         if (marketPrice != null && marketPrice.size() > 0) {
             for (ShareProductMarketPriceData data : marketPrice) {
                 if (data.getId() == null) {
-                    ShareProductMarketPrice entity = new ShareProductMarketPrice(data.getStartDate(), data.getShareValue());
+                    ShareProductMarketPrice entity = new ShareProductMarketPrice(data.getFromDate(), data.getShareValue());
                     entity.setShareProduct(this);
                     marketPriceTemp.add(entity);
                 } else {
                     for (ShareProductMarketPrice priceData : this.marketPrice) {
                         if (priceData.getId().equals(data.getId())) {
-                            priceData.setStartDate(data.getStartDate());
+                            priceData.setStartDate(data.getFromDate());
                             priceData.setShareValue(data.getShareValue());
                             marketPriceTemp.add(priceData);
                         }

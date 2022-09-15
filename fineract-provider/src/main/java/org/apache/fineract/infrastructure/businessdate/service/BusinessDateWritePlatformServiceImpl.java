@@ -135,7 +135,7 @@ public class BusinessDateWritePlatformServiceImpl implements BusinessDateWritePl
         if (!hasChange(oldDate, newDate)) {
             return;
         }
-        businessDate.updateDate(newDate);
+        businessDate.setDate(newDate);
         repository.save(businessDate);
         changes.put(businessDate.getType().name(), newDate);
     }

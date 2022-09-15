@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
@@ -30,6 +31,7 @@ import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 /**
  * Immutable data object for loan charge data.
  */
+@Getter
 public class LoanChargeData {
 
     private final Long id;
@@ -381,22 +383,6 @@ public class LoanChargeData {
         return isAccountTransfer && !this.paid && !this.waived;
     }
 
-    public Long getId() {
-        return this.id;
-    }
-
-    public LocalDate getDueDate() {
-        return this.dueDate;
-    }
-
-    public Long getLoanId() {
-        return this.loanId;
-    }
-
-    public BigDecimal getAmountOutstanding() {
-        return this.amountOutstanding;
-    }
-
     public boolean isInstallmentFee() {
         boolean isInstalmentFee = false;
         if (this.chargeTimeType != null) {
@@ -405,48 +391,7 @@ public class LoanChargeData {
         return isInstalmentFee;
     }
 
-    public EnumOptionData getChargeCalculationType() {
-        return chargeCalculationType;
-    }
-
-    public BigDecimal amountOrPercentage() {
-        return this.amountOrPercentage;
-    }
-
-    public Collection<LoanInstallmentChargeData> getInstallmentChargeData() {
-        return this.installmentChargeData;
-    }
-
-    public boolean isPenalty() {
-        return this.penalty;
-    }
-
-    public BigDecimal getAmount() {
-        return this.amount;
-    }
-
-    public BigDecimal getAmountAccrued() {
-        return this.amountAccrued;
-    }
-
     public void updateAmountAccrued(BigDecimal amountAccrued) {
         this.amountAccrued = amountAccrued;
     }
-
-    public Long getChargeId() {
-        return this.chargeId;
-    }
-
-    public BigDecimal getAmountWaived() {
-        return this.amountWaived;
-    }
-
-    public BigDecimal getAmountUnrecognized() {
-        return this.amountUnrecognized;
-    }
-
-    public String getExternalId() {
-        return externalId;
-    }
-
 }

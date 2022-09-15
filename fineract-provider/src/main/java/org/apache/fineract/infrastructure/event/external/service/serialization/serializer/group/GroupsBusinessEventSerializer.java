@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.event.external.service.serialization.
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import lombok.RequiredArgsConstructor;
+import org.apache.avro.generic.GenericContainer;
 import org.apache.fineract.avro.generic.v1.CommandProcessingResultV1;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.group.GroupsBusinessEvent;
@@ -47,5 +48,10 @@ public class GroupsBusinessEventSerializer implements BusinessEventSerializer {
         CommandProcessingResultV1 avroDto = mapper.map(event.get());
         ByteBuffer buffer = avroDto.toByteBuffer();
         return byteBufferConverter.convert(buffer);
+    }
+
+    @Override
+    public Class<? extends GenericContainer> getSupportedSchema() {
+        return CommandProcessingResultV1.class;
     }
 }

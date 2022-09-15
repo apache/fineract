@@ -65,4 +65,7 @@
     <include file="parts/0043_add_external_event_table.xml" relativeToChangelogFile="true"/>
     <include file="parts/0044_table_report_query_fix.xml" relativeToChangelogFile="true"/>
     <include file="parts/0045_external_event_table_data_binary.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0046_external_event_table_schema_info.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0047_add_loan_delinquency_tags_business_step.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0048_rework_loan_account_locks.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

@@ -19,10 +19,11 @@
 package org.apache.fineract.infrastructure.event.external.service.serialization.mapper.share;
 
 import org.apache.fineract.avro.share.v1.ShareAccountDataV1;
+import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroMapperConfig;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountData;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring")
+@Mapper(config = AvroMapperConfig.class)
 public interface ShareAccountDataMapper {
 
     ShareAccountDataV1 map(ShareAccountData source);

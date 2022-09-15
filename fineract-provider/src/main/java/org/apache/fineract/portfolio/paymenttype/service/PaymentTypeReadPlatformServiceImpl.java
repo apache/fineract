@@ -24,6 +24,7 @@ import java.util.Collection;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,7 @@ public class PaymentTypeReadPlatformServiceImpl implements PaymentTypeReadPlatfo
     }
 
     @Override
+    @Cacheable(value = "payment_types", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('payment_types')")
     public Collection<PaymentTypeData> retrieveAllPaymentTypes() {
         // TODO Auto-generated method stub
         this.context.authenticatedUser();

@@ -30,4 +30,8 @@ public class ByteBufferConverter {
         buffer.position(buffer.position() - bytes.length);
         return bytes;
     }
+
+    public ByteBuffer convert(byte[] buffer) {
+        return ByteBuffer.wrap(buffer);
+    }
 }

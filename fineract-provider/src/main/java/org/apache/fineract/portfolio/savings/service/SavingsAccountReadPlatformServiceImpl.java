@@ -1118,7 +1118,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         ClientData client = null;
         if (clientId != null) {
             client = this.clientReadPlatformService.retrieveOne(clientId);
-            officeId = client.officeId();
+            officeId = client.getOfficeId();
         }
 
         GroupGeneralData group = null;
@@ -1196,7 +1196,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
             String clientName = null;
             if (client != null) {
-                clientName = client.displayName();
+                clientName = client.getDisplayName();
             }
 
             String groupName = null;
@@ -1617,8 +1617,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             Long clientId = null;
             String clientName = null;
             if (this.client != null) {
-                clientId = this.client.id();
-                clientName = this.client.displayName();
+                clientId = this.client.getId();
+                clientName = this.client.getDisplayName();
             }
 
             Long groupId = null;

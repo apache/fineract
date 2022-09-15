@@ -20,7 +20,11 @@ package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@AllArgsConstructor
+@Getter
 public final class LoanRepaymentScheduleInstallmentData {
 
     private Long id;
@@ -30,14 +34,6 @@ public final class LoanRepaymentScheduleInstallmentData {
     private LocalDate date;
 
     private BigDecimal amount;
-
-    private LoanRepaymentScheduleInstallmentData(final Long id, final Integer installmentId, final LocalDate date,
-            final BigDecimal amount) {
-        this.amount = amount;
-        this.date = date;
-        this.installmentId = installmentId;
-        this.id = id;
-    }
 
     public static LoanRepaymentScheduleInstallmentData instanceOf(final Long id, final Integer installmentId, final LocalDate date,
             final BigDecimal amount) {

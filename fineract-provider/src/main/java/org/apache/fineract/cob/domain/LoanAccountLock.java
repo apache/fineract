@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.cob.domain;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -30,6 +30,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 @Entity
 @Table(name = "m_loan_account_locks")
@@ -52,11 +53,27 @@ public class LoanAccountLock {
     private LockOwner lockOwner;
 
     @Column(name = "lock_placed_on", nullable = false)
-    private LocalDateTime lockPlacedOn;
+    private OffsetDateTime lockPlacedOn;
 
     @Column(name = "error")
     private String error;
 
     @Column(name = "stacktrace")
     private String stacktrace;
+
+    public LoanAccountLock(Long loanId, LockOwner lockOwner) {
+        this.loanId = loanId;
+        this.lockOwner = lockOwner;
+        this.lockPlacedOn = DateUtils.getOffsetDateTimeOfTenant();
+    }
+
+    public void setError(String errorMessage, String stacktrace) {
+        this.error = errorMessage;
+        this.stacktrace = stacktrace;
+    }
+
+    public void setNewLockOwner(LockOwner newLockOwner) {
+        this.lockOwner = newLockOwner;
+        this.lockPlacedOn = DateUtils.getOffsetDateTimeOfTenant();
+    }
 }

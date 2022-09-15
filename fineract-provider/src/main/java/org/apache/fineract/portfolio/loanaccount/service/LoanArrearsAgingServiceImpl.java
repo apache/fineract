@@ -194,15 +194,16 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
             for (LoanSchedulePeriodData loanSchedulePeriodData : entry.getValue()) {
                 if (!loanSchedulePeriodData.getComplete()) {
                     principalOverdue = principalOverdue
-                            .add(loanSchedulePeriodData.principalDue().subtract(loanSchedulePeriodData.principalPaid()));
+                            .add(loanSchedulePeriodData.getPrincipalDue().subtract(loanSchedulePeriodData.getPrincipalPaid()));
                     interestOverdue = interestOverdue
-                            .add(loanSchedulePeriodData.interestDue().subtract(loanSchedulePeriodData.interestPaid()));
-                    feeOverdue = feeOverdue.add(loanSchedulePeriodData.feeChargesDue().subtract(loanSchedulePeriodData.feeChargesPaid()));
+                            .add(loanSchedulePeriodData.getInterestDue().subtract(loanSchedulePeriodData.getInterestPaid()));
+                    feeOverdue = feeOverdue
+                            .add(loanSchedulePeriodData.getFeeChargesDue().subtract(loanSchedulePeriodData.getFeeChargesPaid()));
                     penaltyOverdue = penaltyOverdue
-                            .add(loanSchedulePeriodData.penaltyChargesDue().subtract(loanSchedulePeriodData.penaltyChargesPaid()));
-                    if (overDueSince.isAfter(loanSchedulePeriodData.periodDueDate()) && loanSchedulePeriodData.principalDue()
-                            .subtract(loanSchedulePeriodData.principalPaid()).compareTo(BigDecimal.ZERO) > 0) {
-                        overDueSince = loanSchedulePeriodData.periodDueDate();
+                            .add(loanSchedulePeriodData.getPenaltyChargesDue().subtract(loanSchedulePeriodData.getPenaltyChargesPaid()));
+                    if (overDueSince.isAfter(loanSchedulePeriodData.getDueDate()) && loanSchedulePeriodData.getPrincipalDue()
+                            .subtract(loanSchedulePeriodData.getPrincipalPaid()).compareTo(BigDecimal.ZERO) > 0) {
+                        overDueSince = loanSchedulePeriodData.getDueDate();
                     }
                 }
             }
@@ -280,38 +281,38 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService {
                     BigDecimal feeChargesPaid;
                     BigDecimal penaltyChargesPaid;
                     boolean isComplete = true;
-                    if (loanSchedulePeriodData.principalDue().compareTo(principalAmt) > 0) {
+                    if (loanSchedulePeriodData.getPrincipalDue().compareTo(principalAmt) > 0) {
                         principalPaid = principalAmt;
                         principalAmt = BigDecimal.ZERO;
                         isComplete = false;
                     } else {
-                        principalPaid = loanSchedulePeriodData.principalDue();
-                        principalAmt = principalAmt.subtract(loanSchedulePeriodData.principalDue());
+                        principalPaid = loanSchedulePeriodData.getPrincipalDue();
+                        principalAmt = principalAmt.subtract(loanSchedulePeriodData.getPrincipalDue());
                     }
 
-                    if (loanSchedulePeriodData.interestDue().compareTo(interestAmt) > 0) {
+                    if (loanSchedulePeriodData.getInterestDue().compareTo(interestAmt) > 0) {
                         interestPaid = interestAmt;
                         interestAmt = BigDecimal.ZERO;
                         isComplete = false;
                     } else {
-                        interestPaid = loanSchedulePeriodData.interestDue();
-                        interestAmt = interestAmt.subtract(loanSchedulePeriodData.interestDue());
+                        interestPaid = loanSchedulePeriodData.getInterestDue();
+                        interestAmt = interestAmt.subtract(loanSchedulePeriodData.getInterestDue());
                     }
-                    if (loanSchedulePeriodData.feeChargesDue().compareTo(feeAmt) > 0) {
+                    if (loanSchedulePeriodData.getFeeChargesDue().compareTo(feeAmt) > 0) {
                         feeChargesPaid = feeAmt;
                         feeAmt = BigDecimal.ZERO;
                         isComplete = false;
                     } else {
-                        feeChargesPaid = loanSchedulePeriodData.feeChargesDue();
-                        feeAmt = feeAmt.subtract(loanSchedulePeriodData.feeChargesDue());
+                        feeChargesPaid = loanSchedulePeriodData.getFeeChargesDue();
+                        feeAmt = feeAmt.subtract(loanSchedulePeriodData.getFeeChargesDue());
                     }
-                    if (loanSchedulePeriodData.penaltyChargesDue().compareTo(penaltyAmt) > 0) {
+                    if (loanSchedulePeriodData.getPenaltyChargesDue().compareTo(penaltyAmt) > 0) {
                         penaltyChargesPaid = penaltyAmt;
                         penaltyAmt = BigDecimal.ZERO;
                         isComplete = false;
                     } else {
-                        penaltyChargesPaid = loanSchedulePeriodData.penaltyChargesDue();
-                        penaltyAmt = penaltyAmt.subtract(loanSchedulePeriodData.penaltyChargesDue());
+                        penaltyChargesPaid = loanSchedulePeriodData.getPenaltyChargesDue();
+                        penaltyAmt = penaltyAmt.subtract(loanSchedulePeriodData.getPenaltyChargesDue());
                     }
 
                     LoanSchedulePeriodData periodData = LoanSchedulePeriodData.withPaidDetail(loanSchedulePeriodData, isComplete,

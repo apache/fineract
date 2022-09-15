@@ -143,8 +143,7 @@ public final class DelinquencyApiResourceSwagger {
         public Integer id;
         @Schema(example = "10")
         public Long loanId;
-        @Schema(example = "Delinquent 1")
-        public String delinquencyRange;
+        public GetDelinquencyRangesResponse delinquencyRange;
         @Schema(example = "2013,1,2")
         public LocalDate addedOnDate;
         @Schema(example = "2013,2,20")

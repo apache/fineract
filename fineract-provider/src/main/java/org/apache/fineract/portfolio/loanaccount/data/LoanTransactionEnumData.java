@@ -18,10 +18,12 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
+import lombok.Getter;
+
 /**
  * Immutable data object represent loan status enumerations.
  */
-@SuppressWarnings("unused")
+@Getter
 public class LoanTransactionEnumData {
 
     private final Long id;
@@ -80,18 +82,6 @@ public class LoanTransactionEnumData {
         this.chargeback = Long.valueOf(25).equals(this.id);
     }
 
-    public Long id() {
-        return this.id;
-    }
-
-    public String getCode() {
-        return this.code;
-    }
-
-    public String getValue() {
-        return this.value;
-    }
-
     /**
      * Returns true if the transaction involves either a payment (disbursement) or a receipt (repayments, repayments
      * during disbursement etc)
@@ -111,89 +101,4 @@ public class LoanTransactionEnumData {
         }
         return false;
     }
-
-    public boolean isDisbursement() {
-        return this.disbursement;
-    }
-
-    public boolean isRepaymentAtDisbursement() {
-        return this.repaymentAtDisbursement;
-    }
-
-    public boolean isRepayment() {
-        return this.repayment;
-    }
-
-    public boolean isMerchantIssuedRefund() {
-        return this.merchantIssuedRefund;
-    }
-
-    public boolean isPayoutRefund() {
-        return this.payoutRefund;
-    }
-
-    public boolean isGoodwillCredit() {
-        return this.goodwillCredit;
-    }
-
-    public boolean isChargeRefund() {
-        return this.chargeRefund;
-    }
-
-    public boolean isWaiveInterest() {
-        return this.waiveInterest;
-    }
-
-    public boolean isWaiveCharges() {
-        return this.waiveCharges;
-    }
-
-    public boolean isWriteOff() {
-        return this.writeOff;
-    }
-
-    public boolean isRecoveryRepayment() {
-        return this.recoveryRepayment;
-    }
-
-    public boolean isAccrual() {
-        return this.accrual;
-    }
-
-    public boolean isInitiateTransfer() {
-        return this.initiateTransfer;
-    }
-
-    public boolean isApproveTransfer() {
-        return this.approveTransfer;
-    }
-
-    public boolean isWithdrawTransfer() {
-        return this.withdrawTransfer;
-    }
-
-    public boolean isRejectTransfer() {
-        return this.rejectTransfer;
-    }
-
-    public boolean isChargePayment() {
-        return this.chargePayment;
-    }
-
-    public boolean isRefund() {
-        return this.refund;
-    }
-
-    public boolean isRefundForActiveLoans() {
-        return this.refundForActiveLoans;
-    }
-
-    public boolean isCreditBalanceRefund() {
-        return this.creditBalanceRefund;
-    }
-
-    public boolean isChargeback() {
-        return this.chargeback;
-    }
-
 }

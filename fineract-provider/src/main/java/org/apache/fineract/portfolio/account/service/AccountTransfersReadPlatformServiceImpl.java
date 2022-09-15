@@ -136,12 +136,12 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             fromAccount = this.portfolioAccountReadPlatformService.retrieveOne(fromAccountId, accountType);
 
             // override provided fromClient with client of account
-            mostRelevantFromClientId = fromAccount.clientId();
+            mostRelevantFromClientId = fromAccount.getClientId();
         }
 
         if (mostRelevantFromClientId != null) {
             fromClient = this.clientReadPlatformService.retrieveOne(mostRelevantFromClientId);
-            mostRelevantFromOfficeId = fromClient.officeId();
+            mostRelevantFromOfficeId = fromClient.getOfficeId();
             long[] loanStatus = null;
             if (mostRelevantFromAccountType == 1) {
                 loanStatus = new long[] { 300, 700 };
@@ -166,13 +166,13 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
 
         if (toAccountId != null && fromAccount != null) {
             toAccount = this.portfolioAccountReadPlatformService.retrieveOne(toAccountId, mostRelevantToAccountType,
-                    fromAccount.currencyCode());
-            mostRelevantToClientId = toAccount.clientId();
+                    fromAccount.getCurrencyCode());
+            mostRelevantToClientId = toAccount.getClientId();
         }
 
         if (mostRelevantToClientId != null) {
             toClient = this.clientReadPlatformService.retrieveOne(mostRelevantToClientId);
-            mostRelevantToOfficeId = toClient.officeId();
+            mostRelevantToOfficeId = toClient.getOfficeId();
 
             toClientOptions = this.clientReadPlatformService.retrieveAllForLookupByOfficeId(mostRelevantToOfficeId);
 
@@ -199,7 +199,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
     private Collection<PortfolioAccountData> retrieveToAccounts(final PortfolioAccountData excludeThisAccountFromOptions,
             final Integer toAccountType, final Long toClientId) {
 
-        final String currencyCode = excludeThisAccountFromOptions != null ? excludeThisAccountFromOptions.currencyCode() : null;
+        final String currencyCode = excludeThisAccountFromOptions != null ? excludeThisAccountFromOptions.getCurrencyCode() : null;
 
         PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(toAccountType, toClientId, currencyCode, null, null);
         Collection<PortfolioAccountData> accountOptions = this.portfolioAccountReadPlatformService
@@ -491,12 +491,12 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             fromAccount = this.portfolioAccountReadPlatformService.retrieveOneByPaidInAdvance(fromAccountId, accountType);
 
             // override provided fromClient with client of account
-            mostRelevantFromClientId = fromAccount.clientId();
+            mostRelevantFromClientId = fromAccount.getClientId();
         }
 
         if (mostRelevantFromClientId != null) {
             fromClient = this.clientReadPlatformService.retrieveOne(mostRelevantFromClientId);
-            mostRelevantFromOfficeId = fromClient.officeId();
+            mostRelevantFromOfficeId = fromClient.getOfficeId();
             long[] loanStatus = null;
             if (mostRelevantFromAccountType == 1) {
                 loanStatus = new long[] { 300, 700 };
@@ -521,13 +521,13 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
 
         if (toAccountId != null && fromAccount != null) {
             toAccount = this.portfolioAccountReadPlatformService.retrieveOne(toAccountId, mostRelevantToAccountType,
-                    fromAccount.currencyCode());
-            mostRelevantToClientId = toAccount.clientId();
+                    fromAccount.getCurrencyCode());
+            mostRelevantToClientId = toAccount.getClientId();
         }
 
         if (mostRelevantToClientId != null) {
             toClient = this.clientReadPlatformService.retrieveOne(mostRelevantToClientId);
-            mostRelevantToOfficeId = toClient.officeId();
+            mostRelevantToOfficeId = toClient.getOfficeId();
 
             toClientOptions = this.clientReadPlatformService.retrieveAllForLookupByOfficeId(mostRelevantToOfficeId);
 

@@ -47,16 +47,17 @@ public class UpdateDepositsAccountMaturityDetailsTasklet implements Tasklet {
 
         for (final DepositAccountData depositAccount : depositAccounts) {
             try {
-                final DepositAccountType depositAccountType = DepositAccountType.fromInt(depositAccount.depositType().getId().intValue());
-                depositAccountWritePlatformService.updateMaturityDetails(depositAccount.id(), depositAccountType);
+                final DepositAccountType depositAccountType = DepositAccountType
+                        .fromInt(depositAccount.getDepositType().getId().intValue());
+                depositAccountWritePlatformService.updateMaturityDetails(depositAccount.getId(), depositAccountType);
             } catch (final PlatformApiDataValidationException e) {
                 final List<ApiParameterError> errors = e.getErrors();
                 for (final ApiParameterError error : errors) {
-                    log.error("Update maturity details failed for account: {} with message {}", depositAccount.accountNo(),
+                    log.error("Update maturity details failed for account: {} with message {}", depositAccount.getAccountNo(),
                             error.getDeveloperMessage());
                 }
             } catch (final Exception ex) {
-                log.error("Update maturity details failed for account: {}", depositAccount.accountNo(), ex);
+                log.error("Update maturity details failed for account: {}", depositAccount.getAccountNo(), ex);
             }
         }
 

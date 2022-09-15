@@ -18,22 +18,15 @@
  */
 package org.apache.fineract.infrastructure.configuration.data;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class ExternalServicesData {
 
-    private final Long id;
-    private final String name;
-
-    public ExternalServicesData(final Long id, final String name) {
-        this.id = id;
-        this.name = name;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
+    private Long id;
+    private String name;
 }

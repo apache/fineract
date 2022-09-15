@@ -1,4 +1,4 @@
-name: Fineract Gradle build - PostgreSQL
+name: Fineract Build & Test - PostgreSQL
 on: [push, pull_request]
 
 permissions:
@@ -32,7 +32,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3
       - name: Set up JDK 17
-        uses: actions/setup-java@2c7a4878f5d120bd643426d54ae1209b29cc01a3 # tag=v3
+        uses: actions/setup-java@d854b6da19cdadd9a010605529e522c2393ebd38 # tag=v3
         with:
           java-version: '17'
           distribution: 'zulu'
@@ -58,25 +58,28 @@ jobs:
             sudo apt-get update
             sudo apt-get install ghostscript graphviz -y
 
-      - name: Basic Auth Build & Test
-        run: ./gradlew --no-daemon -q --console=plain build test --fail-fast doc -x :twofactor-tests:test -x :oauth2-test:test -PdbType=postgresql
-
-      - name: 2FA Build & Test
-        run: ./gradlew --no-daemon -q --console=plain :twofactor-tests:test --fail-fast -PdbType=postgresql
-
-      - name: OAuth2 Build & Test
-        run: ./gradlew --no-daemon -q --console=plain :oauth2-tests:test --fail-fast -PdbType=postgresql
+      - name: Build & Test
+        run: |
+            ./gradlew --no-daemon --console=plain build test --fail-fast -x doc -x :twofactor-tests:test -x :oauth2-test:test -PdbType=postgresql
+            ./gradlew --no-daemon --console=plain :twofactor-tests:test --fail-fast -PdbType=postgresql
+            ./gradlew --no-daemon --console=plain :oauth2-tests:test --fail-fast -PdbType=postgresql
 
       - name: Archive test results
         if: always()
         uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3
         with:
           name: test-results
-          path: integration-tests/build/reports/
+          path: |
+            integration-tests/build/reports/
+            twofactor-tests/build/reports/
+            oauth2-tests/build/reports/
 
       - name: Archive server logs
         if: always()
         uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3
         with:
           name: server-logs
-          path: integration-tests/build/cargo/
+          path: |
+            integration-tests/build/cargo/
+            twofactor-tests/build/cargo/
+            oauth2-tests/build/cargo/

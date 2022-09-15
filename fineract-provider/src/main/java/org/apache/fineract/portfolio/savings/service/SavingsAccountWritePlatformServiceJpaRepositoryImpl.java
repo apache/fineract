@@ -672,7 +672,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             LOG.info("Interest Posting Ends within {}", endPosting - startPosting);
 
             if (!backdatedTxnsAllowedTill) {
-                List<SavingsAccountTransactionData> transactions = savingsAccountData.getTransactions();
+                List<SavingsAccountTransactionData> transactions = savingsAccountData.getSavingsAccountTransactionData();
                 for (SavingsAccountTransactionData accountTransaction : transactions) {
                     if (accountTransaction.getId() == null) {
                         savingsAccountData.setNewSavingsAccountTransactionData(accountTransaction);

@@ -166,6 +166,6 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     boolean existsByExternalId(@Param("externalId") String externalId);
 
     @Query(FIND_ALL_NON_CLOSED)
-    List<Integer> findAllNonClosedLoanIds();
+    List<Long> findAllNonClosedLoanIds();
 
 }

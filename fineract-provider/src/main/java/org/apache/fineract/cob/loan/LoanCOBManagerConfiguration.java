@@ -18,19 +18,24 @@
  */
 package org.apache.fineract.cob.loan;
 
+import java.util.List;
 import org.apache.fineract.cob.COBBusinessStepService;
-import org.apache.fineract.cob.COBPropertyService;
+import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.listener.COBExecutionListenerRunner;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
+import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.JobScope;
+import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.integration.config.annotation.EnableBatchIntegration;
 import org.springframework.batch.integration.partition.RemotePartitioningManagerStepBuilderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -47,7 +52,9 @@ public class LoanCOBManagerConfiguration {
     @Autowired
     private RemotePartitioningManagerStepBuilderFactory stepBuilderFactory;
     @Autowired
-    private COBPropertyService cobPropertyService;
+    private StepBuilderFactory localStepBuilderFactory;
+    @Autowired
+    private PropertyService propertyService;
     @Autowired
     private DirectChannel outboundRequests;
     @Autowired
@@ -58,27 +65,40 @@ public class LoanCOBManagerConfiguration {
     private JobExplorer jobExplorer;
     @Autowired
     private ApplicationContext applicationContext;
-    @Autowired(required = false)
+    @Autowired
     private RetrieveLoanIdService retrieveLoanIdService;
+    @Autowired
+    private LoanAccountLockRepository accountLockRepository;
 
     @Bean
-    public LoanCOBPartitioner partitioner() {
-        return new LoanCOBPartitioner(cobPropertyService, cobBusinessStepService, jobOperator, jobExplorer, retrieveLoanIdService);
+    @JobScope
+    public LoanCOBPartitioner partitioner(@Value("#{jobExecutionContext['loanIds']}") List<Long> loanIds) {
+        return new LoanCOBPartitioner(propertyService, cobBusinessStepService, jobOperator, jobExplorer, loanIds);
     }
 
     @Bean
     public Step loanCOBStep() {
-        return stepBuilderFactory.get(JobName.LOAN_COB.name()).partitioner("Loan COB worker", partitioner()).outputChannel(outboundRequests)
-                .build();
+        return stepBuilderFactory.get("Loan COB partition - Step").partitioner(LoanCOBConstant.LOAN_COB_WORKER_STEP, partitioner(null))
+                .outputChannel(outboundRequests).build();
+    }
+
+    @Bean
+    public Step fetchAndLockStep() {
+        return localStepBuilderFactory.get("Fetch and Lock loan accounts - Step").tasklet(fetchAndLockLoanTasklet()).build();
+    }
+
+    @Bean
+    @JobScope
+    public FetchAndLockLoanTasklet fetchAndLockLoanTasklet() {
+        return new FetchAndLockLoanTasklet(accountLockRepository, retrieveLoanIdService);
     }
 
     @Bean(name = "loanCOBJob")
     public Job loanCOBJob() {
         return jobBuilderFactory.get(JobName.LOAN_COB.name()) //
                 .listener(new COBExecutionListenerRunner(applicationContext, JobName.LOAN_COB.name())) //
-                .start(loanCOBStep()) //
+                .start(fetchAndLockStep()).next(loanCOBStep()) //
                 .incrementer(new RunIdIncrementer()) //
                 .build();
     }
-
 }

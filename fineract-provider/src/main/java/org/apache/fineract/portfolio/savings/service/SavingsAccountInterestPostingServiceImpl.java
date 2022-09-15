@@ -63,14 +63,12 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
             final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
             final LocalDate postInterestOnDate, final boolean backdatedTxnsAllowedTill, final SavingsAccountData savingsAccountData) {
 
-        Money interestPostedToDate = Money.zero(savingsAccountData.currency());
+        Money interestPostedToDate = Money.zero(savingsAccountData.getCurrency());
         LocalDate startInterestDate = getStartInterestCalculationDate(savingsAccountData);
 
         if (backdatedTxnsAllowedTill && savingsAccountData.getSummary().getInterestPostedTillDate() != null) {
-            interestPostedToDate = Money.of(savingsAccountData.currency(), savingsAccountData.getSummary().getTotalInterestPosted());
-            SavingsAccountTransactionData savingsAccountTransactionData = retrieveLastTransactions(savingsAccountData);
-            LocalDate lastTransactionDate = savingsAccountTransactionData.getLastTransactionDate();
-            savingsAccountData.setStartInterestCalculationDate(lastTransactionDate.plusDays(1));
+            interestPostedToDate = Money.of(savingsAccountData.getCurrency(), savingsAccountData.getSummary().getTotalInterestPosted());
+            savingsAccountData.setStartInterestCalculationDate(savingsAccountData.getSummary().getInterestPostedTillDate());
         } else {
             savingsAccountData.setStartInterestCalculationDate(startInterestDate);
         }
@@ -98,7 +96,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
 
                 if (postingTransaction == null) {
                     SavingsAccountTransactionData newPostingTransaction;
-                    if (interestEarnedToBePostedForPeriod.isGreaterThanOrEqualTo(Money.zero(savingsAccountData.currency()))) {
+                    if (interestEarnedToBePostedForPeriod.isGreaterThanOrEqualTo(Money.zero(savingsAccountData.getCurrency()))) {
                         newPostingTransaction = SavingsAccountTransactionData.interestPosting(savingsAccountData,
                                 interestPostingTransactionDate, interestEarnedToBePostedForPeriod, interestPostingPeriod.isUserPosting());
                     } else {
@@ -133,7 +131,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                             applyWithHoldTaxForOldTransaction = true;
                         }
                         SavingsAccountTransactionData newPostingTransaction;
-                        if (interestEarnedToBePostedForPeriod.isGreaterThanOrEqualTo(Money.zero(savingsAccountData.currency()))) {
+                        if (interestEarnedToBePostedForPeriod.isGreaterThanOrEqualTo(Money.zero(savingsAccountData.getCurrency()))) {
                             newPostingTransaction = SavingsAccountTransactionData.interestPosting(savingsAccountData,
                                     interestPostingTransactionDate, interestEarnedToBePostedForPeriod,
                                     interestPostingPeriod.isUserPosting());
@@ -159,13 +157,13 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
             // no openingBalance concept supported yet but probably will to
             // allow
             // for migrations.
-            Money openingAccountBalance = Money.zero(savingsAccountData.currency());
+            Money openingAccountBalance = Money.zero(savingsAccountData.getCurrency());
 
             if (backdatedTxnsAllowedTill) {
                 if (savingsAccountData.getSummary().getLastInterestCalculationDate() == null) {
-                    openingAccountBalance = Money.zero(savingsAccountData.currency());
+                    openingAccountBalance = Money.zero(savingsAccountData.getCurrency());
                 } else {
-                    openingAccountBalance = Money.of(savingsAccountData.currency(),
+                    openingAccountBalance = Money.of(savingsAccountData.getCurrency(),
                             savingsAccountData.getSummary().getRunningBalanceOnPivotDate());
                 }
             }
@@ -176,10 +174,10 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
         }
 
         if (!backdatedTxnsAllowedTill) {
-            savingsAccountData.getSummary().updateSummary(savingsAccountData.currency(),
+            savingsAccountData.getSummary().updateSummary(savingsAccountData.getCurrency(),
                     savingsAccountData.getSavingsAccountTransactionSummaryWrapper(), savingsAccountData.getSavingsAccountTransactionData());
         } else {
-            savingsAccountData.getSummary().updateSummaryWithPivotConfig(savingsAccountData.currency(),
+            savingsAccountData.getSummary().updateSummaryWithPivotConfig(savingsAccountData.getCurrency(),
                     savingsAccountData.getSavingsAccountTransactionSummaryWrapper(), null,
                     savingsAccountData.getSavingsAccountTransactionData());
         }
@@ -209,9 +207,10 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
 
         // Check global configurations and 'pivot' date is null
         if (backdatedTxnsAllowedTill) {
-            openingAccountBalance = Money.of(savingsAccountData.currency(), savingsAccountData.getSummary().getRunningBalanceOnPivotDate());
+            openingAccountBalance = Money.of(savingsAccountData.getCurrency(),
+                    savingsAccountData.getSummary().getRunningBalanceOnPivotDate());
         } else {
-            openingAccountBalance = Money.zero(savingsAccountData.currency());
+            openingAccountBalance = Money.zero(savingsAccountData.getCurrency());
         }
 
         // update existing transactions so derived balance fields are
@@ -249,14 +248,14 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
             final SavingsAccountTransactionData transaction = retrieveLastTransactions(savingsAccountData);
 
             if (transaction == null) {
-                periodStartingBalance = Money.zero(savingsAccountData.currency());
+                periodStartingBalance = Money.zero(savingsAccountData.getCurrency());
             } else {
-                periodStartingBalance = Money.of(savingsAccountData.currency(),
+                periodStartingBalance = Money.of(savingsAccountData.getCurrency(),
                         savingsAccountData.getSummary().getRunningBalanceOnPivotDate());
             }
 
         } else {
-            periodStartingBalance = Money.zero(savingsAccountData.currency());
+            periodStartingBalance = Money.zero(savingsAccountData.getCurrency());
         }
 
         final SavingsInterestCalculationType interestCalculationType = SavingsInterestCalculationType
@@ -264,11 +263,11 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
         final BigDecimal interestRateAsFraction = getEffectiveInterestRateAsFraction(mc, upToInterestCalculationDate, savingsAccountData);
         final BigDecimal overdraftInterestRateAsFraction = getEffectiveOverdraftInterestRateAsFraction(mc, savingsAccountData);
         final Collection<Long> interestPostTransactions = this.savingsHelper.fetchPostInterestTransactionIds(savingsAccountData.getId());
-        final Money minBalanceForInterestCalculation = Money.of(savingsAccountData.currency(),
+        final Money minBalanceForInterestCalculation = Money.of(savingsAccountData.getCurrency(),
                 minBalanceForInterestCalculation(savingsAccountData));
-        final Money minOverdraftForInterestCalculation = Money.of(savingsAccountData.currency(),
+        final Money minOverdraftForInterestCalculation = Money.of(savingsAccountData.getCurrency(),
                 savingsAccountData.getMinOverdraftForInterestCalculation());
-        final MonetaryCurrency monetaryCurrency = MonetaryCurrency.fromCurrencyData(savingsAccountData.currency());
+        final MonetaryCurrency monetaryCurrency = MonetaryCurrency.fromCurrencyData(savingsAccountData.getCurrency());
 
         for (final LocalDateInterval periodInterval : postingPeriodIntervals) {
 
@@ -294,11 +293,12 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
         savingsAccountData.getSummary().updateFromInterestPeriodSummaries(monetaryCurrency, allPostingPeriods);
 
         if (backdatedTxnsAllowedTill) {
-            savingsAccountData.getSummary().updateSummaryWithPivotConfig(savingsAccountData.currency(),
-                    savingsAccountData.getSavingsAccountTransactionSummaryWrapper(), null, savingsAccountData.getTransactions());
+            savingsAccountData.getSummary().updateSummaryWithPivotConfig(savingsAccountData.getCurrency(),
+                    savingsAccountData.getSavingsAccountTransactionSummaryWrapper(), null,
+                    savingsAccountData.getSavingsAccountTransactionData());
         } else {
-            savingsAccountData.getSummary().updateSummary(savingsAccountData.currency(),
-                    savingsAccountData.getSavingsAccountTransactionSummaryWrapper(), savingsAccountData.getTransactions());
+            savingsAccountData.getSummary().updateSummary(savingsAccountData.getCurrency(),
+                    savingsAccountData.getSavingsAccountTransactionSummaryWrapper(), savingsAccountData.getSavingsAccountTransactionData());
         }
 
         return allPostingPeriods;
@@ -321,7 +321,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
 
     private List<SavingsAccountTransactionData> retreiveListOfTransactions(final SavingsAccountData savingsAccountData) {
         final List<SavingsAccountTransactionData> listOfTransactionsSorted = new ArrayList<>();
-        listOfTransactionsSorted.addAll(savingsAccountData.getTransactions());
+        listOfTransactionsSorted.addAll(savingsAccountData.getSavingsAccountTransactionData());
 
         final SavingsAccountTransactionDataComparator transactionComparator = new SavingsAccountTransactionDataComparator();
         Collections.sort(listOfTransactionsSorted, transactionComparator);
@@ -355,15 +355,16 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
     }
 
     public List<SavingsAccountTransactionData> getTransactions(final SavingsAccountData savingsAccountData) {
-        return savingsAccountData.getTransactions();
+        return savingsAccountData.getSavingsAccountTransactionData();
     }
 
     private SavingsAccountTransactionData retrieveLastTransactions(final SavingsAccountData savingsAccountData) {
-        if (savingsAccountData.getTransactions() != null && savingsAccountData.getTransactions().size() == 1) {
-            return savingsAccountData.getTransactions().get(0);
+        if (savingsAccountData.getSavingsAccountTransactionData() != null
+                && savingsAccountData.getSavingsAccountTransactionData().size() == 1) {
+            return savingsAccountData.getSavingsAccountTransactionData().get(0);
         }
         final List<SavingsAccountTransactionData> listOfTransactionsSorted = new ArrayList<>();
-        listOfTransactionsSorted.addAll(savingsAccountData.getTransactions());
+        listOfTransactionsSorted.addAll(savingsAccountData.getSavingsAccountTransactionData());
         if (!listOfTransactionsSorted.isEmpty()) {
             final SavingsAccountTransactionDataComparator transactionComparator = new SavingsAccountTransactionDataComparator();
             Collections.sort(listOfTransactionsSorted, transactionComparator);
@@ -395,7 +396,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
         List<LocalDate> transactions = new ArrayList<>();
         for (SavingsAccountTransactionData trans : savingsAccountData.getSavingsAccountTransactionData()) {
             if (trans.isInterestPosting() && trans.isNotReversed() && !trans.isReversalTransaction() && trans.isManualTransaction()) {
-                transactions.add(trans.getTransactionLocalDate());
+                transactions.add(trans.getTransactionDate());
             }
         }
         return transactions;
@@ -413,21 +414,21 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
             if (transaction.isReversed() || transaction.isReversalTransaction()) {
                 transaction.zeroBalanceFields();
             } else {
-                Money overdraftAmount = Money.zero(savingsAccountData.currency());
-                Money transactionAmount = Money.zero(savingsAccountData.currency());
+                Money overdraftAmount = Money.zero(savingsAccountData.getCurrency());
+                Money transactionAmount = Money.zero(savingsAccountData.getCurrency());
                 if (transaction.isCredit() || transaction.isAmountRelease()) {
                     if (runningBalance.isLessThanZero()) {
-                        Money diffAmount = Money.of(savingsAccountData.currency(), transaction.getAmount()).plus(runningBalance);
+                        Money diffAmount = Money.of(savingsAccountData.getCurrency(), transaction.getAmount()).plus(runningBalance);
                         if (diffAmount.isGreaterThanZero()) {
-                            overdraftAmount = Money.of(savingsAccountData.currency(), transaction.getAmount()).minus(diffAmount);
+                            overdraftAmount = Money.of(savingsAccountData.getCurrency(), transaction.getAmount()).minus(diffAmount);
                         } else {
-                            overdraftAmount = Money.of(savingsAccountData.currency(), transaction.getAmount());
+                            overdraftAmount = Money.of(savingsAccountData.getCurrency(), transaction.getAmount());
                         }
                     }
                     transactionAmount = transactionAmount.plus(transaction.getAmount());
                 } else if (transaction.isDebit() || transaction.isAmountOnHold()) {
                     if (runningBalance.isLessThanZero()) {
-                        overdraftAmount = Money.of(savingsAccountData.currency(), transaction.getAmount());
+                        overdraftAmount = Money.of(savingsAccountData.getCurrency(), transaction.getAmount());
                     }
                     transactionAmount = transactionAmount.minus(transaction.getAmount());
                 }
@@ -442,7 +443,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
                 }
                 if (transaction.getId() == null && overdraftAmount.isGreaterThanZero()) {
                     transaction.updateOverdraftAmount(overdraftAmount.getAmount());
-                } else if (overdraftAmount.isNotEqualTo(Money.of(savingsAccountData.currency(), transaction.getOverdraftAmount()))) {
+                } else if (overdraftAmount.isNotEqualTo(Money.of(savingsAccountData.getCurrency(), transaction.getOverdraftAmount()))) {
                     SavingsAccountTransactionData accountTransaction = SavingsAccountTransactionData.copyTransaction(transaction);
                     if (transaction.isChargeTransaction()) {
                         Set<SavingsAccountChargesPaidByData> chargesPaidBy = transaction.getSavingsAccountChargesPaid();
@@ -488,13 +489,13 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
 
     private boolean createWithHoldTransaction(final BigDecimal amount, final LocalDate date, final SavingsAccountData savingsAccountData) {
         boolean isTaxAdded = false;
-        if (savingsAccountData.getTaxGroupData() != null && amount.compareTo(BigDecimal.ZERO) > 0) {
+        if (savingsAccountData.getTaxGroup() != null && amount.compareTo(BigDecimal.ZERO) > 0) {
             Map<TaxComponentData, BigDecimal> taxSplit = TaxUtils.splitTaxData(amount, date,
-                    savingsAccountData.getTaxGroupData().getTaxAssociations().stream().collect(Collectors.toSet()), amount.scale());
+                    savingsAccountData.getTaxGroup().getTaxAssociations().stream().collect(Collectors.toSet()), amount.scale());
             BigDecimal totalTax = TaxUtils.totalTaxDataAmount(taxSplit);
             if (totalTax.compareTo(BigDecimal.ZERO) > 0) {
                 SavingsAccountTransactionData withholdTransaction = SavingsAccountTransactionData.withHoldTax(savingsAccountData, date,
-                        Money.of(savingsAccountData.currency(), totalTax), taxSplit);
+                        Money.of(savingsAccountData.getCurrency(), totalTax), taxSplit);
 
                 savingsAccountData.getSavingsAccountTransactionData().add(withholdTransaction);
                 // if (backdatedTxnsAllowedTill) {
@@ -530,11 +531,11 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
             final SavingsAccountTransactionData transaction = accountTransactionsSorted.get(i);
             if (transaction.isNotReversed() && !transaction.isReversalTransaction()
                     && !(transaction.isInterestPostingAndNotReversed() || transaction.isOverdraftInterestAndNotReversed())) {
-                transaction.updateCumulativeBalanceAndDates(MonetaryCurrency.fromCurrencyData(savingsAccountData.currency()),
+                transaction.updateCumulativeBalanceAndDates(MonetaryCurrency.fromCurrencyData(savingsAccountData.getCurrency()),
                         endOfBalanceDate);
                 // this transactions transaction date is end of balance date for
                 // previous transaction.
-                endOfBalanceDate = transaction.getTransactionLocalDate().minusDays(1);
+                endOfBalanceDate = transaction.getTransactionDate().minusDays(1);
             }
         }
     }
@@ -544,7 +545,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
     }
 
     private boolean withHoldTax(final SavingsAccountData savingsAccountData) {
-        return savingsAccountData.withHoldTax();
+        return savingsAccountData.isWithHoldTax();
     }
 
     public DepositAccountType depositAccountType(final SavingsAccountData savingsAccountData) {

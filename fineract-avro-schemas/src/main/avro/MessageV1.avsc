@@ -15,12 +15,7 @@
         },
         {
             "name": "type",
-            "doc": "The type of event the payload refers to. For example LOAN_APPROVED",
-            "type": "string"
-        },
-        {
-            "name": "version",
-            "doc": "The version of the type of event. For example 1, 2, 3, etc",
+            "doc": "The type of event the payload refers to. For example LoanApprovedBusinessEvent",
             "type": "string"
         },
         {
@@ -44,8 +39,13 @@
             "type": "string"
         },
         {
-            "name": "payload",
-            "doc": "The payload serialized into Avro bytes",
+            "name": "dataschema",
+            "doc": "The fully qualified name of the schema of the event payload. For example org.apache.fineract.avro.loan.v1.LoanAccountDataV1",
+            "type": "string"
+        },
+        {
+            "name": "data",
+            "doc": "The payload data serialized into Avro bytes",
             "type": "bytes"
         }
     ]

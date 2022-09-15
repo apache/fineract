@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import lombok.Getter;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
@@ -31,6 +32,7 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.products.data.ProductData;
 
+@Getter
 public final class ShareProductData implements ProductData {
 
     private final Long id;
@@ -244,95 +246,11 @@ public final class ShareProductData implements ProductData {
 
     }
 
-    public Long getId() {
-        return this.id;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public String getShortName() {
-        return this.shortName;
-    }
-
-    public String getDescription() {
-        return this.description;
-    }
-
-    public String getExternalId() {
-        return this.externalId;
-    }
-
-    public CurrencyData getCurrency() {
-        return this.currency;
-    }
-
-    public Long getTotalShares() {
-        return this.totalShares;
-    }
-
-    public Long getTotalSharesIssued() {
-        return this.totalSharesIssued;
-    }
-
-    public BigDecimal getUnitPrice() {
-        return this.unitPrice;
-    }
-
-    public BigDecimal getShareCapital() {
-        return this.shareCapital;
-    }
-
-    public Long getMinimumShares() {
-        return this.minimumShares;
-    }
-
-    public Long getNominaltShares() {
-        return this.nominalShares;
-    }
-
-    public Long getMaximumShares() {
-        return this.maximumShares;
-    }
-
-    public Collection<ShareProductMarketPriceData> getMarketPrice() {
-        return this.marketPrice;
-    }
-
-    public Boolean getAllowDividendCalculationForInactiveClients() {
-        return this.allowDividendCalculationForInactiveClients;
-    }
-
-    public EnumOptionData getLockPeriod() {
-        return this.lockPeriodTypeEnum;
-    }
-
-    public EnumOptionData getMinimumActivePeriodForDividends() {
-        return this.minimumActivePeriodForDividendsTypeEnum;
-    }
-
-    public Collection<CurrencyData> getCurrencyOptions() {
-        return currencyOptions;
-    }
-
-    public Collection<ChargeData> getChargeOptions() {
-        return chargeOptions;
-    }
-
-    public Integer getMinimumActivePeriod() {
-        return this.minimumActivePeriod;
-    }
-
     public boolean hasAccountingEnabled() {
         return this.accountingRule.getId() > AccountingRuleType.NONE.getValue();
     }
 
     public int accountingRuleTypeId() {
         return this.accountingRule.getId().intValue();
-    }
-
-    public EnumOptionData getAccountingRule() {
-        return this.accountingRule;
     }
 }

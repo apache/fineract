@@ -19,10 +19,11 @@
 package org.apache.fineract.infrastructure.event.external.service.serialization.mapper.savings;
 
 import org.apache.fineract.avro.savings.v1.SavingsAccountDataV1;
+import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroMapperConfig;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring")
+@Mapper(config = AvroMapperConfig.class)
 public interface SavingsAccountDataMapper {
 
     SavingsAccountDataV1 map(SavingsAccountData source);

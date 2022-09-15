@@ -22,12 +22,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.Gson;
+import com.linecorp.armeria.internal.shaded.guava.reflect.TypeToken;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -38,8 +40,10 @@ import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.GetDelinquencyTagHistoryResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -186,6 +190,14 @@ public class LoanTransactionHelper {
     public String getLoanDetails(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer loanID) {
         final String URL = "/fineract-provider/api/v1/loans/" + loanID + "?associations=all&" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, URL, null);
+    }
+
+    public ArrayList<GetDelinquencyTagHistoryResponse> getLoanDelinquencyTags(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer loanID) {
+        final String URL = "/fineract-provider/api/v1/loans/" + loanID + "/delinquencytags?" + Utils.TENANT_IDENTIFIER;
+        final String response = Utils.performServerGet(requestSpec, responseSpec, URL);
+        Type delinquencyTagsListType = new TypeToken<ArrayList<GetDelinquencyTagHistoryResponse>>() {}.getType();
+        return GSON.fromJson(response, delinquencyTagsListType);
     }
 
     public Object getLoanProductDetail(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -395,6 +407,14 @@ public class LoanTransactionHelper {
 
     public HashMap reverseRepayment(final Integer loanId, final Integer transactionId, String date) {
         return (HashMap) performLoanTransaction(createLoanTransactionURL(UNDO, loanId, transactionId), getUndoJsonBody(date), "");
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeLoanRepayment(final String date, final Float amountToBePaid, final Integer loanID) {
+        return postLoanTransaction(createLoanTransactionURL(MAKE_REPAYMENT_COMMAND, loanID), getRepaymentBodyAsJSON(date, amountToBePaid));
+    }
+
+    public PostLoansLoanIdTransactionsResponse reverseLoanRepayment(final Integer loanId, final Integer transactionId, String date) {
+        return postLoanTransaction(createLoanTransactionURL(UNDO, loanId, transactionId), getUndoJsonBody(date));
     }
 
     public HashMap makeRepaymentWithPDC(final String date, final Float amountToBePaid, final Integer loanID, final Integer paymentType) {
@@ -785,7 +805,6 @@ public class LoanTransactionHelper {
     }
 
     private HashMap performLoanTransaction(final String postURLForLoanTransaction, final String jsonToBeSent) {
-
         final HashMap response = Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForLoanTransaction, jsonToBeSent,
                 "changes");
         return (HashMap) response.get("status");
@@ -801,6 +820,11 @@ public class LoanTransactionHelper {
     private Object performLoanTransaction(final String postURLForLoanTransaction, final String jsonToBeSent,
             final String responseAttribute) {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForLoanTransaction, jsonToBeSent, responseAttribute);
+    }
+
+    private PostLoansLoanIdTransactionsResponse postLoanTransaction(final String postURLForLoanTransaction, final String jsonToBeSent) {
+        final String response = Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForLoanTransaction, jsonToBeSent);
+        return GSON.fromJson(response, PostLoansLoanIdTransactionsResponse.class);
     }
 
     private Object performLoanTransaction(final String postURLForLoanTransaction, final String jsonToBeSent,
