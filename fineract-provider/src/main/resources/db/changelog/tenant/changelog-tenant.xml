@@ -41,4 +41,5 @@
     <include file="parts/0019_refactor_loan_transaction.xml" relativeToChangelogFile="true"/>
     <include file="parts/0020_add_audit_entries.xml" relativeToChangelogFile="true"/>
     <include file="parts/0026_reversals_for_reversed_transactions.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0027_create_table_for_business_owner.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

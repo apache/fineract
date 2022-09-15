@@ -120,6 +120,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final BusinessEventNotifierService businessEventNotifierService;
     private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
 
+    private final BusinessOwnerWritePlatformService businessOwnerWritePlatformService;
+
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final ClientRepositoryWrapper clientRepository, final ClientNonPersonRepositoryWrapper clientNonPersonRepository,
@@ -135,7 +137,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final AddressWritePlatformService addressWritePlatformService,
             final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService,
             final BusinessEventNotifierService businessEventNotifierService,
-            final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService) {
+            final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
+            BusinessOwnerWritePlatformService businessOwnerWritePlatformService) {
         this.context = context;
         this.clientRepository = clientRepository;
         this.clientNonPersonRepository = clientNonPersonRepository;
@@ -159,6 +162,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.clientFamilyMembersWritePlatformService = clientFamilyMembersWritePlatformService;
         this.businessEventNotifierService = businessEventNotifierService;
         this.entityDatatableChecksWritePlatformService = entityDatatableChecksWritePlatformService;
+        this.businessOwnerWritePlatformService = businessOwnerWritePlatformService;
     }
 
     @Transactional
@@ -230,7 +234,11 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final GlobalConfigurationPropertyData configuration = this.configurationReadPlatformService
                     .retrieveGlobalConfiguration("Enable-Address");
 
+            final GlobalConfigurationPropertyData businessOwner = this.configurationReadPlatformService
+                    .retrieveGlobalConfiguration("Enable-businessOwners");
+
             final Boolean isAddressEnabled = configuration.isEnabled();
+            final Boolean isBusinessOwnerEnabled = businessOwner.isEnabled();
 
             final Boolean isStaff = command.booleanObjectValueOfParameterNamed(ClientApiConstants.isStaffParamName);
 
@@ -327,6 +335,10 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             if (command.arrayOfParameterNamed("familyMembers") != null) {
                 this.clientFamilyMembersWritePlatformService.addClientFamilyMember(newClient, command);
+            }
+
+            if (isBusinessOwnerEnabled) {
+                this.businessOwnerWritePlatformService.addNewBusinessOwner(newClient, command);
             }
 
             if (command.parameterExists(ClientApiConstants.datatables)) {

@@ -119,6 +119,10 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
     private Long clientClassificationId;
     private Long legalFormId;
     private LocalDate submittedOnDate;
+    
+    private final Collection<ClientBusinessOwnerData> ownersData;
+
+    private final Boolean isBusinessOwnerEnabled;
 
     public static ClientData importClientEntityInstance(Long legalFormId, Integer rowIndex, String fullname, Long officeId,
             Long clientTypeId, Long clientClassificationId, Long staffId, Boolean active, LocalDate activationDate,
@@ -192,6 +196,8 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
         this.emailAddress = null;
         this.clientCollateralManagements = null;
         this.id = clientId;
+        this.isBusinessOwnerEnabled = false;
+        this.ownersData = null;
     }
 
     public static ClientData importClientPersonInstance(Long legalFormId, Integer rowIndex, String firstname, String lastname,
@@ -270,6 +276,8 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
         this.familyMemberOptions = null;
         this.emailAddress = null;
         this.clientCollateralManagements = null;
+        this.isBusinessOwnerEnabled = false;
+        this.ownersData = null;
     }
 
     public Integer getRowIndex() {
@@ -295,7 +303,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
             final Collection<CodeValueData> clientNonPersonConstitutionOptions,
             final Collection<CodeValueData> clientNonPersonMainBusinessLineOptions, final List<EnumOptionData> clientLegalFormOptions,
             final ClientFamilyMembersData familyMemberOptions, final Collection<AddressData> address, final Boolean isAddressEnabled,
-            final List<DatatableData> datatables) {
+            final List<DatatableData> datatables, final Collection<ClientBusinessOwnerData> ownersData, final Boolean isBusinessOwnerEnabled) {
         final String accountNo = null;
         final EnumOptionData status = null;
         final CodeValueData subStatus = null;
@@ -334,7 +342,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
                 savingsProductId, savingsProductName, savingsAccountId, savingAccountOptions, clientType, clientClassification,
                 clientTypeOptions, clientClassificationOptions, clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions,
                 clientNonPersonDetails, clientLegalFormOptions, familyMemberOptions, legalForm, address, isAddressEnabled, datatables,
-                isStaff, clientCollateralManagements);
+                isStaff, clientCollateralManagements, ownersData, isBusinessOwnerEnabled);
 
     }
 
@@ -351,7 +359,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
                 templateData.clientClassificationOptions, templateData.clientNonPersonConstitutionOptions,
                 templateData.clientNonPersonMainBusinessLineOptions, clientData.clientNonPersonDetails, templateData.clientLegalFormOptions,
                 templateData.familyMemberOptions, clientData.legalForm, clientData.address, clientData.isAddressEnabled, null,
-                clientData.isStaff, clientCollateralManagements);
+                clientData.isStaff, clientCollateralManagements, clientData.ownersData, clientData.isBusinessOwnerEnabled);
 
     }
 
@@ -369,7 +377,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
                 clientData.clientClassificationOptions, clientData.clientNonPersonConstitutionOptions,
                 clientData.clientNonPersonMainBusinessLineOptions, clientData.clientNonPersonDetails, clientData.clientLegalFormOptions,
                 clientData.familyMemberOptions, clientData.legalForm, clientData.address, clientData.isAddressEnabled, null,
-                clientData.isStaff, clientCollateralManagements);
+                clientData.isStaff, clientCollateralManagements, clientData.ownersData, clientData.isBusinessOwnerEnabled);
 
     }
 
@@ -385,7 +393,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
                 clientData.clientTypeOptions, clientData.clientClassificationOptions, clientData.clientNonPersonConstitutionOptions,
                 clientData.clientNonPersonMainBusinessLineOptions, clientData.clientNonPersonDetails, clientData.clientLegalFormOptions,
                 clientData.familyMemberOptions, clientData.legalForm, clientData.address, clientData.isAddressEnabled, null,
-                clientData.isStaff, clientCollateralManagements);
+                clientData.isStaff, clientCollateralManagements, clientData.ownersData, clientData.isBusinessOwnerEnabled);
 
     }
 
@@ -434,7 +442,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
                 savingProductOptions, savingsProductId, savingsProductName, savingsAccountId, savingAccountOptions, clientType,
                 clientClassification, clientTypeOptions, clientClassificationOptions, clientNonPersonConstitutionOptions,
                 clientNonPersonMainBusinessLineOptions, clientNonPerson, clientLegalFormOptions, familyMemberOptions, legalForm, null, null,
-                null, isStaff, clientCollateralManagements);
+                null, isStaff, clientCollateralManagements, null, null);
     }
 
     public static ClientData lookup(final Long id, final String displayName, final Long officeId, final String officeName) {
@@ -485,7 +493,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
                 savingProductOptions, savingsProductId, savingsProductName, savingsAccountId, savingAccountOptions, clientType,
                 clientClassification, clientTypeOptions, clientClassificationOptions, clientNonPersonConstitutionOptions,
                 clientNonPersonMainBusinessLineOptions, clientNonPerson, clientLegalFormOptions, familyMemberOptions, legalForm, null, null,
-                null, isStaff, clientCollateralManagements);
+                null, isStaff, clientCollateralManagements, null, null);
 
     }
 
@@ -522,7 +530,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
                 imageId, staffId, staffName, allowedOffices, groups, staffOptions, closureReasons, genderOptions, timeline,
                 savingProductOptions, savingsProductId, savingsProductName, savingsAccountId, null, clientType, clientClassification,
                 clientTypeOptions, clientClassificationOptions, clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions,
-                clientNonPerson, clientLegalFormOptions, familyMemberOptions, legalForm, null, null, null, isStaff, null);
+                clientNonPerson, clientLegalFormOptions, familyMemberOptions, legalForm, null, null, null, isStaff, null, null, null);
 
     }
 
@@ -542,7 +550,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
             final List<EnumOptionData> clientLegalFormOptions, final ClientFamilyMembersData familyMemberOptions,
             final EnumOptionData legalForm, final Collection<AddressData> address, final Boolean isAddressEnabled,
             final List<DatatableData> datatables, final Boolean isStaff,
-            final Set<ClientCollateralManagementData> clientCollateralManagements) {
+            final Set<ClientCollateralManagementData> clientCollateralManagements, final Collection<ClientBusinessOwnerData> ownersData, final Boolean isBusinessOwnerEnabled) {
         this.accountNo = accountNo;
         this.status = status;
         if (status != null) {
@@ -609,6 +617,8 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
         this.isAddressEnabled = isAddressEnabled;
         this.datatables = datatables;
         this.clientCollateralManagements = clientCollateralManagements;
+        this.isBusinessOwnerEnabled = isBusinessOwnerEnabled;
+        this.ownersData = ownersData;
     }
 
     public Long id() {

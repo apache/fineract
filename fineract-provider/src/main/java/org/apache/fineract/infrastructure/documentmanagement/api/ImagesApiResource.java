@@ -144,6 +144,8 @@ public class ImagesApiResource {
             this.context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
         } else if (EntityTypeForImages.STAFF.toString().equalsIgnoreCase(entityName)) {
             this.context.authenticatedUser().validateHasReadPermission("STAFFIMAGE");
+        } else if (EntityTypeForImages.BUSINESSOWNER.toString().equalsIgnoreCase(entityName)) {
+            this.context.authenticatedUser();
         }
 
         final FileData imageData = this.imageReadPlatformService.retrieveImage(entityName, entityId);
@@ -222,7 +224,7 @@ public class ImagesApiResource {
     /*** Entities for document Management **/
     public enum EntityTypeForImages {
 
-        STAFF, CLIENTS;
+        STAFF, CLIENTS, BUSINESSOWNER;
 
         @Override
         public String toString() {
