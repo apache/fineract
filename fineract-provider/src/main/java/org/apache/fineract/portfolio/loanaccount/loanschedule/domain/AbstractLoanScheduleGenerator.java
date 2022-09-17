@@ -2201,7 +2201,10 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                                 .adjustRepaymentDate(actualRepaymentDate, loanApplicationTerms, holidayDetailDTO).getChangedScheduleDate();
                         LocalDate modifiedLastInstDate = null;
                         LoanTermVariationsData variation1 = null;
+
+                        boolean hasDueDateVariation = false;
                         while (loanApplicationTerms.getLoanTermVariations().hasDueDateVariation(lastInstallmentDate)) {
+                            hasDueDateVariation = true;
                             LoanTermVariationsData variation = loanApplicationTerms.getLoanTermVariations().nextDueDateVariation();
                             if (!variation.isSpecificToInstallment()) {
                                 modifiedLastInstDate = variation.getDateValue();
@@ -2209,7 +2212,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                             }
                         }
 
-                        if (!lastInstallmentDate.isEqual(installment.getDueDate())
+                        if (hasDueDateVariation && !lastInstallmentDate.isEqual(installment.getDueDate())
                                 && !installment.getDueDate().equals(modifiedLastInstDate)) {
                             lastInstallmentDate = prevLastInstDate;
                             actualRepaymentDate = lastInstallmentDate;

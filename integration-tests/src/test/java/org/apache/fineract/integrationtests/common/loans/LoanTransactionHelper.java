@@ -298,6 +298,11 @@ public class LoanTransactionHelper {
         return performLoanTransaction(createGlimAccountURL(DISBURSE_LOAN_COMMAND, glimID), getDisbursementAsJSON(date));
     }
 
+    public HashMap disburseLoanWithNetDisbursalAmount(final String date, final Integer loanID, final String netDisbursalAmount) {
+        return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID),
+                getDisburseLoanAsJSON(date, null, netDisbursalAmount));
+    }
+
     public HashMap undoDisburseGlimAccount(final Integer glimID) {
         LOG.info("--------------------------------- UNDO DISBURSAL GLIM APPLICATION -------------------------------");
         final String undoBodyJson = "{'note':'UNDO DISBURSAL'}";
