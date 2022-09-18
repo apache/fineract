@@ -18,9 +18,14 @@
  */
 package org.apache.fineract.portfolio.paymenttype.domain;
 
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface PaymentTypeRepository extends JpaRepository<PaymentType, Long>, JpaSpecificationExecutor<PaymentType> {
+
+    List<PaymentType> findAllByOrderByPositionAsc();
+
+    List<PaymentType> findAllByCodeNameIsNotNullOrderByPositionAsc();
 
 }

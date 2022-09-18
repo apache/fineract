@@ -150,4 +150,9 @@ public interface LoanApiConstants {
 
     String DISALLOW_EXPECTED_DISBURSEMENTS = "disallowExpectedDisbursements";
 
+    String TRANSACTION_AMOUNT_PARAMNAME = "transactionAmount";
+    String PAYMENT_TYPE_PARAMNAME = "paymentTypeId";
+
+    // Commands
+    String CHARGEBACK_TRANSACTION_COMMAND = "chargeback";
 }
