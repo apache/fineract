@@ -1,0 +1,117 @@
+= Introducing Effective Date into Fineract
+
+For banks, Apache Fineract is introducing transaction idempotency, business and
+effective date configuration as an addition to currenty supported
+
+* System date
+* Tenant date
+* User-provided date
+
+An effective date represents the date that the receipient of a payment sees the
+funds transferred and the financial institutions at either end of the transaction
+settle funds with one another.
+
+As an example, usually the effective date for credit entries will be one or two
+days after the processing date; for debit entries the effective date is the
+following banking date or business date.
+
+= Features
+
+Customers and developers can now:
+
+* Specify effective date from which the compounding of interest or fee amounts
+  will be considered in recalculation on late payment.
+* Specify effective date from which the late or advanced payment amounts will
+  be considered in recalculation.
+* Update the recommended deposit amount for a RD account as on the effective date.
+* Specify or update deposit account transaction effective date.
+* Specify or update effective date in loan schedule generation.
+* Testing purpose.
+
+For Terms bearing the same effective date, loan term variations is sorted based
+on modified date (when available) and new inserted installment.
+
+= How to enable effective date as a functionality
+
+Effective date functionality can be added using Fineract job or using API. Both
+of which performs proper checks and outputs outcome parameter for the customers
+and developers. These also support timezones, daylight savings. 
+
+== Job
+
+This depends on defining closing of business day (CoB) operations. Customers and
+developers can now:
+
+* Scheduled job
+
+As an example:
+
+```POST /fineract-provider/api/v1/jobs/<job_id>?command=executeJob``
+
+== API
+
+Customers and developers can now manage effective date using API calls.
+
+
+= Effective date use case scenarios
+
+== Apply for loan
+
+* Tenant date
+* Effective date
+* Submitted on date
+* Outcome: SUCESS/FAILURE
+* Message
+* Reason
+* Loan application details
+
+
+== Repayment for a loan
+
+* Tenant date
+* Effective date
+* Transaction date
+* Outcome: SUCCESS/FAILURE
+* Loan transaction details
+  * Submitted on date
+  * Transaction date
+  * Created on date
+
+= Effective date code examples
+
+== Increase Effective date by 1 day
+
+```
+```
+
+== API:
+
+Fetch effective date using:
+
+`GET /fineract-provider/api/v1/businessdates/BUSINESS`
+
+
+```json
+
+Response
+{
+  "type": "BUSINESS",
+  "date": [2022, 5, 13]
+}
+```
+
+= Effective date specifics
+
+== Effective date type name
+
+* Type
+* Locale
+* DateFormat
+* DateValue
+
+== Effective date configuration domain service
+
+* isBusinessDateEnabled()
+
+== Effective date errors and exceptions
+
