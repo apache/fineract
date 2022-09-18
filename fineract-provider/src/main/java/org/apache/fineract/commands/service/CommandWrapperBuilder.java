@@ -905,6 +905,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder chargebackTransaction(final Long loanId, final Long transactionId) {
+        this.actionName = "CHARGEBACK";
+        this.entityName = "LOAN";
+        this.entityId = transactionId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions/" + transactionId;
+        return this;
+    }
+
     public CommandWrapperBuilder loanForeclosure(final Long loanId) {
         this.actionName = "FORECLOSURE";
         this.entityName = "LOAN";

@@ -16,17 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.paymenttype.service;
+package org.apache.fineract.portfolio.loanaccount.domain;
 
-import java.util.Collection;
-import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
+import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface PaymentTypeReadPlatformService {
+public interface LoanTransactionRelationRepository
+        extends JpaRepository<LoanTransactionRelation, Long>, JpaSpecificationExecutor<LoanTransactionRelation> {
 
-    Collection<PaymentTypeData> retrieveAllPaymentTypes();
-
-    Collection<PaymentTypeData> retrieveAllPaymentTypesWithCode();
-
-    PaymentTypeData retrieveOne(Long paymentTypeId);
+    List<LoanTransactionRelation> findByFromTransactionAndRelationType(LoanTransaction loanTransaction,
+            LoanTransactionRelationTypeEnum relationType);
 
 }

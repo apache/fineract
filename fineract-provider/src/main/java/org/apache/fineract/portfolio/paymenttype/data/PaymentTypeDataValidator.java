@@ -43,11 +43,13 @@ public class PaymentTypeDataValidator {
     private final FromJsonHelper fromApiJsonHelper;
     private static final Set<String> CREATE_PAYMENT_TYPE_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(PaymentTypeApiResourceConstants.NAME, PaymentTypeApiResourceConstants.DESCRIPTION,
-                    PaymentTypeApiResourceConstants.ISCASHPAYMENT, PaymentTypeApiResourceConstants.POSITION));
+                    PaymentTypeApiResourceConstants.ISCASHPAYMENT, PaymentTypeApiResourceConstants.POSITION,
+                    PaymentTypeApiResourceConstants.CODE_NAME, PaymentTypeApiResourceConstants.IS_SYSTEM_DEFINED));
 
     private static final Set<String> UPDATE_PAYMENT_TYPE_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(PaymentTypeApiResourceConstants.NAME, PaymentTypeApiResourceConstants.DESCRIPTION,
-                    PaymentTypeApiResourceConstants.ISCASHPAYMENT, PaymentTypeApiResourceConstants.POSITION));
+                    PaymentTypeApiResourceConstants.ISCASHPAYMENT, PaymentTypeApiResourceConstants.POSITION,
+                    PaymentTypeApiResourceConstants.CODE_NAME, PaymentTypeApiResourceConstants.IS_SYSTEM_DEFINED));
 
     @Autowired
     public PaymentTypeDataValidator(final FromJsonHelper fromApiJsonHelper) {
@@ -91,6 +93,19 @@ public class PaymentTypeDataValidator {
             final Long position = this.fromApiJsonHelper.extractLongNamed(PaymentTypeApiResourceConstants.POSITION, element);
             baseDataValidator.reset().parameter(PaymentTypeApiResourceConstants.POSITION).value(position).ignoreIfNull()
                     .integerZeroOrGreater();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(PaymentTypeApiResourceConstants.CODE_NAME, element)) {
+            final String codeName = this.fromApiJsonHelper.extractStringNamed(PaymentTypeApiResourceConstants.CODE_NAME, element);
+            baseDataValidator.reset().parameter(PaymentTypeApiResourceConstants.CODE_NAME).value(codeName).ignoreIfNull()
+                    .notExceedingLengthOf(100);
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(PaymentTypeApiResourceConstants.IS_SYSTEM_DEFINED, element)) {
+            final Boolean isSystemDefined = this.fromApiJsonHelper.extractBooleanNamed(PaymentTypeApiResourceConstants.IS_SYSTEM_DEFINED,
+                    element);
+            baseDataValidator.reset().parameter(PaymentTypeApiResourceConstants.IS_SYSTEM_DEFINED).value(isSystemDefined)
+                    .validateForBooleanValue();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -142,7 +157,20 @@ public class PaymentTypeDataValidator {
                     .integerZeroOrGreater();
         }
 
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+        if (this.fromApiJsonHelper.parameterExists(PaymentTypeApiResourceConstants.CODE_NAME, element)) {
+            final String codeName = this.fromApiJsonHelper.extractStringNamed(PaymentTypeApiResourceConstants.CODE_NAME, element);
+            baseDataValidator.reset().parameter(PaymentTypeApiResourceConstants.CODE_NAME).value(codeName).ignoreIfNull()
+                    .notExceedingLengthOf(100);
+        }
 
+        if (this.fromApiJsonHelper.parameterExists(PaymentTypeApiResourceConstants.IS_SYSTEM_DEFINED, element)) {
+            final Boolean isSystemDefined = this.fromApiJsonHelper.extractBooleanNamed(PaymentTypeApiResourceConstants.IS_SYSTEM_DEFINED,
+                    element);
+            baseDataValidator.reset().parameter(PaymentTypeApiResourceConstants.IS_SYSTEM_DEFINED).value(isSystemDefined)
+                    .validateForBooleanValue();
+        }
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
+
 }
