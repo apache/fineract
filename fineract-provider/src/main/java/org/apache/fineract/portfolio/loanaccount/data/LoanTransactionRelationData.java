@@ -16,17 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.paymenttype.service;
+package org.apache.fineract.portfolio.loanaccount.data;
 
-import java.util.Collection;
-import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 
-public interface PaymentTypeReadPlatformService {
+@Getter
+@Setter
+@AllArgsConstructor
+public class LoanTransactionRelationData implements Serializable {
 
-    Collection<PaymentTypeData> retrieveAllPaymentTypes();
-
-    Collection<PaymentTypeData> retrieveAllPaymentTypesWithCode();
-
-    PaymentTypeData retrieveOne(Long paymentTypeId);
+    private Long fromLoanTransaction;
+    private Long toLoanTransaction;
+    private LoanTransactionRelationTypeEnum relationType;
+    private BigDecimal amount;
+    private String paymentType;
 
 }

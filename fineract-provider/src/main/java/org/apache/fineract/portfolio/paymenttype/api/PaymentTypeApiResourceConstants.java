@@ -37,6 +37,8 @@ public final class PaymentTypeApiResourceConstants {
     public static final String DESCRIPTION = "description";
     public static final String ISCASHPAYMENT = "isCashPayment";
     public static final String POSITION = "position";
+    public static final String CODE_NAME = "code_name";
+    public static final String IS_SYSTEM_DEFINED = "system_defined";
 
     static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(ID, NAME, DESCRIPTION, ISCASHPAYMENT));
 }

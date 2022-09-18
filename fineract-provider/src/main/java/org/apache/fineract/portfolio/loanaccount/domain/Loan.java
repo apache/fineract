@@ -1338,7 +1338,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             final Money principal = this.loanRepaymentScheduleDetail.getPrincipal();
             this.summary.updateSummary(loanCurrency(), principal, getRepaymentScheduleInstallments(), this.loanSummaryWrapper,
                     isDisbursed(), this.charges);
-            updateLoanOutstandingBalaces();
+            updateLoanOutstandingBalances();
         }
     }
 
@@ -2850,7 +2850,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             chargesPayment.updateComponentsAndTotal(zero, zero, disbursentMoney, zero);
             chargesPayment.updateLoan(this);
             addLoanTransaction(chargesPayment);
-            updateLoanOutstandingBalaces();
+            updateLoanOutstandingBalances();
         }
 
         if (getApprovedOnDate() != null && disbursedOn.isBefore(getApprovedOnDate())) {
@@ -2897,7 +2897,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         chargesPayment.updateComponents(zero, zero, charge.getAmount(getCurrency()), zero);
         chargesPayment.updateLoan(this);
         addLoanTransaction(chargesPayment);
-        updateLoanOutstandingBalaces();
+        updateLoanOutstandingBalances();
         charge.markAsFullyPaid();
         return chargesPayment;
     }
@@ -3426,7 +3426,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 addLoanTransaction(finalAccrual);
             }
         }
-        updateLoanOutstandingBalaces();
+        updateLoanOutstandingBalances();
     }
 
     private void determineCumulativeIncomeFromInstallments(HashMap<String, BigDecimal> cumulativeIncomeFromInstallments) {
@@ -3896,6 +3896,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         }
         changedTransactionDetail.getNewTransactionMappings().put(0L, loanTransaction);
         return changedTransactionDetail;
+    }
+
+    public void handleChargebackTransaction(LoanTransaction chargebackTransaction,
+            final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+        chargebackTransaction.updateLoan(this);
+        // TODO To be updated in the repayment schedule
     }
 
     /**
@@ -5422,7 +5428,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 addLoanTransaction(accrual);
             }
         }
-        updateLoanOutstandingBalaces();
+        updateLoanOutstandingBalances();
     }
 
     private void determineFeeDetails(LocalDate fromDate, LocalDate toDate, HashMap<String, Object> feeDetails) {
@@ -5665,7 +5671,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return interestRecalculatedOn;
     }
 
-    private void updateLoanOutstandingBalaces() {
+    private void updateLoanOutstandingBalances() {
         Money outstanding = Money.zero(getCurrency());
         List<LoanTransaction> loanTransactions = retreiveListOfTransactionsExcludeAccruals();
         for (LoanTransaction loanTransaction : loanTransactions) {

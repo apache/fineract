@@ -16,17 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.paymenttype.service;
+package org.apache.fineract.portfolio.paymenttype.mapper;
 
-import java.util.Collection;
+import java.util.List;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
+import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-public interface PaymentTypeReadPlatformService {
+@Mapper(componentModel = "spring")
+public interface PaymentTypeMapper {
 
-    Collection<PaymentTypeData> retrieveAllPaymentTypes();
+    @Mapping(target = "id", source = "source.id")
+    @Mapping(target = "name", source = "source.name")
+    @Mapping(target = "description", source = "source.description")
+    @Mapping(target = "isCashPayment", source = "source.isCashPayment")
+    @Mapping(target = "codeName", source = "source.codeName")
+    @Mapping(target = "isSystemDefined", source = "source.isSystemDefined")
+    PaymentTypeData map(PaymentType source);
 
-    Collection<PaymentTypeData> retrieveAllPaymentTypesWithCode();
-
-    PaymentTypeData retrieveOne(Long paymentTypeId);
+    List<PaymentTypeData> map(List<PaymentType> sources);
 
 }

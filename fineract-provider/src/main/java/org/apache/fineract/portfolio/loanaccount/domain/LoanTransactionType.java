@@ -173,4 +173,9 @@ public enum LoanTransactionType {
     public boolean isIncomePosting() {
         return this.value.equals(LoanTransactionType.INCOME_POSTING.getValue());
     }
+
+    public boolean isChargeback() {
+        return this.value.equals(LoanTransactionType.CHARGEBACK.getValue());
+    }
+
 }

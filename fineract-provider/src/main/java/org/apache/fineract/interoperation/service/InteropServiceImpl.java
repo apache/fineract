@@ -332,7 +332,7 @@ public class InteropServiceImpl implements InteropService {
         InteropTransactionRequestData request = dataValidator.validateAndParseCreateRequest(command);
 
         // TODO: error handling
-        SavingsAccount savingsAccount = validateAndGetSavingAccount(request);
+        validateAndGetSavingAccount(request);
 
         return InteropTransactionRequestResponseData.build(command.commandId(), request.getTransactionCode(), InteropActionState.ACCEPTED,
                 request.getExpiration(), request.getExtensionList(), request.getRequestCode());
@@ -617,7 +617,7 @@ public class InteropServiceImpl implements InteropService {
     PaymentType findPaymentType() {
         List<PaymentType> paymentTypes = paymentTypeRepository.findAll();
         for (PaymentType paymentType : paymentTypes) {
-            if (!paymentType.isCashPayment()) {
+            if (!paymentType.getIsCashPayment()) {
                 return paymentType;
             }
             // TODO: for now first not cash is retured:
