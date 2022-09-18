@@ -1,0 +1,108 @@
+= Introducing Transaction Idempotency into Fineract
+
+For banks, Apache Fineract is introducing transaction idempotency:
+
+Transaction idempotency is the scenario in DELETE, PATCH, POST, and PUT API requests when if the caller sends retry of a request multiple times, the result is equivalent to single request modification. If there is no transaction idempotency, the user retries the request N times, the result will end up having N resources with N different URIs created on server.
+
+In simple terms transaction idempotency is required in case of:
+
+* Retry of write operation in case of timeout due to:
+   ** VM Crash
+   ** JVM Crash
+   ** Thread exception
+   ** APIs Crash
+* Duplicate writes
+* Lock expired, failed, ex: db connection failed.
+
+
+= Background
+
+Fineract is deoployed in many organisations where high-availability and fault
+tolerance is essential. In case of retry operations, even though a former
+executions has already completed, in result 2 executions of the same
+operations are generated.
+
+Imagine you do a Loan repayment for $1000 via the API and the API call crashes.
+The client retries the Loan repayment with the $1000 and results in a success.
+Now looking at the Loan balance, it’s been decreased by $2000 and 2 repayment
+transactions have been created; which is the incorrect behavior.
+
+The system needs to be able to detect these scenarios and prevent executing
+the same request multiple times.
+
+Also, the emitted external events Fineract is sending should provide a similar
+behavior to the above to detect events which are for the same operation.
+
+Previously, Fineract's POST/PUT API operation were not idempotent. Some clients
+made this a requirement and implemented idempotency but this was not available
+in the public branch. Mifos considered this a functional gap and something
+Fineract should support.
+
+= Features
+
+Customers and developers can now:
+
+* Command execution subsystem: Fineract operates with a partial CQRS model.
+  All the write APIs are creating Command objects to be executed using
+  Command Handlers instead of the APIs directly invoking service classes for an
+  exact functionality.
+  The Commands are also stored in the database for further auditing purposes.
+* External events: The events which Fineract is emitting onto external message
+  channels upon business operations.
+
+
+= How to enable API idempotency as a functionality
+
+== API idempotency
+
+APIs which are resubmitted due to fault-tolerance purposes; read: retried;
+are not executed multiple times. One single execution is allowed out of
+these API calls.
+
+== API idempotency key supplied
+
+The header name that should be used for passing idempotency keys in an API is
+called **Idempotency-Key**.
+
+Whether or not an API request correspond to the same operation is decided on the
+client level. The client should have the ability to supply an idempotency key
+within the API requests as an HTTP header.
+
+
+```Idempotency-Key: 8e03978e-40d5-43e8-bc93-6894a57f9324```
+
+== External event idempotency
+
+The external events should provide an idempotency key as an extra information so
+that consumers can keep up with the at-least-once delivery guarantee and decide
+whether an event has been read already.
+
+The reliable event framework already defines an ```idempotencyKey``` attribute
+in the message wrapper.
+
+== Command execution recap
+
+In Fineract, all non-GET APIs are executed via the command execution framework.
+Instead of directly calling a service level method from the API level in the code,
+the API request is rather put onto a command execution queue. The execution is
+synchronous and submitted commands can be handled by different handlers.
+
+There’s a centralized place where each and every non-read operation goes through.
+Fineract already utilizes this aspect by doing some audit logging on the commands
+that are executed, the ability do to 4-eyed operation checks (maker-checker).
+
+Therefore the executed commands are stored in the database within the
+```m_portfolio_command_source``` table (later referred to as the
+command table).
+
+= Idempotency code examples
+
+== API idempotency key supplied
+
+```
+```
+
+== External event idempotency
+
+```
+```
