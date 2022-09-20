@@ -78,6 +78,7 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.charge.Loan
 import org.apache.fineract.infrastructure.event.business.domain.loan.charge.LoanWaiveChargeBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.charge.LoanWaiveChargeUndoBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanChargeRefundBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanDisbursalTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanUndoWrittenOffBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanWaiveInterestBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanWrittenOffPostBusinessEvent;
@@ -539,7 +540,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         // During a disbursement, the entityId should be the disbursement transaction id
         if (!isAccountTransfer) {
-            entityId = loan.getLoanTransactions().get(loan.getLoanTransactions().size() - 1).getId();
+            LoanTransaction disbursalTransaction = loan.getLoanTransactions().get(loan.getLoanTransactions().size() - 1);
+            entityId = disbursalTransaction.getId();
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanDisbursalTransactionBusinessEvent(disbursalTransaction));
         }
 
         return new CommandProcessingResultBuilder() //
@@ -730,6 +733,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                             actualDisbursementDate, txnExternalId);
                     disbursementTransaction.updateLoan(loan);
                     loan.addLoanTransaction(disbursementTransaction);
+                    businessEventNotifierService
+                            .notifyPostBusinessEvent(new LoanDisbursalTransactionBusinessEvent(disbursementTransaction));
                 }
                 LocalDate recalculateFrom = null;
                 final ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
