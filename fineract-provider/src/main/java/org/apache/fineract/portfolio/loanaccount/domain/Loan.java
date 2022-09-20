@@ -59,7 +59,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -143,7 +142,6 @@ import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDat
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.stereotype.Component;
 
-@Slf4j
 @Entity
 @Component
 @Table(name = "m_loan", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "loan_account_no_UNIQUE"),
@@ -916,7 +914,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     private Money getTotalAllTrancheDisbursementAmount() {
         Money amount = Money.zero(getCurrency());
         if (isMultiDisburmentLoan()) {
-            for (final LoanDisbursementDetails loanDisbursementDetail : this.disbursementDetails) {
+            for (final LoanDisbursementDetails loanDisbursementDetail : getDisbursementDetails()) {
                 amount = amount.plus(loanDisbursementDetail.principal());
             }
         }
@@ -1133,7 +1131,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 loanCharge.update(this);
                 if (this.loanProduct.isMultiDisburseLoan() && loanCharge.isTrancheDisbursementCharge()) {
                     loanCharge.getTrancheDisbursementCharge().getloanDisbursementDetails().updateLoan(this);
-                    for (final LoanDisbursementDetails loanDisbursementDetails : this.disbursementDetails) {
+                    for (final LoanDisbursementDetails loanDisbursementDetails : getDisbursementDetails()) {
                         if (loanCharge.getTrancheDisbursementCharge().getloanDisbursementDetails().getId() == null) {
                             if (loanCharge.getTrancheDisbursementCharge().getloanDisbursementDetails().equals(loanDisbursementDetails)) {
                                 loanTrancheDisbursementCharge = new LoanTrancheDisbursementCharge(loanCharge, loanDisbursementDetails);
@@ -1600,7 +1598,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             final JsonArray disbursementDataArray = command.arrayOfParameterNamed(LoanApiConstants.disbursementDataParameterName);
 
             if (loanProduct.isDisallowExpectedDisbursements()) {
-                if (!disbursementDataArray.isEmpty()) {
+                if (disbursementDataArray != null && !disbursementDataArray.isEmpty()) {
                     final String errorMessage = "For this loan product, disbursement details are not allowed";
                     throw new MultiDisbursementDataNotAllowedException(LoanApiConstants.disbursementDataParameterName, errorMessage);
                 }
@@ -1609,11 +1607,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                     final String errorMessage = "For this loan product, disbursement details must be provided";
                     throw new MultiDisbursementDataRequiredException(LoanApiConstants.disbursementDataParameterName, errorMessage);
                 }
-            }
-            if (disbursementDataArray.size() > loanProduct.maxTrancheCount()) {
-                final String errorMessage = "Number of tranche shouldn't be greter than " + loanProduct.maxTrancheCount();
-                throw new ExceedingTrancheCountException(LoanApiConstants.disbursementDataParameterName, errorMessage,
-                        loanProduct.maxTrancheCount(), disbursementDetails.size());
+
+                if (disbursementDataArray.size() > loanProduct.maxTrancheCount()) {
+                    final String errorMessage = "Number of tranche shouldn't be greter than " + loanProduct.maxTrancheCount();
+                    throw new ExceedingTrancheCountException(LoanApiConstants.disbursementDataParameterName, errorMessage,
+                            loanProduct.maxTrancheCount(), disbursementDetails.size());
+                }
             }
         } else {
             this.disbursementDetails.clear();
@@ -1905,7 +1904,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             if (loanDisbursementDetail.actualDisbursementDate() == null) {
                 LocalDate actualDisbursementDate = null;
                 LoanDisbursementDetails disbursementDetails = new LoanDisbursementDetails(expectedDisbursementDate, actualDisbursementDate,
-                        principal, this.netDisbursalAmount);
+                        principal, this.netDisbursalAmount, false);
                 disbursementDetails.updateLoan(this);
                 if (!loanDisbursementDetail.equals(disbursementDetails)) {
                     loanDisbursementDetail.copy(disbursementDetails);
@@ -1916,7 +1915,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         } else {
             LocalDate actualDisbursementDate = null;
             LoanDisbursementDetails disbursementDetails = new LoanDisbursementDetails(expectedDisbursementDate, actualDisbursementDate,
-                    principal, this.netDisbursalAmount);
+                    principal, this.netDisbursalAmount, false);
             disbursementDetails.updateLoan(this);
             this.disbursementDetails.add(disbursementDetails);
             for (LoanTrancheCharge trancheCharge : trancheCharges) {
@@ -1959,7 +1958,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public LoanDisbursementDetails fetchLoanDisbursementsById(Long id) {
         LoanDisbursementDetails loanDisbursementDetail = null;
-        for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
+        for (LoanDisbursementDetails disbursementDetail : getDisbursementDetails()) {
             if (id.equals(disbursementDetail.getId())) {
                 loanDisbursementDetail = disbursementDetail;
                 break;
@@ -1970,7 +1969,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     private List<Long> fetchDisbursementIds() {
         List<Long> list = new ArrayList<>();
-        for (LoanDisbursementDetails disbursementDetails : this.disbursementDetails) {
+        for (LoanDisbursementDetails disbursementDetails : getDisbursementDetails()) {
             list.add(disbursementDetails.getId());
         }
         return list;
@@ -2254,22 +2253,23 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             recalculateAllCharges();
 
             if (loanProduct.isMultiDisburseLoan()) {
+                List<LoanDisbursementDetails> currentDisbursementDetails = getDisbursementDetails();
                 if (loanProduct.isDisallowExpectedDisbursements()) {
-                    if (!disbursementDetails.isEmpty()) {
+                    if (!currentDisbursementDetails.isEmpty()) {
                         final String errorMessage = "For this loan product, disbursement details are not allowed";
                         throw new MultiDisbursementDataNotAllowedException(LoanApiConstants.disbursementDataParameterName, errorMessage);
                     }
                 } else {
-                    if (disbursementDetails.isEmpty()) {
+                    if (currentDisbursementDetails.isEmpty()) {
                         final String errorMessage = "For this loan product, disbursement details must be provided";
                         throw new MultiDisbursementDataRequiredException(LoanApiConstants.disbursementDataParameterName, errorMessage);
                     }
                 }
 
-                if (this.disbursementDetails.size() > loanProduct.maxTrancheCount()) {
+                if (currentDisbursementDetails.size() > loanProduct.maxTrancheCount()) {
                     final String errorMessage = "Number of tranche shouldn't be greter than " + loanProduct.maxTrancheCount();
                     throw new ExceedingTrancheCountException(LoanApiConstants.disbursementDataParameterName, errorMessage,
-                            loanProduct.maxTrancheCount(), disbursementDetails.size());
+                            loanProduct.maxTrancheCount(), currentDisbursementDetails.size());
                 }
             }
             this.approvedOnDate = approvedOn;
@@ -2463,7 +2463,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     private List<LoanDisbursementDetails> getDisbursedLoanDisbursementDetails() {
         List<LoanDisbursementDetails> ret = new ArrayList<>();
         if (this.disbursementDetails != null && this.disbursementDetails.size() > 0) {
-            for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
+            for (LoanDisbursementDetails disbursementDetail : getDisbursementDetails()) {
                 if (disbursementDetail.actualDisbursementDate() != null) {
                     ret.add(disbursementDetail);
                 }
@@ -2634,7 +2634,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     private Collection<LoanDisbursementDetails> fetchUndisbursedDetail() {
         Collection<LoanDisbursementDetails> disbursementDetails = new ArrayList<>();
         LocalDate date = null;
-        for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
+        for (LoanDisbursementDetails disbursementDetail : getDisbursementDetails()) {
             if (disbursementDetail.actualDisbursementDate() == null) {
                 if (date == null || disbursementDetail.expectedDisbursementDate().compareTo(date) == 0 ? Boolean.TRUE : Boolean.FALSE) {
                     disbursementDetails.add(disbursementDetail);
@@ -2653,7 +2653,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         LoanDisbursementDetails details = null;
         LocalDate date = this.actualDisbursementDate;
         if (date != null) {
-            for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
+            for (LoanDisbursementDetails disbursementDetail : getDisbursementDetails()) {
                 if (disbursementDetail.actualDisbursementDate() != null) {
                     if (disbursementDetail.actualDisbursementDate().isAfter(date)
                             || disbursementDetail.actualDisbursementDate().compareTo(date) == 0 ? Boolean.TRUE : Boolean.FALSE) {
@@ -2668,7 +2668,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     private boolean isDisbursementMissed() {
         boolean isDisbursementMissed = false;
-        for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
+        for (LoanDisbursementDetails disbursementDetail : getDisbursementDetails()) {
             if (disbursementDetail.actualDisbursementDate() == null
                     && DateUtils.getBusinessLocalDate().isAfter(disbursementDetail.expectedDisbursementDateAsLocalDate())) {
                 isDisbursementMissed = true;
@@ -2680,7 +2680,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public BigDecimal getDisbursedAmount() {
         BigDecimal principal = BigDecimal.ZERO;
-        for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
+        for (LoanDisbursementDetails disbursementDetail : getDisbursementDetails()) {
             if (disbursementDetail.actualDisbursementDate() != null) {
                 principal = principal.add(disbursementDetail.principal());
             }
@@ -2689,7 +2689,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     private void removeDisbursementDetail() {
-        Set<LoanDisbursementDetails> details = new HashSet<>(this.disbursementDetails);
+        Set<LoanDisbursementDetails> details = new HashSet<>(getDisbursementDetails());
         for (LoanDisbursementDetails disbursementDetail : details) {
             if (disbursementDetail.actualDisbursementDate() == null) {
                 this.disbursementDetails.remove(disbursementDetail);
@@ -2699,10 +2699,15 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     private boolean isDisbursementAllowed() {
         boolean isAllowed = false;
-        for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
-            if (disbursementDetail.actualDisbursementDate() == null) {
-                isAllowed = true;
-                break;
+        List<LoanDisbursementDetails> disbursementDetails = getDisbursementDetails();
+        if (disbursementDetails == null || disbursementDetails.size() == 0) {
+            isAllowed = true;
+        } else {
+            for (LoanDisbursementDetails disbursementDetail : disbursementDetails) {
+                if (disbursementDetail.actualDisbursementDate() == null) {
+                    isAllowed = true;
+                    break;
+                }
             }
         }
         return isAllowed;
@@ -2710,7 +2715,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     private boolean atleastOnceDisbursed() {
         boolean isDisbursed = false;
-        for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
+        for (LoanDisbursementDetails disbursementDetail : getDisbursementDetails()) {
             if (disbursementDetail.actualDisbursementDate() != null) {
                 isDisbursed = true;
                 break;
@@ -2926,7 +2931,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                     : Boolean.TRUE;
             this.loanRepaymentScheduleDetail.setPrincipal(this.approvedPrincipal);
             if (this.loanProduct.isMultiDisburseLoan()) {
-                for (final LoanDisbursementDetails details : this.disbursementDetails) {
+                for (final LoanDisbursementDetails details : getDisbursementDetails()) {
                     details.updateActualDisbursementDate(null);
                 }
             }
@@ -5094,8 +5099,18 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return list;
     }
 
-    public List<LoanDisbursementDetails> getDisbursementDetails() {
+    public List<LoanDisbursementDetails> getAllDisbursementDetails() {
         return this.disbursementDetails;
+    }
+
+    public List<LoanDisbursementDetails> getDisbursementDetails() {
+        List<LoanDisbursementDetails> currentDisbursementDetails = new ArrayList<LoanDisbursementDetails>();
+        for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
+            if (!disbursementDetail.isReversed()) {
+                currentDisbursementDetails.add(disbursementDetail);
+            }
+        }
+        return currentDisbursementDetails;
     }
 
     public ChangedTransactionDetail updateDisbursementDateAndAmountForTranche(final LoanDisbursementDetails disbursementDetails,
@@ -5552,7 +5567,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         NthDayType nthDayType = null;
         DayOfWeekType dayOfWeekType = null;
         final List<DisbursementData> disbursementData = new ArrayList<>();
-        for (LoanDisbursementDetails disbursementDetails : this.disbursementDetails) {
+        for (LoanDisbursementDetails disbursementDetails : getDisbursementDetails()) {
             disbursementData.add(disbursementDetails.toData());
         }
 
@@ -6215,7 +6230,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 charge.resetToOriginal(loanCurrency());
             }
         }
-        for (final LoanDisbursementDetails details : this.disbursementDetails) {
+        for (final LoanDisbursementDetails details : getDisbursementDetails()) {
             if (actualDisbursementDate.equals(details.actualDisbursementDate())) {
                 this.loanRepaymentScheduleDetail.setPrincipal(getDisbursedAmount().subtract(details.principal()));
                 details.updateActualDisbursementDate(null);
@@ -6278,7 +6293,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
      * get the next repayment LocalDate for rescheduling at the time of disbursement
      */
     public LocalDate getNextPossibleRepaymentDateForRescheduling() {
-        List<LoanDisbursementDetails> loanDisbursementDetails = this.disbursementDetails;
+        List<LoanDisbursementDetails> loanDisbursementDetails = getDisbursementDetails();
         LocalDate nextRepaymentDate = DateUtils.getBusinessLocalDate();
         for (LoanDisbursementDetails loanDisbursementDetail : loanDisbursementDetails) {
             if (loanDisbursementDetail.actualDisbursementDate() == null) {

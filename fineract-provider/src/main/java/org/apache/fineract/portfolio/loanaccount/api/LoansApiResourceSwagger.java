@@ -959,7 +959,7 @@ final class LoansApiResourceSwagger {
         public GetLoansLoanIdTimeline timeline;
         public GetLoansLoanIdSummary summary;
         public GetLoansLoanIdRepaymentSchedule repaymentSchedule;
-        @Schema(description = "Set of GetLoansLoanIdDisbursementDetails")
+        @Schema(description = "Set of GetLoansLoanIdTransactions")
         public Set<GetLoansLoanIdTransactions> transactions;
         @Schema(description = "Set of GetLoansLoanIdDisbursementDetails")
         public Set<GetLoansLoanIdDisbursementDetails> disbursementDetails;

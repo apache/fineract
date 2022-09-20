@@ -1237,6 +1237,8 @@ final class LoanProductsApiResourceSwagger {
         @Schema(example = "50")
         public Integer principalThresholdForLastInstalment;
         public GetDelinquencyBucketsResponse delinquencyBucket;
+        @Schema(example = "true")
+        public Boolean disallowExpectedDisbursements;
     }
 
     @Schema(description = "PutLoanProductsProductIdRequest")

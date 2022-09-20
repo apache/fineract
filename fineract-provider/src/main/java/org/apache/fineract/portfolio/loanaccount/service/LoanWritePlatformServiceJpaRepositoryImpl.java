@@ -164,6 +164,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetailsRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanInstallmentCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalcualtionAdditionalDetails;
@@ -269,7 +270,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanRepository loanRepository;
     private final RepaymentWithPostDatedChecksAssembler repaymentWithPostDatedChecksAssembler;
     private final PostDatedChecksRepository postDatedChecksRepository;
-
+    private final LoanDisbursementDetailsRepository loanDisbursementDetailsRepository;
     private final LoanRepaymentScheduleInstallmentRepository loanRepaymentScheduleInstallmentRepository;
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -325,9 +326,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 // products
                 final LocalDate artificialExpectedDate = loan.getExpectedDisbursedOnLocalDate();
                 LoanDisbursementDetails disbursementDetail = new LoanDisbursementDetails(artificialExpectedDate, null,
-                        loan.getDisbursedAmount(), null);
+                        loan.getDisbursedAmount(), null, false);
                 disbursementDetail.updateLoan(loan);
-                loan.getDisbursementDetails().add(disbursementDetail);
+                loan.getAllDisbursementDetails().add(disbursementDetail);
             }
         }
         loan.validateAccountStatus(LoanEvent.LOAN_DISBURSED);
@@ -869,6 +870,19 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(currency.getCode(), existingTransactionIds,
                     existingReversedTransactionIds, isAccountTransfer);
             journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
+
+            // Remove All the Disbursement Details If the Loan Product is disabled and exists one
+            if (loan.loanProduct().isDisallowExpectedDisbursements()) {
+                if (!loan.getDisbursementDetails().isEmpty()) {
+                    List<LoanDisbursementDetails> reversedDisbursementDetails = new ArrayList<LoanDisbursementDetails>();
+                    for (LoanDisbursementDetails disbursementDetail : loan.getAllDisbursementDetails()) {
+                        disbursementDetail.reverse();
+                        reversedDisbursementDetails.add(disbursementDetail);
+                    }
+                    this.loanDisbursementDetailsRepository.saveAllAndFlush(reversedDisbursementDetails);
+                }
+            }
+
             businessEventNotifierService.notifyPostBusinessEvent(new LoanUndoDisbursalBusinessEvent(loan));
         }
 
