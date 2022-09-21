@@ -151,5 +151,6 @@ public class FineractProperties {
 
         private boolean enabled;
         private String eventQueueName;
+        private String brokerUrl;
     }
 }

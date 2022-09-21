@@ -26,6 +26,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
@@ -43,6 +44,7 @@ import org.apache.fineract.infrastructure.event.external.repository.ExternalEven
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEvent;
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventStatus;
 import org.apache.fineract.infrastructure.event.external.service.message.MessageFactory;
+import org.apache.fineract.infrastructure.event.external.service.support.ByteBufferConverter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -69,6 +71,8 @@ class SendAsynchronousEventsTaskletTest {
     private StepContribution stepContribution;
     @Mock
     private ChunkContext chunkContext;
+    @Mock
+    private ByteBufferConverter byteBufferConverter;
     private SendAsynchronousEventsTasklet underTest;
     private RepeatStatus resultStatus;
 
@@ -78,7 +82,7 @@ class SendAsynchronousEventsTaskletTest {
         ThreadLocalContextUtil
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.now(ZoneId.systemDefault()))));
         configureExternalEventsProducerReadBatchSizeProperty(1000);
-        underTest = new SendAsynchronousEventsTasklet(fineractProperties, repository, eventProducer, messageFactory);
+        underTest = new SendAsynchronousEventsTasklet(fineractProperties, repository, eventProducer, messageFactory, byteBufferConverter);
     }
 
     private void configureExternalEventsProducerReadBatchSizeProperty(int readBatchSize) {
@@ -97,13 +101,18 @@ class SendAsynchronousEventsTaskletTest {
         // given
         List<ExternalEvent> events = Arrays.asList(new ExternalEvent("aType", "aSchema", new byte[0], "aIdemtpotencyKey"),
                 new ExternalEvent("aType", "aSchema", new byte[0], "aIdemtpotencyKey"));
+        // Dummy Message
+        MessageV1 dummyMessage = new MessageV1(1, "aSource", "aType", "nocategory", "aCreateDate", "aTennantId", "anidempotencyKey",
+                "aSchema", Mockito.mock(ByteBuffer.class));
+
         when(repository.findByStatusOrderById(Mockito.any(), Mockito.any())).thenReturn(events);
-        when(messageFactory.createMessage(Mockito.any())).thenReturn(new MessageV1());
-        doNothing().when(eventProducer).sendEvent(Mockito.any(MessageV1.class));
+        when(messageFactory.createMessage(Mockito.any())).thenReturn(dummyMessage);
+        when(byteBufferConverter.convert(Mockito.any(ByteBuffer.class))).thenReturn(new byte[0]);
+        doNothing().when(eventProducer).sendEvent(Mockito.any());
         // when
         resultStatus = this.underTest.execute(stepContribution, chunkContext);
         // then
-        verify(eventProducer, times(2)).sendEvent(Mockito.any(MessageV1.class));
+        verify(eventProducer, times(2)).sendEvent(new byte[0]);
         verify(repository, times(2)).save(Mockito.any(ExternalEvent.class));
         assertEquals(RepeatStatus.FINISHED, resultStatus);
     }
@@ -113,10 +122,13 @@ class SendAsynchronousEventsTaskletTest {
         // given
         List<ExternalEvent> events = Arrays.asList(new ExternalEvent("aType", "aSchema", new byte[0], "aIdemtpotencyKey"),
                 new ExternalEvent("aType", "aSchema", new byte[0], "aIdemtpotencyKey"));
+        MessageV1 dummyMessage = new MessageV1(1, "aSource", "aType", "nocategory", "aCreateDate", "aTennantId", "anidempotencyKey",
+                "aSchema", Mockito.mock(ByteBuffer.class));
         when(repository.findByStatusOrderById(Mockito.any(), Mockito.any())).thenReturn(events);
-        when(messageFactory.createMessage(Mockito.any())).thenReturn(new MessageV1());
+        when(messageFactory.createMessage(Mockito.any())).thenReturn(dummyMessage);
+        when(byteBufferConverter.convert(Mockito.any(ByteBuffer.class))).thenReturn(new byte[0]);
         doThrow(new AcknowledgementTimeoutException("Event Send Exception", new RuntimeException())).when(eventProducer)
-                .sendEvent(Mockito.any(MessageV1.class));
+                .sendEvent(Mockito.any());
         // when
         resultStatus = this.underTest.execute(stepContribution, chunkContext);
         // then
@@ -129,9 +141,12 @@ class SendAsynchronousEventsTaskletTest {
         // given
         ArgumentCaptor<ExternalEvent> externalEventArgumentCaptor = ArgumentCaptor.forClass(ExternalEvent.class);
         List<ExternalEvent> events = Arrays.asList(new ExternalEvent("aType", "aSchema", new byte[0], "aIdemtpotencyKey"));
+        MessageV1 dummyMessage = new MessageV1(1, "aSource", "aType", "nocategory", "aCreateDate", "aTennantId", "anidempotencyKey",
+                "aSchema", Mockito.mock(ByteBuffer.class));
         when(repository.findByStatusOrderById(Mockito.any(), Mockito.any())).thenReturn(events);
-        when(messageFactory.createMessage(Mockito.any())).thenReturn(new MessageV1());
-        doNothing().when(eventProducer).sendEvent(Mockito.any(MessageV1.class));
+        when(messageFactory.createMessage(Mockito.any())).thenReturn(dummyMessage);
+        when(byteBufferConverter.convert(Mockito.any(ByteBuffer.class))).thenReturn(new byte[0]);
+        doNothing().when(eventProducer).sendEvent(Mockito.any());
         // when
         resultStatus = this.underTest.execute(stepContribution, chunkContext);
         // then

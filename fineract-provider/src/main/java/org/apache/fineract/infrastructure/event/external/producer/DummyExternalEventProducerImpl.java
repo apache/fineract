@@ -18,15 +18,16 @@
  */
 package org.apache.fineract.infrastructure.event.external.producer;
 
-import org.apache.fineract.avro.MessageV1;
 import org.apache.fineract.infrastructure.event.external.exception.AcknowledgementTimeoutException;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ExternalEventProducerImpl implements ExternalEventProducer {
+@ConditionalOnProperty(value = "fineract.events.external.enabled", havingValue = "false")
+public class DummyExternalEventProducerImpl implements ExternalEventProducer {
 
     @Override
-    public void sendEvent(MessageV1 message) throws AcknowledgementTimeoutException {
+    public void sendEvent(byte[] message) throws AcknowledgementTimeoutException {
         return;
     }
 }
