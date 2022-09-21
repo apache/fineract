@@ -777,6 +777,10 @@ final class LoansApiResourceSwagger {
             public String transactionType;
             @Schema(description = "List of GetLoansLoanIdLoanRepaymentScheduleInstallmentData")
             public List<GetLoansLoanIdLoanRepaymentScheduleInstallmentData> loanRepaymentScheduleInstallments;
+            @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+            public String reversalExternalId;
+            @Schema(example = "[2022, 9, 19]")
+            public LocalDate reversedOnDate;
         }
 
         static final class GetLoansLoanIdLoanChargeData {

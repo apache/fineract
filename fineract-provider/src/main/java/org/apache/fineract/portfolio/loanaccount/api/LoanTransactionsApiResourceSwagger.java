@@ -208,6 +208,8 @@ final class LoanTransactionsApiResourceSwagger {
         public Double transactionAmount;
         @Schema(example = "An optional note about why your adjusting or changing the transaction.")
         public String note;
+        @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+        public String reversalExternalId;
     }
 
     @Schema(description = "PostLoansLoanIdTransactionsTransactionIdResponse")
