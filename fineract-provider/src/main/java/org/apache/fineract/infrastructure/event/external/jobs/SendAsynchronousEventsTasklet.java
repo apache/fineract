@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.event.external.jobs;
 
+import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,7 @@ import org.apache.fineract.infrastructure.event.external.repository.ExternalEven
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEvent;
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventStatus;
 import org.apache.fineract.infrastructure.event.external.service.message.MessageFactory;
+import org.apache.fineract.infrastructure.event.external.service.support.ByteBufferConverter;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -46,6 +48,7 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
     private final ExternalEventRepository repository;
     private final ExternalEventProducer eventProducer;
     private final MessageFactory messageFactory;
+    private final ByteBufferConverter byteBufferConverter;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
@@ -65,10 +68,10 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
         return events;
     }
 
-    private void processEvents(List<ExternalEvent> queuedEvents) {
+    private void processEvents(List<ExternalEvent> queuedEvents) throws IOException {
         for (ExternalEvent event : queuedEvents) {
             MessageV1 message = messageFactory.createMessage(event);
-            eventProducer.sendEvent(message);
+            eventProducer.sendEvent(byteBufferConverter.convert(message.toByteBuffer()));
             event.setStatus(ExternalEventStatus.SENT);
             event.setSentAt(DateUtils.getOffsetDateTimeOfTenant());
             repository.save(event);

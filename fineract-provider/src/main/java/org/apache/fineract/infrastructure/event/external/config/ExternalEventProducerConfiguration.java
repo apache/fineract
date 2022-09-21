@@ -16,17 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.producer;
+package org.apache.fineract.infrastructure.event.external.config;
 
-import org.apache.fineract.infrastructure.event.external.exception.AcknowledgementTimeoutException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.integration.annotation.Gateway;
-import org.springframework.integration.annotation.MessagingGateway;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.integration.channel.DirectChannel;
+import org.springframework.integration.config.EnableIntegration;
 
-@MessagingGateway(name = "externalEventGateway")
+@Configuration
+@EnableIntegration
 @ConditionalOnProperty(value = "fineract.events.external.enabled", havingValue = "true")
-public interface ExternalEventProducer {
+public class ExternalEventProducerConfiguration {
 
-    @Gateway(requestChannel = "outboundRequests", replyTimeout = 2, requestTimeout = 200)
-    void sendEvent(byte[] message) throws AcknowledgementTimeoutException;
+    @Bean
+    public DirectChannel outboundRequests() {
+        return new DirectChannel();
+    }
 }
