@@ -68,7 +68,7 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
             final String entitySubType = rs.getString("entity_subtype");
             final boolean enabled = rs.getBoolean("enabled");
             final List<ResultsetColumnHeaderData> columnHeaderData = this.genericDataService
-                    .fillResultsetColumnHeaders(registeredDatatableName);
+                    .fillResultsetColumnHeaders(registeredDatatableName, true);
 
             surveyDataTables.add(SurveyDataTableData
                     .create(DatatableData.create(appTableName, registeredDatatableName, entitySubType, columnHeaderData), enabled));
@@ -109,7 +109,7 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
             final String entitySubType = rs.getString("entity_subtype");
             final boolean enabled = rs.getBoolean("enabled");
             final List<ResultsetColumnHeaderData> columnHeaderData = this.genericDataService
-                    .fillResultsetColumnHeaders(registeredDatatableName);
+                    .fillResultsetColumnHeaders(registeredDatatableName, true);
             datatableData = SurveyDataTableData
                     .create(DatatableData.create(appTableName, registeredDatatableName, entitySubType, columnHeaderData), enabled);
 
