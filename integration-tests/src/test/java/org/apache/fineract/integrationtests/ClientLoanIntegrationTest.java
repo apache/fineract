@@ -32,6 +32,7 @@ import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -48,6 +49,7 @@ import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.WorkingDaysHelper;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.accounting.JournalEntry;
@@ -5878,6 +5880,80 @@ public class ClientLoanIntegrationTest {
         HashMap savingsAccountErrorData = validationErrorHelper.makeRepayment(retrieveDueDate, amount, loanID);
         ArrayList<HashMap> error = (ArrayList<HashMap>) savingsAccountErrorData.get("errors");
         assertEquals("error.msg.loan.transaction.cannot.be.a.future.date", error.get(0).get("userMessageGlobalisationCode"));
+    }
+
+    @Test
+    public void testLoanScheduleWithInterestRecalculationAfterLatePayment() {
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        WorkingDaysHelper.updateWorkingDaysWeekDays(this.requestSpec, this.responseSpec);
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
+        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "42", true);
+
+        final String loanDisbursementDate = "28 January 2021";
+        String firstRepayment = "01 March 2021";
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer loanProductID = createLoanProductWithInterestRecalculationAndCompoundingDetails(
+                LoanProductTestBuilder.INTEREST_PRINCIPAL_PENALTIES_FEES_ORDER_STRATEGY,
+                LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
+                LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS,
+                LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_SAME_AS_REPAYMENT_PERIOD,
+                LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE, null, "12");
+
+        final Integer loanID = applyForLoanApplicationForInterestRecalculation(clientID, loanProductID, loanDisbursementDate,
+                LoanApplicationTestBuilder.INTEREST_PRINCIPAL_PENALTIES_FEES_ORDER_STRATEGY, firstRepayment);
+
+        Assertions.assertNotNull(loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+        LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
+        loanStatusHashMap = this.loanTransactionHelper.approveLoan(loanDisbursementDate, loanID);
+        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+
+        LOG.info("-------------------------------DISBURSE LOAN-------------------------------------------");
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(loanDisbursementDate, loanID,
+                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
+        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+
+        ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+        Assertions.assertNotNull(loanSchedule);
+
+        List<Map<String, Object>> expectedvalues = new ArrayList<>();
+        addRepaymentValues(expectedvalues, convertStringDateToCalender("01 March 2021"), 0, false, "388.11", "1831.89", "0.0", "0.0");
+        this.loanTransactionHelper.makeRepayment("01 March 2021", 2220.0F, loanID);
+
+        addRepaymentValues(expectedvalues, convertStringDateToCalender("01 April 2021"), 0, false, "270.55", "1949.45", "0.0", "0.0");
+        this.loanTransactionHelper.makeRepayment("01 April 2021", 2220.0F, loanID);
+
+        addRepaymentValues(expectedvalues, convertStringDateToCalender("03 May 2021"), 0, false, "264.31", "1955.69", "0.0", "0.0");
+        this.loanTransactionHelper.makeRepayment("04 May 2021", 2220.0F, loanID);
+
+        addRepaymentValues(expectedvalues, convertStringDateToCalender("04 May 2021"), 0, false, "0.0", "61.12", "0.0", "0.0");
+        this.loanTransactionHelper.makeRepayment("01 June 2021", 2220.0F, loanID);
+
+        addRepaymentValues(expectedvalues, convertStringDateToCalender("01 June 2021"), 0, false, "496.07", "1662.81", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, convertStringDateToCalender("01 July 2021"), 0, false, "535.78", "1684.22", "0.0", "0.0");
+        loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+        Assertions.assertNotNull(loanSchedule);
+        verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
+        WorkingDaysHelper.updateWorkingDays(this.requestSpec, this.responseSpec);
+    }
+
+    private Calendar convertStringDateToCalender(final String stringDate) {
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        Calendar date = Calendar.getInstance();
+        try {
+            Date date1 = dateFormat.parse(stringDate);
+            date.setTime(date1);
+
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        return date;
     }
 
     private void validateIfValuesAreNotOverridden(Integer loanID, Integer loanProductID) {
