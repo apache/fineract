@@ -69,4 +69,5 @@
     <include file="parts/0047_add_loan_delinquency_tags_business_step.xml" relativeToChangelogFile="true"/>
     <include file="parts/0048_rework_loan_account_locks.xml" relativeToChangelogFile="true"/>
     <include file="parts/0049_add_send_asynchronous_events_job.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0050_add_reverse_flag_disbursement_details.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

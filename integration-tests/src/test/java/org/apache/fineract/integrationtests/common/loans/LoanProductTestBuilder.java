@@ -394,7 +394,7 @@ public class LoanProductTestBuilder {
         return this;
     }
 
-    public LoanProductTestBuilder withDisallowExpectectedDisbursements(boolean disallowExpectectedDisbursements) {
+    public LoanProductTestBuilder withDisallowExpectedDisbursements(boolean disallowExpectectedDisbursements) {
         this.disallowExpectedDisbursements = disallowExpectectedDisbursements;
         if (this.disallowExpectedDisbursements) {
             this.allowApprovedDisbursedAmountsOverApplied = true;

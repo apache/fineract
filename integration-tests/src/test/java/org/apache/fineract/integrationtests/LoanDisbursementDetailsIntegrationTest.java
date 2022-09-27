@@ -35,9 +35,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdResponse;
+import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -271,8 +274,6 @@ public class LoanDisbursementDetailsIntegrationTest {
 
     @Test
     public void validateEqualInstallmentsForMultiTrancheLoan() {
-        List<HashMap> emptyTranches = new ArrayList<>();
-
         final String operationDate = "01 January 2014";
         final String principal = "1000";
         final String disbursedPrincipal = "900";
@@ -284,7 +285,7 @@ public class LoanDisbursementDetailsIntegrationTest {
                 .withInterestTypeAsDecliningBalance().withMoratorium("", "").withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
                 .withInterestTypeAsDecliningBalance() //
                 .withMultiDisburse() //
-                .withDisallowExpectectedDisbursements(true) //
+                .withDisallowExpectedDisbursements(true) //
                 .build(null);
         log.info("Product {}", loanProductJSON);
         final Integer loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
@@ -294,7 +295,7 @@ public class LoanDisbursementDetailsIntegrationTest {
 
         log.info("-------------------LOAN CREATED WITH loanId----------------- {}", loanId);
 
-        this.loanTransactionHelper.approveLoanWithApproveAmount(operationDate, expectedDisbursementDate, principal, loanId, emptyTranches);
+        this.loanTransactionHelper.approveLoanWithApproveAmount(operationDate, expectedDisbursementDate, principal, loanId, null);
         log.info("-------------------MULTI DISBURSAL LOAN APPROVED SUCCESSFULLY-------");
 
         GetLoansLoanIdResponse getLoansLoanIdResponse = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
@@ -345,6 +346,101 @@ public class LoanDisbursementDetailsIntegrationTest {
                 this.responseSpec, this.loanId, "disbursementDetails");
         this.disbursementId = (Integer) disbursementDetails.get(0).get("id");
         this.editLoanDisbursementDetails();
+    }
+
+    @Test
+    public void allowModifyLoanApplicationAfterUndoDisbursalWithTranches() throws ParseException {
+        final String operationDate = this.approveDate;
+        List<HashMap> tranches = new ArrayList<>();
+        String principal = "1000";
+        final List<HashMap> collaterals = new ArrayList<>();
+
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, operationDate);
+        log.info("---------------------------------CLIENT CREATED WITH ID--------------------------------------------------- {}", clientId);
+
+        final Integer loanProductId = this.loanTransactionHelper
+                .getLoanProductId(new LoanProductTestBuilder().withInterestTypeAsDecliningBalance().withTranches(true)
+                        .withDisallowExpectedDisbursements(true).withInterestCalculationPeriodTypeAsRepaymentPeriod(true).build(null));
+        log.info("----------------------------------LOAN PRODUCT CREATED WITH ID------------------------------------------- {}",
+                loanProductId);
+        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = this.loanTransactionHelper.getLoanProduct(loanProductId);
+        assertNotNull(getLoanProductsProductIdResponse);
+        log.info("Loan Product Id {} with DisallowExpectectedDisbursements in {}", loanProductId,
+                getLoanProductsProductIdResponse.getDisallowExpectedDisbursements());
+        assertEquals(true, getLoanProductsProductIdResponse.getDisallowExpectedDisbursements());
+
+        final Integer loanId = applyForLoanApplicationWithTranches(clientId, loanProductId, proposedAmount, tranches);
+        log.info("-----------------------------------LOAN CREATED WITH LOANID------------------------------------------------- {}", loanId);
+
+        loanTransactionHelper.approveLoanWithApproveAmount(operationDate, operationDate, approvalAmount, loanId, tranches);
+        GetLoansLoanIdResponse getLoansLoanIdResponse = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+        log.info("Loan Id {} with Status {} with Disbursement details {}", getLoansLoanIdResponse.getId(),
+                getLoansLoanIdResponse.getStatus().getCode(), getLoansLoanIdResponse.getDisbursementDetails().size());
+        log.info("-------------------MULTI DISBURSAL LOAN APPROVED SUCCESSFULLY-------");
+        assertEquals(0, getLoansLoanIdResponse.getDisbursementDetails().size(), "Disbursement details items");
+
+        loanTransactionHelper.disburseLoanWithTransactionAmount(operationDate, loanId, principal);
+
+        getLoansLoanIdResponse = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+        log.info("Loan Id {} with Status {} with Disbursement details {}", getLoansLoanIdResponse.getId(),
+                getLoansLoanIdResponse.getStatus().getCode(), getLoansLoanIdResponse.getDisbursementDetails().size());
+        log.info("-------------------MULTI DISBURSAL LOAN DISBURSED SUCCESSFULLY-------");
+        assertEquals(1, getLoansLoanIdResponse.getDisbursementDetails().size(), "Disbursement details items");
+
+        PostLoansLoanIdResponse postLoansLoanIdResponse = this.loanTransactionHelper.applyLoanCommand(loanId, "undoDisbursal");
+        assertNotNull(postLoansLoanIdResponse);
+        log.info("-------------------UNDO DISBURSAL LOAN SUCCESSFULLY-------");
+        getLoansLoanIdResponse = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+        log.info("Loan Id {} with Status {} with Disbursement details {}", getLoansLoanIdResponse.getId(),
+                getLoansLoanIdResponse.getStatus().getCode(), getLoansLoanIdResponse.getDisbursementDetails().size());
+        assertEquals(0, getLoansLoanIdResponse.getDisbursementDetails().size(), "Disbursement details items");
+
+        getLoansLoanIdResponse = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+        log.info("Loan Id {} with Status {} with Disbursement details {}", getLoansLoanIdResponse.getId(),
+                getLoansLoanIdResponse.getStatus().getCode(), getLoansLoanIdResponse.getDisbursementDetails().size());
+        assertEquals(0, getLoansLoanIdResponse.getDisbursementDetails().size(), "Disbursement details items");
+
+        postLoansLoanIdResponse = this.loanTransactionHelper.applyLoanCommand(loanId, "undoApproval");
+        assertNotNull(postLoansLoanIdResponse);
+        log.info("-------------------UNDO APPROVAL LOAN SUCCESSFULLY-------");
+
+        getLoansLoanIdResponse = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+        log.info("Loan Id {} with Status {} with Disbursement details {}", getLoansLoanIdResponse.getId(),
+                getLoansLoanIdResponse.getStatus().getCode(), getLoansLoanIdResponse.getDisbursementDetails().size());
+
+        principal = "10000";
+        final String loanApplicationJSON = buildLoanApplicationJSON(clientId, loanProductId, principal, tranches, operationDate,
+                collaterals);
+        log.info("Modify Loan Application: {}", loanApplicationJSON);
+        PutLoansLoanIdResponse putLoansLoanIdResponse = this.loanTransactionHelper.modifyLoanApplication(loanId, loanApplicationJSON);
+        assertNotNull(putLoansLoanIdResponse);
+
+        getLoansLoanIdResponse = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+        log.info("Loan Id {} with Status {} with Disbursement details {} and Principal {}", getLoansLoanIdResponse.getId(),
+                getLoansLoanIdResponse.getStatus().getCode(), getLoansLoanIdResponse.getDisbursementDetails().size(),
+                getLoansLoanIdResponse.getPrincipal());
+
+        // ReDo the Approval and Disbursement
+        loanTransactionHelper.approveLoanWithApproveAmount(operationDate, operationDate, approvalAmount, loanId, null);
+        getLoansLoanIdResponse = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+        log.info("Loan Id {} with Status {} with Disbursement details {}", getLoansLoanIdResponse.getId(),
+                getLoansLoanIdResponse.getStatus().getCode(), getLoansLoanIdResponse.getDisbursementDetails().size());
+
+        loanTransactionHelper.disburseLoanWithTransactionAmount(operationDate, loanId, principal);
+
+        getLoansLoanIdResponse = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+        log.info("Loan Id {} with Status {} with Disbursement details {}", getLoansLoanIdResponse.getId(),
+                getLoansLoanIdResponse.getStatus().getCode(), getLoansLoanIdResponse.getDisbursementDetails().size());
+        log.info("-------------------MULTI DISBURSAL LOAN DISBURSED SUCCESSFULLY-------");
+        assertEquals(1, getLoansLoanIdResponse.getDisbursementDetails().size(), "Disbursement details items");
     }
 
     private void editLoanDisbursementDetails() throws ParseException {
@@ -412,17 +508,10 @@ public class LoanDisbursementDetailsIntegrationTest {
         return date;
     }
 
-    private Integer applyForLoanApplicationWithTranches(final Integer clientId, final Integer loanProductId, String principal,
-            List<HashMap> tranches) {
-        log.info("----------------APPLYING FOR LOAN APPLICATION");
-        List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientId.toString(), collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
-        final String loanApplicationJSON = new LoanApplicationTestBuilder() //
+    private String buildLoanApplicationJSON(final Integer clientId, final Integer loanProductId, String principal, List<HashMap> tranches,
+            final String operationDate, List<HashMap> collaterals) {
+
+        return new LoanApplicationTestBuilder() //
                 .withPrincipal(principal) //
                 .withLoanTermFrequency("5") //
                 .withLoanTermFrequencyAsMonths() //
@@ -435,6 +524,20 @@ public class LoanDisbursementDetailsIntegrationTest {
                 .withInterestTypeAsDecliningBalance() //
                 .withSubmittedOnDate("01 March 2014") //
                 .withCollaterals(collaterals).build(clientId.toString(), loanProductId.toString(), null);
+    }
+
+    private Integer applyForLoanApplicationWithTranches(final Integer clientId, final Integer loanProductId, String principal,
+            List<HashMap> tranches) {
+        log.info("----------------APPLYING FOR LOAN APPLICATION");
+        List<HashMap> collaterals = new ArrayList<>();
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        Assertions.assertNotNull(collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                clientId.toString(), collateralId);
+        Assertions.assertNotNull(clientCollateralId);
+        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
+        final String loanApplicationJSON = buildLoanApplicationJSON(clientId, loanProductId, principal, tranches, "01 March 2014",
+                collaterals);
 
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }

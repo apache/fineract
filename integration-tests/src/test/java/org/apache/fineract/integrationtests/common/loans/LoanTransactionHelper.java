@@ -45,7 +45,9 @@ import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
+import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -134,6 +136,12 @@ public class LoanTransactionHelper {
     public Integer updateLoan(final Integer id, final String loanApplicationJSON) {
         return Utils.performServerPut(this.requestSpec, this.responseSpec,
                 "/fineract-provider/api/v1/loans/" + id + "?" + Utils.TENANT_IDENTIFIER, loanApplicationJSON, "loanId");
+    }
+
+    public PutLoansLoanIdResponse modifyLoanApplication(final Integer id, final String loanApplicationJSON) {
+        final String response = Utils.performServerPut(this.requestSpec, this.responseSpec,
+                "/fineract-provider/api/v1/loans/" + id + "?" + Utils.TENANT_IDENTIFIER, loanApplicationJSON, null);
+        return GSON.fromJson(response, PutLoansLoanIdResponse.class);
     }
 
     public ArrayList getLoanRepaymentSchedule(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -317,6 +325,21 @@ public class LoanTransactionHelper {
     public HashMap disburseLoanToSavings(final String date, final Integer loanID, final String netDisbursalAmount) {
         return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_TO_SAVINGS_COMMAND, loanID),
                 getDisburseLoanAsJSON(date, null, netDisbursalAmount));
+    }
+
+    public PostLoansLoanIdResponse applyLoanCommand(final Integer loanId, final String command) {
+        String undoBodyJson = "{}";
+        String url = "";
+        if (command.equals(UNDO_APPROVAL_LOAN_COMMAND)) {
+            undoBodyJson = "{'note':'UNDO APPROVAL'}";
+            url = createLoanOperationURL(UNDO_APPROVAL_LOAN_COMMAND, loanId);
+        } else if (command.equals(UNDO_DISBURSE_LOAN_COMMAND)) {
+            undoBodyJson = "{'note' : 'UNDO DISBURSAL'}";
+            url = createLoanOperationURL(UNDO_DISBURSE_LOAN_COMMAND, loanId);
+        }
+        final String response = Utils.performServerPost(this.requestSpec, this.responseSpec, url, undoBodyJson, null);
+        log.info("Response {}", response);
+        return GSON.fromJson(response, PostLoansLoanIdResponse.class);
     }
 
     public HashMap undoDisbursal(final Integer loanID) {
@@ -807,6 +830,8 @@ public class LoanTransactionHelper {
     }
 
     private HashMap performLoanTransaction(final String postURLForLoanTransaction, final String jsonToBeSent) {
+        log.info("URL: {}", postURLForLoanTransaction);
+        log.info("Body: {}", jsonToBeSent);
         final HashMap response = Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForLoanTransaction, jsonToBeSent,
                 "changes");
         return (HashMap) response.get("status");
