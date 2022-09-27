@@ -199,7 +199,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             this.columnValidator.validateSqlInjection(sqlBuilder.toString(), parameters.limitSql());
         }
 
-        log.info("sql: {}", sqlBuilder);
+        log.debug("sql: {}", sqlBuilder);
 
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), extraCriteria.getArguments(), rm);
     }
@@ -238,7 +238,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         }
         sql += extraCriteria.getSQLTemplate();
         sql += groupAndOrderBySQL;
-        log.info("sql: {}", sql);
+        log.debug("sql: {}", sql);
 
         return this.jdbcTemplate.query(sql, rm, extraCriteria.getArguments()); // NOSONAR
     }

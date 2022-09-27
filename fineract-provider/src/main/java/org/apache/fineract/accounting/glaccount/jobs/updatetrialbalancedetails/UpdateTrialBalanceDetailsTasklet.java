@@ -62,7 +62,7 @@ public class UpdateTrialBalanceDetailsTasklet implements Tasklet {
                     .append("from acc_gl_journal_entry je WHERE je.transaction_date = ? ")
                     .append("group by je.account_id, je.office_id, je.transaction_date, Date(je.entry_date)");
             final int result = jdbcTemplate.update(sqlBuilder.toString(), tbGap);
-            log.info("{}: Records affected by updateTrialBalanceDetails: {}", ThreadLocalContextUtil.getTenant().getName(), result);
+            log.debug("{}: Records affected by updateTrialBalanceDetails: {}", ThreadLocalContextUtil.getTenant().getName(), result);
         }
         String distinctOfficeQuery = "select distinct(office_id) from m_trial_balance where closing_balance is null group by office_id";
         final List<Long> officeIds = jdbcTemplate.queryForList(distinctOfficeQuery, Long.class);

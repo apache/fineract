@@ -84,7 +84,7 @@ public class UpdateNpaTasklet implements Tasklet {
 
         final int result = jdbcTemplate.update(updateSqlBuilder.toString(), user.getId(), DateUtils.getOffsetDateTimeOfTenant());
 
-        log.info("{}: Records affected by updateNPA: {}", ThreadLocalContextUtil.getTenant().getName(), result);
+        log.debug("{}: Records affected by updateNPA: {}", ThreadLocalContextUtil.getTenant().getName(), result);
         return RepeatStatus.FINISHED;
     }
 }

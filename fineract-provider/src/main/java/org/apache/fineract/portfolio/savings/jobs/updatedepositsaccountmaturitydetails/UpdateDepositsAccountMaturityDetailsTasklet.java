@@ -61,7 +61,7 @@ public class UpdateDepositsAccountMaturityDetailsTasklet implements Tasklet {
             }
         }
 
-        log.info("{}: Records affected by updateMaturityDetailsOfDepositAccounts: {}", ThreadLocalContextUtil.getTenant().getName(),
+        log.debug("{}: Records affected by updateMaturityDetailsOfDepositAccounts: {}", ThreadLocalContextUtil.getTenant().getName(),
                 depositAccounts.size());
         return RepeatStatus.FINISHED;
     }

@@ -96,7 +96,7 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
 
         // List<BatchResponse> responseList = new ArrayList<>();
         long start = System.currentTimeMillis();
-        LOG.info("Thread Execution Started at {}", start);
+        LOG.debug("Thread Execution Started at {}", start);
 
         List<Throwable> errors = new ArrayList<>();
         int i = 0;
@@ -113,11 +113,11 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
                         long endPosting = System.currentTimeMillis();
                         savingsAccountDataList.add(savingsAccountDataRet);
 
-                        LOG.info("Posting Completed Within {}", endPosting - startPosting);
+                        LOG.debug("Posting Completed Within {}", endPosting - startPosting);
 
                         numberOfRetries = maxNumberOfRetries + 1;
                     } catch (CannotAcquireLockException | ObjectOptimisticLockingFailureException exception) {
-                        LOG.info("Interest posting job for savings ID {} has been retried {} time(s)", savingsAccountData.getId(),
+                        LOG.debug("Interest posting job for savings ID {} has been retried {} time(s)", savingsAccountData.getId(),
                                 numberOfRetries);
                         // Fail if the transaction has been retired for
                         // maxNumberOfRetries
@@ -166,7 +166,7 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
         }
 
         long end = System.currentTimeMillis();
-        LOG.info("Time To Finish the batch {} by thread {} for accounts {}", end - start, Thread.currentThread().getId(),
+        LOG.debug("Time To Finish the batch {} by thread {} for accounts {}", end - start, Thread.currentThread().getId(),
                 savingAccounts.size());
         return null;
     }
@@ -297,10 +297,10 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
             this.jdbcTemplate.batchUpdate(queryForSavingsUpdate, paramsForSavingsSummary);
             this.jdbcTemplate.batchUpdate(queryForTransactionInsertion, paramsForTransactionInsertion);
             this.jdbcTemplate.batchUpdate(queryForTransactionUpdate, paramsForTransactionUpdate);
-            LOG.info("`Total No Of Interest Posting:` {}", transRefNo.size());
+            LOG.debug("`Total No Of Interest Posting:` {}", transRefNo.size());
             List<SavingsAccountTransactionData> savingsAccountTransactionDataList = fetchTransactionsFromIds(transRefNo);
             if (savingsAccountDataList != null) {
-                LOG.info("Fetched Transactions from DB: {}", savingsAccountTransactionDataList.size());
+                LOG.debug("Fetched Transactions from DB: {}", savingsAccountTransactionDataList.size());
             }
 
             HashMap<String, SavingsAccountTransactionData> savingsAccountTransactionMap = new HashMap<>();

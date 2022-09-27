@@ -150,7 +150,7 @@ public class TenantAwareTenantIdentifierFilter extends GenericFilterBean {
         } finally {
             task.stop();
             final PlatformRequestLog logRequest = PlatformRequestLog.from(task, request);
-            log.info("{}", this.toApiJsonSerializer.serialize(logRequest));
+            log.debug("{}", this.toApiJsonSerializer.serialize(logRequest));
         }
 
     }

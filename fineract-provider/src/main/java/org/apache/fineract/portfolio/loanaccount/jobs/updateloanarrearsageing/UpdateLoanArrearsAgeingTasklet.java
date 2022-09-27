@@ -83,7 +83,7 @@ public class UpdateLoanArrearsAgeingTasklet implements Tasklet {
             result += i;
         }
 
-        log.info("{}: Records affected by updateLoanArrearsAgeingDetails: {}", ThreadLocalContextUtil.getTenant().getName(), result);
+        log.debug("{}: Records affected by updateLoanArrearsAgeingDetails: {}", ThreadLocalContextUtil.getTenant().getName(), result);
         return RepeatStatus.FINISHED;
     }
 

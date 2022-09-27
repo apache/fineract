@@ -913,7 +913,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         Long[] childLoanId = new Long[repayments.size()];
         for (int i = 0; i < repayments.size(); i++) {
             jsonObject = repayments.get(i).getAsJsonObject();
-            log.info("{}", jsonObject.toString());
+            log.debug("{}", jsonObject.toString());
             childLoanId[i] = jsonObject.get("loanId").getAsLong();
         }
         int j = 0;

@@ -55,7 +55,7 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
 
         final PermissionUsageDataMapper mapper = new PermissionUsageDataMapper(sqlGenerator);
         final String sql = mapper.permissionSchema();
-        LOG.info("retrieveAllPermissions: {}", sql);
+        LOG.debug("retrieveAllPermissions: {}", sql);
         return this.jdbcTemplate.query(sql, mapper, new Object[] {});
     }
 
@@ -66,7 +66,7 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
 
         final PermissionUsageDataMapper mapper = new PermissionUsageDataMapper(sqlGenerator);
         final String sql = mapper.makerCheckerablePermissionSchema();
-        LOG.info("retrieveAllMakerCheckerablePermissions: {}", sql);
+        LOG.debug("retrieveAllMakerCheckerablePermissions: {}", sql);
 
         return this.jdbcTemplate.query(sql, mapper, new Object[] {});
     }
@@ -76,7 +76,7 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
 
         final PermissionUsageDataMapper mapper = new PermissionUsageDataMapper(sqlGenerator);
         final String sql = mapper.rolePermissionSchema();
-        LOG.info("retrieveAllRolePermissions: {}", sql);
+        LOG.debug("retrieveAllRolePermissions: {}", sql);
 
         return this.jdbcTemplate.query(sql, mapper, new Object[] { roleId });
     }
