@@ -58,7 +58,7 @@ public class ApplyAnnualFeeForSavingsTasklet implements Tasklet {
             }
         }
 
-        log.info("{}: Records affected by applyAnnualFeeForSavings: {}", ThreadLocalContextUtil.getTenant().getName(),
+        log.debug("{}: Records affected by applyAnnualFeeForSavings: {}", ThreadLocalContextUtil.getTenant().getName(),
                 annualFeeData.size());
         return RepeatStatus.FINISHED;
     }

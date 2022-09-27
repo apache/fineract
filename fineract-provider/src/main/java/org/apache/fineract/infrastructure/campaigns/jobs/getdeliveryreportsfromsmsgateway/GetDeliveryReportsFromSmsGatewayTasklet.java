@@ -89,13 +89,13 @@ public class GetDeliveryReportsFromSmsGatewayTasklet implements Tasklet {
                                 smsMessageRepository.save(smsMessage);
 
                                 if (statusChanged) {
-                                    log.info("Status of SMS message id: {} successfully changed to {}", smsMessage.getId(), statusType);
+                                    log.debug("Status of SMS message id: {} successfully changed to {}", smsMessage.getId(), statusType);
                                 }
                             }
                         }
                     }
                     if (!CollectionUtils.isEmpty(smsMessageDeliveryReportDataCollection)) {
-                        log.info("{} delivery report(s) successfully received from the intermediate gateway - sms",
+                        log.debug("{} delivery report(s) successfully received from the intermediate gateway - sms",
                                 smsMessageDeliveryReportDataCollection.size());
                     }
                 }

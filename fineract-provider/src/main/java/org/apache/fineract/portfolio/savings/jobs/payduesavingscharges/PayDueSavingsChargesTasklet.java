@@ -61,7 +61,7 @@ public class PayDueSavingsChargesTasklet implements Tasklet {
                 log.error("Apply Charges due for savings failed for account: {}", savingsAccountReference.getAccountNo(), ex);
             }
         }
-        log.info("{}: Records affected by applyDueChargesForSavings: {}", ThreadLocalContextUtil.getTenant().getName(),
+        log.debug("{}: Records affected by applyDueChargesForSavings: {}", ThreadLocalContextUtil.getTenant().getName(),
                 chargesDueData.size());
         if (!exceptions.isEmpty()) {
             throw new JobExecutionException(exceptions);

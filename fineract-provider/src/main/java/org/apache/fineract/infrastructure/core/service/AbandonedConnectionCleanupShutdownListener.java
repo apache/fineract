@@ -60,13 +60,13 @@ public class AbandonedConnectionCleanupShutdownListener implements ApplicationLi
                 java.sql.DriverManager.deregisterDriver(driver);
                 LOG.info("JDBC driver de-registered successfully");
             } catch (Throwable t) {
-                LOG.error("Exception occured while deristering jdbc driver", t);
+                LOG.error("Exception occurred while de-register jdbc driver", t);
             }
         }
         try {
             Thread.sleep(2000L);
         } catch (Exception e) {
-            LOG.error("Exception Occcured while trying to sleep.", e);
+            LOG.error("Exception Occcurred while trying to sleep.", e);
         }
     }
 }

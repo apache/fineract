@@ -81,10 +81,10 @@ public class MultiException extends Exception {
     @Override
     @SuppressWarnings("RegexpSinglelineJava")
     public void printStackTrace() {
-        LOG.info("{}", super.getMessage());
+        LOG.error("{}", super.getMessage());
         int i = 0;
         for (Throwable e : throwables) {
-            LOG.info("{}.", ++i);
+            LOG.error("{}.", ++i);
             e.printStackTrace();
         }
     }

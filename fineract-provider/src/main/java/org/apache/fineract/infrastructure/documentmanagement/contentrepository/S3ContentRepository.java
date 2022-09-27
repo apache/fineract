@@ -164,7 +164,7 @@ public class S3ContentRepository implements ContentRepository {
 
     private S3Object getObject(String key) {
         try {
-            log.info("Downloading an object from Amazon S3 Bucket: {}, location: {}", this.s3BucketName, key);
+            log.debug("Downloading an object from Amazon S3 Bucket: {}, location: {}", this.s3BucketName, key);
             return this.s3Client.getObject(new GetObjectRequest(this.s3BucketName, key));
         } catch (AmazonClientException ase) {
             throw new ContentManagementException(key, ase.getMessage(), ase);
