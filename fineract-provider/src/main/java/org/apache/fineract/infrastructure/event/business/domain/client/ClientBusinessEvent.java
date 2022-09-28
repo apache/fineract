@@ -23,7 +23,14 @@ import org.apache.fineract.portfolio.client.domain.Client;
 
 public abstract class ClientBusinessEvent extends AbstractBusinessEvent<Client> {
 
+    private static final String CATEGORY = "Client";
+
     public ClientBusinessEvent(Client value) {
         super(value);
+    }
+
+    @Override
+    public String getCategory() {
+        return CATEGORY;
     }
 }

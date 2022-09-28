@@ -99,8 +99,8 @@ class SendAsynchronousEventsTaskletTest {
     @Test
     public void givenBatchSize2WhenTaskExecutionThenSend2Events() throws Exception {
         // given
-        List<ExternalEvent> events = Arrays.asList(new ExternalEvent("aType", "aSchema", new byte[0], "aIdemtpotencyKey"),
-                new ExternalEvent("aType", "aSchema", new byte[0], "aIdemtpotencyKey"));
+        List<ExternalEvent> events = Arrays.asList(new ExternalEvent("aType", "aCategory", "aSchema", new byte[0], "aIdemtpotencyKey"),
+                new ExternalEvent("aType", "aCategory", "aSchema", new byte[0], "aIdemtpotencyKey"));
         // Dummy Message
         MessageV1 dummyMessage = new MessageV1(1, "aSource", "aType", "nocategory", "aCreateDate", "aTennantId", "anidempotencyKey",
                 "aSchema", Mockito.mock(ByteBuffer.class));
@@ -120,8 +120,8 @@ class SendAsynchronousEventsTaskletTest {
     @Test
     public void givenBatchSize2WhenEventSendFailsThenExecutionStops() throws Exception {
         // given
-        List<ExternalEvent> events = Arrays.asList(new ExternalEvent("aType", "aSchema", new byte[0], "aIdemtpotencyKey"),
-                new ExternalEvent("aType", "aSchema", new byte[0], "aIdemtpotencyKey"));
+        List<ExternalEvent> events = Arrays.asList(new ExternalEvent("aType", "aCategory", "aSchema", new byte[0], "aIdemtpotencyKey"),
+                new ExternalEvent("aType", "aCategory", "aSchema", new byte[0], "aIdemtpotencyKey"));
         MessageV1 dummyMessage = new MessageV1(1, "aSource", "aType", "nocategory", "aCreateDate", "aTennantId", "anidempotencyKey",
                 "aSchema", Mockito.mock(ByteBuffer.class));
         when(repository.findByStatusOrderById(Mockito.any(), Mockito.any())).thenReturn(events);
@@ -140,7 +140,7 @@ class SendAsynchronousEventsTaskletTest {
     public void givenOneEventWhenEventSentThenEventStatusUpdates() throws Exception {
         // given
         ArgumentCaptor<ExternalEvent> externalEventArgumentCaptor = ArgumentCaptor.forClass(ExternalEvent.class);
-        List<ExternalEvent> events = Arrays.asList(new ExternalEvent("aType", "aSchema", new byte[0], "aIdemtpotencyKey"));
+        List<ExternalEvent> events = Arrays.asList(new ExternalEvent("aType", "aCategory", "aSchema", new byte[0], "aIdemtpotencyKey"));
         MessageV1 dummyMessage = new MessageV1(1, "aSource", "aType", "nocategory", "aCreateDate", "aTennantId", "anidempotencyKey",
                 "aSchema", Mockito.mock(ByteBuffer.class));
         when(repository.findByStatusOrderById(Mockito.any(), Mockito.any())).thenReturn(events);

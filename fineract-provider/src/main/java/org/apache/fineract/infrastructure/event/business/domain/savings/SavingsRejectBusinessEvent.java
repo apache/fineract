@@ -22,12 +22,14 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 
 public class SavingsRejectBusinessEvent extends SavingsAccountBusinessEvent {
 
+    private static final String TYPE = "SavingsRejectBusinessEvent";
+
     public SavingsRejectBusinessEvent(SavingsAccount value) {
         super(value);
     }
 
     @Override
     public String getType() {
-        return "SavingsRejectBusinessEvent";
+        return TYPE;
     }
 }

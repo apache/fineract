@@ -22,12 +22,14 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public class CentersCreateBusinessEvent extends GroupsBusinessEvent {
 
+    private static final String TYPE = "CentersCreateBusinessEvent";
+
     public CentersCreateBusinessEvent(CommandProcessingResult value) {
         super(value);
     }
 
     @Override
     public String getType() {
-        return "CentersCreateBusinessEvent";
+        return TYPE;
     }
 }

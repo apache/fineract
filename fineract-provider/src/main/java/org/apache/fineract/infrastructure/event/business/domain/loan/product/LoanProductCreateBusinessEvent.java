@@ -22,12 +22,14 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 
 public class LoanProductCreateBusinessEvent extends LoanProductBusinessEvent {
 
+    private static final String TYPE = "LoanProductCreateBusinessEvent";
+
     public LoanProductCreateBusinessEvent(LoanProduct value) {
         super(value);
     }
 
     @Override
     public String getType() {
-        return "LoanProductCreateBusinessEvent";
+        return TYPE;
     }
 }
