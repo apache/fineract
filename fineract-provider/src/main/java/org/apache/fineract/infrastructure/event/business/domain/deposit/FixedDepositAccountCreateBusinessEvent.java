@@ -22,12 +22,14 @@ import org.apache.fineract.portfolio.savings.domain.FixedDepositAccount;
 
 public class FixedDepositAccountCreateBusinessEvent extends FixedDepositAccountBusinessEvent {
 
+    private static final String TYPE = "FixedDepositAccountCreateBusinessEvent";
+
     public FixedDepositAccountCreateBusinessEvent(FixedDepositAccount value) {
         super(value);
     }
 
     @Override
     public String getType() {
-        return "FixedDepositAccountCreateBusinessEvent";
+        return TYPE;
     }
 }

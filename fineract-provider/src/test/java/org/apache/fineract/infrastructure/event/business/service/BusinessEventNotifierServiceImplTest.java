@@ -156,6 +156,11 @@ class BusinessEventNotifierServiceImplTest {
         public String getType() {
             return null;
         }
+
+        @Override
+        public String getCategory() {
+            return null;
+        }
     }
 
 }

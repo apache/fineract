@@ -26,13 +26,21 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 
 public class LoanAdjustTransactionBusinessEvent extends AbstractBusinessEvent<LoanAdjustTransactionBusinessEvent.Data> {
 
+    private static final String TYPE = "LoanAdjustTransactionBusinessEvent";
+    private static final String CATEGORY = "Loan";
+
     public LoanAdjustTransactionBusinessEvent(Data value) {
         super(value);
     }
 
     @Override
     public String getType() {
-        return "LoanAdjustTransactionBusinessEvent";
+        return TYPE;
+    }
+
+    @Override
+    public String getCategory() {
+        return CATEGORY;
     }
 
     @RequiredArgsConstructor

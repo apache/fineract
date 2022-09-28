@@ -80,8 +80,7 @@ public class MessageFactory implements InitializingBean {
         MessageId id = new MessageId(event.getId().intValue());
         MessageSource source = new MessageSource(SOURCE_UUID);
         MessageType type = new MessageType(event.getType());
-        String messageCategory = "nocategory";
-        MessageCategory category = new MessageCategory(messageCategory);
+        MessageCategory category = new MessageCategory(event.getCategory());
         MessageIdempotencyKey idempotencyKey = new MessageIdempotencyKey(event.getIdempotencyKey());
         MessageDataSchema dataSchema = new MessageDataSchema(event.getSchema());
         MessageData data = new MessageData(byteBufferConverter.convert(event.getData()));

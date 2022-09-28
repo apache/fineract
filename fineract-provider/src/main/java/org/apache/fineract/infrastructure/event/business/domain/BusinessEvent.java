@@ -23,4 +23,6 @@ public interface BusinessEvent<T> {
     T get();
 
     String getType();
+
+    String getCategory();
 }

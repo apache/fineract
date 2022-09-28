@@ -23,7 +23,14 @@ import org.apache.fineract.infrastructure.event.business.domain.AbstractBusiness
 
 public abstract class GroupsBusinessEvent extends AbstractBusinessEvent<CommandProcessingResult> {
 
+    private static final String CATEGORY = "Group";
+
     public GroupsBusinessEvent(CommandProcessingResult value) {
         super(value);
+    }
+
+    @Override
+    public String getCategory() {
+        return CATEGORY;
     }
 }

@@ -22,12 +22,20 @@ import org.apache.fineract.infrastructure.event.business.domain.AbstractBusiness
 
 public class ShareProductDividentsCreateBusinessEvent extends AbstractBusinessEvent<Long> {
 
+    private static final String TYPE = "ShareProductDividentsCreateBusinessEvent";
+    private static final String CATEGORY = "Share";
+
     public ShareProductDividentsCreateBusinessEvent(Long value) {
         super(value);
     }
 
     @Override
     public String getType() {
-        return "ShareProductDividentsCreateBusinessEvent";
+        return TYPE;
+    }
+
+    @Override
+    public String getCategory() {
+        return CATEGORY;
     }
 }
