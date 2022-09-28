@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.client.service;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -55,7 +56,7 @@ public class ClientBusinessOwnerReadPlatformServiceImpl implements ClientBusines
 
         public String schema() {
             return "fmb.id AS id, fmb.client_id AS clientId, fmb.firstname AS firstName, fmb.title AS title,"
-                    + "fmb.lastname AS lastName,fmb.email AS email,fmb.mobile_number as mobileNumber,fmb.alter_mobile_number as alterMobileNumber,"
+                    + "fmb.lastname AS lastName, fmb.ownership AS ownership, fmb.email AS email,fmb.mobile_number as mobileNumber,fmb.alter_mobile_number as alterMobileNumber,"
                     + "fmb.is_active as isActive, fmb.lga as lga, fmb.bvn as bvn, fmb.city as city, fmb.street as street, "
                     + "fmb.state_province_id as state_province_id,cv.code_value as state_name, fmb.country_id as country_id,c.code_value as country_name,"
                     + "fmb.created_by as created_by,fmb.created_on as created_on,fmb.updated_by as updated_by,"
@@ -71,6 +72,7 @@ public class ClientBusinessOwnerReadPlatformServiceImpl implements ClientBusines
             final String firstName = rs.getString("firstName");
             final String title = rs.getString("title");
             final String lastName = rs.getString("lastName");
+            final BigDecimal ownership = rs.getBigDecimal("ownership");
             final String userName = rs.getString("userName");
             final String email = rs.getString("email");
             final String mobileNumber = rs.getString("mobileNumber");
@@ -91,7 +93,7 @@ public class ClientBusinessOwnerReadPlatformServiceImpl implements ClientBusines
             final String city = rs.getString("city");
             final Long imageId = JdbcSupport.getLong(rs, "imageId");
 
-            return ClientBusinessOwnerData.instance(id, clientId, firstName, title, lastName, userName, mobileNumber,
+            return ClientBusinessOwnerData.instance(id, clientId, firstName, title, lastName, ownership, userName, mobileNumber,
                     alterMobileNumber, isActive, city, stateProvinceId, stateName, countryId, countryName, dateOfBirth, createdBy,
                     createdOn, updatedBy, updatedOn, email, street, bvn, lga, null, null, imageId);
 

@@ -20,6 +20,7 @@
 package org.apache.fineract.portfolio.client.data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Date;
@@ -41,6 +42,8 @@ public final class ClientBusinessOwnerData implements Serializable {
     private final String title;
 
     private final String lastName;
+
+    private BigDecimal ownership;
 
     private final LocalDate dateOfBirth;
 
@@ -85,7 +88,7 @@ public final class ClientBusinessOwnerData implements Serializable {
     private final Collection<CodeValueData> stateProvinceIdOptions;
 
     private ClientBusinessOwnerData(final Long id, final Long clientId, final String firstName, final String title,
-            final String lastName, final String username, final String mobileNumber, final String alterMobileNumber, final Boolean isActive,
+            final String lastName, final BigDecimal ownership, final String username, final String mobileNumber, final String alterMobileNumber, final Boolean isActive,
             final String city, final Long stateProvinceId, final String stateName, final Long countryId, final String countryName,
             final LocalDate dateOfBirth, final String createdBy, final Date createdOn, final String updatedBy, final Date updatedOn,
             String email, String streetNumberAndName, String bvn, String lga, final Collection<CodeValueData> countryIdOptions,
@@ -95,6 +98,7 @@ public final class ClientBusinessOwnerData implements Serializable {
         this.firstName = firstName;
         this.title = title;
         this.lastName = lastName;
+        this.ownership = ownership;
         this.username = username;
         this.email = email;
         this.isActive = isActive;
@@ -131,6 +135,7 @@ public final class ClientBusinessOwnerData implements Serializable {
         final String firstName = null;
         final String title = null;
         final String lastName = null;
+        final BigDecimal ownership = null;
         final LocalDate dateOfBirth = null;
         final String mobileNumber = null;
         final String alterMobileNumber = null;
@@ -150,18 +155,18 @@ public final class ClientBusinessOwnerData implements Serializable {
         String countryName = null;
         String stateName = null;
 
-        return new ClientBusinessOwnerData(id, clientId, firstName, title, lastName, username, mobileNumber, alterMobileNumber,
+        return new ClientBusinessOwnerData(id, clientId, firstName, title, lastName, ownership, username, mobileNumber, alterMobileNumber,
                 isActive, city, stateProvinceId, stateName, countryId, countryName, dateOfBirth, createdBy, createdOn, updatedBy, updatedOn,
                 email, streetNumberAndName, bvn, lga, countryIdOptions, stateProvinceIdOptions, null);
     }
 
     public static ClientBusinessOwnerData instance(final Long id, final Long clientId, final String firstName, final String title,
-            final String lastName, final String username, final String mobileNumber, final String alterMobileNumber, final Boolean isActive,
+            final String lastName, final BigDecimal ownership, final String username, final String mobileNumber, final String alterMobileNumber, final Boolean isActive,
             final String city, final Long stateProvinceId, final String stateName, final Long countryId, final String countryName,
             final LocalDate dateOfBirth, final String createdBy, final Date createdOn, final String updatedBy, final Date updatedOn,
             String email, String streetNumberAndName, String bvn, String lga, final Collection<CodeValueData> countryIdOptions,
             final Collection<CodeValueData> stateProvinceIdOptions, final Long imageId) {
-        return new ClientBusinessOwnerData(id, clientId, firstName, title, lastName, username, mobileNumber, alterMobileNumber,
+        return new ClientBusinessOwnerData(id, clientId, firstName, title, lastName, ownership, username, mobileNumber, alterMobileNumber,
                 isActive, city, stateProvinceId, stateName, countryId, countryName, dateOfBirth, createdBy, createdOn, updatedBy, updatedOn,
                 email, streetNumberAndName, bvn, lga, countryIdOptions, stateProvinceIdOptions, imageId);
     }
@@ -314,4 +319,7 @@ public final class ClientBusinessOwnerData implements Serializable {
         return isActive;
     }
 
+    public BigDecimal getOwnership() {
+        return ownership;
+    }
 }

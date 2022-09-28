@@ -22,6 +22,7 @@ package org.apache.fineract.portfolio.client.serialization;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,7 +45,7 @@ public final class ClientBusinessOwnerCommandFromApiJsonDeserializer {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "clientId", "firstName", "title", "lastName",
-            "email", "mobileNumber", "alterMobileNumber", "isActive", "city", "username", "streetNumberAndName", "dateOfBirth", "lga",
+            "ownership", "email", "mobileNumber", "alterMobileNumber", "isActive", "city", "username", "streetNumberAndName", "dateOfBirth", "lga",
             "stateProvinceId", "countryId", "bvn", "locale", "dateFormat"));
 
     @Autowired
@@ -77,6 +78,11 @@ public final class ClientBusinessOwnerCommandFromApiJsonDeserializer {
         if (this.fromApiJsonHelper.extractStringNamed("title", element) != null) {
             final String title = this.fromApiJsonHelper.extractStringNamed("title", element);
             baseDataValidator.reset().parameter("title").value(title).notNull().notBlank().notExceedingLengthOf(100);
+        }
+
+        if (this.fromApiJsonHelper.extractStringNamed("ownership", element) != null) {
+            final BigDecimal ownership = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("title", element);
+            baseDataValidator.reset().parameter("ownership").value(ownership).notNull().positiveAmount();
         }
 
         final String email = this.fromApiJsonHelper.extractStringNamed("email", element);

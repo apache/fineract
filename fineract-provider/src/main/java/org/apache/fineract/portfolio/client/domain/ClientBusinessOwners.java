@@ -20,6 +20,8 @@
 package org.apache.fineract.portfolio.client.domain;
 
 import com.google.gson.JsonObject;
+
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -55,6 +57,9 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
 
     @Column(name = "lastname")
     private String lastName;
+
+    @Column(name = "ownership", scale = 2, precision = 5, nullable = true)
+    private BigDecimal ownership;
 
     @Column(name = "email", length = 50, unique = true)
     private String email;
@@ -112,7 +117,7 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
     private Image image;
 
     private ClientBusinessOwners(final Client client, final String firstName, final String title, final String lastName,
-            final String email, final String mobileNumber, final String lga, final Boolean isActive, final Date dateOfBirth,
+            final BigDecimal ownership, final String email, final String mobileNumber, final String lga, final Boolean isActive, final Date dateOfBirth,
             final CodeValue stateProvince, final CodeValue country, final String bvn, final String username, final String alterMobileNumber,
             final String city, final String createdBy, final LocalDate createdOn, final String updatedBy, final LocalDate updatedOn,
             final String street) {
@@ -121,6 +126,7 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
         this.firstName = firstName;
         this.title = title;
         this.lastName = lastName;
+        this.ownership = ownership;
         this.email = email;
         this.isActive = isActive;
         this.username = username;
@@ -154,6 +160,7 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
         String firstName = "";
         String title = "";
         String lastName = "";
+        BigDecimal ownership = null;
         String email = "";
         Date dateOfBirth = null;
         String mobileNumber = "";
@@ -249,7 +256,11 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
             updatedOnDate = LocalDate.parse(updatedOn, formatter);
         }
 
-        return new ClientBusinessOwners(client, firstName, title, lastName, email, mobileNumber, lga, isActive, dateOfBirth,
+        if (jsonObject.get("ownership") != null) {
+            ownership = jsonObject.get("ownership").getAsBigDecimal();
+        }
+
+        return new ClientBusinessOwners(client, firstName, title, lastName, ownership, email, mobileNumber, lga, isActive, dateOfBirth,
                 stateProvince, country, bvn, username, alterMobileNumber, city, createdBy, createdOnDate, updatedBy, updatedOnDate,
                 streetNumberAndName);
     }
@@ -422,4 +433,11 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
         this.image = image;
     }
 
+    public BigDecimal getOwnership() {
+        return ownership;
+    }
+
+    public void setOwnership(BigDecimal ownership) {
+        this.ownership = ownership;
+    }
 }

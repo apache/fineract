@@ -42,6 +42,7 @@
             <column name="title" type="varchar(100)">
                 <constraints nullable="true"/>
             </column>
+            <column defaultValueComputed="NULL" name="ownership" type="DECIMAL(5, 2)"/>
             <column name="email" type="varchar(100)" >
                 <constraints nullable="false" unique="true"/>
             </column>

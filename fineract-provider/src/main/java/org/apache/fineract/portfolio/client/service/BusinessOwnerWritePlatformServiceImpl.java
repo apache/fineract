@@ -20,6 +20,8 @@ package org.apache.fineract.portfolio.client.service;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
@@ -116,6 +118,7 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
 
         String firstName = "";
         String middleName = "";
+        BigDecimal ownership = null;
         String title = "";
         String email = "";
         Date dateOfBirth = null;
@@ -156,6 +159,12 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
         if (command.stringValueOfParameterNamed("title") != null) {
             title = command.stringValueOfParameterNamed("title");
             clientBusinessOwner.setTitle(title);
+            is_owner_update = true;
+        }
+
+        if (command.stringValueOfParameterNamed("ownership") != null) {
+            ownership = command.bigDecimalValueOfParameterNamed("ownership");
+            clientBusinessOwner.setOwnership(ownership);
             is_owner_update = true;
         }
 
