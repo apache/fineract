@@ -38,7 +38,7 @@ public final class ClientBusinessOwnerData implements Serializable {
 
     private final String firstName;
 
-    private final String middleName;
+    private final String title;
 
     private final String lastName;
 
@@ -84,7 +84,7 @@ public final class ClientBusinessOwnerData implements Serializable {
     private final Collection<CodeValueData> countryIdOptions;
     private final Collection<CodeValueData> stateProvinceIdOptions;
 
-    private ClientBusinessOwnerData(final Long id, final Long clientId, final String firstName, final String middleName,
+    private ClientBusinessOwnerData(final Long id, final Long clientId, final String firstName, final String title,
             final String lastName, final String username, final String mobileNumber, final String alterMobileNumber, final Boolean isActive,
             final String city, final Long stateProvinceId, final String stateName, final Long countryId, final String countryName,
             final LocalDate dateOfBirth, final String createdBy, final Date createdOn, final String updatedBy, final Date updatedOn,
@@ -93,7 +93,7 @@ public final class ClientBusinessOwnerData implements Serializable {
         this.id = id;
         this.clientId = clientId;
         this.firstName = firstName;
-        this.middleName = middleName;
+        this.title = title;
         this.lastName = lastName;
         this.username = username;
         this.email = email;
@@ -129,7 +129,7 @@ public final class ClientBusinessOwnerData implements Serializable {
         final Long id = null;
         final Long clientId = null;
         final String firstName = null;
-        final String middleName = null;
+        final String title = null;
         final String lastName = null;
         final LocalDate dateOfBirth = null;
         final String mobileNumber = null;
@@ -150,18 +150,18 @@ public final class ClientBusinessOwnerData implements Serializable {
         String countryName = null;
         String stateName = null;
 
-        return new ClientBusinessOwnerData(id, clientId, firstName, middleName, lastName, username, mobileNumber, alterMobileNumber,
+        return new ClientBusinessOwnerData(id, clientId, firstName, title, lastName, username, mobileNumber, alterMobileNumber,
                 isActive, city, stateProvinceId, stateName, countryId, countryName, dateOfBirth, createdBy, createdOn, updatedBy, updatedOn,
                 email, streetNumberAndName, bvn, lga, countryIdOptions, stateProvinceIdOptions, null);
     }
 
-    public static ClientBusinessOwnerData instance(final Long id, final Long clientId, final String firstName, final String middleName,
+    public static ClientBusinessOwnerData instance(final Long id, final Long clientId, final String firstName, final String title,
             final String lastName, final String username, final String mobileNumber, final String alterMobileNumber, final Boolean isActive,
             final String city, final Long stateProvinceId, final String stateName, final Long countryId, final String countryName,
             final LocalDate dateOfBirth, final String createdBy, final Date createdOn, final String updatedBy, final Date updatedOn,
             String email, String streetNumberAndName, String bvn, String lga, final Collection<CodeValueData> countryIdOptions,
             final Collection<CodeValueData> stateProvinceIdOptions, final Long imageId) {
-        return new ClientBusinessOwnerData(id, clientId, firstName, middleName, lastName, username, mobileNumber, alterMobileNumber,
+        return new ClientBusinessOwnerData(id, clientId, firstName, title, lastName, username, mobileNumber, alterMobileNumber,
                 isActive, city, stateProvinceId, stateName, countryId, countryName, dateOfBirth, createdBy, createdOn, updatedBy, updatedOn,
                 email, streetNumberAndName, bvn, lga, countryIdOptions, stateProvinceIdOptions, imageId);
     }
@@ -290,8 +290,8 @@ public final class ClientBusinessOwnerData implements Serializable {
         return firstName;
     }
 
-    public String getMiddleName() {
-        return middleName;
+    public String getTitle() {
+        return title;
     }
 
     public String getLastName() {

@@ -43,7 +43,7 @@ import org.springframework.stereotype.Component;
 public final class ClientBusinessOwnerCommandFromApiJsonDeserializer {
 
     private final FromJsonHelper fromApiJsonHelper;
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "clientId", "firstName", "middleName", "lastName",
+    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "clientId", "firstName", "title", "lastName",
             "email", "mobileNumber", "alterMobileNumber", "isActive", "city", "username", "streetNumberAndName", "dateOfBirth", "lga",
             "stateProvinceId", "countryId", "bvn", "locale", "dateFormat"));
 
@@ -74,9 +74,9 @@ public final class ClientBusinessOwnerCommandFromApiJsonDeserializer {
         final String lastName = this.fromApiJsonHelper.extractStringNamed("lastName", element);
         baseDataValidator.reset().parameter("lastName").value(lastName).notNull().notBlank().notExceedingLengthOf(100);
 
-        if (this.fromApiJsonHelper.extractStringNamed("middleName", element) != null) {
-            final String middleName = this.fromApiJsonHelper.extractStringNamed("middleName", element);
-            baseDataValidator.reset().parameter("middleName").value(middleName).notNull().notBlank().notExceedingLengthOf(100);
+        if (this.fromApiJsonHelper.extractStringNamed("title", element) != null) {
+            final String title = this.fromApiJsonHelper.extractStringNamed("title", element);
+            baseDataValidator.reset().parameter("title").value(title).notNull().notBlank().notExceedingLengthOf(100);
         }
 
         final String email = this.fromApiJsonHelper.extractStringNamed("email", element);

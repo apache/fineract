@@ -58,7 +58,7 @@ import org.springframework.stereotype.Component;
 public class ClientBusinessOwnersApiResources {
 
     private final Set<String> responseDataParameters = new HashSet<>(
-            Arrays.asList("id", "clientId", "firstName", "middleName", "lastName", "email", "mobileNumber", "alterMobileNumber", "isActive",
+            Arrays.asList("id", "clientId", "firstName", "title", "lastName", "email", "mobileNumber", "alterMobileNumber", "isActive",
                     "city", "username", "streetNumberAndName", "dateOfBirth", "lga", "stateProvince", "country", "bvn"));
     private final String resourceNameForPermissions = "BusinessOwners";
     private final PlatformSecurityContext context;

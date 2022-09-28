@@ -54,7 +54,7 @@ public class ClientBusinessOwnerReadPlatformServiceImpl implements ClientBusines
     private static final class ClientBusinessOwnerMapper implements RowMapper<ClientBusinessOwnerData> {
 
         public String schema() {
-            return "fmb.id AS id, fmb.client_id AS clientId, fmb.firstname AS firstName, fmb.middlename AS middleName,"
+            return "fmb.id AS id, fmb.client_id AS clientId, fmb.firstname AS firstName, fmb.title AS title,"
                     + "fmb.lastname AS lastName,fmb.email AS email,fmb.mobile_number as mobileNumber,fmb.alter_mobile_number as alterMobileNumber,"
                     + "fmb.is_active as isActive, fmb.lga as lga, fmb.bvn as bvn, fmb.city as city, fmb.street as street, "
                     + "fmb.state_province_id as state_province_id,cv.code_value as state_name, fmb.country_id as country_id,c.code_value as country_name,"
@@ -69,7 +69,7 @@ public class ClientBusinessOwnerReadPlatformServiceImpl implements ClientBusines
             final long id = rs.getLong("id");
             final long clientId = rs.getLong("clientId");
             final String firstName = rs.getString("firstName");
-            final String middleName = rs.getString("middleName");
+            final String title = rs.getString("title");
             final String lastName = rs.getString("lastName");
             final String userName = rs.getString("userName");
             final String email = rs.getString("email");
@@ -91,7 +91,7 @@ public class ClientBusinessOwnerReadPlatformServiceImpl implements ClientBusines
             final String city = rs.getString("city");
             final Long imageId = JdbcSupport.getLong(rs, "imageId");
 
-            return ClientBusinessOwnerData.instance(id, clientId, firstName, middleName, lastName, userName, mobileNumber,
+            return ClientBusinessOwnerData.instance(id, clientId, firstName, title, lastName, userName, mobileNumber,
                     alterMobileNumber, isActive, city, stateProvinceId, stateName, countryId, countryName, dateOfBirth, createdBy,
                     createdOn, updatedBy, updatedOn, email, street, bvn, lga, null, null, imageId);
 

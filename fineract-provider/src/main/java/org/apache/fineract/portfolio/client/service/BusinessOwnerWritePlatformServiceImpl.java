@@ -116,7 +116,7 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
 
         String firstName = "";
         String middleName = "";
-        String lastName = "";
+        String title = "";
         String email = "";
         Date dateOfBirth = null;
         String mobileNumber = "";
@@ -149,13 +149,13 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
 
         if (command.stringValueOfParameterNamed("middleName") != null) {
             middleName = command.stringValueOfParameterNamed("middleName");
-            clientBusinessOwner.setMiddleName(middleName);
+            clientBusinessOwner.setTitle(middleName);
             is_owner_update = true;
         }
 
-        if (command.stringValueOfParameterNamed("lastName") != null) {
-            lastName = command.stringValueOfParameterNamed("lastName");
-            clientBusinessOwner.setLastName(lastName);
+        if (command.stringValueOfParameterNamed("title") != null) {
+            title = command.stringValueOfParameterNamed("title");
+            clientBusinessOwner.setTitle(title);
             is_owner_update = true;
         }
 

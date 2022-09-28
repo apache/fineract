@@ -36,11 +36,11 @@
             <column name="firstname" type="varchar(100)">
                 <constraints nullable="false"/>
             </column>
-            <column name="middlename" type="varchar(100)">
-                <constraints nullable="false"/>
-            </column>
             <column name="lastname" type="varchar(100)">
                 <constraints nullable="false" />
+            </column>
+            <column name="title" type="varchar(100)">
+                <constraints nullable="true"/>
             </column>
             <column name="email" type="varchar(100)" >
                 <constraints nullable="false" unique="true"/>
