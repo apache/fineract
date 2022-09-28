@@ -23,7 +23,14 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 
 public abstract class SavingsAccountTransactionBusinessEvent extends AbstractBusinessEvent<SavingsAccountTransaction> {
 
+    private static final String CATEGORY = "Savings";
+
     public SavingsAccountTransactionBusinessEvent(SavingsAccountTransaction value) {
         super(value);
+    }
+
+    @Override
+    public String getCategory() {
+        return CATEGORY;
     }
 }

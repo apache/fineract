@@ -23,7 +23,14 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 
 public abstract class LoanProductBusinessEvent extends AbstractBusinessEvent<LoanProduct> {
 
+    private static final String CATEGORY = "Loan";
+
     public LoanProductBusinessEvent(LoanProduct value) {
         super(value);
+    }
+
+    @Override
+    public String getCategory() {
+        return CATEGORY;
     }
 }

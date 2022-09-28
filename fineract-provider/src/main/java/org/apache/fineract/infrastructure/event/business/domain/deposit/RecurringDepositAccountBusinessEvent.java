@@ -23,7 +23,14 @@ import org.apache.fineract.portfolio.savings.domain.RecurringDepositAccount;
 
 public abstract class RecurringDepositAccountBusinessEvent extends AbstractBusinessEvent<RecurringDepositAccount> {
 
+    private static final String CATEGORY = "Deposit";
+
     public RecurringDepositAccountBusinessEvent(RecurringDepositAccount value) {
         super(value);
+    }
+
+    @Override
+    public String getCategory() {
+        return CATEGORY;
     }
 }
