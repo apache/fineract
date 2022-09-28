@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.api;
 
+import static org.apache.fineract.infrastructure.core.data.ApiParameterError.parameterErrorWithValue;
+
+import com.google.gson.JsonObject;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -28,8 +31,10 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Stream;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -47,11 +52,14 @@ import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
+import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.dataqueries.service.GenericDataService;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -215,6 +223,55 @@ public class DatatablesApiResource {
         final DatatableData result = this.readWriteNonCoreDataService.retrieveDatatable(datatable);
 
         final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serializePretty(prettyPrint, result);
+    }
+
+    @GET
+    @Path("{datatable}/query")
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Query Data Table values", description = "Query values from a registered data table.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = List.class))) })
+    public String queryValues(@PathParam("datatable") @Parameter(description = "datatable") final String datatable,
+            @QueryParam("columnFilter") @Parameter(description = "columnFilter") final String columnFilter,
+            @QueryParam("valueFilter") @Parameter(description = "valueFilter") final String valueFilter,
+            @QueryParam("resultColumns") @Parameter(description = "resultColumns") final String resultColumns,
+            @Context final UriInfo uriInfo) {
+        this.context.authenticatedUser().validateHasDatatableReadPermission(datatable);
+        List<String> dataTableColumnNames = genericDataService.fillResultsetColumnHeaders(datatable).stream()
+                .map(ResultsetColumnHeaderData::getColumnName).toList();
+        List<ApiParameterError> paramErrors = new ArrayList<>();
+        if (columnFilter == null || columnFilter.isEmpty()) {
+            paramErrors.add(parameterErrorWithValue("400", "Column filter is empty!", "columnFilter", columnFilter));
+        } else {
+            if (!dataTableColumnNames.contains(columnFilter)) {
+                paramErrors.add(parameterErrorWithValue("400", "Column filter not exist in datatable!", "columnFilter", columnFilter));
+            }
+        }
+
+        if (valueFilter == null || valueFilter.isEmpty()) {
+            paramErrors.add(parameterErrorWithValue("400", "Value filter is empty!", "valueFilter", valueFilter));
+        }
+
+        if (resultColumns == null || resultColumns.isEmpty()) {
+            paramErrors.add(parameterErrorWithValue("400", "Result columns filter is empty!", "resultColumns", resultColumns));
+        } else {
+            List<String> resultColumnNames = Stream.of(resultColumns.split(",")).toList();
+            resultColumnNames.forEach(rcn -> {
+                if (!dataTableColumnNames.contains(rcn)) {
+                    paramErrors.add(parameterErrorWithValue("400", "Result column not exist in datatable!", "resultColumns", rcn));
+                }
+            });
+        }
+
+        if (!paramErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(paramErrors);
+        }
+
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+        final List<JsonObject> result = this.readWriteNonCoreDataService.queryDataTable(datatable, columnFilter, valueFilter,
+                resultColumns);
+
         return this.toApiJsonSerializer.serializePretty(prettyPrint, result);
     }
 

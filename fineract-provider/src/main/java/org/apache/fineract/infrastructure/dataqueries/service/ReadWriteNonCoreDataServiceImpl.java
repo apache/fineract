@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
+import static org.apache.fineract.infrastructure.core.data.ApiParameterError.parameterErrorWithValue;
+
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonArray;
@@ -30,6 +32,11 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.sql.Types;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -104,11 +111,13 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             .put("number", "INT").put("boolean", "BIT").put("decimal", "DECIMAL").put("date", "DATE").put("datetime", "DATETIME")
             .put("text", "TEXT").put("dropdown", "INT").build();
     private static final ImmutableMap<String, String> apiTypeToPostgreSQL = ImmutableMap.<String, String>builder().put("string", "VARCHAR")
-            .put("number", "INT").put("boolean", "BIT").put("decimal", "DECIMAL").put("date", "DATE").put("datetime", "TIMESTAMP")
+            .put("number", "INT").put("boolean", "boolean").put("decimal", "DECIMAL").put("date", "DATE").put("datetime", "TIMESTAMP")
             .put("text", "TEXT").put("dropdown", "INT").build();
 
     private static final List<String> stringDataTypes = Arrays.asList("char", "varchar", "blob", "text", "tinyblob", "tinytext",
             "mediumblob", "mediumtext", "longblob", "longtext");
+    private static final DateTimeFormatter DATA_TABLE_DATE_FORMAT_MYSQL = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter DATA_TABLE_DATETIME_FORMAT_MYSQL = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final JdbcTemplate jdbcTemplate;
     private final DatabaseTypeResolver databaseTypeResolver;
@@ -160,9 +169,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         // PERMITTED datatables
         SQLInjectionValidator.validateSQLInput(datatable);
-        final String sql = "select application_table_name, registered_table_name, entity_subtype" + " from x_registered_table "
-                + " where exists" + " (select 'f'" + " from m_appuser_role ur " + " join m_role r on r.id = ur.role_id"
-                + " left join m_role_permission rp on rp.role_id = r.id" + " left join m_permission p on p.id = rp.permission_id"
+        final String sql = "select application_table_name, registered_table_name, entity_subtype from x_registered_table "
+                + " where exists (select 'f' from m_appuser_role ur join m_role r on r.id = ur.role_id"
+                + " left join m_role_permission rp on rp.role_id = r.id left join m_permission p on p.id = rp.permission_id"
                 + " where ur.appuser_id = ? and registered_table_name=? and (p.code in ('ALL_FUNCTIONS', "
                 + "'ALL_FUNCTIONS_READ') or p.code = concat('READ_', registered_table_name))) "
                 + " order by application_table_name, registered_table_name";
@@ -181,6 +190,116 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }
 
         return datatableData;
+    }
+
+    @Override
+    public List<JsonObject> queryDataTable(String datatable, String columnFilter, String valueFilter, String resultColumns) {
+        Arrays.asList(datatable, columnFilter, valueFilter, resultColumns).forEach(SQLInjectionValidator::validateDynamicQuery);
+        List<String> resultColumnNames = Stream.of(resultColumns.split(",")).toList();
+        String sql = "select " + resultColumns + " from " + datatable + " where " + columnFilter + " = ?";
+
+        List<ResultsetColumnHeaderData> resultsetColumnHeaderData = genericDataService.fillResultsetColumnHeaders(datatable);
+        Object finalValueFilter = valueFilter;
+        SqlRowSet rowSet = null;
+        String filterColumnType = resultsetColumnHeaderData.stream().filter(column -> columnFilter.equals(column.getColumnName()))
+                .findFirst().map(ResultsetColumnHeaderData::getColumnType).orElse(columnFilter + " does not exist in datatable");
+        if (databaseTypeResolver.isPostgreSQL()) {
+            int[] argType = new int[1];
+            if ("bit".equalsIgnoreCase(filterColumnType)) {
+                finalValueFilter = BooleanUtils.toString(BooleanUtils.toBooleanObject(valueFilter), "1", "0", "null");
+                argType[0] = Types.BIT;
+            } else if ("boolean".equalsIgnoreCase(filterColumnType) || "bool".equalsIgnoreCase(filterColumnType)) {
+                finalValueFilter = BooleanUtils.toString(BooleanUtils.toBooleanObject(valueFilter), "true", "false", "null");
+                argType[0] = Types.BOOLEAN;
+            } else if ("integer".equalsIgnoreCase(filterColumnType)) {
+                argType[0] = Types.INTEGER;
+            } else if ("bigint".equalsIgnoreCase(filterColumnType)) {
+                argType[0] = Types.BIGINT;
+            } else if ("date".equalsIgnoreCase(filterColumnType)) {
+                argType[0] = Types.DATE;
+            } else if (filterColumnType.toLowerCase().contains("timestamp")) {
+                argType[0] = Types.TIMESTAMP;
+            } else if ("numeric".equalsIgnoreCase(filterColumnType)) {
+                argType[0] = Types.DECIMAL;
+            } else if ("text".equalsIgnoreCase(filterColumnType) || "character varying".equalsIgnoreCase(filterColumnType)) {
+                argType[0] = Types.VARCHAR;
+            } else {
+                List<ApiParameterError> paramErrors = new ArrayList<>();
+                paramErrors.add(parameterErrorWithValue("400",
+                        "Unsupported input type for datatable query! Column filter: " + filterColumnType, "valueFilter", valueFilter));
+                throw new PlatformApiDataValidationException(paramErrors);
+            }
+            rowSet = jdbcTemplate.queryForRowSet(sql, new Object[] { finalValueFilter }, argType);
+        } else if (databaseTypeResolver.isMySQL()) {
+            if ("bit".equalsIgnoreCase(filterColumnType)) {
+                int[] argType = new int[1];
+                argType[0] = Types.BIT;
+                finalValueFilter = BooleanUtils.toString(BooleanUtils.toBooleanObject(valueFilter), "1", "0", "null");
+                rowSet = jdbcTemplate.queryForRowSet(sql, new Object[] { finalValueFilter }, argType);
+            } else if ("date".equalsIgnoreCase(filterColumnType)) {
+                int[] argType = new int[1];
+                argType[0] = Types.DATE;
+                try {
+                    rowSet = jdbcTemplate.queryForRowSet(sql, new Object[] { LocalDate.parse(valueFilter, DATA_TABLE_DATE_FORMAT_MYSQL) },
+                            argType); // NOSONAR
+                } catch (DateTimeParseException e) {
+                    List<ApiParameterError> paramErrors = new ArrayList<>();
+                    paramErrors.add(parameterErrorWithValue("400",
+                            "Unsupported input type for datatable query! Use format: 'yyyy-MM-dd'. Column filter: " + filterColumnType,
+                            "valueFilter", valueFilter));
+                    throw new PlatformApiDataValidationException(paramErrors, e);
+                }
+            } else if ("datetime".equals(filterColumnType)) {
+                int[] argType = new int[1];
+                argType[0] = Types.TIMESTAMP;
+                try {
+                    rowSet = jdbcTemplate.queryForRowSet(sql,
+                            new Object[] { LocalDateTime.parse(valueFilter, DATA_TABLE_DATETIME_FORMAT_MYSQL) }, argType); // NOSONAR
+                } catch (DateTimeParseException e) {
+                    List<ApiParameterError> paramErrors = new ArrayList<>();
+                    paramErrors.add(parameterErrorWithValue("400",
+                            "Unsupported input type for datatable query! Use format: 'yyyy-MM-dd HH:mm:ss'. Column filter: "
+                                    + filterColumnType,
+                            "valueFilter", valueFilter));
+                    throw new PlatformApiDataValidationException(paramErrors, e);
+                }
+            } else {
+                rowSet = jdbcTemplate.queryForRowSet(sql, new Object[] { finalValueFilter }); // NOSONAR
+            }
+        }
+
+        List<JsonObject> results = new ArrayList<>();
+        while (rowSet.next()) {
+            JsonObject json = new JsonObject();
+            for (String rcn : resultColumnNames) {
+                Object rowValue = rowSet.getObject(rcn);
+                if (rowValue != null) {
+                    if (rowValue instanceof Character) {
+                        json.addProperty(rcn, (Character) rowValue);
+                    } else if (rowValue instanceof Number) {
+                        json.addProperty(rcn, new BigDecimal(rowValue.toString()));
+                    } else if (rowValue instanceof Boolean) {
+                        json.addProperty(rcn, (Boolean) rowValue);
+                    } else if (rowValue instanceof LocalDateTime) {
+                        json.addProperty(rcn, DATA_TABLE_DATETIME_FORMAT_MYSQL.format((LocalDateTime) rowValue));
+                    } else if (rowValue instanceof Timestamp) {
+                        json.addProperty(rcn, DATA_TABLE_DATETIME_FORMAT_MYSQL.format(((Timestamp) rowValue).toLocalDateTime()));
+                    } else if (rowValue instanceof LocalDate) {
+                        json.addProperty(rcn, DATA_TABLE_DATE_FORMAT_MYSQL.format((LocalDate) rowValue));
+                    } else if (rowValue instanceof Date) {
+                        json.addProperty(rcn, DATA_TABLE_DATE_FORMAT_MYSQL.format(((Date) rowValue).toLocalDate()));
+                    } else {
+                        json.addProperty(rcn, rowValue.toString());
+                    }
+                }
+            }
+
+            if (json.size() > 0) {
+                results.add(json);
+            }
+        }
+
+        return results;
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {

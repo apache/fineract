@@ -170,6 +170,7 @@ allprojects  {
         reportDir = file("$buildDir/reports/rat")
         excludes = [
             '**/src/main/templates/**/*.mustache',
+            '**/src/main/generated/**',
             '**/.dockerignore',
             '**/*.launch',
             '**/licenses/**',
