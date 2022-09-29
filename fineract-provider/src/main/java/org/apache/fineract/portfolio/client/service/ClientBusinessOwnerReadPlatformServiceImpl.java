@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.client.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -56,12 +55,15 @@ public class ClientBusinessOwnerReadPlatformServiceImpl implements ClientBusines
 
         public String schema() {
             return "fmb.id AS id, fmb.client_id AS clientId, fmb.firstname AS firstName, fmb.title_id AS title_id, tc.code_value as title_name,"
-                    + "fmb.lastname AS lastName, fmb.ownership AS ownership, fmb.email AS email,fmb.mobile_number as mobileNumber,fmb.alter_mobile_number as alterMobileNumber,"
-                    + "fmb.is_active as isActive, fmb.lga as lga, fmb.bvn as bvn, fmb.city as city, fmb.street as street, "
-                    + "fmb.state_province_id as state_province_id,cv.code_value as state_name, fmb.country_id as country_id,c.code_value as country_name,"
+                    + "fmb.lastname AS lastName, fmb.ownership AS ownership, fmb.email AS email, fmb.mobile_number as mobileNumber,"
+                    + "fmb.business_owner_number as businessOwnerNumber, fmb.city_id as city_id, cc.code_value as city_name, "
+                    + "fmb.address1 as address1, fmb.address2 as address2, fmb.address3 as address3, fmb.type_id as type_id, type_code.code_value as type_name, "
+                    + "fmb.postal_code as postalCode, fmb.landmark as landmark, fmb.bvn as bvn, fmb.nin as nin,  fmb.street as street, "
+                    + "fmb.state_province_id as state_province_id, cv.code_value as state_name, fmb.country_id as country_id,c.code_value as country_name,"
                     + "fmb.created_by as created_by,fmb.created_on as created_on,fmb.updated_by as updated_by,"
-                    + "fmb.updated_on as updated_on," + "fmb.date_of_birth AS dateOfBirth, fmb.username as userName, fmb.image_id as imageId "
+                    + "fmb.updated_on as updated_on," + " fmb.image_id as imageId "
                     + " FROM m_business_owners fmb" + " left join m_code_value cv on fmb.state_province_id=cv.id"
+                    + " left join m_code_value cc on fmb.city_id=cc.id" + " left join  m_code_value type_code on fmb.type_id=type_code.id"
                     + " left join m_code_value tc on fmb.title_id=tc.id" + " left join  m_code_value c on fmb.country_id=c.id";
         }
 
@@ -74,29 +76,34 @@ public class ClientBusinessOwnerReadPlatformServiceImpl implements ClientBusines
             final String titleName = rs.getString("title_name");
             final String lastName = rs.getString("lastName");
             final BigDecimal ownership = rs.getBigDecimal("ownership");
-            final String userName = rs.getString("userName");
             final String email = rs.getString("email");
             final String mobileNumber = rs.getString("mobileNumber");
-            final String alterMobileNumber = rs.getString("alterMobileNumber");
-            final boolean isActive = rs.getBoolean("isActive");
-            final String lga = rs.getString("lga");
+            final String businessOwnerNumber = rs.getString("businessOwnerNumber");
+            final String landmark = rs.getString("landmark");
             final long stateProvinceId = rs.getLong("state_province_id");
             final String stateName = rs.getString("state_name");
             final long countryId = rs.getLong("country_id");
             final String countryName = rs.getString("country_name");
-            final LocalDate dateOfBirth = JdbcSupport.getLocalDate(rs, "dateOfBirth");
+            final long typeId = rs.getLong("type_id");
+            final String typeName = rs.getString("type_name");
+            final long cityId = rs.getLong("city_id");
+            final String cityName = rs.getString("city_name");
             final String createdBy = rs.getString("created_by");
             final Date createdOn = rs.getDate("created_on");
             final String updatedBy = rs.getString("updated_by");
             final Date updatedOn = rs.getDate("updated_on");
             final String street = rs.getString("street");
             final String bvn = rs.getString("bvn");
-            final String city = rs.getString("city");
+            final String nin = rs.getString("nin");
+            final String address1 = rs.getString("address1");
+            final String address2 = rs.getString("address2");
+            final String address3 = rs.getString("address3");
+            final String postalCode = rs.getString("postalCode");
             final Long imageId = JdbcSupport.getLong(rs, "imageId");
 
-            return ClientBusinessOwnerData.instance(id, clientId, firstName, titleName, titleId, lastName, ownership, userName, mobileNumber,
-                    alterMobileNumber, isActive, city, stateProvinceId, stateName, countryId, countryName, dateOfBirth, createdBy,
-                    createdOn, updatedBy, updatedOn, email, street, bvn, lga, null, null, null, null, null, imageId);
+            return ClientBusinessOwnerData.instance(id, clientId, firstName, titleName, titleId, lastName, ownership, typeId, typeName, cityId, cityName, mobileNumber,
+                    businessOwnerNumber, stateProvinceId, stateName, countryId, countryName, createdBy, createdOn, updatedBy, updatedOn, email,
+                    street, address1, address2, address3, postalCode, bvn, nin, landmark, null, null, null, null, null, imageId);
 
         }
     }

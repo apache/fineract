@@ -23,7 +23,6 @@ import com.google.gson.JsonObject;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
@@ -111,7 +110,15 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
         long titleId = jsonObject.get("titleId").getAsLong();
         titleIdCodeValue = codeValueRepository.getById(titleId);
 
-        ClientBusinessOwners owner = ClientBusinessOwners.fromJsonObject(jsonObject, client, titleIdCodeValue, stateIdCodeValue, countryIdCodeValue);
+        CodeValue typeIdCodeValue = null;
+        long typeId = jsonObject.get("typeId").getAsLong();
+        typeIdCodeValue = codeValueRepository.getById(typeId);
+
+        CodeValue cityIdCodeValue = null;
+        long cityId = jsonObject.get("cityId").getAsLong();
+        cityIdCodeValue = codeValueRepository.getById(cityId);
+
+        ClientBusinessOwners owner = ClientBusinessOwners.fromJsonObject(jsonObject, client, titleIdCodeValue, typeIdCodeValue, cityIdCodeValue, stateIdCodeValue, countryIdCodeValue);
         owner.setCreatedOn(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
         owner.setUpdatedOn(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
         return owner;
@@ -121,25 +128,28 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
     public CommandProcessingResult updateBusinessOwner(Long businessOwnerId, JsonCommand command) {
 
         String firstName = "";
-        String middleName = "";
         BigDecimal ownership = null;
-        String title = "";
         String email = "";
-        Date dateOfBirth = null;
         String mobileNumber = "";
-        String alterMobileNumber = "";
-        String username = "";
-        Boolean isActive = false;
+        String businessOwnerNumber = "";
         String streetNumberAndName = "";
-        String lga = "";
-        String city = "";
+        String landmark = "";
+        String address1 = "";
+        String address2 = "";
+        String address3 = "";
+        String postalCode = "";
         String bvn = "";
+        String nin = "";
         long stateId;
         long countryId;
         long titleId;
+        long cityId;
+        long typeId;
         CodeValue stateIdobj;
         CodeValue countryIdObj;
         CodeValue titleIdObj;
+        CodeValue cityIdObj;
+        CodeValue typeIdObj;
 
         boolean is_owner_update = false;
 
@@ -183,15 +193,9 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
             is_owner_update = true;
         }
 
-        if (command.stringValueOfParameterNamed("alterMobileNumber") != null) {
-            alterMobileNumber = command.stringValueOfParameterNamed("alterMobileNumber");
-            clientBusinessOwner.setAlterMobileNumber(alterMobileNumber);
-            is_owner_update = true;
-        }
-
-        if (command.booleanObjectValueOfParameterNamed("isActive") != null) {
-            isActive = command.booleanObjectValueOfParameterNamed("isActive");
-            clientBusinessOwner.setActive(isActive);
+        if (command.stringValueOfParameterNamed("businessOwnerNumber") != null) {
+            businessOwnerNumber = command.stringValueOfParameterNamed("businessOwnerNumber");
+            clientBusinessOwner.setBusinessOwnerNumber(businessOwnerNumber);
             is_owner_update = true;
         }
 
@@ -201,22 +205,33 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
             is_owner_update = true;
         }
 
-        if (command.stringValueOfParameterNamed("username") != null) {
-            alterMobileNumber = command.stringValueOfParameterNamed("username");
-            clientBusinessOwner.setUsername(username);
+        if (command.stringValueOfParameterNamed("address1") != null) {
+            address1 = command.stringValueOfParameterNamed("address1");
+            clientBusinessOwner.setAddress1(address1);
             is_owner_update = true;
         }
 
-        if (command.dateValueOfParameterNamed("dateOfBirth") != null) {
-            dateOfBirth = command.dateValueOfParameterNamedFromLocalDate("dateOfBirth");
-            clientBusinessOwner.setDateOfBirth(dateOfBirth);
+        if (command.stringValueOfParameterNamed("address2") != null) {
+            address2 = command.stringValueOfParameterNamed("address2");
+            clientBusinessOwner.setAddress2(address2);
             is_owner_update = true;
-
         }
 
-        if (command.stringValueOfParameterNamed("lga") != null) {
-            lga = command.stringValueOfParameterNamed("lga");
-            clientBusinessOwner.setLga(lga);
+        if (command.stringValueOfParameterNamed("address3") != null) {
+            address3 = command.stringValueOfParameterNamed("address3");
+            clientBusinessOwner.setAddress3(address3);
+            is_owner_update = true;
+        }
+
+        if (command.stringValueOfParameterNamed("postalCode") != null) {
+            postalCode = command.stringValueOfParameterNamed("postalCode");
+            clientBusinessOwner.setPostalCode(postalCode);
+            is_owner_update = true;
+        }
+
+        if (command.stringValueOfParameterNamed("landmark") != null) {
+            landmark = command.stringValueOfParameterNamed("landmark");
+            clientBusinessOwner.setlandmark(landmark);
             is_owner_update = true;
         }
 
@@ -226,10 +241,30 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
             is_owner_update = true;
         }
 
-        if (command.stringValueOfParameterNamed("city") != null) {
-            city = command.stringValueOfParameterNamed("city");
-            clientBusinessOwner.setCity(city);
+        if (command.stringValueOfParameterNamed("nin") != null) {
+            nin = command.stringValueOfParameterNamed("nin");
+            clientBusinessOwner.setNin(nin);
             is_owner_update = true;
+        }
+
+        if (command.longValueOfParameterNamed("typeId") != null) {
+            if (command.longValueOfParameterNamed("typeId") != 0) {
+                is_owner_update = true;
+                typeId = command.longValueOfParameterNamed("typeId");
+                typeIdObj = this.codeValueRepository.getById(typeId);
+                clientBusinessOwner.setType(typeIdObj);
+            }
+
+        }
+
+        if (command.longValueOfParameterNamed("cityId") != null) {
+            if (command.longValueOfParameterNamed("cityId") != 0) {
+                is_owner_update = true;
+                cityId = command.longValueOfParameterNamed("cityId");
+                cityIdObj = this.codeValueRepository.getById(cityId);
+                clientBusinessOwner.setCity(cityIdObj);
+            }
+
         }
 
         if (command.longValueOfParameterNamed("stateProvinceId") != null) {
@@ -241,6 +276,7 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
             }
 
         }
+
         if (command.longValueOfParameterNamed("countryId") != null) {
             if (command.longValueOfParameterNamed("countryId") != 0) {
                 is_owner_update = true;
@@ -259,23 +295,4 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(clientBusinessOwner.getId()).build();
     }
-
-    @Override
-    public ClientBusinessOwners updateBusinessOwnerStatus(Long businessOwnerId, Boolean status) {
-
-        this.context.authenticatedUser();
-
-        ClientBusinessOwners clientBusinessOwner = this.businessOwnerRepository.findById(businessOwnerId)
-                .orElseThrow(() -> new ClientBusinessOwnerNotFoundException(businessOwnerId));
-
-        if (status != null) {
-            clientBusinessOwner.setActive(status);
-        }
-
-        clientBusinessOwner.setUpdatedOn(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
-        this.businessOwnerRepository.save(clientBusinessOwner);
-
-        return clientBusinessOwner;
-    }
-
 }

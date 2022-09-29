@@ -40,47 +40,60 @@
                 <constraints nullable="false" />
             </column>
             <column defaultValueComputed="NULL" name="ownership" type="DECIMAL(5, 2)"/>
+            <column name="title_id" type="int">
+                <constraints nullable="true" foreignKeyName="client_business_owner_Fk_m_title_id"
+                             references="m_code_value(id)"/>
+            </column>
+            <column name="bvn" type="varchar(200)">
+                <constraints nullable="true" />
+            </column>
+            <column name="nin" type="varchar(200)">
+                <constraints nullable="true" />
+            </column>
+            <column name="mobile_number" type="varchar(200)">
+                <constraints nullable="false"/>
+            </column>
             <column name="email" type="varchar(100)" >
                 <constraints nullable="false" unique="true"/>
             </column>
-            <column name="is_active" defaultValueBoolean="false" type="boolean">
-                <constraints nullable="false" />
+            <column name="type_id" type="int">
+                <constraints nullable="true" foreignKeyName="client_business_owner_Fk_m_type_id"
+                             references="m_code_value(id)"/>
             </column>
-            <column name="username" type="varchar(100)">
+            <column name="business_owner_number" type="varchar(200)">
                 <constraints nullable="true" />
             </column>
-            <column name="date_of_birth" type="date">
+            <column name="street" type="varchar(200)">
                 <constraints nullable="false" />
             </column>
-            <column name="lga" type="varchar(500)">
-                <constraints nullable="false" />
+            <column name="address1" type="varchar(200)">
+                <constraints nullable="true" />
             </column>
-            <column name="title_id" type="int">
-                <constraints nullable="false" foreignKeyName="client_business_owner_Fk_m_title_id"
+            <column name="address2" type="varchar(200)">
+                <constraints nullable="true" />
+            </column>
+            <column name="address3" type="varchar(200)">
+                <constraints nullable="true" />
+            </column>
+            <column name="landmark" type="varchar(500)">
+                <constraints nullable="true" />
+            </column>
+            <column name="city_id" type="int">
+                <constraints nullable="false" foreignKeyName="client_business_owner_Fk_m_city_id"
+                             references="m_code_value(id)"/>
+            </column>
+            <column name="state_province_id" type="int">
+                <constraints nullable="false" foreignKeyName="client_business_owner_Fk_m_state_province_id"
                              references="m_code_value(id)"/>
             </column>
             <column name="country_id" type="int">
                 <constraints nullable="false" foreignKeyName="client_business_owner_Fk_m_country_id"
                              references="m_code_value(id)"/>
             </column>
-            <column name="mobile_number" type="varchar(200)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="state_province_id" type="int">
-                <constraints nullable="false" foreignKeyName="client_business_owner_Fk_m_state_province_id" references="m_code_value(id)"/>
-            </column>
-            <column name="alter_mobile_number" type="varchar(200)">
+            <column name="postal_code" type="varchar(100)">
                 <constraints nullable="true" />
             </column>
-            <column name="bvn" type="varchar(200)">
-                <constraints nullable="true" />
-            </column>
-            <column name="city" type="varchar(200)">
-                <constraints nullable="false" />
-            </column>
-            <column name="street" type="varchar(200)">
-                <constraints nullable="false" />
-            </column>
+
             <column name="created_by" type="varchar(200)">
                 <constraints nullable="false" />
             </column>

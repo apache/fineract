@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.client.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Date;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
@@ -47,25 +46,35 @@ public final class ClientBusinessOwnerData implements Serializable {
 
     private BigDecimal ownership;
 
-    private final LocalDate dateOfBirth;
-
     private final String mobileNumber;
 
-    private final String alterMobileNumber;
+    private final String businessOwnerNumber;
 
     private String email;
 
+    private Long typeId;
+
+    private String typeName;
+
+    private Long cityId;
+
+    private String cityName;
+
     private String streetNumberAndName;
 
-    private final Boolean isActive;
+    private String address1;
 
-    private String username;
+    private String address2;
 
-    private String city;
+    private String address3;
 
-    private String lga;
+    private String postalCode;
+
+    private String landmark;
 
     private String bvn;
+
+    private String nin;
 
     private String createdBy;
 
@@ -93,10 +102,10 @@ public final class ClientBusinessOwnerData implements Serializable {
     private final Collection<CodeValueData> typeIdOptions;
 
     private ClientBusinessOwnerData(final Long id, final Long clientId, final String firstName, final String titleName, final Long titleId,
-            final String lastName, final BigDecimal ownership, final String username, final String mobileNumber, final String alterMobileNumber, final Boolean isActive,
-            final String city, final Long stateProvinceId, final String stateName, final Long countryId, final String countryName,
-            final LocalDate dateOfBirth, final String createdBy, final Date createdOn, final String updatedBy, final Date updatedOn,
-            String email, String streetNumberAndName, String bvn, String lga, final Collection<CodeValueData> countryIdOptions,
+            final String lastName, final BigDecimal ownership, final Long typeId, final String typeName, final Long cityId, final String cityName,
+            final String mobileNumber, final String businessOwnerNumber, final Long stateProvinceId, final String stateName, final Long countryId, final String countryName,
+            final String createdBy, final Date createdOn, final String updatedBy, final Date updatedOn, final String email, final String streetNumberAndName,
+            final String address1, final String address2, final String address3, final String postalCode, String bvn, String nin, String landmark, final Collection<CodeValueData> countryIdOptions,
             final Collection<CodeValueData> stateProvinceIdOptions, final Collection<CodeValueData> cityIdOptions, final Collection<CodeValueData> titleIdOptions,
             final Collection<CodeValueData> typeIdOptions, final Long imageId) {
         this.id = id;
@@ -106,14 +115,14 @@ public final class ClientBusinessOwnerData implements Serializable {
         this.titleId = titleId;
         this.lastName = lastName;
         this.ownership = ownership;
-        this.username = username;
         this.email = email;
-        this.isActive = isActive;
-        this.city = city;
         this.stateProvinceId = stateProvinceId;
         this.stateName = stateName;
+        this.typeId = typeId;
+        this.typeName = typeName;
+        this.cityId = cityId;
+        this.cityName = cityName;
         this.countryId = countryId;
-        this.dateOfBirth = dateOfBirth;
         this.countryName = countryName;
         this.createdBy = createdBy;
         this.mobileNumber = mobileNumber;
@@ -121,9 +130,14 @@ public final class ClientBusinessOwnerData implements Serializable {
         this.updatedBy = updatedBy;
         this.updatedOn = updatedOn;
         this.streetNumberAndName = streetNumberAndName;
+        this.address1 = address1;
+        this.address2 = address2;
+        this.address3 = address3;
+        this.postalCode = postalCode;
         this.bvn = bvn;
-        this.lga = lga;
-        this.alterMobileNumber = alterMobileNumber;
+        this.nin = nin;
+        this.landmark = landmark;
+        this.businessOwnerNumber = businessOwnerNumber;
         this.stateProvinceIdOptions = stateProvinceIdOptions;
         this.countryIdOptions = countryIdOptions;
         this.cityIdOptions = cityIdOptions;
@@ -147,16 +161,17 @@ public final class ClientBusinessOwnerData implements Serializable {
         final String titleName = null;
         final String lastName = null;
         final BigDecimal ownership = null;
-        final LocalDate dateOfBirth = null;
         final String mobileNumber = null;
-        final String alterMobileNumber = null;
+        final String businessOwnerNumber = null;
         String email = null;
         String streetNumberAndName = null;
-        final Boolean isActive = null;
-        String username = null;
-        String city = null;
-        String lga = null;
+        String address1 = null;
+        String address2 = null;
+        String address3 = null;
+        String postalCode = null;
+        String landmark = null;
         String bvn = null;
+        String nin = null;
         String createdBy = null;
         Date createdOn = null;
         String updatedBy = null;
@@ -166,22 +181,26 @@ public final class ClientBusinessOwnerData implements Serializable {
         String countryName = null;
         String stateName = null;
         Long titleId = null;
+        Long cityId = null;
+        String cityName = null;
+        Long typeId = null;
+        String typeName = null;
 
-        return new ClientBusinessOwnerData(id, clientId, firstName, titleName, titleId, lastName, ownership, username, mobileNumber, alterMobileNumber,
-                isActive, city, stateProvinceId, stateName, countryId, countryName, dateOfBirth, createdBy, createdOn, updatedBy, updatedOn,
-                email, streetNumberAndName, bvn, lga, countryIdOptions, stateProvinceIdOptions, cityIdOptions, titleIdOptions, typeIdOptions, null);
+        return new ClientBusinessOwnerData(id, clientId, firstName, titleName, titleId, lastName, ownership, typeId, typeName, cityId, cityName,
+                mobileNumber, businessOwnerNumber, stateProvinceId, stateName, countryId, countryName, createdBy, createdOn, updatedBy, updatedOn,
+                email, streetNumberAndName, address1, address2, address3, postalCode, bvn, nin, landmark, countryIdOptions, stateProvinceIdOptions, cityIdOptions, titleIdOptions, typeIdOptions, null);
     }
 
     public static ClientBusinessOwnerData instance(final Long id, final Long clientId, final String firstName, final String titleName, final Long titleId,
-            final String lastName, final BigDecimal ownership, final String username, final String mobileNumber, final String alterMobileNumber, final Boolean isActive,
-            final String city, final Long stateProvinceId, final String stateName, final Long countryId, final String countryName,
-            final LocalDate dateOfBirth, final String createdBy, final Date createdOn, final String updatedBy, final Date updatedOn,
-            String email, String streetNumberAndName, String bvn, String lga, final Collection<CodeValueData> countryIdOptions,
+            final String lastName, final BigDecimal ownership, final Long typeId, final String typeName, final Long cityId, final String cityName,
+            final String mobileNumber, final String businessOwnerNumber, final Long stateProvinceId, final String stateName, final Long countryId, final String countryName,
+            final String createdBy, final Date createdOn, final String updatedBy, final Date updatedOn,
+            String email, String streetNumberAndName, String address1, String address2, String address3, String postalCode, String bvn, String nin, String landmark, final Collection<CodeValueData> countryIdOptions,
             final Collection<CodeValueData> stateProvinceIdOptions, final Collection<CodeValueData> cityIdOptions, final Collection<CodeValueData> titleIdOptions,
             final Collection<CodeValueData> typeIdOptions, final Long imageId) {
-        return new ClientBusinessOwnerData(id, clientId, firstName,  titleName, titleId, lastName, ownership, username, mobileNumber, alterMobileNumber,
-                isActive, city, stateProvinceId, stateName, countryId, countryName, dateOfBirth, createdBy, createdOn, updatedBy, updatedOn,
-                email, streetNumberAndName, bvn, lga, countryIdOptions, stateProvinceIdOptions, cityIdOptions, titleIdOptions, typeIdOptions, imageId);
+        return new ClientBusinessOwnerData(id, clientId, firstName,  titleName, titleId, lastName, ownership, typeId, typeName, cityId, cityName,
+                mobileNumber, businessOwnerNumber, stateProvinceId, stateName, countryId, countryName, createdBy, createdOn, updatedBy, updatedOn,
+                email, streetNumberAndName, address1, address2, address3, postalCode, bvn, nin, landmark, countryIdOptions, stateProvinceIdOptions, cityIdOptions, titleIdOptions, typeIdOptions, imageId);
     }
 
     public String getEmail() {
@@ -200,28 +219,12 @@ public final class ClientBusinessOwnerData implements Serializable {
         this.streetNumberAndName = streetNumberAndName;
     }
 
-    public String getUsername() {
-        return username;
+    public String getlandmark() {
+        return landmark;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getLga() {
-        return lga;
-    }
-
-    public void setLga(String lga) {
-        this.lga = lga;
+    public void setlandmark(String landmark) {
+        this.landmark = landmark;
     }
 
     public String getBvn() {
@@ -316,20 +319,12 @@ public final class ClientBusinessOwnerData implements Serializable {
         return lastName;
     }
 
-    public LocalDate getDateOfBirth() {
-        return dateOfBirth;
-    }
-
     public String getMobileNumber() {
         return mobileNumber;
     }
 
-    public String getAlterMobileNumber() {
-        return alterMobileNumber;
-    }
-
-    public Boolean getIsActive() {
-        return isActive;
+    public String getBusinessOwnerNumber() {
+        return businessOwnerNumber;
     }
 
     public BigDecimal getOwnership() {
@@ -338,5 +333,45 @@ public final class ClientBusinessOwnerData implements Serializable {
 
     public long getTitleId() {
         return titleId;
+    }
+
+    public String getLandmark() {
+        return landmark;
+    }
+
+    public String getNin() {
+        return nin;
+    }
+
+    public Long getTypeId() {
+        return typeId;
+    }
+
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public Long getCityId() {
+        return cityId;
+    }
+
+    public String getCityName() {
+        return cityName;
+    }
+
+    public String getAddress1() {
+        return address1;
+    }
+
+    public String getAddress2() {
+        return address2;
+    }
+
+    public String getAddress3() {
+        return address3;
+    }
+
+    public String getPostalCode() {
+        return postalCode;
     }
 }
