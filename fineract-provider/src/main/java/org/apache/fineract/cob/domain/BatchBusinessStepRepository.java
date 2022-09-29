@@ -30,4 +30,6 @@ public interface BatchBusinessStepRepository extends JpaRepository<BatchBusiness
     @Query("SELECT DISTINCT bbs.jobName FROM BatchBusinessStep bbs")
     List<String> findConfiguredJobNames();
 
+    void deleteAllByJobName(String jobName);
+
 }

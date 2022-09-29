@@ -30,16 +30,15 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Table(name = "m_batch_business_steps")
 @NoArgsConstructor
 @Getter
+@Setter
 public class BatchBusinessStep extends AbstractPersistableCustom {
 
     @Column(name = "job_name", nullable = false)
     private String jobName;
 
-    @Setter
     @Column(name = "step_name", nullable = false)
     private String stepName;
 
-    @Setter
     @Column(name = "step_order", nullable = false)
     private Long stepOrder;
 
