@@ -52,11 +52,12 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
     @Column(name = "firstname")
     private String firstName;
 
-    @Column(name = "title")
-    private String title;
-
     @Column(name = "lastname")
     private String lastName;
+
+    @ManyToOne
+    @JoinColumn(name = "title_id")
+    private CodeValue title;
 
     @Column(name = "ownership", scale = 2, precision = 5, nullable = true)
     private BigDecimal ownership;
@@ -116,7 +117,7 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
     @JoinColumn(name = "image_id", nullable = true)
     private Image image;
 
-    private ClientBusinessOwners(final Client client, final String firstName, final String title, final String lastName,
+    private ClientBusinessOwners(final Client client, final String firstName, final CodeValue title, final String lastName,
             final BigDecimal ownership, final String email, final String mobileNumber, final String lga, final Boolean isActive, final Date dateOfBirth,
             final CodeValue stateProvince, final CodeValue country, final String bvn, final String username, final String alterMobileNumber,
             final String city, final String createdBy, final LocalDate createdOn, final String updatedBy, final LocalDate updatedOn,
@@ -155,10 +156,9 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
 
     }
 
-    public static ClientBusinessOwners fromJsonObject(final JsonObject jsonObject, final Client client, final CodeValue stateProvince,
+    public static ClientBusinessOwners fromJsonObject(final JsonObject jsonObject, final Client client,  final CodeValue title, final CodeValue stateProvince,
             final CodeValue country) {
         String firstName = "";
-        String title = "";
         String lastName = "";
         BigDecimal ownership = null;
         String email = "";
@@ -176,10 +176,6 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
 
         if (jsonObject.get("firstName") != null) {
             firstName = jsonObject.get("firstName").getAsString();
-        }
-
-        if (jsonObject.get("title") != null) {
-            title = jsonObject.get("title").getAsString();
         }
 
         if (jsonObject.get("lastName") != null) {
@@ -281,20 +277,20 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
         this.firstName = firstName;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
     public String getLastName() {
         return lastName;
     }
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public CodeValue getTitle() {
+        return title;
+    }
+
+    public void setTitle(CodeValue title) {
+        this.title = title;
     }
 
     public String getEmail() {

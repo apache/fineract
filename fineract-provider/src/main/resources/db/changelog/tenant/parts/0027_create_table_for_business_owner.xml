@@ -39,9 +39,6 @@
             <column name="lastname" type="varchar(100)">
                 <constraints nullable="false" />
             </column>
-            <column name="title" type="varchar(100)">
-                <constraints nullable="true"/>
-            </column>
             <column defaultValueComputed="NULL" name="ownership" type="DECIMAL(5, 2)"/>
             <column name="email" type="varchar(100)" >
                 <constraints nullable="false" unique="true"/>
@@ -57,6 +54,10 @@
             </column>
             <column name="lga" type="varchar(500)">
                 <constraints nullable="false" />
+            </column>
+            <column name="title_id" type="int">
+                <constraints nullable="false" foreignKeyName="client_business_owner_Fk_m_title_id"
+                             references="m_code_value(id)"/>
             </column>
             <column name="country_id" type="int">
                 <constraints nullable="false" foreignKeyName="client_business_owner_Fk_m_country_id"

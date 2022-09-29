@@ -39,7 +39,9 @@ public final class ClientBusinessOwnerData implements Serializable {
 
     private final String firstName;
 
-    private final String title;
+    private final Long titleId;
+
+    private final String titleName;
 
     private final String lastName;
 
@@ -86,17 +88,22 @@ public final class ClientBusinessOwnerData implements Serializable {
     // template holder
     private final Collection<CodeValueData> countryIdOptions;
     private final Collection<CodeValueData> stateProvinceIdOptions;
+    private final Collection<CodeValueData> cityIdOptions;
+    private final Collection<CodeValueData> titleIdOptions;
+    private final Collection<CodeValueData> typeIdOptions;
 
-    private ClientBusinessOwnerData(final Long id, final Long clientId, final String firstName, final String title,
+    private ClientBusinessOwnerData(final Long id, final Long clientId, final String firstName, final String titleName, final Long titleId,
             final String lastName, final BigDecimal ownership, final String username, final String mobileNumber, final String alterMobileNumber, final Boolean isActive,
             final String city, final Long stateProvinceId, final String stateName, final Long countryId, final String countryName,
             final LocalDate dateOfBirth, final String createdBy, final Date createdOn, final String updatedBy, final Date updatedOn,
             String email, String streetNumberAndName, String bvn, String lga, final Collection<CodeValueData> countryIdOptions,
-            final Collection<CodeValueData> stateProvinceIdOptions, final Long imageId) {
+            final Collection<CodeValueData> stateProvinceIdOptions, final Collection<CodeValueData> cityIdOptions, final Collection<CodeValueData> titleIdOptions,
+            final Collection<CodeValueData> typeIdOptions, final Long imageId) {
         this.id = id;
         this.clientId = clientId;
         this.firstName = firstName;
-        this.title = title;
+        this.titleName = titleName;
+        this.titleId = titleId;
         this.lastName = lastName;
         this.ownership = ownership;
         this.username = username;
@@ -119,6 +126,9 @@ public final class ClientBusinessOwnerData implements Serializable {
         this.alterMobileNumber = alterMobileNumber;
         this.stateProvinceIdOptions = stateProvinceIdOptions;
         this.countryIdOptions = countryIdOptions;
+        this.cityIdOptions = cityIdOptions;
+        this.titleIdOptions = titleIdOptions;
+        this.typeIdOptions = typeIdOptions;
         this.imageId = imageId;
         if (imageId != null) {
             this.imagePresent = Boolean.TRUE;
@@ -129,11 +139,12 @@ public final class ClientBusinessOwnerData implements Serializable {
     }
 
     public static ClientBusinessOwnerData template(final Collection<CodeValueData> countryIdOptions,
-            final Collection<CodeValueData> stateProvinceIdOptions) {
+            final Collection<CodeValueData> stateProvinceIdOptions, final Collection<CodeValueData> cityIdOptions,
+            final Collection<CodeValueData> titleIdOptions, final Collection<CodeValueData> typeIdOptions) {
         final Long id = null;
         final Long clientId = null;
         final String firstName = null;
-        final String title = null;
+        final String titleName = null;
         final String lastName = null;
         final BigDecimal ownership = null;
         final LocalDate dateOfBirth = null;
@@ -154,21 +165,23 @@ public final class ClientBusinessOwnerData implements Serializable {
         Long countryId = null;
         String countryName = null;
         String stateName = null;
+        Long titleId = null;
 
-        return new ClientBusinessOwnerData(id, clientId, firstName, title, lastName, ownership, username, mobileNumber, alterMobileNumber,
+        return new ClientBusinessOwnerData(id, clientId, firstName, titleName, titleId, lastName, ownership, username, mobileNumber, alterMobileNumber,
                 isActive, city, stateProvinceId, stateName, countryId, countryName, dateOfBirth, createdBy, createdOn, updatedBy, updatedOn,
-                email, streetNumberAndName, bvn, lga, countryIdOptions, stateProvinceIdOptions, null);
+                email, streetNumberAndName, bvn, lga, countryIdOptions, stateProvinceIdOptions, cityIdOptions, titleIdOptions, typeIdOptions, null);
     }
 
-    public static ClientBusinessOwnerData instance(final Long id, final Long clientId, final String firstName, final String title,
+    public static ClientBusinessOwnerData instance(final Long id, final Long clientId, final String firstName, final String titleName, final Long titleId,
             final String lastName, final BigDecimal ownership, final String username, final String mobileNumber, final String alterMobileNumber, final Boolean isActive,
             final String city, final Long stateProvinceId, final String stateName, final Long countryId, final String countryName,
             final LocalDate dateOfBirth, final String createdBy, final Date createdOn, final String updatedBy, final Date updatedOn,
             String email, String streetNumberAndName, String bvn, String lga, final Collection<CodeValueData> countryIdOptions,
-            final Collection<CodeValueData> stateProvinceIdOptions, final Long imageId) {
-        return new ClientBusinessOwnerData(id, clientId, firstName, title, lastName, ownership, username, mobileNumber, alterMobileNumber,
+            final Collection<CodeValueData> stateProvinceIdOptions, final Collection<CodeValueData> cityIdOptions, final Collection<CodeValueData> titleIdOptions,
+            final Collection<CodeValueData> typeIdOptions, final Long imageId) {
+        return new ClientBusinessOwnerData(id, clientId, firstName,  titleName, titleId, lastName, ownership, username, mobileNumber, alterMobileNumber,
                 isActive, city, stateProvinceId, stateName, countryId, countryName, dateOfBirth, createdBy, createdOn, updatedBy, updatedOn,
-                email, streetNumberAndName, bvn, lga, countryIdOptions, stateProvinceIdOptions, imageId);
+                email, streetNumberAndName, bvn, lga, countryIdOptions, stateProvinceIdOptions, cityIdOptions, titleIdOptions, typeIdOptions, imageId);
     }
 
     public String getEmail() {
@@ -295,8 +308,8 @@ public final class ClientBusinessOwnerData implements Serializable {
         return firstName;
     }
 
-    public String getTitle() {
-        return title;
+    public String getTitleName() {
+        return titleName;
     }
 
     public String getLastName() {
@@ -321,5 +334,9 @@ public final class ClientBusinessOwnerData implements Serializable {
 
     public BigDecimal getOwnership() {
         return ownership;
+    }
+
+    public long getTitleId() {
+        return titleId;
     }
 }

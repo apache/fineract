@@ -55,14 +55,14 @@ public class ClientBusinessOwnerReadPlatformServiceImpl implements ClientBusines
     private static final class ClientBusinessOwnerMapper implements RowMapper<ClientBusinessOwnerData> {
 
         public String schema() {
-            return "fmb.id AS id, fmb.client_id AS clientId, fmb.firstname AS firstName, fmb.title AS title,"
+            return "fmb.id AS id, fmb.client_id AS clientId, fmb.firstname AS firstName, fmb.title_id AS title_id, tc.code_value as title_name,"
                     + "fmb.lastname AS lastName, fmb.ownership AS ownership, fmb.email AS email,fmb.mobile_number as mobileNumber,fmb.alter_mobile_number as alterMobileNumber,"
                     + "fmb.is_active as isActive, fmb.lga as lga, fmb.bvn as bvn, fmb.city as city, fmb.street as street, "
                     + "fmb.state_province_id as state_province_id,cv.code_value as state_name, fmb.country_id as country_id,c.code_value as country_name,"
                     + "fmb.created_by as created_by,fmb.created_on as created_on,fmb.updated_by as updated_by,"
                     + "fmb.updated_on as updated_on," + "fmb.date_of_birth AS dateOfBirth, fmb.username as userName, fmb.image_id as imageId "
                     + " FROM m_business_owners fmb" + " left join m_code_value cv on fmb.state_province_id=cv.id"
-                    + " left join  m_code_value c on fmb.country_id=c.id";
+                    + " left join m_code_value tc on fmb.title_id=tc.id" + " left join  m_code_value c on fmb.country_id=c.id";
         }
 
         @Override
@@ -70,7 +70,8 @@ public class ClientBusinessOwnerReadPlatformServiceImpl implements ClientBusines
             final long id = rs.getLong("id");
             final long clientId = rs.getLong("clientId");
             final String firstName = rs.getString("firstName");
-            final String title = rs.getString("title");
+            final long titleId = rs.getLong("title_id");
+            final String titleName = rs.getString("title_name");
             final String lastName = rs.getString("lastName");
             final BigDecimal ownership = rs.getBigDecimal("ownership");
             final String userName = rs.getString("userName");
@@ -93,9 +94,9 @@ public class ClientBusinessOwnerReadPlatformServiceImpl implements ClientBusines
             final String city = rs.getString("city");
             final Long imageId = JdbcSupport.getLong(rs, "imageId");
 
-            return ClientBusinessOwnerData.instance(id, clientId, firstName, title, lastName, ownership, userName, mobileNumber,
+            return ClientBusinessOwnerData.instance(id, clientId, firstName, titleName, titleId, lastName, ownership, userName, mobileNumber,
                     alterMobileNumber, isActive, city, stateProvinceId, stateName, countryId, countryName, dateOfBirth, createdBy,
-                    createdOn, updatedBy, updatedOn, email, street, bvn, lga, null, null, imageId);
+                    createdOn, updatedBy, updatedOn, email, street, bvn, lga, null, null, null, null, null, imageId);
 
         }
     }
@@ -129,7 +130,13 @@ public class ClientBusinessOwnerReadPlatformServiceImpl implements ClientBusines
 
         final List<CodeValueData> StateOptions = new ArrayList<>(this.codeValueReadPlatformService.retrieveCodeValuesByCode("STATE"));
 
-        return ClientBusinessOwnerData.template(countryoptions, StateOptions);
+        final List<CodeValueData> cityOptions = new ArrayList<>(this.codeValueReadPlatformService.retrieveCodeValuesByCode("CITY"));
+
+        final List<CodeValueData> titleOptions = new ArrayList<>(this.codeValueReadPlatformService.retrieveCodeValuesByCode("TITLE"));
+
+        final List<CodeValueData> typeOptions = new ArrayList<>(this.codeValueReadPlatformService.retrieveCodeValuesByCode("TYPE"));
+
+        return ClientBusinessOwnerData.template(countryoptions, StateOptions, cityOptions, titleOptions, typeOptions);
     }
 
 }

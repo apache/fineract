@@ -107,7 +107,11 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
         long countryId = jsonObject.get("countryId").getAsLong();
         countryIdCodeValue = codeValueRepository.getById(countryId);
 
-        ClientBusinessOwners owner = ClientBusinessOwners.fromJsonObject(jsonObject, client, stateIdCodeValue, countryIdCodeValue);
+        CodeValue titleIdCodeValue = null;
+        long titleId = jsonObject.get("titleId").getAsLong();
+        titleIdCodeValue = codeValueRepository.getById(titleId);
+
+        ClientBusinessOwners owner = ClientBusinessOwners.fromJsonObject(jsonObject, client, titleIdCodeValue, stateIdCodeValue, countryIdCodeValue);
         owner.setCreatedOn(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
         owner.setUpdatedOn(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
         return owner;
@@ -132,8 +136,10 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
         String bvn = "";
         long stateId;
         long countryId;
+        long titleId;
         CodeValue stateIdobj;
         CodeValue countryIdObj;
+        CodeValue titleIdObj;
 
         boolean is_owner_update = false;
 
@@ -150,16 +156,13 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
             is_owner_update = true;
         }
 
-        if (command.stringValueOfParameterNamed("middleName") != null) {
-            middleName = command.stringValueOfParameterNamed("middleName");
-            clientBusinessOwner.setTitle(middleName);
-            is_owner_update = true;
-        }
-
-        if (command.stringValueOfParameterNamed("title") != null) {
-            title = command.stringValueOfParameterNamed("title");
-            clientBusinessOwner.setTitle(title);
-            is_owner_update = true;
+        if (command.longValueOfParameterNamed("titleId") != null) {
+            if (command.longValueOfParameterNamed("titleId") != 0) {
+                is_owner_update = true;
+                titleId = command.longValueOfParameterNamed("titleId");
+                titleIdObj = this.codeValueRepository.getById(titleId);
+                clientBusinessOwner.setTitle(titleIdObj);
+            }
         }
 
         if (command.stringValueOfParameterNamed("ownership") != null) {
