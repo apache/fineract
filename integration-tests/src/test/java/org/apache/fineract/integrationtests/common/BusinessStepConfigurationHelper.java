@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.data.BusinessStep;
 import org.apache.fineract.cob.data.JobBusinessStepConfigData;
 import org.apache.fineract.cob.data.JobBusinessStepDetail;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 
 @Slf4j
 public final class BusinessStepConfigurationHelper {
@@ -45,6 +46,10 @@ public final class BusinessStepConfigurationHelper {
 
     private static JobBusinessStepConfigData configuredBusinessStepFromJsonString(final String json) {
         return new Gson().fromJson(json, new TypeToken<JobBusinessStepConfigData>() {}.getType());
+    }
+
+    private static ApiParameterError configuredApiParameterErrorFromJsonString(final String json) {
+        return new Gson().fromJson(json, new TypeToken<ApiParameterError>() {}.getType());
     }
 
     private static JobBusinessStepDetail availableBusinessStepFromJsonString(final String json) {
@@ -72,6 +77,14 @@ public final class BusinessStepConfigurationHelper {
         String response = Utils.performServerPut(requestSpec, responseSpec,
                 BUSINESS_STEPS_API_URL_START + jobName + BUSINESS_STEPS_API_URL_END, jsonBodyToSend);
         log.info("BusinessStepConfigurationHelper Response: {}", response);
+    }
+
+    public static ApiParameterError updateBusinessStepOrderWithError(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, String jobName, String jsonBodyToSend) {
+        String response = Utils.performServerPut(requestSpec, responseSpec,
+                BUSINESS_STEPS_API_URL_START + jobName + BUSINESS_STEPS_API_URL_END, jsonBodyToSend);
+        log.info("BusinessStepConfigurationHelper Response: {}", response);
+        return BusinessStepConfigurationHelper.configuredApiParameterErrorFromJsonString(response);
     }
 
     private static final class BusinessStepWrapper {
