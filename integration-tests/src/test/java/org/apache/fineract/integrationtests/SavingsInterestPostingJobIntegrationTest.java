@@ -215,7 +215,7 @@ public class SavingsInterestPostingJobIntegrationTest {
         for (Map.Entry<String, Object> entry : interestPostingTransaction.entrySet()) {
             LOG.info("{} - {}", entry.getKey(), entry.getValue().toString());
         }
-        assertEquals("800.4932", interestPostingTransaction.get("runningBalance").toString(), "Equality check for Balance");
+        assertEquals("800.4384", interestPostingTransaction.get("runningBalance").toString(), "Equality check for Balance");
     }
 
     private Integer createSavingsAccountDailyPosting(final Integer clientID, final String startDate) {
