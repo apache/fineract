@@ -33,10 +33,10 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientBusinessOwnerRepository;
 import org.apache.fineract.portfolio.client.domain.ClientBusinessOwners;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
+import org.apache.fineract.portfolio.client.exception.ClientBusinessOwnerNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.apache.fineract.portfolio.client.exception.ClientBusinessOwnerNotFoundException;
 
 @Service
 public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePlatformService {
@@ -100,9 +100,9 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
             this.staffRepositoryWrapper.save(staff);
 
         } else if (EntityTypeForImages.BUSINESSOWNER.toString().equals(entityName)) {
-        	owner = this.clientBusinessOwnerRepository.findById(clientId)
+            owner = this.clientBusinessOwnerRepository.findById(clientId)
                     .orElseThrow(() -> new ClientBusinessOwnerNotFoundException(clientId));
-        	ClientBusinessOwners businessOwner = (ClientBusinessOwners) owner;
+            ClientBusinessOwners businessOwner = (ClientBusinessOwners) owner;
             image = businessOwner.getImage();
             businessOwner.setImage(null);
             this.clientBusinessOwnerRepository.save(businessOwner);

@@ -102,11 +102,13 @@ public final class ClientBusinessOwnerData implements Serializable {
     private final Collection<CodeValueData> typeIdOptions;
 
     private ClientBusinessOwnerData(final Long id, final Long clientId, final String firstName, final String titleName, final Long titleId,
-            final String lastName, final BigDecimal ownership, final Long typeId, final String typeName, final Long cityId, final String cityName,
-            final String mobileNumber, final String businessOwnerNumber, final Long stateProvinceId, final String stateName, final Long countryId, final String countryName,
-            final String createdBy, final Date createdOn, final String updatedBy, final Date updatedOn, final String email, final String streetNumberAndName,
-            final String address1, final String address2, final String address3, final String postalCode, String bvn, String nin, String landmark, final Collection<CodeValueData> countryIdOptions,
-            final Collection<CodeValueData> stateProvinceIdOptions, final Collection<CodeValueData> cityIdOptions, final Collection<CodeValueData> titleIdOptions,
+            final String lastName, final BigDecimal ownership, final Long typeId, final String typeName, final Long cityId,
+            final String cityName, final String mobileNumber, final String businessOwnerNumber, final Long stateProvinceId,
+            final String stateName, final Long countryId, final String countryName, final String createdBy, final Date createdOn,
+            final String updatedBy, final Date updatedOn, final String email, final String streetNumberAndName, final String address1,
+            final String address2, final String address3, final String postalCode, String bvn, String nin, String landmark,
+            final Collection<CodeValueData> countryIdOptions, final Collection<CodeValueData> stateProvinceIdOptions,
+            final Collection<CodeValueData> cityIdOptions, final Collection<CodeValueData> titleIdOptions,
             final Collection<CodeValueData> typeIdOptions, final Long imageId) {
         this.id = id;
         this.clientId = clientId;
@@ -186,21 +188,25 @@ public final class ClientBusinessOwnerData implements Serializable {
         Long typeId = null;
         String typeName = null;
 
-        return new ClientBusinessOwnerData(id, clientId, firstName, titleName, titleId, lastName, ownership, typeId, typeName, cityId, cityName,
-                mobileNumber, businessOwnerNumber, stateProvinceId, stateName, countryId, countryName, createdBy, createdOn, updatedBy, updatedOn,
-                email, streetNumberAndName, address1, address2, address3, postalCode, bvn, nin, landmark, countryIdOptions, stateProvinceIdOptions, cityIdOptions, titleIdOptions, typeIdOptions, null);
+        return new ClientBusinessOwnerData(id, clientId, firstName, titleName, titleId, lastName, ownership, typeId, typeName, cityId,
+                cityName, mobileNumber, businessOwnerNumber, stateProvinceId, stateName, countryId, countryName, createdBy, createdOn,
+                updatedBy, updatedOn, email, streetNumberAndName, address1, address2, address3, postalCode, bvn, nin, landmark,
+                countryIdOptions, stateProvinceIdOptions, cityIdOptions, titleIdOptions, typeIdOptions, null);
     }
 
-    public static ClientBusinessOwnerData instance(final Long id, final Long clientId, final String firstName, final String titleName, final Long titleId,
-            final String lastName, final BigDecimal ownership, final Long typeId, final String typeName, final Long cityId, final String cityName,
-            final String mobileNumber, final String businessOwnerNumber, final Long stateProvinceId, final String stateName, final Long countryId, final String countryName,
-            final String createdBy, final Date createdOn, final String updatedBy, final Date updatedOn,
-            String email, String streetNumberAndName, String address1, String address2, String address3, String postalCode, String bvn, String nin, String landmark, final Collection<CodeValueData> countryIdOptions,
-            final Collection<CodeValueData> stateProvinceIdOptions, final Collection<CodeValueData> cityIdOptions, final Collection<CodeValueData> titleIdOptions,
+    public static ClientBusinessOwnerData instance(final Long id, final Long clientId, final String firstName, final String titleName,
+            final Long titleId, final String lastName, final BigDecimal ownership, final Long typeId, final String typeName,
+            final Long cityId, final String cityName, final String mobileNumber, final String businessOwnerNumber,
+            final Long stateProvinceId, final String stateName, final Long countryId, final String countryName, final String createdBy,
+            final Date createdOn, final String updatedBy, final Date updatedOn, String email, String streetNumberAndName, String address1,
+            String address2, String address3, String postalCode, String bvn, String nin, String landmark,
+            final Collection<CodeValueData> countryIdOptions, final Collection<CodeValueData> stateProvinceIdOptions,
+            final Collection<CodeValueData> cityIdOptions, final Collection<CodeValueData> titleIdOptions,
             final Collection<CodeValueData> typeIdOptions, final Long imageId) {
-        return new ClientBusinessOwnerData(id, clientId, firstName,  titleName, titleId, lastName, ownership, typeId, typeName, cityId, cityName,
-                mobileNumber, businessOwnerNumber, stateProvinceId, stateName, countryId, countryName, createdBy, createdOn, updatedBy, updatedOn,
-                email, streetNumberAndName, address1, address2, address3, postalCode, bvn, nin, landmark, countryIdOptions, stateProvinceIdOptions, cityIdOptions, titleIdOptions, typeIdOptions, imageId);
+        return new ClientBusinessOwnerData(id, clientId, firstName, titleName, titleId, lastName, ownership, typeId, typeName, cityId,
+                cityName, mobileNumber, businessOwnerNumber, stateProvinceId, stateName, countryId, countryName, createdBy, createdOn,
+                updatedBy, updatedOn, email, streetNumberAndName, address1, address2, address3, postalCode, bvn, nin, landmark,
+                countryIdOptions, stateProvinceIdOptions, cityIdOptions, titleIdOptions, typeIdOptions, imageId);
     }
 
     public String getEmail() {

@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.client.service;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
@@ -58,10 +57,10 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
         JsonObject jsonObject = command.parsedJson().getAsJsonObject();
         context.authenticatedUser();
         fromApiJsonDeserializer.validateForCreate(clientId, jsonObject.toString());
-        
-        ClientBusinessOwners data =  this.businessOwnerRepository.findByEmail(jsonObject.get("email").getAsString());
-        if(data != null) {
-        	throw new EmailAlreadyExistsException(data.getEmail());
+
+        ClientBusinessOwners data = this.businessOwnerRepository.findByEmail(jsonObject.get("email").getAsString());
+        if (data != null) {
+            throw new EmailAlreadyExistsException(data.getEmail());
         }
         final Client client = clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
 
@@ -81,12 +80,12 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
                 final JsonObject jsonObject = ownersArray.get(i).getAsJsonObject();
 
                 fromApiJsonDeserializer.validateForCreate(client.getId(), jsonObject.toString());
-                ClientBusinessOwners data =  this.businessOwnerRepository.findByEmail(jsonObject.get("email").getAsString());
-                if(data != null) {
-                	throw new EmailAlreadyExistsException(data.getEmail());
-                }else {
-                  businessOwner = createBusinessOwner(jsonObject, client);
-                  businessOwnerRepository.save(businessOwner);
+                ClientBusinessOwners data = this.businessOwnerRepository.findByEmail(jsonObject.get("email").getAsString());
+                if (data != null) {
+                    throw new EmailAlreadyExistsException(data.getEmail());
+                } else {
+                    businessOwner = createBusinessOwner(jsonObject, client);
+                    businessOwnerRepository.save(businessOwner);
                 }
             }
         }
@@ -118,7 +117,8 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
         long cityId = jsonObject.get("cityId").getAsLong();
         cityIdCodeValue = codeValueRepository.getById(cityId);
 
-        ClientBusinessOwners owner = ClientBusinessOwners.fromJsonObject(jsonObject, client, titleIdCodeValue, typeIdCodeValue, cityIdCodeValue, stateIdCodeValue, countryIdCodeValue);
+        ClientBusinessOwners owner = ClientBusinessOwners.fromJsonObject(jsonObject, client, titleIdCodeValue, typeIdCodeValue,
+                cityIdCodeValue, stateIdCodeValue, countryIdCodeValue);
         owner.setCreatedOn(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
         owner.setUpdatedOn(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
         return owner;
