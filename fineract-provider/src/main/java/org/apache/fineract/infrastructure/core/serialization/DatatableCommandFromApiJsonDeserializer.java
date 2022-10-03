@@ -123,7 +123,6 @@ public class DatatableCommandFromApiJsonDeserializer {
         baseDataValidator.reset().parameter("apptableName").value(apptableName).notBlank().notExceedingLengthOf(50)
                 .isOneOfTheseValues(this.supportedApptableNames);
 
-
         final String fkColumnName = (apptableName != null) ? apptableName.substring(2) + "_id" : "";
 
         final Boolean multiRow = this.fromApiJsonHelper.extractBooleanNamed("multiRow", element);

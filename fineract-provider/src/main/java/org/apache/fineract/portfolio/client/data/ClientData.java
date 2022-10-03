@@ -119,7 +119,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
     private Long clientClassificationId;
     private Long legalFormId;
     private LocalDate submittedOnDate;
-    
+
     private final Collection<ClientBusinessOwnerData> ownersData;
 
     private final Boolean isBusinessOwnerEnabled;
@@ -303,7 +303,8 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
             final Collection<CodeValueData> clientNonPersonConstitutionOptions,
             final Collection<CodeValueData> clientNonPersonMainBusinessLineOptions, final List<EnumOptionData> clientLegalFormOptions,
             final ClientFamilyMembersData familyMemberOptions, final Collection<AddressData> address, final Boolean isAddressEnabled,
-            final List<DatatableData> datatables, final Collection<ClientBusinessOwnerData> ownersData, final Boolean isBusinessOwnerEnabled) {
+            final List<DatatableData> datatables, final Collection<ClientBusinessOwnerData> ownersData,
+            final Boolean isBusinessOwnerEnabled) {
         final String accountNo = null;
         final EnumOptionData status = null;
         final CodeValueData subStatus = null;
@@ -550,7 +551,8 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
             final List<EnumOptionData> clientLegalFormOptions, final ClientFamilyMembersData familyMemberOptions,
             final EnumOptionData legalForm, final Collection<AddressData> address, final Boolean isAddressEnabled,
             final List<DatatableData> datatables, final Boolean isStaff,
-            final Set<ClientCollateralManagementData> clientCollateralManagements, final Collection<ClientBusinessOwnerData> ownersData, final Boolean isBusinessOwnerEnabled) {
+            final Set<ClientCollateralManagementData> clientCollateralManagements, final Collection<ClientBusinessOwnerData> ownersData,
+            final Boolean isBusinessOwnerEnabled) {
         this.accountNo = accountNo;
         this.status = status;
         if (status != null) {

@@ -45,8 +45,8 @@ public final class ClientBusinessOwnerCommandFromApiJsonDeserializer {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "clientId", "firstName", "titleId", "lastName",
-            "ownership", "email", "mobileNumber", "businessOwnerNumber", "cityId", "streetNumberAndName", "address1", "address2", "address3", "postalCode", "landmark",
-            "typeId", "stateProvinceId", "countryId", "bvn", "nin", "locale", "dateFormat"));
+            "ownership", "email", "mobileNumber", "businessOwnerNumber", "cityId", "streetNumberAndName", "address1", "address2",
+            "address3", "postalCode", "landmark", "typeId", "stateProvinceId", "countryId", "bvn", "nin", "locale", "dateFormat"));
 
     @Autowired
     public ClientBusinessOwnerCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
@@ -97,26 +97,22 @@ public final class ClientBusinessOwnerCommandFromApiJsonDeserializer {
 
         if (this.fromApiJsonHelper.extractStringNamed("address1", element) != null) {
             final String address1 = this.fromApiJsonHelper.extractStringNamed("address1", element);
-            baseDataValidator.reset().parameter("address1").value(address1).notNull().notBlank()
-                    .notExceedingLengthOf(100);
+            baseDataValidator.reset().parameter("address1").value(address1).notNull().notBlank().notExceedingLengthOf(100);
         }
 
         if (this.fromApiJsonHelper.extractStringNamed("address2", element) != null) {
             final String address2 = this.fromApiJsonHelper.extractStringNamed("address2", element);
-            baseDataValidator.reset().parameter("address2").value(address2).notNull().notBlank()
-                    .notExceedingLengthOf(100);
+            baseDataValidator.reset().parameter("address2").value(address2).notNull().notBlank().notExceedingLengthOf(100);
         }
 
         if (this.fromApiJsonHelper.extractStringNamed("address3", element) != null) {
             final String address3 = this.fromApiJsonHelper.extractStringNamed("address3", element);
-            baseDataValidator.reset().parameter("address3").value(address3).notNull().notBlank()
-                    .notExceedingLengthOf(100);
+            baseDataValidator.reset().parameter("address3").value(address3).notNull().notBlank().notExceedingLengthOf(100);
         }
 
         if (this.fromApiJsonHelper.extractStringNamed("postalCode", element) != null) {
             final String postalCode = this.fromApiJsonHelper.extractStringNamed("postalCode", element);
-            baseDataValidator.reset().parameter("postalCode").value(postalCode).notNull().notBlank()
-                    .notExceedingLengthOf(100);
+            baseDataValidator.reset().parameter("postalCode").value(postalCode).notNull().notBlank().notExceedingLengthOf(100);
         }
 
         final String street = this.fromApiJsonHelper.extractStringNamed("streetNumberAndName", element);

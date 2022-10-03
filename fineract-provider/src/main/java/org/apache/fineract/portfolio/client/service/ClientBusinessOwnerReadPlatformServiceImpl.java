@@ -61,10 +61,10 @@ public class ClientBusinessOwnerReadPlatformServiceImpl implements ClientBusines
                     + "fmb.postal_code as postalCode, fmb.landmark as landmark, fmb.bvn as bvn, fmb.nin as nin,  fmb.street as street, "
                     + "fmb.state_province_id as state_province_id, cv.code_value as state_name, fmb.country_id as country_id,c.code_value as country_name,"
                     + "fmb.created_by as created_by,fmb.created_on as created_on,fmb.updated_by as updated_by,"
-                    + "fmb.updated_on as updated_on," + " fmb.image_id as imageId "
-                    + " FROM m_business_owners fmb" + " left join m_code_value cv on fmb.state_province_id=cv.id"
-                    + " left join m_code_value cc on fmb.city_id=cc.id" + " left join  m_code_value type_code on fmb.type_id=type_code.id"
-                    + " left join m_code_value tc on fmb.title_id=tc.id" + " left join  m_code_value c on fmb.country_id=c.id";
+                    + "fmb.updated_on as updated_on," + " fmb.image_id as imageId " + " FROM m_business_owners fmb"
+                    + " left join m_code_value cv on fmb.state_province_id=cv.id" + " left join m_code_value cc on fmb.city_id=cc.id"
+                    + " left join  m_code_value type_code on fmb.type_id=type_code.id" + " left join m_code_value tc on fmb.title_id=tc.id"
+                    + " left join  m_code_value c on fmb.country_id=c.id";
         }
 
         @Override
@@ -101,9 +101,10 @@ public class ClientBusinessOwnerReadPlatformServiceImpl implements ClientBusines
             final String postalCode = rs.getString("postalCode");
             final Long imageId = JdbcSupport.getLong(rs, "imageId");
 
-            return ClientBusinessOwnerData.instance(id, clientId, firstName, titleName, titleId, lastName, ownership, typeId, typeName, cityId, cityName, mobileNumber,
-                    businessOwnerNumber, stateProvinceId, stateName, countryId, countryName, createdBy, createdOn, updatedBy, updatedOn, email,
-                    street, address1, address2, address3, postalCode, bvn, nin, landmark, null, null, null, null, null, imageId);
+            return ClientBusinessOwnerData.instance(id, clientId, firstName, titleName, titleId, lastName, ownership, typeId, typeName,
+                    cityId, cityName, mobileNumber, businessOwnerNumber, stateProvinceId, stateName, countryId, countryName, createdBy,
+                    createdOn, updatedBy, updatedOn, email, street, address1, address2, address3, postalCode, bvn, nin, landmark, null,
+                    null, null, null, null, imageId);
 
         }
     }

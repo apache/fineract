@@ -20,7 +20,6 @@
 package org.apache.fineract.portfolio.client.domain;
 
 import com.google.gson.JsonObject;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -123,10 +122,11 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
     private Image image;
 
     private ClientBusinessOwners(final Client client, final String firstName, final CodeValue title, final String lastName,
-            final BigDecimal ownership, final String email, final String mobileNumber, final String landmark, final CodeValue type, final CodeValue city,
-            final CodeValue stateProvince, final CodeValue country, final String bvn, final String nin, final String businessOwnerNumber,
-            final String createdBy, final LocalDate createdOn, final String updatedBy, final LocalDate updatedOn,
-            final String street, final String address1, final String address2, final String address3, final String postalCode) {
+            final BigDecimal ownership, final String email, final String mobileNumber, final String landmark, final CodeValue type,
+            final CodeValue city, final CodeValue stateProvince, final CodeValue country, final String bvn, final String nin,
+            final String businessOwnerNumber, final String createdBy, final LocalDate createdOn, final String updatedBy,
+            final LocalDate updatedOn, final String street, final String address1, final String address2, final String address3,
+            final String postalCode) {
 
         this.client = client;
         this.firstName = firstName;
@@ -164,8 +164,8 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
 
     }
 
-    public static ClientBusinessOwners fromJsonObject(final JsonObject jsonObject, final Client client,  final CodeValue title, final CodeValue type,
-                                                      final CodeValue city, final CodeValue stateProvince, final CodeValue country) {
+    public static ClientBusinessOwners fromJsonObject(final JsonObject jsonObject, final Client client, final CodeValue title,
+            final CodeValue type, final CodeValue city, final CodeValue stateProvince, final CodeValue country) {
         String firstName = "";
         String lastName = "";
         BigDecimal ownership = null;
@@ -258,8 +258,8 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
             ownership = jsonObject.get("ownership").getAsBigDecimal();
         }
 
-        return new ClientBusinessOwners(client, firstName, title, lastName, ownership, email, mobileNumber, landmark,
-                type, city, stateProvince, country, bvn, nin, businessOwnerNumber, createdBy, createdOnDate, updatedBy, updatedOnDate,
+        return new ClientBusinessOwners(client, firstName, title, lastName, ownership, email, mobileNumber, landmark, type, city,
+                stateProvince, country, bvn, nin, businessOwnerNumber, createdBy, createdOnDate, updatedBy, updatedOnDate,
                 streetNumberAndName, address1, address2, address3, postalCode);
     }
 
