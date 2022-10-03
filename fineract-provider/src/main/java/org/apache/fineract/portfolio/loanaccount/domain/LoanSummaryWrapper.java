@@ -35,7 +35,7 @@ public final class LoanSummaryWrapper {
             final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
         for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
-            total = total.plus(installment.getPrincipalCompleted(currency));
+            total = total.plus(installment.getPrincipalCompleted(currency)).minus(installment.getCredits(currency));
         }
         return total;
     }
