@@ -127,7 +127,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             address = this.addressReadPlatformService.retrieveTemplate();
         }
         if (isbusinessOwnersEnabled) {
-        	ownerData = this.clientBusinessOwnerReadPlatformService.retrieveTemplate();
+            ownerData = this.clientBusinessOwnerReadPlatformService.retrieveTemplate();
         }
 
         final ClientFamilyMembersData familyMemberOptions = this.clientFamilyMembersReadPlatformService.retrieveTemplate();
@@ -167,7 +167,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         return ClientData.template(defaultOfficeId, LocalDate.now(DateUtils.getDateTimeZoneOfTenant()), offices, staffOptions, null,
                 genderOptions, savingsProductDatas, clientTypeOptions, clientClassificationOptions, clientNonPersonConstitutionOptions,
                 clientNonPersonMainBusinessLineOptions, clientLegalFormOptions, familyMemberOptions,
-                new ArrayList<AddressData>(Arrays.asList(address)), isAddressEnabled, datatableTemplates, new ArrayList<ClientBusinessOwnerData>(Arrays.asList(ownerData)), isbusinessOwnersEnabled);
+                new ArrayList<AddressData>(Arrays.asList(address)), isAddressEnabled, datatableTemplates,
+                new ArrayList<ClientBusinessOwnerData>(Arrays.asList(ownerData)), isbusinessOwnersEnabled);
     }
 
     @Override
@@ -849,7 +850,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final Collection<CodeValueData> clientNonPersonMainBusinessLineOptions = null;
         final List<EnumOptionData> clientLegalFormOptions = null;
         return ClientData.template(null, null, null, null, narrations, null, null, clientTypeOptions, clientClassificationOptions,
-                clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions, clientLegalFormOptions, null, null, null, null, null, null);
+                clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions, clientLegalFormOptions, null, null, null, null,
+                null, null);
     }
 
     @Override

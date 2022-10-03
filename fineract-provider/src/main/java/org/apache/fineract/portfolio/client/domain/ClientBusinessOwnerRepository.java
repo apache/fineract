@@ -23,7 +23,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface ClientBusinessOwnerRepository
         extends JpaRepository<ClientBusinessOwners, Long>, JpaSpecificationExecutor<ClientBusinessOwners> {
-	
-	ClientBusinessOwners findByEmail(String email);
+
+    ClientBusinessOwners findByEmail(String email);
 
 }
