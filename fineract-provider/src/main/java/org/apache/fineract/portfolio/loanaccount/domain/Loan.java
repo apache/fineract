@@ -1330,7 +1330,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             this.totalOverpaid = null;
         } else {
             final Money overpaidBy = calculateTotalOverpayment();
-            this.totalOverpaid = overpaidBy.getAmountDefaultedToNullIfZero();
+            this.totalOverpaid = null;
+            if (!overpaidBy.isLessThanZero()) {
+                this.totalOverpaid = overpaidBy.getAmountDefaultedToNullIfZero();
+            }
 
             final Money recoveredAmount = calculateTotalRecoveredPayments();
             this.totalRecovered = recoveredAmount.getAmountDefaultedToNullIfZero();
@@ -1342,7 +1345,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         }
     }
 
-    public void updateLoanSummarAndStatus() {
+    public void updateLoanSummaryAndStatus() {
         updateLoanSummaryDerivedFields();
         doPostLoanTransactionChecks(getLastUserTransactionDate(), loanLifecycleStateMachine);
     }
@@ -3362,14 +3365,18 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return transactions;
     }
 
-    private void doPostLoanTransactionChecks(final LocalDate transactionDate, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
-
+    private boolean doPostLoanTransactionChecks(final LocalDate transactionDate,
+            final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+        boolean statusChanged = false;
         if (isOverPaid()) {
             // FIXME - kw - update account balance to negative amount.
             handleLoanOverpayment(loanLifecycleStateMachine);
+            statusChanged = true;
         } else if (this.summary.isRepaidInFull(loanCurrency())) {
             handleLoanRepaymentInFull(transactionDate, loanLifecycleStateMachine);
+            statusChanged = true;
         }
+        return statusChanged;
     }
 
     private void handleLoanRepaymentInFull(final LocalDate transactionDate, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
@@ -3689,9 +3696,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         }
 
         for (final LoanTransaction loanTransaction : this.loanTransactions) {
-            if ((loanTransaction.isRefund() || loanTransaction.isRefundForActiveLoan() || loanTransaction.isCreditBalanceRefund())
-                    && !loanTransaction.isReversed()) {
-                totalPaidInRepayments = totalPaidInRepayments.minus(loanTransaction.getAmount(currency));
+            if (!loanTransaction.isReversed()) {
+                if ((loanTransaction.isRefund() || loanTransaction.isRefundForActiveLoan() || loanTransaction.isCreditBalanceRefund()
+                        || loanTransaction.isChargeback())) {
+                    totalPaidInRepayments = totalPaidInRepayments.minus(loanTransaction.getAmount(currency));
+                }
             }
         }
 
@@ -3896,12 +3905,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         }
         changedTransactionDetail.getNewTransactionMappings().put(0L, loanTransaction);
         return changedTransactionDetail;
-    }
-
-    public void handleChargebackTransaction(LoanTransaction chargebackTransaction,
-            final LoanLifecycleStateMachine loanLifecycleStateMachine) {
-        chargebackTransaction.updateLoan(this);
-        // TODO To be updated in the repayment schedule
     }
 
     /**
@@ -5678,6 +5681,14 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             if (loanTransaction.isDisbursement() || loanTransaction.isIncomePosting()) {
                 outstanding = outstanding.plus(loanTransaction.getAmount(getCurrency()));
                 loanTransaction.updateOutstandingLoanBalance(outstanding.getAmount());
+            } else if (loanTransaction.isChargeback()) {
+                Money transactionOutstanding = loanTransaction.getAmount(getCurrency());
+                if (!loanTransaction.getOverPaymentPortion(getCurrency()).isZero()) {
+                    transactionOutstanding = transactionOutstanding.minus(loanTransaction.getOverPaymentPortion(getCurrency()));
+                }
+                outstanding = outstanding.plus(transactionOutstanding);
+                loanTransaction.updateOutstandingLoanBalance(outstanding.getAmount());
+
             } else {
                 if (this.loanInterestRecalculationDetails != null
                         && this.loanInterestRecalculationDetails.isCompoundingToBePostedAsTransaction()
@@ -6123,6 +6134,39 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         doPostLoanTransactionChecks(loanTransaction.getTransactionDate(), loanLifecycleStateMachine);
 
         return changedTransactionDetail;
+    }
+
+    public void handleChargebackTransaction(final LoanTransaction chargebackTransaction,
+            final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+
+        chargebackTransaction.updateLoan(this);
+
+        if (!chargebackTransaction.isChargeback()) {
+            final String errorMessage = "A transaction of type chargeback was expected but not received.";
+            throw new InvalidLoanTransactionTypeException("transaction", "is.not.a.chargeback.transaction", errorMessage);
+        }
+
+        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
+                .determineProcessor(this.transactionProcessingStrategy);
+        final Money overpaidAmount = calculateTotalOverpayment(); // Before Transaction
+        if (overpaidAmount.isGreaterThanZero()) {
+            Money difference = chargebackTransaction.getAmount(getCurrency()).minus(overpaidAmount);
+            if (difference.isLessThanZero()) {
+                difference = null;
+            }
+            chargebackTransaction.setOverPayments(difference);
+        }
+
+        if (chargebackTransaction.isNotZero(loanCurrency())) {
+            addLoanTransaction(chargebackTransaction);
+        }
+        loanRepaymentScheduleTransactionProcessor.handleChargeback(chargebackTransaction, getCurrency(), overpaidAmount,
+                getRepaymentScheduleInstallments());
+
+        updateLoanSummaryDerivedFields();
+        if (!doPostLoanTransactionChecks(chargebackTransaction.getTransactionDate(), loanLifecycleStateMachine)) {
+            loanLifecycleStateMachine.transition(LoanEvent.LOAN_CHARGEBACK, this);
+        }
     }
 
     public LocalDate possibleNextRefundDate() {

@@ -350,6 +350,8 @@ final class LoansApiResourceSwagger {
             public Double totalActualCostOfLoanForPeriod;
             @Schema(example = "200.000000")
             public Double totalInstallmentAmountForPeriod;
+            @Schema(example = "2.000000")
+            public Double totalCredits;
         }
 
         static final class GetLoansLoanIdDisbursementDetails {

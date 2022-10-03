@@ -1074,6 +1074,18 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     "Loan transaction:" + transactionId + " update not allowed as loan status is written off", transactionId);
         }
 
+        if (transactionToAdjust.hasLoanTransactionRelations()) {
+            throw new PlatformServiceUnavailableException("error.msg.loan.transaction.update.not.allowed",
+                    "Loan transaction:" + transactionId + " update not allowed as loan transaction is linked to other transactions",
+                    transactionId);
+        }
+
+        if (transactionToAdjust.isChargeback()) {
+            throw new PlatformServiceUnavailableException("error.msg.loan.transaction.update.not.allowed", "Loan transaction:"
+                    + transactionId + " update not allowed as loan transaction is charge back and is linked to other transaction",
+                    transactionId);
+        }
+
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
         final String txnExternalId = command.stringValueOfParameterNamedAllowingNull("externalId");
@@ -1168,7 +1180,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (!transactionIds.isEmpty()) {
             this.accountTransfersWritePlatformService.reverseTransfersWithFromAccountTransactions(transactionIds,
                     PortfolioAccountType.LOAN);
-            loan.updateLoanSummarAndStatus();
+            loan.updateLoanSummaryAndStatus();
         }
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
@@ -1217,9 +1229,17 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         LoanTransaction loanTransaction = this.loanTransactionRepository.findById(transactionId)
                 .orElseThrow(() -> new LoanTransactionNotFoundException(transactionId));
 
-        if (!loanTransaction.isRepayment()) {
+        if (loanTransaction.isReversed()) {
             throw new PlatformServiceUnavailableException("error.msg.loan.chargeback.operation.not.allowed",
-                    "Loan transaction:" + transactionId + " chargeback not allowed as loan transaction is not repayment", transactionId);
+                    "Loan transaction:" + transactionId + " chargeback not allowed as loan transaction repayment is reversed",
+                    transactionId);
+        }
+
+        if (!loanTransaction.isRepayment()) {
+            throw new PlatformServiceUnavailableException(
+                    "error.msg.loan.chargeback.operation.not.allowed", "Loan transaction:" + transactionId
+                            + " chargeback not allowed as loan transaction is not repayment, is " + loanTransaction.getTypeOf().getCode(),
+                    transactionId);
         }
 
         businessEventNotifierService.notifyPreBusinessEvent(new LoanChargebackTransactionBusinessEvent(loanTransaction));
@@ -1236,23 +1256,23 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final Money transactionAmountAsMoney = Money.of(loan.getCurrency(), transactionAmount);
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createPaymentDetail(command, changes);
-        LoanTransaction newTransaction = LoanTransaction.chargeback(loan, transactionAmountAsMoney, paymentDetail, transactionDate,
-                txnExternalId);
+        LoanTransaction newTransaction = LoanTransaction.chargeback(loan.getOffice(), transactionAmountAsMoney, paymentDetail,
+                transactionDate, txnExternalId);
 
         validateLoanTransactionAmountChargeBack(loanTransaction, newTransaction);
 
         this.paymentDetailWritePlatformService.persistPaymentDetail(paymentDetail);
-
-        loan.handleChargebackTransaction(newTransaction, defaultLoanLifecycleStateMachine());
-
-        loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         // Store the Loan Transaction Relation
         LoanTransactionRelation loanTransactionRelation = LoanTransactionRelation.instance(loanTransaction, newTransaction,
                 LoanTransactionRelationTypeEnum.CHARGEBACK);
         this.loanTransactionRelationRepository.save(loanTransactionRelation);
 
-        this.loanTransactionRepository.saveAndFlush(newTransaction);
+        this.loanTransactionRepository.save(newTransaction);
+
+        loan.handleChargebackTransaction(newTransaction, defaultLoanLifecycleStateMachine());
+
+        loan = saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         final String noteText = command.stringValueOfParameterNamed(LoanApiConstants.noteParamName);
         if (StringUtils.isNotBlank(noteText)) {
@@ -1278,8 +1298,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 actualAmount = actualAmount.add(loanTransactionRelation.getToTransaction().getPrincipalPortion());
             }
         }
-        actualAmount = actualAmount.add(chargebackTransaction.getPrincipalPortion());
-        if (actualAmount.compareTo(loanTransaction.getPrincipalPortion()) > 0) {
+        actualAmount = actualAmount.add(chargebackTransaction.getAmount());
+        if (loanTransaction.getPrincipalPortion() != null && actualAmount.compareTo(loanTransaction.getPrincipalPortion()) > 0) {
             throw new PlatformServiceUnavailableException("error.msg.loan.chargeback.operation.not.allowed",
                     "Loan transaction:" + loanTransaction.getId() + " chargeback not allowed as loan transaction amount is not enough",
                     loanTransaction.getId());

@@ -322,6 +322,14 @@
                 "null",
                 "bigdecimal"
             ]
+        },
+        {
+            "default": null,
+            "name": "totalCredits",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
         }
     ]
 }

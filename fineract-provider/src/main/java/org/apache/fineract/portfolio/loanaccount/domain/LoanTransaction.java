@@ -158,9 +158,9 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         return new LoanTransaction(null, office, LoanTransactionType.REPAYMENT, paymentDetail, amount.getAmount(), paymentDate, externalId);
     }
 
-    public static LoanTransaction chargeback(final Loan loan, final Money amount, final PaymentDetail paymentDetail,
+    public static LoanTransaction chargeback(final Office office, final Money amount, final PaymentDetail paymentDetail,
             final LocalDate paymentDate, final String externalId) {
-        LoanTransaction loanTransaction = new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.CHARGEBACK, paymentDetail,
+        LoanTransaction loanTransaction = new LoanTransaction(null, office, LoanTransactionType.CHARGEBACK, paymentDetail,
                 amount.getAmount(), paymentDate, externalId);
         loanTransaction.principalPortion = amount.getAmount();
         return loanTransaction;
@@ -457,6 +457,12 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     public void updateOverPayments(final Money overPayment) {
         final MonetaryCurrency currency = overPayment.getCurrency();
         this.overPaymentPortion = defaultToNullIfZero(getOverPaymentPortion(currency).plus(overPayment).getAmount());
+    }
+
+    public void setOverPayments(final Money overPayment) {
+        if (overPayment != null) {
+            this.overPaymentPortion = defaultToNullIfZero(overPayment.getAmount());
+        }
     }
 
     public Money getPrincipalPortion(final MonetaryCurrency currency) {
@@ -861,6 +867,10 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
 
     public LocalDate getSubmittedOnDate() {
         return submittedOnDate;
+    }
+
+    public boolean hasLoanTransactionRelations() {
+        return (loanTransactionRelations != null && loanTransactionRelations.size() > 0);
     }
 
     public Set<LoanTransactionRelation> getLoanTransactionRelations() {

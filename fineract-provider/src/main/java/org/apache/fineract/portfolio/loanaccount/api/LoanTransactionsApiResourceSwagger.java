@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
+import java.util.Set;
 
 /**
  * Created by Chirag Gupta on 12/30/17.
@@ -128,6 +129,23 @@ final class LoanTransactionsApiResourceSwagger {
             public String displayLabel;
         }
 
+        static final class GetLoanTransactionRelation {
+
+            private GetLoanTransactionRelation() {}
+
+            @Schema(example = "1")
+            public Long fromLoanTransaction;
+            @Schema(example = "10")
+            public Long toLoanTransaction;
+            @Schema(example = "CHARGEBACK")
+            private String relationType;
+            @Schema(example = "100.00")
+            private Double amount;
+            @Schema(example = "Repayment Adjustment Chargeback")
+            private String paymentType;
+
+        }
+
         @Schema(example = "3")
         public Integer id;
         public GetLoansType type;
@@ -146,6 +164,7 @@ final class LoanTransactionsApiResourceSwagger {
         public String reversalExternalId;
         @Schema(example = "[2012, 5, 18]")
         public LocalDate reversedOnDate;
+        public Set<GetLoanTransactionRelation> transactionRelations;
     }
 
     @Schema(description = "PostLoansLoanIdTransactionsRequest")
@@ -210,9 +229,9 @@ final class LoanTransactionsApiResourceSwagger {
         public String note;
         @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
         public String reversalExternalId;
-        @Schema(example = "3")
+        @Schema(example = "1")
         public Integer paymentTypeId;
-        @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+        @Schema(example = "4ff9b1cb988b7")
         public String externalId;
     }
 

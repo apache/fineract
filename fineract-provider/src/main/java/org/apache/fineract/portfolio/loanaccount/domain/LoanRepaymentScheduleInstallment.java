@@ -126,6 +126,12 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     @Column(name = "recalculated_interest_component", nullable = false)
     private boolean recalculatedInterestComponent;
 
+    @Column(name = "is_additional", nullable = false)
+    private boolean additional;
+
+    @Column(name = "credits_amount", scale = 6, precision = 19, nullable = true)
+    private BigDecimal credits;
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "loanRepaymentScheduleInstallment")
     private Set<LoanInterestRecalcualtionAdditionalDetails> loanCompoundingDetails = new HashSet<>();
 
@@ -221,6 +227,10 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
 
     public LocalDate getDueDate() {
         return this.dueDate;
+    }
+
+    public Money getCredits(final MonetaryCurrency currency) {
+        return Money.of(currency, this.credits);
     }
 
     public Money getPrincipal(final MonetaryCurrency currency) {
@@ -688,6 +698,24 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         this.principal = principal;
     }
 
+    public void addToPrincipal(final LocalDate transactionDate, final Money transactionAmount) {
+        if (this.principal == null) {
+            this.principal = transactionAmount.getAmount();
+        } else {
+            this.principal = this.principal.add(transactionAmount.getAmount());
+        }
+        checkIfRepaymentPeriodObligationsAreMet(transactionDate, transactionAmount.getCurrency());
+
+    }
+
+    public void addToCredits(final BigDecimal amount) {
+        if (this.credits == null) {
+            this.credits = amount;
+        } else {
+            this.credits = this.credits.add(amount);
+        }
+    }
+
     public static Comparator<LoanRepaymentScheduleInstallment> installmentNumberComparator = new Comparator<LoanRepaymentScheduleInstallment>() {
 
         @Override
@@ -816,6 +844,12 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         }
     }
 
+    public void updateDueChargeback(final LocalDate transactionDate, final Money transactionAmount) {
+        updateDueDate(transactionDate);
+        addToCredits(transactionAmount.getAmount());
+        addToPrincipal(transactionDate, transactionAmount);
+    }
+
     public Money getDue(MonetaryCurrency currency) {
         return getPrincipal(currency).plus(getInterestCharged(currency)).plus(getFeeChargesCharged(currency))
                 .plus(getPenaltyChargesCharged(currency));
@@ -851,4 +885,13 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     public Set<LoanInstallmentCharge> getInstallmentCharges() {
         return installmentCharges;
     }
+
+    public boolean isAdditional() {
+        return additional;
+    }
+
+    public void markAsAdditional() {
+        this.additional = true;
+    }
+
 }
