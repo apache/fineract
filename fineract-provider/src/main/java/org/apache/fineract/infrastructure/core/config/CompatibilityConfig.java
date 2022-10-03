@@ -112,10 +112,10 @@ public class CompatibilityConfig {
         Environment environment = context.getEnvironment();
         HikariConfig hc = new HikariConfig();
 
-        hc.setDriverClassName(environment.getProperty("fineract_tenants_driver"));
-        hc.setJdbcUrl(environment.getProperty("fineract_tenants_url"));
-        hc.setUsername(environment.getProperty("fineract_tenants_uid"));
-        hc.setPassword(environment.getProperty("fineract_tenants_pwd"));
+        hc.setDriverClassName(environment.getProperty("FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME"));
+        hc.setJdbcUrl(environment.getProperty("FINERACT_HIKARI_JDBC_URL"));
+        hc.setUsername(environment.getProperty("FINERACT_HIKARI_USERNAME"));
+        hc.setPassword(environment.getProperty("FINERACT_HIKARI_PASSWORD"));
         hc.setMinimumIdle(3);
         hc.setMaximumPoolSize(10);
         hc.setIdleTimeout(60000);
