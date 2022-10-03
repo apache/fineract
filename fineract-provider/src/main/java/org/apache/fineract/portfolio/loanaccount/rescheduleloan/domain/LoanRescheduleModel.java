@@ -89,6 +89,8 @@ public final class LoanRescheduleModel {
         final Integer inMultiplesOf = this.totalPrincipalDisbursed.getCurrencyInMultiplesOf();
         final CurrencyData currency = this.applicationCurrency.toData(decimalPlaces, inMultiplesOf);
 
+        final BigDecimal totalCredits = BigDecimal.ZERO;
+
         final Collection<LoanSchedulePeriodData> periodsData = new ArrayList<>();
         for (final LoanRescheduleModalPeriod modelPeriod : this.periods) {
             periodsData.add(modelPeriod.toData());
@@ -103,7 +105,7 @@ public final class LoanRescheduleModel {
         return new LoanScheduleData(currency, periodsData, this.loanTermInDays, this.totalPrincipalDisbursed.getAmount(),
                 this.totalPrincipalExpected, this.totalPrincipalPaid, this.totalInterestCharged, this.totalFeeChargesCharged,
                 this.totalPenaltyChargesCharged, totalWaived, totalWrittenOff, this.totalRepaymentExpected, totalRepayment,
-                totalPaidInAdvance, totalPaidLate, this.totalOutstanding);
+                totalPaidInAdvance, totalPaidLate, this.totalOutstanding, totalCredits);
     }
 
     public Collection<LoanRescheduleModelRepaymentPeriod> getPeriods() {

@@ -53,6 +53,7 @@ public class LoanScheduleData {
     private final BigDecimal totalPaidInAdvance;
     private final BigDecimal totalPaidLate;
     private final BigDecimal totalOutstanding;
+    private final BigDecimal totalCredits;
 
     /**
      * <code>periods</code> is collection of data objects containing specific information to each period of the loan
@@ -67,7 +68,7 @@ public class LoanScheduleData {
             final BigDecimal totalInterestCharged, final BigDecimal totalFeeChargesCharged, final BigDecimal totalPenaltyChargesCharged,
             final BigDecimal totalWaived, final BigDecimal totalWrittenOff, final BigDecimal totalRepaymentExpected,
             final BigDecimal totalRepayment, final BigDecimal totalPaidInAdvance, final BigDecimal totalPaidLate,
-            final BigDecimal totalOutstanding) {
+            final BigDecimal totalOutstanding, final BigDecimal totalCredits) {
         this.currency = currency;
         this.periods = periods;
         this.loanTermInDays = loanTermInDays;
@@ -84,6 +85,7 @@ public class LoanScheduleData {
         this.totalPaidInAdvance = totalPaidInAdvance;
         this.totalPaidLate = totalPaidLate;
         this.totalOutstanding = totalOutstanding;
+        this.totalCredits = totalCredits;
     }
 
     public LoanScheduleData(final CurrencyData currency, final Collection<LoanSchedulePeriodData> periods, final Integer loanTermInDays,
@@ -105,6 +107,7 @@ public class LoanScheduleData {
         this.totalPaidInAdvance = null;
         this.totalPaidLate = null;
         this.totalOutstanding = null;
+        this.totalCredits = BigDecimal.ZERO;
     }
 
     public void updateFuturePeriods(Collection<LoanSchedulePeriodData> futurePeriods) {

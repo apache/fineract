@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -30,12 +31,17 @@ import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
+import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.GetPaymentTypesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
-import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
@@ -50,7 +56,12 @@ import org.junit.jupiter.api.Test;
 public class LoanTransactionChargebackTest {
 
     private ResponseSpecification responseSpec;
+    private ResponseSpecification responseSpecError;
     private RequestSpecification requestSpec;
+    private LoanTransactionHelper loanTransactionHelper;
+    private final String amountVal = "1000";
+    private LocalDate todaysDate;
+    private String operationDate;
 
     @BeforeEach
     public void setup() {
@@ -58,49 +69,342 @@ public class LoanTransactionChargebackTest {
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.responseSpecError = new ResponseSpecBuilder().expectStatusCode(503).build();
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+
+        this.todaysDate = Utils.getLocalDateOfTenant();
+        this.operationDate = Utils.dateFormatter.format(this.todaysDate);
     }
 
     @Test
     public void applyLoanTransactionChargeback() {
-        final LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-
         // Client and Loan account creation
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
-        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper, null);
-        assertNotNull(getLoanProductsProductResponse);
-        log.info("Loan Product Bucket Name: {}", getLoanProductsProductResponse.getDelinquencyBucket().getName());
-
-        final LocalDate todaysDate = Utils.getLocalDateOfTenant();
-        // Older date to have more than one overdue installment
-        final LocalDate transactionDate = todaysDate.minusDays(45);
-        String operationDate = Utils.dateFormatter.format(transactionDate);
-
-        final Integer loanId = createLoanAccount(loanTransactionHelper, clientId.toString(),
-                getLoanProductsProductResponse.getId().toString(), operationDate, "1000");
+        final Integer loanId = createAccounts(15, 1);
 
         GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
 
         loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
 
-        operationDate = Utils.dateFormatter.format(todaysDate);
-        Float amount = Float.valueOf("1100.0");
+        Float amount = Float.valueOf(amountVal);
         PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, amount,
                 loanId);
         assertNotNull(loanIdTransactionsResponse);
         final Integer transactionId = loanIdTransactionsResponse.getResourceId();
 
-        List<GetPaymentTypesResponse> paymentTypeList = PaymentTypeHelper.getSystemPaymentType(requestSpec, responseSpec);
-        assertTrue(!paymentTypeList.isEmpty());
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+        loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.closed.obligations.met");
 
-        amount = Float.valueOf("800.0");
-        final String payload = createChargebackPayload(amount.toString(), paymentTypeList.get(0).getId());
-        PostLoansLoanIdTransactionsTransactionIdRequest postLoansTransactionCommandRequest = loanTransactionHelper
-                .applyLoanTransactionCommand(loanId, transactionId, "chargeback", payload);
-        assertNotNull(postLoansTransactionCommandRequest);
+        reviewLoanTransactionRelations(loanId, transactionId, 0);
+
+        final Integer chargebackTransactionId = applyChargebackTransaction(loanId, transactionId, "1000.00", 0, responseSpec);
+
+        reviewLoanTransactionRelations(loanId, chargebackTransactionId, 1);
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
+        loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.active");
+
+        loanTransactionHelper.validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, amount.doubleValue());
+
+        // Try to reverse a Loan Transaction charge back
+        PostLoansLoanIdTransactionsResponse reverseTransactionResponse = loanTransactionHelper.reverseLoanTransaction(loanId,
+                chargebackTransactionId, operationDate, responseSpecError);
+
+        // Try to reverse a Loan Transaction repayment with linked transactions
+        reverseTransactionResponse = loanTransactionHelper.reverseLoanTransaction(loanId, transactionId, operationDate, responseSpecError);
+    }
+
+    @Test
+    public void applyLoanTransactionChargebackInLongTermLoan() {
+        // Client and Loan account creation
+        final Integer daysToSubtract = 1;
+        final Integer numberOfRepayments = 3;
+        final Integer loanId = createAccounts(daysToSubtract, numberOfRepayments);
+
+        GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+
+        loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
+
+        Float amount = Float.valueOf("333.33");
+        final LocalDate transactionDate = this.todaysDate.minusMonths(numberOfRepayments - 1).plusDays(3);
+        String operationDate = Utils.dateFormatter.format(transactionDate);
+
+        PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, amount,
+                loanId);
+        assertNotNull(loanIdTransactionsResponse);
+        final Integer transactionId = loanIdTransactionsResponse.getResourceId();
+        reviewLoanTransactionRelations(loanId, transactionId, 0);
+
+        final Integer chargebackTransactionId = applyChargebackTransaction(loanId, transactionId, amount.toString(), 0, responseSpec);
+        reviewLoanTransactionRelations(loanId, transactionId, 1);
+
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+
+        loanTransactionHelper.validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, Double.valueOf(amountVal));
+
+        loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
+        GetLoansLoanIdRepaymentSchedule getLoanRepaymentSchedule = getLoansLoanIdResponse.getRepaymentSchedule();
+        for (GetLoansLoanIdRepaymentPeriod period : getLoanRepaymentSchedule.getPeriods()) {
+            if (period.getPeriod() != null && period.getPeriod() == 3) {
+                log.info("Period number {} for due date {} and totalDueForPeriod {}", period.getPeriod(), period.getDueDate(),
+                        period.getTotalDueForPeriod());
+                assertEquals(Double.valueOf("666.67"), period.getTotalDueForPeriod());
+            }
+        }
+    }
+
+    @Test
+    public void applyLoanTransactionChargebackOverNoRepaymentType() {
+        // Client and Loan account creation
+        final Integer loanId = createAccounts(15, 1);
+
+        GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+
+        Set<GetLoansLoanIdTransactions> loanTransactions = getLoansLoanIdResponse.getTransactions();
+        assertNotNull(loanTransactions);
+        log.info("Loan Id {} with {} transactions", loanId, loanTransactions.size());
+        assertEquals(2, loanTransactions.size());
+        GetLoansLoanIdTransactions loanTransaction = loanTransactions.iterator().next();
+        log.info("Try to apply the Charge back over transaction Id {} with type {}", loanTransaction.getId(),
+                loanTransaction.getType().getCode());
+
+        applyChargebackTransaction(loanId, loanTransaction.getId().intValue(), amountVal, 0, responseSpecError);
+    }
+
+    @Test
+    public void applyLoanTransactionChargebackAfterMature() {
+        // Client and Loan account creation
+        final Integer loanId = createAccounts(45, 1);
+
+        GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+
+        loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
+        GetLoansLoanIdRepaymentSchedule getLoanRepaymentSchedule = getLoansLoanIdResponse.getRepaymentSchedule();
+        log.info("Loan with {} periods", getLoanRepaymentSchedule.getPeriods().size());
+        assertEquals(2, getLoanRepaymentSchedule.getPeriods().size());
+
+        Float amount = Float.valueOf(amountVal);
+        PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, amount,
+                loanId);
+        assertNotNull(loanIdTransactionsResponse);
+        final Integer transactionId = loanIdTransactionsResponse.getResourceId();
+
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+        loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.closed.obligations.met");
+
+        reviewLoanTransactionRelations(loanId, transactionId, 0);
+
+        Integer chargebackTransactionId = applyChargebackTransaction(loanId, transactionId, "500.00", 0, responseSpec);
+
+        reviewLoanTransactionRelations(loanId, transactionId, 1);
+
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+        loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.active");
+
+        loanTransactionHelper.validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, Double.valueOf("500.00"));
+
+        // N+1 Scenario
+        loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
+        getLoanRepaymentSchedule = getLoansLoanIdResponse.getRepaymentSchedule();
+        log.info("Loan with {} periods", getLoanRepaymentSchedule.getPeriods().size());
+        assertEquals(3, getLoanRepaymentSchedule.getPeriods().size());
+        getLoanRepaymentSchedule = getLoansLoanIdResponse.getRepaymentSchedule();
+        for (GetLoansLoanIdRepaymentPeriod period : getLoanRepaymentSchedule.getPeriods()) {
+            if (period.getPeriod() != null && period.getPeriod() == 2) {
+                log.info("Period number {} for due date {} and totalDueForPeriod {}", period.getPeriod(), period.getDueDate(),
+                        period.getTotalDueForPeriod());
+                assertEquals(Double.valueOf("500.00"), period.getPrincipalDue());
+            }
+        }
+
+        chargebackTransactionId = applyChargebackTransaction(loanId, transactionId, "300.00", 0, responseSpec);
+
+        reviewLoanTransactionRelations(loanId, transactionId, 2);
+
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+        loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.active");
+
+        loanTransactionHelper.validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, Double.valueOf("800.00"));
+
+        // N+1 Scenario -- Remains the same periods number
+        loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
+        getLoanRepaymentSchedule = getLoansLoanIdResponse.getRepaymentSchedule();
+        log.info("Loan with {} periods", getLoanRepaymentSchedule.getPeriods().size());
+        assertEquals(3, getLoanRepaymentSchedule.getPeriods().size());
+        getLoanRepaymentSchedule = getLoansLoanIdResponse.getRepaymentSchedule();
+        for (GetLoansLoanIdRepaymentPeriod period : getLoanRepaymentSchedule.getPeriods()) {
+            if (period.getPeriod() != null && period.getPeriod() == 2) {
+                log.info("Period number {} for due date {} and totalDueForPeriod {}", period.getPeriod(), period.getDueDate(),
+                        period.getTotalDueForPeriod());
+                assertEquals(Double.valueOf("800.00"), period.getPrincipalDue());
+            }
+        }
+    }
+
+    @Test
+    public void applyLoanTransactionChargebackWithLoanOverpaidToLoanActive() {
+        // Client and Loan account creation
+        final Integer loanId = createAccounts(15, 1);
+
+        GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+
+        loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
+
+        Float amount = Float.valueOf("1100.00");
+        PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, amount,
+                loanId);
+        assertNotNull(loanIdTransactionsResponse);
+        final Integer transactionId = loanIdTransactionsResponse.getResourceId();
+
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+        loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.overpaid");
+
+        reviewLoanTransactionRelations(loanId, transactionId, 0);
+
+        final Integer chargebackTransactionId = applyChargebackTransaction(loanId, transactionId, "200.00", 0, responseSpec);
+
+        reviewLoanTransactionRelations(loanId, chargebackTransactionId, 1);
+
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+        loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.active");
+
+        loanTransactionHelper.validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, Double.valueOf("100.00"));
+    }
+
+    @Test
+    public void applyLoanTransactionChargebackWithLoanOverpaidToLoanClose() {
+        // Client and Loan account creation
+        final Integer loanId = createAccounts(15, 1);
+
+        GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+
+        loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
+
+        Float amount = Float.valueOf("1100.00");
+        PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, amount,
+                loanId);
+        assertNotNull(loanIdTransactionsResponse);
+        final Integer transactionId = loanIdTransactionsResponse.getResourceId();
+
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+        loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.overpaid");
+
+        reviewLoanTransactionRelations(loanId, transactionId, 0);
+
+        final Integer chargebackTransactionId = applyChargebackTransaction(loanId, transactionId, "100.00", 0, responseSpec);
+
+        reviewLoanTransactionRelations(loanId, chargebackTransactionId, 1);
+
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+        loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.closed.obligations.met");
+
+        loanTransactionHelper.validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, Double.valueOf("0.00"));
+    }
+
+    @Test
+    public void applyLoanTransactionChargebackWithLoanOverpaidToKeepAsLoanOverpaid() {
+        // Client and Loan account creation
+        final Integer loanId = createAccounts(15, 1);
+
+        GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+
+        loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
+
+        Float amount = Float.valueOf("1100.00");
+        PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, amount,
+                loanId);
+        assertNotNull(loanIdTransactionsResponse);
+        final Integer transactionId = loanIdTransactionsResponse.getResourceId();
+
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+        loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.overpaid");
+
+        reviewLoanTransactionRelations(loanId, transactionId, 0);
+
+        final Integer chargebackTransactionId = applyChargebackTransaction(loanId, transactionId, "50.00", 0, responseSpec);
+
+        reviewLoanTransactionRelations(loanId, chargebackTransactionId, 1);
+
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+        loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.overpaid");
+
+        loanTransactionHelper.validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, Double.valueOf("0.00"));
+    }
+
+    @Test
+    public void applyMultipleLoanTransactionChargeback() {
+        // Client and Loan account creation
+        final Integer loanId = createAccounts(15, 1);
+
+        GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+
+        loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
+
+        Float amount = Float.valueOf(amountVal);
+        PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, amount,
+                loanId);
+        assertNotNull(loanIdTransactionsResponse);
+        final Integer transactionId = loanIdTransactionsResponse.getResourceId();
+
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+        loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.closed.obligations.met");
+
+        // First round, empty array
+        reviewLoanTransactionRelations(loanId, transactionId, 0);
+
+        applyChargebackTransaction(loanId, transactionId, "200.00", 0, responseSpec);
+
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        loanTransactionHelper.validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, Double.valueOf("200.00"));
+
+        // Second round, array size equal to 1
+        reviewLoanTransactionRelations(loanId, transactionId, 1);
+
+        applyChargebackTransaction(loanId, transactionId, "300.00", 1, responseSpec);
+
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        loanTransactionHelper.validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, Double.valueOf("500.00"));
+
+        // Third round, array size equal to 2
+        reviewLoanTransactionRelations(loanId, transactionId, 2);
+
+        applyChargebackTransaction(loanId, transactionId, "500.00", 0, responseSpec);
+
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        loanTransactionHelper.validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, Double.valueOf("1000.00"));
+    }
+
+    private Integer createAccounts(final Integer daysToSubtract, final Integer numberOfRepayments) {
+        // Client and Loan account creation
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper, null);
+
+        // Older date to have more than one overdue installment
+        final LocalDate transactionDate = this.todaysDate.minusDays(daysToSubtract + (30 * (numberOfRepayments - 1)));
+        String operationDate = Utils.dateFormatter.format(transactionDate);
+
+        return createLoanAccount(loanTransactionHelper, clientId.toString(), getLoanProductsProductResponse.getId().toString(),
+                operationDate, amountVal, numberOfRepayments.toString());
     }
 
     private String createChargebackPayload(final String transactionAmount, final Integer paymentTypeId) {
@@ -121,11 +425,11 @@ public class LoanTransactionChargebackTest {
     }
 
     private Integer createLoanAccount(final LoanTransactionHelper loanTransactionHelper, final String clientId, final String loanProductId,
-            final String operationDate, final String principalAmount) {
-        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(principalAmount).withLoanTermFrequency("12")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("12").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths() //
-                .withInterestRatePerPeriod("2") //
+            final String operationDate, final String principalAmount, final String numberOfRepayments) {
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(principalAmount)
+                .withLoanTermFrequency(numberOfRepayments).withLoanTermFrequencyAsMonths().withNumberOfRepayments(numberOfRepayments)
+                .withRepaymentEveryAfter("1").withRepaymentFrequencyTypeAsMonths() //
+                .withInterestRatePerPeriod("0") //
                 .withExpectedDisbursementDate(operationDate) //
                 .withInterestTypeAsDecliningBalance() //
                 .withSubmittedOnDate(operationDate) //
@@ -135,4 +439,29 @@ public class LoanTransactionChargebackTest {
         loanTransactionHelper.disburseLoanWithNetDisbursalAmount(operationDate, loanId, principalAmount);
         return loanId;
     }
+
+    private Integer applyChargebackTransaction(final Integer loanId, final Integer transactionId, final String amount,
+            final Integer paymentTypeIdx, ResponseSpecification responseSpec) {
+        List<GetPaymentTypesResponse> paymentTypeList = PaymentTypeHelper.getSystemPaymentType(this.requestSpec, this.responseSpec);
+        assertTrue(!paymentTypeList.isEmpty());
+
+        final String payload = createChargebackPayload(amount, paymentTypeList.get(paymentTypeIdx).getId());
+        log.info("Loan Chargeback: {}", payload);
+        PostLoansLoanIdTransactionsTransactionIdResponse postLoansTransactionCommandResponse = loanTransactionHelper
+                .applyLoanTransactionCommand(loanId, transactionId, "chargeback", payload, responseSpec);
+        assertNotNull(postLoansTransactionCommandResponse);
+
+        log.info("Loan Chargeback Id: {}", postLoansTransactionCommandResponse.getResourceId());
+        return postLoansTransactionCommandResponse.getResourceId();
+    }
+
+    private void reviewLoanTransactionRelations(final Integer loanId, final Integer transactionId, final Integer expectedSize) {
+        GetLoansLoanIdTransactionsTransactionIdResponse getLoansTransactionResponse = loanTransactionHelper.getLoanTransaction(loanId,
+                transactionId);
+        assertNotNull(getLoansTransactionResponse);
+        assertNotNull(getLoansTransactionResponse.getTransactionRelations());
+        assertEquals(expectedSize, getLoansTransactionResponse.getTransactionRelations().size());
+        log.info("Loan with {} Chargeback Transactions", getLoansTransactionResponse.getTransactionRelations().size());
+    }
+
 }

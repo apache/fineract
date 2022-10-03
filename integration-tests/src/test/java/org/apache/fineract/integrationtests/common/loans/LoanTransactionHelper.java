@@ -45,9 +45,11 @@ import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdSummary;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
-import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -95,7 +97,6 @@ public class LoanTransactionHelper {
     public GetLoanProductsProductIdResponse getLoanProduct(final Integer loanProductId) {
         final String GET_LOANPRODUCT_URL = "/fineract-provider/api/v1/loanproducts/" + loanProductId + "?" + Utils.TENANT_IDENTIFIER;
         final String response = Utils.performServerGet(this.requestSpec, this.responseSpec, GET_LOANPRODUCT_URL);
-        log.info("Response {}", response);
         return GSON.fromJson(response, GetLoanProductsProductIdResponse.class);
     }
 
@@ -240,12 +241,12 @@ public class LoanTransactionHelper {
         return Utils.performServerGet(requestSpec, responseSpec, GET_REPAYMENTS_URL, "loanRepaymentScheduleInstallments");
     }
 
-    public PostLoansLoanIdTransactionsTransactionIdRequest applyLoanTransactionCommand(final Integer loanId, final Integer transactionId,
-            final String command, final String payload) {
+    public PostLoansLoanIdTransactionsTransactionIdResponse applyLoanTransactionCommand(final Integer loanId, final Integer transactionId,
+            final String command, final String payload, final ResponseSpecification responseSpec) {
         final String LOAN_TRANSACTION_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/" + transactionId + "?command="
                 + command + "&" + Utils.TENANT_IDENTIFIER;
         final String response = Utils.performServerPost(requestSpec, responseSpec, LOAN_TRANSACTION_URL, payload, null);
-        return GSON.fromJson(response, PostLoansLoanIdTransactionsTransactionIdRequest.class);
+        return GSON.fromJson(response, PostLoansLoanIdTransactionsTransactionIdResponse.class);
     }
 
     public HashMap approveLoan(final String approvalDate, final Integer loanID) {
@@ -347,7 +348,6 @@ public class LoanTransactionHelper {
             url = createLoanOperationURL(UNDO_DISBURSE_LOAN_COMMAND, loanId);
         }
         final String response = Utils.performServerPost(this.requestSpec, this.responseSpec, url, undoBodyJson, null);
-        log.info("Response {}", response);
         return GSON.fromJson(response, PostLoansLoanIdResponse.class);
     }
 
@@ -444,11 +444,13 @@ public class LoanTransactionHelper {
     }
 
     public PostLoansLoanIdTransactionsResponse makeLoanRepayment(final String date, final Float amountToBePaid, final Integer loanID) {
+        log.info("Repayment with amount {} in {} for Loan {}", amountToBePaid, date, loanID);
         return postLoanTransaction(createLoanTransactionURL(MAKE_REPAYMENT_COMMAND, loanID), getRepaymentBodyAsJSON(date, amountToBePaid));
     }
 
-    public PostLoansLoanIdTransactionsResponse reverseLoanRepayment(final Integer loanId, final Integer transactionId, String date) {
-        return postLoanTransaction(createLoanTransactionURL(UNDO, loanId, transactionId), getUndoJsonBody(date));
+    public PostLoansLoanIdTransactionsResponse reverseLoanTransaction(final Integer loanId, final Integer transactionId, String date,
+            ResponseSpecification responseSpec) {
+        return postLoanTransaction(createLoanTransactionURL(UNDO, loanId, transactionId), getUndoJsonBody(date), responseSpec);
     }
 
     public HashMap makeRepaymentWithPDC(final String date, final Float amountToBePaid, final Integer loanID, final Integer paymentType) {
@@ -543,6 +545,13 @@ public class LoanTransactionHelper {
         final String GET_LOAN_CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/" + txnId + "?"
                 + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_CHARGES_URL, param);
+    }
+
+    public GetLoansLoanIdTransactionsTransactionIdResponse getLoanTransaction(final Integer loanId, final Integer txnId) {
+        final String GET_LOAN_CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/" + txnId + "?"
+                + Utils.TENANT_IDENTIFIER;
+        final String response = Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_CHARGES_URL);
+        return GSON.fromJson(response, GetLoansLoanIdTransactionsTransactionIdResponse.class);
     }
 
     public HashMap getPostDatedCheck(final Integer loanId, final Integer installmentId) {
@@ -859,7 +868,12 @@ public class LoanTransactionHelper {
     }
 
     private PostLoansLoanIdTransactionsResponse postLoanTransaction(final String postURLForLoanTransaction, final String jsonToBeSent) {
-        final String response = Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForLoanTransaction, jsonToBeSent);
+        return postLoanTransaction(postURLForLoanTransaction, jsonToBeSent, this.responseSpec);
+    }
+
+    private PostLoansLoanIdTransactionsResponse postLoanTransaction(final String postURLForLoanTransaction, final String jsonToBeSent,
+            ResponseSpecification responseSpec) {
+        final String response = Utils.performServerPost(this.requestSpec, responseSpec, postURLForLoanTransaction, jsonToBeSent);
         return GSON.fromJson(response, PostLoansLoanIdTransactionsResponse.class);
     }
 
@@ -1107,6 +1121,21 @@ public class LoanTransactionHelper {
                 log.info("Period number {} for due date {} and outstanding {}", period.getPeriod(), period.getDueDate(),
                         period.getTotalOutstandingForPeriod());
             }
+        }
+    }
+
+    public void validateLoanStatus(GetLoansLoanIdResponse getLoansLoanIdResponse, final String statusCodeExpected) {
+        final String statusCode = getLoansLoanIdResponse.getStatus().getCode();
+        log.info("Loan with Id {} is with Status {}", getLoansLoanIdResponse.getId(), statusCode);
+        assertEquals(statusCodeExpected, statusCode);
+    }
+
+    public void validateLoanPrincipalOustandingBalance(GetLoansLoanIdResponse getLoansLoanIdResponse, Double amountExpected) {
+        GetLoansLoanIdSummary getLoansLoanIdSummary = getLoansLoanIdResponse.getSummary();
+        if (getLoansLoanIdSummary != null) {
+            log.info("Loan with Principal Outstanding Balance {} expected {}", getLoansLoanIdSummary.getPrincipalOutstanding(),
+                    amountExpected);
+            assertEquals(amountExpected, getLoansLoanIdSummary.getPrincipalOutstanding());
         }
     }
 

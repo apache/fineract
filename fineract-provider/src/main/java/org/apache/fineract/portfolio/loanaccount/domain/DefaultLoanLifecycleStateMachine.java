@@ -151,6 +151,11 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
             case LOAN_CREDIT_BALANCE_REFUND:
                 newState = closeObligationsMetTransition();
             break;
+            case LOAN_CHARGEBACK:
+                if (anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED_OBLIGATIONS_MET, LoanStatus.OVERPAID)) {
+                    newState = activeTransition();
+                }
+            break;
             default:
             break;
         }
