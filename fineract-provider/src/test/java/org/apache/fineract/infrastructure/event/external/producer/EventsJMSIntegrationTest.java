@@ -54,8 +54,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 public class EventsJMSIntegrationTest {
 
     @Autowired
-    @Qualifier("outboundRequests")
-    private DirectChannel outboundRequests;
+    @Qualifier("outboundRequestsEvents")
+    private DirectChannel outboundRequestsEvents;
 
     @Autowired
     private ContextConfiguration.TestChannelInterceptor testChannelInterceptor;
@@ -65,7 +65,7 @@ public class EventsJMSIntegrationTest {
 
     @Test
     public void testJmsDownstreamChannelIntegration() {
-        assertThat(outboundRequests.getSubscriberCount()).isEqualTo(1);
+        assertThat(outboundRequestsEvents.getSubscriberCount()).isEqualTo(1);
     }
 
     @Test
@@ -74,7 +74,7 @@ public class EventsJMSIntegrationTest {
         underTest.sendEvent(new byte[0]);
         underTest.sendEvent(new byte[0]);
         // then
-        assertTrue(outboundRequests.getInterceptors().contains(this.testChannelInterceptor));
+        assertTrue(outboundRequestsEvents.getInterceptors().contains(this.testChannelInterceptor));
         assertThat(testChannelInterceptor.getInvoked()).isEqualTo(2);
 
     }
@@ -87,19 +87,19 @@ public class EventsJMSIntegrationTest {
         private static ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("vm://localhost?broker.persistent=false");
 
         @Bean
-        public DirectChannel outboundRequests() {
+        public DirectChannel outboundRequestsEvents() {
             return new DirectChannel();
         }
 
         @Bean
         public IntegrationFlow outboundFlow() {
-            return IntegrationFlows.from("outboundRequests") //
+            return IntegrationFlows.from("outboundRequestsEvents") //
                     .log(LoggingHandler.Level.DEBUG) //
                     .handle(Jms.outboundAdapter(connectionFactory).destination("destinationChannel")).get();
         }
 
         @Component
-        @GlobalChannelInterceptor(patterns = "outboundRequests")
+        @GlobalChannelInterceptor(patterns = "outboundRequestsEvents")
         public static class TestChannelInterceptor implements ChannelInterceptor {
 
             private final AtomicInteger invoked = new AtomicInteger();

@@ -30,7 +30,7 @@ import org.springframework.integration.config.EnableIntegration;
 public class ExternalEventProducerConfiguration {
 
     @Bean
-    public DirectChannel outboundRequests() {
+    public DirectChannel outboundRequestsEvents() {
         return new DirectChannel();
     }
 }
