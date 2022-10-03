@@ -27,6 +27,6 @@ import org.springframework.integration.annotation.MessagingGateway;
 @ConditionalOnProperty(value = "fineract.events.external.enabled", havingValue = "true")
 public interface ExternalEventProducer {
 
-    @Gateway(requestChannel = "outboundRequests", replyTimeout = 2, requestTimeout = 200)
+    @Gateway(requestChannel = "outboundRequestsEvents", replyTimeout = 2, requestTimeout = 200)
     void sendEvent(byte[] message) throws AcknowledgementTimeoutException;
 }

@@ -39,14 +39,14 @@ import org.springframework.integration.jms.dsl.Jms;
 public class ExternalEventJMSProducerConfiguration {
 
     @Autowired
-    private DirectChannel outboundRequests;
+    private DirectChannel outboundRequestsEvents;
 
     @Autowired
     private FineractProperties fineractProperties;
 
     @Bean
-    public IntegrationFlow outboundFlow(ActiveMQConnectionFactory connectionFactory) {
-        return IntegrationFlows.from(outboundRequests) //
+    public IntegrationFlow outboundFlowEvents(ActiveMQConnectionFactory connectionFactory) {
+        return IntegrationFlows.from(outboundRequestsEvents) //
                 .log(LoggingHandler.Level.DEBUG) //
                 .handle(Jms.outboundAdapter(connectionFactory)
                         .destination(fineractProperties.getEvents().getExternal().getProducer().getJms().getEventQueueName()))
