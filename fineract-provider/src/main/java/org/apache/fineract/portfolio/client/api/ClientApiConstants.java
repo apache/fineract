@@ -70,6 +70,7 @@ public class ClientApiConstants {
     public static final String dateFormatParamName = "dateFormat";
     public static final String address = "address";
     public static final String familyMembers = "familyMembers";
+    public static final String businessOwners = "businessOwners";
     public static final String MARITALSTATUS = "MARITALSTATUS";
     public static final String maritalStatusIdParamName = "maritalStatusId";
 

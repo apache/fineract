@@ -30,10 +30,13 @@ import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.Client;
+import org.apache.fineract.portfolio.client.domain.ClientBusinessOwnerRepository;
+import org.apache.fineract.portfolio.client.domain.ClientBusinessOwners;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.apache.fineract.portfolio.client.exception.ClientBusinessOwnerNotFoundException;
 
 @Service
 public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePlatformService {
@@ -42,15 +45,17 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
     private final ClientRepositoryWrapper clientRepositoryWrapper;
     private final ImageRepository imageRepository;
     private final StaffRepositoryWrapper staffRepositoryWrapper;
+    private final ClientBusinessOwnerRepository clientBusinessOwnerRepository;
 
     @Autowired
     public ImageWritePlatformServiceJpaRepositoryImpl(final ContentRepositoryFactory documentStoreFactory,
             final ClientRepositoryWrapper clientRepositoryWrapper, final ImageRepository imageRepository,
-            StaffRepositoryWrapper staffRepositoryWrapper) {
+            StaffRepositoryWrapper staffRepositoryWrapper, final ClientBusinessOwnerRepository clientBusinessOwnerRepository) {
         this.contentRepositoryFactory = documentStoreFactory;
         this.clientRepositoryWrapper = clientRepositoryWrapper;
         this.imageRepository = imageRepository;
         this.staffRepositoryWrapper = staffRepositoryWrapper;
+        this.clientBusinessOwnerRepository = clientBusinessOwnerRepository;
     }
 
     @Transactional
@@ -94,7 +99,15 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
             staff.setImage(null);
             this.staffRepositoryWrapper.save(staff);
 
+        } else if (EntityTypeForImages.BUSINESSOWNER.toString().equals(entityName)) {
+        	owner = this.clientBusinessOwnerRepository.findById(clientId)
+                    .orElseThrow(() -> new ClientBusinessOwnerNotFoundException(clientId));
+        	ClientBusinessOwners businessOwner = (ClientBusinessOwners) owner;
+            image = businessOwner.getImage();
+            businessOwner.setImage(null);
+            this.clientBusinessOwnerRepository.save(businessOwner);
         }
+
         // delete image from the file system
         if (image != null) {
             final ContentRepository contentRepository = this.contentRepositoryFactory
@@ -122,6 +135,11 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
             Staff staff = this.staffRepositoryWrapper.findOneWithNotFoundDetection(entityId);
             image = staff.getImage();
             owner = staff;
+        } else if (EntityTypeForImages.BUSINESSOWNER.toString().equals(entityName)) {
+            ClientBusinessOwners businessOwner = this.clientBusinessOwnerRepository.findById(entityId)
+                    .orElseThrow(() -> new ClientBusinessOwnerNotFoundException(entityId));
+            image = businessOwner.getImage();
+            owner = businessOwner;
         }
         if (image != null) {
             final ContentRepository contentRepository = this.contentRepositoryFactory
@@ -134,6 +152,7 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
     private CommandProcessingResult updateImage(final Object owner, final String imageLocation, final StorageType storageType) {
         Image image = null;
         Long clientId = null;
+        Long businessOwnerId = null;
         if (owner instanceof Client) {
             Client client = (Client) owner;
             image = client.getImage();
@@ -148,6 +167,13 @@ public class ImageWritePlatformServiceJpaRepositoryImpl implements ImageWritePla
             image = createImage(image, imageLocation, storageType);
             staff.setImage(image);
             this.staffRepositoryWrapper.save(staff);
+        } else if (owner instanceof ClientBusinessOwners) {
+            ClientBusinessOwners businessOwner = (ClientBusinessOwners) owner;
+            image = businessOwner.getImage();
+            businessOwnerId = businessOwner.getId();
+            image = createImage(image, imageLocation, storageType);
+            businessOwner.setImage(image);
+            this.clientBusinessOwnerRepository.save(businessOwner);
         }
 
         this.imageRepository.save(image);

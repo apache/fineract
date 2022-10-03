@@ -3485,4 +3485,21 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder addBusinessOwner(final long clientId) {
+        this.actionName = "CREATE";
+        this.entityName = "CLIENTBUSINESSOWNERS";
+        this.href = "/clients/" + clientId + "/businessOwners";
+        this.clientId = clientId;
+        return this;
+    }
+
+    public CommandWrapperBuilder updateBusinessOwner(final Long businessOwnerId, final Long clientId) {
+        this.actionName = "UPDATE";
+        this.entityName = "CLIENTBUSINESSOWNERS";
+        this.href = "/clients/" + clientId + "/businessOwners";
+        this.clientId = clientId;
+        this.entityId = businessOwnerId;
+        return this;
+    }
+
 }
