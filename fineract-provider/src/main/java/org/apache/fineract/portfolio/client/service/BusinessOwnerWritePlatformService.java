@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.client.service;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.portfolio.client.domain.Client;
+import org.apache.fineract.portfolio.client.domain.ClientBusinessOwners;
 
 public interface BusinessOwnerWritePlatformService {
 
@@ -29,4 +30,6 @@ public interface BusinessOwnerWritePlatformService {
     CommandProcessingResult addNewBusinessOwner(Client client, JsonCommand command);
 
     CommandProcessingResult updateBusinessOwner(Long clientId, JsonCommand command);
+
+    ClientBusinessOwners updateBusinessOwnerStatus(Long businessOwnerId, Boolean status);
 }

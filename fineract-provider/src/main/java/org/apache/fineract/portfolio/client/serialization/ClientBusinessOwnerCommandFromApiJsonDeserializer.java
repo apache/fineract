@@ -46,7 +46,7 @@ public final class ClientBusinessOwnerCommandFromApiJsonDeserializer {
     private final FromJsonHelper fromApiJsonHelper;
     private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "clientId", "firstName", "titleId", "lastName",
             "ownership", "email", "mobileNumber", "businessOwnerNumber", "cityId", "streetNumberAndName", "address1", "address2",
-            "address3", "postalCode", "landmark", "typeId", "stateProvinceId", "countryId", "bvn", "nin", "locale", "dateFormat"));
+            "address3", "postalCode", "landmark", "typeId", "stateProvinceId", "countryId", "bvn", "nin", "locale", "dateFormat", "isActive"));
 
     @Autowired
     public ClientBusinessOwnerCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
@@ -142,6 +142,11 @@ public final class ClientBusinessOwnerCommandFromApiJsonDeserializer {
         final Long countryId = this.fromApiJsonHelper.extractLongNamed("countryId", element);
         baseDataValidator.reset().parameter("countryId").value(countryId).notNull().integerGreaterThanZero();
 
+        if (this.fromApiJsonHelper.extractBooleanNamed("isActive", element) != null) {
+            final Boolean isActive = this.fromApiJsonHelper.extractBooleanNamed("isActive", element);
+            baseDataValidator.reset().parameter("isActive").value(isActive).notNull().notBlank().notExceedingLengthOf(100);
+        }
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
     }
@@ -231,6 +236,10 @@ public final class ClientBusinessOwnerCommandFromApiJsonDeserializer {
         if (this.fromApiJsonHelper.extractStringNamed("countryId", element) != null) {
             final Long countryId = this.fromApiJsonHelper.extractLongNamed("countryId", element);
             baseDataValidator.reset().parameter("countryId").value(countryId).notNull().integerGreaterThanZero();
+        }
+        if (this.fromApiJsonHelper.extractBooleanNamed("isActive", element) != null) {
+            final Boolean isActive = this.fromApiJsonHelper.extractBooleanNamed("isActive", element);
+            baseDataValidator.reset().parameter("isActive").value(isActive).notNull().notBlank().notExceedingLengthOf(100);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

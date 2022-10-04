@@ -121,12 +121,15 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
     @JoinColumn(name = "image_id", nullable = true)
     private Image image;
 
+    @Column(name = "is_active")
+    private Boolean isActive;
+
     private ClientBusinessOwners(final Client client, final String firstName, final CodeValue title, final String lastName,
             final BigDecimal ownership, final String email, final String mobileNumber, final String landmark, final CodeValue type,
             final CodeValue city, final CodeValue stateProvince, final CodeValue country, final String bvn, final String nin,
             final String businessOwnerNumber, final String createdBy, final LocalDate createdOn, final String updatedBy,
             final LocalDate updatedOn, final String street, final String address1, final String address2, final String address3,
-            final String postalCode) {
+            final String postalCode, final Boolean isActive) {
 
         this.client = client;
         this.firstName = firstName;
@@ -149,6 +152,7 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
         this.address2 = address2;
         this.address3 = address3;
         this.postalCode = postalCode;
+        this.isActive = isActive;
 
         this.updatedBy = updatedBy;
         if (createdOn != null) {
@@ -179,6 +183,7 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
         LocalDate createdOnDate = null;
         String bvn = null;
         String nin = null;
+        Boolean isActive = false;
 
         if (jsonObject.get("firstName") != null) {
             firstName = jsonObject.get("firstName").getAsString();
@@ -257,10 +262,13 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
         if (jsonObject.get("ownership") != null) {
             ownership = jsonObject.get("ownership").getAsBigDecimal();
         }
+        if (jsonObject.get("isActive") != null) {
+            isActive = jsonObject.get("isActive").getAsBoolean();
+        }
 
         return new ClientBusinessOwners(client, firstName, title, lastName, ownership, email, mobileNumber, landmark, type, city,
                 stateProvince, country, bvn, nin, businessOwnerNumber, createdBy, createdOnDate, updatedBy, updatedOnDate,
-                streetNumberAndName, address1, address2, address3, postalCode);
+                streetNumberAndName, address1, address2, address3, postalCode, isActive);
     }
 
     public Client getClient() {
@@ -469,5 +477,13 @@ public class ClientBusinessOwners extends AbstractPersistableCustom {
 
     public void setOwnership(BigDecimal ownership) {
         this.ownership = ownership;
+    }
+
+    public Boolean getActive() {
+        return isActive;
+    }
+
+    public void setActive(Boolean active) {
+        isActive = active;
     }
 }

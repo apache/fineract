@@ -31,6 +31,10 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
@@ -43,6 +47,7 @@ import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSeria
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.data.ClientBusinessOwnerData;
+import org.apache.fineract.portfolio.client.domain.ClientBusinessOwners;
 import org.apache.fineract.portfolio.client.service.BusinessOwnerWritePlatformService;
 import org.apache.fineract.portfolio.client.service.ClientBusinessOwnerReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +62,7 @@ public class ClientBusinessOwnersApiResources {
 
     private final Set<String> responseDataParameters = new HashSet<>(
             Arrays.asList("id", "clientId", "firstName", "title", "lastName", "email", "mobileNumber", "alterMobileNumber", "isActive",
-                    "city", "username", "streetNumberAndName", "dateOfBirth", "lga", "stateProvince", "country", "bvn"));
+                    "city", "username", "streetNumberAndName", "dateOfBirth", "lga", "stateProvince", "country", "bvn", "isActive"));
     private final String resourceNameForPermissions = "BusinessOwners";
     private final PlatformSecurityContext context;
     private final ClientBusinessOwnerReadPlatformService readPlatformService;
@@ -151,5 +156,21 @@ public class ClientBusinessOwnersApiResources {
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
+    }
+
+    @GET
+    @Path("/{businessOwnerId}/updateOwnerStatus")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Boolean updateOwnerStatus(@Context final UriInfo uriInfo, @PathParam("businessOwnerId") final Long businessOwnerId,
+                                     @QueryParam("status") final Boolean status, @PathParam("clientId") final Long clientId) {
+
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+
+        final ClientBusinessOwners businessOwners = this.writePlatformService.updateBusinessOwnerStatus(businessOwnerId, status);
+
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return businessOwners.getActive();
+
     }
 }
