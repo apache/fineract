@@ -1,4 +1,4 @@
-name: Deploy to ECR
+name: Deploy BACKEND to ECR
 
 on:
  
