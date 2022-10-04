@@ -22,6 +22,7 @@ import java.util.List;
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.listener.COBExecutionListenerRunner;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.springframework.batch.core.Job;
@@ -69,6 +70,8 @@ public class LoanCOBManagerConfiguration {
     private RetrieveLoanIdService retrieveLoanIdService;
     @Autowired
     private LoanAccountLockRepository accountLockRepository;
+    @Autowired
+    private BusinessEventNotifierService businessEventNotifierService;
 
     @Bean
     @JobScope
@@ -88,16 +91,27 @@ public class LoanCOBManagerConfiguration {
     }
 
     @Bean
+    public Step stayedLockedStep() {
+        return localStepBuilderFactory.get("Stayed locked loan accounts - Step").tasklet(stayedLockedTasklet()).build();
+    }
+
+    @Bean
     @JobScope
     public FetchAndLockLoanTasklet fetchAndLockLoanTasklet() {
         return new FetchAndLockLoanTasklet(accountLockRepository, retrieveLoanIdService);
+    }
+
+    @Bean
+    @JobScope
+    public StayedLockedLoansTasklet stayedLockedTasklet() {
+        return new StayedLockedLoansTasklet(accountLockRepository, businessEventNotifierService);
     }
 
     @Bean(name = "loanCOBJob")
     public Job loanCOBJob() {
         return jobBuilderFactory.get(JobName.LOAN_COB.name()) //
                 .listener(new COBExecutionListenerRunner(applicationContext, JobName.LOAN_COB.name())) //
-                .start(fetchAndLockStep()).next(loanCOBStep()) //
+                .start(fetchAndLockStep()).next(loanCOBStep()).next(stayedLockedStep()) //
                 .incrementer(new RunIdIncrementer()) //
                 .build();
     }
