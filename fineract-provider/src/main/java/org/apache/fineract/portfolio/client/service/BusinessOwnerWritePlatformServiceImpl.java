@@ -150,6 +150,7 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
         CodeValue titleIdObj;
         CodeValue cityIdObj;
         CodeValue typeIdObj;
+        Boolean isActive = false;
 
         boolean is_owner_update = false;
 
@@ -286,6 +287,11 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
             }
 
         }
+        if (command.booleanObjectValueOfParameterNamed("isActive") != null) {
+            isActive = command.booleanObjectValueOfParameterNamed("isActive");
+            clientBusinessOwner.setActive(isActive);
+            is_owner_update = true;
+        }
 
         if (is_owner_update) {
             clientBusinessOwner.setUpdatedOn(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
@@ -294,5 +300,23 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
         }
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(clientBusinessOwner.getId()).build();
+    }
+
+    @Override
+    public ClientBusinessOwners updateBusinessOwnerStatus(Long businessOwnerId, Boolean status) {
+
+        this.context.authenticatedUser();
+
+        ClientBusinessOwners clientBusinessOwner = this.businessOwnerRepository.findById(businessOwnerId)
+                .orElseThrow(() -> new ClientBusinessOwnerNotFoundException(businessOwnerId));
+
+        if (status != null) {
+            clientBusinessOwner.setActive(status);
+        }
+
+        clientBusinessOwner.setUpdatedOn(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
+        this.businessOwnerRepository.save(clientBusinessOwner);
+
+        return clientBusinessOwner;
     }
 }
