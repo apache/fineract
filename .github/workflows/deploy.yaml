@@ -65,7 +65,7 @@ jobs:
     
     - name: updating kubeconfig and helm repo
       run: |
-       aws eks --region us-east-2 update-kubeconfig --name unitedcapital-dev
+       aws eks --region us-east-2 update-kubeconfig --name united-capital-dev
        helm repo add fiter-apps https://chartmuseum.fiter.io/ --username ${{ secrets.CHARTMUSEUM_USERNAME }} --password ${{ secrets.CHARTMUSEUM_PASSWORD }}
        
     - name: deploy backend
