@@ -76,9 +76,41 @@ public class ClientFamilyMembers extends AbstractPersistableCustom {
     @Column(name = "date_of_birth", nullable = true)
     private LocalDate dateOfBirth;
 
+    @Column(name = "email", length = 50, unique = true)
+    private String email;
+
+    @ManyToOne
+    @JoinColumn(name = "address_type_id")
+    private CodeValue addressType;
+
+    @Column(name = "address1")
+    private String address1;
+
+    @Column(name = "address2")
+    private String address2;
+
+    @Column(name = "address3")
+    private String address3;
+
+    @ManyToOne
+    @JoinColumn(name = "city_id")
+    private CodeValue city;
+
+    @ManyToOne
+    @JoinColumn(name = "state_province_id")
+    private CodeValue stateProvince;
+
+    @ManyToOne
+    @JoinColumn(name = "country_id")
+    private CodeValue country;
+
+    @Column(name = "postal_code")
+    private String postalCode;
+
     private ClientFamilyMembers(final Client client, final String firstName, final String middleName, final String lastName,
-            final String qualification, final String mobileNumber, final Long age, final Boolean isDependent, final CodeValue relationship,
-            final CodeValue maritalStatus, final CodeValue gender, final LocalDate dateOfBirth, final CodeValue profession) {
+                                final String qualification, final String mobileNumber, final Long age, final Boolean isDependent, final CodeValue relationship,
+                                final CodeValue maritalStatus, final CodeValue gender, final LocalDate dateOfBirth, final CodeValue profession, String email,
+                                CodeValue addressType, String address1, String address2, String address3, CodeValue city, CodeValue stateProvince, CodeValue country, String postalCode) {
 
         this.client = client;
         this.firstName = firstName;
@@ -93,6 +125,15 @@ public class ClientFamilyMembers extends AbstractPersistableCustom {
         this.gender = gender;
         this.dateOfBirth = dateOfBirth;
         this.profession = profession;
+        this.email = email;
+        this.addressType = addressType;
+        this.address1 = address1;
+        this.address2 = address2;
+        this.address3 = address3;
+        this.city = city;
+        this.stateProvince = stateProvince;
+        this.country = country;
+        this.postalCode = postalCode;
     }
 
     public ClientFamilyMembers() {
@@ -101,9 +142,11 @@ public class ClientFamilyMembers extends AbstractPersistableCustom {
 
     public static ClientFamilyMembers fromJson(final Client client, final String firstName, final String middleName, final String lastName,
             final String qualification, final String mobileNumber, final Long age, final Boolean isDependent, final CodeValue relationship,
-            final CodeValue maritalStatus, final CodeValue gender, final LocalDate dateOfBirth, final CodeValue profession) {
+            final CodeValue maritalStatus, final CodeValue gender, final LocalDate dateOfBirth, final CodeValue profession,
+            String email, CodeValue addressType, String address1, String address2, String address3, CodeValue city, CodeValue stateProvince,
+            CodeValue country, String postalCode) {
         return new ClientFamilyMembers(client, firstName, middleName, lastName, qualification, mobileNumber, age, isDependent, relationship,
-                maritalStatus, gender, dateOfBirth, profession);
+                maritalStatus, gender, dateOfBirth, profession, email, addressType, address1, address2, address3, city, stateProvince, country, postalCode);
     }
 
     public Client getClient() {
@@ -210,4 +253,83 @@ public class ClientFamilyMembers extends AbstractPersistableCustom {
         this.isDependent = isDependent;
     }
 
+    public Boolean getDependent() {
+        return isDependent;
+    }
+
+    public void setDependent(Boolean dependent) {
+        isDependent = dependent;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public CodeValue getAddressType() {
+        return addressType;
+    }
+
+    public void setAddressType(CodeValue addressType) {
+        this.addressType = addressType;
+    }
+
+    public String getAddress1() {
+        return address1;
+    }
+
+    public void setAddress1(String address1) {
+        this.address1 = address1;
+    }
+
+    public String getAddress2() {
+        return address2;
+    }
+
+    public void setAddress2(String address2) {
+        this.address2 = address2;
+    }
+
+    public String getAddress3() {
+        return address3;
+    }
+
+    public void setAddress3(String address3) {
+        this.address3 = address3;
+    }
+
+    public CodeValue getCity() {
+        return city;
+    }
+
+    public void setCity(CodeValue city) {
+        this.city = city;
+    }
+
+    public CodeValue getStateProvince() {
+        return stateProvince;
+    }
+
+    public void setStateProvince(CodeValue stateProvince) {
+        this.stateProvince = stateProvince;
+    }
+
+    public CodeValue getCountry() {
+        return country;
+    }
+
+    public void setCountry(CodeValue country) {
+        this.country = country;
+    }
+
+    public String getPostalCode() {
+        return postalCode;
+    }
+
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
+    }
 }

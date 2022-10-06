@@ -62,18 +62,48 @@ public final class ClientFamilyMembersData implements Serializable {
 
     private final Boolean isDependent;
 
+    private String email;
+
+    private String address1;
+
+    private String address2;
+
+    private String address3;
+
+    private String postalCode;
+
+    private Long stateProvinceId;
+
+    private Long countryId;
+
+    private String countryName;
+
+    private String stateName;
+
+    private Long cityId;
+
+    private String cityName;
+
+
     // template holder
     private final Collection<CodeValueData> relationshipIdOptions;
     private final Collection<CodeValueData> genderIdOptions;
     private final Collection<CodeValueData> maritalStatusIdOptions;
     private final Collection<CodeValueData> professionIdOptions;
 
+    private final Collection<CodeValueData> countryIdOptions;
+    private final Collection<CodeValueData> stateProvinceIdOptions;
+    private final Collection<CodeValueData> cityIdOptions;
+    private final Collection<CodeValueData> addressTypeIdOptions;
+    private final Long addressTypeId;
+    private final String addressType;
+
     private ClientFamilyMembersData(final Long id, final Long clientId, final String firstName, final String middleName,
-            final String lastName, final String qualification, final String mobileNumber, final Long age, final Boolean isDependent,
-            final String relationship, final Long relationshipId, final String maritalStatus, final Long maritalStatusId,
-            final String gender, final Long genderId, final LocalDate dateOfBirth, final String profession, final Long professionId,
-            final Collection<CodeValueData> relationshipIdOptions, final Collection<CodeValueData> genderIdOptions,
-            final Collection<CodeValueData> maritalStatusIdOptions, final Collection<CodeValueData> professionIdOptions) {
+                                    final String lastName, final String qualification, final String mobileNumber, final Long age, final Boolean isDependent,
+                                    final String relationship, final Long relationshipId, final String maritalStatus, final Long maritalStatusId,
+                                    final String gender, final Long genderId, final LocalDate dateOfBirth, final String profession, final Long professionId,
+                                    String email, String address1, String address2, String address3, String postalCode, Long stateProvinceId, Long countryId, String countryName, String stateName, Long cityId, String cityName, final Collection<CodeValueData> relationshipIdOptions, final Collection<CodeValueData> genderIdOptions,
+                                    final Collection<CodeValueData> maritalStatusIdOptions, final Collection<CodeValueData> professionIdOptions, Collection<CodeValueData> countryIdOptions, Collection<CodeValueData> stateProvinceIdOptions, Collection<CodeValueData> cityIdOptions, Collection<CodeValueData> addressTypeIdOptions, Long addressTypeId, String addressType) {
         this.id = id;
         this.clientId = clientId;
         this.firstName = firstName;
@@ -92,28 +122,53 @@ public final class ClientFamilyMembersData implements Serializable {
         this.mobileNumber = mobileNumber;
         this.age = age;
         this.isDependent = isDependent;
+        this.email = email;
+        this.address1 = address1;
+        this.address2 = address2;
+        this.address3 = address3;
+        this.postalCode = postalCode;
+        this.stateProvinceId = stateProvinceId;
+        this.countryId = countryId;
+        this.countryName = countryName;
+        this.stateName = stateName;
+        this.cityId = cityId;
+        this.cityName = cityName;
         this.relationshipIdOptions = relationshipIdOptions;
         this.genderIdOptions = genderIdOptions;
         this.maritalStatusIdOptions = maritalStatusIdOptions;
         this.professionIdOptions = professionIdOptions;
+        this.countryIdOptions = countryIdOptions;
+        this.stateProvinceIdOptions = stateProvinceIdOptions;
+        this.cityIdOptions = cityIdOptions;
 
+        this.addressTypeIdOptions = addressTypeIdOptions;
+        this.addressTypeId = addressTypeId;
+        this.addressType = addressType;
     }
 
     public static ClientFamilyMembersData instance(final Long id, final Long clientId, final String firstName, final String middleName,
             final String lastName, final String qualification, final String mobileNumber, final Long age, final Boolean isDependent,
             final String relationship, final Long relationshipId, final String maritalStatus, final Long maritalStatusId,
-            final String gender, final Long genderId, final LocalDate dateOfBirth, final String profession, final Long professionId) {
+            final String gender, final Long genderId, final LocalDate dateOfBirth, final String profession, final Long professionId,
+            String email, String address1, String address2, String address3, String postalCode, Long stateProvinceId, Long countryId,
+            String countryName, String stateName, Long cityId, String cityName,
+            Long addressTypeId, String addressType) {
         return new ClientFamilyMembersData(id, clientId, firstName, middleName, lastName, qualification, mobileNumber, age, isDependent,
-                relationship, relationshipId, maritalStatus, maritalStatusId, gender, genderId, dateOfBirth, profession, professionId, null,
-                null, null, null);
+                relationship, relationshipId, maritalStatus, maritalStatusId, gender, genderId, dateOfBirth, profession, professionId,
+                email, address1, address2, address3, postalCode, stateProvinceId, countryId, countryName, stateName, cityId, cityName, null,
+                null, null, null, null, null, null, null,
+                addressTypeId, addressType);
     }
 
     public static ClientFamilyMembersData templateInstance(final Collection<CodeValueData> relationshipIdOptions,
             final Collection<CodeValueData> genderIdOptions, final Collection<CodeValueData> maritalStatusIdOptions,
-            final Collection<CodeValueData> professionIdOptions) {
+            final Collection<CodeValueData> professionIdOptions, Collection<CodeValueData> countryIdOptions,
+            Collection<CodeValueData> stateProvinceIdOptions, Collection<CodeValueData> cityIdOptions,
+            Collection<CodeValueData> addressTypeIdOptions) {
 
         return new ClientFamilyMembersData(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-                null, null, relationshipIdOptions, genderIdOptions, maritalStatusIdOptions, professionIdOptions);
+                null, null, null, null, null, null, null, null, null, null, null, null, null, relationshipIdOptions, genderIdOptions, maritalStatusIdOptions, professionIdOptions,
+                countryIdOptions, stateProvinceIdOptions, cityIdOptions, addressTypeIdOptions, null, null);
     }
 
     public Long getId() {
