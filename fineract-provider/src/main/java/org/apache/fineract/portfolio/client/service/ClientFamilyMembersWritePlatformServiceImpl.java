@@ -83,6 +83,19 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
         Long age = null;
         Boolean isDependent = false;
         LocalDate dateOfBirth = null;
+        String address1 = "";
+        String address2 = "";
+        String address3 = "";
+        String postalCode = "";
+        String email = "";
+        long cityId;
+        long stateId;
+        long countryId;
+        long addressTypeId;
+        CodeValue stateIdObj = null;
+        CodeValue countryIdObj = null;
+        CodeValue cityIdObj = null;
+        CodeValue addressTypeIdObj = null;
 
         this.context.authenticatedUser();
         apiJsonDeserializer.validateForCreate(clientId, command.json());
@@ -118,8 +131,47 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
 
         dateOfBirth = command.localDateValueOfParameterNamed("dateOfBirth");
 
+        address1 = command.stringValueOfParameterNamed("address1");
+
+        address2 = command.stringValueOfParameterNamed("address2");
+
+        address3 = command.stringValueOfParameterNamed("address3");
+
+        postalCode = command.stringValueOfParameterNamed("postalCode");
+        postalCode = command.stringValueOfParameterNamed("email");
+
+        if (command.longValueOfParameterNamed("addressTypeId") != null) {
+            if (command.longValueOfParameterNamed("addressTypeId") != 0) {
+                addressTypeId = command.longValueOfParameterNamed("addressTypeId");
+                addressTypeIdObj = codeValueRepository.getReferenceById(addressTypeId);
+            }
+        }
+
+        if (command.longValueOfParameterNamed("cityId") != null) {
+            if (command.longValueOfParameterNamed("cityId") != 0) {
+                cityId = command.longValueOfParameterNamed("cityId");
+                cityIdObj = this.codeValueRepository.getReferenceById(cityId);
+            }
+        }
+
+        if (command.longValueOfParameterNamed("stateProvinceId") != null) {
+            if (command.longValueOfParameterNamed("stateProvinceId") != 0) {
+                stateId = command.longValueOfParameterNamed("stateProvinceId");
+                stateIdObj = this.codeValueRepository.getReferenceById(stateId);
+            }
+        }
+
+        if (command.longValueOfParameterNamed("countryId") != null) {
+            if (command.longValueOfParameterNamed("countryId") != 0) {
+                countryId = command.longValueOfParameterNamed("countryId");
+                countryIdObj = this.codeValueRepository.getReferenceById(countryId);
+            }
+        }
+
+
         ClientFamilyMembers clientFamilyMembers = ClientFamilyMembers.fromJson(client, firstName, middleName, lastName, qualification,
-                mobileNumber, age, isDependent, relationship, maritalStatus, gender, dateOfBirth, profession);
+                mobileNumber, age, isDependent, relationship, maritalStatus, gender, dateOfBirth, profession, 
+                email, addressTypeIdObj, address1, address2, address3, cityIdObj, stateIdObj, countryIdObj, postalCode);
 
         this.clientFamilyRepository.saveAndFlush(clientFamilyMembers);
 
@@ -146,6 +198,7 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
         String mobileNumber = "";
         Long age = null;
         Boolean isDependent = false;
+        String email = "";
 
         this.context.authenticatedUser();
 
@@ -231,8 +284,53 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
 
             }
 
+            CodeValue addressTypeIdCodeValue = null;
+            if (member.get("addressTypeId") != null) {
+                 long addressTypeId = member.get("addressTypeId").getAsLong();
+                 addressTypeIdCodeValue = codeValueRepository.getReferenceById(addressTypeId);
+            }
+            if (member.get("email") != null) {
+                email = member.get("email").getAsString();
+            }
+            String address1 = "";
+            if (member.get("address1") != null) {
+                address1 = member.get("address1").getAsString();
+            }
+
+            String address2 = "";
+            if (member.get("address2") != null) {
+                address2 = member.get("address2").getAsString();
+            }
+
+            String address3 = "";
+            if (member.get("address3") != null) {
+                address3 = member.get("address3").getAsString();
+            }
+
+            String postalCode = "";
+            if (member.get("postalCode") != null) {
+                postalCode = member.get("postalCode").getAsString();
+            }
+            CodeValue stateIdCodeValue = null;
+            if (member.get("stateProvinceId") != null) {
+                long stateId = member.get("stateProvinceId").getAsLong();
+                stateIdCodeValue = codeValueRepository.getReferenceById(stateId);
+            }
+
+            CodeValue countryIdCodeValue = null;
+            if (member.get("countryId") != null) {
+                long countryId = member.get("countryId").getAsLong();
+                countryIdCodeValue = codeValueRepository.getReferenceById(countryId);
+            }
+            CodeValue cityIdCodeValue = null;
+            if (member.get("cityId") != null) {
+                long cityId = member.get("cityId").getAsLong();
+                cityIdCodeValue = codeValueRepository.getById(cityId);
+            }
+
             familyMember = ClientFamilyMembers.fromJson(client, firstName, middleName, lastName, qualification, mobileNumber, age,
-                    isDependent, relationship, maritalStatus, gender, dateOfBirth, profession);
+                    isDependent, relationship, maritalStatus, gender, dateOfBirth, profession, email, addressTypeIdCodeValue, address1, address2, address3,
+                    cityIdCodeValue, stateIdCodeValue, countryIdCodeValue, postalCode);
 
             this.clientFamilyRepository.saveAndFlush(familyMember);
 
@@ -261,6 +359,19 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
         String mobileNumber = "";
         Long age = null;
         Boolean isDependent = false;
+        String address1 = "";
+        String address2 = "";
+        String address3 = "";
+        String postalCode = "";
+        String email = "";
+        long cityId;
+        long stateId;
+        long countryId;
+        long addressTypeId;
+        CodeValue stateIdObj = null;
+        CodeValue countryIdObj = null;
+        CodeValue cityIdObj = null;
+        CodeValue addressTypeIdObj = null;
         // long clientFamilyMemberId=0;
 
         this.context.authenticatedUser();
@@ -339,6 +450,65 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
         if (command.localDateValueOfParameterNamed("dateOfBirth") != null) {
             dateOfBirth = command.localDateValueOfParameterNamed("dateOfBirth");
             clientFamilyMember.setDateOfBirth(dateOfBirth);
+
+        }
+        if (command.stringValueOfParameterNamed("email") != null) {
+            email = command.stringValueOfParameterNamed("email");
+            clientFamilyMember.setEmail(email);
+        }
+        if (command.stringValueOfParameterNamed("address1") != null) {
+            address1 = command.stringValueOfParameterNamed("address1");
+            clientFamilyMember.setAddress1(address1);
+        }
+
+        if (command.stringValueOfParameterNamed("address2") != null) {
+            address2 = command.stringValueOfParameterNamed("address2");
+            clientFamilyMember.setAddress2(address2);
+        }
+
+        if (command.stringValueOfParameterNamed("address3") != null) {
+            address3 = command.stringValueOfParameterNamed("address3");
+            clientFamilyMember.setAddress3(address3);
+        }
+
+        if (command.stringValueOfParameterNamed("postalCode") != null) {
+            postalCode = command.stringValueOfParameterNamed("postalCode");
+            clientFamilyMember.setPostalCode(postalCode);
+        }
+
+        if (command.longValueOfParameterNamed("addressTypeId") != null) {
+            if (command.longValueOfParameterNamed("addressTypeId") != 0) {
+                addressTypeId = command.longValueOfParameterNamed("addressTypeId");
+                addressTypeIdObj = this.codeValueRepository.getById(addressTypeId);
+                clientFamilyMember.setAddressType(addressTypeIdObj);
+            }
+
+        }
+
+        if (command.longValueOfParameterNamed("cityId") != null) {
+            if (command.longValueOfParameterNamed("cityId") != 0) {
+                cityId = command.longValueOfParameterNamed("cityId");
+                cityIdObj = this.codeValueRepository.getById(cityId);
+                clientFamilyMember.setCity(cityIdObj);
+            }
+
+        }
+
+        if (command.longValueOfParameterNamed("stateProvinceId") != null) {
+            if (command.longValueOfParameterNamed("stateProvinceId") != 0) {
+                stateId = command.longValueOfParameterNamed("stateProvinceId");
+                stateIdObj = this.codeValueRepository.getById(stateId);
+                clientFamilyMember.setStateProvince(stateIdObj);
+            }
+
+        }
+
+        if (command.longValueOfParameterNamed("countryId") != null) {
+            if (command.longValueOfParameterNamed("countryId") != 0) {
+                countryId = command.longValueOfParameterNamed("countryId");
+                countryIdObj = this.codeValueRepository.getById(countryId);
+                clientFamilyMember.setCountry(countryIdObj);
+            }
 
         }
 

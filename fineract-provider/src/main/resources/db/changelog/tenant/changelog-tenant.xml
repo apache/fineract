@@ -44,4 +44,5 @@
     <include file="parts/0027_create_table_for_business_owner.xml" relativeToChangelogFile="true"/>
     <include file="parts/0028_add_field_in_business_owners_table_for_isActive.xml" relativeToChangelogFile="true"/>
     <include file="parts/0029_add_codes_for_city_and_Title_and_Type.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0030_add_fields_in_family_members_table.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

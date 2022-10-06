@@ -54,12 +54,17 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
 
         public String schema() {
             return "fmb.id AS id, fmb.client_id AS clientId, fmb.firstname AS firstName, fmb.middlename AS middleName,"
-                    + "fmb.lastname AS lastName,fmb.qualification AS qualification,fmb.mobile_number as mobileNumber,fmb.age as age,fmb.is_dependent as isDependent,cv.code_value AS relationship,fmb.relationship_cv_id AS relationshipId,"
-                    + "c.code_value AS maritalStatus,fmb.marital_status_cv_id AS maritalStatusId,"
-                    + "c1.code_value AS gender, fmb.gender_cv_id AS genderId, fmb.date_of_birth AS dateOfBirth, c2.code_value AS profession, fmb.profession_cv_id AS professionId"
+                    + " fmb.lastname AS lastName, fmb.email AS email, fmb.qualification AS qualification,fmb.mobile_number as mobileNumber,fmb.age as age,fmb.is_dependent as isDependent,cv.code_value AS relationship,fmb.relationship_cv_id AS relationshipId,"
+                    + " c.code_value AS maritalStatus,fmb.marital_status_cv_id AS maritalStatusId,"
+                    + " c1.code_value AS gender, fmb.gender_cv_id AS genderId, fmb.date_of_birth AS dateOfBirth, c2.code_value AS profession, fmb.profession_cv_id AS professionId,"
+                    + " fmb.address1 as address1, fmb.address2 as address2, fmb.address3 as address3, fmb.address_type_id as addressTypeId, type_code.code_value as addressType,"
+                    + " fmb.state_province_id as state_province_id, cvs.code_value as state_name, fmb.country_id as country_id,cvc.code_value as country_name,"
+                    + " fmb.postal_code as postalCode, fmb.city_id as city_id, cc.code_value as city_name "
                     + " FROM m_family_members fmb" + " LEFT JOIN m_code_value cv ON fmb.relationship_cv_id=cv.id"
                     + " LEFT JOIN m_code_value c ON fmb.marital_status_cv_id=c.id" + " LEFT JOIN m_code_value c1 ON fmb.gender_cv_id=c1.id"
-                    + " LEFT JOIN m_code_value c2 ON fmb.profession_cv_id=c2.id";
+                    + " LEFT JOIN m_code_value c2 ON fmb.profession_cv_id=c2.id"
+                    + " left join m_code_value cvs on fmb.state_province_id=cvs.id" + " left join m_code_value cc on fmb.city_id=cc.id"
+                    + " left join  m_code_value cvc on fmb.country_id=cvc.id left join m_code_value type_code on fmb.address_type_id=type_code.id";
         }
 
         @Override
@@ -82,10 +87,24 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
             final LocalDate dateOfBirth = JdbcSupport.getLocalDate(rs, "dateOfBirth");
             final String profession = rs.getString("profession");
             final long professionId = rs.getLong("professionId");
+            final long stateProvinceId = rs.getLong("state_province_id");
+            final String stateName = rs.getString("state_name");
+            final long countryId = rs.getLong("country_id");
+            final String countryName = rs.getString("country_name");
+            final long cityId = rs.getLong("city_id");
+            final String cityName = rs.getString("city_name");
+            final String address1 = rs.getString("address1");
+            final String address2 = rs.getString("address2");
+            final String address3 = rs.getString("address3");
+            final String postalCode = rs.getString("postalCode");
+            final String email = rs.getString("email");
+            final String addressType = rs.getString("addressType");
+            final long addressTypeId = rs.getLong("addressTypeId");
 
             return ClientFamilyMembersData.instance(id, clientId, firstName, middleName, lastName, qualification, mobileNumber, age,
                     isDependent, relationship, relationshipId, maritalStatus, maritalStatusId, gender, genderId, dateOfBirth, profession,
-                    professionId);
+                    professionId, email, address1, address2, address3, postalCode, stateProvinceId, countryId, countryName, stateName, cityId, cityName,
+                    addressTypeId, addressType);
 
         }
     }
@@ -126,7 +145,16 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
         final List<CodeValueData> professionOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode("PROFESSION"));
 
-        return ClientFamilyMembersData.templateInstance(relationshipOptions, genderOptions, maritalStatusOptions, professionOptions);
+        final List<CodeValueData> countryOptions = new ArrayList<>(this.codeValueReadPlatformService.retrieveCodeValuesByCode("COUNTRY"));
+
+        final List<CodeValueData> stateOptions = new ArrayList<>(this.codeValueReadPlatformService.retrieveCodeValuesByCode("STATE"));
+
+        final List<CodeValueData> cityOptions = new ArrayList<>(this.codeValueReadPlatformService.retrieveCodeValuesByCode("CITY"));
+
+        final List<CodeValueData> addressTypeOptions = new ArrayList<>(this.codeValueReadPlatformService.retrieveCodeValuesByCode("ADDRESS_TYPE"));
+
+        return ClientFamilyMembersData.templateInstance(relationshipOptions, genderOptions, maritalStatusOptions, professionOptions, countryOptions,
+                stateOptions, cityOptions, addressTypeOptions);
     }
 
 }
