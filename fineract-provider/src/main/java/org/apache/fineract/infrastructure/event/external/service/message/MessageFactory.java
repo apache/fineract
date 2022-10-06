@@ -89,7 +89,7 @@ public class MessageFactory implements InitializingBean {
     }
 
     private String getTenantId() {
-        return ThreadLocalContextUtil.getTenant().getName();
+        return ThreadLocalContextUtil.getTenant().getTenantIdentifier();
     }
 
     private String getMessageCreatedAt() {
