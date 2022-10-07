@@ -215,7 +215,31 @@ public class SavingsInterestPostingJobIntegrationTest {
         for (Map.Entry<String, Object> entry : interestPostingTransaction.entrySet()) {
             LOG.info("{} - {}", entry.getKey(), entry.getValue().toString());
         }
-        assertEquals("800.4932", interestPostingTransaction.get("runningBalance").toString(), "Equality check for Balance");
+        assertEquals("800.4384", interestPostingTransaction.get("runningBalance").toString(), "Equality check for Balance");
+    }
+
+    @Test
+    public void testAccountBalanceWithWithdrawalFeeAfterInterestPostingJobInOverdraftAccount() {
+        final String startDate = "21 June 2022";
+        final String jobName = "Post Interest For Savings";
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        Assertions.assertNotNull(clientID);
+
+        final Integer savingsId = createOverdraftSavingsAccountDailyPostingWithCharge(clientID, startDate);
+
+        this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "1000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        Float balance = Float.parseFloat("-1100.0");
+        assertEquals(balance, summary.get("accountBalance"), "Verifying account balance is -1100");
+
+        this.scheduleJobHelper.executeAndAwaitJob(jobName);
+        Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
+        ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
+        HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 3);
+        for (Map.Entry<String, Object> entry : interestPostingTransaction.entrySet()) {
+            LOG.info("{} - {}", entry.getKey(), entry.getValue().toString());
+        }
+        assertEquals("-1100.3014", interestPostingTransaction.get("runningBalance").toString(), "Equality check for Balance");
     }
 
     private Integer createSavingsAccountDailyPosting(final Integer clientID, final String startDate) {
@@ -246,6 +270,25 @@ public class SavingsInterestPostingJobIntegrationTest {
 
     private Integer createSavingsAccountDailyPostingWithCharge(final Integer clientID, final String startDate) {
         final Integer savingsProductID = createSavingsProductDailyPosting();
+        Assertions.assertNotNull(savingsProductID);
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplicationOnDate(clientID, savingsProductID,
+                ACCOUNT_TYPE_INDIVIDUAL, startDate);
+        Assertions.assertNotNull(savingsId);
+
+        final Integer withdrawalChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
+                ChargesHelper.getSavingsWithdrawalFeeJSON());
+        Assertions.assertNotNull(withdrawalChargeId);
+
+        this.savingsAccountHelper.addChargesForSavings(savingsId, withdrawalChargeId, false);
+        HashMap savingsStatusHashMap = this.savingsAccountHelper.approveSavingsOnDate(savingsId, startDate);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavingsAccount(savingsId, startDate);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+        return savingsId;
+    }
+
+    private Integer createOverdraftSavingsAccountDailyPostingWithCharge(final Integer clientID, final String startDate) {
+        final Integer savingsProductID = createSavingsProductDailyPostingOverdraft();
         Assertions.assertNotNull(savingsProductID);
         final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplicationOnDate(clientID, savingsProductID,
                 ACCOUNT_TYPE_INDIVIDUAL, startDate);
