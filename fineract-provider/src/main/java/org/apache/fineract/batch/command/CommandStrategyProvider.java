@@ -103,6 +103,8 @@ public class CommandStrategyProvider {
                 "createTransactionLoanCommandStrategy");
         this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\?command=payoutRefund").method("POST").build(),
                 "createTransactionLoanCommandStrategy");
+        this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\/\\d+").method("POST").build(),
+                "adjustTransactionCommandStrategy");
         this.commandStrategies.put(CommandContext.resource("clients\\/\\d+\\?command=activate").method("POST").build(),
                 "activateClientCommandStrategy");
         this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\?command=approve").method("POST").build(),
