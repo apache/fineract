@@ -2,16 +2,39 @@
 {
     {T
     + custom
-    ++ mycustom
-    +++ service
-    ++++ src
-    +++++ main
-    ++++++ java
-    +++++++ org.apache.fineract.mymodule.service
-    ++++++++ MyServiceImpl.java
-    ++++ build.gradle
-    ++++ dependencies.gradle
-    +++ build.gradle
+    ++ acme
+    +++ note
+    ++++ core
+    +++++ src
+    ++++++ main
+    +++++++ java
+    ++++++++ com.acme.fineract.note.core
+    +++++++++ data
+    ++++++++++ MyData.java
+    +++++++++ service
+    ++++++++++ MyCustomService.java
+    +++++ build.gradle
+    +++++ dependencies.gradle
+    ++++ service
+    +++++ src
+    ++++++ main
+    +++++++ java
+    ++++++++ com.acme.fineract.note.service
+    +++++++++ AcmeNoteReadService.java
+    +++++++++ AcmeNoteWriteService.java
+    +++++ build.gradle
+    +++++ dependencies.gradle
+    ++++ starter
+    +++++ src
+    ++++++ main
+    +++++++ java
+    ++++++++ com.acme.fineract.note.starter
+    +++++++++ AcmeNoteAutoConfiguration.java
+    +++++ resources
+    ++++++ META-INF
+    +++++++ spring.factories
+    +++++ build.gradle
+    +++++ dependencies.gradle
     }
 }
 @endsalt
