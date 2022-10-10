@@ -155,6 +155,7 @@ allprojects  {
             "**/banner.txt",
             "**/build.gradle.mustache",
             "**/pom.mustache",
+            "**/avro/**/*.java",
         ])
         strictCheck true
     }
@@ -250,7 +251,8 @@ allprojects  {
             "**/git.properties",
             ".mailmap",
             '**/images/diag-*.svg',
-            '**/*.avsc'
+            '**/*.avsc',
+            "**/generated/**/*MapperImpl.java"
         ]
     }
 }
