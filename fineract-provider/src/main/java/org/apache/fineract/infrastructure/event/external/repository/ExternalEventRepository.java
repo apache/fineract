@@ -18,13 +18,20 @@
  */
 package org.apache.fineract.infrastructure.event.external.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEvent;
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 
 public interface ExternalEventRepository extends JpaRepository<ExternalEvent, Long> {
 
     List<ExternalEvent> findByStatusOrderById(ExternalEventStatus status, Pageable batchSize);
+
+    @Modifying(flushAutomatically = true)
+    @Query("delete from ExternalEvent e where e.status = :status and e.businessDate <= :dateForPurgeCriteria")
+    void deleteOlderEventsWithSentStatus(ExternalEventStatus status, LocalDate dateForPurgeCriteria);
 }

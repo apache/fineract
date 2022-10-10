@@ -57,7 +57,8 @@ public enum JobName {
     INCREASE_COB_DATE_BY_1_DAY("Increase COB Date by 1 day"), //
     LOAN_COB("Loan COB"), //
     LOAN_DELINQUENCY_CLASSIFICATION("Loan Delinquency Classification"), //
-    SEND_ASYNCHRONOUS_EVENTS("Send Asynchronous Events");
+    SEND_ASYNCHRONOUS_EVENTS("Send Asynchronous Events"), //
+    PURGE_EXTERNAL_EVENTS("Purge External Events");
 
     private final String name;
 
