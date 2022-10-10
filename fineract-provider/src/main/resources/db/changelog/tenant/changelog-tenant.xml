@@ -72,4 +72,5 @@
     <include file="parts/0050_add_reverse_flag_disbursement_details.xml" relativeToChangelogFile="true"/>
     <include file="parts/0051_external_event_table_category_info.xml" relativeToChangelogFile="true"/>
     <include file="parts/0052_loan_transaction_chargeback.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0053_add_external_events_purge_job.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

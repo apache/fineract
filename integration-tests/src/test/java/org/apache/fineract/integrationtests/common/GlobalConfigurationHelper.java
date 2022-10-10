@@ -99,8 +99,8 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
         // There are currently 37 global configurations.
-        Assertions.assertEquals(41, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(41, actualGlobalConfigurations.size());
+        Assertions.assertEquals(42, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(42, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -463,6 +463,14 @@ public class GlobalConfigurationHelper {
         isReversalTransactionAllowed.put("enabled", false);
         isReversalTransactionAllowed.put("trapDoor", false);
         defaults.add(isReversalTransactionAllowed);
+
+        HashMap<String, Object> purgeExternalEventsOlderThanDaysDefault = new HashMap<>();
+        purgeExternalEventsOlderThanDaysDefault.put("id", 47);
+        purgeExternalEventsOlderThanDaysDefault.put("name", "purge-external-events-older-than-days");
+        purgeExternalEventsOlderThanDaysDefault.put("value", 30);
+        purgeExternalEventsOlderThanDaysDefault.put("enabled", false);
+        purgeExternalEventsOlderThanDaysDefault.put("trapDoor", false);
+        defaults.add(purgeExternalEventsOlderThanDaysDefault);
 
         return defaults;
     }

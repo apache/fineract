@@ -4783,7 +4783,7 @@ public class ClientLoanIntegrationTest {
                 .withInterestCalculationPeriodTypeAsDays() //
                 .withExpectedDisbursementDate(disbursementDate) //
                 .withSubmittedOnDate(disbursementDate) //
-                .withwithRepaymentStrategy(repaymentStrategy).withRepaymentFrequencyTypeAsMonths()//
+                .withRepaymentStrategy(repaymentStrategy).withRepaymentFrequencyTypeAsMonths()//
                 .withFirstRepaymentDate(firstRepaymentDate).withCollaterals(collaterals)
                 .build(clientID.toString(), loanProductID.toString(), null);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
