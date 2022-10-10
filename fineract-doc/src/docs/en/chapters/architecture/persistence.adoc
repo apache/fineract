@@ -62,3 +62,129 @@ The switch from Flyway (1.6.x) to Liquibase (1.7.x) was planned to be as smooth 
 * If the database is empty, Liquibase will create the database schema from scratch
 * If the database contains the latest Fineract 1.6.x database structure which was previously migrated with Flyway. Liquibase will seamlessly upgrade it to the latest version. Note: the Flyway related 2 database tables are left as they are and are not deleted.
 * If the database contains an earlier version of the database structure than Fineract 1.6.x. Liquibase will *NOT* do anything and *will fail the application during startup*. The proper approach in this case is to first upgrade your application version to the latest Fineract 1.6.x so that the latest Flyway changes are executed and then upgrade to the newer Fineract version where Liquibase will seamlessly take over the database upgrades.
+
+== Tuning and Indexing
+
+To optimize performance based on PostgreSQL and Eclipselink enhancements, tuning
+and indexing can be performed.
+
+=== Add inverted index for full text search
+
+For text data, such as log, commodity description, OLAP users need to search in
+the text. For example search error logs that contains 'ERROR', 'Exception' keywords.
+
+Currently, users use LIKE SQL function for text pattern matching in Doris and
+most OLAP databases. But LIKE is not slow since all rows need to be checked
+against the search pattern.
+
+Elasticsearch support distributed fulltext search capability based on the open
+source search library lucene.
+
+Some database, eg. MySQL, PostgreSQL, also add inverted index to support fulltext
+search.
+
+In fact, the BITMAP index in Doris is a simple inverted index. But it lack text
+tokenization, efficient dictionary, search query syntax to support mature fulltext
+search.
+
+=== Setup
+
+==== Functionality
+
+1. Add a new index type INVERTED index.
+2. Support create INVERTED index with parser and fast fulltext search on text
+column with type char/varchar/string.
+3. Support create INVERTED index without parser and fast equal, range operators
+on text column with type char/varchar/string.
+4. Support create INVERTED index without parser and fast equal, range operators
+on numeric column with type int*/float*/date/datetime.
+
+==== User interface
+
+1. Create table with INVERTED index
+
+```
+CREATE TABLE httplogs (
+  ts datetime,
+  clientip varchar(20),
+  request string,
+  status smallint,
+  size int,
+  INDEX idx_size (size) USING INVERTED,
+  INDEX idx_status (status) USING INVERTED,
+  INDEX idx_clientip (clientip) USING INVERTED PROPERTIES("parser"="none"),
+) ENGINE=OLAP
+DUPLICATE KEY(ts);
+```
+
+2. Add an INVERTED index  to a table
+
+```
+CREATE INDEX idx_request ON httplogs(request) USING INVERTED PROPERTIES("parser"="english")
+```
+
+3. Fulltext search query
+
+```
+-- search for request contains word 'login'
+SELECT * FROM httplogs WHERE request MATCH 'login';
+
+-- search for request contains word 'login' or 'error'
+SELECT * FROM httplogs WHERE request MATCH 'login error';
+
+-- search for request contains word 'login' and 'error'
+SELECT * FROM httplogs WHERE request MATCH_ALL 'login';
+```
+
+4. Equal query
+
+```
+SELECT * FROM httplogs WHERE status = 404;
+```
+
+5. Range query
+
+```
+SELECT COUNT() FROM httplogs WHERE size > 1024;
+```
+
+=== PostgreSQL Tuning
+
+1. Find out where the postgresql.conf file is. On some systems (ubuntu), it's in
+`/etc/postgresql/9.4/main` or similar.
+2. Run `pgtune` and let it create a new config file, tuned to the system (you may
+have to install it first). Example:
+`pgtune -i postgresql.conf -o postgresql.conf.pgtune -T Web`
+3. Look at the bottom of `postgresql.conf.pgtune`, add these entries to your
+`postgresql.conf`
+
+```
+------------------------------------------------------------------------------
+# CUSTOMIZED OPTIONS
+#------------------------------------------------------------------------------
+#custom_variable_classes = ''           # list of custom variable class
+names
+maintenance_work_mem = 1GB # pgtune wizard 2022-10-08
+checkpoint_completion_target = 0.7 # pgtune wizard 2022-10-08
+effective_cache_size = 22GB # pgtune wizard 2022-10-08
+work_mem = 160MB # pgtune wizard 2022-10-08
+wal_buffers = 4MB # pgtune wizard 2022-10-08
+checkpoint_segments = 8 # pgtune wizard 2022-10-08
+shared_buffers = 7680MB # pgtune wizard 2022-10-08
+max_connections = 200 # pgtune wizard 2022-10-08
+```
+
+4. Restart postgresql. It might complain about "shared memory". That needs to be
+placed in `/etc/sysctl.conf`. Examples: `kernel.shmmax = 16870928384`.
+
+Note: Don't use the above number! Use the number provided by the postgresql logs
+(or console) during restart.
+
+5. Reload `/etc/sysctl.conf`, if necessary, restart postgresql.
+
+```
+# sysctl -p
+
+# /etc/init.d/postgres restart
+
+```
