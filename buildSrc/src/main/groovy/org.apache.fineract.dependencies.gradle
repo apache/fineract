@@ -61,8 +61,8 @@ dependencyManagement {
             exclude 'com.sun.mail:javax.mail'
         }
         dependency 'org.quartz-scheduler:quartz:2.3.2'
-        dependency 'com.amazonaws:aws-java-sdk-s3:1.12.316'
-        dependency 'org.ehcache:ehcache:3.10.1'
+        dependency 'com.amazonaws:aws-java-sdk-s3:1.12.319'
+        dependency 'org.ehcache:ehcache:3.10.2'
         dependency 'com.github.spullara.mustache.java:compiler:0.9.10'
         dependency 'com.jayway.jsonpath:json-path:2.7.0'
         dependency 'org.apache.tika:tika-core:2.5.0'
@@ -183,8 +183,8 @@ dependencyManagement {
             entry 'xml-path'
         }
 
-        dependency 'org.mapstruct:mapstruct:1.5.2.Final'
-        dependency 'org.mapstruct:mapstruct-processor:1.5.2.Final'
+        dependency 'org.mapstruct:mapstruct:1.5.3.Final'
+        dependency 'org.mapstruct:mapstruct-processor:1.5.3.Final'
 
         dependency "org.apache.avro:avro:1.11.1"
     }
