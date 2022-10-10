@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.restassured.builder.RequestSpecBuilder;
@@ -33,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import org.apache.fineract.batch.command.internal.AdjustTransactionCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
@@ -147,7 +149,7 @@ public class BatchApiTest {
      * rolled back.
      *
      * @see org.apache.fineract.batch.command.internal.CreateClientCommandStrategy
-     * @see org.apache.fineract.batch.api.BatchesApiResource
+     * @see org.apache.fineract.batch.api.BatchApiResource
      * @see org.apache.fineract.batch.service.BatchApiService
      */
     @Test
@@ -1164,6 +1166,247 @@ public class BatchApiTest {
         Assertions.assertEquals(HttpStatus.SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Disburse loan");
         Assertions.assertEquals(HttpStatus.SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for merchant issued refund");
         Assertions.assertEquals(HttpStatus.SC_OK, responses.get(4).getStatusCode(), "Verify Status Code 200 for payout refund");
+    }
+
+    /**
+     * Test for the successful repayment reversal transaction. A '200' status code is expected on successful responses.
+     *
+     * @see AdjustTransactionCommandStrategy
+     */
+    @Test
+    public void shouldReturnOkStatusForBatchRepaymentReversal() {
+
+        final String loanProductJSON = new LoanProductTestBuilder() //
+                .withPrincipal("10000000.00") //
+                .withNumberOfRepayments("24") //
+                .withRepaymentAfterEvery("1") //
+                .withRepaymentTypeAsMonth() //
+                .withinterestRatePerPeriod("2") //
+                .withInterestRateFrequencyTypeAsMonths() //
+                .withAmortizationTypeAsEqualPrincipalPayment() //
+                .withInterestTypeAsDecliningBalance() //
+                .currencyDetails("0", "100").build(null);
+
+        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+
+        final LocalDate date = LocalDate.now(Utils.getZoneIdOfTenant());
+        final Long applyLoanRequestId = 5730L;
+        final Long approveLoanRequestId = 5731L;
+        final Long disburseLoanRequestId = 5732L;
+        final Long repayLoanRequestId = 5733L;
+        final Long repayReversalRequestId = 5734L;
+        final Long getLoanRequestId = 5735L;
+
+        // Create client
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+
+        // Create an apply loan request
+        final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
+
+        // Create an approve loan request
+        final BatchRequest approveLoanRequest = BatchHelper.approveLoanRequest(approveLoanRequestId, applyLoanRequestId);
+
+        // Create a disburse loan request
+        final BatchRequest disburseLoanRequest = BatchHelper.disburseLoanRequest(disburseLoanRequestId, approveLoanRequestId);
+
+        // Create a repayment request.
+        final BatchRequest repaymentRequest = BatchHelper.repayLoanRequest(repayLoanRequestId, disburseLoanRequestId, "500");
+
+        // Create a repayment reversal request
+        final BatchRequest repaymentReversalRequest = BatchHelper.createAdjustTransactionRequest(repayReversalRequestId, repayLoanRequestId,
+                "0", date);
+
+        // Get loan transactions request
+        final BatchRequest getLoanTransactionsRequest = BatchHelper.getLoanByIdRequest(getLoanRequestId, applyLoanRequestId,
+                "associations=transactions");
+
+        final List<BatchRequest> batchRequests = Arrays.asList(applyLoanRequest, approveLoanRequest, disburseLoanRequest, repaymentRequest,
+                repaymentReversalRequest, getLoanTransactionsRequest);
+
+        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+                BatchHelper.toJsonString(batchRequests));
+
+        final FromJsonHelper jsonHelper = new FromJsonHelper();
+        final JsonObject repayment = jsonHelper.parse(responses.get(5).getBody()).getAsJsonObject().get("transactions").getAsJsonArray()
+                .get(2).getAsJsonObject();
+        final JsonArray dateArray = repayment.get("reversedOnDate").getAsJsonArray();
+        final LocalDate reversedOnDate = LocalDate.of(dateArray.get(0).getAsInt(), dateArray.get(1).getAsInt(),
+                dateArray.get(2).getAsInt());
+
+        Assertions.assertEquals(HttpStatus.SC_OK, (long) responses.get(4).getStatusCode(), "Verify Status Code 200 for repayment reversal");
+        Assertions.assertEquals("Repayment", repayment.get("type").getAsJsonObject().get("value").getAsString());
+        Assertions.assertTrue(repayment.get("manuallyReversed").getAsBoolean());
+        Assertions.assertEquals(date, reversedOnDate);
+    }
+
+    /**
+     * Tests successful run of batch goodwill credit reversal for loans. A '200' status code is expected on successful
+     * responses.
+     *
+     * @see AdjustTransactionCommandStrategy
+     */
+    @Test
+    public void shouldReturnOkStatusForBatchGoodwillCreditReversal() {
+
+        final String loanProductJSON = new LoanProductTestBuilder() //
+                .withPrincipal("1000.00") //
+                .withNumberOfRepayments("24") //
+                .withRepaymentAfterEvery("1") //
+                .withRepaymentTypeAsMonth() //
+                .withinterestRatePerPeriod("2") //
+                .withInterestRateFrequencyTypeAsMonths() //
+                .withAmortizationTypeAsEqualPrincipalPayment() //
+                .withInterestTypeAsDecliningBalance() //
+                .currencyDetails("0", "100").build(null);
+
+        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+
+        final LocalDate date = LocalDate.now(Utils.getZoneIdOfTenant());
+        final Long applyLoanRequestId = 5730L;
+        final Long approveLoanRequestId = 5731L;
+        final Long disburseLoanRequestId = 5732L;
+        final Long goodwillCreditRequestId = 5733L;
+        final Long goodwillCreditReversalRequestId = 5734L;
+        final Long getLoanRequestId = 5735L;
+
+        // Create client
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+
+        // Create an apply loan request
+        final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
+
+        // Create an approve loan request
+        final BatchRequest approveLoanRequest = BatchHelper.approveLoanRequest(approveLoanRequestId, applyLoanRequestId);
+
+        // Create a disburse loan request
+        final BatchRequest disburseLoanRequest = BatchHelper.disburseLoanRequest(disburseLoanRequestId, approveLoanRequestId);
+
+        // Create a good will credit request
+        final BatchRequest goodwillCreditRequest = BatchHelper.goodwillCreditRequest(goodwillCreditRequestId, disburseLoanRequestId, "500");
+
+        // Create a good will credit reversal request
+        final BatchRequest goodwillCreditReversalRequest = BatchHelper.createAdjustTransactionRequest(goodwillCreditReversalRequestId,
+                goodwillCreditRequestId, "0", date);
+
+        // Get loan transactions request
+        final BatchRequest getLoanTransactionsRequest = BatchHelper.getLoanByIdRequest(getLoanRequestId, applyLoanRequestId,
+                "associations=transactions");
+
+        final List<BatchRequest> batchRequests = Arrays.asList(applyLoanRequest, approveLoanRequest, disburseLoanRequest,
+                goodwillCreditRequest, goodwillCreditReversalRequest, getLoanTransactionsRequest);
+
+        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+                BatchHelper.toJsonString(batchRequests));
+
+        final FromJsonHelper jsonHelper = new FromJsonHelper();
+        final JsonObject goodWillCredit = jsonHelper.parse(responses.get(5).getBody()).getAsJsonObject().get("transactions")
+                .getAsJsonArray().get(2).getAsJsonObject();
+        final JsonArray dateArray = goodWillCredit.get("reversedOnDate").getAsJsonArray();
+        final LocalDate reversedOnDate = LocalDate.of(dateArray.get(0).getAsInt(), dateArray.get(1).getAsInt(),
+                dateArray.get(2).getAsInt());
+
+        Assertions.assertEquals(HttpStatus.SC_OK, (long) responses.get(4).getStatusCode(),
+                "Verify Status Code 200 for goodwill credit reversal");
+        Assertions.assertEquals("Goodwill Credit", goodWillCredit.get("type").getAsJsonObject().get("value").getAsString());
+        Assertions.assertTrue(goodWillCredit.get("manuallyReversed").getAsBoolean());
+        Assertions.assertEquals(date, reversedOnDate);
+    }
+
+    /**
+     * Test for the successful merchant issued refund and payout refund reversal transaction. A '200' status code is
+     * expected on successful responses.
+     *
+     * @see AdjustTransactionCommandStrategy
+     */
+    @Test
+    public void shouldReturnOkStatusOnSuccessfulTransactionMerchantIssuedAndPayoutRefundReversal() {
+        final String loanProductJSON = new LoanProductTestBuilder() //
+                .withPrincipal("10000000.00") //
+                .withNumberOfRepayments("24") //
+                .withRepaymentAfterEvery("1") //
+                .withRepaymentTypeAsMonth() //
+                .withinterestRatePerPeriod("2") //
+                .withInterestRateFrequencyTypeAsMonths() //
+                .withAmortizationTypeAsEqualPrincipalPayment() //
+                .withInterestTypeAsDecliningBalance() //
+                .currencyDetails("0", "100").build(null);
+
+        final LocalDate date = LocalDate.now(Utils.getZoneIdOfTenant());
+        final Long applyLoanRequestId = 5730L;
+        final Long approveLoanRequestId = 5731L;
+        final Long disburseLoanRequestId = 5732L;
+        final Long merchantIssuedRefundRequestId = 5733L;
+        final Long payoutRefundRequestId = 5734L;
+        final Long merchantIssuedRefundReversalRequestId = 5735L;
+        final Long payoutRefundReversalRequestId = 5736L;
+        final Long getLoanRequestId = 5737L;
+
+        // Create product
+        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+
+        // Create client
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+
+        // Create an apply loan request
+        final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
+
+        // Create an approve loan request
+        final BatchRequest approveLoanRequest = BatchHelper.approveLoanRequest(approveLoanRequestId, applyLoanRequestId);
+
+        // Create a disburse loan request
+        final BatchRequest disburseLoanRequest = BatchHelper.disburseLoanRequest(disburseLoanRequestId, approveLoanRequestId,
+                date.minusDays(1));
+
+        // Create a merchant issued refund request
+        final BatchRequest merchantIssuedRefundRequest = BatchHelper.merchantIssuedRefundRequest(merchantIssuedRefundRequestId,
+                applyLoanRequestId, "10");
+
+        // Create a payout refund request
+        final BatchRequest payoutRefundRequest = BatchHelper.payoutRefundRequest(payoutRefundRequestId, applyLoanRequestId, "10");
+
+        // Create a merchant issued refund reversal request
+        final BatchRequest merchantIssuedRefundReversalRequest = BatchHelper
+                .createAdjustTransactionRequest(merchantIssuedRefundReversalRequestId, merchantIssuedRefundRequestId, "0", date);
+
+        // Create a payout refund reversal request
+        final BatchRequest payoutRefundReversalRequest = BatchHelper.createAdjustTransactionRequest(payoutRefundReversalRequestId,
+                payoutRefundRequestId, "0", date);
+
+        // Get loan transactions request
+        final BatchRequest getLoanTransactionsRequest = BatchHelper.getLoanByIdRequest(getLoanRequestId, applyLoanRequestId,
+                "associations=transactions");
+
+        final List<BatchRequest> batchRequests = Arrays.asList(applyLoanRequest, approveLoanRequest, disburseLoanRequest,
+                merchantIssuedRefundRequest, payoutRefundRequest, merchantIssuedRefundReversalRequest, payoutRefundReversalRequest,
+                getLoanTransactionsRequest);
+
+        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
+                BatchHelper.toJsonString(batchRequests));
+
+        final FromJsonHelper jsonHelper = new FromJsonHelper();
+        final JsonObject merchantIssuedRefund = jsonHelper.parse(responses.get(7).getBody()).getAsJsonObject().get("transactions")
+                .getAsJsonArray().get(2).getAsJsonObject();
+        final JsonObject payoutRefund = jsonHelper.parse(responses.get(7).getBody()).getAsJsonObject().get("transactions").getAsJsonArray()
+                .get(3).getAsJsonObject();
+        final JsonArray merchantIssuedDateArray = merchantIssuedRefund.get("reversedOnDate").getAsJsonArray();
+        final LocalDate merchantIssuedDate = LocalDate.of(merchantIssuedDateArray.get(0).getAsInt(),
+                merchantIssuedDateArray.get(1).getAsInt(), merchantIssuedDateArray.get(2).getAsInt());
+        final JsonArray payoutRefundDateArray = payoutRefund.getAsJsonObject().get("reversedOnDate").getAsJsonArray();
+        final LocalDate payoutRefundDate = LocalDate.of(payoutRefundDateArray.get(0).getAsInt(), payoutRefundDateArray.get(1).getAsInt(),
+                payoutRefundDateArray.get(2).getAsInt());
+
+        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(5).getStatusCode(),
+                "Verify Status Code 200 for merchant issued refund reversal");
+        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(6).getStatusCode(), "Verify Status Code 200 for payout refund reversal");
+        Assertions.assertEquals("Merchant Issued Refund", merchantIssuedRefund.get("type").getAsJsonObject().get("value").getAsString());
+        Assertions.assertEquals("Payout Refund", payoutRefund.get("type").getAsJsonObject().get("value").getAsString());
+        Assertions.assertTrue(merchantIssuedRefund.get("manuallyReversed").getAsBoolean());
+        Assertions.assertTrue(payoutRefund.get("manuallyReversed").getAsBoolean());
+        Assertions.assertEquals(date, merchantIssuedDate);
+        Assertions.assertEquals(date, payoutRefundDate);
     }
 
     /**

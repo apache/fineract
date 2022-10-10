@@ -42,6 +42,7 @@ import org.apache.fineract.client.services.AdhocQueryApiApi;
 import org.apache.fineract.client.services.AuditsApi;
 import org.apache.fineract.client.services.AuthenticationHttpBasicApi;
 import org.apache.fineract.client.services.BatchApiApi;
+import org.apache.fineract.client.services.BusinessDateManagementApi;
 import org.apache.fineract.client.services.CacheApi;
 import org.apache.fineract.client.services.CashierJournalsApi;
 import org.apache.fineract.client.services.CashiersApi;
@@ -57,6 +58,7 @@ import org.apache.fineract.client.services.CodesApi;
 import org.apache.fineract.client.services.CurrencyApi;
 import org.apache.fineract.client.services.DataTablesApi;
 import org.apache.fineract.client.services.DefaultApi;
+import org.apache.fineract.client.services.DelinquencyRangeAndBucketsManagementApi;
 import org.apache.fineract.client.services.DocumentsApiFixed;
 import org.apache.fineract.client.services.EntityDataTableApi;
 import org.apache.fineract.client.services.EntityFieldConfigurationApi;
@@ -174,6 +176,7 @@ public final class FineractClient {
     public final AuditsApi audits;
     public final AuthenticationHttpBasicApi authentication;
     public final BatchApiApi batches;
+    public final BusinessDateManagementApi businessDateManagement;
     public final CacheApi caches;
     public final CashierJournalsApi cashiersJournal;
     public final CashiersApi cashiers;
@@ -190,6 +193,7 @@ public final class FineractClient {
     public final DataTablesApi dataTables;
     public final @Deprecated DefaultApi legacy; // TODO FINERACT-1222
     public final DocumentsApiFixed documents;
+    public final DelinquencyRangeAndBucketsManagementApi delinquencyRangeAndBucketsManagement;
     public final EntityDataTableApi entityDatatableChecks;
     public final EntityFieldConfigurationApi entityFieldConfigurations;
     public final ExternalServicesApi externalServices;
@@ -286,6 +290,7 @@ public final class FineractClient {
         audits = retrofit.create(AuditsApi.class);
         authentication = retrofit.create(AuthenticationHttpBasicApi.class);
         batches = retrofit.create(BatchApiApi.class);
+        businessDateManagement = retrofit.create(BusinessDateManagementApi.class);
         caches = retrofit.create(CacheApi.class);
         cashiersJournal = retrofit.create(CashierJournalsApi.class);
         cashiers = retrofit.create(CashiersApi.class);
@@ -300,6 +305,7 @@ public final class FineractClient {
         codeValues = retrofit.create(CodeValuesApi.class);
         currencies = retrofit.create(CurrencyApi.class);
         dataTables = retrofit.create(DataTablesApi.class);
+        delinquencyRangeAndBucketsManagement = retrofit.create(DelinquencyRangeAndBucketsManagementApi.class);
         legacy = retrofit.create(DefaultApi.class);
         documents = retrofit.create(DocumentsApiFixed.class);
         entityDatatableChecks = retrofit.create(EntityDataTableApi.class);
