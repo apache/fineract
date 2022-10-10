@@ -161,10 +161,6 @@ dependencies {
     //
     testImplementation( 'io.cucumber:cucumber-spring',
             'io.github.classgraph:classgraph',
-            project(':module:dummy:core'),
-            project(':module:dummy:service'),
-            project(':module:dummy:starter'),
-            project(':custom:foo:service'),
             )
     testImplementation ('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'
@@ -173,6 +169,6 @@ dependencies {
         exclude group: 'javax.activation'
         exclude group: 'org.skyscreamer'
     }
-    testImplementation ('org.mockito:mockito-inline:4.8.0')
+    testImplementation ('org.mockito:mockito-inline')
 
 }

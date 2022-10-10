@@ -45,7 +45,7 @@ public class ShareProductDividendAssembler {
     private final ShareAccountReadPlatformService shareAccountReadPlatformService;
 
     @Autowired
-    public ShareProductDividendAssembler(final ShareProductReadPlatformServiceImpl shareProductReadPlatformService,
+    public ShareProductDividendAssembler(final ShareProductReadPlatformService shareProductReadPlatformService,
             final ShareAccountReadPlatformService shareAccountReadPlatformService) {
         this.shareProductReadPlatformService = shareProductReadPlatformService;
         this.shareAccountReadPlatformService = shareAccountReadPlatformService;
