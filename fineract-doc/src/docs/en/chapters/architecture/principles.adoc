@@ -31,6 +31,34 @@ Why? There are numerous reasons for choosing this approach which at present is n
 * Used to support a general approach to *maker-checker*.
 * State changing commands use the Object-Oriented paradign (and hence ORM) whilst querys can stay in the data paradigm.
 
+== Read/Write/Batch API Operation Separation
+
+Fineract now has 3 different Fineract instance types, you can find detailed documentation https://github.com/apache/fineract/blob/develop/fineract-doc/src/docs/en/chapters/deployment/instance-type.adoc.
+
+All 3 different instance types:
+
+* read
+* write
+* batch
+
+has a few performance enhancing restrictions in terms of what they are capable of.
+
+For example, a read instance is going to be only capable of serving read (GET)
+APIs. Write APIs will be able to serve both read and write APIs. Batch instances
+will be only able to serve batch job related APIs and run the batch jobs themselves.
+
+This greatly improves performance in terms of how we can scale Fineract in case
+we're planning to deploy it to a highly-available setup with the highest
+throughput because we can scale individual parts of it.
+
+As an instance, reading data happens much more often than actually writing data
+so the ability to do this type of deployment will greatly improve what we can
+achieve in terms of performance.
+
+With separation in place, we could utilize read-replica databases as well where
+where write and batch instances connect to a master DB and the read instances
+connect to read-replicas therefore reducing the load on the database as well.
+
 == Maker-Checker
 
 Also known as *four-eyes principal*. Enables apps to support a maker-checker style workflow process. Commands that pass validation will be persisted. Maker-checker can be enabled/disabled at fine-grained level for any state changing API.

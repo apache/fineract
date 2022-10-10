@@ -40,3 +40,31 @@ NOTE: if a RollbackTransactionAsCommandIsNotApprovedByCheckerException occurs at
 * Process command using handler (In transactional scope).
 * CommandSource object created/updated with all details for logging to 'm_portfolio_command_source' table.
 * In update scenario, we check to see if there where really any changes/updates. If so only JSON for changes is stored in audit log.
+
+= Instance Types Configuring Capabilities to Fineract
+
+Now, Fineract has enabled performance enhancing separation of three instance types,
+i.e., read, write, and batch.
+
+Using environment variables, the three instance types performance enhancing
+operation separation can be performed:
+
+* FINERACT_READ_MODE_ENABLED
+* FINERACT_WRITE_MODE_ENABLED
+* FINERACT_BATCH_MODE_ENABLED
+
+Where each of the environment variables represent each of the capabilities of
+the different instance types; configuring all of them to true will mean the
+current state of Fineract - i.e. a single instance in default will be capable of
+serving every functionality Fineract has right now.
+
+For backward compatibility reasons, all 3 environment variables have true values
+so that it's easy to kick off a single instance deployment and to give the
+potential to bigger deployments to utilize this type of splitting.
+
+This makes 4 modes:
+
+* Full mode (default)
+* Read mode
+* Write mode
+* Batch mode
