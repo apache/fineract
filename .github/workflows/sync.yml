@@ -1,0 +1,30 @@
+name: Sync Upstream Fineract
+
+# This runs every hour
+on:
+  schedule:
+    - cron: '0 * * * *'
+  # Allows manual workflow run (must in default branch to work)
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          repository: openMF/fineract
+          fetch-depth: 0
+      - name: Sync
+        run:  |
+          set -ex;
+          git config --local user.email "vidakovic@users.noreply.github.com";
+          git config --local user.name  "Aleksandar Vidakovic";
+          git remote add upstream "https://github.com/apache/fineract.git";
+          git checkout develop;
+          git pull;
+          git fetch upstream;
+          git rebase upstream/develop;
+          git push -f;

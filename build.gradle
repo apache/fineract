@@ -712,11 +712,11 @@ configure(project.fineractPublishProjects) {
         }
 
         repositories {
-            def releaseUrl = 'https://repository.apache.org/content/repositories/releases'
-            def stagingUrl = 'https://repository.apache.org/content/repositories/snapshots'
+            def releaseUrl = 'https://mifos.jfrog.io/artifactory/libs-release-local'
+            def stagingUrl = 'https://mifos.jfrog.io/artifactory/libs-snapshot-local'
 
             maven {
-                name 'apache'
+                name 'mifos'
                 url hasProperty('fineract.release.version') ? releaseUrl : stagingUrl
                 credentials {
                     username "${findProperty('fineract.config.username')}"
