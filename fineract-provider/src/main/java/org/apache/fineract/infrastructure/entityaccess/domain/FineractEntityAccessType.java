@@ -18,23 +18,25 @@
  */
 package org.apache.fineract.infrastructure.entityaccess.domain;
 
-public final class FineractEntityAccessType {
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
+public class FineractEntityAccessType {
 
     private String str;
 
-    public static final FineractEntityAccessType OFFICE_ACCESS_TO_LOAN_PRODUCTS = new FineractEntityAccessType(
-            "office_access_to_loan_products");
-    public static final FineractEntityAccessType OFFICE_ACCESS_TO_SAVINGS_PRODUCTS = new FineractEntityAccessType(
-            "office_access_to_savings_products");
-    public static final FineractEntityAccessType OFFICE_ACCESS_TO_CHARGES = new FineractEntityAccessType("office_access_to_fees/charges");
-
-    private FineractEntityAccessType(String str) {
-        this.str = str;
-    }
-
-    public String toStr() {
-        return this.str;
-    }
+    public static final FineractEntityAccessType OFFICE_ACCESS_TO_LOAN_PRODUCTS = new FineractEntityAccessType()
+            .setStr("office_access_to_loan_products");
+    public static final FineractEntityAccessType OFFICE_ACCESS_TO_SAVINGS_PRODUCTS = new FineractEntityAccessType()
+            .setStr("office_access_to_savings_products");
+    public static final FineractEntityAccessType OFFICE_ACCESS_TO_CHARGES = new FineractEntityAccessType()
+            .setStr("office_access_to_fees/charges");
 
     public static FineractEntityAccessType get(String type) {
 

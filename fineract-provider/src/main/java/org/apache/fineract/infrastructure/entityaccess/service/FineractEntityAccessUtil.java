@@ -90,7 +90,7 @@ public class FineractEntityAccessUtil {
                 LocalDate startDateFormapping = null;
                 LocalDate endDateFormapping = null;
                 FineractEntityRelation fineractEntityRelation = fineractEntityRelationRepositoryWrapper
-                        .findOneByCodeName(fineractEntityAccessType.toStr());
+                        .findOneByCodeName(fineractEntityAccessType.getStr());
                 Long relId = fineractEntityRelation.getId();
                 final FineractEntityRelation mapId = this.fineractEntityRelationRepositoryWrapper.findOneWithNotFoundDetection(relId);
                 final FineractEntityToEntityMapping newMap = FineractEntityToEntityMapping.newMap(mapId, officeId, productOrChargeId,

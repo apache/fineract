@@ -19,28 +19,29 @@
 package org.apache.fineract.infrastructure.entityaccess.data;
 
 import java.io.Serializable;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class FineractEntityRelationData implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     @SuppressWarnings("unused")
-    private final Long id;
+    private Long id;
     @SuppressWarnings("unused")
-    private final Integer fromEntityType;
+    private Integer fromEntityType;
     @SuppressWarnings("unused")
-    private final Integer toEntityType;
+    private Integer toEntityType;
     @SuppressWarnings("unused")
-    private final String mappingTypes;
-
-    public FineractEntityRelationData(final Long id, final Integer fromEntityType, final Integer toEntityType, final String mappingTypes) {
-        this.id = id;
-        this.fromEntityType = fromEntityType;
-        this.toEntityType = toEntityType;
-        this.mappingTypes = mappingTypes;
-    }
+    private String mappingTypes;
 
     public static FineractEntityRelationData getMappingTypes(final Long id, final String mappingTypes) {
         Integer fromEntityType = null;
         final Integer toEntityType = null;
-        return new FineractEntityRelationData(id, fromEntityType, toEntityType, mappingTypes);
+        return new FineractEntityRelationData().setId(id).setFromEntityType(fromEntityType).setToEntityType(toEntityType)
+                .setMappingTypes(mappingTypes);
     }
 }

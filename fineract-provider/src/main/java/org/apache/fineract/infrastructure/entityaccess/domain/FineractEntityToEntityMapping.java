@@ -27,6 +27,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.entityaccess.api.FineractEntityApiResourceConstants;
@@ -34,6 +38,10 @@ import org.apache.fineract.infrastructure.entityaccess.exception.FineractEntityT
 
 @Entity
 @Table(name = "m_entity_to_entity_mapping", uniqueConstraints = { @UniqueConstraint(columnNames = { "rel_id", "from_id", "to_id" }) })
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public class FineractEntityToEntityMapping extends AbstractPersistableCustom {
 
     @ManyToOne
@@ -52,24 +60,11 @@ public class FineractEntityToEntityMapping extends AbstractPersistableCustom {
     @Column(name = "end_date", nullable = true)
     private LocalDate endDate;
 
-    private FineractEntityToEntityMapping(final FineractEntityRelation relationId, final Long fromId, final Long toId,
-            final LocalDate startDate, final LocalDate endDate) {
-        this.relationId = relationId;
-        this.fromId = fromId;
-        this.toId = toId;
-        this.startDate = startDate;
-        this.endDate = endDate;
-
-    }
-
-    public FineractEntityToEntityMapping() {
-        //
-    }
-
     public static FineractEntityToEntityMapping newMap(FineractEntityRelation relationId, Long fromId, Long toId, LocalDate startDate,
             LocalDate endDate) {
 
-        return new FineractEntityToEntityMapping(relationId, fromId, toId, startDate, endDate);
+        return new FineractEntityToEntityMapping().setRelationId(relationId).setFromId(fromId).setToId(toId).setStartDate(startDate)
+                .setEndDate(endDate);
 
     }
 
@@ -108,14 +103,6 @@ public class FineractEntityToEntityMapping extends AbstractPersistableCustom {
 
         return actualChanges;
 
-    }
-
-    public FineractEntityRelation getRelationId() {
-        return this.relationId;
-    }
-
-    public void setRelationId(FineractEntityRelation relationId) {
-        this.relationId = relationId;
     }
 
     /*
