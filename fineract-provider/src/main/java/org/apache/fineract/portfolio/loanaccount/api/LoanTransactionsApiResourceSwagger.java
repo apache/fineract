@@ -210,6 +210,10 @@ final class LoanTransactionsApiResourceSwagger {
         public String note;
         @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
         public String reversalExternalId;
+        @Schema(example = "3")
+        public Integer paymentTypeId;
+        @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+        public String externalId;
     }
 
     @Schema(description = "PostLoansLoanIdTransactionsTransactionIdResponse")
