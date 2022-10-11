@@ -128,7 +128,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
             this.schedularWritePlatformService.saveOrUpdate(scheduledJobDetail);
         } catch (final Throwable throwable) {
             final String stackTrace = getStackTraceAsString(throwable);
-            scheduledJobDetail.updateErrorLog(stackTrace);
+            scheduledJobDetail.setErrorLog(stackTrace);
             this.schedularWritePlatformService.saveOrUpdate(scheduledJobDetail);
         }
     }
@@ -137,7 +137,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     public void pauseScheduler() {
         final SchedulerDetail schedulerDetail = this.schedularWritePlatformService.retriveSchedulerDetail();
         if (!schedulerDetail.isSuspended()) {
-            schedulerDetail.updateSuspendedState(true);
+            schedulerDetail.setSuspended(true);
             this.schedularWritePlatformService.updateSchedulerDetail(schedulerDetail);
         }
     }
@@ -146,16 +146,16 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     public void startScheduler() {
         final SchedulerDetail schedulerDetail = this.schedularWritePlatformService.retriveSchedulerDetail();
         if (schedulerDetail.isSuspended()) {
-            schedulerDetail.updateSuspendedState(false);
+            schedulerDetail.setSuspended(false);
             this.schedularWritePlatformService.updateSchedulerDetail(schedulerDetail);
             if (schedulerDetail.isExecuteInstructionForMisfiredJobs()) {
                 final List<ScheduledJobDetail> scheduledJobDetails = this.schedularWritePlatformService
                         .retrieveAllJobs(fineractProperties.getNodeId());
                 for (final ScheduledJobDetail jobDetail : scheduledJobDetails) {
-                    if (jobDetail.isTriggerMisfired() || jobDetail.getIsMismatchedJob()) {
+                    if (jobDetail.isTriggerMisfired() || jobDetail.isMismatchedJob()) {
                         if (jobDetail.isActiveSchedular()) {
                             executeJob(jobDetail, SchedulerServiceConstants.TRIGGER_TYPE_CRON);
-                            jobDetail.setIsMismatchedJob(false);
+                            jobDetail.setMismatchedJob(false);
                         }
                         final String schedulerName = getSchedulerName(jobDetail);
                         final Scheduler scheduler = this.schedulers.get(schedulerName);
@@ -166,14 +166,14 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
                                 final List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
                                 for (final Trigger trigger : triggers) {
                                     if (trigger.getNextFireTime() != null && trigger.getNextFireTime().after(jobDetail.getNextRunTime())) {
-                                        jobDetail.updateNextRunTime(trigger.getNextFireTime());
+                                        jobDetail.setNextRunTime(trigger.getNextFireTime());
                                     }
                                 }
                             } catch (final SchedulerException e) {
                                 log.error("Error occured.", e);
                             }
                         }
-                        jobDetail.updateTriggerMisfired(false);
+                        jobDetail.setTriggerMisfired(false);
                         this.schedularWritePlatformService.saveOrUpdate(jobDetail);
                     }
                 }
@@ -188,7 +188,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         if (nodeIdStored.equals(fineractProperties.getNodeId()) || nodeIdStored.equals("0")) {
             rescheduleJob(scheduledJobDetail);
         } else {
-            scheduledJobDetail.setIsMismatchedJob(true);
+            scheduledJobDetail.setMismatchedJob(true);
             this.schedularWritePlatformService.saveOrUpdate(scheduledJobDetail);
             throw new JobNodeIdMismatchingException(nodeIdStored, fineractProperties.getNodeId());
         }
@@ -204,10 +204,10 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
 
         if (nodeIdStored.equals(fineractProperties.getNodeId()) || nodeIdStored.equals("0")) {
             executeJob(scheduledJobDetail, null);
-            scheduledJobDetail.setIsMismatchedJob(false);
+            scheduledJobDetail.setMismatchedJob(false);
             this.schedularWritePlatformService.saveOrUpdate(scheduledJobDetail);
         } else {
-            scheduledJobDetail.setIsMismatchedJob(true);
+            scheduledJobDetail.setMismatchedJob(true);
             this.schedularWritePlatformService.saveOrUpdate(scheduledJobDetail);
             throw new JobNodeIdMismatchingException(nodeIdStored, fineractProperties.getNodeId());
         }
@@ -232,25 +232,25 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     public void scheduleJob(final ScheduledJobDetail scheduledJobDetails) {
         try {
             final JobDetail jobDetail = createJobDetail(scheduledJobDetails);
-            scheduledJobDetails.updateJobKey(getJobKeyAsString(jobDetail.getKey()));
+            scheduledJobDetails.setJobKey(getJobKeyAsString(jobDetail.getKey()));
             if (!scheduledJobDetails.isActiveSchedular()) {
-                scheduledJobDetails.updateNextRunTime(null);
-                scheduledJobDetails.updateCurrentlyRunningStatus(false);
+                scheduledJobDetails.setNextRunTime(null);
+                scheduledJobDetails.setCurrentlyRunning(false);
                 return;
             }
 
             final Trigger trigger = createTrigger(scheduledJobDetails, jobDetail);
             final Scheduler scheduler = getScheduler(scheduledJobDetails);
             scheduler.scheduleJob(jobDetail, trigger);
-            scheduledJobDetails.updateNextRunTime(trigger.getNextFireTime());
-            scheduledJobDetails.updateErrorLog(null);
+            scheduledJobDetails.setNextRunTime(trigger.getNextFireTime());
+            scheduledJobDetails.setErrorLog(null);
         } catch (final Throwable throwable) {
-            scheduledJobDetails.updateNextRunTime(null);
+            scheduledJobDetails.setNextRunTime(null);
             final String stackTrace = getStackTraceAsString(throwable);
-            scheduledJobDetails.updateErrorLog(stackTrace);
+            scheduledJobDetails.setErrorLog(stackTrace);
             log.error("Could not schedule job: {}", scheduledJobDetails.getJobName(), throwable);
         }
-        scheduledJobDetails.updateCurrentlyRunningStatus(false);
+        scheduledJobDetails.setCurrentlyRunning(false);
     }
 
     @Override

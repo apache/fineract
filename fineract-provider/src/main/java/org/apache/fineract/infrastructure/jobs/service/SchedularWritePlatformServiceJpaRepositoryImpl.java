@@ -142,10 +142,10 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
         }
         final SchedulerDetail schedulerDetail = retriveSchedulerDetail();
         if (triggerType.equals(SchedulerServiceConstants.TRIGGER_TYPE_CRON) && schedulerDetail.isSuspended()) {
-            scheduledJobDetail.updateTriggerMisfired(true);
+            scheduledJobDetail.setTriggerMisfired(true);
             isStopExecution = true;
         } else if (!isStopExecution) {
-            scheduledJobDetail.updateCurrentlyRunningStatus(true);
+            scheduledJobDetail.setCurrentlyRunning(true);
         }
         this.scheduledJobDetailsRepository.save(scheduledJobDetail);
         return isStopExecution;
