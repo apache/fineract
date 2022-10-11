@@ -22,6 +22,9 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.gcm.GcmConstants;
 
 /**
@@ -72,17 +75,23 @@ import org.apache.fineract.infrastructure.gcm.GcmConstants;
  *
  * </code>
  */
+
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class Message implements Serializable {
 
-    private final String collapseKey;
-    private final Boolean delayWhileIdle;
-    private final Integer timeToLive;
-    private final Map<String, String> data;
-    private final Boolean dryRun;
-    private final String restrictedPackageName;
-    private final String priority;
-    private final Boolean contentAvailable;
-    private final Notification notification;
+    private static final long serialVersionUID = 1L;
+
+    private String collapseKey;
+    private Boolean delayWhileIdle;
+    private Integer timeToLive;
+    private Map<String, String> data;
+    private Boolean dryRun;
+    private String restrictedPackageName;
+    private String priority;
+    private Boolean contentAvailable;
+    private Notification notification;
 
     public enum Priority {
         NORMAL, HIGH
@@ -201,69 +210,6 @@ public final class Message implements Serializable {
         priority = builder.priority;
         contentAvailable = builder.contentAvailable;
         notification = builder.notification;
-    }
-
-    /**
-     * Gets the collapse key.
-     */
-    public String getCollapseKey() {
-        return collapseKey;
-    }
-
-    /**
-     * Gets the delayWhileIdle flag.
-     */
-    public Boolean isDelayWhileIdle() {
-        return delayWhileIdle;
-    }
-
-    /**
-     * Gets the time to live (in seconds).
-     */
-    public Integer getTimeToLive() {
-        return timeToLive;
-    }
-
-    /**
-     * Gets the dryRun flag.
-     */
-    public Boolean isDryRun() {
-        return dryRun;
-    }
-
-    /**
-     * Gets the restricted package name.
-     */
-    public String getRestrictedPackageName() {
-        return restrictedPackageName;
-    }
-
-    /**
-     * Gets the message priority value.
-     */
-    public String getPriority() {
-        return priority;
-    }
-
-    /**
-     * Gets the contentAvailable value
-     */
-    public Boolean getContentAvailable() {
-        return contentAvailable;
-    }
-
-    /**
-     * Gets the payload data, which is immutable.
-     */
-    public Map<String, String> getData() {
-        return data;
-    }
-
-    /**
-     * Gets notification payload, which is immutable.
-     */
-    public Notification getNotification() {
-        return notification;
     }
 
     @Override
