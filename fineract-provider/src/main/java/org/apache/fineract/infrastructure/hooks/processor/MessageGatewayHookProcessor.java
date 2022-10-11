@@ -60,7 +60,7 @@ public class MessageGatewayHookProcessor implements HookProcessor {
     public void process(final Hook hook, final String payload, final String entityName, final String actionName,
             final FineractContext context) throws IOException {
 
-        final Set<HookConfiguration> config = hook.getHookConfig();
+        final Set<HookConfiguration> config = hook.getConfig();
 
         Integer SMSProviderId = null;
 
