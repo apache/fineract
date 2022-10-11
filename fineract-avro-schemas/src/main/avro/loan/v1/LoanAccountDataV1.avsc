@@ -526,18 +526,15 @@
         },
         {
             "default": null,
-            "name": "accountLinkingOptions",
+            "name": "multiDisburseLoan",
             "type": [
                 "null",
-                {
-                    "type": "array",
-                    "items": "org.apache.fineract.avro.portfolio.v1.PortfolioAccountDataV1"
-                }
+                "boolean"
             ]
         },
         {
             "default": null,
-            "name": "multiDisburseLoan",
+            "name": "disallowExpectedDisbursements",
             "type": [
                 "null",
                 "boolean"
@@ -635,6 +632,14 @@
             "type": [
                 "null",
                 "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "product",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.LoanProductDataV1"
             ]
         },
         {

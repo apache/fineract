@@ -18,37 +18,43 @@
  */
 package org.apache.fineract.portfolio.paymenttype.service;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
+import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
+import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
+import org.apache.fineract.portfolio.paymenttype.mapper.PaymentTypeMapper;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class PaymentTypeReadPlatformServiceImpl implements PaymentTypeReadPlatformService {
 
-    private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
-
-    @Autowired
-    public PaymentTypeReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
-        this.context = context;
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    private final PaymentTypeMapper paymentTypeMapper;
+    private final PaymentTypeRepositoryWrapper paymentTypeRepository;
 
     @Override
+    @Cacheable(value = "payment_types", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('payment_types')")
     public Collection<PaymentTypeData> retrieveAllPaymentTypes() {
         // TODO Auto-generated method stub
         this.context.authenticatedUser();
 
-        final PaymentTypeMapper ptm = new PaymentTypeMapper();
-        final String sql = "select " + ptm.schema() + "order by position";
+        List<PaymentType> paymentType = this.paymentTypeRepository.findAll();
+        return this.paymentTypeMapper.map(paymentType);
+    }
 
-        return this.jdbcTemplate.query(sql, ptm); // NOSONAR
+    @Override
+    @Cacheable(value = "paymentTypesWithCode", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('payment_types')")
+    public Collection<PaymentTypeData> retrieveAllPaymentTypesWithCode() {
+        // TODO Auto-generated method stub
+        this.context.authenticatedUser();
+
+        List<PaymentType> paymentType = this.paymentTypeRepository.findAllWithCodeName();
+        return this.paymentTypeMapper.map(paymentType);
     }
 
     @Override
@@ -56,30 +62,8 @@ public class PaymentTypeReadPlatformServiceImpl implements PaymentTypeReadPlatfo
         // TODO Auto-generated method stub
         this.context.authenticatedUser();
 
-        final PaymentTypeMapper ptm = new PaymentTypeMapper();
-        final String sql = "select " + ptm.schema() + "where pt.id = ?";
-
-        return this.jdbcTemplate.queryForObject(sql, ptm, new Object[] { paymentTypeId }); // NOSONAR
-    }
-
-    private static final class PaymentTypeMapper implements RowMapper<PaymentTypeData> {
-
-        public String schema() {
-            return " pt.id as id, pt.value as name, pt.description as description,pt.is_cash_payment as isCashPayment,pt.order_position as position from m_payment_type pt ";
-        }
-
-        @Override
-        public PaymentTypeData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
-            final Long id = rs.getLong("id");
-            final String name = rs.getString("name");
-            final String description = rs.getString("description");
-            final boolean isCashPayment = rs.getBoolean("isCashPayment");
-            final Long position = rs.getLong("position");
-
-            return PaymentTypeData.instance(id, name, description, isCashPayment, position);
-        }
-
+        final PaymentType paymentType = this.paymentTypeRepository.findOneWithNotFoundDetection(paymentTypeId);
+        return this.paymentTypeMapper.map(paymentType);
     }
 
 }

@@ -28,6 +28,7 @@ import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.exception.UnsupportedCommandException;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
@@ -47,10 +48,30 @@ import org.springframework.stereotype.Component;
 @Component
 @NoArgsConstructor
 @Slf4j
-public class CommandHandlerProvider implements ApplicationContextAware {
+public class CommandHandlerProvider implements ApplicationContextAware, InitializingBean {
 
+    private final HashMap<String, String> registeredHandlers = new HashMap<>();
     private ApplicationContext applicationContext;
-    private HashMap<String, String> registeredHandlers;
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        initializeHandlerRegistry();
+    }
+
+    private void initializeHandlerRegistry() {
+        final String[] commandHandlerBeans = applicationContext.getBeanNamesForAnnotation(CommandType.class);
+        if (ArrayUtils.isNotEmpty(commandHandlerBeans)) {
+            for (final String commandHandlerName : commandHandlerBeans) {
+                log.debug("Register command handler '{}' ...", commandHandlerName);
+                final CommandType commandType = applicationContext.findAnnotationOnBean(commandHandlerName, CommandType.class);
+                try {
+                    registeredHandlers.put(commandType.entity() + "|" + commandType.action(), commandHandlerName);
+                } catch (final Throwable th) {
+                    log.error("Unable to register command handler '{}'!", commandHandlerName, th);
+                }
+            }
+        }
+    }
 
     /**
      * Returns a handler for the given entity and action.<br>
@@ -68,34 +89,14 @@ public class CommandHandlerProvider implements ApplicationContextAware {
         Preconditions.checkArgument(StringUtils.isNoneEmpty(action), "An action must be given!");
 
         final String key = entity + "|" + action;
-        if (!this.registeredHandlers.containsKey(key)) {
+        if (!registeredHandlers.containsKey(key)) {
             throw new UnsupportedCommandException(key);
         }
-        return (NewCommandSourceHandler) this.applicationContext.getBean(this.registeredHandlers.get(key));
-    }
-
-    private void initializeHandlerRegistry() {
-        if (this.registeredHandlers == null) {
-            this.registeredHandlers = new HashMap<>();
-
-            final String[] commandHandlerBeans = this.applicationContext.getBeanNamesForAnnotation(CommandType.class);
-            if (ArrayUtils.isNotEmpty(commandHandlerBeans)) {
-                for (final String commandHandlerName : commandHandlerBeans) {
-                    log.debug("Register command handler '{}' ...", commandHandlerName);
-                    final CommandType commandType = this.applicationContext.findAnnotationOnBean(commandHandlerName, CommandType.class);
-                    try {
-                        this.registeredHandlers.put(commandType.entity() + "|" + commandType.action(), commandHandlerName);
-                    } catch (final Throwable th) {
-                        log.error("Unable to register command handler '{}'!", commandHandlerName, th);
-                    }
-                }
-            }
-        }
+        return (NewCommandSourceHandler) applicationContext.getBean(registeredHandlers.get(key));
     }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
-        this.initializeHandlerRegistry();
     }
 }

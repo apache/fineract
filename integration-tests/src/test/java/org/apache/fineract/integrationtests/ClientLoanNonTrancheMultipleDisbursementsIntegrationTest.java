@@ -25,6 +25,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
+import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
@@ -75,7 +76,7 @@ public class ClientLoanNonTrancheMultipleDisbursementsIntegrationTest {
                 .withMultiDisburse() //
                 .withInterestCalculationPeriodTypeAsRepaymentPeriod(true) //
                 .withMaxTrancheCount("30") //
-                .withDisallowExpectectedDisbursements(true);
+                .withDisallowExpectedDisbursements(true);
         if (isInterestRecalculationEnabled) {
             final String interestRecalculationCompoundingMethod = LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE;
             final String rescheduleStrategyMethod = LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS;
@@ -160,8 +161,12 @@ public class ClientLoanNonTrancheMultipleDisbursementsIntegrationTest {
 
         LOG.info("-------------------------------DISBURSE non-tranch multi-disbursal loan       ----------");
         final String netDisbursedAmt = null;
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(submitDate, loanID, approved.toString(),
-                netDisbursedAmt);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithTransactionAmount(submitDate, loanID, approved.toString());
+
+        GetLoansLoanIdResponse getLoansLoanIdResponse = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);
+        Assertions.assertNotNull(getLoansLoanIdResponse);
+
+        this.loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
 
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);

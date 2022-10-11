@@ -27,6 +27,15 @@ final class ConfigureBusinessStepResourceSwagger {
 
     }
 
+    @Schema(description = "GetBusinessJobConfigResponse")
+    public static final class GetBusinessJobConfigResponse {
+
+        private GetBusinessJobConfigResponse() {}
+
+        public List<String> businessJobs;
+
+    }
+
     @Schema(description = "GetBusinessStepConfigResponse")
     public static final class GetBusinessStepConfigResponse {
 

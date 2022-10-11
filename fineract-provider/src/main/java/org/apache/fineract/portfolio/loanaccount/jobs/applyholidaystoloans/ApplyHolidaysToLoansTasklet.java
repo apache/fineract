@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.jobs.applyholidaystoloans;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,26 +27,35 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.event.business.domain.loan.LoanRescheduledDueHolidayBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepositoryWrapper;
 import org.apache.fineract.organisation.office.domain.Office;
+import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.DefaultScheduledDateGenerator;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.stereotype.Component;
 
 @Slf4j
 @RequiredArgsConstructor
+@Component
 public class ApplyHolidaysToLoansTasklet implements Tasklet {
 
     private final ConfigurationDomainService configurationDomainService;
     private final HolidayRepositoryWrapper holidayRepository;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final LoanUtilService loanUtilService;
+    private final BusinessEventNotifierService businessEventNotifierService;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
@@ -72,12 +82,88 @@ public class ApplyHolidaysToLoansTasklet implements Tasklet {
             loans.addAll(loanRepositoryWrapper.findByGroupOfficeIdsAndLoanStatus(officeIds, loanStatuses));
 
             for (final Loan loan : loans) {
-                loan.applyHolidayToRepaymentScheduleDates(holiday, loanUtilService);
+                applyHolidayToRepaymentScheduleDates(loan, holiday);
             }
             loanRepositoryWrapper.save(loans);
             holiday.processed();
         }
         holidayRepository.save(holidays);
         return RepeatStatus.FINISHED;
+    }
+
+    public void applyHolidayToRepaymentScheduleDates(Loan loan, Holiday holiday) {
+        LocalDate adjustedRescheduleToDate = null;
+        if (holiday.getReScheduleType().isResheduleToNextRepaymentDate()) {
+            adjustedRescheduleToDate = getNextRepaymentDate(loan, holiday);
+        } else {
+            adjustedRescheduleToDate = holiday.getRepaymentsRescheduledToLocalDate();
+        }
+
+        if (isRepaymentScheduleAdjustmentNeeded(adjustedRescheduleToDate)) {
+            adjustRepaymentSchedules(loan, holiday, adjustedRescheduleToDate);
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanRescheduledDueHolidayBusinessEvent(loan));
+        }
+    }
+
+    private boolean isRepaymentScheduleAdjustmentNeeded(LocalDate adjustedRescheduleToDate) {
+        return adjustedRescheduleToDate != null;
+    }
+
+    private void adjustRepaymentSchedules(Loan loan, Holiday holiday, LocalDate adjustedRescheduleToDate) {
+        final DefaultScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
+        ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, holiday.getFromDateLocalDate());
+        final LoanApplicationTerms loanApplicationTerms = loan.constructLoanApplicationTerms(scheduleGeneratorDTO);
+
+        // first repayment's from date is same as disbursement date.
+        LocalDate tmpFromDate = loan.getDisbursementDate();
+
+        // Loop through all loanRepayments
+        List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
+        for (final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : installments) {
+
+            final LocalDate oldDueDate = loanRepaymentScheduleInstallment.getDueDate();
+
+            // update from date if it's not same as previous installment's due
+            // date.
+            if (!loanRepaymentScheduleInstallment.getFromDate().isEqual(tmpFromDate)) {
+                loanRepaymentScheduleInstallment.updateFromDate(tmpFromDate);
+            }
+
+            if (oldDueDate.equals(holiday.getFromDateLocalDate()) || oldDueDate.isAfter(holiday.getFromDateLocalDate())) {
+                // FIXME: AA do we need to apply non-working days.
+                // Assuming holiday's repayment reschedule to date cannot be
+                // created on a non-working day.
+
+                adjustedRescheduleToDate = scheduledDateGenerator.generateNextRepaymentDate(adjustedRescheduleToDate, loanApplicationTerms,
+                        false);
+                loanRepaymentScheduleInstallment.updateDueDate(adjustedRescheduleToDate);
+            }
+            tmpFromDate = loanRepaymentScheduleInstallment.getDueDate();
+        }
+    }
+
+    private LocalDate getNextRepaymentDate(Loan loan, Holiday holiday) {
+        LocalDate adjustedRescheduleToDate = null;
+        final LocalDate rescheduleToDate = holiday.getToDateLocalDate();
+        for (final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : loan.getRepaymentScheduleInstallments()) {
+            if (rescheduleToDate.isEqual(loanRepaymentScheduleInstallment.getDueDate())) {
+                adjustedRescheduleToDate = rescheduleToDate;
+                break;
+            } else {
+                adjustedRescheduleToDate = doStandardMonthlyCheck(adjustedRescheduleToDate, rescheduleToDate,
+                        loanRepaymentScheduleInstallment);
+            }
+        }
+        return adjustedRescheduleToDate;
+    }
+
+    private LocalDate doStandardMonthlyCheck(LocalDate adjustedRescheduleToDate, LocalDate rescheduleToDate,
+            LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment) {
+        // Standard Monthly Loan Holiday check
+        if (rescheduleToDate.isAfter(loanRepaymentScheduleInstallment.getDueDate())
+                && rescheduleToDate.isBefore(loanRepaymentScheduleInstallment.getDueDate().plusDays(30))) {
+            adjustedRescheduleToDate = loanRepaymentScheduleInstallment.getDueDate();
+        }
+        return adjustedRescheduleToDate;
     }
 }

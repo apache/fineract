@@ -26,7 +26,7 @@ import java.util.Set;
  ***/
 public enum AdHocJsonInputParams {
 
-    ID("id"), NAME("name"), QUERY("query"), TABLENAME("tableName"), TABLEFIELDS("tableFields"), ISACTIVE("isActive"), REPORT_RUN_FREQUENCY(
+    ID("id"), NAME("name"), QUERY("query"), TABLENAME("tableName"), TABLEFIELDS("tableFields"), ACTIVE("isActive"), REPORT_RUN_FREQUENCY(
             "reportRunFrequency"), REPORT_RUN_EVERY("reportRunEvery"), EMAIL("email");
 
     private final String value;

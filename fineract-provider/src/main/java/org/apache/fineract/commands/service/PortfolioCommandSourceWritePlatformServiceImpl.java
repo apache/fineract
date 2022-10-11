@@ -77,7 +77,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
 
         final String json = wrapper.getJson();
         CommandProcessingResult result = null;
-        JsonCommand command = null;
+        JsonCommand command;
         int numberOfRetries = 0;
         int maxNumberOfRetries = ThreadLocalContextUtil.getTenant().getConnection().getMaxRetriesOnDeadlock();
         int maxIntervalBetweenRetries = ThreadLocalContextUtil.getTenant().getConnection().getMaxIntervalBetweenRetries();
@@ -88,10 +88,10 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
                 wrapper.getOrganisationCreditBureauId());
         while (numberOfRetries <= maxNumberOfRetries) {
             try {
-                result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
+                result = this.processAndLogCommandService.executeCommand(wrapper, command, isApprovedByChecker);
                 numberOfRetries = maxNumberOfRetries + 1;
             } catch (CannotAcquireLockException | ObjectOptimisticLockingFailureException exception) {
-                log.info("The following command {} has been retried  {} time(s)", command.json(), numberOfRetries);
+                log.debug("The following command {} has been retried  {} time(s)", command.json(), numberOfRetries);
                 /***
                  * Fail if the transaction has been retired for maxNumberOfRetries
                  **/
@@ -140,7 +140,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
                 commandSourceInput.getOrganisationCreditBureauId());
 
         final boolean makerCheckerApproval = true;
-        return this.processAndLogCommandService.processAndLogCommand(wrapper, command, makerCheckerApproval);
+        return this.processAndLogCommandService.executeCommand(wrapper, command, makerCheckerApproval);
     }
 
     @Transactional

@@ -22,12 +22,20 @@ import java.util.List;
 
 public class BulkBusinessEvent extends AbstractBusinessEvent<List<BusinessEvent<?>>> {
 
+    private static final String CATEGORY = "Bulk";
+    private static final String TYPE = "BulkBusinessEvent";
+
     public BulkBusinessEvent(List<BusinessEvent<?>> value) {
         super(value);
     }
 
     @Override
     public String getType() {
-        return "BulkBusinessEvent";
+        return TYPE;
+    }
+
+    @Override
+    public String getCategory() {
+        return CATEGORY;
     }
 }

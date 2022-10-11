@@ -19,9 +19,9 @@
 package org.apache.fineract.batch.domain;
 
 import java.util.Set;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * Provides an object for separate HTTP responses in the Batch Response for Batch API. It contains all the information
@@ -35,8 +35,8 @@ import lombok.NoArgsConstructor;
  * @see Header
  */
 @NoArgsConstructor
-@AllArgsConstructor
 @Data
+@Accessors(chain = true)
 public class BatchResponse {
 
     private Long requestId;

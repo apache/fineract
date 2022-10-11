@@ -22,12 +22,14 @@ import org.apache.fineract.portfolio.client.domain.Client;
 
 public class ClientRejectBusinessEvent extends ClientBusinessEvent {
 
+    private static final String TYPE = "ClientRejectBusinessEvent";
+
     public ClientRejectBusinessEvent(Client value) {
         super(value);
     }
 
     @Override
     public String getType() {
-        return "ClientRejectBusinessEvent";
+        return TYPE;
     }
 }

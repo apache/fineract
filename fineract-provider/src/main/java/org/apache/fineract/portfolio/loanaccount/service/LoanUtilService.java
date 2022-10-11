@@ -337,9 +337,13 @@ public class LoanUtilService {
                         netDisbursalAmount = jsonObject.getAsJsonPrimitive(LoanApiConstants.disbursementNetDisbursalAmountParameterName)
                                 .getAsBigDecimal();
                     }
-
-                    disbursementDatas.add(
-                            new LoanDisbursementDetails(expectedDisbursementDate, actualDisbursementDate, principal, netDisbursalAmount));
+                    boolean isReversed = false;
+                    if (jsonObject.has(LoanApiConstants.disbursementReversedParameterName)) {
+                        isReversed = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.disbursementReversedParameterName,
+                                jsonObject);
+                    }
+                    disbursementDatas.add(new LoanDisbursementDetails(expectedDisbursementDate, actualDisbursementDate, principal,
+                            netDisbursalAmount, isReversed));
                     i++;
                 } while (i < disbursementDataArray.size());
             }

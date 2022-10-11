@@ -37,7 +37,7 @@ import org.springframework.stereotype.Component;
 public class LoanTransactionBusinessEventSerializer implements BusinessEventSerializer {
 
     private final LoanReadPlatformService service;
-    private final LoanTransactionDataMapper mapper;
+    private final LoanTransactionDataMapper loanTransactionMapper;
     private final ByteBufferConverter byteBufferConverter;
 
     @Override
@@ -48,8 +48,10 @@ public class LoanTransactionBusinessEventSerializer implements BusinessEventSeri
     @Override
     public <T> byte[] serialize(BusinessEvent<T> rawEvent) throws IOException {
         LoanTransactionBusinessEvent event = (LoanTransactionBusinessEvent) rawEvent;
-        LoanTransactionData data = service.retrieveLoanTransaction(event.get().getLoan().getId(), event.get().getId());
-        LoanTransactionDataV1 avroDto = mapper.map(data);
+        Long loanId = event.get().getLoan().getId();
+        Long loanTransactionId = event.get().getId();
+        LoanTransactionData transactionData = service.retrieveLoanTransaction(loanId, loanTransactionId);
+        LoanTransactionDataV1 avroDto = loanTransactionMapper.map(transactionData);
         ByteBuffer buffer = avroDto.toByteBuffer();
         return byteBufferConverter.convert(buffer);
     }

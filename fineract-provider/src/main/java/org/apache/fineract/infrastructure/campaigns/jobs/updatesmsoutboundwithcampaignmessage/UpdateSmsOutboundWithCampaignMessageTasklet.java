@@ -54,7 +54,7 @@ public class UpdateSmsOutboundWithCampaignMessageTasklet implements Tasklet {
                 LocalDateTime tenantDateNow = TenantDateTimeUtil.tenantDateTime();
                 LocalDateTime nextTriggerDate = smsCampaign.getNextTriggerDate();
 
-                log.info("tenant time {} trigger time {} {}", tenantDateNow, nextTriggerDate,
+                log.debug("tenant time {} trigger time {} {}", tenantDateNow, nextTriggerDate,
                         JobName.UPDATE_SMS_OUTBOUND_WITH_CAMPAIGN_MESSAGE.name());
                 if (nextTriggerDate.isBefore(tenantDateNow)) {
                     smsCampaignWritePlatformService.insertDirectCampaignIntoSmsOutboundTable(smsCampaign);

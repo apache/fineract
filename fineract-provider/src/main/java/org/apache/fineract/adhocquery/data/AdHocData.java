@@ -22,8 +22,9 @@ import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.fineract.adhocquery.domain.ReportRunFrequency;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
@@ -31,32 +32,32 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
  * Immutable data object represent note or case information AdHocData
  *
  */
-@Getter
-@RequiredArgsConstructor
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class AdHocData {
 
-    private final Long id;
-    private final String name;
-    private final String query;
-    private final String tableName;
-    private final String tableFields;
-    private final String email;
-    private final boolean isActive;
-    private final ZonedDateTime createdOn;
-    private final Long createdById;
-    private final Long updatedById;
-    private final ZonedDateTime updatedOn;
-    private final String createdBy;
-    private final List<EnumOptionData> reportRunFrequencies;
-    private final Long reportRunFrequency;
-    private final Long reportRunEvery;
-    private final ZonedDateTime lastRun;
+    private Long id;
+    private String name;
+    private String query;
+    private String tableName;
+    private String tableFields;
+    private String email;
+    private boolean isActive;
+    private ZonedDateTime createdOn;
+    private Long createdById;
+    private Long updatedById;
+    private ZonedDateTime updatedOn;
+    private String createdBy;
+    private List<EnumOptionData> reportRunFrequencies;
+    private Long reportRunFrequency;
+    private Long reportRunEvery;
+    private ZonedDateTime lastRun;
 
     public static AdHocData template() {
         List<EnumOptionData> reportRunFrequencies = Arrays.stream(ReportRunFrequency.values())
                 .map(rrf -> new EnumOptionData(rrf.getValue(), rrf.getCode(), rrf.getCode())).collect(Collectors.toList());
 
-        return new AdHocData(null, null, null, null, null, null, false, null, null, null, null, null, reportRunFrequencies, null, null,
-                null);
+        return new AdHocData().setReportRunFrequencies(reportRunFrequencies);
     }
 }

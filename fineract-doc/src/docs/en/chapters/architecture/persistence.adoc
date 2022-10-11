@@ -62,3 +62,45 @@ The switch from Flyway (1.6.x) to Liquibase (1.7.x) was planned to be as smooth 
 * If the database is empty, Liquibase will create the database schema from scratch
 * If the database contains the latest Fineract 1.6.x database structure which was previously migrated with Flyway. Liquibase will seamlessly upgrade it to the latest version. Note: the Flyway related 2 database tables are left as they are and are not deleted.
 * If the database contains an earlier version of the database structure than Fineract 1.6.x. Liquibase will *NOT* do anything and *will fail the application during startup*. The proper approach in this case is to first upgrade your application version to the latest Fineract 1.6.x so that the latest Flyway changes are executed and then upgrade to the newer Fineract version where Liquibase will seamlessly take over the database upgrades.
+
+=== Troubleshooting
+
+1. During upgrade from Fineract 1.5.0 to 1.6.0, Liquibase fails
+
+After dropping the flyway migrations table (schema_version), Liquibase runs it's
+own migrations which fails (in recreating tables which already exisit) because
+we are aiming to re-use DB with existing data from Fineract 1.5.0.
+
+Solution: The latest release version (1.6.0) doesn't have Liquibase at all, it
+still runs Flyway migrations. Only the develop branch (later to be 1.7.0) got
+sqitched to Liquibase. Do not pull the develop before upgrading your instance.
+
+Make sure first you upgrade your instance (aka database schema with Fineract 1.6.0).
+Then upgrade with the current develop branch. Check if some migration scripts
+did not run which led to some operations failing due to slight differences in
+schema. Try with running the missing migrations manually.
+
+Note: develop is considered unstable until released.
+
+2. Upgrading database from MySQL 5.7 as advised to Maria DB 10.6, fails. If we
+use data from version 18.03.01 it fails to migrate the data. If we use databases
+running on 1.5.0 release it completes the startup but the system login fails.
+
+Solution: A database upgrade is separate thing to take care of.
+
+3. We are getting `ScehmaUpgradeNeededException: Make sure to upgrade to Fineract
+1.6 first and then to a newer version` error while upgrading to `tag 1.6`.
+
+1.6 version shouldn't include Liquibase. It will only be released after 1.6.
+Make sure Liquibase is dropping `schema_version` table, as there is no Flyway
+it is not required. Drop Flyway and use Liquibase for both migrations and
+database independence. In case, if you still get errors, you can use git SHA
+`746c589a6e809b33d68c0596930fcaa7338d5270` and Flyway migration will be done to
+the latest.
+
+```
+TENANT_LATEST_FLYWAY_VERSION = 392;
+TENANT_LATEST_FLYWAY_SCRIPT_NAME =
+"V392__interest_recovery_conf_for_rescedule.sql";
+TENANT_LATEST_FLYWAY_SCRIPT_CHECKSUM = 1102395052;
+```

@@ -22,12 +22,14 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 
 public class LoanWaiveChargeUndoBusinessEvent extends LoanChargeBusinessEvent {
 
+    private static final String TYPE = "LoanWaiveChargeUndoBusinessEvent";
+
     public LoanWaiveChargeUndoBusinessEvent(LoanCharge value) {
         super(value);
     }
 
     @Override
     public String getType() {
-        return "LoanWaiveChargeUndoBusinessEvent";
+        return TYPE;
     }
 }

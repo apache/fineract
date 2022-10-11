@@ -423,4 +423,8 @@ public final class LoanSchedulePeriodData {
     public BigDecimal getTotalOverdue() {
         return defaultToZeroIfNull(this.totalOverdue);
     }
+
+    public BigDecimal totalOutstandingForPeriod() {
+        return defaultToZeroIfNull(this.totalOutstandingForPeriod);
+    }
 }

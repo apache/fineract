@@ -29,22 +29,30 @@ import org.apache.fineract.cob.data.JobBusinessStepConfigData;
 import org.apache.fineract.cob.data.JobBusinessStepDetail;
 import org.apache.fineract.cob.domain.BatchBusinessStep;
 import org.apache.fineract.cob.domain.BatchBusinessStepRepository;
+import org.apache.fineract.cob.exceptions.BusinessStepException;
 import org.apache.fineract.cob.exceptions.BusinessStepNotBelongsToJobException;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class ConfigJobParameterServiceImpl implements ConfigJobParameterService {
+public class ConfigJobParameterServiceImpl implements ConfigJobParameterService, InitializingBean {
 
     private final BatchBusinessStepRepository batchBusinessStepRepository;
     private final BusinessStepConfigDataParser dataParser;
     private final BusinessStepCategoryService businessStepCategoryService;
     private final ApplicationContext applicationContext;
     private final BusinessStepMapper mapper;
+    private JobBusinessStepDetail availableBusinessStepsForLoan;
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        availableBusinessStepsForLoan = getAvailableBusinessStepsByJobName(BusinessStepCategory.LOAN.name());
+    }
 
     @Override
     public JobBusinessStepConfigData getBusinessStepConfigByJobName(String jobName) {
@@ -59,15 +67,25 @@ public class ConfigJobParameterServiceImpl implements ConfigJobParameterService 
     public CommandProcessingResult updateStepConfigByJobName(JsonCommand command, String jobName)
             throws BusinessStepNotBelongsToJobException {
         List<BusinessStep> businessSteps = dataParser.parseUpdate(command);
-        List<BatchBusinessStep> batchBusinessSteps = batchBusinessStepRepository.findAllByJobName(jobName);
-        businessSteps.forEach(newBusinessStepConfig -> {
-            BatchBusinessStep batchBusinessStep = batchBusinessSteps.stream()
-                    .filter(oldBusinessStepConfig -> oldBusinessStepConfig.getStepName().equals(newBusinessStepConfig.getStepName()))
-                    .findFirst().orElseThrow(BusinessStepNotBelongsToJobException::new);
-            batchBusinessStep.setStepName(newBusinessStepConfig.getStepName());
-            batchBusinessStep.setStepOrder(newBusinessStepConfig.getOrder());
-            batchBusinessStepRepository.save(batchBusinessStep);
-        });
+        if (businessSteps.isEmpty()) {
+            throw new BusinessStepException("A job needs to have 1 business step at least.");
+        }
+        List<String> availableBusinessStepNames = availableBusinessStepsForLoan.getAvailableBusinessSteps().stream()
+                .map(BusinessStepDetail::getStepName).toList();
+        List<String> notValidBusinessStepNames = businessSteps.stream().map(BusinessStep::getStepName)
+                .filter(businessStepName -> !availableBusinessStepNames.contains(businessStepName)).toList();
+        if (notValidBusinessStepNames.isEmpty()) {
+            batchBusinessStepRepository.deleteAllByJobName(jobName);
+            businessSteps.forEach(newBusinessStepConfig -> {
+                BatchBusinessStep batchBusinessStep = new BatchBusinessStep();
+                batchBusinessStep.setJobName(jobName);
+                batchBusinessStep.setStepName(newBusinessStepConfig.getStepName());
+                batchBusinessStep.setStepOrder(newBusinessStepConfig.getOrder());
+                batchBusinessStepRepository.save(batchBusinessStep);
+            });
+        } else {
+            throw new BusinessStepException(notValidBusinessStepNames + " Business steps are not configurable for this job.");
+        }
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).build();
     }
 
@@ -90,5 +108,10 @@ public class ConfigJobParameterServiceImpl implements ConfigJobParameterService 
         jobBusinessStepDetail.setJobName(jobName);
         jobBusinessStepDetail.setAvailableBusinessSteps(availableBusinessSteps);
         return jobBusinessStepDetail;
+    }
+
+    @Override
+    public List<String> getAllConfiguredJobNames() {
+        return batchBusinessStepRepository.findConfiguredJobNames();
     }
 }

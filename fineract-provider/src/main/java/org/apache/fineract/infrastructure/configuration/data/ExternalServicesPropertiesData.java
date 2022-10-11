@@ -19,23 +19,18 @@
 package org.apache.fineract.infrastructure.configuration.data;
 
 import java.io.Serializable;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class ExternalServicesPropertiesData implements Serializable {
 
-    private final String name;
-    private final String value;
+    private static final long serialVersionUID = 1L;
 
-    public ExternalServicesPropertiesData(final String name, final String value) {
-        this.name = name;
-        this.value = value;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getValue() {
-        return value;
-    }
+    private String name;
+    private String value;
 
 }

@@ -20,30 +20,37 @@ package org.apache.fineract.infrastructure.event.external.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import javax.persistence.EntityManager;
+import org.apache.fineract.avro.BulkMessageItemV1;
 import org.apache.fineract.avro.loan.v1.LoanAccountDataV1;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.event.business.domain.BulkBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.external.repository.ExternalEventRepository;
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEvent;
 import org.apache.fineract.infrastructure.event.external.service.idempotency.ExternalEventIdempotencyKeyGenerator;
-import org.apache.fineract.infrastructure.event.external.service.serialization.BusinessEventSerializerFactory;
+import org.apache.fineract.infrastructure.event.external.service.message.BulkMessageItemFactory;
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializerFactory;
+import org.apache.fineract.infrastructure.event.external.service.support.ByteBufferConverter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -57,12 +64,20 @@ class ExternalEventServiceTest {
     private ExternalEventIdempotencyKeyGenerator idempotencyKeyGenerator;
     @Mock
     private BusinessEventSerializerFactory serializerFactory;
+    @Mock
+    private ByteBufferConverter byteBufferConverter;
+    @Mock
+    private BulkMessageItemFactory bulkMessageItemFactory;
+    @Mock
+    private EntityManager entityManager;
 
-    @InjectMocks
     private ExternalEventService underTest;
 
     @BeforeEach
     public void setUp() {
+        underTest = new ExternalEventService(repository, idempotencyKeyGenerator, serializerFactory, byteBufferConverter,
+                bulkMessageItemFactory);
+        underTest.setEntityManager(entityManager);
         FineractPlatformTenant tenant = new FineractPlatformTenant(1L, "default", "Default Tenant", "Europe/Budapest", null);
         ThreadLocalContextUtil.setTenant(tenant);
         ThreadLocalContextUtil
@@ -91,7 +106,7 @@ class ExternalEventServiceTest {
     }
 
     @Test
-    public void testPostEventShouldWork() throws IOException {
+    public void testPostEventShouldWorkWithRegularEvent() throws IOException {
         // given
         ArgumentCaptor<ExternalEvent> externalEventArgumentCaptor = ArgumentCaptor.forClass(ExternalEvent.class);
 
@@ -116,5 +131,59 @@ class ExternalEventServiceTest {
         assertThat(externalEvent.getData()).isEqualTo(data);
         assertThat(externalEvent.getType()).isEqualTo(eventType);
         assertThat(externalEvent.getSchema()).isEqualTo(eventSchema);
+    }
+
+    @Test
+    public void testPostEventShouldWorkWithBulkEvent() throws IOException {
+        // given
+        ArgumentCaptor<ExternalEvent> externalEventArgumentCaptor = ArgumentCaptor.forClass(ExternalEvent.class);
+        String eventType = "BulkBusinessEvent";
+        String schema = "org.apache.fineract.avro.BulkMessagePayloadV1";
+
+        String idempotencyKey = "key";
+        BusinessEvent event = mock(BusinessEvent.class);
+        BulkMessageItemV1 messageItem = new BulkMessageItemV1(1, "", "", "", ByteBuffer.wrap(new byte[0]));
+        BulkBusinessEvent bulkEvent = new BulkBusinessEvent(List.of(event));
+        byte[] data = new byte[0];
+
+        given(bulkMessageItemFactory.createBulkMessageItem(1, event)).willReturn(messageItem);
+        given(idempotencyKeyGenerator.generate(bulkEvent)).willReturn(idempotencyKey);
+        given(byteBufferConverter.convert(any(ByteBuffer.class))).willReturn(data);
+        // when
+        underTest.postEvent(bulkEvent);
+        // then
+        verify(repository).save(externalEventArgumentCaptor.capture());
+        ExternalEvent externalEvent = externalEventArgumentCaptor.getValue();
+        assertThat(externalEvent.getIdempotencyKey()).isEqualTo(idempotencyKey);
+        assertThat(externalEvent.getData()).isEqualTo(data);
+        assertThat(externalEvent.getType()).isEqualTo(eventType);
+        assertThat(externalEvent.getSchema()).isEqualTo(schema);
+    }
+
+    @Test
+    public void testPostEventShouldSaveEventCategory() throws IOException {
+        // given
+        ArgumentCaptor<ExternalEvent> externalEventArgumentCaptor = ArgumentCaptor.forClass(ExternalEvent.class);
+        String eventSchema = "org.apache.fineract.avro.loan.v1.LoanAccountDataV1";
+        String eventType = "TestType";
+        String eventCategory = "TestCategory";
+        String idempotencyKey = "key";
+        BusinessEvent event = mock(BusinessEvent.class);
+        BusinessEventSerializer eventSerializer = mock(BusinessEventSerializer.class);
+        byte[] data = new byte[0];
+
+        given(event.getType()).willReturn(eventType);
+        given(event.getCategory()).willReturn(eventCategory);
+        given(idempotencyKeyGenerator.generate(event)).willReturn(idempotencyKey);
+        given(serializerFactory.create(event)).willReturn(eventSerializer);
+        given(eventSerializer.getSupportedSchema()).will(invocation -> LoanAccountDataV1.class);
+        given(eventSerializer.serialize(event)).willReturn(data);
+        // when
+        underTest.postEvent(event);
+        // then
+        verify(repository).save(externalEventArgumentCaptor.capture());
+        ExternalEvent externalEvent = externalEventArgumentCaptor.getValue();
+        assertThat(externalEvent.getCategory()).isEqualTo(eventCategory);
+
     }
 }

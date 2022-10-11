@@ -24,6 +24,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
@@ -31,10 +35,14 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 @SuppressWarnings({ "MemberName" })
 @Entity
 @Table(name = "m_creditbureau_loanproduct_mapping")
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public class CreditBureauLoanProductMapping extends AbstractPersistableCustom {
 
     @Column(name = "is_credit_check_mandatory")
-    private boolean isCreditCheckMandatory;
+    private boolean creditCheckMandatory;
 
     @Column(name = "skip_credit_check_in_failure")
     private boolean skipCreditCheckInFailure;
@@ -43,7 +51,7 @@ public class CreditBureauLoanProductMapping extends AbstractPersistableCustom {
     private int stalePeriod;
 
     @Column(name = "is_active")
-    private boolean isActive;
+    private boolean active;
 
     @ManyToOne
     private OrganisationCreditBureau organisation_creditbureau;
@@ -51,20 +59,6 @@ public class CreditBureauLoanProductMapping extends AbstractPersistableCustom {
     @OneToOne
     @JoinColumn(name = "loan_product_id")
     private LoanProduct loanProduct;
-
-    public CreditBureauLoanProductMapping() {
-
-    }
-
-    public CreditBureauLoanProductMapping(boolean isCreditCheckMandatory, boolean skipCreditCheckInFailure, int stalePeriod,
-            boolean isActive, OrganisationCreditBureau organisationCreditbureau, LoanProduct loanProduct) {
-        this.isCreditCheckMandatory = isCreditCheckMandatory;
-        this.skipCreditCheckInFailure = skipCreditCheckInFailure;
-        this.stalePeriod = stalePeriod;
-        this.isActive = isActive;
-        this.organisation_creditbureau = organisationCreditbureau;
-        this.loanProduct = loanProduct;
-    }
 
     public static CreditBureauLoanProductMapping fromJson(final JsonCommand command, OrganisationCreditBureau organisation_creditbureau,
             LoanProduct loanProduct) {
@@ -88,57 +82,9 @@ public class CreditBureauLoanProductMapping extends AbstractPersistableCustom {
             isActive = command.booleanPrimitiveValueOfParameterNamed("isActive");
         }
 
-        return new CreditBureauLoanProductMapping(isCreditCheckMandatory, skipCreditCheckInFailure, stalePeriod, isActive,
-                organisation_creditbureau, loanProduct);
+        return new CreditBureauLoanProductMapping().setCreditCheckMandatory(isCreditCheckMandatory)
+                .setSkipCreditCheckInFailure(skipCreditCheckInFailure).setStalePeriod(stalePeriod).setActive(isActive)
+                .setOrganisation_creditbureau(organisation_creditbureau).setLoanProduct(loanProduct);
 
     }
-
-    public boolean isCreditCheckMandatory() {
-        return this.isCreditCheckMandatory;
-    }
-
-    public void setCreditCheckMandatory(boolean isCreditCheckMandatory) {
-        this.isCreditCheckMandatory = isCreditCheckMandatory;
-    }
-
-    public boolean isSkipCreditCheckInFailure() {
-        return this.skipCreditCheckInFailure;
-    }
-
-    public void setSkipCreditCheckInFailure(boolean skipCreditCheckInFailure) {
-        this.skipCreditCheckInFailure = skipCreditCheckInFailure;
-    }
-
-    public int getStalePeriod() {
-        return this.stalePeriod;
-    }
-
-    public void setStalePeriod(int stalePeriod) {
-        this.stalePeriod = stalePeriod;
-    }
-
-    public boolean isIs_active() {
-        return this.isActive;
-    }
-
-    public void setIs_active(boolean isActive) {
-        this.isActive = isActive;
-    }
-
-    public OrganisationCreditBureau getOrganisationCreditbureau() {
-        return this.organisation_creditbureau;
-    }
-
-    public void setOrganisationCreditbureau(OrganisationCreditBureau organisationCreditbureau) {
-        this.organisation_creditbureau = organisationCreditbureau;
-    }
-
-    public LoanProduct getLoanProduct() {
-        return this.loanProduct;
-    }
-
-    public void setLoanProduct(LoanProduct loanProduct) {
-        this.loanProduct = loanProduct;
-    }
-
 }

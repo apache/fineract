@@ -49,16 +49,20 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom {
     @Column(name = "net_disbursal_amount", scale = 6, precision = 19)
     private BigDecimal netDisbursalAmount;
 
+    @Column(name = "is_reversed", nullable = false)
+    private boolean reversed;
+
     protected LoanDisbursementDetails() {
 
     }
 
     public LoanDisbursementDetails(final LocalDate expectedDisbursementDate, final LocalDate actualDisbursementDate,
-            final BigDecimal principal, final BigDecimal netDisbursalAmount) {
+            final BigDecimal principal, final BigDecimal netDisbursalAmount, final boolean reversed) {
         this.expectedDisbursementDate = expectedDisbursementDate;
         this.actualDisbursementDate = actualDisbursementDate;
         this.principal = principal;
         this.netDisbursalAmount = netDisbursalAmount;
+        this.reversed = reversed;
     }
 
     public void updateLoan(final Loan loan) {
@@ -88,6 +92,7 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom {
         this.principal = disbursementDetails.principal;
         this.expectedDisbursementDate = disbursementDetails.expectedDisbursementDate;
         this.actualDisbursementDate = disbursementDetails.actualDisbursementDate;
+        this.reversed = disbursementDetails.reversed;
     }
 
     public LocalDate expectedDisbursementDate() {
@@ -142,4 +147,11 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom {
         this.principal = principal;
     }
 
+    public void reverse() {
+        this.reversed = true;
+    }
+
+    public boolean isReversed() {
+        return reversed;
+    }
 }

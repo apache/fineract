@@ -28,12 +28,14 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
 import org.springframework.batch.integration.partition.RemotePartitioningWorkerStepBuilderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,9 +46,11 @@ import org.springframework.transaction.support.TransactionTemplate;
 @ConditionalOnProperty(value = "fineract.mode.batch-worker-enabled", havingValue = "true")
 public class LoanCOBWorkerConfiguration {
 
-    public static final String ALREADY_LOCKED_LOAN_IDS = "alreadyLockedLoanIds";
     @Autowired
     private RemotePartitioningWorkerStepBuilderFactory stepBuilderFactory;
+
+    @Autowired
+    private StepBuilderFactory localStepBuilderFactory;
     @Autowired
     private PropertyService propertyService;
     @Autowired
@@ -69,17 +73,20 @@ public class LoanCOBWorkerConfiguration {
 
     @Bean
     public Flow flow() {
-        return new FlowBuilder<Flow>("cobFlow").start(initialisationStep()).next(applyLockStep()).next(loanBusinessStep()).build();
+        return new FlowBuilder<Flow>("cobFlow").start(initialisationStep(null)).next(applyLockStep(null)).next(loanBusinessStep(null))
+                .build();
     }
 
     @Bean
-    public Step initialisationStep() {
-        return stepBuilderFactory.get("Initialisation - Step").inputChannel(inboundRequests).tasklet(initialiseContext()).build();
+    @StepScope
+    public Step initialisationStep(@Value("#{stepExecutionContext['partition']}") String partitionName) {
+        return localStepBuilderFactory.get("Initialisation - Step:" + partitionName).tasklet(initialiseContext()).build();
     }
 
     @Bean
-    public Step loanBusinessStep() {
-        return stepBuilderFactory.get("Loan COB worker - Step").inputChannel(inboundRequests)
+    @StepScope
+    public Step loanBusinessStep(@Value("#{stepExecutionContext['partition']}") String partitionName) {
+        return localStepBuilderFactory.get("Loan Business - Step:" + partitionName)
                 .<Loan, Loan>chunk(propertyService.getChunkSize(JobName.LOAN_COB.name())).reader(cobWorkerItemReader())
                 .processor(cobWorkerItemProcessor()).writer(cobWorkerItemWriter()).faultTolerant().skip(Exception.class)
                 .skipLimit(propertyService.getChunkSize(JobName.LOAN_COB.name()) + 1).listener(loanItemListener())
@@ -87,13 +94,12 @@ public class LoanCOBWorkerConfiguration {
     }
 
     @Bean
-    public Step applyLockStep() {
-        return stepBuilderFactory.get("Apply lock - Step").inputChannel(inboundRequests).tasklet(applyLock()).listener(promotionListener())
-                .build();
+    @StepScope
+    public Step applyLockStep(@Value("#{stepExecutionContext['partition']}") String partitionName) {
+        return localStepBuilderFactory.get("Apply lock - Step:" + partitionName).tasklet(applyLock()).listener(promotionListener()).build();
     }
 
     @Bean
-    @StepScope
     public InitialisationTasklet initialiseContext() {
         return new InitialisationTasklet(userRepository);
     }
@@ -104,7 +110,6 @@ public class LoanCOBWorkerConfiguration {
     }
 
     @Bean
-    @StepScope
     public ApplyLoanLockTasklet applyLock() {
         return new ApplyLoanLockTasklet(accountLockRepository);
     }
@@ -132,7 +137,7 @@ public class LoanCOBWorkerConfiguration {
     @Bean
     public ExecutionContextPromotionListener promotionListener() {
         ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
-        listener.setKeys(new String[] { ALREADY_LOCKED_LOAN_IDS });
+        listener.setKeys(new String[] { LoanCOBConstant.ALREADY_LOCKED_LOAN_IDS });
         return listener;
     }
 }

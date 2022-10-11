@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.savings.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
 
 final class SavingsAccountTransactionsApiResourceSwagger {
 
@@ -32,7 +33,7 @@ final class SavingsAccountTransactionsApiResourceSwagger {
         @Schema(example = "27 March 2022")
         public String transactionDate;
         @Schema(example = "1000")
-        public Integer transactionAmount;
+        public BigDecimal transactionAmount;
         @Schema(example = "en")
         public String locale;
         @Schema(example = "dd MMMM yyyy")
@@ -41,6 +42,8 @@ final class SavingsAccountTransactionsApiResourceSwagger {
         public String lienAllowed;
         @Schema(example = "String")
         public String reasonForBlock;
+        @Schema(example = "1")
+        public Integer paymentTypeId;
     }
 
     @Schema(description = "PostSavingsAccountTransactionsResponse")

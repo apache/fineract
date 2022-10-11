@@ -98,6 +98,7 @@ public class LoanProductTestBuilder {
     private Boolean allowApprovedDisbursedAmountsOverApplied = false;
     private String overAppliedCalculationType = null;
     private Integer overAppliedNumber = null;
+    private Boolean isEqualAmortization = false;
 
     private Boolean isInterestRecalculationEnabled = false;
     private String daysInYearType = "1";
@@ -130,6 +131,7 @@ public class LoanProductTestBuilder {
     private boolean syncExpectedWithDisbursementDate = false;
     private String fixedPrincipalPercentagePerInstallment;
     private String installmentAmountInMultiplesOf;
+    private boolean canDefineInstallmentAmount;
 
     public String build(final String chargeId) {
         final HashMap<String, Object> map = build(chargeId, null);
@@ -168,6 +170,7 @@ public class LoanProductTestBuilder {
         map.put("accountingRule", this.accountingRule);
         map.put("minPrincipal", this.minPrincipal);
         map.put("maxPrincipal", this.maxPrincipal);
+        map.put("isEqualAmortization", this.isEqualAmortization);
         map.put("overdueDaysForNPA", this.overdueDaysForNPA);
         if (this.minimumDaysBetweenDisbursalAndFirstRepayment != null) {
             map.put("minimumDaysBetweenDisbursalAndFirstRepayment", this.minimumDaysBetweenDisbursalAndFirstRepayment);
@@ -183,7 +186,9 @@ public class LoanProductTestBuilder {
                 map.put("overAppliedNumber", this.overAppliedNumber);
             }
         }
-
+        if (this.canDefineInstallmentAmount) {
+            map.put("canDefineInstallmentAmount", this.canDefineInstallmentAmount);
+        }
         if (multiDisburseLoan) {
             map.put("multiDisburseLoan", this.multiDisburseLoan);
             map.put("maxTrancheCount", this.maxTrancheCount);
@@ -382,12 +387,17 @@ public class LoanProductTestBuilder {
         return this;
     }
 
+    public LoanProductTestBuilder withEqualAmortization(boolean isEqualAmortization) {
+        this.isEqualAmortization = isEqualAmortization;
+        return this;
+    }
+
     public LoanProductTestBuilder withMultiDisburse() {
         this.multiDisburseLoan = true;
         return this;
     }
 
-    public LoanProductTestBuilder withDisallowExpectectedDisbursements(boolean disallowExpectectedDisbursements) {
+    public LoanProductTestBuilder withDisallowExpectedDisbursements(boolean disallowExpectectedDisbursements) {
         this.disallowExpectedDisbursements = disallowExpectectedDisbursements;
         if (this.disallowExpectedDisbursements) {
             this.allowApprovedDisbursedAmountsOverApplied = true;
@@ -463,6 +473,11 @@ public class LoanProductTestBuilder {
     public LoanProductTestBuilder withAccounting(final String accountingRule, final Account[] account_list) {
         this.accountingRule = accountingRule;
         this.accountList = account_list;
+        return this;
+    }
+
+    public LoanProductTestBuilder withDefineInstallmentAmount(final boolean canDefineInstallmentAmount) {
+        this.canDefineInstallmentAmount = canDefineInstallmentAmount;
         return this;
     }
 

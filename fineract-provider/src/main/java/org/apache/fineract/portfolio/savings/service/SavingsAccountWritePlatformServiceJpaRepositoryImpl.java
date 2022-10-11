@@ -355,7 +355,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         if (account.getGsim() != null) {
             isGsim = true;
-            LOG.info("is gsim");
+            LOG.debug("is gsim");
         }
         checkClientOrGroupActive(account);
 
@@ -379,13 +379,13 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             LOG.debug("Deposit account has been created: {} ", deposit);
 
             GroupSavingsIndividualMonitoring gsim = gsimRepository.findById(account.getGsim().getId()).orElseThrow();
-            LOG.info("parent deposit : {} ", gsim.getParentDeposit());
-            LOG.info("child account : {} ", savingsId);
+            LOG.debug("parent deposit : {} ", gsim.getParentDeposit());
+            LOG.debug("child account : {} ", savingsId);
             BigDecimal currentBalance = gsim.getParentDeposit();
             BigDecimal newBalance = currentBalance.add(transactionAmount);
             gsim.setParentDeposit(newBalance);
             gsimRepository.save(gsim);
-            LOG.info("balance after making deposit : {} ",
+            LOG.debug("balance after making deposit : {} ",
                     gsimRepository.findById(account.getGsim().getId()).orElseThrow().getParentDeposit());
 
         }
@@ -663,13 +663,13 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             }
 
             long startPosting = System.currentTimeMillis();
-            LOG.info("Interest Posting Start Here at {}", startPosting);
+            LOG.debug("Interest Posting Start Here at {}", startPosting);
 
             savingsAccountData = this.savingsAccountInterestPostingService.postInterest(mc, today, isInterestTransfer,
                     isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill,
                     savingsAccountData);
             long endPosting = System.currentTimeMillis();
-            LOG.info("Interest Posting Ends within {}", endPosting - startPosting);
+            LOG.debug("Interest Posting Ends within {}", endPosting - startPosting);
 
             if (!backdatedTxnsAllowedTill) {
                 List<SavingsAccountTransactionData> transactions = savingsAccountData.getSavingsAccountTransactionData();
