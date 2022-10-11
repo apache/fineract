@@ -22,10 +22,18 @@ import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "job_parameters")
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public class JobParameter extends AbstractPersistableCustom {
 
     @Column(name = "job_id", nullable = false)
@@ -37,40 +45,8 @@ public class JobParameter extends AbstractPersistableCustom {
     @Column(name = "parameter_value", nullable = true)
     private String parameterValue;
 
-    public JobParameter() {}
-
-    public JobParameter(final Long jobId, final String parameterName, final String parameterValue) {
-        this.jobId = jobId;
-        this.parameterName = parameterName;
-        this.parameterValue = parameterValue;
-    }
-
     public static JobParameter getInstance(final Long jobId, final String parameterName, final String parameterValue) {
-        return new JobParameter(jobId, parameterName, parameterValue);
-    }
-
-    public Long getJobId() {
-        return jobId;
-    }
-
-    public void setJobId(final Long jobId) {
-        this.jobId = jobId;
-    }
-
-    public String getParameterName() {
-        return parameterName;
-    }
-
-    public void setParameterName(final String parameterName) {
-        this.parameterName = parameterName;
-    }
-
-    public String getParameterValue() {
-        return parameterValue;
-    }
-
-    public void setParameterValue(final String parameterValue) {
-        this.parameterValue = parameterValue;
+        return new JobParameter().setJobId(jobId).setParameterName(parameterName).setParameterValue(parameterValue);
     }
 
     @Override

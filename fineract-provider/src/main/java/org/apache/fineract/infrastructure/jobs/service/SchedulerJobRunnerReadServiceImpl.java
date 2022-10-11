@@ -185,11 +185,13 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
 
             JobDetailHistoryData lastRunHistory = null;
             if (version > 0) {
-                lastRunHistory = new JobDetailHistoryData(version, jobRunStartTime, jobRunEndTime, status, jobRunErrorMessage, triggerType,
-                        jobRunErrorLog);
+                lastRunHistory = new JobDetailHistoryData().setVersion(version).setJobRunStartTime(jobRunStartTime)
+                        .setJobRunEndTime(jobRunEndTime).setStatus(status).setJobRunErrorMessage(jobRunErrorMessage)
+                        .setTriggerType(triggerType).setJobRunErrorLog(jobRunErrorLog);
             }
-            final JobDetailData jobDetail = new JobDetailData(id, displayName, nextRunTime, initializingError, cronExpression, active,
-                    currentlyRunning, lastRunHistory);
+            final JobDetailData jobDetail = new JobDetailData().setJobId(id).setDisplayName(displayName).setNextRunTime(nextRunTime)
+                    .setInitializingError(initializingError).setCronExpression(cronExpression).setActive(active)
+                    .setCurrentlyRunning(currentlyRunning).setLastRunHistory(lastRunHistory);
             return jobDetail;
         }
 
@@ -220,8 +222,9 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
             final String jobRunErrorMessage = rs.getString("jobRunErrorMessage");
             final String triggerType = rs.getString("triggerType");
             final String jobRunErrorLog = rs.getString("jobRunErrorLog");
-            final JobDetailHistoryData jobDetailHistory = new JobDetailHistoryData(version, jobRunStartTime, jobRunEndTime, status,
-                    jobRunErrorMessage, triggerType, jobRunErrorLog);
+            final JobDetailHistoryData jobDetailHistory = new JobDetailHistoryData().setVersion(version).setJobRunStartTime(jobRunStartTime)
+                    .setJobRunEndTime(jobRunEndTime).setStatus(status).setJobRunErrorMessage(jobRunErrorMessage).setTriggerType(triggerType)
+                    .setJobRunErrorLog(jobRunErrorLog);
             return jobDetailHistory;
         }
 
