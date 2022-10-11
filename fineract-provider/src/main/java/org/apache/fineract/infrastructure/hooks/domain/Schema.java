@@ -23,10 +23,18 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_hook_schema")
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public class Schema extends AbstractPersistableCustom {
 
     @ManyToOne(optional = false)
@@ -44,21 +52,5 @@ public class Schema extends AbstractPersistableCustom {
 
     @Column(name = "optional", nullable = false)
     private boolean optional = false;
-
-    public Schema() {
-        //
-    }
-
-    public String getFieldName() {
-        return this.fieldName;
-    }
-
-    public String getFieldType() {
-        return this.fieldType;
-    }
-
-    public boolean isOptional() {
-        return this.optional;
-    }
 
 }

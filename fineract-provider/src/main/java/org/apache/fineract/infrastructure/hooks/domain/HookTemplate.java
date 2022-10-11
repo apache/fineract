@@ -28,13 +28,21 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_hook_templates")
-public class HookTemplate extends AbstractPersistableCustom {
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
+public final class HookTemplate extends AbstractPersistableCustom {
 
     @Column(name = "name", nullable = false, length = 100)
     private String name;
@@ -51,20 +59,8 @@ public class HookTemplate extends AbstractPersistableCustom {
         }
     }
 
-    protected HookTemplate() {
-
-    }
-
     public static HookTemplate fromJson(final JsonCommand command) {
         final String name = command.stringValueOfParameterNamed(nameParamName);
         return new HookTemplate(name);
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public Set<Schema> getSchema() {
-        return this.fields;
     }
 }

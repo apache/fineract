@@ -23,10 +23,18 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_hook_configuration")
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public class HookConfiguration extends AbstractPersistableCustom {
 
     @ManyToOne(optional = false)
@@ -43,38 +51,11 @@ public class HookConfiguration extends AbstractPersistableCustom {
     private String fieldValue;
 
     public static HookConfiguration createNewWithoutHook(final String fieldType, final String fieldName, final String fieldValue) {
-        return new HookConfiguration(null, fieldType, fieldName, fieldValue);
+        return new HookConfiguration().setFieldType(fieldType).setFieldName(fieldName).setFieldValue(fieldValue);
     }
 
     public static HookConfiguration createNew(final Hook hook, final String fieldType, final String fieldName, final String fieldValue) {
-        return new HookConfiguration(hook, fieldType, fieldName, fieldValue);
-    }
-
-    protected HookConfiguration() {
-        //
-    }
-
-    private HookConfiguration(final Hook hook, final String fieldType, final String fieldName, final String fieldValue) {
-        this.hook = hook;
-        this.fieldType = fieldType;
-        this.fieldName = fieldName;
-        this.fieldValue = fieldValue;
-    }
-
-    public String getFieldName() {
-        return this.fieldName;
-    }
-
-    public String getFieldType() {
-        return this.fieldType;
-    }
-
-    public String getFieldValue() {
-        return this.fieldValue;
-    }
-
-    public void update(final Hook hook) {
-        this.hook = hook;
+        return new HookConfiguration().setHook(hook).setFieldType(fieldType).setFieldName(fieldName).setFieldValue(fieldValue);
     }
 
 }
