@@ -212,7 +212,7 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
                     fcmEndPoint = rs.getString("value");
                 }
             }
-            return new NotificationConfigurationData(null, serverKey, gcmEndPoint, fcmEndPoint);
+            return new NotificationConfigurationData().setServerKey(serverKey).setGcmEndPoint(gcmEndPoint).setFcmEndPoint(fcmEndPoint);
         }
     }
 
