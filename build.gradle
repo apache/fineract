@@ -725,10 +725,6 @@ configure(project.fineractPublishProjects) {
             }
         }
     }
-
-    signing {
-        sign publishing.publications.mavenJava
-    }
 }
 
 task printSourceSetInformation() {
