@@ -165,25 +165,25 @@ public class ExecuteReportMailingJobsTasklet implements Tasklet {
         final LocalDateTime nextRunDateTime = reportMailingJob.getNextRunDateTime();
         ReportMailingJobPreviousRunStatus reportMailingJobPreviousRunStatus = ReportMailingJobPreviousRunStatus.SUCCESS;
 
-        reportMailingJob.updatePreviousRunErrorLog(null);
+        reportMailingJob.setPreviousRunErrorLog(null);
 
         if (errorLog != null && errorLog.length() > 0) {
             reportMailingJobPreviousRunStatus = ReportMailingJobPreviousRunStatus.ERROR;
-            reportMailingJob.updatePreviousRunErrorLog(errorLog.toString());
+            reportMailingJob.setPreviousRunErrorLog(errorLog.toString());
         }
 
         reportMailingJob.increaseNumberOfRunsByOne();
-        reportMailingJob.updatePreviousRunStatus(reportMailingJobPreviousRunStatus.getValue());
-        reportMailingJob.updatePreviousRunDateTime(reportMailingJob.getNextRunDateTime());
+        reportMailingJob.setPreviousRunStatus(reportMailingJobPreviousRunStatus.getValue());
+        reportMailingJob.setPreviousRunDateTime(reportMailingJob.getNextRunDateTime());
 
         if (StringUtils.isEmpty(recurrence)) {
-            reportMailingJob.deactivate();
+            reportMailingJob.setActive(false);
 
-            reportMailingJob.updateNextRunDateTime(null);
+            reportMailingJob.setNextRunDateTime(null);
         } else if (nextRunDateTime != null) {
             final LocalDateTime nextRecurringDateTime = createNextRecurringDateTime(recurrence, nextRunDateTime);
 
-            reportMailingJob.updateNextRunDateTime(nextRecurringDateTime);
+            reportMailingJob.setNextRunDateTime(nextRecurringDateTime);
         }
 
         reportMailingJobRepository.save(reportMailingJob);
@@ -202,8 +202,8 @@ public class ExecuteReportMailingJobsTasklet implements Tasklet {
             byteArrayOutputStream.writeTo(outputStream);
 
             for (String emailRecipient : emailRecipients) {
-                final ReportMailingJobEmailData reportMailingJobEmailData = new ReportMailingJobEmailData(emailRecipient,
-                        reportMailingJob.getEmailMessage(), reportMailingJob.getEmailSubject(), file);
+                final ReportMailingJobEmailData reportMailingJobEmailData = new ReportMailingJobEmailData().setTo(emailRecipient)
+                        .setText(reportMailingJob.getEmailMessage()).setSubject(reportMailingJob.getEmailSubject()).setAttachment(file);
 
                 reportMailingJobEmailService.sendEmailWithAttachment(reportMailingJobEmailData);
             }
