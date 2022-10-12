@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
+import static java.util.Arrays.asList;
+import static org.apache.fineract.infrastructure.core.data.ApiParameterError.parameterErrorWithValue;
+
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonArray;
@@ -30,12 +33,18 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.sql.Types;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 import javax.persistence.PersistenceException;
@@ -74,6 +83,7 @@ import org.apache.fineract.infrastructure.security.service.SqlInjectionPreventer
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -104,11 +114,24 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             .put("number", "INT").put("boolean", "BIT").put("decimal", "DECIMAL").put("date", "DATE").put("datetime", "DATETIME")
             .put("text", "TEXT").put("dropdown", "INT").build();
     private static final ImmutableMap<String, String> apiTypeToPostgreSQL = ImmutableMap.<String, String>builder().put("string", "VARCHAR")
-            .put("number", "INT").put("boolean", "BIT").put("decimal", "DECIMAL").put("date", "DATE").put("datetime", "TIMESTAMP")
+            .put("number", "INT").put("boolean", "boolean").put("decimal", "DECIMAL").put("date", "DATE").put("datetime", "TIMESTAMP")
             .put("text", "TEXT").put("dropdown", "INT").build();
 
     private static final List<String> stringDataTypes = Arrays.asList("char", "varchar", "blob", "text", "tinyblob", "tinytext",
             "mediumblob", "mediumtext", "longblob", "longtext");
+    private static final DateTimeFormatter DATA_TABLE_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter DATA_TABLE_DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    public static final String PG_BOOLEAN_TYPE = "boolean";
+    public static final String PG_BOOL_TYPE = "bool";
+    public static final String PG_INT_TYPE = "integer";
+    public static final String PG_BIGINT_TYPE = "bigint";
+    public static final String PG_DATE_TYPE = "date";
+    public static final String PG_NUMERIC_TYPE = "numeric";
+    public static final String PG_TEXT_TYPE = "text";
+    public static final String PG_VARCHAR_TYPE = "character varying";
+    public static final String BIT_TYPE = "bit";
+    public static final String MYSQL_DATETIME_TYPE = "datetime";
+    public static final String MYSQL_DATE_TYPE = "date";
 
     private final JdbcTemplate jdbcTemplate;
     private final DatabaseTypeResolver databaseTypeResolver;
@@ -160,9 +183,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         // PERMITTED datatables
         SQLInjectionValidator.validateSQLInput(datatable);
-        final String sql = "select application_table_name, registered_table_name, entity_subtype" + " from x_registered_table "
-                + " where exists" + " (select 'f'" + " from m_appuser_role ur " + " join m_role r on r.id = ur.role_id"
-                + " left join m_role_permission rp on rp.role_id = r.id" + " left join m_permission p on p.id = rp.permission_id"
+        final String sql = "select application_table_name, registered_table_name, entity_subtype from x_registered_table "
+                + " where exists (select 'f' from m_appuser_role ur join m_role r on r.id = ur.role_id"
+                + " left join m_role_permission rp on rp.role_id = r.id left join m_permission p on p.id = rp.permission_id"
                 + " where ur.appuser_id = ? and registered_table_name=? and (p.code in ('ALL_FUNCTIONS', "
                 + "'ALL_FUNCTIONS_READ') or p.code = concat('READ_', registered_table_name))) "
                 + " order by application_table_name, registered_table_name";
@@ -181,6 +204,164 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }
 
         return datatableData;
+    }
+
+    @Override
+    public List<JsonObject> queryDataTable(String datatable, String columnFilter, String valueFilter, String resultColumns) {
+        Arrays.asList(datatable, columnFilter, valueFilter, resultColumns).forEach(SQLInjectionValidator::validateDynamicQuery);
+
+        List<ResultsetColumnHeaderData> resultsetColumnHeaderData = genericDataService.fillResultsetColumnHeaders(datatable);
+        validateRequestParams(columnFilter, valueFilter, resultColumns, resultsetColumnHeaderData);
+
+        String sql = "select " + resultColumns + " from " + datatable + " where " + columnFilter + " = ?";
+        SqlRowSet rowSet = null;
+        String filterColumnType = resultsetColumnHeaderData.stream().filter(column -> Objects.equals(columnFilter, column.getColumnName()))
+                .findFirst().map(ResultsetColumnHeaderData::getColumnType).orElse(columnFilter + " does not exist in datatable");
+        if (databaseTypeResolver.isPostgreSQL()) {
+            rowSet = callFilteredPgSql(sql, valueFilter, filterColumnType);
+        } else if (databaseTypeResolver.isMySQL()) {
+            rowSet = callFilteredMysql(sql, valueFilter, filterColumnType);
+        }
+
+        String[] resultColumnNames = resultColumns.split(",");
+        List<JsonObject> results = new ArrayList<>();
+        while (rowSet.next()) {
+            extractResults(rowSet, resultColumnNames, results);
+        }
+
+        return results;
+    }
+
+    private void extractResults(SqlRowSet rowSet, String[] resultColumnNames, List<JsonObject> results) {
+        JsonObject json = new JsonObject();
+        for (String rcn : resultColumnNames) {
+            Object rowValue = rowSet.getObject(rcn);
+            if (rowValue != null) {
+                if (rowValue instanceof Character) {
+                    json.addProperty(rcn, (Character) rowValue);
+                } else if (rowValue instanceof Number) {
+                    json.addProperty(rcn, new BigDecimal(rowValue.toString()));
+                } else if (rowValue instanceof Boolean) {
+                    json.addProperty(rcn, (Boolean) rowValue);
+                } else if (rowValue instanceof LocalDateTime) {
+                    json.addProperty(rcn, DATA_TABLE_DATETIME_FORMAT.format((LocalDateTime) rowValue));
+                } else if (rowValue instanceof Timestamp) {
+                    json.addProperty(rcn, DATA_TABLE_DATETIME_FORMAT.format(((Timestamp) rowValue).toLocalDateTime()));
+                } else if (rowValue instanceof LocalDate) {
+                    json.addProperty(rcn, DATA_TABLE_DATE_FORMAT.format((LocalDate) rowValue));
+                } else if (rowValue instanceof Date) {
+                    json.addProperty(rcn, DATA_TABLE_DATE_FORMAT.format(((Date) rowValue).toLocalDate()));
+                } else {
+                    json.addProperty(rcn, rowValue.toString());
+                }
+            }
+        }
+
+        if (json.size() > 0) {
+            results.add(json);
+        }
+    }
+
+    @NotNull
+    private SqlRowSet callFilteredMysql(String sql, String valueFilter, String filterColumnType) {
+        Object finalValueFilter = valueFilter;
+        SqlRowSet rowSet;
+        if (BIT_TYPE.equalsIgnoreCase(filterColumnType)) {
+            int[] argType = new int[1];
+            argType[0] = Types.BIT;
+            finalValueFilter = BooleanUtils.toString(BooleanUtils.toBooleanObject(valueFilter), "1", "0", "null");
+            rowSet = jdbcTemplate.queryForRowSet(sql, new Object[] { finalValueFilter }, argType);
+        } else if (MYSQL_DATE_TYPE.equalsIgnoreCase(filterColumnType)) {
+            int[] argType = new int[1];
+            argType[0] = Types.DATE;
+            try {
+                rowSet = jdbcTemplate.queryForRowSet(sql, new Object[] { LocalDate.parse(valueFilter, DATA_TABLE_DATE_FORMAT) }, argType);
+            } catch (DateTimeParseException e) {
+                List<ApiParameterError> paramErrors = new ArrayList<>();
+                paramErrors.add(parameterErrorWithValue("400",
+                        "Unsupported input type for datatable query! Use format: 'yyyy-MM-dd'. Column filter: " + filterColumnType,
+                        "valueFilter", valueFilter));
+                throw new PlatformApiDataValidationException(paramErrors, e);
+            }
+        } else if (MYSQL_DATETIME_TYPE.equals(filterColumnType)) {
+            int[] argType = new int[1];
+            argType[0] = Types.TIMESTAMP;
+            try {
+                rowSet = jdbcTemplate.queryForRowSet(sql, new Object[] { LocalDateTime.parse(valueFilter, DATA_TABLE_DATETIME_FORMAT) },
+                        argType);
+            } catch (DateTimeParseException e) {
+                List<ApiParameterError> paramErrors = new ArrayList<>();
+                paramErrors.add(parameterErrorWithValue("400",
+                        "Unsupported input type for datatable query! Use format: 'yyyy-MM-dd HH:mm:ss'. Column filter: " + filterColumnType,
+                        "valueFilter", valueFilter));
+                throw new PlatformApiDataValidationException(paramErrors, e);
+            }
+        } else {
+            rowSet = jdbcTemplate.queryForRowSet(sql, finalValueFilter);
+        }
+        return rowSet;
+    }
+
+    @NotNull
+    private SqlRowSet callFilteredPgSql(String sql, String valueFilter, String filterColumnType) {
+        Object finalValueFilter = valueFilter;
+        int[] argType = new int[1];
+        if (BIT_TYPE.equalsIgnoreCase(filterColumnType)) {
+            finalValueFilter = BooleanUtils.toString(BooleanUtils.toBooleanObject(valueFilter), "1", "0", "null");
+            argType[0] = Types.BIT;
+        } else if (PG_BOOLEAN_TYPE.equalsIgnoreCase(filterColumnType) || PG_BOOL_TYPE.equalsIgnoreCase(filterColumnType)) {
+            finalValueFilter = BooleanUtils.toString(BooleanUtils.toBooleanObject(valueFilter), "true", "false", "null");
+            argType[0] = Types.BOOLEAN;
+        } else if (PG_INT_TYPE.equalsIgnoreCase(filterColumnType)) {
+            argType[0] = Types.INTEGER;
+        } else if (PG_BIGINT_TYPE.equalsIgnoreCase(filterColumnType)) {
+            argType[0] = Types.BIGINT;
+        } else if (PG_DATE_TYPE.equalsIgnoreCase(filterColumnType)) {
+            argType[0] = Types.DATE;
+        } else if (filterColumnType.toLowerCase().contains("timestamp")) {
+            argType[0] = Types.TIMESTAMP;
+        } else if (PG_NUMERIC_TYPE.equalsIgnoreCase(filterColumnType)) {
+            argType[0] = Types.DECIMAL;
+        } else if (PG_TEXT_TYPE.equalsIgnoreCase(filterColumnType) || PG_VARCHAR_TYPE.equalsIgnoreCase(filterColumnType)) {
+            argType[0] = Types.VARCHAR;
+        } else {
+            List<ApiParameterError> paramErrors = new ArrayList<>();
+            paramErrors.add(parameterErrorWithValue("400", "Unsupported input type for datatable query! Column filter: " + filterColumnType,
+                    "valueFilter", valueFilter));
+            throw new PlatformApiDataValidationException(paramErrors);
+        }
+        return jdbcTemplate.queryForRowSet(sql, new Object[] { finalValueFilter }, argType);
+    }
+
+    private static void validateRequestParams(String columnFilter, String valueFilter, String resultColumns,
+            List<ResultsetColumnHeaderData> resultsetColumnHeaderData) {
+        List<ApiParameterError> paramErrors = new ArrayList<>();
+        List<String> dataTableColumnNames = resultsetColumnHeaderData.stream().map(ResultsetColumnHeaderData::getColumnName).toList();
+        if (columnFilter == null || columnFilter.isEmpty()) {
+            paramErrors.add(parameterErrorWithValue("400", "Column filter is empty!", "columnFilter", columnFilter));
+        } else {
+            if (!dataTableColumnNames.contains(columnFilter)) {
+                paramErrors.add(parameterErrorWithValue("400", "Column filter not exist in datatable!", "columnFilter", columnFilter));
+            }
+        }
+
+        if (valueFilter == null || valueFilter.isEmpty()) {
+            paramErrors.add(parameterErrorWithValue("400", "Value filter is empty!", "valueFilter", valueFilter));
+        }
+
+        if (resultColumns == null || resultColumns.isEmpty()) {
+            paramErrors.add(parameterErrorWithValue("400", "Result columns filter is empty!", "resultColumns", resultColumns));
+        } else {
+            asList(resultColumns.split(",")).forEach(rcn -> {
+                if (!dataTableColumnNames.contains(rcn)) {
+                    paramErrors.add(parameterErrorWithValue("400", "Result column not exist in datatable!", "resultColumns", rcn));
+                }
+            });
+        }
+
+        if (!paramErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(paramErrors);
+        }
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {

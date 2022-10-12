@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.api;
 
+import com.google.gson.JsonObject;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -216,6 +217,25 @@ public class DatatablesApiResource {
 
         final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serializePretty(prettyPrint, result);
+    }
+
+    @GET
+    @Path("{datatable}/query")
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Query Data Table values", description = "Query values from a registered data table.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = List.class))) })
+    public String queryValues(@PathParam("datatable") @Parameter(description = "datatable") final String datatable,
+            @QueryParam("columnFilter") @Parameter(description = "columnFilter") final String columnFilter,
+            @QueryParam("valueFilter") @Parameter(description = "valueFilter") final String valueFilter,
+            @QueryParam("resultColumns") @Parameter(description = "resultColumns") final String resultColumns,
+            @Context final UriInfo uriInfo) {
+        this.context.authenticatedUser().validateHasDatatableReadPermission(datatable);
+
+        final List<JsonObject> result = this.readWriteNonCoreDataService.queryDataTable(datatable, columnFilter, valueFilter,
+                resultColumns);
+
+        return this.toApiJsonSerializer.serializePretty(ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters()), result);
     }
 
     @GET
