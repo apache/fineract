@@ -329,8 +329,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
 
         String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
         Set<Long> userIds = getNotifiableUserIds(officeId, permission);
-        NotificationData notificationData = new NotificationData(objectType, objectIdentifier, eventType, appUserId, notificationContent,
-                false, false, tenantIdentifier, officeId, userIds);
+        NotificationData notificationData = new NotificationData().setObjectType(objectType).setObjectId(objectIdentifier)
+                .setAction(eventType).setActorId(appUserId).setContent(notificationContent).setRead(false).setSystemGenerated(false)
+                .setTenantIdentifier(tenantIdentifier).setOfficeId(officeId).setUserIds(userIds);
         try {
             notificationEventPublisher.broadcastNotification(notificationData);
         } catch (Exception e) {
