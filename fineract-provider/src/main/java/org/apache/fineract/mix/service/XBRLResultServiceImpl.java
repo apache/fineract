@@ -66,7 +66,7 @@ public class XBRLResultServiceImpl implements XBRLResultService {
         if (config == null || config.size() == 0) {
             throw new XBRLMappingInvalidException("Mapping is empty");
         }
-        return new XBRLData(config, startDate, endDate, currency);
+        return new XBRLData().setResultMap(config).setStartDate(startDate).setEndDate(endDate).setCurrency(currency);
     }
 
     @SuppressWarnings("unchecked")

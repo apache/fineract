@@ -21,13 +21,21 @@ package org.apache.fineract.mix.domain;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "mix_taxonomy_mapping")
-public class MixTaxonomyMapping extends AbstractPersistableCustom {
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
+public final class MixTaxonomyMapping extends AbstractPersistableCustom {
 
     @Column(name = "identifier")
     private String identifier;
@@ -37,10 +45,6 @@ public class MixTaxonomyMapping extends AbstractPersistableCustom {
 
     @Column(name = "currency")
     private String currency;
-
-    protected MixTaxonomyMapping() {
-        // default
-    }
 
     private MixTaxonomyMapping(final String identifier, final String config, final String currency) {
         this.identifier = StringUtils.defaultIfEmpty(identifier, null);

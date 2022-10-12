@@ -100,7 +100,7 @@ public class XBRLBuilder {
             final NamespaceData ns = this.readNamespaceService.retrieveNamespaceByPrefix(prefix);
             if (ns != null) {
 
-                this.root.addNamespace(prefix, ns.url());
+                this.root.addNamespace(prefix, ns.getUrl());
             }
             qname = prefix + ":" + taxonomy.getName();
 
@@ -115,12 +115,16 @@ public class XBRLBuilder {
             final List<String> dims = Splitter.on(':').splitToList(dimension);
 
             if (dims.size() == 2) {
-                context = new ContextData(dims.get(0), dims.get(1), taxonomy.getType());
+                context = new ContextData().setDimensionType(dims.get(0)).setDimension(dims.get(1)).setPeriodType(
+                        taxonomy.getType().equals(MixTaxonomyData.BALANCESHEET) || taxonomy.getType().equals(MixTaxonomyData.PORTFOLIO) ? 0
+                                : 1);
             }
         }
 
         if (context == null) {
-            context = new ContextData(null, null, taxonomy.getType());
+            context = new ContextData().setPeriodType(
+                    taxonomy.getType().equals(MixTaxonomyData.BALANCESHEET) || taxonomy.getType().equals(MixTaxonomyData.PORTFOLIO) ? 0
+                            : 1);
         }
 
         if (!this.contextMap.containsKey(context)) {
