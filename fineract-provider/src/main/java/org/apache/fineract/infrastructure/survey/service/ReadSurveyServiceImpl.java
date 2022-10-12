@@ -133,10 +133,10 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
         List<ClientScoresOverview> scoresOverviews = new ArrayList<>();
 
         while (rs.next()) {
-            scoresOverviews.add(new ClientScoresOverview(rs.getString("code"), rs.getString("name"), rs.getLong("score"),
-                    rs.getDouble("poverty_line"), rs.getDate("date").toLocalDate(), rs.getLong("id"), surveyName));
+            scoresOverviews.add(new ClientScoresOverview().setLikelihoodCode(rs.getString("code")).setLikelihoodName(rs.getString("name"))
+                    .setScore(rs.getLong("score")).setPovertyLine(rs.getDouble("poverty_line")).setDate(rs.getDate("date").toLocalDate())
+                    .setId(rs.getLong("id")).setSurveyName(surveyName));
         }
-
         return scoresOverviews;
     }
 
@@ -162,8 +162,12 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
             final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
 
             while (rs.next()) {
-                scoresOverviews.add(new ClientScoresOverview(rs.getString("code"), rs.getString("name"), rs.getLong("score"),
-                        rs.getDouble("poverty_line"), rs.getDate("date").toLocalDate(), rs.getLong("id"), rs.getString("surveyName")));
+                scoresOverviews.add(new ClientScoresOverview().setLikelihoodCode(rs.getString("code"))
+                        .setLikelihoodName(rs.getString("name")).setScore(rs.getLong("score")).setPovertyLine(rs.getDouble("poverty_line"))
+                        .setDate(rs.getDate("date").toLocalDate()).setId(rs.getLong("id")).setSurveyName(rs.getString("surveyName"))
+
+                );
+
             }
 
         }
