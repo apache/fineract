@@ -18,6 +18,13 @@
  */
 package org.apache.fineract.mix.data;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class MixTaxonomyData {
 
     public static final Integer PORTFOLIO = 0;
@@ -26,40 +33,13 @@ public class MixTaxonomyData {
     public static final Integer EXPENSE = 3;
 
     @SuppressWarnings("unused")
-    private final Long id;
-    private final String name;
-    private final String namespace;
-    private final String dimension;
-    private final Integer type;
+    private Long id;
+    private String name;
+    private String namespace;
+    private String dimension;
+    private Integer type;
     @SuppressWarnings("unused")
-    private final String description;
-
-    public MixTaxonomyData(final Long id, final String name, final String namespace, final String dimension, final Integer type,
-            final String description) {
-
-        this.id = id;
-        this.name = name;
-        this.namespace = namespace;
-        this.dimension = dimension;
-        this.type = type;
-        this.description = description;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public String getNamespace() {
-        return this.namespace;
-    }
-
-    public String getDimension() {
-        return this.dimension;
-    }
-
-    public Integer getType() {
-        return this.type;
-    }
+    private String description;
 
     public boolean isPortfolio() {
         return this.type == 5;
