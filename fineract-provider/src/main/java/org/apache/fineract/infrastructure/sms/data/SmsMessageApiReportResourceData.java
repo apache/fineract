@@ -20,47 +20,26 @@ package org.apache.fineract.infrastructure.sms.data;
 
 import com.google.gson.Gson;
 import java.util.List;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * Immutable data object representing the API request body sent in the POST request to the "/report" resource
  **/
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class SmsMessageApiReportResourceData {
 
     private List<Long> externalIds;
     private String mifosTenantIdentifier;
 
     /**
-     * SmsMessageApiReportResourceData constructor
-     **/
-    private SmsMessageApiReportResourceData(List<Long> externalIds, String mifosTenantIdentifier) {
-        this.externalIds = externalIds;
-        this.mifosTenantIdentifier = mifosTenantIdentifier;
-    }
-
-    /**
-     * SmsMessageApiReportResourceData constructor
-     **/
-    protected SmsMessageApiReportResourceData() {}
-
-    /**
      * @return new instance of the SmsMessageApiReportResourceData class
      **/
     public static final SmsMessageApiReportResourceData instance(List<Long> externalIds, String mifosTenantIdentifier) {
-        return new SmsMessageApiReportResourceData(externalIds, mifosTenantIdentifier);
-    }
-
-    /**
-     * @return the externalIds
-     */
-    public List<Long> getExternalIds() {
-        return externalIds;
-    }
-
-    /**
-     * @return the mifosTenantIdentifier
-     */
-    public String getMifosTenantIdentifier() {
-        return mifosTenantIdentifier;
+        return new SmsMessageApiReportResourceData().setExternalIds(externalIds).setMifosTenantIdentifier(mifosTenantIdentifier);
     }
 
     /**
