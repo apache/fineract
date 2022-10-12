@@ -19,30 +19,25 @@
 package org.apache.fineract.infrastructure.security.data;
 
 import java.time.ZonedDateTime;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class OTPRequest {
 
-    private final String token;
-    private final OTPMetadata metadata;
-
-    public OTPRequest(String token, OTPMetadata metadata) {
-        this.token = token;
-        this.metadata = metadata;
-    }
+    private String token;
+    private OTPMetadata metadata;
 
     public static OTPRequest create(String token, int tokenLiveTimeInSec, boolean extendedAccessToken, OTPDeliveryMethod deliveryMethod) {
-        final OTPMetadata metadata = new OTPMetadata(DateUtils.getLocalDateTimeOfTenant().atZone(DateUtils.getDateTimeZoneOfTenant()),
-                tokenLiveTimeInSec, extendedAccessToken, deliveryMethod);
-        return new OTPRequest(token, metadata);
-    }
+        final OTPMetadata metadata = new OTPMetadata()
+                .setRequestTime(DateUtils.getLocalDateTimeOfTenant().atZone(DateUtils.getDateTimeZoneOfTenant()))
+                .setTokenLiveTimeInSec(tokenLiveTimeInSec).setExtendedAccessToken(extendedAccessToken).setDeliveryMethod(deliveryMethod);
 
-    public String getToken() {
-        return token;
-    }
-
-    public OTPMetadata getMetadata() {
-        return metadata;
+        return new OTPRequest().setToken(token).setMetadata(metadata);
     }
 
     public boolean isValid() {
