@@ -43,13 +43,10 @@ public class ReadLikelihoodServiceImpl implements ReadLikelihoodService {
         List<LikelihoodData> likelihoodDatas = new ArrayList<>();
 
         while (likelihood.next()) {
-            likelihoodDatas.add(new LikelihoodData(likelihood.getLong("id"), likelihood.getString("name"), likelihood.getString("code"),
-                    likelihood.getLong("enabled")
-
-            ));
+            likelihoodDatas.add(new LikelihoodData().setResourceId(likelihood.getLong("id")).setLikeliHoodName(likelihood.getString("name"))
+                    .setLikeliHoodCode(likelihood.getString("code")).setEnabled(likelihood.getLong("enabled")));
 
         }
-
         return likelihoodDatas;
     }
 
@@ -69,10 +66,8 @@ public class ReadLikelihoodServiceImpl implements ReadLikelihoodService {
 
         likelihood.first();
 
-        return new LikelihoodData(likelihood.getLong("id"), likelihood.getString("name"), likelihood.getString("code"),
-                likelihood.getLong("enabled")
-
-        );
+        return new LikelihoodData().setResourceId(likelihood.getLong("id")).setLikeliHoodName(likelihood.getString("name"))
+                .setLikeliHoodCode(likelihood.getString("code")).setEnabled(likelihood.getLong("enabled"));
 
     }
 
