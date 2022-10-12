@@ -20,67 +20,42 @@ package org.apache.fineract.infrastructure.reportmailingjob.data;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportData;
 
 /**
  * Immutable data object representing report mailing job data.
  **/
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class ReportMailingJobData {
 
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final ZonedDateTime startDateTime;
-    private final String recurrence;
-    private final ReportMailingJobTimelineData timeline;
-    private final String emailRecipients;
-    private final String emailSubject;
-    private final String emailMessage;
-    private final EnumOptionData emailAttachmentFileFormat;
-    private final ReportData stretchyReport;
-    private final String stretchyReportParamMap;
-    private final ZonedDateTime previousRunDateTime;
-    private final ZonedDateTime nextRunDateTime;
-    private final String previousRunStatus;
-    private final String previousRunErrorLog;
-    private final String previousRunErrorMessage;
-    private final Integer numberOfRuns;
-    private final boolean isActive;
-    private final List<EnumOptionData> emailAttachmentFileFormatOptions;
-    private final List<EnumOptionData> stretchyReportParamDateOptions;
-    private final Long runAsUserId;
-
-    private ReportMailingJobData(final Long id, final String name, final String description, final ZonedDateTime startDateTime,
-            final String recurrence, final ReportMailingJobTimelineData timeline, final String emailRecipients, final String emailSubject,
-            final String emailMessage, final EnumOptionData emailAttachmentFileFormat, final ReportData stretchyReport,
-            final String stretchyReportParamMap, final ZonedDateTime previousRunDateTime, final ZonedDateTime nextRunDateTime,
-            final String previousRunStatus, final String previousRunErrorLog, final String previousRunErrorMessage,
-            final Integer numberOfRuns, final boolean isActive, final List<EnumOptionData> emailAttachmentFileFormatOptions,
-            final List<EnumOptionData> stretchyReportParamDateOptions, final Long runAsUserId) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.startDateTime = startDateTime;
-        this.recurrence = recurrence;
-        this.timeline = timeline;
-        this.emailRecipients = emailRecipients;
-        this.emailMessage = emailMessage;
-        this.emailSubject = emailSubject;
-        this.emailAttachmentFileFormat = emailAttachmentFileFormat;
-        this.stretchyReport = stretchyReport;
-        this.stretchyReportParamMap = stretchyReportParamMap;
-        this.previousRunDateTime = previousRunDateTime;
-        this.nextRunDateTime = nextRunDateTime;
-        this.previousRunStatus = previousRunStatus;
-        this.previousRunErrorLog = previousRunErrorLog;
-        this.previousRunErrorMessage = previousRunErrorMessage;
-        this.isActive = isActive;
-        this.numberOfRuns = numberOfRuns;
-        this.emailAttachmentFileFormatOptions = emailAttachmentFileFormatOptions;
-        this.stretchyReportParamDateOptions = stretchyReportParamDateOptions;
-        this.runAsUserId = runAsUserId;
-    }
+    private Long id;
+    private String name;
+    private String description;
+    private ZonedDateTime startDateTime;
+    private String recurrence;
+    private ReportMailingJobTimelineData timeline;
+    private String emailRecipients;
+    private String emailSubject;
+    private String emailMessage;
+    private EnumOptionData emailAttachmentFileFormat;
+    private ReportData stretchyReport;
+    private String stretchyReportParamMap;
+    private ZonedDateTime previousRunDateTime;
+    private ZonedDateTime nextRunDateTime;
+    private String previousRunStatus;
+    private String previousRunErrorLog;
+    private String previousRunErrorMessage;
+    private Integer numberOfRuns;
+    private boolean isActive;
+    private List<EnumOptionData> emailAttachmentFileFormatOptions;
+    private List<EnumOptionData> stretchyReportParamDateOptions;
+    private Long runAsUserId;
 
     /**
      * @return an instance of the ReportMailingJobData class
@@ -92,9 +67,13 @@ public final class ReportMailingJobData {
             final ZonedDateTime previousRunDateTime, final ZonedDateTime nextRunDateTime, final String previousRunStatus,
             final String previousRunErrorLog, final String previousRunErrorMessage, final Integer numberOfRuns, final boolean isActive,
             final Long runAsUserId) {
-        return new ReportMailingJobData(id, name, description, startDateTime, recurrence, timeline, emailRecipients, emailSubject,
-                emailMessage, emailAttachmentFileFormat, stretchyReport, stretchyReportParamMap, previousRunDateTime, nextRunDateTime,
-                previousRunStatus, previousRunErrorLog, previousRunErrorMessage, numberOfRuns, isActive, null, null, runAsUserId);
+        return new ReportMailingJobData().setId(id).setName(name).setDescription(description).setStartDateTime(startDateTime)
+                .setRecurrence(recurrence).setTimeline(timeline).setEmailRecipients(emailRecipients).setEmailSubject(emailSubject)
+                .setEmailMessage(emailMessage).setEmailAttachmentFileFormat(emailAttachmentFileFormat).setStretchyReport(stretchyReport)
+                .setStretchyReportParamMap(stretchyReportParamMap).setPreviousRunDateTime(previousRunDateTime)
+                .setNextRunDateTime(nextRunDateTime).setPreviousRunStatus(previousRunStatus).setPreviousRunErrorLog(previousRunErrorLog)
+                .setPreviousRunErrorMessage(previousRunErrorMessage).setNumberOfRuns(numberOfRuns).setActive(isActive)
+                .setRunAsUserId(runAsUserId);
     }
 
     /**
@@ -102,8 +81,8 @@ public final class ReportMailingJobData {
      **/
     public static ReportMailingJobData newInstance(final List<EnumOptionData> emailAttachmentFileFormatOptions,
             final List<EnumOptionData> stretchyReportParamDateOptions) {
-        return new ReportMailingJobData(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-                null, null, false, emailAttachmentFileFormatOptions, stretchyReportParamDateOptions, null);
+        return new ReportMailingJobData().setEmailAttachmentFileFormatOptions(emailAttachmentFileFormatOptions)
+                .setStretchyReportParamDateOptions(stretchyReportParamDateOptions);
     }
 
     /**
@@ -111,168 +90,21 @@ public final class ReportMailingJobData {
      **/
     public static ReportMailingJobData newInstance(final ReportMailingJobData dataWithoutEnumOptions,
             final ReportMailingJobData dataWithEnumOptions) {
-        return new ReportMailingJobData(dataWithoutEnumOptions.id, dataWithoutEnumOptions.name, dataWithoutEnumOptions.description,
-                dataWithoutEnumOptions.startDateTime, dataWithoutEnumOptions.recurrence, dataWithoutEnumOptions.timeline,
-                dataWithoutEnumOptions.emailRecipients, dataWithoutEnumOptions.emailSubject, dataWithoutEnumOptions.emailMessage,
-                dataWithoutEnumOptions.emailAttachmentFileFormat, dataWithoutEnumOptions.stretchyReport,
-                dataWithoutEnumOptions.stretchyReportParamMap, dataWithoutEnumOptions.previousRunDateTime,
-                dataWithoutEnumOptions.nextRunDateTime, dataWithoutEnumOptions.previousRunStatus,
-                dataWithoutEnumOptions.previousRunErrorLog, dataWithoutEnumOptions.previousRunErrorMessage,
-                dataWithoutEnumOptions.numberOfRuns, dataWithoutEnumOptions.isActive, dataWithEnumOptions.emailAttachmentFileFormatOptions,
-                dataWithEnumOptions.stretchyReportParamDateOptions, dataWithoutEnumOptions.runAsUserId);
-    }
-
-    /**
-     * @return the id
-     */
-    public Long getId() {
-        return id;
-    }
-
-    /**
-     * @return the name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * @return the description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * @return the startDateTime
-     */
-    public ZonedDateTime getStartDateTime() {
-        return startDateTime;
-    }
-
-    /**
-     * @return the recurrence
-     */
-    public String getRecurrence() {
-        return recurrence;
-    }
-
-    /**
-     * @return the timeline
-     */
-    public ReportMailingJobTimelineData getTimeline() {
-        return timeline;
-    }
-
-    /**
-     * @return the emailRecipients
-     */
-    public String getEmailRecipients() {
-        return emailRecipients;
-    }
-
-    /**
-     * @return the emailSubject
-     */
-    public String getEmailSubject() {
-        return emailSubject;
-    }
-
-    /**
-     * @return the emailMessage
-     */
-    public String getEmailMessage() {
-        return emailMessage;
-    }
-
-    /**
-     * @return the emailAttachmentFileFormat
-     */
-    public EnumOptionData getEmailAttachmentFileFormat() {
-        return emailAttachmentFileFormat;
-    }
-
-    /**
-     * @return the stretchyReport
-     */
-    public ReportData getStretchyReport() {
-        return stretchyReport;
-    }
-
-    /**
-     * @return the stretchyReportParamMap
-     */
-    public String getStretchyReportParamMap() {
-        return stretchyReportParamMap;
-    }
-
-    /**
-     * @return the previousRunDateTime
-     */
-    public ZonedDateTime getPreviousRunDateTime() {
-        return previousRunDateTime;
-    }
-
-    /**
-     * @return the nextRunDateTime
-     */
-    public ZonedDateTime getNextRunDateTime() {
-        return nextRunDateTime;
-    }
-
-    /**
-     * @return the previousRunStatus
-     */
-    public String getPreviousRunStatus() {
-        return previousRunStatus;
-    }
-
-    /**
-     * @return the previousRunErrorLog
-     */
-    public String getPreviousRunErrorLog() {
-        return previousRunErrorLog;
-    }
-
-    /**
-     * @return the previousRunErrorMessage
-     */
-    public String getPreviousRunErrorMessage() {
-        return previousRunErrorMessage;
-    }
-
-    /**
-     * @return the isActive
-     */
-    public boolean isActive() {
-        return isActive;
-    }
-
-    /**
-     * @return the emailAttachmentFileFormatOptions
-     */
-    public List<EnumOptionData> getEmailAttachmentFileFormatOptions() {
-        return emailAttachmentFileFormatOptions;
-    }
-
-    /**
-     * @return the stretchyReportParamDateOptions
-     **/
-    public List<EnumOptionData> getStretchyReportParamDateOptions() {
-        return this.stretchyReportParamDateOptions;
-    }
-
-    /**
-     * @return the numberOfRuns
-     */
-    public Integer getNumberOfRuns() {
-        return numberOfRuns;
-    }
-
-    /**
-     * @return the runAsUserId
-     */
-    public Long getRunAsUserId() {
-        return runAsUserId;
+        return new ReportMailingJobData().setId(dataWithoutEnumOptions.id).setName(dataWithoutEnumOptions.name)
+                .setDescription(dataWithoutEnumOptions.description).setStartDateTime(dataWithoutEnumOptions.startDateTime)
+                .setRecurrence(dataWithoutEnumOptions.recurrence).setTimeline(dataWithoutEnumOptions.timeline)
+                .setEmailRecipients(dataWithoutEnumOptions.emailRecipients).setEmailSubject(dataWithoutEnumOptions.emailSubject)
+                .setEmailMessage(dataWithoutEnumOptions.emailMessage)
+                .setEmailAttachmentFileFormat(dataWithoutEnumOptions.emailAttachmentFileFormat)
+                .setStretchyReport(dataWithoutEnumOptions.stretchyReport)
+                .setStretchyReportParamMap(dataWithoutEnumOptions.stretchyReportParamMap)
+                .setPreviousRunDateTime(dataWithoutEnumOptions.previousRunDateTime)
+                .setNextRunDateTime(dataWithoutEnumOptions.nextRunDateTime).setPreviousRunStatus(dataWithoutEnumOptions.previousRunStatus)
+                .setPreviousRunErrorLog(dataWithoutEnumOptions.previousRunErrorLog)
+                .setPreviousRunErrorMessage(dataWithoutEnumOptions.previousRunErrorMessage)
+                .setNumberOfRuns(dataWithoutEnumOptions.numberOfRuns).setActive(dataWithoutEnumOptions.isActive)
+                .setEmailAttachmentFileFormatOptions(dataWithEnumOptions.emailAttachmentFileFormatOptions)
+                .setStretchyReportParamDateOptions(dataWithEnumOptions.stretchyReportParamDateOptions)
+                .setRunAsUserId(dataWithoutEnumOptions.runAsUserId);
     }
 }

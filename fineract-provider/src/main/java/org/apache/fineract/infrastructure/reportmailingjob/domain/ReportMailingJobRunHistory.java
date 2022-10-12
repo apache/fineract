@@ -24,10 +24,18 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_report_mailing_job_run_history")
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public class ReportMailingJobRunHistory extends AbstractPersistableCustom {
 
     private static final long serialVersionUID = -3757370929988421076L;
@@ -52,82 +60,13 @@ public class ReportMailingJobRunHistory extends AbstractPersistableCustom {
     private String errorLog;
 
     /**
-     * ReportMailingJobRunHistory protected constructor
-     **/
-    protected ReportMailingJobRunHistory() {}
-
-    /**
-     * ReportMailingJobRunHistory private constructor
-     **/
-    private ReportMailingJobRunHistory(final ReportMailingJob reportMailingJob, final LocalDateTime startDateTime,
-            final LocalDateTime endDateTime, final String status, final String errorMessage, final String errorLog) {
-        this.reportMailingJob = reportMailingJob;
-        this.startDateTime = null;
-
-        if (startDateTime != null) {
-            this.startDateTime = startDateTime;
-        }
-
-        this.endDateTime = null;
-
-        if (endDateTime != null) {
-            this.endDateTime = endDateTime;
-        }
-
-        this.status = status;
-        this.errorMessage = errorMessage;
-        this.errorLog = errorLog;
-    }
-
-    /**
      * Creates an instance of the ReportMailingJobRunHistory class
      *
      * @return ReportMailingJobRunHistory object
      **/
     public static ReportMailingJobRunHistory newInstance(final ReportMailingJob reportMailingJob, final LocalDateTime startDateTime,
             final LocalDateTime endDateTime, final String status, final String errorMessage, final String errorLog) {
-        return new ReportMailingJobRunHistory(reportMailingJob, startDateTime, endDateTime, status, errorMessage, errorLog);
-    }
-
-    /**
-     * @return the reportMailingJobId
-     */
-    public ReportMailingJob getReportMailingJob() {
-        return this.reportMailingJob;
-    }
-
-    /**
-     * @return the startDateTime
-     */
-    public LocalDateTime getStartDateTime() {
-        return this.startDateTime;
-    }
-
-    /**
-     * @return the endDateTime
-     */
-    public LocalDateTime getEndDateTime() {
-        return this.endDateTime;
-    }
-
-    /**
-     * @return the status
-     */
-    public String getStatus() {
-        return status;
-    }
-
-    /**
-     * @return the errorMessage
-     */
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    /**
-     * @return the errorLog
-     */
-    public String getErrorLog() {
-        return errorLog;
+        return new ReportMailingJobRunHistory().setReportMailingJob(reportMailingJob).setStartDateTime(startDateTime)
+                .setEndDateTime(endDateTime).setStatus(status).setErrorMessage(errorMessage).setErrorLog(errorLog);
     }
 }
