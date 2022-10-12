@@ -123,7 +123,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
                 final Report stretchyReport = this.reportRepositoryWrapper.findOneThrowExceptionIfNotFound(stretchyReportId);
 
                 // update the stretchy report
-                reportMailingJob.update(stretchyReport);
+                reportMailingJob.setStretchyReport(stretchyReport);
             }
 
             // check if the recurrence was updated
@@ -146,13 +146,13 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
                     final LocalDateTime nextRecurringDateTime = this.createNextRecurringDateTime(recurrence, startDateTime);
 
                     // update the next run time property
-                    reportMailingJob.updateNextRunDateTime(nextRecurringDateTime);
+                    reportMailingJob.setNextRunDateTime(nextRecurringDateTime);
 
                     // check if the next run LocalDateTime is not empty and the
                     // recurrence is empty
                 } else if (StringUtils.isBlank(recurrence) && (nextRunDateTime != null)) {
                     // the next run LocalDateTime should be set to null
-                    reportMailingJob.updateNextRunDateTime(null);
+                    reportMailingJob.setNextRunDateTime(null);
                 }
             }
 
@@ -170,7 +170,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
                 }
 
                 // update the next run time property
-                reportMailingJob.updateNextRunDateTime(nextRecurringDateTime);
+                reportMailingJob.setNextRunDateTime(nextRecurringDateTime);
             }
 
             if (!changes.isEmpty()) {

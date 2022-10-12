@@ -19,42 +19,25 @@
 package org.apache.fineract.infrastructure.reportmailingjob.data;
 
 import java.time.LocalDate;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * Immutable data object represent the timeline events of a report mailing job (creation)
  **/
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 @SuppressWarnings("unused")
 public class ReportMailingJobTimelineData {
 
-    private final LocalDate createdOnDate;
-    private final String createdByUsername;
-    private final String createdByFirstname;
-    private final String createdByLastname;
-    private final LocalDate updatedOnDate;
-    private final String updatedByUsername;
-    private final String updatedByFirstname;
-    private final String updatedByLastname;
-
-    /**
-     * @param createdOnDate
-     * @param createdByUsername
-     * @param createdByFirstname
-     * @param createdByLastname
-     * @param updatedOnDate
-     * @param updatedByUsername
-     * @param updatedByFirstname
-     * @param updatedByLastname
-     */
-    public ReportMailingJobTimelineData(LocalDate createdOnDate, String createdByUsername, String createdByFirstname,
-            String createdByLastname, LocalDate updatedOnDate, String updatedByUsername, String updatedByFirstname,
-            String updatedByLastname) {
-        this.createdOnDate = createdOnDate;
-        this.createdByUsername = createdByUsername;
-        this.createdByFirstname = createdByFirstname;
-        this.createdByLastname = createdByLastname;
-        this.updatedOnDate = updatedOnDate;
-        this.updatedByUsername = updatedByUsername;
-        this.updatedByFirstname = updatedByFirstname;
-        this.updatedByLastname = updatedByLastname;
-    }
+    private LocalDate createdOnDate;
+    private String createdByUsername;
+    private String createdByFirstname;
+    private String createdByLastname;
+    private LocalDate updatedOnDate;
+    private String updatedByUsername;
+    private String updatedByFirstname;
+    private String updatedByLastname;
 }
