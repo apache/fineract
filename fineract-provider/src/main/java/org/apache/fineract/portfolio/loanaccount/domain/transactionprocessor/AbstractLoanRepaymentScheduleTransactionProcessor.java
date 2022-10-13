@@ -540,8 +540,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
                 pastDueDate = currentInstallment.getDueDate();
                 if (!currentInstallment.isAdditional() && currentInstallment.getDueDate().isAfter(transactionDate)) {
-                    currentInstallment.addToPrincipal(transactionDate, transactionAmountUnprocessed);
                     currentInstallment.addToCredits(transactionAmountUnprocessed.getAmount());
+                    currentInstallment.addToPrincipal(transactionDate, transactionAmountUnprocessed);
                     transactionMappings.add(LoanTransactionToRepaymentScheduleMapping.createFrom(loanTransaction, currentInstallment,
                             transactionAmountUnprocessed, zeroMoney, zeroMoney, zeroMoney));
 

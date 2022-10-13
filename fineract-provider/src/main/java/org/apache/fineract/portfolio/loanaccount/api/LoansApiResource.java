@@ -610,8 +610,8 @@ public class LoansApiResource {
 
             if (associationParameters.contains(DataTableApiConstant.collectionAssociateParamName)) {
                 mandatoryResponseParameters.add(DataTableApiConstant.collectionAssociateParamName);
-                if (LoanStatus.fromInt(loanBasicDetails.getStatus().getId().intValue()).isActive()) {
-                    collectionData = this.loanReadPlatformService.retrieveLoanCollectionData(loanId);
+                if (loanBasicDetails.isActive()) {
+                    collectionData = this.delinquencyReadPlatformService.calculateLoanCollectionData(loanId);
                 }
             }
         }

@@ -18,11 +18,30 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Optional;
+import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 
 public interface LoanTransactionRepository extends JpaRepository<LoanTransaction, Long>, JpaSpecificationExecutor<LoanTransaction> {
 
     Optional<LoanTransaction> findByIdAndLoanId(Long transactionId, Long loanId);
+
+    @Query("""
+            SELECT new org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData(
+                lt.loan.id,
+                min(lt.dateOf),
+                0L,
+                lt.loan
+            ) FROM LoanTransaction lt
+            WHERE lt.typeOf = :transactionType and
+            lt.dateOf <= :businessDate and
+            lt.loan.loanProduct.delinquencyBucket is not null
+            GROUP BY lt.loan
+            """)
+    Collection<LoanScheduleDelinquencyData> fetchLoanTransactionsByTypeAndLessOrEqualDate(Integer transactionType, LocalDate businessDate);
+
 }

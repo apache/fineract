@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests.common.loans;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.common.reflect.TypeToken;
@@ -43,11 +44,13 @@ import javax.ws.rs.core.MediaType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetDelinquencyTagHistoryResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdCollectionData;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdSummary;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
+import org.apache.fineract.client.models.GetPaymentTypesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
@@ -55,6 +58,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionI
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.CommonConstants;
+import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -1155,9 +1159,16 @@ public class LoanTransactionHelper {
         if (getLoanRepaymentSchedule != null) {
             log.info("Loan with {} periods", getLoanRepaymentSchedule.getPeriods().size());
             for (GetLoansLoanIdRepaymentPeriod period : getLoanRepaymentSchedule.getPeriods()) {
-                log.info("Period number {} for due date {} and outstanding {}", period.getPeriod(), period.getDueDate(),
-                        period.getTotalOutstandingForPeriod());
+                log.info("Period number {} for due date {} and outstanding {} {}", period.getPeriod(), period.getDueDate(),
+                        period.getTotalOutstandingForPeriod(), period.getComplete());
             }
+        }
+    }
+
+    public void printDelinquencyData(GetLoansLoanIdResponse getLoansLoanIdResponse) {
+        GetLoansLoanIdCollectionData getLoansLoanIdCollectionData = getLoansLoanIdResponse.getDelinquent();
+        if (getLoansLoanIdCollectionData != null) {
+            log.info("Loan Delinquency {}", getLoansLoanIdCollectionData.toString());
         }
     }
 
@@ -1190,6 +1201,48 @@ public class LoanTransactionHelper {
             log.info("Loan with Total Outstanding Balance {} expected {}", getLoansLoanIdSummary.getTotalOutstanding(), amountExpected);
             assertEquals(amountExpected, getLoansLoanIdSummary.getTotalOutstanding());
         }
+    }
+
+    public Integer applyChargebackTransaction(final Integer loanId, final Integer transactionId, final String amount,
+            final Integer paymentTypeIdx, ResponseSpecification responseSpec) {
+        List<GetPaymentTypesResponse> paymentTypeList = PaymentTypeHelper.getSystemPaymentType(this.requestSpec, this.responseSpec);
+        assertTrue(!paymentTypeList.isEmpty());
+
+        final String payload = createChargebackPayload(amount, paymentTypeList.get(paymentTypeIdx).getId());
+        log.info("Loan Chargeback: {}", payload);
+        PostLoansLoanIdTransactionsTransactionIdResponse postLoansTransactionCommandResponse = applyLoanTransactionCommand(loanId,
+                transactionId, "chargeback", payload, responseSpec);
+        assertNotNull(postLoansTransactionCommandResponse);
+
+        log.info("Loan Chargeback Id: {}", postLoansTransactionCommandResponse.getResourceId());
+        return postLoansTransactionCommandResponse.getResourceId();
+    }
+
+    public void reviewLoanTransactionRelations(final Integer loanId, final Integer transactionId, final Integer expectedSize) {
+        GetLoansLoanIdTransactionsTransactionIdResponse getLoansTransactionResponse = getLoanTransaction(loanId, transactionId);
+        assertNotNull(getLoansTransactionResponse);
+        assertNotNull(getLoansTransactionResponse.getTransactionRelations());
+        assertEquals(expectedSize, getLoansTransactionResponse.getTransactionRelations().size());
+        log.info("Loan with {} Chargeback Transactions", getLoansTransactionResponse.getTransactionRelations().size());
+    }
+
+    public void evaluateLoanSummaryAdjustments(GetLoansLoanIdResponse getLoansLoanIdResponse, Double amountExpected) {
+        // Evaluate The Loan Summary Principal Adjustments
+        GetLoansLoanIdSummary getLoansLoanIdSummary = getLoansLoanIdResponse.getSummary();
+        if (getLoansLoanIdSummary != null) {
+            log.info("Loan with Principal Adjustments {} expected {}", getLoansLoanIdSummary.getPrincipalAdjustments(), amountExpected);
+            assertEquals(amountExpected, getLoansLoanIdSummary.getPrincipalAdjustments());
+        }
+    }
+
+    private String createChargebackPayload(final String transactionAmount, final Integer paymentTypeId) {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("transactionAmount", transactionAmount);
+        map.put("paymentTypeId", paymentTypeId);
+        map.put("locale", CommonConstants.LOCALE);
+        final String chargebackPayload = new Gson().toJson(map);
+        log.info("{}", chargebackPayload);
+        return chargebackPayload;
     }
 
 }

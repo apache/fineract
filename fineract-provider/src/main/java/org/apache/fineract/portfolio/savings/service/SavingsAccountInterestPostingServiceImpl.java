@@ -305,7 +305,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
     }
 
     private List<SavingsAccountTransactionData> retreiveOrderedNonInterestPostingTransactions(final SavingsAccountData savingsAccountData) {
-        final List<SavingsAccountTransactionData> listOfTransactionsSorted = retreiveListOfTransactions(savingsAccountData);
+        final List<SavingsAccountTransactionData> listOfTransactionsSorted = retrieveListOfTransactions(savingsAccountData);
 
         final List<SavingsAccountTransactionData> orderedNonInterestPostingTransactions = new ArrayList<>();
 
@@ -319,7 +319,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
         return orderedNonInterestPostingTransactions;
     }
 
-    private List<SavingsAccountTransactionData> retreiveListOfTransactions(final SavingsAccountData savingsAccountData) {
+    private List<SavingsAccountTransactionData> retrieveListOfTransactions(final SavingsAccountData savingsAccountData) {
         final List<SavingsAccountTransactionData> listOfTransactionsSorted = new ArrayList<>();
         listOfTransactionsSorted.addAll(savingsAccountData.getSavingsAccountTransactionData());
 
@@ -407,7 +407,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
 
         Money runningBalance = openingAccountBalance.copy();
 
-        List<SavingsAccountTransactionData> accountTransactionsSorted = retreiveListOfTransactions(savingsAccountData);
+        List<SavingsAccountTransactionData> accountTransactionsSorted = retrieveListOfTransactions(savingsAccountData);
         boolean isTransactionsModified = false;
 
         for (final SavingsAccountTransactionData transaction : accountTransactionsSorted) {
@@ -466,7 +466,7 @@ public class SavingsAccountInterestPostingServiceImpl implements SavingsAccountI
         }
 
         if (isTransactionsModified) {
-            accountTransactionsSorted = retreiveListOfTransactions(savingsAccountData);
+            accountTransactionsSorted = retrieveListOfTransactions(savingsAccountData);
         }
         resetAccountTransactionsEndOfDayBalances(accountTransactionsSorted, interestPostingUpToDate, savingsAccountData);
     }

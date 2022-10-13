@@ -1289,7 +1289,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
-        this.loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
+        this.loanAccountDomainService.setLoanDelinquencyTag(loan, transactionDate);
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanChargebackTransactionBusinessEvent(loanTransaction));
 

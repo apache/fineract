@@ -19,16 +19,47 @@
 package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
+import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 
 public interface LoanRepaymentScheduleInstallmentRepository
         extends JpaRepository<LoanRepaymentScheduleInstallment, Long>, JpaSpecificationExecutor<LoanRepaymentScheduleInstallment> {
 
-    LoanRepaymentScheduleInstallment findFirstByLoanAndDueDateLessThanEqualAndObligationsMetOnDateOrderByDueDate(Loan loan,
-            LocalDate businnessDate, LocalDate obligationsMetOnDate);
+    @Query("""
+            SELECT new org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData(
+                lrs.loan.id,
+                min(lrs.dueDate),
+                0L,
+                lrs.loan
+            ) FROM LoanRepaymentScheduleInstallment lrs
+            WHERE lrs.loan.loanStatus = :loanStatus AND
+            lrs.dueDate <= :businessDate AND
+            lrs.obligationsMet = :obligationsMet AND
+            lrs.loan.loanProduct.delinquencyBucket IS NOT NULL
+            GROUP BY lrs.loan
+            """)
+    Collection<LoanScheduleDelinquencyData> fetchLoanScheduleDataByDueDateAndObligationsMet(Integer loanStatus, LocalDate businessDate,
+            boolean obligationsMet);
 
-    List<LoanRepaymentScheduleInstallment> findByLoanAndDueDateLessThanEqualAndObligationsMetOnDateOrderByDueDate(Loan loan,
-            LocalDate businnessDate, LocalDate obligationsMetOnDate);
+    @Query("""
+            SELECT new org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData(
+                lrs.loan.id,
+                min(lrs.dueDate),
+                0L,
+                lrs.loan
+            ) FROM LoanRepaymentScheduleInstallment lrs
+            WHERE lrs.loan.loanStatus = :loanStatus AND
+            lrs.dueDate <= :businessDate AND
+            lrs.obligationsMet = :obligationsMet AND
+            lrs.loan.loanProduct.delinquencyBucket IS NOT NULL AND
+            lrs.loan.id NOT IN :loanIds
+            GROUP BY lrs.loan
+            """)
+    Collection<LoanScheduleDelinquencyData> fetchLoanScheduleDataByDueDateAndObligationsMet(Integer loanStatus, LocalDate businessDate,
+            boolean obligationsMet, List<Long> loanIds);
+
 }

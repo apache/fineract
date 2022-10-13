@@ -478,7 +478,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
 
                     .append(" l.closedon_date as closedOnDate,")
                     .append(" cbu.username as closedByUsername, cbu.firstname as closedByFirstname, cbu.lastname as closedByLastname,")
-                    .append(" la.overdue_since_date_derived as overdueSinceDate,")
+                    .append(" la.overdue_since_date_derived as overdueSinceDate, ")
                     .append(" l.writtenoffon_date as writtenOffOnDate, l.expected_maturedon_date as expectedMaturityDate")
 
                     .append(" from m_loan l ").append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id")
@@ -550,10 +550,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
             final LocalDate expectedMaturityDate = JdbcSupport.getLocalDate(rs, "expectedMaturityDate");
 
             final LocalDate overdueSinceDate = JdbcSupport.getLocalDate(rs, "overdueSinceDate");
-            Boolean inArrears = true;
-            if (overdueSinceDate == null) {
-                inArrears = false;
-            }
+            Boolean inArrears = (overdueSinceDate != null);
 
             final LoanApplicationTimelineData timeline = new LoanApplicationTimelineData(submittedOnDate, submittedByUsername,
                     submittedByFirstname, submittedByLastname, rejectedOnDate, rejectedByUsername, rejectedByFirstname, rejectedByLastname,

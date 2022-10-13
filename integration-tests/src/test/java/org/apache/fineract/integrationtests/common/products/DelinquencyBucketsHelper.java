@@ -18,6 +18,10 @@
  */
 package org.apache.fineract.integrationtests.common.products;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.google.gson.Gson;
 import com.linecorp.armeria.internal.shaded.guava.reflect.TypeToken;
 import io.restassured.specification.RequestSpecification;
@@ -25,21 +29,23 @@ import io.restassured.specification.ResponseSpecification;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.DeleteDelinquencyBucketResponse;
 import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
+import org.apache.fineract.client.models.GetDelinquencyRangesResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdCollectionData;
+import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
+import org.apache.fineract.client.models.PostDelinquencyRangeResponse;
 import org.apache.fineract.client.models.PutDelinquencyBucketResponse;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class DelinquencyBucketsHelper {
 
     private static final String DELINQUENCY_BUCKETS_URL = "/fineract-provider/api/v1/delinquency/buckets";
     private static final Gson GSON = new JSON().getGson();
-
-    private static final Logger LOG = LoggerFactory.getLogger(DelinquencyBucketsHelper.class);
 
     protected DelinquencyBucketsHelper() {}
 
@@ -60,7 +66,7 @@ public class DelinquencyBucketsHelper {
 
     public static PostDelinquencyBucketResponse createDelinquencyBucket(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String json) {
-        LOG.info("JSON: {}", json);
+        log.info("JSON: {}", json);
         final String response = Utils.performServerPost(requestSpec, responseSpec, DELINQUENCY_BUCKETS_URL + "?" + Utils.TENANT_IDENTIFIER,
                 json, null);
         return GSON.fromJson(response, PostDelinquencyBucketResponse.class);
@@ -68,7 +74,7 @@ public class DelinquencyBucketsHelper {
 
     public static PutDelinquencyBucketResponse updateDelinquencyBucket(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final Integer resourceId, final String json) {
-        LOG.info("JSON: {}", json);
+        log.info("JSON: {}", json);
         final String response = Utils.performServerPut(requestSpec, responseSpec,
                 DELINQUENCY_BUCKETS_URL + "/" + resourceId + "?" + Utils.TENANT_IDENTIFIER, json, null);
         return GSON.fromJson(response, PutDelinquencyBucketResponse.class);
@@ -86,6 +92,54 @@ public class DelinquencyBucketsHelper {
         map.put("name", Utils.randomNameGenerator("Delinquency_Bucket_", 4));
         map.put("ranges", rangeIds.toArray());
         return new Gson().toJson(map);
+    }
+
+    public static Integer createDelinquencyBucket(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+        ArrayList<Integer> rangeIds = new ArrayList<>();
+
+        // First Range
+        String jsonRange = DelinquencyRangesHelper.getAsJSON(1, 3);
+        PostDelinquencyRangeResponse delinquencyRangeResponse = DelinquencyRangesHelper.createDelinquencyRange(requestSpec, responseSpec,
+                jsonRange);
+        rangeIds.add(delinquencyRangeResponse.getResourceId());
+        jsonRange = DelinquencyRangesHelper.getAsJSON(4, 60);
+        GetDelinquencyRangesResponse range = DelinquencyRangesHelper.getDelinquencyRange(requestSpec, responseSpec,
+                delinquencyRangeResponse.getResourceId());
+
+        // Second Range
+        delinquencyRangeResponse = DelinquencyRangesHelper.createDelinquencyRange(requestSpec, responseSpec, jsonRange);
+        rangeIds.add(delinquencyRangeResponse.getResourceId());
+        range = DelinquencyRangesHelper.getDelinquencyRange(requestSpec, responseSpec, delinquencyRangeResponse.getResourceId());
+
+        String jsonBucket = DelinquencyBucketsHelper.getAsJSON(rangeIds);
+        PostDelinquencyBucketResponse delinquencyBucketResponse = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec,
+                responseSpec, jsonBucket);
+        assertNotNull(delinquencyBucketResponse);
+
+        return delinquencyBucketResponse.getResourceId();
+    }
+
+    public static void evaluateLoanCollectionData(GetLoansLoanIdResponse getLoansLoanIdResponse, Integer pastDueDays,
+            Double amountExpected) {
+        GetLoansLoanIdCollectionData getCollectionData = getLoansLoanIdResponse.getDelinquent();
+        if (getCollectionData != null) {
+            log.info("Loan Delinquency Data in Days {} and Amount {}", getCollectionData.getPastDueDays(),
+                    getCollectionData.getDelinquentAmount());
+            assertEquals(pastDueDays, getCollectionData.getPastDueDays());
+            assertEquals(amountExpected, getCollectionData.getDelinquentAmount());
+        } else {
+            log.info("Loan Delinquency Data is null");
+        }
+
+        GetDelinquencyRangesResponse delinquencyRange = getLoansLoanIdResponse.getDelinquencyRange();
+        if (delinquencyRange != null) {
+            log.info("Loan Delinquency Classification is {} : ({} - {}) {}", delinquencyRange.getClassification(),
+                    delinquencyRange.getMinimumAgeDays(), delinquencyRange.getMaximumAgeDays(), pastDueDays);
+            assertTrue(delinquencyRange.getMinimumAgeDays() <= pastDueDays);
+            assertTrue(delinquencyRange.getMaximumAgeDays() >= pastDueDays);
+        } else {
+            log.info("Loan Delinquency Classification is null");
+        }
     }
 
 }

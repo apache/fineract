@@ -18,8 +18,10 @@
  */
 package org.apache.fineract.portfolio.delinquency.service;
 
+import java.time.LocalDate;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 
 public interface DelinquencyWritePlatformService {
@@ -38,12 +40,14 @@ public interface DelinquencyWritePlatformService {
 
     CommandProcessingResult applyDelinquencyTagToLoan(Long loanId, JsonCommand command);
 
-    void applyDelinquencyTagToLoan(Long loanId, Long ageDays);
-
-    void applyDelinquencyTagToLoan(Loan loan, Long ageDays);
-
     void removeDelinquencyTagToLoan(Loan loan);
 
     void cleanLoanDelinquencyTags(Loan loan);
+
+    LoanScheduleDelinquencyData calculateDelinquencyData(LoanScheduleDelinquencyData loanScheduleDelinquencyData);
+
+    void applyDelinquencyTagToLoan(LoanScheduleDelinquencyData loanDelinquencyData);
+
+    LocalDate getOverdueSinceDate(Loan loan, LocalDate businessDate, Integer graceOnArrearAgeing);
 
 }

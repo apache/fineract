@@ -16,31 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.data;
+package org.apache.fineract.portfolio.loanaccount.domain;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-@AllArgsConstructor
-@Getter
-@Setter
-public final class CollectionData {
+public interface LoanTransactionToRepaymentScheduleMappingRepository extends JpaRepository<LoanTransactionToRepaymentScheduleMapping, Long>,
+        JpaSpecificationExecutor<LoanTransactionToRepaymentScheduleMapping> {
 
-    private BigDecimal availableDisbursementAmount;
-    private Long pastDueDays;
-    private LocalDate nextPaymentDueDate;
-    private Long delinquentDays;
-    private LocalDate delinquentDate;
-    private BigDecimal delinquentAmount;
-    private LocalDate lastPaymentDate;
-    private BigDecimal lastPaymentAmount;
-
-    public static CollectionData template() {
-        final BigDecimal zero = BigDecimal.ZERO;
-        return new CollectionData(zero, 0L, null, 0L, null, zero, null, zero);
-    }
+    LoanTransactionToRepaymentScheduleMapping findByLoanTransaction(LoanTransaction loanTransaction);
 
 }
