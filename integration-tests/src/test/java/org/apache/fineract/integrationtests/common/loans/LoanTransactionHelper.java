@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests.common.loans;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.Gson;
@@ -951,7 +952,14 @@ public class LoanTransactionHelper {
             }
         }
         assertTrue(isTransactionFound, "No Accrual entries are posted");
+    }
 
+    public void noAccrualTransactionForRepayment(final Integer loanID) {
+        ArrayList<HashMap> transactions = (ArrayList<HashMap>) getLoanTransactions(this.requestSpec, this.responseSpec, loanID);
+        for (HashMap transaction : transactions) {
+            HashMap transactionType = (HashMap) transaction.get("type");
+            assertFalse((Boolean) transactionType.get("accrual"), "Accrual entries are posted!");
+        }
     }
 
     public HashMap makeRefundByCash(final String date, final Float amountToBeRefunded, final Integer loanID) {

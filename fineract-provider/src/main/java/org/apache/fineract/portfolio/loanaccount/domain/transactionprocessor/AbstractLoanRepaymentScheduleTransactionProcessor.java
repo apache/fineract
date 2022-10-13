@@ -142,7 +142,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         }
 
         for (final LoanTransaction loanTransaction : transactionstoBeProcessed) {
-
+            // TODO: analyze and remove this
             if (!loanTransaction.getTypeOf().equals(LoanTransactionType.REFUND_FOR_ACTIVE_LOAN)) {
                 final Comparator<LoanRepaymentScheduleInstallment> byDate = new Comparator<LoanRepaymentScheduleInstallment>() {
 
