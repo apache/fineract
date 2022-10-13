@@ -18,14 +18,20 @@
  */
 package org.apache.fineract.portfolio.loanaccount.jobs.setloandelinquencytags;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyWritePlatformService;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
-import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -36,24 +42,54 @@ import org.springframework.batch.repeat.RepeatStatus;
 public class SetLoanDelinquencyTagsTasklet implements Tasklet {
 
     private final DelinquencyWritePlatformService delinquencyWritePlatformService;
-    private final LoanReadPlatformService loanReadPlatformService;
+    private final LoanRepaymentScheduleInstallmentRepository loanRepaymentScheduleInstallmentRepository;
+    private final LoanTransactionRepository loanTransactionRepository;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        log.debug("Run job for date {}", DateUtils.getBusinessLocalDate());
-        Collection<LoanScheduleDelinquencyData> loanScheduleDelinquencyData = this.loanReadPlatformService
-                .retrieveScheduleDelinquencyData(DateUtils.getBusinessLocalDate());
+
+        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
+        log.debug("Run job for date {}", businessDate);
+
+        // Read Loan Ids with Loan Transaction Charge back
+        Collection<LoanScheduleDelinquencyData> loanScheduleDelinquencyData = this.loanTransactionRepository
+                .fetchLoanTransactionsByTypeAndLessOrEqualDate(LoanTransactionType.CHARGEBACK.getValue(), businessDate);
+        List<Long> processedLoans = applyDelinquencyTagToLoans(loanScheduleDelinquencyData);
+        log.debug("{}: Records affected by setLoanDelinquencyTags: {}", ThreadLocalContextUtil.getTenant().getName(),
+                processedLoans.size());
+
+        // Read Loan Ids with overdue installments
+        if (processedLoans.isEmpty()) {
+            loanScheduleDelinquencyData = this.loanRepaymentScheduleInstallmentRepository
+                    .fetchLoanScheduleDataByDueDateAndObligationsMet(LoanStatus.ACTIVE.getValue(), businessDate, false);
+        } else {
+            loanScheduleDelinquencyData = this.loanRepaymentScheduleInstallmentRepository
+                    .fetchLoanScheduleDataByDueDateAndObligationsMet(LoanStatus.ACTIVE.getValue(), businessDate, false, processedLoans);
+        }
+        processedLoans = applyDelinquencyTagToLoans(loanScheduleDelinquencyData);
+
+        return RepeatStatus.FINISHED;
+    }
+
+    private List<Long> applyDelinquencyTagToLoans(Collection<LoanScheduleDelinquencyData> loanScheduleDelinquencyData) {
+        List<Long> processedLoans = new ArrayList<>();
+
         log.debug("Were found {} items", loanScheduleDelinquencyData.size());
         for (LoanScheduleDelinquencyData loanDelinquencyData : loanScheduleDelinquencyData) {
-            log.debug("Processing Loan {} with due date {} and {} overdue days", loanDelinquencyData.getLoanId(),
-                    loanDelinquencyData.getDueDate(), loanDelinquencyData.getAgeDays());
-            this.delinquencyWritePlatformService.applyDelinquencyTagToLoan(loanDelinquencyData.getLoanId(),
-                    loanDelinquencyData.getAgeDays());
-        }
+            // Set the data used by Delinquency Classification method
+            loanDelinquencyData = this.delinquencyWritePlatformService.calculateDelinquencyData(loanDelinquencyData);
+            log.debug("Processing Loan {} with {} overdue days since date {}", loanDelinquencyData.getLoanId(),
+                    loanDelinquencyData.getOverdueDays(), loanDelinquencyData.getOverdueSinceDate());
+            // Set or Unset the Delinquency Classification Tag
+            if (loanDelinquencyData.getOverdueDays() > 0) {
+                this.delinquencyWritePlatformService.applyDelinquencyTagToLoan(loanDelinquencyData);
+            } else {
+                this.delinquencyWritePlatformService.removeDelinquencyTagToLoan(loanDelinquencyData.getLoan());
+            }
 
-        log.debug("{}: Records affected by setLoanDelinquencyTags: {}", ThreadLocalContextUtil.getTenant().getName(),
-                loanScheduleDelinquencyData.size());
-        return RepeatStatus.FINISHED;
+            processedLoans.add(loanDelinquencyData.getLoanId());
+        }
+        return processedLoans;
     }
 
 }

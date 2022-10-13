@@ -84,6 +84,7 @@ import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
@@ -541,13 +542,15 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
     @Override
     public void setLoanDelinquencyTag(final Loan loan, final LocalDate transactionDate) {
-        // Revalidate the Delinquency Classification
-        final Long ageOfOverdueDays = loan.getAgeOfOverdueDays(transactionDate);
-        log.debug("Loan {} with {} days and current classification {}", loan.getId(), ageOfOverdueDays);
-        if (ageOfOverdueDays > 0L) { // If loan is overdue
-            this.delinquencyWritePlatformService.applyDelinquencyTagToLoan(loan, ageOfOverdueDays);
+        LoanScheduleDelinquencyData loanDelinquencyData = new LoanScheduleDelinquencyData(loan.getId(), transactionDate, null, loan);
+        loanDelinquencyData = this.delinquencyWritePlatformService.calculateDelinquencyData(loanDelinquencyData);
+        log.debug("Processing Loan {} with {} overdue days since date {}", loanDelinquencyData.getLoanId(),
+                loanDelinquencyData.getOverdueDays(), loanDelinquencyData.getOverdueSinceDate());
+        // Set or Unset the Delinquency Classification Tag
+        if (loanDelinquencyData.getOverdueDays() > 0) {
+            this.delinquencyWritePlatformService.applyDelinquencyTagToLoan(loanDelinquencyData);
         } else {
-            this.delinquencyWritePlatformService.removeDelinquencyTagToLoan(loan);
+            this.delinquencyWritePlatformService.removeDelinquencyTagToLoan(loanDelinquencyData.getLoan());
         }
     }
 

@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.delinquency.api.DelinquencyApiConstants;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
@@ -48,10 +49,13 @@ import org.apache.fineract.portfolio.delinquency.exception.DelinquencyBucketAges
 import org.apache.fineract.portfolio.delinquency.exception.DelinquencyRangeInvalidAgesException;
 import org.apache.fineract.portfolio.delinquency.validator.DelinquencyBucketParseAndValidator;
 import org.apache.fineract.portfolio.delinquency.validator.DelinquencyRangeParseAndValidator;
+import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionToRepaymentScheduleMapping;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.springframework.stereotype.Service;
 
@@ -69,7 +73,6 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
     private final LoanDelinquencyTagHistoryRepository loanDelinquencyTagRepository;
     private final LoanRepositoryWrapper loanRepository;
     private final LoanProductRepository loanProductRepository;
-    private final LoanRepaymentScheduleInstallmentRepository loanRepaymentScheduleInstallmentRepository;
 
     @Override
     public CommandProcessingResult createDelinquencyRange(JsonCommand command) {
@@ -100,8 +103,9 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
                         "Data integrity issue with resource: " + delinquencyRange.getId());
             }
             repositoryRange.delete(delinquencyRange);
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(delinquencyRange.getId()).build();
         }
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(delinquencyRange.getId()).build();
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(delinquencyRangeId).build();
     }
 
     @Override
@@ -135,7 +139,71 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
             }
             repositoryBucket.delete(delinquencyBucket);
         }
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(delinquencyBucket.getId()).build();
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(delinquencyBucketId).build();
+    }
+
+    @Override
+    public LoanScheduleDelinquencyData calculateDelinquencyData(LoanScheduleDelinquencyData loanScheduleDelinquencyData) {
+        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
+        Loan loan = loanScheduleDelinquencyData.getLoan();
+        if (loan == null) {
+            loan = this.loanRepository.findOneWithNotFoundDetection(loanScheduleDelinquencyData.getLoanId());
+        }
+
+        final Integer graceOnArrearAgeing = loan.getLoanProduct().getLoanProductRelatedDetail().getGraceOnArrearsAgeing();
+        final LocalDate overdueSinceDate = getOverdueSinceDate(loan, businessDate, graceOnArrearAgeing);
+        final Long overdueDays = calculateOverdueDays(businessDate, overdueSinceDate);
+        return new LoanScheduleDelinquencyData(loan.getId(), overdueSinceDate, overdueDays, loan);
+    }
+
+    @Override
+    public LocalDate getOverdueSinceDate(final Loan loan, final LocalDate businessDate, final Integer graceOnArrearAgeing) {
+        LoanRepaymentScheduleInstallment loanRepaymentSchedule = null;
+        for (LoanRepaymentScheduleInstallment installment : loan.getRepaymentScheduleInstallments()) {
+            if (installment.getDueDate().isBefore(businessDate) && installment.isNotFullyPaidOff()) {
+                loanRepaymentSchedule = installment;
+                break;
+            }
+        }
+
+        LocalDate overdueSinceDate = null;
+        final MonetaryCurrency loanCurrency = loan.getCurrency();
+        final List<LoanTransaction> loanTransactions = loan.retrieveListOfTransactionsByType(LoanTransactionType.CHARGEBACK);
+        if (loanRepaymentSchedule != null) {
+            // Default Due date
+            overdueSinceDate = loanRepaymentSchedule.getDueDate();
+        }
+
+        // If there is some Loan Transaction Chargeback
+        for (LoanTransaction loanTransaction : loanTransactions) {
+            if (loanTransaction.getLoanTransactionToRepaymentScheduleMappings().iterator().hasNext()) {
+                final LoanTransactionToRepaymentScheduleMapping transactionMapping = loanTransaction
+                        .getLoanTransactionToRepaymentScheduleMappings().iterator().next();
+
+                if (transactionMapping != null
+                        && !transactionMapping.getLoanRepaymentScheduleInstallment().isPrincipalCompleted(loanCurrency)) {
+                    overdueSinceDate = loanTransaction.getTransactionDate();
+                    break;
+                }
+            }
+        }
+
+        // Include grace days If It's defined
+        if (overdueSinceDate != null && graceOnArrearAgeing != null) {
+            overdueSinceDate = overdueSinceDate.plusDays(graceOnArrearAgeing.longValue());
+        }
+        return overdueSinceDate;
+    }
+
+    private Long calculateOverdueDays(final LocalDate businessDate, LocalDate overdueSinceDate) {
+        Long overdueDays = 0L;
+        if (overdueSinceDate != null) {
+            overdueDays = DateUtils.getDifferenceInDays(overdueSinceDate, businessDate);
+            if (overdueDays < 0) {
+                overdueDays = 0L;
+            }
+        }
+        return overdueDays;
     }
 
     @Override
@@ -146,28 +214,31 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
         final DelinquencyBucket delinquencyBucket = loan.getLoanProduct().getDelinquencyBucket();
         if (delinquencyBucket != null) {
             final LocalDate businessDate = DateUtils.getBusinessLocalDate();
-            LoanRepaymentScheduleInstallment loanRepaymentSchedule = this.loanRepaymentScheduleInstallmentRepository
-                    .findFirstByLoanAndDueDateLessThanEqualAndObligationsMetOnDateOrderByDueDate(loan, businessDate, null);
 
-            Long overdueDays = 0L;
-            if (loanRepaymentSchedule != null) {
-                overdueDays = DateUtils.getDifferenceInDays(loanRepaymentSchedule.getDueDate(), businessDate);
-            }
+            final Integer graceOnArrearAgeing = loan.getLoanProduct().getLoanProductRelatedDetail().getGraceOnArrearsAgeing();
+            final LocalDate overdueSinceDate = getOverdueSinceDate(loan, businessDate, graceOnArrearAgeing);
+
+            final Long overdueDays = calculateOverdueDays(businessDate, overdueSinceDate);
             changes = lookUpDelinquencyRange(loan, delinquencyBucket, overdueDays);
         }
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(loan.getId()).with(changes).build();
     }
 
     @Override
-    public void applyDelinquencyTagToLoan(Long loanId, Long ageDays) {
-        final Loan loan = this.loanRepository.findOneWithNotFoundDetection(loanId);
-        applyDelinquencyTagToLoan(loan, ageDays);
-    }
-
-    @Override
-    public void applyDelinquencyTagToLoan(final Loan loan, Long ageDays) {
+    public void applyDelinquencyTagToLoan(LoanScheduleDelinquencyData loanDelinquencyData) {
+        final Loan loan = loanDelinquencyData.getLoan();
         if (loan.hasDelinquencyBucket()) {
-            lookUpDelinquencyRange(loan, loan.getLoanProduct().getDelinquencyBucket(), ageDays);
+            final LocalDate businessDate = DateUtils.getBusinessLocalDate();
+            final DelinquencyBucket delinquencyBucket = loan.getLoanProduct().getDelinquencyBucket();
+            final Integer graceOnArrearAgeing = loan.getLoanProduct().getLoanProductRelatedDetail().getGraceOnArrearsAgeing();
+
+            LocalDate overdueSinceDate = loanDelinquencyData.getOverdueSinceDate();
+            if (overdueSinceDate == null) {
+                getOverdueSinceDate(loan, businessDate, graceOnArrearAgeing);
+            }
+
+            final Long overdueDays = calculateOverdueDays(businessDate, overdueSinceDate);
+            lookUpDelinquencyRange(loan, delinquencyBucket, overdueDays);
         }
     }
 
@@ -289,11 +360,11 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
         }
     }
 
-    private Map<String, Object> lookUpDelinquencyRange(final Loan loan, final DelinquencyBucket delinquencyBucket, long ageDays) {
+    private Map<String, Object> lookUpDelinquencyRange(final Loan loan, final DelinquencyBucket delinquencyBucket, long overdueDays) {
         Map<String, Object> changes = new HashMap<>();
 
-        if (ageDays <= 0) { // No Delinquency
-            log.debug("Loan {} without delinquency range with {} days", loan.getId(), ageDays);
+        if (overdueDays <= 0) { // No Delinquency
+            log.debug("Loan {} without delinquency range with {} days", loan.getId(), overdueDays);
             changes = setLoanDelinquencyTag(loan, null);
 
         } else {
@@ -302,27 +373,27 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
 
             for (final DelinquencyRange delinquencyRange : ranges) {
                 if (delinquencyRange.getMaximumAgeDays() == null) { // Last Range in the Bucket
-                    if (delinquencyRange.getMinimumAgeDays() <= ageDays) {
+                    if (delinquencyRange.getMinimumAgeDays() <= overdueDays) {
                         log.debug("Loan {} with delinquency range {} with {} days", loan.getId(), delinquencyRange.getClassification(),
-                                ageDays);
+                                overdueDays);
                         changes = setLoanDelinquencyTag(loan, delinquencyRange.getId());
                         break;
                     }
                 } else {
-                    if (delinquencyRange.getMinimumAgeDays() <= ageDays && delinquencyRange.getMaximumAgeDays() >= ageDays) {
+                    if (delinquencyRange.getMinimumAgeDays() <= overdueDays && delinquencyRange.getMaximumAgeDays() >= overdueDays) {
                         log.debug("Loan {} with delinquency range {} with {} days", loan.getId(), delinquencyRange.getClassification(),
-                                ageDays);
+                                overdueDays);
                         changes = setLoanDelinquencyTag(loan, delinquencyRange.getId());
                         break;
                     }
                 }
             }
         }
-        changes.put("ageDays", ageDays);
+        changes.put("overdueDays", overdueDays);
         return changes;
     }
 
-    public Map<String, Object> setLoanDelinquencyTag(Loan loan, Long delinquencyRangeId) {
+    private Map<String, Object> setLoanDelinquencyTag(Loan loan, Long delinquencyRangeId) {
         Map<String, Object> changes = new HashMap<>();
         List<LoanDelinquencyTagHistory> loanDelinquencyTagHistory = new ArrayList<>();
         final LocalDate transactionDate = DateUtils.getBusinessLocalDate();

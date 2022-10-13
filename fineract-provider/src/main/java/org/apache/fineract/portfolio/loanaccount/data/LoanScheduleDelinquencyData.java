@@ -22,14 +22,19 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
+@Setter
 public class LoanScheduleDelinquencyData implements Serializable {
 
-    private final Long loanId;
-    private final Long productId;
-    private final LocalDate dueDate;
-    private final Long ageDays;
+    private Long loanId;
+    private LocalDate overdueSinceDate;
+    private Long overdueDays;
+    private Loan loan;
 
 }

@@ -928,7 +928,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     protected List<SavingsAccountTransaction> retreiveOrderedNonInterestPostingTransactions() {
-        final List<SavingsAccountTransaction> listOfTransactionsSorted = retreiveListOfTransactions();
+        final List<SavingsAccountTransaction> listOfTransactionsSorted = retrieveListOfTransactions();
 
         final List<SavingsAccountTransaction> orderedNonInterestPostingTransactions = new ArrayList<>();
 
@@ -965,7 +965,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         return listOfTransactionsSorted;
     }
 
-    protected List<SavingsAccountTransaction> retreiveListOfTransactions() {
+    protected List<SavingsAccountTransaction> retrieveListOfTransactions() {
         final List<SavingsAccountTransaction> listOfTransactionsSorted = new ArrayList<>();
         listOfTransactionsSorted.addAll(this.transactions);
 
@@ -983,7 +983,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         if (backdatedTxnsAllowedTill) {
             accountTransactionsSorted = retrieveSortedTransactions();
         } else {
-            accountTransactionsSorted = retreiveListOfTransactions();
+            accountTransactionsSorted = retrieveListOfTransactions();
         }
 
         boolean isTransactionsModified = false;
@@ -1058,7 +1058,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
             if (backdatedTxnsAllowedTill) {
                 accountTransactionsSorted = retrieveSortedTransactions();
             } else {
-                accountTransactionsSorted = retreiveListOfTransactions();
+                accountTransactionsSorted = retrieveListOfTransactions();
             }
         }
         resetAccountTransactionsEndOfDayBalances(accountTransactionsSorted, interestPostingUpToDate);
@@ -1415,7 +1415,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         boolean transactionBeforeLastInterestPosting = false;
 
         if (!backdatedTxnsAllowedTill) {
-            for (final SavingsAccountTransaction transaction : retreiveListOfTransactions()) {
+            for (final SavingsAccountTransaction transaction : retrieveListOfTransactions()) {
                 if ((transaction.isInterestPostingAndNotReversed() || transaction.isOverdraftInterestAndNotReversed())
                         && transaction.isAfter(transactionDate) && !transaction.isReversalTransaction()) {
                     transactionBeforeLastInterestPosting = true;
@@ -1441,7 +1441,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         if (backdatedTxnsAllowedTill) {
             transactionsSortedByDate = retrieveSortedTransactions();
         } else {
-            transactionsSortedByDate = retreiveListOfTransactions();
+            transactionsSortedByDate = retrieveListOfTransactions();
         }
 
         Money runningBalance = Money.zero(this.currency);
@@ -1524,7 +1524,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         if (backdatedTxnsAllowedTill) {
             transactionsSortedByDate = retrieveSortedTransactions();
         } else {
-            transactionsSortedByDate = retreiveListOfTransactions();
+            transactionsSortedByDate = retrieveListOfTransactions();
         }
         Money runningBalance = Money.zero(this.currency);
 
@@ -2507,7 +2507,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     public void validateAccountBalanceDoesNotBecomeNegativeMinimal(final BigDecimal transactionAmount, final boolean isException) {
-        // final List<SavingsAccountTransaction> transactionsSortedByDate = retreiveListOfTransactions();
+        // final List<SavingsAccountTransaction> transactionsSortedByDate = retrieveListOfTransactions();
         Money runningBalance = this.summary.getAccountBalance(getCurrency());
         Money minRequiredBalance = minRequiredBalanceDerived(getCurrency());
         org.joda.time.LocalDate lastSavingsDate = null;
@@ -2846,7 +2846,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
                 throw new PlatformApiDataValidationException(dataValidationErrors);
             }
         }
-        final List<SavingsAccountTransaction> savingsAccountTransactions = retreiveListOfTransactions();
+        final List<SavingsAccountTransaction> savingsAccountTransactions = retrieveListOfTransactions();
         if (savingsAccountTransactions.size() > 0) {
             final SavingsAccountTransaction accountTransaction = savingsAccountTransactions.get(savingsAccountTransactions.size() - 1);
             if (accountTransaction.isAfter(closedDate)) {
@@ -3806,7 +3806,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
     }
 
     public LocalDate retrieveLastTransactionDate() {
-        final List<SavingsAccountTransaction> transactionsSortedByDate = retreiveListOfTransactions();
+        final List<SavingsAccountTransaction> transactionsSortedByDate = retrieveListOfTransactions();
         SavingsAccountTransaction lastTransaction = null;
         if (transactionsSortedByDate.size() > 0) {
             lastTransaction = transactionsSortedByDate.get(transactionsSortedByDate.size() - 1);

@@ -44,6 +44,7 @@ import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
 import org.apache.fineract.portfolio.floatingrates.data.InterestRatePeriodData;
 import org.apache.fineract.portfolio.fund.data.FundData;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.guarantor.data.GuarantorData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductBorrowerCycleVariationData;
@@ -56,6 +57,7 @@ import org.apache.fineract.portfolio.rate.data.RateData;
 @Data
 @NoArgsConstructor
 @Accessors(chain = true)
+@SuppressWarnings("ObjectToString")
 public class LoanAccountData {
 
     // basic loan details
@@ -1166,5 +1168,9 @@ public class LoanAccountData {
             return this.interestRecalculationData.getId();
         }
         return null;
+    }
+
+    public boolean isActive() {
+        return LoanStatus.fromInt(getStatus().getId().intValue()).isActive();
     }
 }
