@@ -117,6 +117,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final GSIMRepositoy gsimRepository;
     private final GroupRepositoryWrapper groupRepositoryWrapper;
     private final GroupSavingsIndividualMonitoringWritePlatformService gsimWritePlatformService;
+    private final NubanAccountService nubanAccountService;
 
     /*
      * Guaranteed to throw an exception no matter what the data integrity issue is.
@@ -720,22 +721,5 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 .withSavingsId(account.getId()) //
                 .setRollbackTransaction(rollbackTransaction)//
                 .build();
-    }
-    private void generateAccountNumber(final SavingsAccount account) {
-        if (account.isAccountNumberRequiresAutoGeneration()) {
-            final AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.SAVINGS);
-            account.updateAccountNo(this.accountNumberGenerator.generate(account, accountNumberFormat));
-            String serialNumber = account.getAccountNumber();
-            String nubanAccountNumber = this.nubanAccountService.generateNubanAccountNumber(serialNumber, "1");
-            SavingsAccount existingAccount = this.savingAccountRepository.findByAccountNumber(nubanAccountNumber);
-
-            while (existingAccount != null) {
-                serialNumber = this.nubanAccountService.generateNextSerialNumber(serialNumber);
-                nubanAccountNumber = this.nubanAccountService.generateNubanAccountNumber(serialNumber, "1");
-                existingAccount = this.savingAccountRepository.findByAccountNumber(nubanAccountNumber);
-            }
-            account.updateAccountNo(nubanAccountNumber);
-            this.savingAccountRepository.save(account);
-        }
     }
 }
