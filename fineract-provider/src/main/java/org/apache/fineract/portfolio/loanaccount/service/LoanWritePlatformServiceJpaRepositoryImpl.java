@@ -1773,6 +1773,22 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             }
         }
 
+        if (!loan.isInterestBearing() && loanCharge.isSpecifiedDueDate() && loanCharge.getDueDate().isAfter(loan.getMaturityDate())) {
+            LoanRepaymentScheduleInstallment latestRepaymentScheduleInstalment = loan.getRepaymentScheduleInstallments()
+                    .get(loan.getLoanRepaymentScheduleInstallmentsSize() - 1);
+            if (loanCharge.getDueDate().isAfter(latestRepaymentScheduleInstalment.getDueDate())) {
+                if (latestRepaymentScheduleInstalment.isAdditional()) {
+                    latestRepaymentScheduleInstalment.updateDueDate(loanCharge.getDueDate());
+                } else {
+                    final LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(loan,
+                            (loan.getLoanRepaymentScheduleInstallmentsSize() + 1), latestRepaymentScheduleInstalment.getDueDate(),
+                            loanCharge.getDueDate(), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false, null);
+                    installment.markAsAdditional();
+                    loan.addLoanRepaymentScheduleInstallment(installment);
+                }
+            }
+        }
+
         loan.addLoanCharge(loanCharge);
 
         this.loanChargeRepository.saveAndFlush(loanCharge);

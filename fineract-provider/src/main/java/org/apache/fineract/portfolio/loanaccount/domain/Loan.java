@@ -572,8 +572,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public void addLoanCharge(final LoanCharge loanCharge) {
 
-        validateLoanIsNotClosed(loanCharge);
-
         if (isChargesAdditionAllowed() && loanCharge.isDueAtDisbursement()) {
             // Note: added this constraint to restrict adding disbursement
             // charges to a loan
@@ -596,7 +594,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         loanCharge.update(this);
 
         final BigDecimal amount = calculateAmountPercentageAppliedTo(loanCharge);
-        BigDecimal chargeAmt = BigDecimal.ZERO;
+        BigDecimal chargeAmt;
         BigDecimal totalChargeAmt = BigDecimal.ZERO;
         if (loanCharge.getChargeCalculation().isPercentageBased()) {
             chargeAmt = loanCharge.getPercentage();
@@ -626,6 +624,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         wrapper.reprocess(getCurrency(), getDisbursementDate(), getRepaymentScheduleInstallments(), charges());
         updateLoanSummaryDerivedFields();
 
+        loanLifecycleStateMachine.transition(LoanEvent.LOAN_CHARGE_ADDED, this);
     }
 
     public ChangedTransactionDetail reprocessTransactions() {
@@ -743,7 +742,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     private void validateChargeHasValidSpecifiedDateIfApplicable(final LoanCharge loanCharge, final LocalDate disbursementDate,
             final LocalDate lastRepaymentPeriodDueDate) {
-        if (loanCharge.isSpecifiedDueDate()
+        if (isInterestBearing() && loanCharge.isSpecifiedDueDate()
                 && !loanCharge.isDueForCollectionFromAndUpToAndIncluding(disbursementDate, lastRepaymentPeriodDueDate)) {
             final String defaultUserMessage = "This charge with specified due date cannot be added as the it is not in schedule range.";
             throw new LoanChargeCannotBeAddedException("loanCharge", "specified.due.date.outside.range", defaultUserMessage,
@@ -5240,6 +5239,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             return this.loanInterestRecalculationDetails.getId();
         }
         return null;
+    }
+
+    public boolean isInterestBearing() {
+        return getLoanRepaymentScheduleDetail().isInterestRecalculationEnabled()
+                && BigDecimal.ZERO.compareTo(getLoanRepaymentScheduleDetail().getAnnualNominalInterestRate()) < 0;
     }
 
     public LocalDate getExpectedMaturityDate() {
