@@ -20,48 +20,46 @@ package org.apache.fineract.organisation.staff.data;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.fineract.organisation.office.data.OfficeData;
 
 /**
  * Immutable data object returned for loan-officer bulk transfer screens.
  */
+
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class BulkTransferLoanOfficerData {
 
     @SuppressWarnings("unused")
-    private final Long officeId;
+    private Long officeId;
     @SuppressWarnings("unused")
-    private final Long fromLoanOfficerId;
+    private Long fromLoanOfficerId;
     @SuppressWarnings("unused")
-    private final LocalDate assignmentDate;
+    private LocalDate assignmentDate;
 
     // template
     @SuppressWarnings("unused")
-    private final Collection<OfficeData> officeOptions;
+    private Collection<OfficeData> officeOptions;
     @SuppressWarnings("unused")
-    private final Collection<StaffData> loanOfficerOptions;
+    private Collection<StaffData> loanOfficerOptions;
     @SuppressWarnings("unused")
-    private final StaffAccountSummaryCollectionData accountSummaryCollection;
+    private StaffAccountSummaryCollectionData accountSummaryCollection;
 
     public static BulkTransferLoanOfficerData templateForBulk(final Long officeId, final Long fromLoanOfficerId,
             final LocalDate assignmentDate, final Collection<OfficeData> officeOptions, final Collection<StaffData> loanOfficerOptions,
             final StaffAccountSummaryCollectionData accountSummaryCollection) {
-        return new BulkTransferLoanOfficerData(officeId, fromLoanOfficerId, assignmentDate, officeOptions, loanOfficerOptions,
-                accountSummaryCollection);
+        return new BulkTransferLoanOfficerData().setOfficeId(officeId).setFromLoanOfficerId(fromLoanOfficerId)
+                .setAssignmentDate(assignmentDate).setOfficeOptions(officeOptions).setLoanOfficerOptions(loanOfficerOptions)
+                .setAccountSummaryCollection(accountSummaryCollection);
     }
 
     public static BulkTransferLoanOfficerData template(final Long fromLoanOfficerId, final Collection<StaffData> loanOfficerOptions,
             final LocalDate assignmentDate) {
-        return new BulkTransferLoanOfficerData(null, fromLoanOfficerId, assignmentDate, null, loanOfficerOptions, null);
-    }
-
-    private BulkTransferLoanOfficerData(final Long officeId, final Long fromLoanOfficerId, final LocalDate assignmentDate,
-            final Collection<OfficeData> officeOptions, final Collection<StaffData> loanOfficerOptions,
-            final StaffAccountSummaryCollectionData accountSummaryCollection) {
-        this.officeId = officeId;
-        this.fromLoanOfficerId = fromLoanOfficerId;
-        this.assignmentDate = assignmentDate;
-        this.officeOptions = officeOptions;
-        this.loanOfficerOptions = loanOfficerOptions;
-        this.accountSummaryCollection = accountSummaryCollection;
+        return new BulkTransferLoanOfficerData().setFromLoanOfficerId(fromLoanOfficerId).setAssignmentDate(assignmentDate)
+                .setLoanOfficerOptions(loanOfficerOptions);
     }
 }

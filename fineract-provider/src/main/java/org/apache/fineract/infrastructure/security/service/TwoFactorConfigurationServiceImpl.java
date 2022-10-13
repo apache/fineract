@@ -253,8 +253,8 @@ public class TwoFactorConfigurationServiceImpl implements TwoFactorConfiguration
         templateData.put("email", user.getEmail());
         templateData.put("firstname", user.getFirstname());
         templateData.put("lastname", user.getLastname());
-        if (user.getStaff() != null && user.getStaff().mobileNo() != null) {
-            templateData.put("mobileno", user.getStaff().mobileNo());
+        if (user.getStaff() != null && user.getStaff().getMobileNo() != null) {
+            templateData.put("mobileno", user.getStaff().getMobileNo());
         }
 
         templateData.put("token", request.getToken());

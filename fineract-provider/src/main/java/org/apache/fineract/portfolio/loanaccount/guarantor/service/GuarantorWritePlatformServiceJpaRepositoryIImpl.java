@@ -147,7 +147,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
                         /** Get the right guarantor based on guarantorType **/
                         String defaultUserMessage = null;
                         if (guarantorTypeId.equals(GuarantorType.STAFF.getValue())) {
-                            defaultUserMessage = this.staffRepositoryWrapper.findOneWithNotFoundDetection(entityId).displayName();
+                            defaultUserMessage = this.staffRepositoryWrapper.findOneWithNotFoundDetection(entityId).getDisplayName();
                         } else {
                             defaultUserMessage = this.clientRepositoryWrapper.findOneWithNotFoundDetection(entityId).getDisplayName();
                         }

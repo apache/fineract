@@ -92,7 +92,7 @@ public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
                 displayName = owner.getDisplayName();
             } else if (EntityTypeForImages.STAFF.toString().equalsIgnoreCase(entityType)) {
                 Staff owner = this.staffRepositoryWrapper.findOneWithNotFoundDetection(entityId);
-                displayName = owner.displayName();
+                displayName = owner.getDisplayName();
             } else {
                 displayName = "UnknownEntityType:" + entityType;
             }

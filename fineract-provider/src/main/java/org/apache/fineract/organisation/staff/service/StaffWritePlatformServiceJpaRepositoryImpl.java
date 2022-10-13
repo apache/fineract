@@ -98,7 +98,7 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
             if (changesOnly.containsKey("officeId")) {
                 final Long officeId = (Long) changesOnly.get("officeId");
                 final Office newOffice = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
-                staffForUpdate.changeOffice(newOffice);
+                staffForUpdate.setOffice(newOffice);
             }
 
             if (!changesOnly.isEmpty()) {
@@ -106,7 +106,7 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
             }
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(staffId)
-                    .withOfficeId(staffForUpdate.officeId()).with(changesOnly).build();
+                    .withOfficeId(staffForUpdate.getOffice().getId()).with(changesOnly).build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             handleStaffDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();

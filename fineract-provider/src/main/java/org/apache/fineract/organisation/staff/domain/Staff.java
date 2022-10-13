@@ -28,6 +28,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -39,6 +43,10 @@ import org.apache.fineract.organisation.office.domain.Office;
 @Table(name = "m_staff", uniqueConstraints = { @UniqueConstraint(columnNames = { "display_name" }, name = "display_name"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "external_id_UNIQUE"),
         @UniqueConstraint(columnNames = { "mobile_no" }, name = "mobile_no_UNIQUE") })
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public class Staff extends AbstractPersistableCustom {
 
     @Column(name = "firstname", length = 50)
@@ -113,10 +121,6 @@ public class Staff extends AbstractPersistableCustom {
         return new Staff(staffOffice, firstname, lastname, externalId, mobileNo, isLoanOfficer, isActive, joiningDate);
     }
 
-    protected Staff() {
-        //
-    }
-
     private Staff(final Office staffOffice, final String firstname, final String lastname, final String externalId, final String mobileNo,
             final boolean isLoanOfficer, final Boolean isActive, final LocalDate joiningDate) {
         this.office = staffOffice;
@@ -136,10 +140,6 @@ public class Staff extends AbstractPersistableCustom {
             organisationalRole = StaffEnumerations.organisationalRole(this.organisationalRoleType);
         }
         return organisationalRole;
-    }
-
-    public void changeOffice(final Office newOffice) {
-        this.office = newOffice;
     }
 
     public Map<String, Object> update(final JsonCommand command) {
@@ -212,22 +212,6 @@ public class Staff extends AbstractPersistableCustom {
         return actualChanges;
     }
 
-    public boolean isNotLoanOfficer() {
-        return !isLoanOfficer();
-    }
-
-    public boolean isLoanOfficer() {
-        return this.loanOfficer;
-    }
-
-    public boolean isNotActive() {
-        return !isActive();
-    }
-
-    public boolean isActive() {
-        return this.active;
-    }
-
     private void deriveDisplayName(final String firstname) {
         if (!StringUtils.isBlank(firstname)) {
             this.displayName = this.lastname + ", " + this.firstname;
@@ -238,33 +222,5 @@ public class Staff extends AbstractPersistableCustom {
 
     public boolean identifiedBy(final Staff staff) {
         return getId().equals(staff.getId());
-    }
-
-    public String emailAddress() {
-        return emailAddress;
-    }
-
-    public Long officeId() {
-        return this.office.getId();
-    }
-
-    public String displayName() {
-        return this.displayName;
-    }
-
-    public String mobileNo() {
-        return this.mobileNo;
-    }
-
-    public Office office() {
-        return this.office;
-    }
-
-    public void setImage(Image image) {
-        this.image = image;
-    }
-
-    public Image getImage() {
-        return this.image;
     }
 }

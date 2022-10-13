@@ -404,8 +404,8 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
     }
 
     public String getDisplayName() {
-        if (this.staff != null && StringUtils.isNotBlank(this.staff.displayName())) {
-            return this.staff.displayName();
+        if (this.staff != null && StringUtils.isNotBlank(this.staff.getDisplayName())) {
+            return this.staff.getDisplayName();
         }
         String firstName = StringUtils.isNotBlank(this.firstname) ? this.firstname : "";
         if (StringUtils.isNotBlank(this.lastname)) {
@@ -670,7 +670,7 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
     public String getStaffDisplayName() {
         String staffDisplayName = null;
         if (this.staff != null) {
-            staffDisplayName = this.staff.displayName();
+            staffDisplayName = this.staff.getDisplayName();
         }
         return staffDisplayName;
     }

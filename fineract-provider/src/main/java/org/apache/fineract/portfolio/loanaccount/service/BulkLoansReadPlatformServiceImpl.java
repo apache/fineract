@@ -75,7 +75,7 @@ public class BulkLoansReadPlatformServiceImpl implements BulkLoansReadPlatformSe
             groupSummary.setLoans(groupLoanAccounts);
         }
 
-        return new StaffAccountSummaryCollectionData(clientSummaryList, groupSummaryList);
+        return new StaffAccountSummaryCollectionData().setClients(clientSummaryList).setGroups(groupSummaryList);
     }
 
     private static final class StaffClientMapper implements RowMapper<StaffAccountSummaryCollectionData.LoanAccountSummary> {
@@ -91,7 +91,7 @@ public class BulkLoansReadPlatformServiceImpl implements BulkLoansReadPlatformSe
             final Long id = JdbcSupport.getLong(rs, "id");
             final String displayName = rs.getString("displayName");
 
-            return new StaffAccountSummaryCollectionData.LoanAccountSummary(id, displayName);
+            return new StaffAccountSummaryCollectionData.LoanAccountSummary().setId(id).setDisplayName(displayName);
         }
     }
 
@@ -108,7 +108,7 @@ public class BulkLoansReadPlatformServiceImpl implements BulkLoansReadPlatformSe
             final Long id = JdbcSupport.getLong(rs, "id");
             final String name = rs.getString("name");
 
-            return new StaffAccountSummaryCollectionData.LoanAccountSummary(id, name);
+            return new StaffAccountSummaryCollectionData.LoanAccountSummary().setId(id).setDisplayName(name);
         }
     }
 }
