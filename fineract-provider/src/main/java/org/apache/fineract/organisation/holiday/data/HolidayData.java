@@ -19,38 +19,31 @@
 package org.apache.fineract.organisation.holiday.data;
 
 import java.time.LocalDate;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class HolidayData {
 
     @SuppressWarnings("unused")
-    private final Long id;
+    private Long id;
     @SuppressWarnings("unused")
-    private final String name;
+    private String name;
     @SuppressWarnings("unused")
-    private final String description;
+    private String description;
     @SuppressWarnings("unused")
-    private final LocalDate fromDate;
+    private LocalDate fromDate;
     @SuppressWarnings("unused")
-    private final LocalDate toDate;
+    private LocalDate toDate;
     @SuppressWarnings("unused")
-    private final LocalDate repaymentsRescheduledTo;
+    private LocalDate repaymentsRescheduledTo;
     @SuppressWarnings("unused")
-    private final Long officeId;
+    private Long officeId;
     @SuppressWarnings("unused")
-    private final EnumOptionData status;
-    private final Integer reschedulingType;
-
-    public HolidayData(final Long id, final String name, final String description, final LocalDate fromDate, final LocalDate toDate,
-            final LocalDate repaymentsRescheduledTo, final EnumOptionData status, final Integer reschedulingType) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.fromDate = fromDate;
-        this.toDate = toDate;
-        this.repaymentsRescheduledTo = repaymentsRescheduledTo;
-        this.officeId = null;
-        this.status = status;
-        this.reschedulingType = reschedulingType;
-    }
+    private EnumOptionData status;
+    private Integer reschedulingType;
 }
