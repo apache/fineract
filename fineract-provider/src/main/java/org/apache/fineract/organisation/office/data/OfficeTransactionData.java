@@ -21,61 +21,53 @@ package org.apache.fineract.organisation.office.data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 /**
  * Immutable data object for office transactions.
  */
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class OfficeTransactionData {
 
     @SuppressWarnings("unused")
-    private final Long id;
+    private Long id;
     @SuppressWarnings("unused")
-    private final LocalDate transactionDate;
+    private LocalDate transactionDate;
     @SuppressWarnings("unused")
-    private final Long fromOfficeId;
+    private Long fromOfficeId;
     @SuppressWarnings("unused")
-    private final String fromOfficeName;
+    private String fromOfficeName;
     @SuppressWarnings("unused")
-    private final Long toOfficeId;
+    private Long toOfficeId;
     @SuppressWarnings("unused")
-    private final String toOfficeName;
+    private String toOfficeName;
     @SuppressWarnings("unused")
-    private final CurrencyData currency;
+    private CurrencyData currency;
     @SuppressWarnings("unused")
-    private final BigDecimal transactionAmount;
+    private BigDecimal transactionAmount;
     @SuppressWarnings("unused")
-    private final String description;
+    private String description;
     @SuppressWarnings("unused")
-    private final Collection<CurrencyData> currencyOptions;
+    private Collection<CurrencyData> currencyOptions;
     @SuppressWarnings("unused")
-    private final Collection<OfficeData> allowedOffices;
+    private Collection<OfficeData> allowedOffices;
 
     public static OfficeTransactionData instance(final Long id, final LocalDate transactionDate, final Long fromOfficeId,
             final String fromOfficeName, final Long toOfficeId, final String toOfficeName, final CurrencyData currency,
             final BigDecimal transactionAmount, final String description) {
-        return new OfficeTransactionData(id, transactionDate, fromOfficeId, fromOfficeName, toOfficeId, toOfficeName, currency,
-                transactionAmount, description, null, null);
+        return new OfficeTransactionData().setId(id).setTransactionDate(transactionDate).setFromOfficeId(fromOfficeId)
+                .setFromOfficeName(fromOfficeName).setToOfficeId(toOfficeId).setToOfficeName(toOfficeName).setCurrency(currency)
+                .setTransactionAmount(transactionAmount).setDescription(description);
     }
 
     public static OfficeTransactionData template(final LocalDate transactionDate, final Collection<OfficeData> parentLookups,
             final Collection<CurrencyData> currencyOptions) {
-        return new OfficeTransactionData(null, transactionDate, null, null, null, null, null, null, null, parentLookups, currencyOptions);
-    }
-
-    private OfficeTransactionData(final Long id, final LocalDate transactionDate, final Long fromOfficeId, final String fromOfficeName,
-            final Long toOfficeId, final String toOfficeName, final CurrencyData currency, final BigDecimal transactionAmount,
-            final String description, final Collection<OfficeData> allowedOffices, final Collection<CurrencyData> currencyOptions) {
-        this.id = id;
-        this.fromOfficeId = fromOfficeId;
-        this.fromOfficeName = fromOfficeName;
-        this.toOfficeId = toOfficeId;
-        this.toOfficeName = toOfficeName;
-        this.currency = currency;
-        this.transactionAmount = transactionAmount;
-        this.description = description;
-        this.transactionDate = transactionDate;
-        this.allowedOffices = allowedOffices;
-        this.currencyOptions = currencyOptions;
+        return new OfficeTransactionData().setTransactionDate(transactionDate).setAllowedOffices(parentLookups)
+                .setCurrencyOptions(currencyOptions);
     }
 }

@@ -906,12 +906,12 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
     public void validateOfficeOpeningDateisAfterGroupOrCenterOpeningDate(final Office groupOffice, final GroupLevel groupLevel,
             final LocalDate activationDate) {
-        if (activationDate != null && groupOffice.getOpeningLocalDate().isAfter(activationDate)) {
+        if (activationDate != null && groupOffice.getOpeningDate().isAfter(activationDate)) {
             final String levelName = groupLevel.getLevelName();
             final String errorMessage = levelName + " activation date should be greater than or equal to the parent Office's creation date "
                     + activationDate.toString();
             throw new InvalidGroupStateTransitionException(levelName.toLowerCase(), "activate.date",
-                    "cannot.be.before.office.activation.date", errorMessage, activationDate, groupOffice.getOpeningLocalDate());
+                    "cannot.be.before.office.activation.date", errorMessage, activationDate, groupOffice.getOpeningDate());
         }
     }
 
