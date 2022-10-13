@@ -85,7 +85,7 @@ public class ApplyHolidaysToLoansTasklet implements Tasklet {
                 applyHolidayToRepaymentScheduleDates(loan, holiday);
             }
             loanRepositoryWrapper.save(loans);
-            holiday.processed();
+            holiday.isProcessed();
         }
         holidayRepository.save(holidays);
         return RepeatStatus.FINISHED;
@@ -96,7 +96,7 @@ public class ApplyHolidaysToLoansTasklet implements Tasklet {
         if (holiday.getReScheduleType().isResheduleToNextRepaymentDate()) {
             adjustedRescheduleToDate = getNextRepaymentDate(loan, holiday);
         } else {
-            adjustedRescheduleToDate = holiday.getRepaymentsRescheduledToLocalDate();
+            adjustedRescheduleToDate = holiday.getRepaymentsRescheduledTo();
         }
 
         if (isRepaymentScheduleAdjustmentNeeded(adjustedRescheduleToDate)) {
@@ -111,7 +111,7 @@ public class ApplyHolidaysToLoansTasklet implements Tasklet {
 
     private void adjustRepaymentSchedules(Loan loan, Holiday holiday, LocalDate adjustedRescheduleToDate) {
         final DefaultScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
-        ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, holiday.getFromDateLocalDate());
+        ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, holiday.getFromDate());
         final LoanApplicationTerms loanApplicationTerms = loan.constructLoanApplicationTerms(scheduleGeneratorDTO);
 
         // first repayment's from date is same as disbursement date.
@@ -129,7 +129,7 @@ public class ApplyHolidaysToLoansTasklet implements Tasklet {
                 loanRepaymentScheduleInstallment.updateFromDate(tmpFromDate);
             }
 
-            if (oldDueDate.equals(holiday.getFromDateLocalDate()) || oldDueDate.isAfter(holiday.getFromDateLocalDate())) {
+            if (oldDueDate.equals(holiday.getFromDate()) || oldDueDate.isAfter(holiday.getFromDate())) {
                 // FIXME: AA do we need to apply non-working days.
                 // Assuming holiday's repayment reschedule to date cannot be
                 // created on a non-working day.
@@ -144,7 +144,7 @@ public class ApplyHolidaysToLoansTasklet implements Tasklet {
 
     private LocalDate getNextRepaymentDate(Loan loan, Holiday holiday) {
         LocalDate adjustedRescheduleToDate = null;
-        final LocalDate rescheduleToDate = holiday.getToDateLocalDate();
+        final LocalDate rescheduleToDate = holiday.getToDate();
         for (final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : loan.getRepaymentScheduleInstallments()) {
             if (rescheduleToDate.isEqual(loanRepaymentScheduleInstallment.getDueDate())) {
                 adjustedRescheduleToDate = rescheduleToDate;

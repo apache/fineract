@@ -115,7 +115,7 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
             final Holiday holiday = this.holidayRepository.findOneWithNotFoundDetection(command.entityId());
             Map<String, Object> changes = holiday.update(command);
 
-            validateInputDates(holiday.getFromDateLocalDate(), holiday.getToDateLocalDate(), holiday.getRepaymentsRescheduledToLocalDate());
+            validateInputDates(holiday.getFromDate(), holiday.getToDate(), holiday.getRepaymentsRescheduledTo());
 
             if (changes.containsKey(officesParamName)) {
                 final Set<Office> offices = getSelectedOffices(command);
