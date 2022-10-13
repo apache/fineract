@@ -82,8 +82,9 @@ public class ClientChargeReadPlatformServiceImpl implements ClientChargeReadPlat
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDecimalPlaces = JdbcSupport.getInteger(rs, "currencyDecimalPlaces");
             final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDecimalPlaces, inMultiplesOf,
-                    currencyDisplaySymbol, currencyNameCode);
+            final CurrencyData currency = new CurrencyData().setCode(currencyCode).setName(currencyName)
+                    .setDecimalPlaces(currencyDecimalPlaces).setInMultiplesOf(inMultiplesOf).setDisplaySymbol(currencyDisplaySymbol)
+                    .setNameCode(currencyNameCode);
 
             final int chargeTime = rs.getInt("chargeTime");
             final EnumOptionData chargeTimeType = ChargeEnumerations.chargeTimeType(chargeTime);

@@ -480,7 +480,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     currencyCode = rs.getString("currencyCode");
                     currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
                     inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
-                    currency = new CurrencyData(currencyCode, currencyDigits, inMultiplesOf);
+                    currency = new CurrencyData().setCode(currencyCode).setDecimalPlaces(currencyDigits).setInMultiplesOf(inMultiplesOf);
 
                     final BigDecimal totalDeposits = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalDeposits");
                     final BigDecimal totalWithdrawals = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalWithdrawals");
@@ -948,8 +948,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
             final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol,
-                    currencyNameCode);
+            final CurrencyData currency = new CurrencyData().setCode(currencyCode).setName(currencyName).setDecimalPlaces(currencyDigits)
+                    .setInMultiplesOf(inMultiplesOf).setDisplaySymbol(currencyDisplaySymbol).setNameCode(currencyNameCode);
 
             final BigDecimal nominalAnnualInterestRate = rs.getBigDecimal("nominalAnnualInterestRate");
 
@@ -1404,8 +1404,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
             final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol,
-                    currencyNameCode);
+            final CurrencyData currency = new CurrencyData().setCode(currencyCode).setName(currencyName).setDecimalPlaces(currencyDigits)
+                    .setInMultiplesOf(inMultiplesOf).setDisplaySymbol(currencyDisplaySymbol).setNameCode(currencyNameCode);
 
             AccountTransferData transfer = null;
             final Long fromTransferId = JdbcSupport.getLong(rs, "fromTransferId");
@@ -1469,8 +1469,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
             final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol,
-                    currencyNameCode);
+            final CurrencyData currency = new CurrencyData().setCode(currencyCode).setName(currencyName).setDecimalPlaces(currencyDigits)
+                    .setInMultiplesOf(inMultiplesOf).setDisplaySymbol(currencyDisplaySymbol).setNameCode(currencyNameCode);
 
             return SavingsAccountTransactionData.template(savingsId, accountNo, DateUtils.getBusinessLocalDate(), currency);
         }
@@ -1545,8 +1545,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
             final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol,
-                    currencyNameCode);
+            final CurrencyData currency = new CurrencyData().setCode(currencyCode).setName(currencyName).setDecimalPlaces(currencyDigits)
+                    .setInMultiplesOf(inMultiplesOf).setDisplaySymbol(currencyDisplaySymbol).setNameCode(currencyNameCode);
 
             final BigDecimal nominalAnnualIterestRate = rs.getBigDecimal("nominalAnnualIterestRate");
 

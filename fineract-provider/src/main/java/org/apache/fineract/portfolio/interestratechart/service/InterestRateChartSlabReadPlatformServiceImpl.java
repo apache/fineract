@@ -178,8 +178,8 @@ public class InterestRateChartSlabReadPlatformServiceImpl implements InterestRat
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
             final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
             // currency
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol,
-                    currencyNameCode);
+            final CurrencyData currency = new CurrencyData().setCode(currencyCode).setName(currencyName).setDecimalPlaces(currencyDigits)
+                    .setInMultiplesOf(inMultiplesOf).setDisplaySymbol(currencyDisplaySymbol).setNameCode(currencyNameCode);
 
             return InterestRateChartSlabData.instance(id, description, periodType, fromPeriod, toPeriod, amountRangeFrom, amountRangeTo,
                     annualInterestRate, currency);

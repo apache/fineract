@@ -290,7 +290,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 
         String currencyCode = this.currency.getCode();
         Integer digitsAfterDecimal = this.currency.getDigitsAfterDecimal();
-        Integer inMultiplesOf = this.currency.getCurrencyInMultiplesOf();
+        Integer inMultiplesOf = this.currency.getInMultiplesOf();
 
         final String digitsAfterDecimalParamName = "digitsAfterDecimal";
         if (command.isChangeInIntegerParameterNamed(digitsAfterDecimalParamName, digitsAfterDecimal)) {
@@ -298,7 +298,8 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             actualChanges.put(digitsAfterDecimalParamName, newValue);
             actualChanges.put("locale", localeAsInput);
             digitsAfterDecimal = newValue;
-            this.currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal, inMultiplesOf);
+            this.currency = new MonetaryCurrency().setCode(currencyCode).setDigitsAfterDecimal(digitsAfterDecimal)
+                    .setInMultiplesOf(inMultiplesOf);
         }
 
         final String currencyCodeParamName = "currencyCode";
@@ -306,7 +307,8 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final String newValue = command.stringValueOfParameterNamed(currencyCodeParamName);
             actualChanges.put(currencyCodeParamName, newValue);
             currencyCode = newValue;
-            this.currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal, inMultiplesOf);
+            this.currency = new MonetaryCurrency().setCode(currencyCode).setDigitsAfterDecimal(digitsAfterDecimal)
+                    .setInMultiplesOf(inMultiplesOf);
         }
 
         final String inMultiplesOfParamName = "inMultiplesOf";
@@ -314,7 +316,8 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final Integer newValue = command.integerValueOfParameterNamed(inMultiplesOfParamName);
             actualChanges.put(inMultiplesOfParamName, newValue);
             inMultiplesOf = newValue;
-            this.currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal, inMultiplesOf);
+            this.currency = new MonetaryCurrency().setCode(currencyCode).setDigitsAfterDecimal(digitsAfterDecimal)
+                    .setInMultiplesOf(inMultiplesOf);
         }
 
         final Map<String, Object> loanApplicationAttributeChanges = updateLoanApplicationAttributes(command, aprCalculator);

@@ -81,7 +81,8 @@ public class CurrencyReadPlatformServiceImpl implements CurrencyReadPlatformServ
             final String displaySymbol = rs.getString("displaySymbol");
             final String nameCode = rs.getString("nameCode");
 
-            return new CurrencyData(code, name, decimalPlaces, inMultiplesOf, displaySymbol, nameCode);
+            return new CurrencyData().setCode(code).setName(name).setDecimalPlaces(decimalPlaces).setInMultiplesOf(inMultiplesOf)
+                    .setDisplaySymbol(displaySymbol).setNameCode(nameCode);
         }
 
         public String schema() {

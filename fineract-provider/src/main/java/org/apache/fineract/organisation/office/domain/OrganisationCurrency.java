@@ -73,6 +73,6 @@ public class OrganisationCurrency extends AbstractPersistableCustom {
     }
 
     public final MonetaryCurrency toMonetaryCurrency() {
-        return new MonetaryCurrency(this.code, this.decimalPlaces, this.inMultiplesOf);
+        return new MonetaryCurrency().setCode(this.code).setDigitsAfterDecimal(this.decimalPlaces).setInMultiplesOf(this.inMultiplesOf);
     }
 }

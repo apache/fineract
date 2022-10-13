@@ -692,8 +692,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
             final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
-            final CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
-                    currencyDisplaySymbol, currencyNameCode);
+            final CurrencyData currencyData = new CurrencyData().setCode(currencyCode).setName(currencyName)
+                    .setDecimalPlaces(currencyDigits).setInMultiplesOf(inMultiplesOf).setDisplaySymbol(currencyDisplaySymbol)
+                    .setNameCode(currencyNameCode);
 
             final Long id = rs.getLong("id");
             final String accountNo = rs.getString("accountNo");
@@ -1097,8 +1098,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     this.disbursement.isDisbursed());
 
             final Collection<LoanSchedulePeriodData> periods = new ArrayList<>();
-            final MonetaryCurrency monCurrency = new MonetaryCurrency(this.currency.getCode(), this.currency.getDecimalPlaces(),
-                    this.currency.getInMultiplesOf());
+            final MonetaryCurrency monCurrency = new MonetaryCurrency().setCode(this.currency.getCode())
+                    .setDigitsAfterDecimal(this.currency.getDecimalPlaces()).setInMultiplesOf(this.currency.getInMultiplesOf());
             BigDecimal totalPrincipalDisbursed = BigDecimal.ZERO;
             BigDecimal disbursementChargeAmount = this.totalFeeChargesDueAtDisbursement;
             if (disbursementData.isEmpty()) {
@@ -1320,8 +1321,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
             final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
-            final CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
-                    currencyDisplaySymbol, currencyNameCode);
+            final CurrencyData currencyData = new CurrencyData().setCode(currencyCode).setName(currencyName)
+                    .setDecimalPlaces(currencyDigits).setInMultiplesOf(inMultiplesOf).setDisplaySymbol(currencyDisplaySymbol)
+                    .setNameCode(currencyNameCode);
 
             final Long id = rs.getLong("id");
             final Long officeId = rs.getLong("officeId");
@@ -1800,8 +1802,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
             final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
-            final CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
-                    currencyDisplaySymbol, currencyNameCode);
+            final CurrencyData currencyData = new CurrencyData().setCode(currencyCode).setName(currencyName)
+                    .setDecimalPlaces(currencyDigits).setInMultiplesOf(inMultiplesOf).setDisplaySymbol(currencyDisplaySymbol)
+                    .setNameCode(currencyNameCode);
 
             return new LoanScheduleAccrualData(loanId, officeId, installmentNumber, accruedTill, frequency, repayEvery, dueDate, fromDate,
                     repaymentScheduleId, loanProductId, interestIncome, feeIncome, penaltyIncome, accruedInterestIncome, accruedFeeIncome,
@@ -1854,8 +1857,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
             final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
-            final CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
-                    currencyDisplaySymbol, currencyNameCode);
+            final CurrencyData currencyData = new CurrencyData().setCode(currencyCode).setName(currencyName)
+                    .setDecimalPlaces(currencyDigits).setInMultiplesOf(inMultiplesOf).setDisplaySymbol(currencyDisplaySymbol)
+                    .setNameCode(currencyNameCode);
             final LocalDate accruedTill = null;
             final PeriodFrequencyType frequency = null;
             final Integer repayEvery = null;
@@ -2316,7 +2320,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
             final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
-            return new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol, currencyNameCode);
+            return new CurrencyData().setCode(currencyCode).setName(currencyName).setDecimalPlaces(currencyDigits)
+                    .setInMultiplesOf(inMultiplesOf).setDisplaySymbol(currencyDisplaySymbol).setNameCode(currencyNameCode);
         }
 
     }

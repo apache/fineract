@@ -297,8 +297,8 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
             CurrencyData currencyData = null;
             if (currencyCode != null) {
-                currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol,
-                        currencyNameCode);
+                currencyData = new CurrencyData().setCode(currencyCode).setName(currencyName).setDecimalPlaces(currencyDigits)
+                        .setInMultiplesOf(inMultiplesOf).setDisplaySymbol(currencyDisplaySymbol).setNameCode(currencyNameCode);
             }
 
             final BigDecimal disbursementAmount = rs.getBigDecimal("disbursementAmount");
@@ -665,8 +665,8 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
             final String depositAccountType = rs.getString("depositAccountType");
             // currency
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol,
-                    currencyNameCode);
+            final CurrencyData currency = new CurrencyData().setCode(currencyCode).setName(currencyName).setDecimalPlaces(currencyDigits)
+                    .setInMultiplesOf(inMultiplesOf).setDisplaySymbol(currencyDisplaySymbol).setNameCode(currencyNameCode);
 
             return SavingsDueData.instance(savingsId, accountId, accountStatusId, productName, productId, currency, dueAmount,
                     depositAccountType);
@@ -789,8 +789,8 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
             CurrencyData currencyData = null;
             if (currencyCode != null) {
-                currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol,
-                        currencyNameCode);
+                currencyData = new CurrencyData().setCode(currencyCode).setName(currencyName).setDecimalPlaces(currencyDigits)
+                        .setInMultiplesOf(inMultiplesOf).setDisplaySymbol(currencyDisplaySymbol).setNameCode(currencyNameCode);
             }
 
             final BigDecimal disbursementAmount = rs.getBigDecimal("disbursementAmount");

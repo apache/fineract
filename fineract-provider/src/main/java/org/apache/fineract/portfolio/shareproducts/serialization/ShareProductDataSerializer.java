@@ -130,7 +130,8 @@ public class ShareProductDataSerializer {
                 .extractIntegerWithLocaleNamed(ShareProductApiConstants.digitsafterdecimal_paramname, element);
         final Integer inMultiplesOf = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(ShareProductApiConstants.inmultiplesof_paramname,
                 element);
-        final MonetaryCurrency currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal, inMultiplesOf);
+        final MonetaryCurrency currency = new MonetaryCurrency().setCode(currencyCode).setDigitsAfterDecimal(digitsAfterDecimal)
+                .setInMultiplesOf(inMultiplesOf);
 
         final BigDecimal unitPrice = this.fromApiJsonHelper.extractBigDecimalNamed(ShareProductApiConstants.unitprice_paramname, element,
                 locale);
@@ -335,7 +336,8 @@ public class ShareProductDataSerializer {
                     .extractIntegerWithLocaleNamed(ShareProductApiConstants.digitsafterdecimal_paramname, element);
             final Integer inMultiplesOf = this.fromApiJsonHelper
                     .extractIntegerWithLocaleNamed(ShareProductApiConstants.inmultiplesof_paramname, element);
-            final MonetaryCurrency currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal, inMultiplesOf);
+            final MonetaryCurrency currency = new MonetaryCurrency().setCode(currencyCode).setDigitsAfterDecimal(digitsAfterDecimal)
+                    .setInMultiplesOf(inMultiplesOf);
             if (product.setMonetaryCurrency(currency)) {
                 actualChanges.put(ShareProductApiConstants.currency_paramname, currency);
             }

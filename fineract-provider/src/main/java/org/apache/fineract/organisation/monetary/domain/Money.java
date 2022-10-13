@@ -23,10 +23,18 @@ import java.math.RoundingMode;
 import java.util.Iterator;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 @Embeddable
-public class Money implements Comparable<Money> {
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
+public final class Money implements Comparable<Money> {
 
     @Column(name = "currency_code", length = 3)
     private String currencyCode;
@@ -64,8 +72,7 @@ public class Money implements Comparable<Money> {
     }
 
     public static Money of(final MonetaryCurrency currency, final BigDecimal newAmount) {
-        return new Money(currency.getCode(), currency.getDigitsAfterDecimal(), defaultToZeroIfNull(newAmount),
-                currency.getCurrencyInMultiplesOf());
+        return new Money(currency.getCode(), currency.getDigitsAfterDecimal(), defaultToZeroIfNull(newAmount), currency.getInMultiplesOf());
     }
 
     public static Money of(final CurrencyData currency, final BigDecimal newAmount) {
@@ -73,18 +80,11 @@ public class Money implements Comparable<Money> {
     }
 
     public static Money zero(final MonetaryCurrency currency) {
-        return new Money(currency.getCode(), currency.getDigitsAfterDecimal(), BigDecimal.ZERO, currency.getCurrencyInMultiplesOf());
+        return new Money(currency.getCode(), currency.getDigitsAfterDecimal(), BigDecimal.ZERO, currency.getInMultiplesOf());
     }
 
     public static Money zero(final CurrencyData currency) {
         return new Money(currency.getCode(), currency.getDecimalPlaces(), BigDecimal.ZERO, currency.getInMultiplesOf());
-    }
-
-    protected Money() {
-        this.currencyCode = null;
-        this.currencyDigitsAfterDecimal = 0;
-        this.inMultiplesOf = 0;
-        this.amount = null;
     }
 
     private Money(final String currencyCode, final int digitsAfterDecimal, final BigDecimal amount, final Integer inMultiplesOf) {
@@ -330,22 +330,6 @@ public class Money implements Comparable<Money> {
         return isLessThan(Money.zero(getCurrency()));
     }
 
-    public String getCurrencyCode() {
-        return this.currencyCode;
-    }
-
-    public int getCurrencyDigitsAfterDecimal() {
-        return this.currencyDigitsAfterDecimal;
-    }
-
-    public Integer getCurrencyInMultiplesOf() {
-        return this.inMultiplesOf;
-    }
-
-    public BigDecimal getAmount() {
-        return this.amount;
-    }
-
     public BigDecimal getAmountDefaultedToNullIfZero() {
         return defaultToNullIfZero(this.amount);
     }
@@ -379,7 +363,8 @@ public class Money implements Comparable<Money> {
     }
 
     private MonetaryCurrency monetaryCurrency() {
-        return new MonetaryCurrency(this.currencyCode, this.currencyDigitsAfterDecimal, this.inMultiplesOf);
+        return new MonetaryCurrency().setCode(this.currencyCode).setDigitsAfterDecimal(this.currencyDigitsAfterDecimal)
+                .setInMultiplesOf(this.inMultiplesOf);
     }
 
     public Money zero() {

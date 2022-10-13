@@ -20,9 +20,17 @@ package org.apache.fineract.organisation.monetary.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 @Embeddable
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public class MonetaryCurrency {
 
     @Column(name = "currency_code", length = 3, nullable = false)
@@ -34,41 +42,18 @@ public class MonetaryCurrency {
     @Column(name = "currency_multiplesof")
     private Integer inMultiplesOf;
 
-    protected MonetaryCurrency() {
-        this.code = null;
-        this.digitsAfterDecimal = 0;
-        this.inMultiplesOf = 0;
-    }
-
-    public MonetaryCurrency(final String code, final int digitsAfterDecimal, final Integer inMultiplesOf) {
-        this.code = code;
-        this.digitsAfterDecimal = digitsAfterDecimal;
-        this.inMultiplesOf = inMultiplesOf;
-    }
-
     public MonetaryCurrency copy() {
-        return new MonetaryCurrency(this.code, this.digitsAfterDecimal, this.inMultiplesOf);
+        return new MonetaryCurrency().setCode(this.code).setDigitsAfterDecimal(this.digitsAfterDecimal)
+                .setInMultiplesOf(this.inMultiplesOf);
     }
 
     public static MonetaryCurrency fromApplicationCurrency(ApplicationCurrency applicationCurrency) {
-        return new MonetaryCurrency(applicationCurrency.getCode(), applicationCurrency.getDecimalPlaces(),
-                applicationCurrency.getCurrencyInMultiplesOf());
+        return new MonetaryCurrency().setCode(applicationCurrency.getCode()).setDigitsAfterDecimal(applicationCurrency.getDecimalPlaces())
+                .setInMultiplesOf(applicationCurrency.getInMultiplesOf());
     }
 
     public static MonetaryCurrency fromCurrencyData(final CurrencyData currencyData) {
-        return new MonetaryCurrency(currencyData.getCode(), currencyData.getDecimalPlaces(), currencyData.getInMultiplesOf());
+        return new MonetaryCurrency().setCode(currencyData.getCode()).setDigitsAfterDecimal(currencyData.getDecimalPlaces())
+                .setInMultiplesOf(currencyData.getInMultiplesOf());
     }
-
-    public String getCode() {
-        return this.code;
-    }
-
-    public int getDigitsAfterDecimal() {
-        return this.digitsAfterDecimal;
-    }
-
-    public Integer getCurrencyInMultiplesOf() {
-        return this.inMultiplesOf;
-    }
-
 }

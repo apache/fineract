@@ -1244,8 +1244,8 @@ public final class LoanApplicationTerms {
     }
 
     public LoanProductRelatedDetail toLoanProductRelatedDetail() {
-        final MonetaryCurrency currency = new MonetaryCurrency(this.currency.getCode(), this.currency.getDecimalPlaces(),
-                this.currency.getCurrencyInMultiplesOf());
+        final MonetaryCurrency currency = new MonetaryCurrency().setCode(this.currency.getCode())
+                .setDigitsAfterDecimal(this.currency.getDecimalPlaces()).setInMultiplesOf(this.currency.getInMultiplesOf());
 
         return LoanProductRelatedDetail.createFrom(currency, this.principal.getAmount(), this.interestRatePerPeriod,
                 this.interestRatePeriodFrequencyType, this.annualNominalInterestRate, this.interestMethod,
