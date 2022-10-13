@@ -287,8 +287,17 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         if (account.isAccountNumberRequiresAutoGeneration()) {
             final AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.SAVINGS);
             account.updateAccountNo(this.accountNumberGenerator.generate(account, accountNumberFormat));
+            String serialNumber = account.getAccountNumber();
+            String nubanAccountNumber = this.nubanAccountService.generateNubanAccountNumber(serialNumber, "1");
+            SavingsAccount existingAccount = this.savingAccountRepository.findByAccountNumber(nubanAccountNumber);
 
-            this.savingAccountRepository.saveAndFlush(account);
+            while (existingAccount != null) {
+                serialNumber = this.nubanAccountService.generateNextSerialNumber(serialNumber);
+                nubanAccountNumber = this.nubanAccountService.generateNubanAccountNumber(serialNumber, "1");
+                existingAccount = this.savingAccountRepository.findByAccountNumber(nubanAccountNumber);
+            }
+            account.updateAccountNo(nubanAccountNumber);
+            this.savingAccountRepository.save(account);
         }
     }
 
@@ -711,5 +720,22 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 .withSavingsId(account.getId()) //
                 .setRollbackTransaction(rollbackTransaction)//
                 .build();
+    }
+    private void generateAccountNumber(final SavingsAccount account) {
+        if (account.isAccountNumberRequiresAutoGeneration()) {
+            final AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.SAVINGS);
+            account.updateAccountNo(this.accountNumberGenerator.generate(account, accountNumberFormat));
+            String serialNumber = account.getAccountNumber();
+            String nubanAccountNumber = this.nubanAccountService.generateNubanAccountNumber(serialNumber, "1");
+            SavingsAccount existingAccount = this.savingAccountRepository.findByAccountNumber(nubanAccountNumber);
+
+            while (existingAccount != null) {
+                serialNumber = this.nubanAccountService.generateNextSerialNumber(serialNumber);
+                nubanAccountNumber = this.nubanAccountService.generateNubanAccountNumber(serialNumber, "1");
+                existingAccount = this.savingAccountRepository.findByAccountNumber(nubanAccountNumber);
+            }
+            account.updateAccountNo(nubanAccountNumber);
+            this.savingAccountRepository.save(account);
+        }
     }
 }
