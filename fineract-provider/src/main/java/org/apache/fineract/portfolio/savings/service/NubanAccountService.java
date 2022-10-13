@@ -20,7 +20,7 @@ package org.apache.fineract.portfolio.savings.service;
 
 public interface NubanAccountService {
 
-    static final String VFD_UNIQUE_CODE_IDENTIFIER = "566";
+    String UNITED_CAPITAL_UNIQUE_CODE_IDENTIFIER = "566";
 
     String generateNextSerialNumber(String serialNumber);
 
