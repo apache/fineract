@@ -36,6 +36,7 @@ import org.apache.fineract.batch.command.internal.CreateClientCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateLoanRescheduleRequestCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy;
 import org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy;
+import org.apache.fineract.batch.command.internal.GetChargeByIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetDatatableEntryByAppTableIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetLoanByIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetTransactionByIdCommandStrategy;
@@ -69,6 +70,8 @@ public class CommandStrategyProviderTest {
                 Arguments.of("loans/123/charges", HttpMethod.POST, "createChargeCommandStrategy", mock(CreateChargeCommandStrategy.class)),
                 Arguments.of("loans/123/charges", HttpMethod.GET, "collectChargesCommandStrategy",
                         mock(CollectChargesCommandStrategy.class)),
+                Arguments.of("loans/123/charges/123", HttpMethod.GET, "getChargeByIdCommandStrategy",
+                        mock(GetChargeByIdCommandStrategy.class)),
                 Arguments.of("loans/123/transactions?command=repayment", HttpMethod.POST, "createTransactionLoanCommandStrategy",
                         mock(CreateTransactionLoanCommandStrategy.class)),
                 Arguments.of("loans/123/transactions?command=creditBalanceRefund", HttpMethod.POST, "createTransactionLoanCommandStrategy",
@@ -130,7 +133,8 @@ public class CommandStrategyProviderTest {
     private static Stream<Arguments> provideCommandStrategyResourceDetailsForErrors() {
         return Stream.of(Arguments.of("loans/123?command=reject", HttpMethod.POST),
                 Arguments.of("loans/glimAccount/746?command=approve", HttpMethod.POST), Arguments.of("loans/123", HttpMethod.PUT),
-                Arguments.of("datatables/test_dt_table", HttpMethod.GET), Arguments.of("datatables", HttpMethod.GET));
+                Arguments.of("datatables/test_dt_table", HttpMethod.GET), Arguments.of("datatables", HttpMethod.GET),
+                Arguments.of("loans//charges/123", HttpMethod.GET), Arguments.of("loans/123/charges/", HttpMethod.GET));
 
     }
 

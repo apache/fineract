@@ -156,6 +156,7 @@ allprojects  {
             "**/build.gradle.mustache",
             "**/pom.mustache",
             "**/avro/**/*.java",
+            "**/org/apache/fineract/client/**/*.java"
         ])
         strictCheck true
     }

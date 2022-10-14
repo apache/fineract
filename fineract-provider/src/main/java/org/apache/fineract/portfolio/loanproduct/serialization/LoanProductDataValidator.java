@@ -526,7 +526,8 @@ public final class LoanProductDataValidator {
         baseDataValidator.reset().parameter(LoanProductConstants.fixedPrincipalPercentagePerInstallmentParamName)
                 .value(fixedPrincipalPercentagePerInstallment).notLessThanMin(BigDecimal.ONE).notGreaterThanMax(BigDecimal.valueOf(100));
 
-        if (!amortizationType.equals(AmortizationMethod.EQUAL_PRINCIPAL.getValue()) && fixedPrincipalPercentagePerInstallment != null) {
+        if (amortizationType != null && !amortizationType.equals(AmortizationMethod.EQUAL_PRINCIPAL.getValue())
+                && fixedPrincipalPercentagePerInstallment != null) {
             baseDataValidator.reset().parameter(LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName).failWithCode(
                     "not.supported.principal.fixing.not.allowed.with.equal.installments",
                     "Principal fixing cannot be done with equal installment amortization");

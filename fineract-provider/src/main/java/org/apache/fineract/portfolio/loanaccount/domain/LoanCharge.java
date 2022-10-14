@@ -42,6 +42,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
@@ -67,6 +68,9 @@ public class LoanCharge extends AbstractPersistableCustom {
 
     @Column(name = "charge_time_enum", nullable = false)
     private Integer chargeTime;
+
+    @Column(name = "submitted_on_date", nullable = true)
+    private LocalDate submittedOnDate;
 
     @Column(name = "due_for_collection_as_of_date")
     private LocalDate dueDate;
@@ -229,6 +233,7 @@ public class LoanCharge extends AbstractPersistableCustom {
             final ChargePaymentMode chargePaymentMode, final Integer numberOfRepayments, final BigDecimal loanCharge) {
         this.loan = loan;
         this.charge = chargeDefinition;
+        this.submittedOnDate = DateUtils.getBusinessLocalDate();
         this.penaltyCharge = chargeDefinition.isPenalty();
         this.minCap = chargeDefinition.getMinCap();
         this.maxCap = chargeDefinition.getMaxCap();
@@ -595,6 +600,10 @@ public class LoanCharge extends AbstractPersistableCustom {
 
     public LocalDate getDueDate() {
         return this.dueDate;
+    }
+
+    public LocalDate getSubmittedOnDate() {
+        return submittedOnDate;
     }
 
     private boolean determineIfFullyPaid() {
