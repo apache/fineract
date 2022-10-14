@@ -21,6 +21,14 @@
         },
         {
             "default": null,
+            "name": "principalAdjustments",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
             "name": "principalPaid",
             "type": [
                 "null",

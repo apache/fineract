@@ -264,7 +264,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
              * TODO Vishwas: Remove references to "Contra" from the codebase
              ***/
             final String sql = "select " + rm.loanPaymentsSchema() + " where tr.loan_id = ? and tr.transaction_type_enum not in (0, 3) "
-                    + " and (tr.is_reversed=false or tr.manually_adjusted_or_reversed = true) " + " order by tr.transaction_date ASC,id ";
+                    + " and (tr.is_reversed=false or tr.manually_adjusted_or_reversed = true)  order by tr.transaction_date ASC,id ";
             Collection<LoanTransactionData> loanTransactionData = this.jdbcTemplate.query(sql, rm, loanId); // NOSONAR
             for (LoanTransactionData loanTransaction : loanTransactionData) {
                 if (loanTransaction.getType().isRepaymentType()) {
@@ -615,14 +615,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + sqlGenerator.escape("name")
                     + " as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, "
                     + " l.loan_officer_id as loanOfficerId, s.display_name as loanOfficerName, "
-                    + " l.principal_disbursed_derived as principalDisbursed," + " l.principal_repaid_derived as principalPaid,"
-                    + " l.principal_writtenoff_derived as principalWrittenOff,"
-                    + " l.principal_outstanding_derived as principalOutstanding," + " l.interest_charged_derived as interestCharged,"
-                    + " l.interest_repaid_derived as interestPaid," + " l.interest_waived_derived as interestWaived,"
-                    + " l.interest_writtenoff_derived as interestWrittenOff," + " l.interest_outstanding_derived as interestOutstanding,"
+                    + " l.principal_disbursed_derived as principalDisbursed, l.principal_repaid_derived as principalPaid,"
+                    + " l.principal_adjustments_derived as principalAdjustments, l.principal_writtenoff_derived as principalWrittenOff,"
+                    + " l.principal_outstanding_derived as principalOutstanding, l.interest_charged_derived as interestCharged,"
+                    + " l.interest_repaid_derived as interestPaid, l.interest_waived_derived as interestWaived,"
+                    + " l.interest_writtenoff_derived as interestWrittenOff, l.interest_outstanding_derived as interestOutstanding,"
                     + " l.fee_charges_charged_derived as feeChargesCharged,"
                     + " l.total_charges_due_at_disbursement_derived as feeChargesDueAtDisbursementCharged,"
-                    + " l.fee_charges_repaid_derived as feeChargesPaid," + " l.fee_charges_waived_derived as feeChargesWaived,"
+                    + " l.fee_charges_repaid_derived as feeChargesPaid, l.fee_charges_waived_derived as feeChargesWaived,"
                     + " l.fee_charges_writtenoff_derived as feeChargesWrittenOff,"
                     + " l.fee_charges_outstanding_derived as feeChargesOutstanding,"
                     + " l.penalty_charges_charged_derived as penaltyChargesCharged,"
@@ -630,15 +630,15 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " l.penalty_charges_waived_derived as penaltyChargesWaived,"
                     + " l.penalty_charges_writtenoff_derived as penaltyChargesWrittenOff,"
                     + " l.penalty_charges_outstanding_derived as penaltyChargesOutstanding,"
-                    + " l.total_expected_repayment_derived as totalExpectedRepayment," + " l.total_repayment_derived as totalRepayment,"
-                    + " l.total_expected_costofloan_derived as totalExpectedCostOfLoan," + " l.total_costofloan_derived as totalCostOfLoan,"
-                    + " l.total_waived_derived as totalWaived," + " l.total_writtenoff_derived as totalWrittenOff,"
-                    + " l.writeoff_reason_cv_id as writeoffReasonId," + " codev.code_value as writeoffReason,"
-                    + " l.total_outstanding_derived as totalOutstanding," + " l.total_overpaid_derived as totalOverpaid,"
-                    + " l.fixed_emi_amount as fixedEmiAmount," + " l.max_outstanding_loan_balance as outstandingLoanBalance,"
-                    + " l.loan_sub_status_id as loanSubStatusId," + " la.principal_overdue_derived as principalOverdue,"
-                    + " la.interest_overdue_derived as interestOverdue," + " la.fee_charges_overdue_derived as feeChargesOverdue,"
-                    + " la.penalty_charges_overdue_derived as penaltyChargesOverdue," + " la.total_overdue_derived as totalOverdue,"
+                    + " l.total_expected_repayment_derived as totalExpectedRepayment, l.total_repayment_derived as totalRepayment,"
+                    + " l.total_expected_costofloan_derived as totalExpectedCostOfLoan, l.total_costofloan_derived as totalCostOfLoan,"
+                    + " l.total_waived_derived as totalWaived, l.total_writtenoff_derived as totalWrittenOff,"
+                    + " l.writeoff_reason_cv_id as writeoffReasonId, codev.code_value as writeoffReason,"
+                    + " l.total_outstanding_derived as totalOutstanding, l.total_overpaid_derived as totalOverpaid,"
+                    + " l.fixed_emi_amount as fixedEmiAmount, l.max_outstanding_loan_balance as outstandingLoanBalance,"
+                    + " l.loan_sub_status_id as loanSubStatusId, la.principal_overdue_derived as principalOverdue,"
+                    + " la.interest_overdue_derived as interestOverdue, la.fee_charges_overdue_derived as feeChargesOverdue,"
+                    + " la.penalty_charges_overdue_derived as penaltyChargesOverdue, la.total_overdue_derived as totalOverdue,"
                     + " la.overdue_since_date_derived as overdueSinceDate,"
                     + " l.sync_disbursement_with_meeting as syncDisbursementWithMeeting,"
                     + " l.loan_counter as loanCounter, l.loan_product_counter as loanProductCounter,"
@@ -659,21 +659,21 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " l.interest_rate_differential as interestRateDifferential, "
                     + " l.create_standing_instruction_at_disbursement as createStandingInstructionAtDisbursement, "
                     + " lpvi.minimum_gap as minimuminstallmentgap, lpvi.maximum_gap as maximuminstallmentgap, "
-                    + " lp.can_use_for_topup as canUseForTopup, " + " l.is_topup as isTopup, " + " topup.closure_loan_id as closureLoanId, "
-                    + " l.total_recovered_derived as totalRecovered" + ", topuploan.account_no as closureLoanAccountNo, "
-                    + " topup.topup_amount as topupAmount " + " from m_loan l" //
+                    + " lp.can_use_for_topup as canUseForTopup, l.is_topup as isTopup, topup.closure_loan_id as closureLoanId, "
+                    + " l.total_recovered_derived as totalRecovered, topuploan.account_no as closureLoanAccountNo, "
+                    + " topup.topup_amount as topupAmount from m_loan l" //
                     + " join m_product_loan lp on lp.id = l.product_id" //
-                    + " left join m_loan_recalculation_details lir on lir.loan_id = l.id " + " join m_currency rc on rc."
+                    + " left join m_loan_recalculation_details lir on lir.loan_id = l.id join m_currency rc on rc."
                     + sqlGenerator.escape("code") + " = l.currency_code" //
                     + " left join m_client c on c.id = l.client_id" //
                     + " left join m_group g on g.id = l.group_id" //
                     + " left join m_loan_arrears_aging la on la.loan_id = l.id" //
                     + " left join m_fund f on f.id = l.fund_id" //
                     + " left join m_staff s on s.id = l.loan_officer_id" //
-                    + " left join m_appuser sbu on sbu.id = l.created_by" + " left join m_appuser rbu on rbu.id = l.rejectedon_userid"
+                    + " left join m_appuser sbu on sbu.id = l.created_by left join m_appuser rbu on rbu.id = l.rejectedon_userid"
                     + " left join m_appuser wbu on wbu.id = l.withdrawnon_userid"
                     + " left join m_appuser abu on abu.id = l.approvedon_userid"
-                    + " left join m_appuser dbu on dbu.id = l.disbursedon_userid" + " left join m_appuser cbu on cbu.id = l.closedon_userid"
+                    + " left join m_appuser dbu on dbu.id = l.disbursedon_userid left join m_appuser cbu on cbu.id = l.closedon_userid"
                     + " left join m_code_value cv on cv.id = l.loanpurpose_cv_id"
                     + " left join m_code_value codev on codev.id = l.writeoff_reason_cv_id"
                     + " left join ref_loan_transaction_processing_strategy lps on lps.id = l.loan_transaction_strategy_id"
@@ -851,6 +851,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
                 // loan summary
                 final BigDecimal principalDisbursed = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalDisbursed");
+                final BigDecimal principalAdjustments = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalAdjustments");
                 final BigDecimal principalPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalPaid");
                 final BigDecimal principalWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalWrittenOff");
                 final BigDecimal principalOutstanding = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalOutstanding");
@@ -892,14 +893,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     inArrears = true;
                 }
 
-                loanSummary = new LoanSummaryData(currencyData, principalDisbursed, principalPaid, principalWrittenOff,
-                        principalOutstanding, principalOverdue, interestCharged, interestPaid, interestWaived, interestWrittenOff,
-                        interestOutstanding, interestOverdue, feeChargesCharged, feeChargesDueAtDisbursementCharged, feeChargesPaid,
-                        feeChargesWaived, feeChargesWrittenOff, feeChargesOutstanding, feeChargesOverdue, penaltyChargesCharged,
-                        penaltyChargesPaid, penaltyChargesWaived, penaltyChargesWrittenOff, penaltyChargesOutstanding,
-                        penaltyChargesOverdue, totalExpectedRepayment, totalRepayment, totalExpectedCostOfLoan, totalCostOfLoan,
-                        totalWaived, totalWrittenOff, totalOutstanding, totalOverdue, overdueSinceDate, writeoffReasonId, writeoffReason,
-                        totalRecovered);
+                loanSummary = new LoanSummaryData(currencyData, principalDisbursed, principalAdjustments, principalPaid,
+                        principalWrittenOff, principalOutstanding, principalOverdue, interestCharged, interestPaid, interestWaived,
+                        interestWrittenOff, interestOutstanding, interestOverdue, feeChargesCharged, feeChargesDueAtDisbursementCharged,
+                        feeChargesPaid, feeChargesWaived, feeChargesWrittenOff, feeChargesOutstanding, feeChargesOverdue,
+                        penaltyChargesCharged, penaltyChargesPaid, penaltyChargesWaived, penaltyChargesWrittenOff,
+                        penaltyChargesOutstanding, penaltyChargesOverdue, totalExpectedRepayment, totalRepayment, totalExpectedCostOfLoan,
+                        totalCostOfLoan, totalWaived, totalWrittenOff, totalOutstanding, totalOverdue, overdueSinceDate, writeoffReasonId,
+                        writeoffReason, totalRecovered);
             }
 
             GroupGeneralData groupData = null;
@@ -1015,8 +1016,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " ls.fee_charges_amount as feeChargesDue, ls.fee_charges_completed_derived as feeChargesPaid, ls.fee_charges_waived_derived as feeChargesWaived, ls.fee_charges_writtenoff_derived as feeChargesWrittenOff, "
                     + " ls.penalty_charges_amount as penaltyChargesDue, ls.penalty_charges_completed_derived as penaltyChargesPaid, ls.penalty_charges_waived_derived as penaltyChargesWaived, ls.penalty_charges_writtenoff_derived as penaltyChargesWrittenOff, "
                     + " ls.total_paid_in_advance_derived as totalPaidInAdvanceForPeriod, ls.total_paid_late_derived as totalPaidLateForPeriod, "
-                    + " mc.amount,mc.id as chargeId " + " from m_loan_repayment_schedule ls "
-                    + " inner join m_loan ml on ml.id = ls.loan_id "
+                    + " mc.amount,mc.id as chargeId  from m_loan_repayment_schedule ls " + " inner join m_loan ml on ml.id = ls.loan_id "
                     + " join m_product_loan_charge plc on plc.product_loan_id = ml.product_id "
                     + " join m_charge mc on mc.id = plc.charge_id ";
 
@@ -1326,7 +1326,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " totran.description as toTransferDescription from m_loan l join m_loan_transaction tr on tr.loan_id = l.id "
                     + " join m_currency rc on rc." + sqlGenerator.escape("code") + " = l.currency_code "
                     + " left JOIN m_payment_detail pd ON tr.payment_detail_id = pd.id"
-                    + " left join m_payment_type pt on pd.payment_type_id = pt.id" + " left join m_office office on office.id=tr.office_id"
+                    + " left join m_payment_type pt on pd.payment_type_id = pt.id left join m_office office on office.id=tr.office_id"
                     + " left join m_account_transfer_transaction fromtran on fromtran.from_loan_transaction_id = tr.id "
                     + " left join m_account_transfer_transaction totran on totran.to_loan_transaction_id = tr.id ";
         }
@@ -2067,7 +2067,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + ", tr.amount as total, tr.principal_portion_derived as principal, tr.interest_portion_derived as interest, "
                     + " tr.fee_charges_portion_derived as fees, tr.penalty_charges_portion_derived as penalties, "
                     + " tr.overpayment_portion_derived as overpayment, tr.outstanding_loan_balance_derived as outstandingLoanBalance, "
-                    + " tr.unrecognized_income_portion as unrecognizedIncome " + " from m_loan_transaction tr ";
+                    + " tr.unrecognized_income_portion as unrecognizedIncome from m_loan_transaction tr ";
         }
 
         @Override

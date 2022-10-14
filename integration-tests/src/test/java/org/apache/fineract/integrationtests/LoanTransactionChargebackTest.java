@@ -37,6 +37,7 @@ import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdSummary;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.GetPaymentTypesResponse;
@@ -128,7 +129,8 @@ public class LoanTransactionChargebackTest {
 
         loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
 
-        Float amount = Float.valueOf("333.33");
+        final String baseAmount = "333.33";
+        Float amount = Float.valueOf(baseAmount);
         final LocalDate transactionDate = this.todaysDate.minusMonths(numberOfRepayments - 1).plusDays(3);
         String operationDate = Utils.dateFormatter.format(transactionDate);
 
@@ -155,6 +157,8 @@ public class LoanTransactionChargebackTest {
                 assertEquals(Double.valueOf("666.67"), period.getTotalDueForPeriod());
             }
         }
+
+        evaluateLoanSummaryAdjustments(getLoansLoanIdResponse, Double.valueOf(baseAmount));
     }
 
     @Test
@@ -377,6 +381,8 @@ public class LoanTransactionChargebackTest {
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         loanTransactionHelper.validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, Double.valueOf("200.00"));
 
+        evaluateLoanSummaryAdjustments(getLoansLoanIdResponse, Double.valueOf("200.00"));
+
         // Second round, array size equal to 1
         reviewLoanTransactionRelations(loanId, transactionId, 1);
 
@@ -385,6 +391,8 @@ public class LoanTransactionChargebackTest {
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         loanTransactionHelper.validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, Double.valueOf("500.00"));
 
+        evaluateLoanSummaryAdjustments(getLoansLoanIdResponse, Double.valueOf("500.00"));
+
         // Third round, array size equal to 2
         reviewLoanTransactionRelations(loanId, transactionId, 2);
 
@@ -392,6 +400,8 @@ public class LoanTransactionChargebackTest {
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         loanTransactionHelper.validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, Double.valueOf("1000.00"));
+
+        evaluateLoanSummaryAdjustments(getLoansLoanIdResponse, Double.valueOf("1000.00"));
     }
 
     private Integer createAccounts(final Integer daysToSubtract, final Integer numberOfRepayments) {
@@ -462,6 +472,15 @@ public class LoanTransactionChargebackTest {
         assertNotNull(getLoansTransactionResponse.getTransactionRelations());
         assertEquals(expectedSize, getLoansTransactionResponse.getTransactionRelations().size());
         log.info("Loan with {} Chargeback Transactions", getLoansTransactionResponse.getTransactionRelations().size());
+    }
+
+    private void evaluateLoanSummaryAdjustments(GetLoansLoanIdResponse getLoansLoanIdResponse, Double amountExpected) {
+        // Evaluate The Loan Summary Principal Adjustments
+        GetLoansLoanIdSummary getLoansLoanIdSummary = getLoansLoanIdResponse.getSummary();
+        if (getLoansLoanIdSummary != null) {
+            log.info("Loan with Principal Adjustments {} expected {}", getLoansLoanIdSummary.getPrincipalAdjustments(), amountExpected);
+            assertEquals(amountExpected, getLoansLoanIdSummary.getPrincipalAdjustments());
+        }
     }
 
 }
