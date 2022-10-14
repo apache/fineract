@@ -164,9 +164,10 @@ public class SmsCampaign extends AbstractPersistableCustom {
         }
 
         return new SmsCampaign().setCampaignName(campaignName).setCampaignType(campaignType.intValue())
-                .setTriggerType(triggerType.intValue()).setBusinessRuleId(report).setProviderId(providerId).setParamValue(paramValue)
+                .setTriggerType(SmsCampaignTriggerType.fromInt(triggerType.intValue()).getValue()).setBusinessRuleId(report).setProviderId(providerId).setParamValue(paramValue)
                 .setMessage(message).setSubmittedOnDate(submittedOnDate).setSubmittedBy(submittedBy).setRecurrence(recurrence)
-                .setRecurrenceStartDate(recurrenceStartDate).setNotification(isNotification);
+                .setRecurrenceStartDate(recurrenceStartDate).setNotification(isNotification).setStatus(SmsCampaignStatus.PENDING.getValue()
+                );
 
     }
 
