@@ -24,6 +24,7 @@ import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.COBBusinessStepServiceImpl;
 import org.apache.fineract.cob.domain.BatchBusinessStepRepository;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -39,9 +40,14 @@ public class TestDefaultConfiguration {
     }
 
     @Bean
+    public BusinessEventNotifierService businessEventNotifierService() {
+        return mock(BusinessEventNotifierService.class);
+    }
+
+    @Bean
     public COBBusinessStepService cobBusinessStepService(BatchBusinessStepRepository batchBusinessStepRepository,
-            ApplicationContext context, ListableBeanFactory beanFactory) {
-        return new COBBusinessStepServiceImpl(batchBusinessStepRepository, context, beanFactory);
+            ApplicationContext context, ListableBeanFactory beanFactory, BusinessEventNotifierService businessEventNotifierService) {
+        return new COBBusinessStepServiceImpl(batchBusinessStepRepository, context, beanFactory, businessEventNotifierService);
     }
 
     @Bean

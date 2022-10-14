@@ -30,6 +30,7 @@ import org.apache.fineract.cob.exceptions.BusinessStepException;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -43,12 +44,14 @@ public class COBBusinessStepServiceImpl implements COBBusinessStepService {
     private final BatchBusinessStepRepository batchBusinessStepRepository;
     private final ApplicationContext applicationContext;
     private final ListableBeanFactory beanFactory;
+    private final BusinessEventNotifierService businessEventNotifierService;
 
     @Override
     public <T extends COBBusinessStep<S>, S extends AbstractPersistableCustom> S run(TreeMap<Long, String> executionMap, S item) {
         if (executionMap == null || executionMap.isEmpty()) {
             throw new BusinessStepException("Execution map is empty! COB Business step execution skipped!");
         }
+        businessEventNotifierService.startExternalEventRecording();
         for (String businessStep : executionMap.values()) {
             try {
                 COBBusinessStep<S> businessStepBean = (COBBusinessStep<S>) applicationContext.getBean(businessStep);
@@ -60,6 +63,7 @@ public class COBBusinessStepServiceImpl implements COBBusinessStepService {
                 ThreadLocalContextUtil.setActionContext(ActionContext.COB);
             }
         }
+        businessEventNotifierService.stopExternalEventRecording();
         return item;
     }
 
