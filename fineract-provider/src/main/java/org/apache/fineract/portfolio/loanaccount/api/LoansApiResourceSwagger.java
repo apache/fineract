@@ -478,6 +478,8 @@ final class LoansApiResourceSwagger {
             public Double principalDisbursed;
             @Schema(example = "0.000000")
             public Double principalPaid;
+            @Schema(example = "0.00")
+            public Double principalAdjustments;
             @Schema(example = "0.000000")
             public Double principalWrittenOff;
             @Schema(example = "1000000.000000")

@@ -35,7 +35,16 @@ public final class LoanSummaryWrapper {
             final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
         for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
-            total = total.plus(installment.getPrincipalCompleted(currency)).minus(installment.getCredits(currency));
+            total = total.plus(installment.getPrincipalCompleted(currency));
+        }
+        return total;
+    }
+
+    public Money calculateTotalPrincipalAdjusted(final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments,
+            final MonetaryCurrency currency) {
+        Money total = Money.zero(currency);
+        for (final LoanRepaymentScheduleInstallment installment : repaymentScheduleInstallments) {
+            total = total.plus(installment.getCredits(currency));
         }
         return total;
     }
