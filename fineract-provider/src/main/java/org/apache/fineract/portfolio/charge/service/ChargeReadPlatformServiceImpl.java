@@ -293,7 +293,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                     + "oc.internationalized_name_code as currencyNameCode, c.fee_on_day as feeOnDay, c.fee_on_month as feeOnMonth, "
                     + "c.fee_interval as feeInterval, c.fee_frequency as feeFrequency,c.min_cap as minCap,c.max_cap as maxCap, "
                     + "c.income_or_liability_account_id as glAccountId , acc.name as glAccountName, acc.gl_code as glCode, "
-                    + "tg.id as taxGroupId, c.is_payment_type as isPaymentType, pt.id as paymentTypeId, pt.value as paymentTypeName, tg.name as taxGroupName "
+                    + "tg.id as taxGroupId, c.is_payment_type as isPaymentType, pt.id as paymentTypeId, pt.value as paymentTypeName, tg.name as taxGroupName, c.min_amount AS minAmount, c.max_amount AS maxAmount "
                     + "from m_charge c " + "join m_organisation_currency oc on c.currency_code = oc.code "
                     + " LEFT JOIN acc_gl_account acc on acc.id = c.income_or_liability_account_id "
                     + " LEFT JOIN m_tax_group tg on tg.id = c.tax_group_id " + " LEFT JOIN m_payment_type pt on pt.id = c.payment_type_id ";
@@ -316,6 +316,8 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             final Long id = rs.getLong("id");
             final String name = rs.getString("name");
             final BigDecimal amount = rs.getBigDecimal("amount");
+            final BigDecimal minAmount = rs.getBigDecimal("minAmount");
+            final BigDecimal maxAmount = rs.getBigDecimal("maxAmount");
 
             final String currencyCode = rs.getString("currencyCode");
             final String currencyName = rs.getString("currencyName");
@@ -390,7 +392,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             return ChargeData.instance(id, name, amount, currency, chargeTimeType, chargeAppliesToType, chargeCalculationType,
                     chargePaymentMode, feeOnMonthDay, feeInterval, penalty, active, isFreeWithdrawal, freeWithdrawalChargeFrequency,
                     restartFrequency, restartFrequencyEnum, isPaymentType, paymentTypeData, minCap, maxCap, feeFrequencyType, glAccountData,
-                    taxGroupData);
+                    taxGroupData,minAmount,maxAmount);
         }
     }
 
