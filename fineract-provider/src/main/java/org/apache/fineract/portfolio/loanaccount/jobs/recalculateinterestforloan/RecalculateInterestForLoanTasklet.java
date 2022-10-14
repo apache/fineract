@@ -63,7 +63,7 @@ public class RecalculateInterestForLoanTasklet implements Tasklet {
         Map<String, JobParameter> jobParameters = chunkContext.getStepContext().getStepExecution().getJobParameters().getParameters();
         if (!jobParameters.isEmpty()) {
             final String officeId = (String) jobParameters.get("officeId").getValue();
-            log.info("recalculateInterest: officeId={}", officeId);
+            log.debug("recalculateInterest: officeId={}", officeId);
             Long officeIdLong = Long.valueOf(officeId);
 
             final OfficeData office = officeReadPlatformService.retrieveOffice(officeIdLong);
@@ -82,14 +82,14 @@ public class RecalculateInterestForLoanTasklet implements Tasklet {
             if (!loanIds.isEmpty()) {
                 List<Throwable> errors = new ArrayList<>();
                 for (Long loanId : loanIds) {
-                    log.info("recalculateInterest: Loan ID = {}", loanId);
+                    log.debug("recalculateInterest: Loan ID = {}", loanId);
                     int numberOfRetries = 0;
                     while (numberOfRetries <= maxNumberOfRetries) {
                         try {
                             loanWritePlatformService.recalculateInterest(loanId);
                             numberOfRetries = maxNumberOfRetries + 1;
                         } catch (CannotAcquireLockException | ObjectOptimisticLockingFailureException exception) {
-                            log.info("Recalulate interest job has been retried {} time(s)", numberOfRetries);
+                            log.debug("Recalulate interest job has been retried {} time(s)", numberOfRetries);
                             if (numberOfRetries >= maxNumberOfRetries) {
                                 log.error(
                                         "Recalulate interest job has been retried for the max allowed attempts of {} and will be rolled back",
@@ -113,7 +113,7 @@ public class RecalculateInterestForLoanTasklet implements Tasklet {
                         }
                         i++;
                     }
-                    log.info("recalculateInterest: Loans count {}", i);
+                    log.debug("recalculateInterest: Loans count {}", i);
                 }
                 if (!errors.isEmpty()) {
                     throw new JobExecutionException(errors);
@@ -136,7 +136,7 @@ public class RecalculateInterestForLoanTasklet implements Tasklet {
 
         do {
             int totalFilteredRecords = loanIds.size();
-            log.info("Starting accrual - total filtered records - {}", totalFilteredRecords);
+            log.debug("Starting accrual - total filtered records - {}", totalFilteredRecords);
             recalculateInterest(loanIds, threadPoolSize, batchSize, executorService);
             maxLoanIdInList += pageSize + 1;
             loanIds = Collections.synchronizedList(

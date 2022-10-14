@@ -18,52 +18,30 @@
  */
 package org.apache.fineract.infrastructure.creditbureau.data;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class CreditBureauConfigurationData {
 
-    private final long creditBureauConfigurationId;
+    private long creditBureauConfigurationId;
 
-    private final String configurationKey;
+    private String configurationKey;
 
-    private final String value;
+    private String value;
 
-    private final long organizationCreditBureauId;
+    private long organizationCreditBureauId;
 
-    private final String description;
-
-    private CreditBureauConfigurationData(final long creditBureauConfigurationId, final String configurationKey, final String value,
-            final long organizationCreditBureauId, final String description) {
-        this.creditBureauConfigurationId = creditBureauConfigurationId;
-        this.configurationKey = configurationKey;
-        this.value = value;
-        this.organizationCreditBureauId = organizationCreditBureauId;
-        this.description = description;
-
-    }
+    private String description;
 
     public static CreditBureauConfigurationData instance(final long creditBureauConfigurationId, final String configurationKey,
             final String value, final long organizationCreditBureauId, final String description) {
-        return new CreditBureauConfigurationData(creditBureauConfigurationId, configurationKey, value, organizationCreditBureauId,
-                description);
-    }
-
-    public long getCreditBureauConfigurationId() {
-        return this.creditBureauConfigurationId;
-    }
-
-    public String getConfigurationKey() {
-        return this.configurationKey;
-    }
-
-    public String getValue() {
-        return this.value;
-    }
-
-    public long getOrganizationCreditBureauId() {
-        return this.organizationCreditBureauId;
-    }
-
-    public String getDescription() {
-        return this.description;
+        return new CreditBureauConfigurationData().setCreditBureauConfigurationId(creditBureauConfigurationId)
+                .setConfigurationKey(configurationKey).setValue(value).setOrganizationCreditBureauId(organizationCreditBureauId)
+                .setDescription(description);
     }
 
 }

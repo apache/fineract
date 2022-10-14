@@ -118,4 +118,6 @@ public interface ConfigurationDomainService {
     boolean isCOBDateAdjustmentEnabled();
 
     boolean isReversalTransactionAllowed();
+
+    Long retrieveExternalEventsPurgeDaysCriteria();
 }

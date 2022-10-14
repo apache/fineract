@@ -23,7 +23,14 @@ import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
 
 public abstract class ShareAccountBusinessEvent extends AbstractBusinessEvent<ShareAccount> {
 
+    private static final String CATEGORY = "Share";
+
     public ShareAccountBusinessEvent(ShareAccount value) {
         super(value);
+    }
+
+    @Override
+    public String getCategory() {
+        return CATEGORY;
     }
 }

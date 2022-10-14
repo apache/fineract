@@ -564,11 +564,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
             final LocalDate startDate = JdbcSupport.getLocalDate(rs, "start_date");
             final LocalDate endDate = JdbcSupport.getLocalDate(rs, "end_date");
-            final Integer fullDayFromDB = rs.getInt("full_day");
-            Boolean fullDay = false;
-            if (fullDayFromDB == 1) {
-                fullDay = true;
-            }
+            final Boolean fullDay = rs.getBoolean("full_day");
             final String startTime = rs.getString("start_time");
             final String endTime = rs.getString("end_time");
 

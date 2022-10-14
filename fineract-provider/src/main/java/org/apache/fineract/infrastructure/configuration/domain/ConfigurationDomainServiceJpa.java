@@ -40,6 +40,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
 
     public static final String ENABLE_BUSINESS_DATE = "enable_business_date";
     public static final String ENABLE_AUTOMATIC_COB_DATE_ADJUSTMENT = "enable_automatic_cob_date_adjustment";
+    public static final String EXTERNAL_EVENTS_PURGE_DAYS = "purge-external-events-older-than-days";
     private final PermissionRepository permissionRepository;
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
     private final PlatformCacheRepository cacheTypeRepository;
@@ -450,5 +451,12 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final String propertyName = "enable-post-reversal-txns-for-reverse-transactions";
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
         return property.isEnabled();
+    }
+
+    @Override
+    public Long retrieveExternalEventsPurgeDaysCriteria() {
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(EXTERNAL_EVENTS_PURGE_DAYS);
+        return property.getValue();
+
     }
 }

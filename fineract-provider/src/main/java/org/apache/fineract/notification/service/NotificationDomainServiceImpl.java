@@ -34,6 +34,7 @@ import org.apache.fineract.infrastructure.event.business.domain.deposit.Recurrin
 import org.apache.fineract.infrastructure.event.business.domain.group.CentersCreateBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.group.GroupsCreateBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanApprovedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.LoanChargebackTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanCloseAsRescheduleBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanCloseBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanCreatedBusinessEvent;
@@ -53,6 +54,7 @@ import org.apache.fineract.notification.data.NotificationData;
 import org.apache.fineract.notification.eventandlistener.NotificationEventPublisher;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.domain.FixedDepositAccount;
@@ -92,6 +94,8 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         businessEventNotifierService.addPostBusinessEventListener(LoanCreatedBusinessEvent.class, new LoanCreatedListener());
         businessEventNotifierService.addPostBusinessEventListener(LoanApprovedBusinessEvent.class, new LoanApprovedListener());
         businessEventNotifierService.addPostBusinessEventListener(LoanCloseBusinessEvent.class, new LoanClosedListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanChargebackTransactionBusinessEvent.class,
+                new LoanChargebackTransactionListener());
         businessEventNotifierService.addPostBusinessEventListener(LoanCloseAsRescheduleBusinessEvent.class,
                 new LoanCloseAsRescheduledListener());
         businessEventNotifierService.addPostBusinessEventListener(LoanTransactionMakeRepaymentPostBusinessEvent.class,
@@ -247,6 +251,19 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         }
     }
 
+    private class LoanChargebackTransactionListener implements BusinessEventListener<LoanChargebackTransactionBusinessEvent> {
+
+        @Override
+        public void onBusinessEvent(LoanChargebackTransactionBusinessEvent event) {
+            LoanTransaction loanTransaction = event.get();
+            buildNotification(LoanChargebackTransactionBusinessEvent.LOAN_CHARGEBACK_TRANSACTION_PERMISSION,
+                    LoanChargebackTransactionBusinessEvent.LOAN_CHARGEBACK_TRANSACTION_OBJECT_TYPE, loanTransaction.getId(),
+                    LoanChargebackTransactionBusinessEvent.LOAN_CHARGEBACK_TRANSACTION_NOTIFICATION,
+                    LoanChargebackTransactionBusinessEvent.LOAN_CHARGEBACK_TRANSACTION_EVENT_TYPE, context.authenticatedUser().getId(),
+                    loanTransaction.getLoan().getOfficeId());
+        }
+    }
+
     private class LoanMakeRepaymentListener implements BusinessEventListener<LoanTransactionMakeRepaymentPostBusinessEvent> {
 
         @Override
@@ -312,8 +329,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
 
         String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
         Set<Long> userIds = getNotifiableUserIds(officeId, permission);
-        NotificationData notificationData = new NotificationData(objectType, objectIdentifier, eventType, appUserId, notificationContent,
-                false, false, tenantIdentifier, officeId, userIds);
+        NotificationData notificationData = new NotificationData().setObjectType(objectType).setObjectId(objectIdentifier)
+                .setAction(eventType).setActorId(appUserId).setContent(notificationContent).setRead(false).setSystemGenerated(false)
+                .setTenantIdentifier(tenantIdentifier).setOfficeId(officeId).setUserIds(userIds);
         try {
             notificationEventPublisher.broadcastNotification(notificationData);
         } catch (Exception e) {

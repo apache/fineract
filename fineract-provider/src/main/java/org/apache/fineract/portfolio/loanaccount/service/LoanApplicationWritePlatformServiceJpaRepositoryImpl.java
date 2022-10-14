@@ -1693,7 +1693,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 .findOneByNameWithNotFoundDetection(FineractEntityAccessConstants.GLOBAL_CONFIG_FOR_OFFICE_SPECIFIC_PRODUCTS);
         if (restrictToUserOfficeProperty.isEnabled()) {
             FineractEntityRelation fineractEntityRelation = fineractEntityRelationRepository
-                    .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS.toStr());
+                    .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS.getStr());
             FineractEntityToEntityMapping officeToLoanProductMappingList = this.entityMappingRepository
                     .findListByProductId(fineractEntityRelation, productId, officeId);
             if (officeToLoanProductMappingList == null) {

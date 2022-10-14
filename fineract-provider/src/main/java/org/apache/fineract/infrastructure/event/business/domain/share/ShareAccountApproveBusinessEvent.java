@@ -22,12 +22,14 @@ import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
 
 public class ShareAccountApproveBusinessEvent extends ShareAccountBusinessEvent {
 
+    private static final String TYPE = "ShareAccountApproveBusinessEvent";
+
     public ShareAccountApproveBusinessEvent(ShareAccount value) {
         super(value);
     }
 
     @Override
     public String getType() {
-        return "ShareAccountApproveBusinessEvent";
+        return TYPE;
     }
 }

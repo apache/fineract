@@ -62,12 +62,12 @@ public class JobSchedulerServiceImpl implements ApplicationListener<ContextRefre
                     .retrieveAllJobs(fineractProperties.getNodeId());
             for (final ScheduledJobDetail jobDetails : scheduledJobDetails) {
                 jobRegisterService.scheduleJob(jobDetails);
-                jobDetails.updateTriggerMisfired(false);
+                jobDetails.setTriggerMisfired(false);
                 schedularWritePlatformService.saveOrUpdate(jobDetails);
             }
             final SchedulerDetail schedulerDetail = schedularWritePlatformService.retriveSchedulerDetail();
             if (schedulerDetail.isResetSchedulerOnBootup()) {
-                schedulerDetail.updateSuspendedState(false);
+                schedulerDetail.setSuspended(false);
                 schedularWritePlatformService.updateSchedulerDetail(schedulerDetail);
             }
         }

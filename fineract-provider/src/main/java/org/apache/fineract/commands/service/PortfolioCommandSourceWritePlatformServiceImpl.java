@@ -91,7 +91,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
                 result = this.processAndLogCommandService.executeCommand(wrapper, command, isApprovedByChecker);
                 numberOfRetries = maxNumberOfRetries + 1;
             } catch (CannotAcquireLockException | ObjectOptimisticLockingFailureException exception) {
-                log.info("The following command {} has been retried  {} time(s)", command.json(), numberOfRetries);
+                log.debug("The following command {} has been retried  {} time(s)", command.json(), numberOfRetries);
                 /***
                  * Fail if the transaction has been retired for maxNumberOfRetries
                  **/

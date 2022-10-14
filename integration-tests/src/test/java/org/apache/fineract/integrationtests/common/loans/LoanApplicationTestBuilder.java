@@ -335,7 +335,7 @@ public class LoanApplicationTestBuilder {
         return this;
     }
 
-    public LoanApplicationTestBuilder withwithRepaymentStrategy(final String transactionProcessingStrategy) {
+    public LoanApplicationTestBuilder withRepaymentStrategy(final String transactionProcessingStrategy) {
         this.transactionProcessingID = transactionProcessingStrategy;
         return this;
     }

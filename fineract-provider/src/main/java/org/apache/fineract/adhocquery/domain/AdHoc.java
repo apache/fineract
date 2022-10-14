@@ -23,16 +23,23 @@ import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import org.apache.commons.lang3.BooleanUtils;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.adhocquery.api.AdHocJsonInputParams;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 @Entity
 @Table(name = "m_adhoc")
-public final class AdHoc extends AbstractAuditableCustom {
+public class AdHoc extends AbstractAuditableCustom {
 
     @Column(name = "name", length = 100)
     private String name;
@@ -56,22 +63,7 @@ public final class AdHoc extends AbstractAuditableCustom {
     private Long reportRunEvery;
 
     @Column(name = "is_active", nullable = false)
-    private boolean isActive = false;
-
-    private AdHoc() {}
-
-    private AdHoc(final String name, final String query, final String tableName, final String tableFields, final String email,
-            final Long reportRunFrequency, final Long reportRunEvery, final boolean isActive) {
-        this.name = StringUtils.defaultIfEmpty(name, null);
-        this.query = StringUtils.defaultIfEmpty(query, null);
-        this.tableName = StringUtils.defaultIfEmpty(tableName, null);
-        this.tableFields = StringUtils.defaultIfEmpty(tableFields, null);
-        this.email = StringUtils.defaultIfEmpty(email, null);
-        this.reportRunFrequency = reportRunFrequency;
-        this.reportRunEvery = reportRunEvery;
-        this.isActive = BooleanUtils.toBooleanDefaultIfNull(isActive, false);
-
-    }
+    private boolean active;
 
     public static AdHoc fromJson(final JsonCommand command) {
         final String name = command.stringValueOfParameterNamed(AdHocJsonInputParams.NAME.getValue());
@@ -85,8 +77,11 @@ public final class AdHoc extends AbstractAuditableCustom {
         final String email = command.stringValueOfParameterNamed(AdHocJsonInputParams.EMAIL.getValue());
         final Long reportRunFrequency = command.longValueOfParameterNamed(AdHocJsonInputParams.REPORT_RUN_FREQUENCY.getValue());
         final Long reportRunEvery = command.longValueOfParameterNamed(AdHocJsonInputParams.REPORT_RUN_EVERY.getValue());
-        final boolean isActive = command.booleanPrimitiveValueOfParameterNamed(AdHocJsonInputParams.ISACTIVE.getValue());
-        return new AdHoc(name, query, tableName, tableFields, email, reportRunFrequency, reportRunEvery, isActive);
+        final boolean active = command.booleanPrimitiveValueOfParameterNamed(AdHocJsonInputParams.ACTIVE.getValue());
+        return new AdHoc().setName(StringUtils.defaultIfEmpty(name, null)).setQuery(StringUtils.defaultIfEmpty(query, null))
+                .setTableName(StringUtils.defaultIfEmpty(tableName, null)).setTableFields(StringUtils.defaultIfEmpty(tableFields, null))
+                .setEmail(StringUtils.defaultIfEmpty(email, null)).setReportRunFrequency(reportRunFrequency)
+                .setReportRunEvery(reportRunEvery).setActive(false);
     }
 
     public Map<String, Object> update(final JsonCommand command) {
@@ -136,52 +131,13 @@ public final class AdHoc extends AbstractAuditableCustom {
             actualChanges.put(reportRunEvery, newValue);
             this.reportRunEvery = newValue;
         }
-        final String paramisActive = "isActive";
-        if (command.isChangeInBooleanParameterNamed(paramisActive, this.isActive)) {
+        final String paramisActive = "active";
+        if (command.isChangeInBooleanParameterNamed(paramisActive, this.active)) {
             final Boolean newValue = command.booleanObjectValueOfParameterNamed(paramisActive);
             actualChanges.put(paramisActive, newValue);
-            this.isActive = newValue;
+            this.active = newValue;
         }
         return actualChanges;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getQuery() {
-        return query;
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public String getTableFields() {
-        return tableFields;
-    }
-
-    public boolean isActive() {
-        return this.isActive;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void disableActive() {
-        this.isActive = true;
-    }
-
-    public void enableActive() {
-        this.isActive = false;
-    }
-
-    public Long getReportRunFrequency() {
-        return this.reportRunFrequency;
-    }
-
-    public Long getReportRunEvery() {
-        return this.reportRunEvery;
-    }
 }

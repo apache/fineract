@@ -71,6 +71,7 @@ public final class LoanSchedulePeriodData {
     private final BigDecimal totalOverdue;
     private final BigDecimal totalActualCostOfLoanForPeriod;
     private final BigDecimal totalInstallmentAmountForPeriod;
+    private final BigDecimal totalCredits;
 
     public static LoanSchedulePeriodData disbursementOnlyPeriod(final LocalDate disbursementDate, final BigDecimal principalDisbursed,
             final BigDecimal feeChargesDueAtTimeOfDisbursement, final boolean isDisbursed) {
@@ -102,7 +103,7 @@ public final class LoanSchedulePeriodData {
             final BigDecimal totalDueForPeriod, final BigDecimal totalPaid, final BigDecimal totalPaidInAdvanceForPeriod,
             final BigDecimal totalPaidLateForPeriod, final BigDecimal totalWaived, final BigDecimal totalWrittenOff,
             final BigDecimal totalOutstanding, final BigDecimal totalActualCostOfLoanForPeriod,
-            final BigDecimal totalInstallmentAmountForPeriod) {
+            final BigDecimal totalInstallmentAmountForPeriod, final BigDecimal totalCredits) {
 
         return new LoanSchedulePeriodData(periodNumber, fromDate, dueDate, obligationsMetOnDate, complete, principalOriginalDue,
                 principalPaid, principalWrittenOff, principalOutstanding, outstandingPrincipalBalanceOfLoan,
@@ -110,7 +111,7 @@ public final class LoanSchedulePeriodData {
                 feeChargesPaid, feeChargesWaived, feeChargesWrittenOff, feeChargesOutstanding, penaltyChargesDue, penaltyChargesPaid,
                 penaltyChargesWaived, penaltyChargesWrittenOff, penaltyChargesOutstanding, totalDueForPeriod, totalPaid,
                 totalPaidInAdvanceForPeriod, totalPaidLateForPeriod, totalWaived, totalWrittenOff, totalOutstanding,
-                totalActualCostOfLoanForPeriod, totalInstallmentAmountForPeriod);
+                totalActualCostOfLoanForPeriod, totalInstallmentAmountForPeriod, totalCredits);
     }
 
     public static LoanSchedulePeriodData withPaidDetail(final LoanSchedulePeriodData loanSchedulePeriodData, final boolean complete,
@@ -130,7 +131,8 @@ public final class LoanSchedulePeriodData {
                 loanSchedulePeriodData.totalPaidForPeriod, loanSchedulePeriodData.totalPaidInAdvanceForPeriod,
                 loanSchedulePeriodData.totalPaidLateForPeriod, loanSchedulePeriodData.totalWaivedForPeriod,
                 loanSchedulePeriodData.totalWrittenOffForPeriod, loanSchedulePeriodData.totalOutstandingForPeriod,
-                loanSchedulePeriodData.totalActualCostOfLoanForPeriod, loanSchedulePeriodData.totalInstallmentAmountForPeriod);
+                loanSchedulePeriodData.totalActualCostOfLoanForPeriod, loanSchedulePeriodData.totalInstallmentAmountForPeriod,
+                loanSchedulePeriodData.totalCredits);
     }
 
     /*
@@ -197,6 +199,7 @@ public final class LoanSchedulePeriodData {
         } else {
             this.totalOverdue = null;
         }
+        this.totalCredits = BigDecimal.ZERO;
     }
 
     /*
@@ -259,6 +262,7 @@ public final class LoanSchedulePeriodData {
         } else {
             this.totalOverdue = null;
         }
+        this.totalCredits = BigDecimal.ZERO;
     }
 
     /*
@@ -276,7 +280,8 @@ public final class LoanSchedulePeriodData {
             final BigDecimal penaltyChargesWrittenOff, final BigDecimal penaltyChargesOutstanding, final BigDecimal totalDueForPeriod,
             final BigDecimal totalPaid, final BigDecimal totalPaidInAdvanceForPeriod, final BigDecimal totalPaidLateForPeriod,
             final BigDecimal totalWaived, final BigDecimal totalWrittenOff, final BigDecimal totalOutstanding,
-            final BigDecimal totalActualCostOfLoanForPeriod, final BigDecimal totalInstallmentAmountForPeriod) {
+            final BigDecimal totalActualCostOfLoanForPeriod, final BigDecimal totalInstallmentAmountForPeriod,
+            final BigDecimal totalCredits) {
         this.period = periodNumber;
         this.fromDate = fromDate;
         this.dueDate = dueDate;
@@ -330,6 +335,7 @@ public final class LoanSchedulePeriodData {
         } else {
             this.totalOverdue = null;
         }
+        this.totalCredits = totalCredits;
     }
 
     private BigDecimal defaultToZeroIfNull(final BigDecimal possibleNullValue) {

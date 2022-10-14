@@ -373,7 +373,6 @@ public final class CalendarUtils {
     }
 
     public static boolean isValidRedurringDate(final String recurringRule, final LocalDate seedDate, final LocalDate date) {
-
         final Recur recur = CalendarUtils.getICalRecur(recurringRule);
         if (recur == null) {
             return false;

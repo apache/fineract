@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 import java.util.stream.Stream;
 import javax.ws.rs.HttpMethod;
 import org.apache.fineract.batch.command.internal.ActivateClientCommandStrategy;
+import org.apache.fineract.batch.command.internal.AdjustTransactionCommandStrategy;
 import org.apache.fineract.batch.command.internal.ApplyLoanCommandStrategy;
 import org.apache.fineract.batch.command.internal.ApplySavingsCommandStrategy;
 import org.apache.fineract.batch.command.internal.ApproveLoanCommandStrategy;
@@ -78,6 +79,8 @@ public class CommandStrategyProviderTest {
                         mock(CreateTransactionLoanCommandStrategy.class)),
                 Arguments.of("loans/123/transactions?command=payoutRefund", HttpMethod.POST, "createTransactionLoanCommandStrategy",
                         mock(CreateTransactionLoanCommandStrategy.class)),
+                Arguments.of("loans/123/transactions/123", HttpMethod.POST, "adjustTransactionCommandStrategy",
+                        mock(AdjustTransactionCommandStrategy.class)),
                 Arguments.of("clients/456?command=activate", HttpMethod.POST, "activateClientCommandStrategy",
                         mock(ActivateClientCommandStrategy.class)),
                 Arguments.of("loans/123?command=approve", HttpMethod.POST, "approveLoanCommandStrategy",

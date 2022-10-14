@@ -25,6 +25,7 @@ public interface LoanApiConstants {
     String disbursementDataParameterName = "disbursementData";
     String disbursementDateParameterName = "expectedDisbursementDate";
     String disbursementPrincipalParameterName = "principal";
+    String disbursementReversedParameterName = "reversed";
     String disbursementNetDisbursalAmountParameterName = "netDisbursalAmount";
     String updatedDisbursementDateParameterName = "updatedExpectedDisbursementDate";
     String updatedDisbursementPrincipalParameterName = "updatedPrincipal";
@@ -146,4 +147,12 @@ public interface LoanApiConstants {
     // Reversal Transation Data
     String REVERSAL_EXTERNAL_ID_PARAMNAME = "reversalExternalId";
     String REVERSED_ON_DATE_PARAMNAME = "reversedOnDate";
+
+    String DISALLOW_EXPECTED_DISBURSEMENTS = "disallowExpectedDisbursements";
+
+    String TRANSACTION_AMOUNT_PARAMNAME = "transactionAmount";
+    String PAYMENT_TYPE_PARAMNAME = "paymentTypeId";
+
+    // Commands
+    String CHARGEBACK_TRANSACTION_COMMAND = "chargeback";
 }

@@ -153,9 +153,12 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
             String categoryName = null;
             String liabilityAccountName = null;
             String expenseAccountName = null;
-            ProvisioningCriteriaDefinitionData data = new ProvisioningCriteriaDefinitionData(id, categoryId, categoryName, minimumAge,
-                    maximumAge, provisioningpercentage, liabilityAccount.getId(), liabilityAccount.getGlCode(), liabilityAccountName,
-                    expenseAccount.getId(), expenseAccount.getGlCode(), expenseAccountName);
+            ProvisioningCriteriaDefinitionData data = new ProvisioningCriteriaDefinitionData().setId(id).setCategoryId(categoryId)
+                    .setCategoryName(categoryName).setMinAge(minimumAge).setMaxAge(maximumAge)
+                    .setProvisioningPercentage(provisioningpercentage).setLiabilityAccount(liabilityAccount.getId())
+                    .setLiabilityCode(liabilityAccount.getGlCode()).setLiabilityName(liabilityAccountName)
+                    .setExpenseAccount(expenseAccount.getId()).setExpenseCode(expenseAccount.getGlCode())
+                    .setExpenseName(expenseAccountName);
             provisioningCriteria.update(data, liabilityAccount, expenseAccount);
         }
     }

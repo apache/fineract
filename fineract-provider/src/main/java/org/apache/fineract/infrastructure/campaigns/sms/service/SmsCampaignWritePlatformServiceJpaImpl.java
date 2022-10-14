@@ -452,7 +452,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
             final String response = this.genericDataService.generateJsonFromGenericResultsetData(results);
             resultList = new ObjectMapper().readValue(response, new TypeReference<List<HashMap<String, Object>>>() {});
         } catch (JsonParseException e) {
-            log.info("Conversion of report query results to JSON failed", e);
+            log.warn("Conversion of report query results to JSON failed", e);
             return resultList;
         }
         // loop changes array date to string date

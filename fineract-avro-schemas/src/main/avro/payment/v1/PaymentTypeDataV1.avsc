@@ -42,6 +42,22 @@
                 "null",
                 "long"
             ]
+        },
+        {
+            "default": null,
+            "name": "codeName",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "isSystemDefined",
+            "type": [
+                "null",
+                "boolean"
+            ]
         }
     ]
 }

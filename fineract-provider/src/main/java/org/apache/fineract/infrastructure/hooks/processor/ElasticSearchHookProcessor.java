@@ -43,7 +43,7 @@ public class ElasticSearchHookProcessor implements HookProcessor {
     public void process(final Hook hook, final String payload, final String entityName, final String actionName,
             final FineractContext context) {
 
-        final Set<HookConfiguration> config = hook.getHookConfig();
+        final Set<HookConfiguration> config = hook.getConfig();
 
         String url = "";
         String contentType = "";

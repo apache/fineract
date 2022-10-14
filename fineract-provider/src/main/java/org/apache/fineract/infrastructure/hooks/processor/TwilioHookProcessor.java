@@ -54,7 +54,7 @@ public class TwilioHookProcessor implements HookProcessor {
     public void process(final Hook hook, final String payload, final String entityName, final String actionName,
             final FineractContext context) throws IOException {
 
-        final SmsProviderData smsProviderData = new SmsProviderData(hook.getHookConfig());
+        final SmsProviderData smsProviderData = new SmsProviderData(hook.getConfig());
 
         sendRequest(smsProviderData, payload, entityName, actionName, hook, context);
     }

@@ -534,6 +534,14 @@
         },
         {
             "default": null,
+            "name": "disallowExpectedDisbursements",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "default": null,
             "name": "canDefineInstallmentAmount",
             "type": [
                 "null",

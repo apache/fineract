@@ -84,17 +84,19 @@ public class ExternalEventService {
         BulkMessagePayloadV1 avroDto = new BulkMessagePayloadV1(messages);
         byte[] data = byteBufferConverter.convert(avroDto.toByteBuffer());
 
-        return new ExternalEvent(bulkBusinessEvent.getType(), BulkMessagePayloadV1.class.getName(), data, idempotencyKey);
+        return new ExternalEvent(bulkBusinessEvent.getType(), bulkBusinessEvent.getCategory(), BulkMessagePayloadV1.class.getName(), data,
+                idempotencyKey);
     }
 
     private <T> ExternalEvent handleRegularBusinessEvent(BusinessEvent<T> event) throws IOException {
         String eventType = event.getType();
+        String eventCategory = event.getCategory();
         String idempotencyKey = idempotencyKeyGenerator.generate(event);
         BusinessEventSerializer serializer = serializerFactory.create(event);
         String schema = serializer.getSupportedSchema().getName();
         byte[] data = serializer.serialize(event);
 
-        return new ExternalEvent(eventType, schema, data, idempotencyKey);
+        return new ExternalEvent(eventType, eventCategory, schema, data, idempotencyKey);
     }
 
     private void flushChangesBeforeSerialization() {

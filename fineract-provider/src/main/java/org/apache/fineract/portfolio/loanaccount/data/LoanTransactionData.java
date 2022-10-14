@@ -91,6 +91,8 @@ public class LoanTransactionData {
     private String reversalExternalId;
     private LocalDate reversedOnDate;
 
+    private List<LoanTransactionRelationData> transactionRelations;
+
     public static LoanTransactionData importInstance(BigDecimal repaymentAmount, LocalDate lastRepaymentDate, Long repaymentTypeId,
             Integer rowIndex, String locale, String dateFormat) {
         return new LoanTransactionData(repaymentAmount, lastRepaymentDate, repaymentTypeId, rowIndex, locale, dateFormat);
@@ -347,5 +349,9 @@ public class LoanTransactionData {
 
     public void setLoanChargePaidByList(Collection<LoanChargePaidByData> loanChargePaidByList) {
         this.loanChargePaidByList = loanChargePaidByList;
+    }
+
+    public void setLoanTransactionRelations(List<LoanTransactionRelationData> transactionRelations) {
+        this.transactionRelations = transactionRelations;
     }
 }

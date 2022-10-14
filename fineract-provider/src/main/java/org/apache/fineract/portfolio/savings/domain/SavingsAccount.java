@@ -1322,11 +1322,11 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
                 if (charge.isEnablePaymentType() && charge.isEnableFreeWithdrawal()) { // discount transaction to
                                                                                        // specific paymentType
-                    if (paymentDetail.getPaymentType().getPaymentName().equals(charge.getCharge().getPaymentType().getPaymentName())) {
+                    if (paymentDetail.getPaymentType().getName().equals(charge.getCharge().getPaymentType().getName())) {
                         resetFreeChargeDaysCount(charge, transactionAmount, transactionDate, user, refNo);
                     }
                 } else if (charge.isEnablePaymentType()) { // normal charge-transaction to specific paymentType
-                    if (paymentDetail.getPaymentType().getPaymentName().equals(charge.getCharge().getPaymentType().getPaymentName())) {
+                    if (paymentDetail.getPaymentType().getName().equals(charge.getCharge().getPaymentType().getName())) {
                         charge.updateWithdralFeeAmount(transactionAmount);
                         this.payCharge(charge, charge.getAmountOutstanding(this.getCurrency()), transactionDate, user,
                                 backdatedTxnsAllowedTill, refNo);

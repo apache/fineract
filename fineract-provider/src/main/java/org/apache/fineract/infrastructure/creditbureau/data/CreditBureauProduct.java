@@ -18,35 +18,25 @@
  */
 package org.apache.fineract.infrastructure.creditbureau.data;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class CreditBureauProduct {
 
-    private final long creditBureauProductId;
+    private long creditBureauProductId;
 
-    private final String creditBureauProductName;
+    private String creditBureauProductName;
 
-    private final long creditBureauMasterId;
-
-    private CreditBureauProduct(final long creditBureauProductId, final String creditBureauProductName, final long creditBureauMasterId) {
-        this.creditBureauProductId = creditBureauProductId;
-        this.creditBureauProductName = creditBureauProductName;
-        this.creditBureauMasterId = creditBureauMasterId;
-    }
+    private long creditBureauMasterId;
 
     public static CreditBureauProduct instance(final long creditBureauProductId, final String creditBureauProductName,
             final long creditBureauMasterId) {
-        return new CreditBureauProduct(creditBureauProductId, creditBureauProductName, creditBureauMasterId);
-    }
-
-    public long getCreditBureauProductId() {
-        return this.creditBureauProductId;
-    }
-
-    public String getCreditBureauProductName() {
-        return this.creditBureauProductName;
-    }
-
-    public long getCreditBureauMasterId() {
-        return this.creditBureauMasterId;
+        return new CreditBureauProduct().setCreditBureauProductId(creditBureauProductId).setCreditBureauProductName(creditBureauProductName)
+                .setCreditBureauMasterId(creditBureauMasterId);
     }
 
 }

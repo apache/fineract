@@ -914,7 +914,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     private Money getTotalAllTrancheDisbursementAmount() {
         Money amount = Money.zero(getCurrency());
         if (isMultiDisburmentLoan()) {
-            for (final LoanDisbursementDetails loanDisbursementDetail : this.disbursementDetails) {
+            for (final LoanDisbursementDetails loanDisbursementDetail : getDisbursementDetails()) {
                 amount = amount.plus(loanDisbursementDetail.principal());
             }
         }
@@ -1131,7 +1131,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 loanCharge.update(this);
                 if (this.loanProduct.isMultiDisburseLoan() && loanCharge.isTrancheDisbursementCharge()) {
                     loanCharge.getTrancheDisbursementCharge().getloanDisbursementDetails().updateLoan(this);
-                    for (final LoanDisbursementDetails loanDisbursementDetails : this.disbursementDetails) {
+                    for (final LoanDisbursementDetails loanDisbursementDetails : getDisbursementDetails()) {
                         if (loanCharge.getTrancheDisbursementCharge().getloanDisbursementDetails().getId() == null) {
                             if (loanCharge.getTrancheDisbursementCharge().getloanDisbursementDetails().equals(loanDisbursementDetails)) {
                                 loanTrancheDisbursementCharge = new LoanTrancheDisbursementCharge(loanCharge, loanDisbursementDetails);
@@ -1330,7 +1330,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             this.totalOverpaid = null;
         } else {
             final Money overpaidBy = calculateTotalOverpayment();
-            this.totalOverpaid = overpaidBy.getAmountDefaultedToNullIfZero();
+            this.totalOverpaid = null;
+            if (!overpaidBy.isLessThanZero()) {
+                this.totalOverpaid = overpaidBy.getAmountDefaultedToNullIfZero();
+            }
 
             final Money recoveredAmount = calculateTotalRecoveredPayments();
             this.totalRecovered = recoveredAmount.getAmountDefaultedToNullIfZero();
@@ -1338,11 +1341,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             final Money principal = this.loanRepaymentScheduleDetail.getPrincipal();
             this.summary.updateSummary(loanCurrency(), principal, getRepaymentScheduleInstallments(), this.loanSummaryWrapper,
                     isDisbursed(), this.charges);
-            updateLoanOutstandingBalaces();
+            updateLoanOutstandingBalances();
         }
     }
 
-    public void updateLoanSummarAndStatus() {
+    public void updateLoanSummaryAndStatus() {
         updateLoanSummaryDerivedFields();
         doPostLoanTransactionChecks(getLastUserTransactionDate(), loanLifecycleStateMachine);
     }
@@ -1598,7 +1601,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             final JsonArray disbursementDataArray = command.arrayOfParameterNamed(LoanApiConstants.disbursementDataParameterName);
 
             if (loanProduct.isDisallowExpectedDisbursements()) {
-                if (!disbursementDataArray.isEmpty()) {
+                if (disbursementDataArray != null && !disbursementDataArray.isEmpty()) {
                     final String errorMessage = "For this loan product, disbursement details are not allowed";
                     throw new MultiDisbursementDataNotAllowedException(LoanApiConstants.disbursementDataParameterName, errorMessage);
                 }
@@ -1607,11 +1610,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                     final String errorMessage = "For this loan product, disbursement details must be provided";
                     throw new MultiDisbursementDataRequiredException(LoanApiConstants.disbursementDataParameterName, errorMessage);
                 }
-            }
-            if (disbursementDataArray.size() > loanProduct.maxTrancheCount()) {
-                final String errorMessage = "Number of tranche shouldn't be greter than " + loanProduct.maxTrancheCount();
-                throw new ExceedingTrancheCountException(LoanApiConstants.disbursementDataParameterName, errorMessage,
-                        loanProduct.maxTrancheCount(), disbursementDetails.size());
+
+                if (disbursementDataArray.size() > loanProduct.maxTrancheCount()) {
+                    final String errorMessage = "Number of tranche shouldn't be greter than " + loanProduct.maxTrancheCount();
+                    throw new ExceedingTrancheCountException(LoanApiConstants.disbursementDataParameterName, errorMessage,
+                            loanProduct.maxTrancheCount(), disbursementDetails.size());
+                }
             }
         } else {
             this.disbursementDetails.clear();
@@ -1903,7 +1907,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             if (loanDisbursementDetail.actualDisbursementDate() == null) {
                 LocalDate actualDisbursementDate = null;
                 LoanDisbursementDetails disbursementDetails = new LoanDisbursementDetails(expectedDisbursementDate, actualDisbursementDate,
-                        principal, this.netDisbursalAmount);
+                        principal, this.netDisbursalAmount, false);
                 disbursementDetails.updateLoan(this);
                 if (!loanDisbursementDetail.equals(disbursementDetails)) {
                     loanDisbursementDetail.copy(disbursementDetails);
@@ -1914,7 +1918,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         } else {
             LocalDate actualDisbursementDate = null;
             LoanDisbursementDetails disbursementDetails = new LoanDisbursementDetails(expectedDisbursementDate, actualDisbursementDate,
-                    principal, this.netDisbursalAmount);
+                    principal, this.netDisbursalAmount, false);
             disbursementDetails.updateLoan(this);
             this.disbursementDetails.add(disbursementDetails);
             for (LoanTrancheCharge trancheCharge : trancheCharges) {
@@ -1957,7 +1961,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public LoanDisbursementDetails fetchLoanDisbursementsById(Long id) {
         LoanDisbursementDetails loanDisbursementDetail = null;
-        for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
+        for (LoanDisbursementDetails disbursementDetail : getDisbursementDetails()) {
             if (id.equals(disbursementDetail.getId())) {
                 loanDisbursementDetail = disbursementDetail;
                 break;
@@ -1968,7 +1972,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     private List<Long> fetchDisbursementIds() {
         List<Long> list = new ArrayList<>();
-        for (LoanDisbursementDetails disbursementDetails : this.disbursementDetails) {
+        for (LoanDisbursementDetails disbursementDetails : getDisbursementDetails()) {
             list.add(disbursementDetails.getId());
         }
         return list;
@@ -2252,22 +2256,23 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             recalculateAllCharges();
 
             if (loanProduct.isMultiDisburseLoan()) {
+                List<LoanDisbursementDetails> currentDisbursementDetails = getDisbursementDetails();
                 if (loanProduct.isDisallowExpectedDisbursements()) {
-                    if (!disbursementDetails.isEmpty()) {
+                    if (!currentDisbursementDetails.isEmpty()) {
                         final String errorMessage = "For this loan product, disbursement details are not allowed";
                         throw new MultiDisbursementDataNotAllowedException(LoanApiConstants.disbursementDataParameterName, errorMessage);
                     }
                 } else {
-                    if (disbursementDetails.isEmpty()) {
+                    if (currentDisbursementDetails.isEmpty()) {
                         final String errorMessage = "For this loan product, disbursement details must be provided";
                         throw new MultiDisbursementDataRequiredException(LoanApiConstants.disbursementDataParameterName, errorMessage);
                     }
                 }
 
-                if (this.disbursementDetails.size() > loanProduct.maxTrancheCount()) {
+                if (currentDisbursementDetails.size() > loanProduct.maxTrancheCount()) {
                     final String errorMessage = "Number of tranche shouldn't be greter than " + loanProduct.maxTrancheCount();
                     throw new ExceedingTrancheCountException(LoanApiConstants.disbursementDataParameterName, errorMessage,
-                            loanProduct.maxTrancheCount(), disbursementDetails.size());
+                            loanProduct.maxTrancheCount(), currentDisbursementDetails.size());
                 }
             }
             this.approvedOnDate = approvedOn;
@@ -2461,7 +2466,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     private List<LoanDisbursementDetails> getDisbursedLoanDisbursementDetails() {
         List<LoanDisbursementDetails> ret = new ArrayList<>();
         if (this.disbursementDetails != null && this.disbursementDetails.size() > 0) {
-            for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
+            for (LoanDisbursementDetails disbursementDetail : getDisbursementDetails()) {
                 if (disbursementDetail.actualDisbursementDate() != null) {
                     ret.add(disbursementDetail);
                 }
@@ -2632,7 +2637,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     private Collection<LoanDisbursementDetails> fetchUndisbursedDetail() {
         Collection<LoanDisbursementDetails> disbursementDetails = new ArrayList<>();
         LocalDate date = null;
-        for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
+        for (LoanDisbursementDetails disbursementDetail : getDisbursementDetails()) {
             if (disbursementDetail.actualDisbursementDate() == null) {
                 if (date == null || disbursementDetail.expectedDisbursementDate().compareTo(date) == 0 ? Boolean.TRUE : Boolean.FALSE) {
                     disbursementDetails.add(disbursementDetail);
@@ -2651,7 +2656,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         LoanDisbursementDetails details = null;
         LocalDate date = this.actualDisbursementDate;
         if (date != null) {
-            for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
+            for (LoanDisbursementDetails disbursementDetail : getDisbursementDetails()) {
                 if (disbursementDetail.actualDisbursementDate() != null) {
                     if (disbursementDetail.actualDisbursementDate().isAfter(date)
                             || disbursementDetail.actualDisbursementDate().compareTo(date) == 0 ? Boolean.TRUE : Boolean.FALSE) {
@@ -2666,7 +2671,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     private boolean isDisbursementMissed() {
         boolean isDisbursementMissed = false;
-        for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
+        for (LoanDisbursementDetails disbursementDetail : getDisbursementDetails()) {
             if (disbursementDetail.actualDisbursementDate() == null
                     && DateUtils.getBusinessLocalDate().isAfter(disbursementDetail.expectedDisbursementDateAsLocalDate())) {
                 isDisbursementMissed = true;
@@ -2678,7 +2683,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public BigDecimal getDisbursedAmount() {
         BigDecimal principal = BigDecimal.ZERO;
-        for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
+        for (LoanDisbursementDetails disbursementDetail : getDisbursementDetails()) {
             if (disbursementDetail.actualDisbursementDate() != null) {
                 principal = principal.add(disbursementDetail.principal());
             }
@@ -2687,7 +2692,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     private void removeDisbursementDetail() {
-        Set<LoanDisbursementDetails> details = new HashSet<>(this.disbursementDetails);
+        Set<LoanDisbursementDetails> details = new HashSet<>(getDisbursementDetails());
         for (LoanDisbursementDetails disbursementDetail : details) {
             if (disbursementDetail.actualDisbursementDate() == null) {
                 this.disbursementDetails.remove(disbursementDetail);
@@ -2697,10 +2702,15 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     private boolean isDisbursementAllowed() {
         boolean isAllowed = false;
-        for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
-            if (disbursementDetail.actualDisbursementDate() == null) {
-                isAllowed = true;
-                break;
+        List<LoanDisbursementDetails> disbursementDetails = getDisbursementDetails();
+        if (disbursementDetails == null || disbursementDetails.size() == 0) {
+            isAllowed = true;
+        } else {
+            for (LoanDisbursementDetails disbursementDetail : disbursementDetails) {
+                if (disbursementDetail.actualDisbursementDate() == null) {
+                    isAllowed = true;
+                    break;
+                }
             }
         }
         return isAllowed;
@@ -2708,7 +2718,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     private boolean atleastOnceDisbursed() {
         boolean isDisbursed = false;
-        for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
+        for (LoanDisbursementDetails disbursementDetail : getDisbursementDetails()) {
             if (disbursementDetail.actualDisbursementDate() != null) {
                 isDisbursed = true;
                 break;
@@ -2843,7 +2853,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             chargesPayment.updateComponentsAndTotal(zero, zero, disbursentMoney, zero);
             chargesPayment.updateLoan(this);
             addLoanTransaction(chargesPayment);
-            updateLoanOutstandingBalaces();
+            updateLoanOutstandingBalances();
         }
 
         if (getApprovedOnDate() != null && disbursedOn.isBefore(getApprovedOnDate())) {
@@ -2890,7 +2900,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         chargesPayment.updateComponents(zero, zero, charge.getAmount(getCurrency()), zero);
         chargesPayment.updateLoan(this);
         addLoanTransaction(chargesPayment);
-        updateLoanOutstandingBalaces();
+        updateLoanOutstandingBalances();
         charge.markAsFullyPaid();
         return chargesPayment;
     }
@@ -2924,7 +2934,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                     : Boolean.TRUE;
             this.loanRepaymentScheduleDetail.setPrincipal(this.approvedPrincipal);
             if (this.loanProduct.isMultiDisburseLoan()) {
-                for (final LoanDisbursementDetails details : this.disbursementDetails) {
+                for (final LoanDisbursementDetails details : getDisbursementDetails()) {
                     details.updateActualDisbursementDate(null);
                 }
             }
@@ -3355,14 +3365,18 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return transactions;
     }
 
-    private void doPostLoanTransactionChecks(final LocalDate transactionDate, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
-
+    private boolean doPostLoanTransactionChecks(final LocalDate transactionDate,
+            final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+        boolean statusChanged = false;
         if (isOverPaid()) {
             // FIXME - kw - update account balance to negative amount.
             handleLoanOverpayment(loanLifecycleStateMachine);
+            statusChanged = true;
         } else if (this.summary.isRepaidInFull(loanCurrency())) {
             handleLoanRepaymentInFull(transactionDate, loanLifecycleStateMachine);
+            statusChanged = true;
         }
+        return statusChanged;
     }
 
     private void handleLoanRepaymentInFull(final LocalDate transactionDate, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
@@ -3419,7 +3433,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 addLoanTransaction(finalAccrual);
             }
         }
-        updateLoanOutstandingBalaces();
+        updateLoanOutstandingBalances();
     }
 
     private void determineCumulativeIncomeFromInstallments(HashMap<String, BigDecimal> cumulativeIncomeFromInstallments) {
@@ -3682,9 +3696,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         }
 
         for (final LoanTransaction loanTransaction : this.loanTransactions) {
-            if ((loanTransaction.isRefund() || loanTransaction.isRefundForActiveLoan() || loanTransaction.isCreditBalanceRefund())
-                    && !loanTransaction.isReversed()) {
-                totalPaidInRepayments = totalPaidInRepayments.minus(loanTransaction.getAmount(currency));
+            if (!loanTransaction.isReversed()) {
+                if ((loanTransaction.isRefund() || loanTransaction.isRefundForActiveLoan() || loanTransaction.isCreditBalanceRefund()
+                        || loanTransaction.isChargeback())) {
+                    totalPaidInRepayments = totalPaidInRepayments.minus(loanTransaction.getAmount(currency));
+                }
             }
         }
 
@@ -5092,8 +5108,18 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return list;
     }
 
-    public List<LoanDisbursementDetails> getDisbursementDetails() {
+    public List<LoanDisbursementDetails> getAllDisbursementDetails() {
         return this.disbursementDetails;
+    }
+
+    public List<LoanDisbursementDetails> getDisbursementDetails() {
+        List<LoanDisbursementDetails> currentDisbursementDetails = new ArrayList<LoanDisbursementDetails>();
+        for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
+            if (!disbursementDetail.isReversed()) {
+                currentDisbursementDetails.add(disbursementDetail);
+            }
+        }
+        return currentDisbursementDetails;
     }
 
     public ChangedTransactionDetail updateDisbursementDateAndAmountForTranche(final LoanDisbursementDetails disbursementDetails,
@@ -5112,15 +5138,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         actualChanges.put(LoanApiConstants.disbursementPrincipalParameterName,
                 command.bigDecimalValueOfParameterNamed(LoanApiConstants.disbursementPrincipalParameterName, locale));
 
-        Collection<LoanDisbursementDetails> loanDisburseDetails = this.getDisbursementDetails();
-        BigDecimal setPrincipalAmount = BigDecimal.ZERO;
-        for (LoanDisbursementDetails details : loanDisburseDetails) {
-            if (details.actualDisbursementDate() != null) {
-                setPrincipalAmount = setPrincipalAmount.add(details.principal());
-            }
-        }
+        this.loanRepaymentScheduleDetail.setPrincipal(getPrincipalAmountForRepaymentSchedule());
 
-        this.loanRepaymentScheduleDetail.setPrincipal(setPrincipalAmount);
         if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
             regenerateRepaymentScheduleWithInterestRecalculation(scheduleGeneratorDTO);
         } else {
@@ -5139,6 +5158,25 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         }
 
         return changedTransactionDetail;
+    }
+
+    public BigDecimal getPrincipalAmountForRepaymentSchedule() {
+        BigDecimal principalAmount = BigDecimal.ZERO;
+
+        if (isMultiDisburmentLoan() && isDisbursed()) {
+            Collection<LoanDisbursementDetails> loanDisburseDetails = this.getDisbursementDetails();
+            for (LoanDisbursementDetails details : loanDisburseDetails) {
+                if (details.actualDisbursementDate() != null) {
+                    principalAmount = principalAmount.add(details.principal());
+                }
+            }
+        } else if (isApproved()) {
+            principalAmount = getApprovedPrincipal();
+        } else {
+            principalAmount = getPrincipal().getAmount();
+        }
+
+        return principalAmount;
     }
 
     public BigDecimal retriveLastEmiAmount() {
@@ -5393,7 +5431,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 addLoanTransaction(accrual);
             }
         }
-        updateLoanOutstandingBalaces();
+        updateLoanOutstandingBalances();
     }
 
     private void determineFeeDetails(LocalDate fromDate, LocalDate toDate, HashMap<String, Object> feeDetails) {
@@ -5538,7 +5576,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         NthDayType nthDayType = null;
         DayOfWeekType dayOfWeekType = null;
         final List<DisbursementData> disbursementData = new ArrayList<>();
-        for (LoanDisbursementDetails disbursementDetails : this.disbursementDetails) {
+        for (LoanDisbursementDetails disbursementDetails : getDisbursementDetails()) {
             disbursementData.add(disbursementDetails.toData());
         }
 
@@ -5636,13 +5674,21 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return interestRecalculatedOn;
     }
 
-    private void updateLoanOutstandingBalaces() {
+    private void updateLoanOutstandingBalances() {
         Money outstanding = Money.zero(getCurrency());
         List<LoanTransaction> loanTransactions = retreiveListOfTransactionsExcludeAccruals();
         for (LoanTransaction loanTransaction : loanTransactions) {
             if (loanTransaction.isDisbursement() || loanTransaction.isIncomePosting()) {
                 outstanding = outstanding.plus(loanTransaction.getAmount(getCurrency()));
                 loanTransaction.updateOutstandingLoanBalance(outstanding.getAmount());
+            } else if (loanTransaction.isChargeback()) {
+                Money transactionOutstanding = loanTransaction.getAmount(getCurrency());
+                if (!loanTransaction.getOverPaymentPortion(getCurrency()).isZero()) {
+                    transactionOutstanding = transactionOutstanding.minus(loanTransaction.getOverPaymentPortion(getCurrency()));
+                }
+                outstanding = outstanding.plus(transactionOutstanding);
+                loanTransaction.updateOutstandingLoanBalance(outstanding.getAmount());
+
             } else {
                 if (this.loanInterestRecalculationDetails != null
                         && this.loanInterestRecalculationDetails.isCompoundingToBePostedAsTransaction()
@@ -6090,6 +6136,39 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return changedTransactionDetail;
     }
 
+    public void handleChargebackTransaction(final LoanTransaction chargebackTransaction,
+            final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+
+        chargebackTransaction.updateLoan(this);
+
+        if (!chargebackTransaction.isChargeback()) {
+            final String errorMessage = "A transaction of type chargeback was expected but not received.";
+            throw new InvalidLoanTransactionTypeException("transaction", "is.not.a.chargeback.transaction", errorMessage);
+        }
+
+        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
+                .determineProcessor(this.transactionProcessingStrategy);
+        final Money overpaidAmount = calculateTotalOverpayment(); // Before Transaction
+        if (overpaidAmount.isGreaterThanZero()) {
+            Money difference = chargebackTransaction.getAmount(getCurrency()).minus(overpaidAmount);
+            if (difference.isLessThanZero()) {
+                difference = null;
+            }
+            chargebackTransaction.setOverPayments(difference);
+        }
+
+        if (chargebackTransaction.isNotZero(loanCurrency())) {
+            addLoanTransaction(chargebackTransaction);
+        }
+        loanRepaymentScheduleTransactionProcessor.handleChargeback(chargebackTransaction, getCurrency(), overpaidAmount,
+                getRepaymentScheduleInstallments());
+
+        updateLoanSummaryDerivedFields();
+        if (!doPostLoanTransactionChecks(chargebackTransaction.getTransactionDate(), loanLifecycleStateMachine)) {
+            loanLifecycleStateMachine.transition(LoanEvent.LOAN_CHARGEBACK, this);
+        }
+    }
+
     public LocalDate possibleNextRefundDate() {
 
         final LocalDate now = DateUtils.getBusinessLocalDate();
@@ -6201,7 +6280,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 charge.resetToOriginal(loanCurrency());
             }
         }
-        for (final LoanDisbursementDetails details : this.disbursementDetails) {
+        for (final LoanDisbursementDetails details : getDisbursementDetails()) {
             if (actualDisbursementDate.equals(details.actualDisbursementDate())) {
                 this.loanRepaymentScheduleDetail.setPrincipal(getDisbursedAmount().subtract(details.principal()));
                 details.updateActualDisbursementDate(null);
@@ -6264,7 +6343,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
      * get the next repayment LocalDate for rescheduling at the time of disbursement
      */
     public LocalDate getNextPossibleRepaymentDateForRescheduling() {
-        List<LoanDisbursementDetails> loanDisbursementDetails = this.disbursementDetails;
+        List<LoanDisbursementDetails> loanDisbursementDetails = getDisbursementDetails();
         LocalDate nextRepaymentDate = DateUtils.getBusinessLocalDate();
         for (LoanDisbursementDetails loanDisbursementDetail : loanDisbursementDetails) {
             if (loanDisbursementDetail.actualDisbursementDate() == null) {

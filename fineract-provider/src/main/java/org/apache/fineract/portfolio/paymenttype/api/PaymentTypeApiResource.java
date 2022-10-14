@@ -36,9 +36,11 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.AllArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -50,9 +52,9 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+@AllArgsConstructor
 @Path("/paymenttypes")
 @Component
 
@@ -64,24 +66,7 @@ public class PaymentTypeApiResource {
     private final PaymentTypeReadPlatformService readPlatformService;
     private final PortfolioCommandSourceWritePlatformService commandWritePlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-    // private final String resourceNameForPermissions = "PAYMENT_TYPE";
     private final PaymentTypeRepositoryWrapper paymentTypeRepositoryWrapper;
-
-    // private final Set<String> RESPONSE_DATA_PARAMETERS = new
-    // HashSet<>(Arrays.asList("id", "value", "description", "isCashPayment"));
-
-    @Autowired
-    public PaymentTypeApiResource(PlatformSecurityContext securityContext, DefaultToApiJsonSerializer<PaymentTypeData> jsonSerializer,
-            PaymentTypeReadPlatformService readPlatformService, PaymentTypeRepositoryWrapper paymentTypeRepositoryWrapper,
-            ApiRequestParameterHelper apiRequestParameterHelper, PortfolioCommandSourceWritePlatformService commandWritePlatformService) {
-
-        this.securityContext = securityContext;
-        this.jsonSerializer = jsonSerializer;
-        this.readPlatformService = readPlatformService;
-        this.paymentTypeRepositoryWrapper = paymentTypeRepositoryWrapper;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandWritePlatformService = commandWritePlatformService;
-    }
 
     @GET
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
@@ -89,9 +74,15 @@ public class PaymentTypeApiResource {
     @Operation(summary = "Retrieve all Payment Types", description = "Retrieve list of payment types")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PaymentTypeApiResourceSwagger.GetPaymentTypesResponse.class)))) })
-    public String getAllPaymentTypes(@Context final UriInfo uriInfo) {
+    public String getAllPaymentTypes(@Context final UriInfo uriInfo,
+            @QueryParam("onlyWithCode") @Parameter(description = "onlyWithCode") final boolean onlyWithCode) {
         this.securityContext.authenticatedUser().validateHasReadPermission(PaymentTypeApiResourceConstants.resourceNameForPermissions);
-        final Collection<PaymentTypeData> paymentTypes = this.readPlatformService.retrieveAllPaymentTypes();
+        Collection<PaymentTypeData> paymentTypes = null;
+        if (onlyWithCode) {
+            paymentTypes = this.readPlatformService.retrieveAllPaymentTypesWithCode();
+        } else {
+            paymentTypes = this.readPlatformService.retrieveAllPaymentTypes();
+        }
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.jsonSerializer.serialize(settings, paymentTypes, PaymentTypeApiResourceConstants.RESPONSE_DATA_PARAMETERS);
     }

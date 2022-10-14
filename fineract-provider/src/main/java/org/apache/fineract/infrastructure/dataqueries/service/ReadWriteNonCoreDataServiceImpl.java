@@ -184,7 +184,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
-        LOG.error("Error occured.", dve);
+        LOG.error("Error occurred.", dve);
     }
 
     @Transactional
@@ -538,7 +538,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         if (StringUtils.isNotBlank(code)) {
             if (isConstraintApproach) {
-                codeMappings.put(dataTableNameAlias + "_" + name, this.codeReadPlatformService.retriveCode(code).getCodeId());
+                codeMappings.put(dataTableNameAlias + "_" + name, this.codeReadPlatformService.retriveCode(code).getId());
                 String fkName = "fk_" + dataTableNameAlias + "_" + name;
                 constrainBuilder.append(", CONSTRAINT ").append(sqlGenerator.escape(fkName)).append(" ")
                         .append("FOREIGN KEY (" + sqlGenerator.escape(name) + ") ").append("REFERENCES ")
@@ -750,7 +750,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                         }
                     }
                     if (newCode != null) {
-                        codeMappings.put(dataTableNameAlias + "_" + newName, this.codeReadPlatformService.retriveCode(newCode).getCodeId());
+                        codeMappings.put(dataTableNameAlias + "_" + newName, this.codeReadPlatformService.retriveCode(newCode).getId());
                         if (code == null || !StringUtils.equalsIgnoreCase(name, newName)) {
                             constrainBuilder.append(",ADD CONSTRAINT  ").append(sqlGenerator.escape(newFkName)).append(" ")
                                     .append("FOREIGN KEY (" + sqlGenerator.escape(newName) + ") ").append("REFERENCES ")
@@ -806,7 +806,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         try {
             codeId = this.jdbcTemplate.queryForObject(checkColumnCodeMapping.toString(), Integer.class);
         } catch (final EmptyResultDataAccessException e) {
-            LOG.info("Error occured.", e);
+            LOG.warn("Error occurred.", e);
         }
         return ObjectUtils.defaultIfNull(codeId, 0);
     }
@@ -824,7 +824,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         if (StringUtils.isNotBlank(code)) {
             if (isConstraintApproach) {
                 String fkName = "fk_" + dataTableNameAlias + "_" + name;
-                codeMappings.put(dataTableNameAlias + "_" + name, this.codeReadPlatformService.retriveCode(code).getCodeId());
+                codeMappings.put(dataTableNameAlias + "_" + name, this.codeReadPlatformService.retriveCode(code).getId());
                 constrainBuilder.append(",ADD CONSTRAINT  ").append(sqlGenerator.escape(fkName)).append(" ")
                         .append("FOREIGN KEY (" + sqlGenerator.escape(name) + ") ").append("REFERENCES ")
                         .append(sqlGenerator.escape(CODE_VALUES_TABLE)).append(" (id)");
@@ -1228,11 +1228,11 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 pkValue = datatableId;
             }
             final String sql = getUpdateSql(grs.getColumnHeaders(), dataTableName, pkName, pkValue, changes);
-            LOG.info("Update sql: {}", sql);
+            LOG.debug("Update sql: {}", sql);
             if (StringUtils.isNotBlank(sql)) {
                 this.jdbcTemplate.update(sql);
             } else {
-                LOG.info("No Changes");
+                LOG.debug("No Changes");
             }
         }
 
@@ -1574,7 +1574,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         addSql = "insert into " + sqlGenerator.escape(datatable) + " (" + sqlGenerator.escape(fkName) + " " + insertColumns + ")"
                 + " select " + appTableId + " as id" + selectColumns;
 
-        LOG.info("{}", addSql);
+        LOG.debug("{}", addSql);
 
         return addSql;
     }
@@ -1624,7 +1624,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 + ", score )" + " select " + appTableId + " as id" + selectColumns
                 + " , ( SELECT SUM( code_score ) FROM m_code_value WHERE m_code_value.id IN (" + scoresId + " ) ) as score";
 
-        LOG.info("{}", vaddSql);
+        LOG.debug("{}", vaddSql);
 
         return vaddSql;
     }

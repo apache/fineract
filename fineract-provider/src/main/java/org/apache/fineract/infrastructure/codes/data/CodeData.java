@@ -19,29 +19,27 @@
 package org.apache.fineract.infrastructure.codes.data;
 
 import java.io.Serializable;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * Immutable data object representing a code.
  */
+
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class CodeData implements Serializable {
 
-    private final Long id;
+    private Long id;
     @SuppressWarnings("unused")
-    private final String name;
+    private String name;
     @SuppressWarnings("unused")
-    private final boolean systemDefined;
+    private boolean systemDefined;
 
     public static CodeData instance(final Long id, final String name, final boolean systemDefined) {
-        return new CodeData(id, name, systemDefined);
+        return new CodeData().setId(id).setName(name).setSystemDefined(systemDefined);
     }
 
-    private CodeData(final Long id, final String name, final boolean systemDefined) {
-        this.id = id;
-        this.name = name;
-        this.systemDefined = systemDefined;
-    }
-
-    public Long getCodeId() {
-        return this.id;
-    }
 }

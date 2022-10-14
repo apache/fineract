@@ -130,6 +130,9 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "loanTransaction")
     private Set<LoanTransactionToRepaymentScheduleMapping> loanTransactionToRepaymentScheduleMappings = new HashSet<>();
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "fromTransaction")
+    private Set<LoanTransactionRelation> loanTransactionRelations = new HashSet<>();
+
     protected LoanTransaction() {}
 
     public static LoanTransaction incomePosting(final Loan loan, final Office office, final LocalDate dateOf, final BigDecimal amount,
@@ -155,6 +158,14 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         return new LoanTransaction(null, office, LoanTransactionType.REPAYMENT, paymentDetail, amount.getAmount(), paymentDate, externalId);
     }
 
+    public static LoanTransaction chargeback(final Office office, final Money amount, final PaymentDetail paymentDetail,
+            final LocalDate paymentDate, final String externalId) {
+        LoanTransaction loanTransaction = new LoanTransaction(null, office, LoanTransactionType.CHARGEBACK, paymentDetail,
+                amount.getAmount(), paymentDate, externalId);
+        loanTransaction.principalPortion = amount.getAmount();
+        return loanTransaction;
+    }
+
     public static LoanTransaction repaymentType(final LoanTransactionType repaymentType, final Office office, final Money amount,
             final PaymentDetail paymentDetail, final LocalDate paymentDate, final String externalId, final String chargeRefundChargeType) {
         return new LoanTransaction(null, office, repaymentType, paymentDetail, amount.getAmount(), paymentDate, externalId,
@@ -170,7 +181,6 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
                 break;
             }
         }
-
     }
 
     public static LoanTransaction recoveryRepayment(final Office office, final Money amount, final PaymentDetail paymentDetail,
@@ -449,6 +459,12 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         this.overPaymentPortion = defaultToNullIfZero(getOverPaymentPortion(currency).plus(overPayment).getAmount());
     }
 
+    public void setOverPayments(final Money overPayment) {
+        if (overPayment != null) {
+            this.overPaymentPortion = defaultToNullIfZero(overPayment.getAmount());
+        }
+    }
+
     public Money getPrincipalPortion(final MonetaryCurrency currency) {
         return Money.of(currency, this.principalPortion);
     }
@@ -587,6 +603,10 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
 
     public boolean isChargePayment() {
         return getTypeOf().isChargePayment() && isNotReversed();
+    }
+
+    public boolean isChargeback() {
+        return getTypeOf().isChargeback() && isNotReversed();
     }
 
     public boolean isPenaltyPayment() {
@@ -847,6 +867,18 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
 
     public LocalDate getSubmittedOnDate() {
         return submittedOnDate;
+    }
+
+    public boolean hasLoanTransactionRelations() {
+        return (loanTransactionRelations != null && loanTransactionRelations.size() > 0);
+    }
+
+    public Set<LoanTransactionRelation> getLoanTransactionRelations() {
+        return loanTransactionRelations;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
     }
 
     // TODO missing hashCode(), equals(Object obj), but probably OK as long as

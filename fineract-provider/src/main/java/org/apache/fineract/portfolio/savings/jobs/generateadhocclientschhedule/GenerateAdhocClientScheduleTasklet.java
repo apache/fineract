@@ -85,18 +85,18 @@ public class GenerateAdhocClientScheduleTasklet implements Tasklet {
                             .append(") ").append(adhoc.getQuery());
                     if (insertSqlBuilder.length() > 0) {
                         final int result = jdbcTemplate.update(insertSqlBuilder.toString());
-                        log.info("{}: Records affected by generateClientSchedule: {}", ThreadLocalContextUtil.getTenant().getName(),
+                        log.debug("{}: Records affected by generateClientSchedule: {}", ThreadLocalContextUtil.getTenant().getName(),
                                 result);
 
                         jdbcTemplate.update("UPDATE m_adhoc SET last_run=? WHERE id=?", new Date(), adhoc.getId());
                     }
                 } else {
-                    log.info("{}: Skipping execution of {}, scheduled for execution on {}", ThreadLocalContextUtil.getTenant().getName(),
+                    log.debug("{}: Skipping execution of {}, scheduled for execution on {}", ThreadLocalContextUtil.getTenant().getName(),
                             adhoc.getName(), next);
                 }
             });
         } else {
-            log.info("{}: Nothing to update by generateClientSchedule", ThreadLocalContextUtil.getTenant().getName());
+            log.debug("{}: Nothing to update by generateClientSchedule", ThreadLocalContextUtil.getTenant().getName());
         }
         return RepeatStatus.FINISHED;
     }

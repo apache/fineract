@@ -89,15 +89,15 @@ public class SavingsAccountTransactionEnumData implements Serializable {
     }
 
     public boolean isAnnualFee() {
-        return this.value.equals(SavingsAccountTransactionType.ANNUAL_FEE.getValue().toString());
+        return Long.valueOf(SavingsAccountTransactionType.ANNUAL_FEE.getValue()).equals(this.id);
     }
 
     public boolean isPayCharge() {
-        return this.value.equals(SavingsAccountTransactionType.PAY_CHARGE.getValue().toString());
+        return Long.valueOf(SavingsAccountTransactionType.PAY_CHARGE.getValue()).equals(this.id);
     }
 
     public boolean isWithdrawalFee() {
-        return this.value.equals(SavingsAccountTransactionType.WITHDRAWAL_FEE.getValue().toString());
+        return Long.valueOf(SavingsAccountTransactionType.WITHDRAWAL_FEE.getValue()).equals(this.id);
     }
 
 }

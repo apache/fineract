@@ -785,4 +785,21 @@ public final class BatchHelper {
 
         return br;
     }
+
+    public static BatchRequest createAdjustTransactionRequest(final Long requestId, final Long reference, final String amount,
+            final LocalDate date) {
+        final BatchRequest br = new BatchRequest();
+
+        br.setRequestId(requestId);
+        br.setReference(reference);
+        br.setRelativeUrl("loans/$.loanId/transactions/$.resourceId");
+        br.setMethod("POST");
+        String dateString = date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+        br.setBody(String.format(
+                "{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", " + "\"transactionDate\": \"%s\",  \"transactionAmount\": %s}",
+                dateString, amount));
+
+        return br;
+
+    }
 }
