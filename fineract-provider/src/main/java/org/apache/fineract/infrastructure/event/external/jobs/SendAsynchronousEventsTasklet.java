@@ -53,12 +53,18 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
         try {
-            List<ExternalEvent> events = getQueuedEventsBatch();
-            processEvents(events);
+            if (isDownstreamChannelEnabled()) {
+                List<ExternalEvent> events = getQueuedEventsBatch();
+                processEvents(events);
+            }
         } catch (Exception e) {
             log.error("Error occurred while processing events: ", e);
         }
         return RepeatStatus.FINISHED;
+    }
+
+    private boolean isDownstreamChannelEnabled() {
+        return fineractProperties.getEvents().getExternal().getProducer().getJms().isEnabled();
     }
 
     private List<ExternalEvent> getQueuedEventsBatch() {

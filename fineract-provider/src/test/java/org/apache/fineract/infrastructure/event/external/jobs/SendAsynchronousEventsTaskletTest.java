@@ -89,8 +89,11 @@ class SendAsynchronousEventsTaskletTest {
         FineractProperties.FineractEventsProperties eventsProperties = new FineractProperties.FineractEventsProperties();
         FineractProperties.FineractExternalEventsProperties externalProperties = new FineractProperties.FineractExternalEventsProperties();
         FineractProperties.FineractExternalEventsProducerProperties externalEventsProducerProperties = new FineractProperties.FineractExternalEventsProducerProperties();
+        FineractProperties.FineractExternalEventsProducerJmsProperties externalEventsProducerJMSProperties = new FineractProperties.FineractExternalEventsProducerJmsProperties();
+        externalEventsProducerJMSProperties.setEnabled(true);
         externalProperties.setEnabled(true);
         externalEventsProducerProperties.setReadBatchSize(readBatchSize);
+        externalEventsProducerProperties.setJms(externalEventsProducerJMSProperties);
         externalProperties.setProducer(externalEventsProducerProperties);
         eventsProperties.setExternal(externalProperties);
         when(fineractProperties.getEvents()).thenReturn(eventsProperties);
