@@ -349,10 +349,14 @@ public final class BatchHelper {
      * given requestId and reference
      *
      * @param requestId
+     *            the batch request id.
      * @param reference
+     *            the reference id.
+     * @param chargeId
+     *            the charge id used for getting charge type.
      * @return BatchRequest
      */
-    public static BatchRequest createChargeRequest(final Long requestId, final Long reference) {
+    public static BatchRequest createChargeRequest(final Long requestId, final Long reference, final Integer chargeId) {
 
         final BatchRequest br = new BatchRequest();
         br.setRequestId(requestId);
@@ -360,8 +364,12 @@ public final class BatchHelper {
         br.setMethod("POST");
         br.setReference(reference);
 
-        final String body = "{\"chargeId\": \"2\", \"locale\": \"en\", \"amount\": \"100\", "
-                + "\"dateFormat\": \"dd MMMM yyyy\", \"dueDate\": \"29 April 2013\"}";
+        final String dateFormat = "dd MMMM yyyy";
+        final String dateString = LocalDate.now(Utils.getZoneIdOfTenant()).format(DateTimeFormatter.ofPattern(dateFormat));
+
+        final String body = String.format(
+                "{\"chargeId\": \"%d\", \"locale\": \"en\", \"amount\": \"11.15\", " + "\"dateFormat\": \"%s\", \"dueDate\": \"%s\"}",
+                chargeId, dateFormat, dateString);
         br.setBody(body);
 
         return br;
@@ -384,6 +392,30 @@ public final class BatchHelper {
         br.setReference(reference);
         br.setMethod("GET");
         br.setBody("{ }");
+
+        return br;
+    }
+
+    /**
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.GetChargeByIdCommandStrategy} request
+     * with given requestId and reference.
+     *
+     * @param requestId
+     *            the request id
+     * @param reference
+     *            the reference
+     * @return the {@link BatchRequest}
+     */
+    public static BatchRequest getChargeByIdCommandStrategy(final Long requestId, final Long reference) {
+
+        final BatchRequest br = new BatchRequest();
+        String relativeUrl = "loans/$.loanId/charges/$.resourceId";
+
+        br.setRequestId(requestId);
+        br.setRelativeUrl(relativeUrl);
+        br.setMethod(HttpMethod.GET);
+        br.setReference(reference);
+        br.setBody("{}");
 
         return br;
     }

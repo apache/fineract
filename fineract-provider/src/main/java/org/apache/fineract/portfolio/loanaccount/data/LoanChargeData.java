@@ -39,6 +39,8 @@ public class LoanChargeData {
     private final String name;
     private final EnumOptionData chargeTimeType;
 
+    private final LocalDate submittedOnDate;
+
     private final LocalDate dueDate;
 
     private final EnumOptionData chargeCalculationType;
@@ -103,10 +105,10 @@ public class LoanChargeData {
 
     public LoanChargeData(final Long id, final Long chargeId, final String name, final CurrencyData currency, final BigDecimal amount,
             final BigDecimal amountPaid, final BigDecimal amountWaived, final BigDecimal amountWrittenOff,
-            final BigDecimal amountOutstanding, final EnumOptionData chargeTimeType, final LocalDate dueDate,
-            final EnumOptionData chargeCalculationType, final BigDecimal percentage, final BigDecimal amountPercentageAppliedTo,
-            final boolean penalty, final EnumOptionData chargePaymentMode, final boolean paid, final boolean waived, final Long loanId,
-            final BigDecimal minCap, final BigDecimal maxCap, final BigDecimal amountOrPercentage,
+            final BigDecimal amountOutstanding, final EnumOptionData chargeTimeType, final LocalDate submittedOnDate,
+            final LocalDate dueDate, final EnumOptionData chargeCalculationType, final BigDecimal percentage,
+            final BigDecimal amountPercentageAppliedTo, final boolean penalty, final EnumOptionData chargePaymentMode, final boolean paid,
+            final boolean waived, final Long loanId, final BigDecimal minCap, final BigDecimal maxCap, final BigDecimal amountOrPercentage,
             Collection<LoanInstallmentChargeData> installmentChargeData, final String externalId) {
         this.id = id;
         this.chargeId = chargeId;
@@ -118,6 +120,7 @@ public class LoanChargeData {
         this.amountWrittenOff = amountWrittenOff;
         this.amountOutstanding = amountOutstanding;
         this.chargeTimeType = chargeTimeType;
+        this.submittedOnDate = submittedOnDate;
         this.dueDate = dueDate;
         this.chargeCalculationType = chargeCalculationType;
         this.percentage = percentage;
@@ -162,6 +165,7 @@ public class LoanChargeData {
         this.amountWrittenOff = BigDecimal.ZERO;
         this.amountOutstanding = amount;
         this.chargeTimeType = chargeTimeType;
+        this.submittedOnDate = null;
         this.dueDate = null;
         this.chargeCalculationType = chargeCalculationType;
         this.percentage = percentage;
@@ -203,6 +207,7 @@ public class LoanChargeData {
         this.amountWrittenOff = null;
         this.amountOutstanding = amountOutstanding;
         this.chargeTimeType = chargeTimeType;
+        this.submittedOnDate = null;
         this.dueDate = dueAsOfDate;
         this.chargeCalculationType = null;
         this.percentage = null;
@@ -234,6 +239,7 @@ public class LoanChargeData {
         this.amountWrittenOff = null;
         this.amountOutstanding = null;
         this.chargeTimeType = chargeTimeType;
+        this.submittedOnDate = null;
         this.dueDate = dueAsOfDate;
         this.chargeCalculationType = null;
         this.percentage = null;
@@ -264,6 +270,7 @@ public class LoanChargeData {
         this.amountWrittenOff = null;
         this.amountOutstanding = null;
         this.chargeTimeType = chargeData.chargeTimeType;
+        this.submittedOnDate = chargeData.submittedOnDate;
         this.dueDate = chargeData.dueDate;
         this.chargeCalculationType = null;
         this.percentage = null;
@@ -294,6 +301,7 @@ public class LoanChargeData {
         this.amountWrittenOff = chargeData.amountWrittenOff;
         this.amountOutstanding = chargeData.amountOutstanding;
         this.chargeTimeType = chargeData.chargeTimeType;
+        this.submittedOnDate = chargeData.submittedOnDate;
         this.dueDate = chargeData.dueDate;
         this.chargeCalculationType = chargeData.chargeCalculationType;
         this.percentage = chargeData.percentage;
@@ -326,6 +334,7 @@ public class LoanChargeData {
         this.amountWrittenOff = null;
         this.amountOutstanding = null;
         this.chargeTimeType = chargeTimeType;
+        this.submittedOnDate = null;
         this.dueDate = dueAsOfDate;
         this.chargeCalculationType = chargeCalculationType;
         this.percentage = null;
@@ -356,6 +365,7 @@ public class LoanChargeData {
         this.amountWrittenOff = null;
         this.amountOutstanding = null;
         this.chargeTimeType = null;
+        this.submittedOnDate = null;
         this.dueDate = dueAsOfDate;
         this.chargeCalculationType = null;
         this.percentage = null;

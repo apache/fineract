@@ -91,6 +91,8 @@ public class CommandStrategyProvider {
         this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/charges").method("POST").build(), "createChargeCommandStrategy");
         this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/charges").method("GET").build(),
                 "collectChargesCommandStrategy");
+        this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/charges\\/\\d+").method("GET").build(),
+                "getChargeByIdCommandStrategy");
         this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\?command=repayment").method("POST").build(),
                 "createTransactionLoanCommandStrategy");
         this.commandStrategies.put(

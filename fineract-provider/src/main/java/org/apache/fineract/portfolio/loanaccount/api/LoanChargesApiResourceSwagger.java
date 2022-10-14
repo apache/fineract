@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDate;
 import java.util.Set;
 
 /**
@@ -102,6 +103,8 @@ final class LoanChargesApiResourceSwagger {
         public Double amountOrPercentage;
         @Schema(example = "false")
         public Boolean penalty;
+        @Schema(example = "27 March 2013")
+        public LocalDate submittedOnDate;
     }
 
     @Schema(description = "GetLoansLoanIdChargesTemplateResponse")
@@ -179,6 +182,8 @@ final class LoanChargesApiResourceSwagger {
         public String dateFormat;
         @Schema(example = "29 April 2013")
         public String dueDate;
+        @Schema(example = "786444UUUYYH7")
+        public String externalId;
     }
 
     @Schema(description = " PostLoansLoanIdChargesResponse")
