@@ -75,4 +75,5 @@
     <include file="parts/0053_add_external_events_purge_job.xml" relativeToChangelogFile="true"/>
     <include file="parts/0054_additional_fields_loan_repayment_schedule.xml" relativeToChangelogFile="true"/>
     <include file="parts/0055_add_submitted_on_date_to_loan_charge.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0056_add_external_event_default_configuration.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

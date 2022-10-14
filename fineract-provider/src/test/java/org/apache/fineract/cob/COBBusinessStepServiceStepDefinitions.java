@@ -37,6 +37,7 @@ import org.apache.fineract.cob.loan.LoanCOBBusinessStep;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.mix.data.MixTaxonomyData;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -47,8 +48,9 @@ public class COBBusinessStepServiceStepDefinitions implements En {
     private ApplicationContext applicationContext = mock(ApplicationContext.class);
     private ListableBeanFactory beanFactory = mock(ListableBeanFactory.class);
     private BatchBusinessStepRepository batchBusinessStepRepository = mock(BatchBusinessStepRepository.class);
+    private BusinessEventNotifierService businessEventNotifierService = mock(BusinessEventNotifierService.class);
     private final COBBusinessStepService businessStepService = new COBBusinessStepServiceImpl(batchBusinessStepRepository,
-            applicationContext, beanFactory);
+            applicationContext, beanFactory, businessEventNotifierService);
     private COBBusinessStep cobBusinessStep = mock(COBBusinessStep.class);
     private COBBusinessStep notRegistereCobBusinessStep = mock(COBBusinessStep.class);
     private TreeMap<Long, String> executionMap;
