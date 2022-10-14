@@ -19,36 +19,30 @@
 package org.apache.fineract.organisation.monetary.data;
 
 import java.io.Serializable;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * Immutable data object representing currency.
  */
-@Getter
-@EqualsAndHashCode
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class CurrencyData implements Serializable {
 
-    private final String code;
-    private final String name;
-    private final int decimalPlaces;
-    private final Integer inMultiplesOf;
-    private final String displaySymbol;
-    private final String nameCode;
-    private final String displayLabel;
+    private static final long serialVersionUID = 1L;
+
+    private String code;
+    private String name;
+    private int decimalPlaces;
+    private Integer inMultiplesOf;
+    private String displaySymbol;
+    private String nameCode;
+    private String displayLabel;
 
     public static CurrencyData blank() {
         return new CurrencyData("", "", 0, 0, "", "");
-    }
-
-    public CurrencyData(String code) {
-        this.code = code;
-        this.name = null;
-        this.decimalPlaces = 0;
-        this.inMultiplesOf = null;
-        this.displaySymbol = null;
-        this.nameCode = null;
-        this.displayLabel = null;
     }
 
     public CurrencyData(final String code, final String name, final int decimalPlaces, final Integer inMultiplesOf,
@@ -60,16 +54,6 @@ public class CurrencyData implements Serializable {
         this.displaySymbol = displaySymbol;
         this.nameCode = nameCode;
         this.displayLabel = generateDisplayLabel();
-    }
-
-    public CurrencyData(final String code, final int decimalPlaces, final Integer inMultiplesOf) {
-        this.code = code;
-        this.name = null;
-        this.decimalPlaces = decimalPlaces;
-        this.inMultiplesOf = inMultiplesOf;
-        this.displaySymbol = null;
-        this.nameCode = null;
-        this.displayLabel = null;
     }
 
     private String generateDisplayLabel() {

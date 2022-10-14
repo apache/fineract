@@ -480,7 +480,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     currencyCode = rs.getString("currencyCode");
                     currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
                     inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
-                    currency = new CurrencyData(currencyCode, currencyDigits, inMultiplesOf);
+                    currency = new CurrencyData().setCode(currencyCode).setDecimalPlaces(currencyDigits).setInMultiplesOf(inMultiplesOf);
 
                     final BigDecimal totalDeposits = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalDeposits");
                     final BigDecimal totalWithdrawals = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalWithdrawals");

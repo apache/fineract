@@ -1355,8 +1355,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             boolean isChargesModified, final LoanProduct loanProduct) {
 
         final Map<String, Object> actualChanges = this.loanRepaymentScheduleDetail.updateLoanApplicationAttributes(command, aprCalculator);
-        final MonetaryCurrency currency = new MonetaryCurrency(loanProduct.getCurrency().getCode(),
-                loanProduct.getCurrency().getDigitsAfterDecimal(), loanProduct.getCurrency().getCurrencyInMultiplesOf());
+        final MonetaryCurrency currency = new MonetaryCurrency().setCode(loanProduct.getCurrency().getCode())
+                .setDigitsAfterDecimal(loanProduct.getCurrency().getDigitsAfterDecimal())
+                .setInMultiplesOf(loanProduct.getCurrency().getInMultiplesOf());
         this.loanRepaymentScheduleDetail.updateCurrency(currency);
 
         if (!actualChanges.isEmpty()) {

@@ -19,32 +19,19 @@
 package org.apache.fineract.organisation.monetary.data;
 
 import java.math.BigDecimal;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * Immutable data object representing currency.
  */
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class MoneyData {
 
-    private final String code;
-    private final BigDecimal amount;
-    private final int decimalPlaces;
-
-    public MoneyData(final String code, final BigDecimal amount, final int decimalPlaces) {
-        this.code = code;
-        this.amount = amount;
-        this.decimalPlaces = decimalPlaces;
-    }
-
-    public String getCode() {
-        return this.code;
-    }
-
-    public BigDecimal getAmount() {
-        return this.amount;
-    }
-
-    public int getDecimalPlaces() {
-        return this.decimalPlaces;
-    }
-
+    private String code;
+    private BigDecimal amount;
+    private int decimalPlaces;
 }

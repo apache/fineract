@@ -55,8 +55,8 @@ public class ShareProductDividendAssembler {
             final LocalDate dividendPeriodStartDate, final LocalDate dividendPeriodEndDate) {
 
         ShareProductData product = (ShareProductData) this.shareProductReadPlatformService.retrieveOne(productId, false);
-        MonetaryCurrency currency = new MonetaryCurrency(product.getCurrency().getCode(), product.getCurrency().getDecimalPlaces(),
-                product.getCurrency().getInMultiplesOf());
+        MonetaryCurrency currency = new MonetaryCurrency().setCode(product.getCurrency().getCode())
+                .setDigitsAfterDecimal(product.getCurrency().getDecimalPlaces()).setInMultiplesOf(product.getCurrency().getInMultiplesOf());
         Collection<ShareAccountData> shareAccountDatas = this.shareAccountReadPlatformService.retrieveAllShareAccountDataForDividends(
                 productId, product.getAllowDividendCalculationForInactiveClients(), dividendPeriodStartDate);
         if (shareAccountDatas == null || shareAccountDatas.isEmpty()) {

@@ -129,8 +129,8 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
                     this.disbursement.isDisbursed());
 
             final Collection<LoanSchedulePeriodData> periods = new ArrayList<>();
-            final MonetaryCurrency monCurrency = new MonetaryCurrency(this.currency.getCode(), this.currency.getDecimalPlaces(),
-                    this.currency.getInMultiplesOf());
+            final MonetaryCurrency monCurrency = new MonetaryCurrency().setCode(this.currency.getCode())
+                    .setDigitsAfterDecimal(this.currency.getDecimalPlaces()).setInMultiplesOf(this.currency.getInMultiplesOf());
             BigDecimal totalPrincipalDisbursed = BigDecimal.ZERO;
             if (disbursementData == null || disbursementData.isEmpty()) {
                 periods.add(disbursementPeriod);

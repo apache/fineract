@@ -211,7 +211,8 @@ public class LoanProduct extends AbstractPersistableCustom {
         final Integer digitsAfterDecimal = command.integerValueOfParameterNamed("digitsAfterDecimal");
         final Integer inMultiplesOf = command.integerValueOfParameterNamed("inMultiplesOf");
 
-        final MonetaryCurrency currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal, inMultiplesOf);
+        final MonetaryCurrency currency = new MonetaryCurrency().setCode(currencyCode).setDigitsAfterDecimal(digitsAfterDecimal)
+                .setInMultiplesOf(inMultiplesOf);
         final BigDecimal principal = command.bigDecimalValueOfParameterNamed("principal");
         final BigDecimal minPrincipal = command.bigDecimalValueOfParameterNamed("minPrincipal");
         final BigDecimal maxPrincipal = command.bigDecimalValueOfParameterNamed("maxPrincipal");

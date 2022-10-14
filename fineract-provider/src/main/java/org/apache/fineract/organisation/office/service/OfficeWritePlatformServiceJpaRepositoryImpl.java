@@ -173,8 +173,8 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
         final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
         final ApplicationCurrency appCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currencyCode);
 
-        final MonetaryCurrency currency = new MonetaryCurrency(appCurrency.getCode(), appCurrency.getDecimalPlaces(),
-                appCurrency.getCurrencyInMultiplesOf());
+        final MonetaryCurrency currency = new MonetaryCurrency().setCode(appCurrency.getCode())
+                .setDigitsAfterDecimal(appCurrency.getDecimalPlaces()).setInMultiplesOf(appCurrency.getInMultiplesOf());
         final Money amount = Money.of(currency, command.bigDecimalValueOfParameterNamed("transactionAmount"));
 
         final OfficeTransaction entity = OfficeTransaction.fromJson(fromOffice, toOffice, amount, command);
