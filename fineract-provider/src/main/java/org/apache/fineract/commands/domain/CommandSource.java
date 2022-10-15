@@ -107,9 +107,13 @@ public class CommandSource extends AbstractPersistableCustom {
     @Column(name = "job_name")
     private String jobName;
 
-    public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker) {
+    @Column(name = "idempotency_key", length = 50)
+    private String idempotencyKey;
+
+    public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker,
+            String idempotencyKey) {
         return new CommandSource(wrapper.actionName(), wrapper.entityName(), wrapper.getHref(), command.entityId(), command.subentityId(),
-                command.json(), maker);
+                command.json(), maker, idempotencyKey);
     }
 
     protected CommandSource() {
@@ -117,7 +121,7 @@ public class CommandSource extends AbstractPersistableCustom {
     }
 
     private CommandSource(final String actionName, final String entityName, final String href, final Long resourceId,
-            final Long subresourceId, final String commandSerializedAsJson, final AppUser maker) {
+            final Long subresourceId, final String commandSerializedAsJson, final AppUser maker, final String idempotencyKey) {
         this.actionName = actionName;
         this.entityName = entityName;
         this.resourceGetUrl = href;
@@ -127,6 +131,7 @@ public class CommandSource extends AbstractPersistableCustom {
         this.maker = maker;
         this.madeOnDate = DateUtils.getOffsetDateTimeOfTenant();
         this.processingResult = CommandProcessingResultType.PROCESSED.getValue();
+        this.idempotencyKey = idempotencyKey;
     }
 
     public Long getCreditBureauId() {
@@ -286,4 +291,11 @@ public class CommandSource extends AbstractPersistableCustom {
         this.transactionId = transactionId;
     }
 
+    public String getIdempotencyKey() {
+        return idempotencyKey;
+    }
+
+    public void setIdempotencyKey(String idempotencyKey) {
+        this.idempotencyKey = idempotencyKey;
+    }
 }
