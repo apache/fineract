@@ -16,19 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.infrastructure.jobs.api;
 
-import org.apache.fineract.cob.domain.LoanAccountLockRepository;
-import org.apache.fineract.cob.domain.LockOwner;
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
 
-public class LoanItemWriter extends AbstractLoanItemWriter {
+final class InlineJobResourceSwagger {
 
-    public LoanItemWriter(LoanAccountLockRepository accountLockRepository) {
-        super(accountLockRepository);
+    private InlineJobResourceSwagger() {}
+
+    @Schema(description = "InlineJobRequest")
+    public static final class InlineJobRequest {
+
+        private InlineJobRequest() {}
+
+        public List<Long> loanIds;
     }
 
-    @Override
-    protected LockOwner getLockOwner() {
-        return LockOwner.LOAN_COB_CHUNK_PROCESSING;
+    @Schema(description = "InlineJobResponse")
+    public static final class InlineJobResponse {
+
+        private InlineJobResponse() {}
+
+        public List<Long> loanIds;
+
     }
 }

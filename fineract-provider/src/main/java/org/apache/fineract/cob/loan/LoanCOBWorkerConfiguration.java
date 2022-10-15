@@ -21,7 +21,7 @@ package org.apache.fineract.cob.loan;
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.common.InitialisationTasklet;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
-import org.apache.fineract.cob.listener.LoanItemListener;
+import org.apache.fineract.cob.listener.ChunkProcessingLoanItemListener;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -105,8 +105,8 @@ public class LoanCOBWorkerConfiguration {
     }
 
     @Bean
-    public LoanItemListener loanItemListener() {
-        return new LoanItemListener(accountLockRepository, transactionTemplate);
+    public ChunkProcessingLoanItemListener loanItemListener() {
+        return new ChunkProcessingLoanItemListener(accountLockRepository, transactionTemplate);
     }
 
     @Bean

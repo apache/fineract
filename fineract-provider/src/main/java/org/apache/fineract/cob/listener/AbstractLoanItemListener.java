@@ -44,7 +44,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 @Slf4j
 @RequiredArgsConstructor
-public class LoanItemListener {
+public abstract class AbstractLoanItemListener {
 
     private final LoanAccountLockRepository accountLockRepository;
 
@@ -57,8 +57,7 @@ public class LoanItemListener {
             @Override
             protected void doInTransactionWithoutResult(@NotNull TransactionStatus status) {
                 for (Long loanId : loanIds) {
-                    Optional<LoanAccountLock> loanAccountLock = accountLockRepository.findByLoanIdAndLockOwner(loanId,
-                            LockOwner.LOAN_COB_CHUNK_PROCESSING);
+                    Optional<LoanAccountLock> loanAccountLock = accountLockRepository.findByLoanIdAndLockOwner(loanId, getLockOwner());
                     loanAccountLock.ifPresent(
                             accountLock -> accountLock.setError(String.format(msg, loanId), ThrowableSerialization.serialize(e)));
                 }
@@ -101,4 +100,7 @@ public class LoanItemListener {
     public void onSkipInWrite(@NotNull Loan item, @NotNull Exception e) {
         log.warn("Skipping was triggered during writing of Loan (id={})", item.getId());
     }
+
+    protected abstract LockOwner getLockOwner();
+
 }

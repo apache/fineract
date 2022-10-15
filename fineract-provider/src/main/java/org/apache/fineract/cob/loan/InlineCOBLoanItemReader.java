@@ -26,20 +26,17 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.item.ExecutionContext;
 
-public class LoanItemReader extends AbstractLoanItemReader {
+public class InlineCOBLoanItemReader extends AbstractLoanItemReader {
 
-    public LoanItemReader(LoanRepository loanRepository) {
+    public InlineCOBLoanItemReader(LoanRepository loanRepository) {
         super(loanRepository);
     }
 
     @BeforeStep
     @SuppressWarnings({ "unchecked" })
     public void beforeStep(@NotNull StepExecution stepExecution) {
-
-        ExecutionContext executionContext = stepExecution.getExecutionContext();
-        ExecutionContext jobExecutionContext = stepExecution.getJobExecution().getExecutionContext();
+        ExecutionContext executionContext = stepExecution.getJobExecution().getExecutionContext();
         List<Long> loanIds = (List<Long>) executionContext.get(LoanCOBConstant.LOAN_IDS);
-        setAlreadyLockedAccounts((List<Long>) jobExecutionContext.get(LoanCOBConstant.ALREADY_LOCKED_LOAN_IDS));
         setRemainingData(new ArrayList<>(loanIds));
     }
 }

@@ -18,42 +18,18 @@
  */
 package org.apache.fineract.cob.loan;
 
-import java.util.TreeMap;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.COBBusinessStepService;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.annotation.AfterStep;
 import org.springframework.batch.core.annotation.BeforeStep;
-import org.springframework.batch.item.ExecutionContext;
-import org.springframework.batch.item.ItemProcessor;
 
-@RequiredArgsConstructor
-@Slf4j
-public class LoanItemProcessor implements ItemProcessor<Loan, Loan> {
+public class LoanItemProcessor extends AbstractLoanItemProcessor {
 
-    private final COBBusinessStepService cobBusinessStepService;
-    private StepExecution stepExecution;
+    public LoanItemProcessor(COBBusinessStepService cobBusinessStepService) {
+        super(cobBusinessStepService);
+    }
 
     @BeforeStep
-    public void beforeStep(@NotNull StepExecution stepExecution) {
-        this.stepExecution = stepExecution;
+    public void beforeStep(StepExecution stepExecution) {
+        setExecutionContext(stepExecution.getExecutionContext());
     }
-
-    @Override
-    public Loan process(@NotNull Loan item) throws Exception {
-        ExecutionContext executionContext = stepExecution.getExecutionContext();
-        TreeMap<Long, String> businessStepMap = (TreeMap<Long, String>) executionContext.get(LoanCOBConstant.BUSINESS_STEP_MAP);
-
-        return cobBusinessStepService.run(businessStepMap, item);
-    }
-
-    @AfterStep
-    public ExitStatus afterStep(@NotNull StepExecution stepExecution) {
-        return ExitStatus.COMPLETED;
-    }
-
 }

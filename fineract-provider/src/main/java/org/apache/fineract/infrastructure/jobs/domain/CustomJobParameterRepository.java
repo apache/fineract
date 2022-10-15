@@ -16,19 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.infrastructure.jobs.domain;
 
-import org.apache.fineract.cob.domain.LoanAccountLockRepository;
-import org.apache.fineract.cob.domain.LockOwner;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public class LoanItemWriter extends AbstractLoanItemWriter {
-
-    public LoanItemWriter(LoanAccountLockRepository accountLockRepository) {
-        super(accountLockRepository);
-    }
-
-    @Override
-    protected LockOwner getLockOwner() {
-        return LockOwner.LOAN_COB_CHUNK_PROCESSING;
-    }
-}
+public interface CustomJobParameterRepository extends JpaRepository<CustomJobParameter, Long> {}

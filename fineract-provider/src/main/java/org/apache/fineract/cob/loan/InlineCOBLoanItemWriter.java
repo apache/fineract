@@ -21,14 +21,14 @@ package org.apache.fineract.cob.loan;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
 
-public class LoanItemWriter extends AbstractLoanItemWriter {
+public class InlineCOBLoanItemWriter extends AbstractLoanItemWriter {
 
-    public LoanItemWriter(LoanAccountLockRepository accountLockRepository) {
+    public InlineCOBLoanItemWriter(LoanAccountLockRepository accountLockRepository) {
         super(accountLockRepository);
     }
 
     @Override
     protected LockOwner getLockOwner() {
-        return LockOwner.LOAN_COB_CHUNK_PROCESSING;
+        return LockOwner.LOAN_INLINE_COB_PROCESSING;
     }
 }

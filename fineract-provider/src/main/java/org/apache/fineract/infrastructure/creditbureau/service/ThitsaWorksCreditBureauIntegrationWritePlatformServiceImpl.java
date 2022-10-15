@@ -450,7 +450,7 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
             apicommand = JsonCommand.from(json, parsedCommand, this.fromApiJsonHelper, wrapper.getEntityName(), wrapper.getEntityId(),
                     wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getSavingsId(),
                     wrapper.getTransactionId(), wrapper.getHref(), wrapper.getProductId(), wrapper.getCreditBureauId(),
-                    wrapper.getOrganisationCreditBureauId());
+                    wrapper.getOrganisationCreditBureauId(), wrapper.getJobName());
 
             this.fromApiJsonDeserializer.validateForCreate(apicommand.json());
 
