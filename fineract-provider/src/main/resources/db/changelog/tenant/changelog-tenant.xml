@@ -80,4 +80,5 @@
     <include file="parts/0058_add_execute_inline_cob_permission.xml" relativeToChangelogFile="true"/>
     <include file="parts/0059_add_spring_batch_loan_id_list_table.xml" relativeToChangelogFile="true"/>
     <include file="parts/0060_add_job_name_to_command_source.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0061_add_idempotency_key_to_command_source.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

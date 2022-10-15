@@ -63,6 +63,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     private final ConfigurationDomainService configurationDomainService;
     private final CommandHandlerProvider commandHandlerProvider;
 
+    private final IdempotencyKeyGenerator idempotencyKeyGenerator;
+
     @Transactional
     @Override
     public CommandProcessingResult executeCommand(final CommandWrapper wrapper, final JsonCommand command,
@@ -88,7 +90,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                     .orElseThrow(() -> new CommandNotFoundException(command.commandId()));
             commandSourceResult.markAsChecked(maker);
         } else {
-            commandSourceResult = CommandSource.fullEntryFrom(wrapper, command, maker);
+            commandSourceResult = CommandSource.fullEntryFrom(wrapper, command, maker,
+                    wrapper.getIdempotencyKey() == null ? idempotencyKeyGenerator.create() : wrapper.getIdempotencyKey());
         }
         commandSourceResult.updateResourceId(result.getResourceId());
         commandSourceResult.updateForAudit(result.getOfficeId(), result.getGroupId(), result.getClientId(), result.getLoanId(),
@@ -134,6 +137,9 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     public CommandProcessingResult logCommand(CommandSource commandSourceResult) {
 
         commandSourceResult.markAsAwaitingApproval();
+        if (commandSourceResult.getIdempotencyKey() == null) {
+            commandSourceResult.setIdempotencyKey(idempotencyKeyGenerator.create());
+        }
         commandSourceResult = commandSourceRepository.saveAndFlush(commandSourceResult);
 
         return new CommandProcessingResultBuilder().withCommandId(commandSourceResult.getId())
