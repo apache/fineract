@@ -27,6 +27,7 @@ public final class LoanCOBConstant {
     public static final String LOAN_COB_WORKER_STEP = "loanCOBWorkerStep";
 
     public static final String ALREADY_LOCKED_LOAN_IDS = "alreadyLockedLoanIds";
+    public static final String INLINE_LOAN_COB_JOB_NAME = "INLINE_LOAN_COB";
 
     private LoanCOBConstant() {
 

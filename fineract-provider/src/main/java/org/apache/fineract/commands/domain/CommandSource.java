@@ -104,6 +104,9 @@ public class CommandSource extends AbstractPersistableCustom {
     @Column(name = "organisation_creditbureau_id")
     private Long organisationCreditBureauId;
 
+    @Column(name = "job_name")
+    private String jobName;
+
     public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker) {
         return new CommandSource(wrapper.actionName(), wrapper.entityName(), wrapper.getHref(), command.entityId(), command.subentityId(),
                 command.json(), maker);
@@ -136,6 +139,10 @@ public class CommandSource extends AbstractPersistableCustom {
 
     public Long getOrganisationCreditBureauId() {
         return this.organisationCreditBureauId;
+    }
+
+    public String getJobName() {
+        return this.jobName;
     }
 
     public void setOrganisationCreditBureauId(Long organisationCreditBureauId) {

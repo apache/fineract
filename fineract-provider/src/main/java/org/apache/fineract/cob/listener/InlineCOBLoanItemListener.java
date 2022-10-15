@@ -16,19 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.cob.listener;
 
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
+import org.springframework.transaction.support.TransactionTemplate;
 
-public class LoanItemWriter extends AbstractLoanItemWriter {
+public class InlineCOBLoanItemListener extends AbstractLoanItemListener {
 
-    public LoanItemWriter(LoanAccountLockRepository accountLockRepository) {
-        super(accountLockRepository);
+    public InlineCOBLoanItemListener(LoanAccountLockRepository accountLockRepository, TransactionTemplate transactionTemplate) {
+        super(accountLockRepository, transactionTemplate);
     }
 
     @Override
     protected LockOwner getLockOwner() {
-        return LockOwner.LOAN_COB_CHUNK_PROCESSING;
+        return LockOwner.LOAN_INLINE_COB_PROCESSING;
     }
 }

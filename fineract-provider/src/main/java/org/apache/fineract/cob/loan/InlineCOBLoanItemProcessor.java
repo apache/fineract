@@ -18,17 +18,18 @@
  */
 package org.apache.fineract.cob.loan;
 
-import org.apache.fineract.cob.domain.LoanAccountLockRepository;
-import org.apache.fineract.cob.domain.LockOwner;
+import org.apache.fineract.cob.COBBusinessStepService;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.annotation.BeforeStep;
 
-public class LoanItemWriter extends AbstractLoanItemWriter {
+public class InlineCOBLoanItemProcessor extends AbstractLoanItemProcessor {
 
-    public LoanItemWriter(LoanAccountLockRepository accountLockRepository) {
-        super(accountLockRepository);
+    public InlineCOBLoanItemProcessor(COBBusinessStepService cobBusinessStepService) {
+        super(cobBusinessStepService);
     }
 
-    @Override
-    protected LockOwner getLockOwner() {
-        return LockOwner.LOAN_COB_CHUNK_PROCESSING;
+    @BeforeStep
+    public void beforeStep(StepExecution stepExecution) {
+        setExecutionContext(stepExecution.getJobExecution().getExecutionContext());
     }
 }

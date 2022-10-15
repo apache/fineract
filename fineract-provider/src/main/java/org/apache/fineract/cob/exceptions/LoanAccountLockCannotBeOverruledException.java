@@ -16,19 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.cob.exceptions;
 
-import org.apache.fineract.cob.domain.LoanAccountLockRepository;
-import org.apache.fineract.cob.domain.LockOwner;
+public class LoanAccountLockCannotBeOverruledException extends RuntimeException {
 
-public class LoanItemWriter extends AbstractLoanItemWriter {
-
-    public LoanItemWriter(LoanAccountLockRepository accountLockRepository) {
-        super(accountLockRepository);
-    }
-
-    @Override
-    protected LockOwner getLockOwner() {
-        return LockOwner.LOAN_COB_CHUNK_PROCESSING;
+    public LoanAccountLockCannotBeOverruledException(String message) {
+        super(message);
     }
 }

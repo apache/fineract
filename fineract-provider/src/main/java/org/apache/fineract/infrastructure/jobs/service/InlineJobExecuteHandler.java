@@ -16,28 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.service;
+package org.apache.fineract.infrastructure.jobs.service;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.cob.exceptions.BusinessStepException;
-import org.apache.fineract.cob.exceptions.BusinessStepNotBelongsToJobException;
 import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
-@CommandType(entity = "BATCH_BUSINESS_STEP", action = "UPDATE")
-public class BusinessStepConfigUpdateHandler implements NewCommandSourceHandler {
+@CommandType(entity = "INLINE_JOB", action = "EXECUTE")
+public class InlineJobExecuteHandler implements NewCommandSourceHandler {
 
-    private final ConfigJobParameterService configJobParameterService;
+    private final ApplicationContext applicationContext;
 
     @Override
-    @Transactional
-    public CommandProcessingResult processCommand(JsonCommand command) throws BusinessStepNotBelongsToJobException, BusinessStepException {
-        return configJobParameterService.updateStepConfigByJobName(command, command.getJobName());
+    public CommandProcessingResult processCommand(JsonCommand command) {
+        InlineJobType inlineJobType = InlineJobType.getInlineJobType(command.getJobName());
+        InlineExecutorService inlineJobExecutorService = applicationContext.getBean(inlineJobType.getExecutorServiceClass());
+        return inlineJobExecutorService.executeInlineJob(command, inlineJobType.getInlineJobName());
     }
 }

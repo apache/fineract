@@ -40,6 +40,7 @@ public class CommandWrapper {
     private final Long productId;
     private final Long creditBureauId;
     private final Long organisationCreditBureauId;
+    private final String jobName;
 
     @SuppressWarnings("unused")
     private Long templateId;
@@ -80,12 +81,13 @@ public class CommandWrapper {
         this.productId = productId;
         this.creditBureauId = null;
         this.organisationCreditBureauId = null;
+        this.jobName = null;
     }
 
     public CommandWrapper(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final Long savingsId,
             final String actionName, final String entityName, final Long entityId, final Long subentityId, final String href,
             final String json, final String transactionId, final Long productId, final Long templateId, final Long creditBureauId,
-            final Long organisationCreditBureauId) {
+            final Long organisationCreditBureauId, final String jobName) {
 
         this.commandId = null;
         this.officeId = officeId;
@@ -105,6 +107,7 @@ public class CommandWrapper {
         this.templateId = templateId;
         this.creditBureauId = creditBureauId;
         this.organisationCreditBureauId = organisationCreditBureauId;
+        this.jobName = jobName;
     }
 
     private CommandWrapper(final Long commandId, final String actionName, final String entityName, final Long resourceId,
@@ -129,6 +132,7 @@ public class CommandWrapper {
         this.productId = productId;
         this.creditBureauId = creditBureauId;
         this.organisationCreditBureauId = organisationCreditBureauId;
+        this.jobName = null;
     }
 
     public Long getCreditBureauId() {
@@ -337,5 +341,9 @@ public class CommandWrapper {
     public boolean addAndDeleteDisbursementDetails() {
         return this.actionName.equalsIgnoreCase("UPDATE") && this.entityName.equalsIgnoreCase("DISBURSEMENTDETAIL")
                 && this.entityId == null;
+    }
+
+    public String getJobName() {
+        return jobName;
     }
 }

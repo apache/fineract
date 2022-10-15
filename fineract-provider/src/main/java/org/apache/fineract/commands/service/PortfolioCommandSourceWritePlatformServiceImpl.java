@@ -85,7 +85,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         command = JsonCommand.from(json, parsedCommand, this.fromApiJsonHelper, wrapper.getEntityName(), wrapper.getEntityId(),
                 wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getSavingsId(),
                 wrapper.getTransactionId(), wrapper.getHref(), wrapper.getProductId(), wrapper.getCreditBureauId(),
-                wrapper.getOrganisationCreditBureauId());
+                wrapper.getOrganisationCreditBureauId(), wrapper.getJobName());
         while (numberOfRetries <= maxNumberOfRetries) {
             try {
                 result = this.processAndLogCommandService.executeCommand(wrapper, command, isApprovedByChecker);
@@ -137,7 +137,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
                 commandSourceInput.subresourceId(), commandSourceInput.getGroupId(), commandSourceInput.getClientId(),
                 commandSourceInput.getLoanId(), commandSourceInput.getSavingsId(), commandSourceInput.getTransactionId(),
                 commandSourceInput.getResourceGetUrl(), commandSourceInput.getProductId(), commandSourceInput.getCreditBureauId(),
-                commandSourceInput.getOrganisationCreditBureauId());
+                commandSourceInput.getOrganisationCreditBureauId(), commandSourceInput.getJobName());
 
         final boolean makerCheckerApproval = true;
         return this.processAndLogCommandService.executeCommand(wrapper, command, makerCheckerApproval);

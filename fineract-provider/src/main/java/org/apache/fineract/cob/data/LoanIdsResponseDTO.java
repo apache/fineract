@@ -16,19 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.cob.data;
 
-import org.apache.fineract.cob.domain.LoanAccountLockRepository;
-import org.apache.fineract.cob.domain.LockOwner;
+import java.util.List;
+import lombok.Data;
 
-public class LoanItemWriter extends AbstractLoanItemWriter {
+@Data
+public class LoanIdsResponseDTO {
 
-    public LoanItemWriter(LoanAccountLockRepository accountLockRepository) {
-        super(accountLockRepository);
-    }
-
-    @Override
-    protected LockOwner getLockOwner() {
-        return LockOwner.LOAN_COB_CHUNK_PROCESSING;
-    }
+    private List<Long> loanIds;
 }

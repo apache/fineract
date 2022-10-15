@@ -16,19 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.infrastructure.jobs.domain;
 
-import org.apache.fineract.cob.domain.LoanAccountLockRepository;
-import org.apache.fineract.cob.domain.LockOwner;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
-public class LoanItemWriter extends AbstractLoanItemWriter {
+@Entity
+@Table(name = "batch_custom_job_parameters")
+@NoArgsConstructor
+@Getter
+@Setter
+public class CustomJobParameter extends AbstractPersistableCustom {
 
-    public LoanItemWriter(LoanAccountLockRepository accountLockRepository) {
-        super(accountLockRepository);
-    }
-
-    @Override
-    protected LockOwner getLockOwner() {
-        return LockOwner.LOAN_COB_CHUNK_PROCESSING;
-    }
+    @Column(name = "parameter_json", nullable = false)
+    private String parameterJson;
 }

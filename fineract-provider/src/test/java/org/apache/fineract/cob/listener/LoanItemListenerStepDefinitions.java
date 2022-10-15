@@ -46,7 +46,8 @@ public class LoanItemListenerStepDefinitions implements En {
     private LoanAccountLockRepository accountLockRepository = mock(LoanAccountLockRepository.class);
     private TransactionTemplate transactionTemplate = spy(TransactionTemplate.class);
 
-    private LoanItemListener loanItemListener = new LoanItemListener(accountLockRepository, transactionTemplate);
+    private ChunkProcessingLoanItemListener loanItemListener = new ChunkProcessingLoanItemListener(accountLockRepository,
+            transactionTemplate);
 
     private Exception exception;
 
