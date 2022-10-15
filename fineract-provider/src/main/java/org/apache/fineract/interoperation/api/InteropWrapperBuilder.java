@@ -25,6 +25,7 @@ import static org.apache.fineract.interoperation.util.InteropUtil.ENTITY_NAME_TR
 import static org.apache.fineract.interoperation.util.InteropUtil.ROOT_PATH;
 
 import org.apache.fineract.commands.domain.CommandWrapper;
+import org.apache.fineract.commands.service.IdempotencyKeyGenerator;
 import org.apache.fineract.interoperation.domain.InteropIdentifierType;
 import org.apache.fineract.interoperation.domain.InteropTransferActionType;
 
@@ -37,7 +38,7 @@ public class InteropWrapperBuilder {
 
     public CommandWrapper build() {
         return new CommandWrapper(null, null, null, null, null, actionName, entityName, null, null, href, json, null, null, null, null,
-                null);
+                null, IdempotencyKeyGenerator.create());
     }
 
     public InteropWrapperBuilder withJson(final String json) {

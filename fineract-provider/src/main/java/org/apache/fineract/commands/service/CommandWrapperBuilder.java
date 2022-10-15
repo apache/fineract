@@ -44,11 +44,18 @@ public class CommandWrapperBuilder {
     private Long templateId;
     private Long creditBureauId;
     private Long organisationCreditBureauId;
+    private String idempotencyKey;
 
     public CommandWrapper build() {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName, this.entityName,
                 this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId,
-                this.creditBureauId, this.organisationCreditBureauId);
+                this.creditBureauId, this.organisationCreditBureauId, IdempotencyKeyGenerator.create());
+    }
+
+    public CommandWrapper build(String idempotencyKey) {
+        return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName, this.entityName,
+                this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId,
+                this.creditBureauId, this.organisationCreditBureauId, idempotencyKey);
     }
 
     public CommandWrapperBuilder updateCreditBureau() {

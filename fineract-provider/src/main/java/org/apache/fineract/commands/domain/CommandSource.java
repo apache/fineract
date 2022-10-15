@@ -25,6 +25,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.commands.service.IdempotencyKeyGenerator;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -104,9 +105,13 @@ public class CommandSource extends AbstractPersistableCustom {
     @Column(name = "organisation_creditbureau_id")
     private Long organisationCreditBureauId;
 
+    @Column(name = "idempotency_key", length = 50)
+    private String idempotencyKey;
+
     public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker) {
         return new CommandSource(wrapper.actionName(), wrapper.entityName(), wrapper.getHref(), command.entityId(), command.subentityId(),
-                command.json(), maker);
+                command.json(), maker,
+                wrapper.getIdempotencyKey() == null ? IdempotencyKeyGenerator.create() : wrapper.getIdempotencyKey());
     }
 
     protected CommandSource() {
@@ -114,7 +119,7 @@ public class CommandSource extends AbstractPersistableCustom {
     }
 
     private CommandSource(final String actionName, final String entityName, final String href, final Long resourceId,
-            final Long subresourceId, final String commandSerializedAsJson, final AppUser maker) {
+            final Long subresourceId, final String commandSerializedAsJson, final AppUser maker, final String idempotencyKey) {
         this.actionName = actionName;
         this.entityName = entityName;
         this.resourceGetUrl = href;
@@ -124,6 +129,7 @@ public class CommandSource extends AbstractPersistableCustom {
         this.maker = maker;
         this.madeOnDate = DateUtils.getOffsetDateTimeOfTenant();
         this.processingResult = CommandProcessingResultType.PROCESSED.getValue();
+        this.idempotencyKey = idempotencyKey;
     }
 
     public Long getCreditBureauId() {
@@ -279,4 +285,11 @@ public class CommandSource extends AbstractPersistableCustom {
         this.transactionId = transactionId;
     }
 
+    public String getIdempotencyKey() {
+        return idempotencyKey;
+    }
+
+    public void setIdempotencyKey(String idempotencyKey) {
+        this.idempotencyKey = idempotencyKey;
+    }
 }

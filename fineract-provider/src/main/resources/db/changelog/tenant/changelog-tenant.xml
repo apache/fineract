@@ -77,4 +77,5 @@
     <include file="parts/0055_add_submitted_on_date_to_loan_charge.xml" relativeToChangelogFile="true"/>
     <include file="parts/0056_add_external_event_default_configuration.xml" relativeToChangelogFile="true"/>
     <include file="parts/0057_add_principal_adjustments_to_loan.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0058_add_idempotency_key_to_comman_source.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
