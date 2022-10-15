@@ -19,26 +19,22 @@
 package org.apache.fineract.infrastructure.campaigns.sms.data;
 
 import java.time.LocalDate;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 @SuppressWarnings("unused")
 public class SmsCampaignTimeLine {
 
-    private final LocalDate submittedOnDate;
-    private final String submittedByUsername;
+    private LocalDate submittedOnDate;
+    private String submittedByUsername;
 
-    private final LocalDate activatedOnDate;
-    private final String activatedByUsername;
+    private LocalDate activatedOnDate;
+    private String activatedByUsername;
 
-    private final LocalDate closedOnDate;
-    private final String closedByUsername;
-
-    public SmsCampaignTimeLine(final LocalDate submittedOnDate, final String submittedByUsername, final LocalDate activatedOnDate,
-            final String activatedByUsername, final LocalDate closedOnDate, final String closedByUsername) {
-        this.submittedOnDate = submittedOnDate;
-        this.submittedByUsername = submittedByUsername;
-        this.activatedOnDate = activatedOnDate;
-        this.activatedByUsername = activatedByUsername;
-        this.closedOnDate = closedOnDate;
-        this.closedByUsername = closedByUsername;
-    }
+    private LocalDate closedOnDate;
+    private String closedByUsername;
 }

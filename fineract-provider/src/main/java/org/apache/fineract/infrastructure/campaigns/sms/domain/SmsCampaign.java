@@ -32,6 +32,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.campaigns.constants.CampaignType;
 import org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignStatus;
@@ -49,6 +53,10 @@ import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "sms_campaign", uniqueConstraints = { @UniqueConstraint(columnNames = { "campaign_name" }, name = "campaign_name_UNIQUE") })
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public class SmsCampaign extends AbstractPersistableCustom {
 
     @Column(name = "campaign_name", nullable = false)
@@ -115,32 +123,6 @@ public class SmsCampaign extends AbstractPersistableCustom {
     @Column(name = "is_notification", nullable = true)
     private boolean isNotification;
 
-    public SmsCampaign() {}
-
-    private SmsCampaign(final String campaignName, final Integer campaignType, final Integer triggerType, final Report businessRuleId,
-            final Long providerId, final String paramValue, final String message, final LocalDate submittedOnDate,
-            final AppUser submittedBy, final String recurrence, final LocalDateTime localDateTime, final boolean isNotification) {
-        this.campaignName = campaignName;
-        this.campaignType = campaignType;
-        this.triggerType = SmsCampaignTriggerType.fromInt(triggerType).getValue();
-        this.businessRuleId = businessRuleId;
-        this.providerId = providerId;
-        this.paramValue = paramValue;
-        this.status = SmsCampaignStatus.PENDING.getValue();
-        this.message = message;
-        this.submittedOnDate = submittedOnDate;
-        this.submittedBy = submittedBy;
-        this.recurrence = recurrence;
-        LocalDateTime recurrenceStartDate = LocalDateTime.now(DateUtils.getDateTimeZoneOfTenant());
-        this.isVisible = true;
-        if (localDateTime != null) {
-            this.recurrenceStartDate = localDateTime;
-        } else {
-            this.recurrenceStartDate = recurrenceStartDate;
-        }
-        this.isNotification = isNotification;
-    }
-
     public static SmsCampaign instance(final AppUser submittedBy, final Report report, final JsonCommand command) {
 
         final String campaignName = command.stringValueOfParameterNamed(SmsCampaignValidator.campaignName);
@@ -181,8 +163,11 @@ public class SmsCampaign extends AbstractPersistableCustom {
             recurrenceStartDate = null;
         }
 
-        return new SmsCampaign(campaignName, campaignType.intValue(), triggerType.intValue(), report, providerId, paramValue, message,
-                submittedOnDate, submittedBy, recurrence, recurrenceStartDate, isNotification);
+        return new SmsCampaign().setCampaignName(campaignName).setCampaignType(campaignType.intValue())
+                .setTriggerType(SmsCampaignTriggerType.fromInt(triggerType.intValue()).getValue()).setBusinessRuleId(report)
+                .setProviderId(providerId).setParamValue(paramValue).setStatus(SmsCampaignStatus.PENDING.getValue()).setMessage(message)
+                .setSubmittedOnDate(submittedOnDate).setSubmittedBy(submittedBy).setRecurrence(recurrence)
+                .setRecurrenceStartDate(recurrenceStartDate).setNotification(isNotification);
     }
 
     public Map<String, Object> update(JsonCommand command) {
@@ -394,7 +379,7 @@ public class SmsCampaign extends AbstractPersistableCustom {
             dataValidationErrors.add(error);
         }
 
-        if (getActivationLocalDate() != null && getSubmittedOnDate() != null && getSubmittedOnDate().isAfter(getActivationLocalDate())) {
+        if (getApprovedOnDate() != null && getSubmittedOnDate() != null && getSubmittedOnDate().isAfter(getApprovedOnDate())) {
 
             final String defaultUserMessage = "submitted date cannot be after the activation date";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.campaign.submittedOnDate.after.activation.date",
@@ -403,11 +388,11 @@ public class SmsCampaign extends AbstractPersistableCustom {
             dataValidationErrors.add(error);
         }
 
-        if (getActivationLocalDate() != null && isDateInTheFuture(getActivationLocalDate())) {
+        if (getApprovedOnDate() != null && isDateInTheFuture(getApprovedOnDate())) {
 
             final String defaultUserMessage = "Activation date cannot be in the future.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.campaign.activationDate.in.the.future",
-                    defaultUserMessage, SmsCampaignValidator.activationDateParamName, getActivationLocalDate());
+                    defaultUserMessage, SmsCampaignValidator.activationDateParamName, getApprovedOnDate());
 
             dataValidationErrors.add(error);
         }
@@ -415,15 +400,15 @@ public class SmsCampaign extends AbstractPersistableCustom {
     }
 
     private void validateReactivationDate(final List<ApiParameterError> dataValidationErrors) {
-        if (getActivationLocalDate() != null && isDateInTheFuture(getActivationLocalDate())) {
+        if (getApprovedOnDate() != null && isDateInTheFuture(getApprovedOnDate())) {
 
             final String defaultUserMessage = "Activation date cannot be in the future.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.campaign.activationDate.in.the.future",
-                    defaultUserMessage, SmsCampaignValidator.activationDateParamName, getActivationLocalDate());
+                    defaultUserMessage, SmsCampaignValidator.activationDateParamName, getApprovedOnDate());
 
             dataValidationErrors.add(error);
         }
-        if (getActivationLocalDate() != null && getSubmittedOnDate() != null && getSubmittedOnDate().isAfter(getActivationLocalDate())) {
+        if (getApprovedOnDate() != null && getSubmittedOnDate() != null && getSubmittedOnDate().isAfter(getApprovedOnDate())) {
 
             final String defaultUserMessage = "submitted date cannot be after the activation date";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.campaign.submittedOnDate.after.activation.date",
@@ -452,77 +437,8 @@ public class SmsCampaign extends AbstractPersistableCustom {
         }
     }
 
-    public LocalDate getSubmittedOnDate() {
-        return this.submittedOnDate;
-
-    }
-
-    public LocalDate getClosureDate() {
-        return this.closureDate;
-    }
-
-    public LocalDate getActivationLocalDate() {
-        return this.approvedOnDate;
-    }
-
     private boolean isDateInTheFuture(final LocalDate localDate) {
         return localDate.isAfter(DateUtils.getBusinessLocalDate());
-    }
-
-    public Report getBusinessRuleId() {
-        return this.businessRuleId;
-    }
-
-    public String getCampaignName() {
-        return this.campaignName;
-    }
-
-    public String getMessage() {
-        return this.message;
-    }
-
-    public String getParamValue() {
-        return this.paramValue;
-    }
-
-    public String getRecurrence() {
-        return this.recurrence;
-    }
-
-    public LocalDateTime getRecurrenceStartDate() {
-        return this.recurrenceStartDate;
-    }
-
-    public LocalDateTime getRecurrenceStartDateTime() {
-        return this.recurrenceStartDate;
-    }
-
-    public void setLastTriggerDate(LocalDateTime lastTriggerDate) {
-        this.lastTriggerDate = lastTriggerDate;
-    }
-
-    public void setNextTriggerDate(LocalDateTime nextTriggerDate) {
-        this.nextTriggerDate = nextTriggerDate;
-    }
-
-    public LocalDateTime getNextTriggerDate() {
-        return this.nextTriggerDate;
-    }
-
-    public LocalDateTime getLastTriggerDate() {
-        return this.lastTriggerDate;
-    }
-
-    public void updateIsVisible(boolean isVisible) {
-        this.isVisible = isVisible;
-    }
-
-    public void updateBusinessRuleId(final Report report) {
-        this.businessRuleId = report;
-    }
-
-    public Long getProviderId() {
-        return this.providerId;
     }
 
     private static String constructRecurrence(final JsonCommand command) {
@@ -557,13 +473,4 @@ public class SmsCampaign extends AbstractPersistableCustom {
         }
         return recurrenceBuilder.toString();
     }
-
-    public boolean isNotification() {
-        return this.isNotification;
-    }
-
-    public void setNotification(boolean isNotification) {
-        this.isNotification = isNotification;
-    }
-
 }

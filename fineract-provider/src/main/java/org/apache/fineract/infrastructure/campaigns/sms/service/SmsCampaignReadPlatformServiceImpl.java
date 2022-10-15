@@ -268,8 +268,9 @@ public class SmsCampaignReadPlatformServiceImpl implements SmsCampaignReadPlatfo
             final String activatedByUsername = rs.getString("activatedByUsername");
             final String recurrence = rs.getString("recurrence");
             final ZonedDateTime recurrenceStartDate = JdbcSupport.getDateTime(rs, "recurrenceStartDate");
-            final SmsCampaignTimeLine smsCampaignTimeLine = new SmsCampaignTimeLine(submittedOnDate, submittedByUsername, activatedOnDate,
-                    activatedByUsername, closedOnDate, closedByUsername);
+            final SmsCampaignTimeLine smsCampaignTimeLine = new SmsCampaignTimeLine().setSubmittedOnDate(submittedOnDate)
+                    .setClosedByUsername(submittedByUsername).setActivatedOnDate(activatedOnDate)
+                    .setActivatedByUsername(activatedByUsername).setClosedOnDate(closedOnDate).setClosedByUsername(closedByUsername);
             final String reportName = rs.getString("reportName");
             final Long providerId = rs.getLong("providerId");
             final Boolean isNotification = rs.getBoolean("isNotification");
