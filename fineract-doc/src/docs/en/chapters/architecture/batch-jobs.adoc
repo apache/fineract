@@ -253,3 +253,75 @@ PUT /fineract-provider/api/v1/jobs/{jobName}/steps?tenantIdentifier={tenantId}
 ----
 
 The business step configuration for jobs are tracked within the database in the `m_batch_business_steps` table.
+
+== Fineract COB Performance Improvements with Spring Batch
+
+Fineract's COB is not distributed.
+
+=== Background
+
+The current COB is single threaded. This is now, solved bu integrating Spring Batch and distributing the work. Fineract jobs generally do not have direct dependencies on each other. Fineract has a library of jobs that can be used. Jobs need to be run in a particular order to achieve the desired result. List of batch jobs include **managing scheduler jobs**.
+
+By using Scheduler Jobs, you can set batch jobs to be completed at regular intervals. Users can schedule, modify or delete jobs. Users can  manually run selected jobs by accessing the list of Scheduler Jobs. Scheduler jobs include:
+
+.Scheduler Jobs
+|===
+^| Job Name ^| Purpose/Description ^| Scheduled Frequency for Execution
+| Add Accrual Transactions | All the interest will be accrued till the 'Due date' of the job run and can be viewed under 'Transactions' tab (Uncheck 'Hide Accruals') | Daily
+| Update Savings Dormant Accounts | If dormant account definition is, let's say 6 months during  which no transactions (deposit or withdrawal) are done on savings account, This job updates all such savings accounts to 'Dormant state'.  | Daily
+| Recalculate Interest For Loans | If loan accounts enabled with Interest Recalculation and if the clients make more repayment, the new interest will be automatically calculated. On the other hand, if the client makes less repayment or late repayment, this job is run to update the repayment schedule. | Daily
+| Apply Holidays to Loans |If new 'future' holiday is created (say, February 1) and if this job is ran successfully (say on January 15), it should affect all the repayments scheduled on February 1 and must be postponed to the date described by holiday definition. bAdd Periodic Accrual Transactions. | Daily
+| Transfer Interest to Savings | If this job is run successfully, the interest from, let's say, FDs or RDs can be transferred to Savings account. The FD or RD account must be pre-configured with Savings account | Monthly
+| Apply Annual Fee for Savings | It applies recurrent fee- that is annual fee for all savings accounts of the clients which are attached with annual fee. You can create annual fee (or any other recurrent fee like monthly fee) for savings account in Admin>Products>Charges and later add it either directly to savings product or at the time of submission of savings application. | Daily
+| Pay Due Savings Charges | Savings account can have 'Specified Due Date' charge. And if this job is run, all the due date charges prior to the job run date will be applied and the charge amount will be deducted from the savings account. | Daily
+| Add Periodic Accrual Transactions | Similar to 'Add Accrual Transactions' except that all the interest will be accrued till the current date (i.e... Job run date and time) | Daily
+| Add Accrual Transactions For Loans With Income Posted As Transactions | Similar to 'Add Accrual Transactions', except that Compounded interest will be accrued once this job is ran. In other words, this job should be run if compounded interests have to accrued. | Daily
+| Transfer fee for Loans from Savings | Some loans could have 'Installment Fee' (or due date fee) and some amount as a fee will be charged from savings account and paid for loan account. If this job is run, Fees will be transferred from savings account and will be paid for loan account if loan account is linked with savings account and Fee transfer is configured. | Daily
+| Execute standing instruction | Standing instructions are created in client level whenever - For Example, A Client has one savings account and one loan account and let's say he has loan repayment first of every month and he expects that the repayments of his loan account must be done through deducting from his savings account on the first of every month automatically.
+
+Once this job is ran successfully, standing instruction of all clients for the particular date (i.e .. job run date) will be applied. That is, as given in the example above, if standing instruction is ran on the first of every month, the savings account will be debited and the loan account will be credited with repayment. | Daily
+| Update Loan Paid in Advance | The loan paid in advance immediately updates after the transaction in which loan repayment is done prior to scheduled date. This job is no longer required. | -
+| Get Delivery Reports from SMS Gateway | This job is run to get delivery reports from SMS gateway in order to check how many SMSs are successfully delivered.  | Daily/Manually
+| Execute Report Mailing Jobs | This job is run to mail the reports regularly or recurrently to the given mail ids. It has no UI and mail ids and reports are configured in database level. | Daily/Weekly/Monthly
+| Post Dividend for Shares | This job is run to post dividends of shares to linked savings account. It can be run monthly/quarterly/half-yearly in order to post dividend to savings account. | Daily/Weekly/Monthly
+| Post Interest for Savings | This job is run to post interest to savings account. It can be run monthly/quarterly/half-yearly in order to post interest to savings account. Interest could be based on 'Average Daily Balance' of Savings Account or 'Daily Balance' of the savings account. | Monthly
+| Update Email Outbound with campaign message |This job is run to send all emails from email server to customer mail account.  | Daily
+| Update SMS Outbound with Campaign Message | This job is run to send all messages from 'Message Gateway' server to customer mobile premises.  | Daily
+| Send Messages to SMS Gateway | This job is run to send SMSs  from platform to 'Message-Gateway' server.  | Daily/Manually
+| Execute  Email | This job is run to send  Emails (without reports) with given template email formats.  | Daily/Weekly/Monthly
+| Update Deposit Accounts Maturity details | This job is specifically for Fixed Deposits and Recurring Deposits. Once this job is ran, all the FDs, RDs which are in 'ready for maturity state' will be matured and could be closed by: Withdrawing the matured amount, Transferring the matured amount to Savings, Reinvesting matured amount for next fixed period (in case of RDs) | Monthly
+| Apply penalty to overdue loans |  This job once ran successfully applies penalty to all overdue loans   based on the penalty definition. The penalties could be daily, weekly  or monthly based penalty charge definition.  | Daily
+| Update Accounting Running Balances | This job once ran successfully, updates all the running balances based on the branch (office) level.  | Monthly
+| Update Loan Arrears Ageing | This job updates all the loan accounts into 'Arrears Stage' based on Arrears definition of the loan accounts. The loan accounts could have different arrears ageing based on the definition (It's generally defined in loan product level). | Daily
+| Update non-Performing Assets | This job updates loan accounts to 'NPA' based on NPA definition in the loan product. Generally, first loans move into arrears and arrears ageing exceeds certain limit, they move into NPA based on the definition.  | Daily
+| Update Loan Summary | This job updates loan summary of each loan account of the clients. However this job is no longer required as loan summary is updated instantly after each transaction. | -
+| Generate Loan Loss Provisioning | This job updates provisioning entries (Accounting>Provisioning Entries) with type (Standard, Sub Standard, etc) defined by Loan Provisioning Criteria (Admin>Organization) | Frequency will be defined by the organization.
+| Generate Adhoc Client Schedule | |
+| Generate Mandatory Savings Schedule | |
+|===
+
+=== Engineering Implementation
+
+Now, Fineract has distributed COB integrated with Spring Batch. It splits the accounts that need to be processed into chunks. It then load the chunks into a queue. Further, it distributes the processsing of chunks across a EKS Pod that is dedicated to the COB. This makes the number of accounts per chunk configurable. Each chunk runs in a single database transaction. Each chunks is processed by each job in the COB pipeline in serial.
+
+== Fineract COB Availability Enhancements with Spring Batch
+
+Users and customers expects partner SORs to be online 24*7/365 in read/write mode.
+
+=== Background
+
+Fineract doest not had support for account state changes via the REST API while the account is being processed by the COB batch system. Fineract did not previosly support write operation for the next business day during COB for the previous business day.
+
+=== Engineering Implementation
+
+Now, with async writes Fineract further enhances performance with Spring Batch. It places the writes in a queue for the chunk and return a 202 accepted. When chunk completes to process the queue, an async API is impossible to adapat to the Partner API and is a breaking change to Fineract's API.
+
+It also rejects writes, doing the right thing at the right moment. If the account is being processed in a chunk then it rejects the write. This is easier to adapater to the Partner API then async writes. This is used if the write operation thread times out while waiting for the chunk to be processed because the COB couldn't be inlined. With this, on API write operation:
+
+If COB is in-progress and the account is not processed then, it locks account, runs COB for the account, exectues write operation on account and then unloacks account.
+
+If account is processed, it performs writes as normal. If in case, account is locked, it waits for the chunk to finish.
+
+This is performed for all accounts once the COB date changes.
+
+The job with write operations is done withing 30 seconds. 
