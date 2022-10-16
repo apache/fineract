@@ -440,3 +440,29 @@ NOTE: All the default serializers are having `Ordered.LOWEST_PRECEDENCE`.
 |Whether the external event sending is enabled or disabled.
 
 |===
+
+== Fineract Events Reliability with Kafka
+
+A new reliable event handling framework built on Kafka now makes Fineract events more reliable and improves performance.
+
+Users and customers requires guaranteed, at least once, message delivery.
+
+=== Background
+
+Fineract has an internal notification system for communicating events. This system can have various adapters connected to forward the event to an external system. Now Fineract has a Kafka (MSK) adapter. Using these events can be generated from any write operations via and API operation or from COB. Events will be lost if there is any fatal error with the EC2/JVM after the DB TX (Database Transaction) is committed and before the event is committed to MSK.
+
+=== Engineering Solution
+
+Events are guaranteed to be delivered at least once. Events delivered more than once must have the same UUID for deduplication. Events much have a stable UUID assigned and stored in the DB. Events must be committed to the DB part of the write operation that created the event.
+
+== Fineract Events Performance Enhancements with Kafka
+
+Users and customers requires events, for all state changes, from Fineract to maintain eventually consistent datasets in the Credit Platform. The volume of events, from API writes and COB, must be scalable and not impact Fineract's overall performance.
+
+=== Background
+
+Fineract has adapter(s) to publish events to webhooks, publishing to Apache Kafka would yeild the best results.
+
+=== Engineering Implementation
+
+Now, AWS MSK is used with a new Fineract adapter for Kafka. This is hardened/productionized with guaranteed message delivery.
