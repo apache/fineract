@@ -42,6 +42,7 @@ import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameter;
 import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameterRepository;
 import org.apache.fineract.infrastructure.jobs.exception.JobNotFoundException;
 import org.apache.fineract.infrastructure.jobs.service.InlineExecutorService;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.springbatch.SpringBatchJobConstants;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.core.BatchStatus;
@@ -77,6 +78,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService, 
     private final JobExplorer jobExplorer;
     private final TransactionTemplate transactionTemplate;
     private final CustomJobParameterRepository customJobParameterRepository;
+    private final PlatformSecurityContext context;
 
     private Gson gson;
 
@@ -168,10 +170,14 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService, 
     }
 
     private boolean isLockOverrulable(LoanAccountLock loanAccountLock) {
-        if (LockOwner.LOAN_COB_PARTITIONING.equals(loanAccountLock.getLockOwner())) {
+        if (LockOwner.LOAN_COB_PARTITIONING.equals(loanAccountLock.getLockOwner()) || isBypassUser()) {
             return true;
         } else {
             return StringUtils.isNotBlank(loanAccountLock.getError());
         }
+    }
+
+    private boolean isBypassUser() {
+        return context.getAuthenticatedUserIfPresent().isBypassUser();
     }
 }

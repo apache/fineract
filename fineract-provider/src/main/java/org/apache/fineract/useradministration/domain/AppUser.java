@@ -434,6 +434,10 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
         return this.enabled;
     }
 
+    public boolean isBypassUser() {
+        return hasAnyPermission("BYPASS_LOAN_WRITE_PROTECTION");
+    }
+
     public String getFirstname() {
         return this.firstname;
     }
