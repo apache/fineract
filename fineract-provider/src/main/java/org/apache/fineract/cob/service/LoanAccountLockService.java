@@ -24,4 +24,6 @@ import org.apache.fineract.cob.domain.LoanAccountLock;
 public interface LoanAccountLockService {
 
     List<LoanAccountLock> getLockedLoanAccountByPage(int page, int limit);
+
+    boolean isLoanHardLocked(Long loanId);
 }

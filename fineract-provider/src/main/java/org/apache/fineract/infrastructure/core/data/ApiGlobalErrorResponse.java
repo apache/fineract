@@ -89,6 +89,16 @@ public class ApiGlobalErrorResponse {
         return globalErrorResponse;
     }
 
+    public static ApiGlobalErrorResponse loanIsLocked(final Long loanId) {
+        final ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
+        globalErrorResponse.setHttpStatusCode(Status.CONFLICT.toString());
+        globalErrorResponse.setDeveloperMessage("Loan is locked by the COB job. Loan ID: " + loanId);
+        globalErrorResponse.setUserMessageGlobalisationCode("error.msg.loan.locked");
+        globalErrorResponse.setDefaultUserMessage("Loan is locked by the COB job. Loan ID: \" + loanId");
+
+        return globalErrorResponse;
+    }
+
     public static ApiGlobalErrorResponse unAuthorized(final String defaultUserMessage) {
         final ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
         globalErrorResponse.setHttpStatusCode("403");

@@ -19,9 +19,12 @@
 package org.apache.fineract.cob.service;
 
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
+import org.apache.fineract.cob.domain.LockOwner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,5 +41,14 @@ public class LoanAccountLockServiceImpl implements LoanAccountLockService {
         Pageable loanAccountLockPage = PageRequest.of(page, limit);
         Page<LoanAccountLock> loanAccountLocks = loanAccountLockRepository.findAll(loanAccountLockPage);
         return loanAccountLocks.getContent();
+    }
+
+    @Override
+    public boolean isLoanHardLocked(Long loanId) {
+        Optional<LoanAccountLock> loanAccountLockOptional = loanAccountLockRepository.findById(loanId);
+        return loanAccountLockOptional //
+                .filter(loanAccountLock -> LockOwner.LOAN_COB_CHUNK_PROCESSING.equals(loanAccountLock.getLockOwner()) //
+                        || LockOwner.LOAN_INLINE_COB_PROCESSING.equals(loanAccountLock.getLockOwner())) //
+                .filter(loanAccountLock -> StringUtils.isBlank(loanAccountLock.getError())).isPresent();
     }
 }
