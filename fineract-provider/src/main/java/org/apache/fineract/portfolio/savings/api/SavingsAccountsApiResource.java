@@ -78,6 +78,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountBlockNarrationHistoryData;
 
 @Path("/savingsaccounts")
 @Component
@@ -238,6 +239,7 @@ public class SavingsAccountsApiResource {
         Collection<SavingsAccountChargeData> charges = null;
         Integer transactionCount = null;
         Collection<CodeValueData> blockNarrationsOptions = null;
+        Collection<SavingsAccountBlockNarrationHistoryData> blockNarrationHistoryData = null;
 
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         if (!associationParameters.isEmpty()) {
@@ -268,6 +270,7 @@ public class SavingsAccountsApiResource {
                 mandatoryResponseParameters.add(SavingsApiConstants.blockNarrations);
                 blockNarrationsOptions = this.codeValueReadPlatformService
                         .retrieveCodeValuesByCode(AccountingConstants.BLOCK_UNBLOCK_OPTION_CODE_NAME);
+                blockNarrationHistoryData = this.savingsAccountReadPlatformService.retrieveSavingsAccountBlockNarrationHistory(accountId);
 
             }
         }
@@ -279,7 +282,7 @@ public class SavingsAccountsApiResource {
                     savingsAccount.productId(), staffInSelectedOfficeOnly);
         }
 
-        return SavingsAccountData.withTemplateOptions(savingsAccount, templateData, transactions, charges, blockNarrationsOptions);
+        return SavingsAccountData.withTemplateOptions(savingsAccount, templateData, transactions, charges, blockNarrationsOptions, blockNarrationHistoryData);
     }
 
     @PUT

@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.savings.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -74,6 +75,7 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountSummaryData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountBlockNarrationHistoryData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountChargesPaidByData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
@@ -121,6 +123,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     private final SavingsAccountAssembler savingAccountAssembler;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
 
+    private final SavingsAccountBlockNarrationHistoryMapper savingsAccountBlockNarrationHistoryMapper;
+
     @Autowired
     public SavingsAccountReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             final ClientReadPlatformService clientReadPlatformService, final GroupReadPlatformService groupReadPlatformService,
@@ -149,6 +153,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         this.savingAccountMapperForInterestPosting = new SavingAccountMapperForInterestPosting();
         this.savingAccountAssembler = savingAccountAssembler;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
+        this.savingsAccountBlockNarrationHistoryMapper = new SavingsAccountBlockNarrationHistoryMapper();
 
     }
 
@@ -1823,4 +1828,57 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             return new ArrayList<>();
         }
     }
+
+    private static final class SavingsAccountBlockNarrationHistoryMapper implements RowMapper<SavingsAccountBlockNarrationHistoryData> {
+
+        private final String schemaSql;
+
+        SavingsAccountBlockNarrationHistoryMapper() {
+            final StringBuilder sqlBuilder = new StringBuilder(400);
+            sqlBuilder.append(
+                    "blockNarrationHistory.id as id, blockNarrationHistory.block_narration_id as blockNarrationId, au.username as submittedByUsername, ");
+            sqlBuilder.append(
+                    "blockNarrationHistory.start_date as startDate, blockNarrationHistory.end_date as endDate, blockNarrationHistory.sub_status as subStatus, ");
+            sqlBuilder.append(
+                    "blockNarrationHistory.block_narration_comment as blockNarrationComment, cvn.code_value as blockNarrationValue ");
+            sqlBuilder.append("from m_savings_account sa ");
+            sqlBuilder.append(
+                    "join m_savings_account_block_narration_history blockNarrationHistory on blockNarrationHistory.account_id = sa.id ");
+            sqlBuilder.append("left join m_appuser au on au.id=blockNarrationHistory.createdby_id  ");
+            sqlBuilder.append("left join m_code_value cvn on cvn.id = blockNarrationHistory.block_narration_id  ");
+
+            this.schemaSql = sqlBuilder.toString();
+        }
+
+        public String schema() {
+            return this.schemaSql;
+        }
+
+        @Override
+        public SavingsAccountBlockNarrationHistoryData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
+                throws SQLException {
+
+            final Long id = rs.getLong("id");
+            final Long blockNarrationId = rs.getLong("blockNarrationId");
+            final String blockNarrationValue = rs.getString("blockNarrationValue");
+            final String blockNarrationComment = rs.getString("blockNarrationComment");
+            final String subStatus = rs.getString("subStatus");
+            final String submittedByUsername = rs.getString("submittedByUsername");
+            final Timestamp startDate = rs.getTimestamp("startDate");
+            final LocalDate endDate = JdbcSupport.getLocalDate(rs, "endDate");
+
+            return new SavingsAccountBlockNarrationHistoryData(id, startDate, endDate, blockNarrationComment, blockNarrationId,
+                    blockNarrationValue, subStatus, submittedByUsername);
+
+        }
+    }
+
+    @Override
+    public Collection<SavingsAccountBlockNarrationHistoryData> retrieveSavingsAccountBlockNarrationHistory(Long savingsId) {
+
+        String sql = "select " + this.savingsAccountBlockNarrationHistoryMapper.schema()
+                + " where sa.id = ? order by blockNarrationHistory.start_date DESC";
+        return this.jdbcTemplate.query(sql, this.savingsAccountBlockNarrationHistoryMapper, new Object[] { savingsId });
+    }
+
 }

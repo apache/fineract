@@ -341,6 +341,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     public transient ConfigurationDomainService configurationDomainService;
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccount", orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<SavingsAccountBlockNarrationHistory> savingsAccountBlockNarrationHistory = new HashSet<>();
+
     @ManyToOne
     @JoinColumn(name = "block_narration_id")
     private CodeValue blockNarration;
@@ -3639,7 +3642,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         return actualChanges;
     }
 
-    public Map<String, Object> blockCredits(Integer currentSubstatus) {
+    public Map<String, Object> blockCredits(Integer currentSubstatus, final CodeValue blockNarration, final String pndComment) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
 
@@ -3666,12 +3669,22 @@ public class SavingsAccount extends AbstractPersistableCustom {
         } else {
             this.sub_status = SavingsAccountSubStatusEnum.BLOCK_CREDIT.getValue();
         }
+        SavingsAccountBlockNarrationHistory savingsAccountBlockNarrationHistory = SavingsAccountBlockNarrationHistory.createNew(this,
+                blockNarration.getId(), pndComment, "BLOCK CREDIT");
+        this.savingsAccountBlockNarrationHistory.add(savingsAccountBlockNarrationHistory);
         actualChanges.put(SavingsApiConstants.subStatusParamName, SavingsEnumerations.subStatus(this.sub_status));
+
+        // set narration
+        this.blockNarration = blockNarration;
+        if(blockNarration != null) {
+
+            actualChanges.put(SavingsApiConstants.blockNarrationParamName, blockNarration.toData());
+        }
 
         return actualChanges;
     }
 
-    public Map<String, Object> unblockCredits() {
+    public Map<String, Object> unblockCredits(final CodeValue blockNarration, final String pndComment) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
 
@@ -3698,11 +3711,20 @@ public class SavingsAccount extends AbstractPersistableCustom {
         } else {
             this.sub_status = SavingsAccountSubStatusEnum.NONE.getValue();
         }
+        SavingsAccountBlockNarrationHistory savingsAccountBlockNarrationHistory = SavingsAccountBlockNarrationHistory.createNew(this,
+                blockNarration.getId(), pndComment, "UNBLOCK CREDIT");
+        this.savingsAccountBlockNarrationHistory.add(savingsAccountBlockNarrationHistory);
         actualChanges.put(SavingsApiConstants.subStatusParamName, SavingsEnumerations.subStatus(this.sub_status));
+        // set narration
+        this.blockNarration = blockNarration;
+        if(blockNarration != null) {
+
+            actualChanges.put(SavingsApiConstants.blockNarrationParamName, blockNarration.toData());
+        }
         return actualChanges;
     }
 
-    public Map<String, Object> blockDebits(Integer currentSubstatus, final CodeValue blockNarration) {
+    public Map<String, Object> blockDebits(Integer currentSubstatus, final CodeValue blockNarration, final String pndComment) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
 
@@ -3732,6 +3754,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
         // set narration
         this.blockNarration = blockNarration;
+        SavingsAccountBlockNarrationHistory savingsAccountBlockNarrationHistory = SavingsAccountBlockNarrationHistory.createNew(this,
+                blockNarration.getId(), pndComment, "BLOCK DEBIT");
+        this.savingsAccountBlockNarrationHistory.add(savingsAccountBlockNarrationHistory);
         actualChanges.put(SavingsApiConstants.subStatusParamName, SavingsEnumerations.subStatus(this.sub_status));
         if(blockNarration != null) {
 
@@ -3740,7 +3765,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         return actualChanges;
     }
 
-    public Map<String, Object> unblockDebits(final CodeValue blockNarration) {
+    public Map<String, Object> unblockDebits(final CodeValue blockNarration, final String pndComment) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
 
@@ -3773,6 +3798,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
         actualChanges.put(SavingsApiConstants.subStatusParamName, SavingsEnumerations.subStatus(this.sub_status));
         // set narration
         this.blockNarration = blockNarration;
+        SavingsAccountBlockNarrationHistory savingsAccountBlockNarrationHistory = SavingsAccountBlockNarrationHistory.createNew(this,
+                blockNarration.getId(), pndComment, "UNBLOCK DEBIT");
+        this.savingsAccountBlockNarrationHistory.add(savingsAccountBlockNarrationHistory);
         if(blockNarration != null) {
 
             actualChanges.put(SavingsApiConstants.blockNarrationParamName, blockNarration.toData());

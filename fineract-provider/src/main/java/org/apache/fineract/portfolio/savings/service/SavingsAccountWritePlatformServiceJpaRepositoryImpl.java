@@ -1922,8 +1922,12 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final String reasonForBlock = command.stringValueOfParameterNamed(SavingsApiConstants.reasonForBlockParamName);
         validateReasonForHold(reasonForBlock);
         account.updateReason(reasonForBlock);
+        final String pndComment = command.stringValueOfParameterNamed("pndComment");
+        final Long narrationId = command.longValueOfParameterNamed("narrationId");
 
-        final Map<String, Object> changes = account.blockCredits(account.getSubStatus());
+        final CodeValue codeValue =  narrationId != null ? codeValueRepositoryWrapper.findOneWithNotFoundDetection(narrationId) : null;
+
+        final Map<String, Object> changes = account.blockCredits(account.getSubStatus(), codeValue, pndComment);
         if (!changes.isEmpty()) {
 
             this.savingAccountRepositoryWrapper.save(account);
@@ -1940,7 +1944,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
         checkClientOrGroupActive(account);
         account.updateReason(null);
-        final Map<String, Object> changes = account.unblockCredits();
+        final String pndComment = command.stringValueOfParameterNamed("pndComment");
+        final Long narrationId = command.longValueOfParameterNamed("narrationId");
+        final CodeValue codeValue =  narrationId != null ? codeValueRepositoryWrapper.findOneWithNotFoundDetection(narrationId) : null;
+        final Map<String, Object> changes = account.unblockCredits(codeValue, pndComment);
         if (!changes.isEmpty()) {
 
             this.savingAccountRepositoryWrapper.save(account);
@@ -1962,10 +1969,11 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         account.updateReason(reasonForBlock);
 
         final Long narrationId = command.longValueOfParameterNamed("narrationId");
+        final String pndComment = command.stringValueOfParameterNamed("pndComment");
 
-        CodeValue codeValue =  codeValueRepositoryWrapper.findOneWithNotFoundDetection(narrationId);
+        final CodeValue codeValue =  narrationId != null ? codeValueRepositoryWrapper.findOneWithNotFoundDetection(narrationId) : null;
 
-        final Map<String, Object> changes = account.blockDebits(account.getSubStatus(), codeValue);
+        final Map<String, Object> changes = account.blockDebits(account.getSubStatus(), codeValue, pndComment);
         if (!changes.isEmpty()) {
 
             this.savingAccountRepositoryWrapper.save(account);
@@ -1983,12 +1991,13 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         checkClientOrGroupActive(account);
 
         final Long narrationId = command.longValueOfParameterNamed("narrationId");
+        final String pndComment = command.stringValueOfParameterNamed("pndComment");
 
-        CodeValue codeValue =  codeValueRepositoryWrapper.findOneWithNotFoundDetection(narrationId);
+        final CodeValue codeValue =  narrationId != null ? codeValueRepositoryWrapper.findOneWithNotFoundDetection(narrationId) : null;
 
         account.updateReason(null);
 
-        final Map<String, Object> changes = account.unblockDebits(codeValue);
+        final Map<String, Object> changes = account.unblockDebits(codeValue, pndComment);
         if (!changes.isEmpty()) {
 
             this.savingAccountRepositoryWrapper.save(account);
