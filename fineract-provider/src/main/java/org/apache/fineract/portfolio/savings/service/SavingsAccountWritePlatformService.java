@@ -105,11 +105,11 @@ public interface SavingsAccountWritePlatformService {
 
     CommandProcessingResult blockCredits(Long savingsId, JsonCommand command);
 
-    CommandProcessingResult unblockCredits(Long savingsId);
+    CommandProcessingResult unblockCredits(Long savingsId, JsonCommand command);
 
     CommandProcessingResult blockDebits(Long savingsId, JsonCommand command);
 
-    CommandProcessingResult unblockDebits(Long savingsId);
+    CommandProcessingResult unblockDebits(Long savingsId, JsonCommand command);
 
     CommandProcessingResult releaseAmount(Long savingsId, Long transactionId);
 
