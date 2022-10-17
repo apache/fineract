@@ -35,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.cob.service.LoanAccountLockService;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringAccount;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -49,6 +50,7 @@ public class LoanCOBApiFilter extends OncePerRequestFilter {
 
     private final GLIMAccountInfoRepository glimAccountInfoRepository;
     private final LoanAccountLockService loanAccountLockService;
+    private final PlatformSecurityContext context;
 
     private static final List<HttpMethod> HTTP_METHODS = List.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE);
     private static final Function<String, Boolean> URL_FUNCTION = s -> s.matches("/loans/\\d+.*") || s.matches("/loans/glimAccount/\\d+.*");
@@ -59,7 +61,7 @@ public class LoanCOBApiFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        if (!isOnApiList(request)) {
+        if (!isOnApiList(request) || isBypassUser()) {
             proceed(filterChain, request, response);
         } else {
             Iterable<String> split = Splitter.on('/').split(request.getPathInfo());
@@ -72,6 +74,10 @@ public class LoanCOBApiFilter extends OncePerRequestFilter {
                 proceed(filterChain, request, response);
             }
         }
+    }
+
+    private boolean isBypassUser() {
+        return context.getAuthenticatedUserIfPresent().isBypassUser();
     }
 
     private boolean isLoanLocked(Long loanId, boolean isGlim) {

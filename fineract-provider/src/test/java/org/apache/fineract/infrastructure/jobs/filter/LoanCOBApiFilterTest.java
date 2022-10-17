@@ -31,9 +31,11 @@ import java.util.Collections;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import org.apache.fineract.cob.service.LoanAccountLockService;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringAccount;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,14 +57,34 @@ class LoanCOBApiFilterTest {
     private LoanAccountLockService loanAccountLockService;
     @Mock
     private GLIMAccountInfoRepository glimAccountInfoRepository;
+    @Mock
+    private PlatformSecurityContext context;
 
     @Test
     void shouldProceedWhenUrlDoesNotMatch() throws ServletException, IOException {
         MockHttpServletRequest request = mock(MockHttpServletRequest.class);
-        given(request.getPathInfo()).willReturn("/jobs/2/inline");
-        given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         MockHttpServletResponse response = mock(MockHttpServletResponse.class);
         FilterChain filterChain = mock(FilterChain.class);
+
+        given(request.getPathInfo()).willReturn("/jobs/2/inline");
+        given(request.getMethod()).willReturn(HTTPMethods.POST.value());
+
+        testObj.doFilterInternal(request, response, filterChain);
+        verify(filterChain, times(1)).doFilter(request, response);
+    }
+
+    @Test
+    void shouldProceedWhenUserHasBypassPermission() throws ServletException, IOException {
+        MockHttpServletRequest request = mock(MockHttpServletRequest.class);
+        MockHttpServletResponse response = mock(MockHttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+        AppUser appUser = mock(AppUser.class);
+
+        given(request.getPathInfo()).willReturn("/jobs/2/inline");
+        given(request.getMethod()).willReturn(HTTPMethods.POST.value());
+        given(context.getAuthenticatedUserIfPresent()).willReturn(appUser);
+        given(appUser.isBypassUser()).willReturn(true);
+
         testObj.doFilterInternal(request, response, filterChain);
         verify(filterChain, times(1)).doFilter(request, response);
     }
@@ -72,10 +94,12 @@ class LoanCOBApiFilterTest {
         MockHttpServletRequest request = mock(MockHttpServletRequest.class);
         MockHttpServletResponse response = mock(MockHttpServletResponse.class);
         FilterChain filterChain = mock(FilterChain.class);
+        AppUser appUser = mock(AppUser.class);
 
         given(request.getPathInfo()).willReturn("/loans/2/charges");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
+        given(context.getAuthenticatedUserIfPresent()).willReturn(appUser);
 
         testObj.doFilterInternal(request, response, filterChain);
         verify(filterChain, times(1)).doFilter(request, response);
@@ -86,10 +110,12 @@ class LoanCOBApiFilterTest {
         MockHttpServletRequest request = mock(MockHttpServletRequest.class);
         MockHttpServletResponse response = mock(MockHttpServletResponse.class);
         FilterChain filterChain = mock(FilterChain.class);
+        AppUser appUser = mock(AppUser.class);
 
         given(request.getPathInfo()).willReturn("/loans/2/charges");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
+        given(context.getAuthenticatedUserIfPresent()).willReturn(appUser);
 
         testObj.doFilterInternal(request, response, filterChain);
         verify(filterChain, times(1)).doFilter(request, response);
@@ -101,11 +127,13 @@ class LoanCOBApiFilterTest {
         MockHttpServletResponse response = mock(MockHttpServletResponse.class);
         FilterChain filterChain = mock(FilterChain.class);
         PrintWriter writer = mock(PrintWriter.class);
+        AppUser appUser = mock(AppUser.class);
 
         given(request.getPathInfo()).willReturn("/loans/2/charges");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(true);
         given(response.getWriter()).willReturn(writer);
+        given(context.getAuthenticatedUserIfPresent()).willReturn(appUser);
 
         testObj.doFilterInternal(request, response, filterChain);
         verify(response, times(1)).setStatus(HttpStatus.SC_CONFLICT);
@@ -120,6 +148,7 @@ class LoanCOBApiFilterTest {
         GroupLoanIndividualMonitoringAccount glimAccount = mock(GroupLoanIndividualMonitoringAccount.class);
         Loan loan = mock(Loan.class);
         Long loanId = 2L;
+        AppUser appUser = mock(AppUser.class);
 
         given(request.getPathInfo()).willReturn("/loans/glimAccount/2");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
@@ -128,6 +157,7 @@ class LoanCOBApiFilterTest {
         given(loan.getId()).willReturn(loanId);
         given(loanAccountLockService.isLoanHardLocked(loanId)).willReturn(true);
         given(response.getWriter()).willReturn(writer);
+        given(context.getAuthenticatedUserIfPresent()).willReturn(appUser);
 
         testObj.doFilterInternal(request, response, filterChain);
         verify(response, times(1)).setStatus(HttpStatus.SC_CONFLICT);
