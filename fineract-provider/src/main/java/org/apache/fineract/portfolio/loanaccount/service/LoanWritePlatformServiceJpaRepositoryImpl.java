@@ -39,6 +39,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
+import org.apache.fineract.cob.domain.LoanAccountLockRepository;
+import org.apache.fineract.cob.exceptions.LoanAccountLockCannotBeOverruledException;
+import org.apache.fineract.cob.service.LoanAccountLockService;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -278,6 +281,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final PostDatedChecksRepository postDatedChecksRepository;
     private final LoanDisbursementDetailsRepository loanDisbursementDetailsRepository;
     private final LoanRepaymentScheduleInstallmentRepository loanRepaymentScheduleInstallmentRepository;
+    private final LoanAccountLockRepository loanAccountLockRepository;
+    private final LoanAccountLockService loanAccountLockService;
 
     private static boolean isPartOfThisInstallment(LoanCharge loanCharge, LoanRepaymentScheduleInstallment e) {
         return e.getFromDate().isBefore(loanCharge.getDueDate()) && !loanCharge.getDueDate().isAfter(e.getDueDate());
@@ -2551,20 +2556,28 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final Staff fromLoanOfficer = this.loanAssembler.findLoanOfficerByIdIfProvided(fromLoanOfficerId);
         final Staff toLoanOfficer = this.loanAssembler.findLoanOfficerByIdIfProvided(toLoanOfficerId);
+        List<Long> lockedLoanIds = new ArrayList<>();
 
         for (final String loanIdString : loanIds) {
             final Long loanId = Long.valueOf(loanIdString);
             final Loan loan = this.loanAssembler.assembleFrom(loanId);
-            businessEventNotifierService.notifyPreBusinessEvent(new LoanReassignOfficerBusinessEvent(loan));
-            checkClientOrGroupActive(loan);
+            if (loanAccountLockService.isLoanHardLocked(loanId)) {
+                lockedLoanIds.add(loanId);
+            } else {
+                businessEventNotifierService.notifyPreBusinessEvent(new LoanReassignOfficerBusinessEvent(loan));
+                checkClientOrGroupActive(loan);
 
-            if (!loan.hasLoanOfficer(fromLoanOfficer)) {
-                throw new LoanOfficerAssignmentException(loanId, fromLoanOfficerId);
+                if (!loan.hasLoanOfficer(fromLoanOfficer)) {
+                    throw new LoanOfficerAssignmentException(loanId, fromLoanOfficerId);
+                }
+
+                loan.reassignLoanOfficer(toLoanOfficer, dateOfLoanOfficerAssignment);
+                saveLoanWithDataIntegrityViolationChecks(loan);
+                businessEventNotifierService.notifyPostBusinessEvent(new LoanReassignOfficerBusinessEvent(loan));
             }
-
-            loan.reassignLoanOfficer(toLoanOfficer, dateOfLoanOfficerAssignment);
-            saveLoanWithDataIntegrityViolationChecks(loan);
-            businessEventNotifierService.notifyPostBusinessEvent(new LoanReassignOfficerBusinessEvent(loan));
+        }
+        if (!lockedLoanIds.isEmpty()) {
+            throw new LoanAccountLockCannotBeOverruledException("There are hard-lcoked loan accounts: " + lockedLoanIds);
         }
         this.loanRepositoryWrapper.flush();
 
