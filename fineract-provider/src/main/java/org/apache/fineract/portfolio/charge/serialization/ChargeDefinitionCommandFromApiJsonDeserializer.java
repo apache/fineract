@@ -193,7 +193,8 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
 
             final ChargeCalculationType chargeCalculationTypeValue = ChargeCalculationType.fromInt(chargeCalculationType);
 
-            if(chargeCalculationTypeValue != null && chargeCalculationTypeValue.getValue().equals(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue())){
+            if((chargeCalculationTypeValue != null && chargeCalculationTypeValue.getValue().equals(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue())) &&
+                    (ctt != null && ctt.isWithdrawalFee())){
 
             final BigDecimal minAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("minAmount", element.getAsJsonObject());
             baseDataValidator.reset().parameter("minAmount").value(minAmount).notNull().positiveAmount();
