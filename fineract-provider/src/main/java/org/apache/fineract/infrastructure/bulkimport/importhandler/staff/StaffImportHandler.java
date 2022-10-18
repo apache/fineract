@@ -31,7 +31,6 @@ import org.apache.fineract.infrastructure.bulkimport.data.Count;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.poi.ss.usermodel.Cell;
@@ -48,8 +47,6 @@ import org.springframework.stereotype.Service;
 public class StaffImportHandler implements ImportHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(StaffImportHandler.class);
-    private List<StaffData> staffList;
-    private Workbook workbook;
 
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
@@ -59,27 +56,26 @@ public class StaffImportHandler implements ImportHandler {
     }
 
     @Override
-    public Count process(Workbook workbook, String locale, String dateFormat) {
-        this.workbook = workbook;
-        this.staffList = new ArrayList<>();
-        readExcelFile(locale, dateFormat);
-        return importEntity(dateFormat);
+    public Count process(final Workbook workbook, final String locale, final String dateFormat) {
+        List<StaffData> staffList = readExcelFile(workbook, locale, dateFormat);
+        return importEntity(workbook, staffList, dateFormat);
     }
 
-    public void readExcelFile(String locale, String dateFormat) {
+    private List<StaffData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
+        List<StaffData> staffList = new ArrayList<>();
         Sheet staffSheet = workbook.getSheet(TemplatePopulateImportConstants.EMPLOYEE_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(staffSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = staffSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, StaffConstants.STATUS_COL)) {
-                staffList.add(readStaff(row, locale, dateFormat));
+                staffList.add(readStaff(workbook, row, locale, dateFormat));
             }
-
         }
+        return staffList;
     }
 
-    private StaffData readStaff(Row row, String locale, String dateFormat) {
+    private StaffData readStaff(final Workbook workbook, final Row row, final String locale, final String dateFormat) {
         String officeName = ImportHandlerUtils.readAsString(StaffConstants.OFFICE_NAME_COL, row);
         Long officeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME), officeName);
         String firstName = ImportHandlerUtils.readAsString(StaffConstants.FIRST_NAME_COL, row);
@@ -97,11 +93,11 @@ public class StaffImportHandler implements ImportHandler {
                 row.getRowNum(), locale, dateFormat);
     }
 
-    public Count importEntity(String dateFormat) {
+    private Count importEntity(final Workbook workbook, final List<StaffData> staffList, final String dateFormat) {
         Sheet staffSheet = workbook.getSheet(TemplatePopulateImportConstants.EMPLOYEE_SHEET_NAME);
         int successCount = 0;
         int errorCount = 0;
-        String errorMessage = "";
+        String errorMessage;
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
         for (StaffData staff : staffList) {
@@ -111,7 +107,7 @@ public class StaffImportHandler implements ImportHandler {
                         .createStaff()//
                         .withJson(payload) //
                         .build(); //
-                final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+                commandsSourceWritePlatformService.logCommandSource(commandRequest);
                 successCount++;
                 Cell statusCell = staffSheet.getRow(staff.getRowIndex()).createCell(StaffConstants.STATUS_COL);
                 statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);

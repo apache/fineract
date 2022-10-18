@@ -108,7 +108,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
     private final LoanScheduleGeneratorFactory loanScheduleFactory;
     private final LoanSummaryWrapper loanSummaryWrapper;
     private final AccountTransfersWritePlatformService accountTransfersWritePlatformService;
-    private final DefaultScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
+    private static final DefaultScheduledDateGenerator DEFAULT_SCHEDULED_DATE_GENERATOR = new DefaultScheduledDateGenerator();
     private final LoanAccountDomainService loanAccountDomainService;
     private final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository;
 
@@ -359,7 +359,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             List<LoanRescheduleRequestToTermVariationMapping> loanRescheduleRequestToTermVariationMappings, final Boolean isActive,
             final boolean isSpecificToInstallment, final BigDecimal decimalValue, LoanTermVariations parent) {
         LoanTermVariations loanTermVariation = new LoanTermVariations(termType, rescheduleFromDate, decimalValue, adjustedDueDate,
-                isSpecificToInstallment, loan, loan.status().getValue(), isActive, parent);
+                isSpecificToInstallment, loan, loan.getStatus().getValue(), isActive, parent);
         loan.getLoanTermVariations().add(loanTermVariation);
         loanRescheduleRequestToTermVariationMappings
                 .add(LoanRescheduleRequestToTermVariationMapping.createNew(loanRescheduleRequest, loanTermVariation));
@@ -421,9 +421,9 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                         dueDateVariationInCurrentRequest.setTermApplicableFrom(rescheduleFromDate);
                     } else if (!activeLoanTermVariation.fetchTermApplicaDate().isBefore(fromScheduleDate)) {
                         while (currentScheduleDate.isBefore(activeLoanTermVariation.fetchTermApplicaDate())) {
-                            currentScheduleDate = this.scheduledDateGenerator.generateNextRepaymentDate(currentScheduleDate,
+                            currentScheduleDate = DEFAULT_SCHEDULED_DATE_GENERATOR.generateNextRepaymentDate(currentScheduleDate,
                                     loanApplicationTerms, false);
-                            modifiedScheduleDate = this.scheduledDateGenerator.generateNextRepaymentDate(modifiedScheduleDate,
+                            modifiedScheduleDate = DEFAULT_SCHEDULED_DATE_GENERATOR.generateNextRepaymentDate(modifiedScheduleDate,
                                     loanApplicationTerms, false);
                             changeMap.put(currentScheduleDate, modifiedScheduleDate);
                         }

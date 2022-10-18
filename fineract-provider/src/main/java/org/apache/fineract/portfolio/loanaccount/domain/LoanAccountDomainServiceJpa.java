@@ -555,7 +555,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     public void recalculateAccruals(Loan loan, boolean isInterestCalculationHappened) {
         LocalDate accruedTill = loan.getAccruedTill();
         if (!loan.isPeriodicAccrualAccountingEnabledOnLoanProduct() || !isInterestCalculationHappened || accruedTill == null || loan.isNpa()
-                || !loan.status().isActive()) {
+                || !loan.getStatus().isActive()) {
             return;
         }
 
@@ -576,7 +576,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         MonetaryCurrency currency = loan.getCurrency();
         ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
         CurrencyData currencyData = applicationCurrency.toData();
-        Set<LoanCharge> loanCharges = loan.charges();
+        Set<LoanCharge> loanCharges = loan.getActiveCharges();
 
         for (LoanRepaymentScheduleInstallment installment : installments) {
             if (installment.getDueDate().isAfter(loan.getMaturityDate())) {
@@ -748,7 +748,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 newTransactions.add(accrualTransaction);
                 loan.addLoanTransaction(accrualTransaction);
                 Set<LoanChargePaidBy> accrualCharges = accrualTransaction.getLoanChargesPaid();
-                for (LoanCharge loanCharge : loan.charges()) {
+                for (LoanCharge loanCharge : loan.getActiveCharges()) {
                     if (loanCharge.isActive() && !loanCharge.isPaid()
                             && (loanCharge.isDueForCollectionFromAndUpToAndIncluding(fromDate, foreClosureDate)
                                     || loanCharge.isInstalmentFee())) {
@@ -821,7 +821,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     @Override
     @Transactional
     public void disableStandingInstructionsLinkedToClosedLoan(Loan loan) {
-        if ((loan != null) && (loan.status() != null) && loan.status().isClosed()) {
+        if ((loan != null) && (loan.getStatus() != null) && loan.getStatus().isClosed()) {
             final Integer standingInstructionStatus = StandingInstructionStatus.ACTIVE.getValue();
             final Collection<AccountTransferStandingInstruction> accountTransferStandingInstructions = this.standingInstructionRepository
                     .findByLoanAccountAndStatus(loan, standingInstructionStatus);

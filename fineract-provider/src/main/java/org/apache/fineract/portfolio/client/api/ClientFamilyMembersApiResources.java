@@ -56,9 +56,9 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Client Family Member", description = "")
 public class ClientFamilyMembersApiResources {
 
-    private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "clientId", "firstName", "middleName", "lastName",
-            "qualification", "relationship", "maritalStatus", "gender", "dateOfBirth", "profession", "clientFamilyMemberId"));
-    private final String resourceNameForPermissions = "FamilyMembers";
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "clientId", "firstName", "middleName",
+            "lastName", "qualification", "relationship", "maritalStatus", "gender", "dateOfBirth", "profession", "clientFamilyMemberId"));
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "FamilyMembers";
     private final PlatformSecurityContext context;
     private final ClientFamilyMembersReadPlatformService readPlatformService;
     private final ToApiJsonSerializer<ClientFamilyMembersData> toApiJsonSerializer;
@@ -86,12 +86,12 @@ public class ClientFamilyMembersApiResources {
     public String getFamilyMember(@Context final UriInfo uriInfo, @PathParam("familyMemberId") final Long familyMemberId,
             @PathParam("clientId") @Parameter(description = "clientId") final Long clientId) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final ClientFamilyMembersData familyMembers = this.readPlatformService.getClientFamilyMember(familyMemberId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, familyMembers, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, familyMembers, RESPONSE_DATA_PARAMETERS);
 
     }
 
@@ -100,12 +100,12 @@ public class ClientFamilyMembersApiResources {
     @Produces({ MediaType.APPLICATION_JSON })
     public String getFamilyMembers(@Context final UriInfo uriInfo, @PathParam("clientId") final long clientId) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final Collection<ClientFamilyMembersData> familyMembers = this.readPlatformService.getClientFamilyMembers(clientId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, familyMembers, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, familyMembers, RESPONSE_DATA_PARAMETERS);
 
     }
 
@@ -115,12 +115,12 @@ public class ClientFamilyMembersApiResources {
     @Produces({ MediaType.APPLICATION_JSON })
     public String getTemplate(@Context final UriInfo uriInfo, @PathParam("clientId") final long clientId) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final ClientFamilyMembersData options = this.readPlatformService.retrieveTemplate();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, options, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, options, RESPONSE_DATA_PARAMETERS);
 
     }
 

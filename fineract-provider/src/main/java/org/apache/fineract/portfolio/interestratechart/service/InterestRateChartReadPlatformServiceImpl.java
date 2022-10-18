@@ -53,12 +53,11 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
 
     private final PlatformSecurityContext context;
     private final JdbcTemplate jdbcTemplate;
-    private final InterestRateChartMapper chartRowMapper = new InterestRateChartMapper();
+    private static final InterestRateChartMapper CHART_ROW_MAPPER = new InterestRateChartMapper();
     private final InterestRateChartExtractor chartExtractor;
     private final InterestRateChartDropdownReadPlatformService chartDropdownReadPlatformService;
     private final InterestIncentiveDropdownReadPlatformService interestIncentiveDropdownReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
-    private final DatabaseSpecificSQLGenerator sqlGenerator;
 
     @Autowired
     public InterestRateChartReadPlatformServiceImpl(PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
@@ -70,16 +69,15 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
         this.chartDropdownReadPlatformService = chartDropdownReadPlatformService;
         this.interestIncentiveDropdownReadPlatformService = interestIncentiveDropdownReadPlatformService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
-        this.sqlGenerator = sqlGenerator;
-        chartExtractor = new InterestRateChartExtractor(this.sqlGenerator);
+        chartExtractor = new InterestRateChartExtractor(sqlGenerator);
     }
 
     @Override
     public InterestRateChartData retrieveOne(Long chartId) {
         try {
             this.context.authenticatedUser();
-            final String sql = "select " + this.chartRowMapper.schema() + " where irc.id = ?";
-            return this.jdbcTemplate.queryForObject(sql, this.chartRowMapper, new Object[] { chartId }); // NOSONAR
+            final String sql = "select " + CHART_ROW_MAPPER.schema() + " where irc.id = ?";
+            return this.jdbcTemplate.queryForObject(sql, CHART_ROW_MAPPER, chartId); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new InterestRateChartNotFoundException(chartId, e);
         }

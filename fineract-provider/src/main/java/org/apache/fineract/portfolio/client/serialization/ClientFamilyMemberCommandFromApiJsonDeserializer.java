@@ -42,10 +42,29 @@ import org.springframework.stereotype.Component;
 @Component
 public final class ClientFamilyMemberCommandFromApiJsonDeserializer {
 
+    public static final String ID = "id";
+    public static final String CLIENT_ID = "clientId";
+    public static final String FIRST_NAME = "firstName";
+    public static final String MIDDLE_NAME = "middleName";
+    public static final String LAST_NAME = "lastName";
+    public static final String QUALIFICATION = "qualification";
+    public static final String MOBILE_NUMBER = "mobileNumber";
+    public static final String AGE = "age";
+    public static final String IS_DEPENDENT = "isDependent";
+    public static final String RELATIONSHIP_ID = "relationshipId";
+    public static final String MARITAL_STATUS_ID = "maritalStatusId";
+    public static final String GENDER_ID = "genderId";
+    public static final String DATE_OF_BIRTH = "dateOfBirth";
+    public static final String PROFESSION_ID = "professionId";
+    public static final String LOCALE = "locale";
+    public static final String DATE_FORMAT = "dateFormat";
+    public static final String FAMILY_MEMBERS = "familyMembers";
+    private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(
+            Arrays.asList(ID, CLIENT_ID, FIRST_NAME, MIDDLE_NAME, LAST_NAME, QUALIFICATION, MOBILE_NUMBER, AGE, IS_DEPENDENT,
+                    RELATIONSHIP_ID, MARITAL_STATUS_ID, GENDER_ID, DATE_OF_BIRTH, PROFESSION_ID, LOCALE, DATE_FORMAT, FAMILY_MEMBERS));
+    public static final String FAMILY_MEMBERS1 = "FamilyMembers";
+    public static final String RELATION_SHIP_ID = "relationShipId";
     private final FromJsonHelper fromApiJsonHelper;
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "clientId", "firstName", "middleName", "lastName",
-            "qualification", "mobileNumber", "age", "isDependent", "relationshipId", "maritalStatusId", "genderId", "dateOfBirth",
-            "professionId", "locale", "dateFormat", "familyMembers"));
 
     @Autowired
     public ClientFamilyMemberCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
@@ -58,18 +77,20 @@ public final class ClientFamilyMemberCommandFromApiJsonDeserializer {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("FamilyMembers");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(FAMILY_MEMBERS1);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        if (this.fromApiJsonHelper.extractArrayNamed("familyMembers", element) != null) {
-            final JsonArray familyMembers = this.fromApiJsonHelper.extractJsonArrayNamed("familyMembers", element);
+        if (this.fromApiJsonHelper.extractArrayNamed(FAMILY_MEMBERS, element) != null) {
+            final JsonArray familyMembers = this.fromApiJsonHelper.extractJsonArrayNamed(FAMILY_MEMBERS, element);
             baseDataValidator.reset().value(familyMembers).arrayNotEmpty();
         } else {
-            baseDataValidator.reset().value(this.fromApiJsonHelper.extractJsonArrayNamed("familyMembers", element)).arrayNotEmpty();
+            baseDataValidator.reset().value(this.fromApiJsonHelper.extractJsonArrayNamed(FAMILY_MEMBERS, element)).arrayNotEmpty();
         }
 
         validateForCreate(1, json);
@@ -82,85 +103,87 @@ public final class ClientFamilyMemberCommandFromApiJsonDeserializer {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("FamilyMembers");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(FAMILY_MEMBERS1);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         baseDataValidator.reset().value(clientId).notBlank().integerGreaterThanZero();
 
-        if (this.fromApiJsonHelper.extractStringNamed("firstName", element) != null) {
-            final String firstName = this.fromApiJsonHelper.extractStringNamed("firstName", element);
-            baseDataValidator.reset().parameter("firstName").value(firstName).notNull().notBlank().notExceedingLengthOf(100);
+        if (this.fromApiJsonHelper.extractStringNamed(FIRST_NAME, element) != null) {
+            final String firstName = this.fromApiJsonHelper.extractStringNamed(FIRST_NAME, element);
+            baseDataValidator.reset().parameter(FIRST_NAME).value(firstName).notNull().notBlank().notExceedingLengthOf(100);
         } else {
-            baseDataValidator.reset().parameter("firstName").value(this.fromApiJsonHelper.extractStringNamed("firstName", element))
-                    .notNull().notBlank().notExceedingLengthOf(100);
+            baseDataValidator.reset().parameter(FIRST_NAME).value(this.fromApiJsonHelper.extractStringNamed(FIRST_NAME, element)).notNull()
+                    .notBlank().notExceedingLengthOf(100);
         }
 
-        if (this.fromApiJsonHelper.extractStringNamed("lastName", element) != null) {
-            final String lastName = this.fromApiJsonHelper.extractStringNamed("lastName", element);
-            baseDataValidator.reset().parameter("lastName").value(lastName).notNull().notBlank().notExceedingLengthOf(100);
+        if (this.fromApiJsonHelper.extractStringNamed(LAST_NAME, element) != null) {
+            final String lastName = this.fromApiJsonHelper.extractStringNamed(LAST_NAME, element);
+            baseDataValidator.reset().parameter(LAST_NAME).value(lastName).notNull().notBlank().notExceedingLengthOf(100);
         }
 
-        if (this.fromApiJsonHelper.extractStringNamed("middleName", element) != null) {
-            final String middleName = this.fromApiJsonHelper.extractStringNamed("middleName", element);
-            baseDataValidator.reset().parameter("middleName").value(middleName).notNull().notBlank().notExceedingLengthOf(100);
+        if (this.fromApiJsonHelper.extractStringNamed(MIDDLE_NAME, element) != null) {
+            final String middleName = this.fromApiJsonHelper.extractStringNamed(MIDDLE_NAME, element);
+            baseDataValidator.reset().parameter(MIDDLE_NAME).value(middleName).notNull().notBlank().notExceedingLengthOf(100);
         }
 
-        if (this.fromApiJsonHelper.extractStringNamed("qualification", element) != null) {
-            final String qualification = this.fromApiJsonHelper.extractStringNamed("qualification", element);
-            baseDataValidator.reset().parameter("qualification").value(qualification).notNull().notBlank().notExceedingLengthOf(100);
+        if (this.fromApiJsonHelper.extractStringNamed(QUALIFICATION, element) != null) {
+            final String qualification = this.fromApiJsonHelper.extractStringNamed(QUALIFICATION, element);
+            baseDataValidator.reset().parameter(QUALIFICATION).value(qualification).notNull().notBlank().notExceedingLengthOf(100);
         }
 
-        if (this.fromApiJsonHelper.extractStringNamed("mobileNumber", element) != null) {
-            final String mobileNumber = this.fromApiJsonHelper.extractStringNamed("mobileNumber", element);
-            baseDataValidator.reset().parameter("mobileNumber").value(mobileNumber).notNull().notBlank().notExceedingLengthOf(100);
+        if (this.fromApiJsonHelper.extractStringNamed(MOBILE_NUMBER, element) != null) {
+            final String mobileNumber = this.fromApiJsonHelper.extractStringNamed(MOBILE_NUMBER, element);
+            baseDataValidator.reset().parameter(MOBILE_NUMBER).value(mobileNumber).notNull().notBlank().notExceedingLengthOf(100);
         }
 
-        if (this.fromApiJsonHelper.extractBooleanNamed("isDependent", element) != null) {
-            final Boolean isDependent = this.fromApiJsonHelper.extractBooleanNamed("isDependent", element);
-            baseDataValidator.reset().parameter("isDependent").value(isDependent).notNull().notBlank().notExceedingLengthOf(100);
+        if (this.fromApiJsonHelper.extractBooleanNamed(IS_DEPENDENT, element) != null) {
+            final Boolean isDependent = this.fromApiJsonHelper.extractBooleanNamed(IS_DEPENDENT, element);
+            baseDataValidator.reset().parameter(IS_DEPENDENT).value(isDependent).notNull().notBlank().notExceedingLengthOf(100);
         }
 
-        if (this.fromApiJsonHelper.extractLongNamed("relationShipId", element) != null) {
-            final long relationShipId = this.fromApiJsonHelper.extractLongNamed("relationShipId", element);
-            baseDataValidator.reset().parameter("relationShipId").value(relationShipId).notBlank().longGreaterThanZero();
+        if (this.fromApiJsonHelper.extractLongNamed(RELATION_SHIP_ID, element) != null) {
+            final long relationShipId = this.fromApiJsonHelper.extractLongNamed(RELATION_SHIP_ID, element);
+            baseDataValidator.reset().parameter(RELATION_SHIP_ID).value(relationShipId).notBlank().longGreaterThanZero();
 
         } else {
-            baseDataValidator.reset().parameter("relationShipId").value(this.fromApiJsonHelper.extractLongNamed("relationShipId", element))
+            baseDataValidator.reset().parameter(RELATION_SHIP_ID).value(this.fromApiJsonHelper.extractLongNamed(RELATION_SHIP_ID, element))
                     .notBlank().longGreaterThanZero();
         }
 
-        if (this.fromApiJsonHelper.extractLongNamed("maritalStatusId", element) != null) {
-            final long maritalStatusId = this.fromApiJsonHelper.extractLongNamed("maritalStatusId", element);
-            baseDataValidator.reset().parameter("maritalStatusId").value(maritalStatusId).notBlank().longGreaterThanZero();
+        if (this.fromApiJsonHelper.extractLongNamed(MARITAL_STATUS_ID, element) != null) {
+            final long maritalStatusId = this.fromApiJsonHelper.extractLongNamed(MARITAL_STATUS_ID, element);
+            baseDataValidator.reset().parameter(MARITAL_STATUS_ID).value(maritalStatusId).notBlank().longGreaterThanZero();
 
         }
 
-        if (this.fromApiJsonHelper.extractLongNamed("genderId", element) != null) {
-            final long genderId = this.fromApiJsonHelper.extractLongNamed("genderId", element);
-            baseDataValidator.reset().parameter("genderId").value(genderId).notBlank().longGreaterThanZero();
+        if (this.fromApiJsonHelper.extractLongNamed(GENDER_ID, element) != null) {
+            final long genderId = this.fromApiJsonHelper.extractLongNamed(GENDER_ID, element);
+            baseDataValidator.reset().parameter(GENDER_ID).value(genderId).notBlank().longGreaterThanZero();
 
         }
 
-        if (this.fromApiJsonHelper.extractLongNamed("age", element) != null) {
-            final long age = this.fromApiJsonHelper.extractLongNamed("age", element);
-            baseDataValidator.reset().parameter("age").value(age).notBlank().longGreaterThanZero();
+        if (this.fromApiJsonHelper.extractLongNamed(AGE, element) != null) {
+            final long age = this.fromApiJsonHelper.extractLongNamed(AGE, element);
+            baseDataValidator.reset().parameter(AGE).value(age).notBlank().longGreaterThanZero();
 
         }
 
-        if (this.fromApiJsonHelper.extractLongNamed("professionId", element) != null) {
-            final long professionId = this.fromApiJsonHelper.extractLongNamed("professionId", element);
-            baseDataValidator.reset().parameter("professionId").value(professionId).notBlank().longGreaterThanZero();
+        if (this.fromApiJsonHelper.extractLongNamed(PROFESSION_ID, element) != null) {
+            final long professionId = this.fromApiJsonHelper.extractLongNamed(PROFESSION_ID, element);
+            baseDataValidator.reset().parameter(PROFESSION_ID).value(professionId).notBlank().longGreaterThanZero();
 
         }
 
-        if (this.fromApiJsonHelper.extractLocalDateNamed("dateOfBirth", element) != null) {
-            final LocalDate dateOfBirth = this.fromApiJsonHelper.extractLocalDateNamed("dateOfBirth", element);
-            baseDataValidator.reset().parameter("dateOfBirth").value(dateOfBirth).value(dateOfBirth).notNull()
+        if (this.fromApiJsonHelper.extractLocalDateNamed(DATE_OF_BIRTH, element) != null) {
+            final LocalDate dateOfBirth = this.fromApiJsonHelper.extractLocalDateNamed(DATE_OF_BIRTH, element);
+            baseDataValidator.reset().parameter(DATE_OF_BIRTH).value(dateOfBirth).value(dateOfBirth).notNull()
                     .validateDateBefore(DateUtils.getBusinessLocalDate());
 
         }
@@ -173,63 +196,65 @@ public final class ClientFamilyMemberCommandFromApiJsonDeserializer {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("FamilyMembers");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(FAMILY_MEMBERS1);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         baseDataValidator.reset().value(familyMemberId).notBlank().integerGreaterThanZero();
 
-        if (this.fromApiJsonHelper.extractStringNamed("firstName", element) != null) {
-            final String firstName = this.fromApiJsonHelper.extractStringNamed("firstName", element);
-            baseDataValidator.reset().parameter("firstName").value(firstName).notNull().notBlank().notExceedingLengthOf(100);
+        if (this.fromApiJsonHelper.extractStringNamed(FIRST_NAME, element) != null) {
+            final String firstName = this.fromApiJsonHelper.extractStringNamed(FIRST_NAME, element);
+            baseDataValidator.reset().parameter(FIRST_NAME).value(firstName).notNull().notBlank().notExceedingLengthOf(100);
         }
 
-        if (this.fromApiJsonHelper.extractStringNamed("lastName", element) != null) {
-            final String lastName = this.fromApiJsonHelper.extractStringNamed("lastName", element);
-            baseDataValidator.reset().parameter("lastName").value(lastName).notNull().notBlank().notExceedingLengthOf(100);
+        if (this.fromApiJsonHelper.extractStringNamed(LAST_NAME, element) != null) {
+            final String lastName = this.fromApiJsonHelper.extractStringNamed(LAST_NAME, element);
+            baseDataValidator.reset().parameter(LAST_NAME).value(lastName).notNull().notBlank().notExceedingLengthOf(100);
         }
 
-        if (this.fromApiJsonHelper.extractStringNamed("middleName", element) != null) {
-            final String middleName = this.fromApiJsonHelper.extractStringNamed("middleName", element);
-            baseDataValidator.reset().parameter("middleName").value(middleName).notNull().notBlank().notExceedingLengthOf(100);
+        if (this.fromApiJsonHelper.extractStringNamed(MIDDLE_NAME, element) != null) {
+            final String middleName = this.fromApiJsonHelper.extractStringNamed(MIDDLE_NAME, element);
+            baseDataValidator.reset().parameter(MIDDLE_NAME).value(middleName).notNull().notBlank().notExceedingLengthOf(100);
         }
 
-        if (this.fromApiJsonHelper.extractStringNamed("qualification", element) != null) {
-            final String qualification = this.fromApiJsonHelper.extractStringNamed("qualification", element);
-            baseDataValidator.reset().parameter("qualification").value(qualification).notNull().notBlank().notExceedingLengthOf(100);
+        if (this.fromApiJsonHelper.extractStringNamed(QUALIFICATION, element) != null) {
+            final String qualification = this.fromApiJsonHelper.extractStringNamed(QUALIFICATION, element);
+            baseDataValidator.reset().parameter(QUALIFICATION).value(qualification).notNull().notBlank().notExceedingLengthOf(100);
         }
 
-        if (this.fromApiJsonHelper.extractLongNamed("relationShipId", element) != null) {
-            final long relationShipId = this.fromApiJsonHelper.extractLongNamed("relationShipId", element);
-            baseDataValidator.reset().parameter("relationShipId").value(relationShipId).notBlank().longGreaterThanZero();
-
-        }
-
-        if (this.fromApiJsonHelper.extractLongNamed("maritalStatusId", element) != null) {
-            final long maritalStatusId = this.fromApiJsonHelper.extractLongNamed("maritalStatusId", element);
-            baseDataValidator.reset().parameter("maritalStatusId").value(maritalStatusId).notBlank().longGreaterThanZero();
+        if (this.fromApiJsonHelper.extractLongNamed(RELATION_SHIP_ID, element) != null) {
+            final long relationShipId = this.fromApiJsonHelper.extractLongNamed(RELATION_SHIP_ID, element);
+            baseDataValidator.reset().parameter(RELATION_SHIP_ID).value(relationShipId).notBlank().longGreaterThanZero();
 
         }
 
-        if (this.fromApiJsonHelper.extractLongNamed("genderId", element) != null) {
-            final long genderId = this.fromApiJsonHelper.extractLongNamed("genderId", element);
-            baseDataValidator.reset().parameter("genderId").value(genderId).longGreaterThanZero();
+        if (this.fromApiJsonHelper.extractLongNamed(MARITAL_STATUS_ID, element) != null) {
+            final long maritalStatusId = this.fromApiJsonHelper.extractLongNamed(MARITAL_STATUS_ID, element);
+            baseDataValidator.reset().parameter(MARITAL_STATUS_ID).value(maritalStatusId).notBlank().longGreaterThanZero();
 
         }
 
-        if (this.fromApiJsonHelper.extractLongNamed("professionId", element) != null) {
-            final long professionId = this.fromApiJsonHelper.extractLongNamed("professionId", element);
-            baseDataValidator.reset().parameter("professionId").value(professionId).longGreaterThanZero();
+        if (this.fromApiJsonHelper.extractLongNamed(GENDER_ID, element) != null) {
+            final long genderId = this.fromApiJsonHelper.extractLongNamed(GENDER_ID, element);
+            baseDataValidator.reset().parameter(GENDER_ID).value(genderId).longGreaterThanZero();
 
         }
 
-        if (this.fromApiJsonHelper.extractLocalDateNamed("dateOfBirth", element) != null) {
-            final LocalDate dateOfBirth = this.fromApiJsonHelper.extractLocalDateNamed("dateOfBirth", element);
-            baseDataValidator.reset().parameter("dateOfBirth").value(dateOfBirth).validateDateBefore(DateUtils.getBusinessLocalDate());
+        if (this.fromApiJsonHelper.extractLongNamed(PROFESSION_ID, element) != null) {
+            final long professionId = this.fromApiJsonHelper.extractLongNamed(PROFESSION_ID, element);
+            baseDataValidator.reset().parameter(PROFESSION_ID).value(professionId).longGreaterThanZero();
+
+        }
+
+        if (this.fromApiJsonHelper.extractLocalDateNamed(DATE_OF_BIRTH, element) != null) {
+            final LocalDate dateOfBirth = this.fromApiJsonHelper.extractLocalDateNamed(DATE_OF_BIRTH, element);
+            baseDataValidator.reset().parameter(DATE_OF_BIRTH).value(dateOfBirth).validateDateBefore(DateUtils.getBusinessLocalDate());
 
         }
 
@@ -238,7 +263,7 @@ public final class ClientFamilyMemberCommandFromApiJsonDeserializer {
     public void validateForDelete(final long familyMemberId) {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("FamilyMembers");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(FAMILY_MEMBERS1);
 
         // final JsonElement element = this.fromApiJsonHelper.parse(json);
 

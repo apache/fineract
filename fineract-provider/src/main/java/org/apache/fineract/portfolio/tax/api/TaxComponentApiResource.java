@@ -59,7 +59,7 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Tax Components", description = "This defines the Tax Components")
 public class TaxComponentApiResource {
 
-    private final String resourceNameForPermissions = "TAXCOMPONENT";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "TAXCOMPONENT";
 
     private final PlatformSecurityContext context;
     private final TaxReadPlatformService readPlatformService;
@@ -87,12 +87,12 @@ public class TaxComponentApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = TaxComponentApiResourceSwagger.GetTaxesComponentsResponse.class)))) })
     public String retrieveAllTaxComponents(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
-        final Collection<TaxComponentData> TaxComponents = this.readPlatformService.retrieveAllTaxComponents();
+        final Collection<TaxComponentData> taxComponents = this.readPlatformService.retrieveAllTaxComponents();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, TaxComponents);
+        return this.toApiJsonSerializer.serialize(settings, taxComponents);
     }
 
     @GET
@@ -105,7 +105,7 @@ public class TaxComponentApiResource {
     public String retrieveTaxComponent(@PathParam("taxComponentId") @Parameter(description = "taxComponentId") final Long taxComponentId,
             @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
@@ -119,7 +119,7 @@ public class TaxComponentApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveTemplate(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final TaxComponentData taxComponentData = this.readPlatformService.retrieveTaxComponentTemplate();
 

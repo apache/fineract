@@ -73,7 +73,7 @@ public class LoanTermVariations extends AbstractPersistableCustom {
         this.decimalValue = decimalValue;
         this.dateValue = dateValue;
         this.isSpecificToInstallment = isSpecificToInstallment;
-        this.onLoanStatus = loan.status().getValue();
+        this.onLoanStatus = loan.getStatus().getValue();
         this.isActive = true;
         this.parent = null;
     }

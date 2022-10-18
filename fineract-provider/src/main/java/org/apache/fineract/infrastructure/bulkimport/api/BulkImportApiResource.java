@@ -49,7 +49,7 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Bulk Import", description = "")
 public class BulkImportApiResource {
 
-    private final String resourceNameForPermissions = "IMPORT";
+    private static final String RESOURCE_NAME_FOR_PERMISSION = "IMPORT";
 
     private final PlatformSecurityContext context;
     private final BulkImportWorkbookService bulkImportWorkbookService;
@@ -70,7 +70,7 @@ public class BulkImportApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveImportDocuments(@Context final UriInfo uriInfo, @QueryParam("entityType") final String entityType) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
         Collection<ImportData> importData = new ArrayList<>();
         if (entityType.equals(GlobalEntityType.CLIENT.getCode())) {
             final Collection<ImportData> importForClientEntity = this.bulkImportWorkbookService.getImports(GlobalEntityType.CLIENTS_ENTTTY);
@@ -95,7 +95,7 @@ public class BulkImportApiResource {
     @GET
     @Path("getOutputTemplateLocation")
     public String retriveOutputTemplateLocation(@QueryParam("importDocumentId") final String importDocumentId) {
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
         final DocumentData documentData = this.bulkImportWorkbookService.getOutputTemplateLocation(importDocumentId);
         return this.toApiJsonSerializer.serialize(documentData.fileLocation());
     }

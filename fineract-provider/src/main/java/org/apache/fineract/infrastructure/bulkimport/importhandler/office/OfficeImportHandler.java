@@ -31,7 +31,6 @@ import org.apache.fineract.infrastructure.bulkimport.data.Count;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.poi.ss.usermodel.Cell;
@@ -48,8 +47,6 @@ import org.springframework.stereotype.Service;
 public class OfficeImportHandler implements ImportHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(OfficeImportHandler.class);
-    private List<OfficeData> offices;
-    private Workbook workbook;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
@@ -59,13 +56,12 @@ public class OfficeImportHandler implements ImportHandler {
 
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
-        this.offices = new ArrayList<>();
-        this.workbook = workbook;
-        readExcelFile(locale, dateFormat);
-        return importEntity(dateFormat);
+        List<OfficeData> offices = readExcelFile(workbook, locale, dateFormat);
+        return importEntity(workbook, offices, dateFormat);
     }
 
-    public void readExcelFile(final String locale, final String dateFormat) {
+    private List<OfficeData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
+        List<OfficeData> offices = new ArrayList<>();
         Sheet officeSheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(officeSheet, 0);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
@@ -75,6 +71,7 @@ public class OfficeImportHandler implements ImportHandler {
                 offices.add(readOffice(row, locale, dateFormat));
             }
         }
+        return offices;
     }
 
     private OfficeData readOffice(Row row, final String locale, final String dateFormat) {
@@ -87,14 +84,14 @@ public class OfficeImportHandler implements ImportHandler {
         return office;
     }
 
-    public Count importEntity(String dateFormat) {
+    private Count importEntity(final Workbook workbook, final List<OfficeData> offices, final String dateFormat) {
         Sheet officeSheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
 
         int successCount = 0;
         int errorCount = 0;
-        String errorMessage = "";
+        String errorMessage;
         for (OfficeData office : offices) {
             try {
                 String payload = gsonBuilder.create().toJson(office);
@@ -102,7 +99,7 @@ public class OfficeImportHandler implements ImportHandler {
                         .createOffice() //
                         .withJson(payload) //
                         .build(); //
-                final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+                commandsSourceWritePlatformService.logCommandSource(commandRequest);
                 successCount++;
                 Cell statusCell = officeSheet.getRow(office.getRowIndex()).createCell(OfficeConstants.STATUS_COL);
                 statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);
@@ -118,9 +115,5 @@ public class OfficeImportHandler implements ImportHandler {
         ImportHandlerUtils.writeString(OfficeConstants.STATUS_COL, officeSheet.getRow(0),
                 TemplatePopulateImportConstants.STATUS_COL_REPORT_HEADER);
         return Count.instance(successCount, errorCount);
-    }
-
-    public List<OfficeData> getOffices() {
-        return offices;
     }
 }

@@ -44,11 +44,20 @@ import org.springframework.stereotype.Component;
 @Component
 public class FloatingRateDataValidator {
 
-    private final Set<String> supportedParametersForFloatingRates = new HashSet<>(
-            Arrays.asList("name", "isBaseLendingRate", "isActive", "ratePeriods"));
-    private final Set<String> supportedParametersForFloatingRatePeriods = new HashSet<>(
-            Arrays.asList("fromDate", "interestRate", "isDifferentialToBaseLendingRate", "locale", "dateFormat"));
-
+    public static final String NAME = "name";
+    public static final String IS_BASE_LENDING_RATE = "isBaseLendingRate";
+    public static final String IS_ACTIVE = "isActive";
+    public static final String RATE_PERIODS = "ratePeriods";
+    public static final String FROM_DATE = "fromDate";
+    public static final String INTEREST_RATE = "interestRate";
+    public static final String IS_DIFFERENTIAL_TO_BASE_LENDING_RATE = "isDifferentialToBaseLendingRate";
+    public static final String LOCALE = "locale";
+    public static final String DATE_FORMAT = "dateFormat";
+    public static final String FLOATINGRATE = "floatingrate";
+    private static final Set<String> SUPPORTED_PARAMETERS_FOR_FLOATING_RATES = new HashSet<>(
+            Arrays.asList(NAME, IS_BASE_LENDING_RATE, IS_ACTIVE, RATE_PERIODS));
+    private static final Set<String> SUPPORTED_PARAMETERS_FOR_FLOATING_RATE_PERIODS = new HashSet<>(
+            Arrays.asList(FROM_DATE, INTEREST_RATE, IS_DIFFERENTIAL_TO_BASE_LENDING_RATE, LOCALE, DATE_FORMAT));
     private final FromJsonHelper fromApiJsonHelper;
     private final FloatingRateRepository floatingRateRepository;
 
@@ -59,37 +68,39 @@ public class FloatingRateDataValidator {
     }
 
     public void validateForCreate(String json) {
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParametersForFloatingRates);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS_FOR_FLOATING_RATES);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("floatingrate");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(FLOATINGRATE);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final String name = this.fromApiJsonHelper.extractStringNamed("name", element);
-        baseDataValidator.reset().parameter("name").value(name).notBlank().notExceedingLengthOf(200);
+        final String name = this.fromApiJsonHelper.extractStringNamed(NAME, element);
+        baseDataValidator.reset().parameter(NAME).value(name).notBlank().notExceedingLengthOf(200);
 
         Boolean isBaseLendingRate = null;
-        if (this.fromApiJsonHelper.parameterExists("isBaseLendingRate", element)) {
-            isBaseLendingRate = this.fromApiJsonHelper.extractBooleanNamed("isBaseLendingRate", element);
+        if (this.fromApiJsonHelper.parameterExists(IS_BASE_LENDING_RATE, element)) {
+            isBaseLendingRate = this.fromApiJsonHelper.extractBooleanNamed(IS_BASE_LENDING_RATE, element);
 
-            baseDataValidator.reset().parameter("isBaseLendingRate").value(isBaseLendingRate).notNull();
+            baseDataValidator.reset().parameter(IS_BASE_LENDING_RATE).value(isBaseLendingRate).notNull();
             if (isBaseLendingRate == null) {
-                baseDataValidator.reset().parameter("isBaseLendingRate").trueOrFalseRequired(false);
+                baseDataValidator.reset().parameter(IS_BASE_LENDING_RATE).trueOrFalseRequired(false);
             } else if (isBaseLendingRate) {
                 FloatingRate baseLendingRate = this.floatingRateRepository.retrieveBaseLendingRate();
                 if (baseLendingRate != null) {
-                    baseDataValidator.reset().parameter("isBaseLendingRate").value(isBaseLendingRate)
+                    baseDataValidator.reset().parameter(IS_BASE_LENDING_RATE).value(isBaseLendingRate)
                             .failWithCode("baselendingrate.duplicate", "Base Lending Rate already exists");
                 }
             }
         }
 
-        if (this.fromApiJsonHelper.parameterExists("isActive", element)) {
-            final Boolean isActive = this.fromApiJsonHelper.extractBooleanNamed("isActive", element);
+        if (this.fromApiJsonHelper.parameterExists(IS_ACTIVE, element)) {
+            final Boolean isActive = this.fromApiJsonHelper.extractBooleanNamed(IS_ACTIVE, element);
             if (isActive == null) {
-                baseDataValidator.reset().parameter("isActive").trueOrFalseRequired(false);
+                baseDataValidator.reset().parameter(IS_ACTIVE).trueOrFalseRequired(false);
             }
         }
 
@@ -103,9 +114,9 @@ public class FloatingRateDataValidator {
 
     private void validateRatePeriods(DataValidatorBuilder baseDataValidator, JsonElement element, boolean isBaseLendingRate,
             boolean isBLRModifiedAsNonBLR) {
-        if (this.fromApiJsonHelper.parameterExists("ratePeriods", element)) {
-            final JsonArray ratePeriods = this.fromApiJsonHelper.extractJsonArrayNamed("ratePeriods", element);
-            baseDataValidator.reset().parameter("ratePeriods").value(ratePeriods).notBlank().jsonArrayNotEmpty();
+        if (this.fromApiJsonHelper.parameterExists(RATE_PERIODS, element)) {
+            final JsonArray ratePeriods = this.fromApiJsonHelper.extractJsonArrayNamed(RATE_PERIODS, element);
+            baseDataValidator.reset().parameter(RATE_PERIODS).value(ratePeriods).notBlank().jsonArrayNotEmpty();
 
             if (ratePeriods != null) {
                 List<LocalDate> fromDates = new ArrayList<>();
@@ -113,38 +124,38 @@ public class FloatingRateDataValidator {
                     final JsonElement ratePeriod = ratePeriods.get(i);
 
                     this.fromApiJsonHelper.checkForUnsupportedParameters(ratePeriod.getAsJsonObject(),
-                            this.supportedParametersForFloatingRatePeriods);
+                            SUPPORTED_PARAMETERS_FOR_FLOATING_RATE_PERIODS);
 
-                    final LocalDate fromDate = this.fromApiJsonHelper.extractLocalDateNamed("fromDate", ratePeriod);
-                    baseDataValidator.reset().parameter("fromDate").parameterAtIndexArray("fromDate", i + 1).value(fromDate).notBlank()
+                    final LocalDate fromDate = this.fromApiJsonHelper.extractLocalDateNamed(FROM_DATE, ratePeriod);
+                    baseDataValidator.reset().parameter(FROM_DATE).parameterAtIndexArray(FROM_DATE, i + 1).value(fromDate).notBlank()
                             .validateDateAfter(DateUtils.getBusinessLocalDate().plusDays(1));
                     if (fromDate != null) {
                         fromDates.add(fromDate);
                     }
 
-                    final BigDecimal interestRatePerPeriod = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRate",
+                    final BigDecimal interestRatePerPeriod = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(INTEREST_RATE,
                             ratePeriod);
-                    baseDataValidator.reset().parameter("interestRate").parameterAtIndexArray("interestRate", i + 1)
+                    baseDataValidator.reset().parameter(INTEREST_RATE).parameterAtIndexArray(INTEREST_RATE, i + 1)
                             .value(interestRatePerPeriod).notNull().zeroOrPositiveAmount();
 
-                    if (this.fromApiJsonHelper.parameterExists("isDifferentialToBaseLendingRate", ratePeriod)) {
+                    if (this.fromApiJsonHelper.parameterExists(IS_DIFFERENTIAL_TO_BASE_LENDING_RATE, ratePeriod)) {
                         final Boolean isDifferentialToBaseLendingRate = this.fromApiJsonHelper
-                                .extractBooleanNamed("isDifferentialToBaseLendingRate", ratePeriod);
+                                .extractBooleanNamed(IS_DIFFERENTIAL_TO_BASE_LENDING_RATE, ratePeriod);
                         if (isDifferentialToBaseLendingRate == null) {
-                            baseDataValidator.reset().parameter("isDifferentialToBaseLendingRate")
-                                    .parameterAtIndexArray("isDifferentialToBaseLendingRate", i + 1).trueOrFalseRequired(false);
+                            baseDataValidator.reset().parameter(IS_DIFFERENTIAL_TO_BASE_LENDING_RATE)
+                                    .parameterAtIndexArray(IS_DIFFERENTIAL_TO_BASE_LENDING_RATE, i + 1).trueOrFalseRequired(false);
                         } else if (isDifferentialToBaseLendingRate) {
                             FloatingRate baseLendingRate = this.floatingRateRepository.retrieveBaseLendingRate();
                             if (baseLendingRate == null || isBLRModifiedAsNonBLR) {
-                                baseDataValidator.reset().parameter("isDifferentialToBaseLendingRate")
-                                        .parameterAtIndexArray("isDifferentialToBaseLendingRate", i + 1)
+                                baseDataValidator.reset().parameter(IS_DIFFERENTIAL_TO_BASE_LENDING_RATE)
+                                        .parameterAtIndexArray(IS_DIFFERENTIAL_TO_BASE_LENDING_RATE, i + 1)
                                         .value(isDifferentialToBaseLendingRate)
                                         .failWithCode("no.baselending.rate.defined", "Base Lending Rate doesn't exists");
                             }
 
                             if (isBaseLendingRate) {
-                                baseDataValidator.reset().parameter("isDifferentialToBaseLendingRate")
-                                        .parameterAtIndexArray("isDifferentialToBaseLendingRate", i + 1)
+                                baseDataValidator.reset().parameter(IS_DIFFERENTIAL_TO_BASE_LENDING_RATE)
+                                        .parameterAtIndexArray(IS_DIFFERENTIAL_TO_BASE_LENDING_RATE, i + 1)
                                         .value(isDifferentialToBaseLendingRate).failWithCode("cannot.be.true.for.baselendingrate",
                                                 "isDifferentialToBaseLendingRate cannot be true for floating rate marked as Base Lending Rate.");
                             }
@@ -154,7 +165,7 @@ public class FloatingRateDataValidator {
                 }
                 Set<LocalDate> uniqueFromDates = new HashSet<>(fromDates);
                 if (fromDates.size() != uniqueFromDates.size()) {
-                    baseDataValidator.reset().parameter("fromDate").failWithCode("multiple.same.date",
+                    baseDataValidator.reset().parameter(FROM_DATE).failWithCode("multiple.same.date",
                             "More than one entry in ratePeriods have same fromDate.");
                 }
 
@@ -163,41 +174,41 @@ public class FloatingRateDataValidator {
     }
 
     public void validateForUpdate(String json, FloatingRate floatingRateForUpdate) {
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParametersForFloatingRates);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS_FOR_FLOATING_RATES);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("floatingrate");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(FLOATINGRATE);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        if (this.fromApiJsonHelper.parameterExists("name", element)) {
-            final String name = this.fromApiJsonHelper.extractStringNamed("name", element);
-            baseDataValidator.reset().parameter("name").value(name).notBlank().notExceedingLengthOf(200);
+        if (this.fromApiJsonHelper.parameterExists(NAME, element)) {
+            final String name = this.fromApiJsonHelper.extractStringNamed(NAME, element);
+            baseDataValidator.reset().parameter(NAME).value(name).notBlank().notExceedingLengthOf(200);
         }
 
         Boolean isBaseLendingRate = null;
         Boolean isBLRModifiedAsNonBLR = false;
         FloatingRate baseLendingRate = this.floatingRateRepository.retrieveBaseLendingRate();
-        if (this.fromApiJsonHelper.parameterExists("isBaseLendingRate", element)) {
-            isBaseLendingRate = this.fromApiJsonHelper.extractBooleanNamed("isBaseLendingRate", element);
+        if (this.fromApiJsonHelper.parameterExists(IS_BASE_LENDING_RATE, element)) {
+            isBaseLendingRate = this.fromApiJsonHelper.extractBooleanNamed(IS_BASE_LENDING_RATE, element);
 
-            baseDataValidator.reset().parameter("isBaseLendingRate").value(isBaseLendingRate).notNull();
+            baseDataValidator.reset().parameter(IS_BASE_LENDING_RATE).value(isBaseLendingRate).notNull();
             if (isBaseLendingRate == null) {
-                baseDataValidator.reset().parameter("isBaseLendingRate").trueOrFalseRequired(false);
-            } else if (isBaseLendingRate) {
-                if (baseLendingRate != null && !baseLendingRate.getId().equals(floatingRateForUpdate.getId())) {
-                    baseDataValidator.reset().parameter("isBaseLendingRate").value(isBaseLendingRate)
-                            .failWithCode("baselendingrate.duplicate", "Base Lending Rate already exists");
-                }
+                baseDataValidator.reset().parameter(IS_BASE_LENDING_RATE).trueOrFalseRequired(false);
+            } else if (isBaseLendingRate && baseLendingRate != null && !baseLendingRate.getId().equals(floatingRateForUpdate.getId())) {
+                baseDataValidator.reset().parameter(IS_BASE_LENDING_RATE).value(isBaseLendingRate).failWithCode("baselendingrate.duplicate",
+                        "Base Lending Rate already exists");
             }
         }
 
         Boolean isActive = null;
-        if (this.fromApiJsonHelper.parameterExists("isActive", element)) {
-            isActive = this.fromApiJsonHelper.extractBooleanNamed("isActive", element);
+        if (this.fromApiJsonHelper.parameterExists(IS_ACTIVE, element)) {
+            isActive = this.fromApiJsonHelper.extractBooleanNamed(IS_ACTIVE, element);
             if (isActive == null) {
-                baseDataValidator.reset().parameter("isActive").trueOrFalseRequired(false);
+                baseDataValidator.reset().parameter(IS_ACTIVE).trueOrFalseRequired(false);
             }
         }
 
@@ -209,16 +220,14 @@ public class FloatingRateDataValidator {
             isActive = floatingRateForUpdate.isActive();
         }
 
-        if (baseLendingRate != null && baseLendingRate.getId().equals(floatingRateForUpdate.getId())) {
-            if (!isBaseLendingRate || !isActive) {
-                isBLRModifiedAsNonBLR = true;
-            }
+        if (baseLendingRate != null && baseLendingRate.getId().equals(floatingRateForUpdate.getId()) && (!isBaseLendingRate || !isActive)) {
+            isBLRModifiedAsNonBLR = true;
         }
 
         if (isBLRModifiedAsNonBLR) {
             Collection<FloatingRate> floatingRates = this.floatingRateRepository.retrieveFloatingRatesLinkedToBLR();
-            if (floatingRates != null && floatingRates.size() > 0) {
-                baseDataValidator.reset().parameter("isBaseLendingRate").value(isBaseLendingRate).failWithCode(
+            if (floatingRates != null && !floatingRates.isEmpty()) {
+                baseDataValidator.reset().parameter(IS_BASE_LENDING_RATE).value(isBaseLendingRate).failWithCode(
                         "cannot.be.marked.non.baselendingrate",
                         "There are floating rates linked to this Base Lending Rate, cannot be marked as non-Base Lending Rate.");
             }

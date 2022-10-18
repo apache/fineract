@@ -30,7 +30,6 @@ import org.apache.fineract.infrastructure.bulkimport.constants.UserConstants;
 import org.apache.fineract.infrastructure.bulkimport.data.Count;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.useradministration.data.AppUserData;
 import org.apache.poi.ss.usermodel.Cell;
@@ -47,9 +46,6 @@ import org.springframework.stereotype.Service;
 public class UserImportHandler implements ImportHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(UserImportHandler.class);
-    private Workbook workbook;
-    private List<AppUserData> users;
-    private List<String> statuses;
 
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
@@ -59,27 +55,27 @@ public class UserImportHandler implements ImportHandler {
     }
 
     @Override
-    public Count process(Workbook workbook, String locale, String dateFormat) {
-        this.workbook = workbook;
-        users = new ArrayList<>();
-        statuses = new ArrayList<>();
-        readExcelFile();
-        return importEntity(dateFormat);
+    public Count process(final Workbook workbook, final String locale, final String dateFormat) {
+        List<String> statuses = new ArrayList<>();
+        List<AppUserData> users = readExcelFile(workbook, statuses);
+        return importEntity(workbook, users);
     }
 
-    public void readExcelFile() {
+    private List<AppUserData> readExcelFile(final Workbook workbook, final List<String> statuses) {
+        List<AppUserData> users = new ArrayList<>();
         Sheet usersSheet = workbook.getSheet(TemplatePopulateImportConstants.USER_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(usersSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = usersSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, UserConstants.STATUS_COL)) {
-                users.add(readUsers(row));
+                users.add(readUsers(workbook, row, statuses));
             }
         }
+        return users;
     }
 
-    private AppUserData readUsers(Row row) {
+    private AppUserData readUsers(final Workbook workbook, final Row row, final List<String> statuses) {
         String officeName = ImportHandlerUtils.readAsString(UserConstants.OFFICE_NAME_COL, row);
         Long officeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME), officeName);
         String staffName = ImportHandlerUtils.readAsString(UserConstants.STAFF_NAME_COL, row);
@@ -109,11 +105,11 @@ public class UserImportHandler implements ImportHandler {
 
     }
 
-    public Count importEntity(String dateFormat) {
+    private Count importEntity(final Workbook workbook, final List<AppUserData> users) {
         Sheet userSheet = workbook.getSheet(TemplatePopulateImportConstants.USER_SHEET_NAME);
         int successCount = 0;
         int errorCount = 0;
-        String errorMessage = "";
+        String errorMessage;
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
         for (AppUserData user : users) {
             try {
@@ -123,7 +119,7 @@ public class UserImportHandler implements ImportHandler {
                         .createUser() //
                         .withJson(payload) //
                         .build(); //
-                final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+                commandsSourceWritePlatformService.logCommandSource(commandRequest);
                 successCount++;
                 Cell statusCell = userSheet.getRow(user.getRowIndex()).createCell(UserConstants.STATUS_COL);
                 statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);

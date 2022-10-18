@@ -55,7 +55,7 @@ public class LoanReschedulePreviewPlatformServiceImpl implements LoanRescheduleP
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
     private final LoanScheduleGeneratorFactory loanScheduleFactory;
     private final LoanSummaryWrapper loanSummaryWrapper;
-    private final DefaultScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
+    private static final DefaultScheduledDateGenerator DEFAULT_SCHEDULED_DATE_GENERATOR = new DefaultScheduledDateGenerator();
 
     @Autowired
     public LoanReschedulePreviewPlatformServiceImpl(final LoanRescheduleRequestRepositoryWrapper loanRescheduleRequestRepository,
@@ -115,10 +115,10 @@ public class LoanReschedulePreviewPlatformServiceImpl implements LoanRescheduleP
 
         for (LoanTermVariationsData loanTermVariation : loanApplicationTerms.getLoanTermVariations().getDueDateVariation()) {
             if (rescheduleFromDate.isBefore(loanTermVariation.getTermVariationApplicableFrom())) {
-                LocalDate applicableDate = this.scheduledDateGenerator.generateNextRepaymentDate(rescheduleFromDate, loanApplicationTerms,
-                        false);
+                LocalDate applicableDate = DEFAULT_SCHEDULED_DATE_GENERATOR.generateNextRepaymentDate(rescheduleFromDate,
+                        loanApplicationTerms, false);
                 if (loanTermVariation.getTermVariationApplicableFrom().equals(applicableDate)) {
-                    LocalDate adjustedDate = this.scheduledDateGenerator.generateNextRepaymentDate(adjustedApplicableDate,
+                    LocalDate adjustedDate = DEFAULT_SCHEDULED_DATE_GENERATOR.generateNextRepaymentDate(adjustedApplicableDate,
                             loanApplicationTerms, false);
                     loanTermVariation.setApplicableFromDate(adjustedDate);
                     loanTermVariationsData.add(loanTermVariation);
@@ -137,10 +137,8 @@ public class LoanReschedulePreviewPlatformServiceImpl implements LoanRescheduleP
         final LoanScheduleDTO loanSchedule = loanScheduleGenerator.rescheduleNextInstallments(mathContext, loanApplicationTerms, loan,
                 loanApplicationTerms.getHolidayDetailDTO(), loanRepaymentScheduleTransactionProcessor, rescheduleFromDate);
         final LoanScheduleModel loanScheduleModel = loanSchedule.getLoanScheduleModel();
-        LoanScheduleModel loanScheduleModels = LoanScheduleModel.withLoanScheduleModelPeriods(loanScheduleModel.getPeriods(),
-                loanScheduleModel);
 
-        return loanScheduleModels;
+        return LoanScheduleModel.withLoanScheduleModelPeriods(loanScheduleModel.getPeriods(), loanScheduleModel);
     }
 
 }

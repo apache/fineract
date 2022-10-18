@@ -526,9 +526,9 @@ public class LoanScheduleAssembler {
                     BigDecimal principal = null;
                     BigDecimal netDisbursalAmount = null;
 
-                    if (jsonObject.has(LoanApiConstants.disbursementDateParameterName)) {
-                        expectedDisbursementDate = this.fromApiJsonHelper
-                                .extractLocalDateNamed(LoanApiConstants.disbursementDateParameterName, jsonObject, dateFormat, locale);
+                    if (jsonObject.has(LoanApiConstants.expectedDisbursementDateParameterName)) {
+                        expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed(
+                                LoanApiConstants.expectedDisbursementDateParameterName, jsonObject, dateFormat, locale);
                     }
                     if (jsonObject.has(LoanApiConstants.disbursementPrincipalParameterName)
                             && jsonObject.get(LoanApiConstants.disbursementPrincipalParameterName).isJsonPrimitive()

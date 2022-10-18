@@ -723,7 +723,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             final List<Loan> clientLoans = this.loanRepositoryWrapper.findLoanByClientId(clientId);
             for (final Loan loan : clientLoans) {
-                final LoanStatusMapper loanStatus = new LoanStatusMapper(loan.status().getValue());
+                final LoanStatusMapper loanStatus = new LoanStatusMapper(loan.getStatus().getValue());
                 if (loanStatus.isOpen() || loanStatus.isPendingApproval() || loanStatus.isAwaitingDisbursal()) {
                     final String errorMessage = "Client cannot be closed because of non-closed loans.";
                     throw new InvalidClientStateTransitionException("close", "loan.non-closed", errorMessage);

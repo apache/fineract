@@ -79,7 +79,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
     private final ShareAccountChargeReadPlatformService shareAccountChargeReadPlatformService;
     private final PurchasedSharesReadPlatformService purchasedSharesReadPlatformService;
     private final JdbcTemplate jdbcTemplate;
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private final PaginationHelper shareAccountDataPaginationHelper;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
 
@@ -155,7 +155,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
 
         ShareAccountMapper mapper = new ShareAccountMapper(charges, purchasedShares);
         String query = "select " + mapper.schema() + "where sa.id=?";
-        ShareAccountData data = (ShareAccountData) this.jdbcTemplate.queryForObject(query, mapper, new Object[] { id }); // NOSONAR
+        ShareAccountData data = (ShareAccountData) this.jdbcTemplate.queryForObject(query, mapper, id); // NOSONAR
         String serviceName = "share" + ProductsApiConstants.READPLATFORM_NAME;
         ShareProductReadPlatformService service = (ShareProductReadPlatformService) this.applicationContext.getBean(serviceName);
         final ShareProductData productData = (ShareProductData) service.retrieveOne(data.getProductId(), false);
@@ -182,7 +182,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
     private Collection<ShareAccountDividendData> retrieveAssociatedDividends(final Long shareAccountId) {
         ShareAccountDividendRowMapper mapper = new ShareAccountDividendRowMapper();
         String query = "select " + mapper.schema() + "where sadd.account_id=?";
-        return this.jdbcTemplate.query(query, mapper, new Object[] { shareAccountId }); // NOSONAR
+        return this.jdbcTemplate.query(query, mapper, shareAccountId); // NOSONAR
     }
 
     @Override
@@ -222,7 +222,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         params.add(id);
         params.add(ShareAccountStatusType.ACTIVE.getValue());
         if (fetchInActiveAccounts) {
-            String formattedStartDate = formatter.format(startDate);
+            String formattedStartDate = DATE_TIME_FORMATTER.format(startDate);
             sb.append(" and (sa.status_enum = ? or (sa.status_enum = ? ");
             sb.append(" and sa.closed_date > '" + formattedStartDate + "')) ");
             params.add(ShareAccountStatusType.CLOSED.getValue());

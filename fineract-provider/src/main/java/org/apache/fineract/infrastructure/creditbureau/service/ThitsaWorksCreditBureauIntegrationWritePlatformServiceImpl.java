@@ -49,10 +49,8 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauConfigurations;
 import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauReportData;
 import org.apache.fineract.infrastructure.creditbureau.domain.CreditBureauConfiguration;
-import org.apache.fineract.infrastructure.creditbureau.domain.CreditBureauConfigurationRepository;
 import org.apache.fineract.infrastructure.creditbureau.domain.CreditBureauConfigurationRepositoryWrapper;
 import org.apache.fineract.infrastructure.creditbureau.domain.CreditBureauToken;
-import org.apache.fineract.infrastructure.creditbureau.domain.CreditReportRepository;
 import org.apache.fineract.infrastructure.creditbureau.domain.TokenRepositoryWrapper;
 import org.apache.fineract.infrastructure.creditbureau.serialization.CreditBureauTokenCommandFromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -68,30 +66,24 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implements ThitsaWorksCreditBureauIntegrationWritePlatformService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl.class);
     private final PlatformSecurityContext context;
     private final FromJsonHelper fromApiJsonHelper;
     private final TokenRepositoryWrapper tokenRepositoryWrapper;
     private final CreditBureauConfigurationRepositoryWrapper configDataRepository;
     private final CreditBureauTokenCommandFromApiJsonDeserializer fromApiJsonDeserializer;
-    private final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-    private final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-            .resource("ThitsaWorksCreditBureauIntegration");
 
     @Autowired
     public ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl(final PlatformSecurityContext context,
             final FromJsonHelper fromApiJsonHelper, final TokenRepositoryWrapper tokenRepositoryWrapper,
             final CreditBureauConfigurationRepositoryWrapper configDataRepository,
-            final CreditBureauConfigurationRepository configurationDataRepository,
-            final CreditBureauTokenCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final CreditReportRepository creditReportRepository) {
+            final CreditBureauTokenCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
         this.context = context;
         this.tokenRepositoryWrapper = tokenRepositoryWrapper;
         this.configDataRepository = configDataRepository;
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
     }
-
-    private static final Logger LOG = LoggerFactory.getLogger(ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl.class);
 
     @Transactional
     @Override
@@ -171,8 +163,8 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
 
         if (process.equals("UploadCreditReport")) { // to show the Response on frontEnd
             JsonObject reportObject = JsonParser.parseString(reponseMessage).getAsJsonObject();
-            String ResponseMessageJson = reportObject.get("ResponseMessage").getAsString();
-            this.handleAPIIntegrityIssues(ResponseMessageJson);
+            String responseMessageJson = reportObject.get("ResponseMessage").getAsString();
+            this.handleAPIIntegrityIssues(responseMessageJson);
         }
 
         return reponseMessage;
@@ -249,7 +241,7 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
         JsonElement element = reportObject.get("Data");
 
         if (!(element instanceof JsonNull)) { // NOTE : "element instanceof JsonNull" is for handling empty values (and
-                                              // assigning null) while fetching data from results
+            // assigning null) while fetching data from results
             jsonData = (JsonObject) element;
 
         }
@@ -265,9 +257,9 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
             borrowerInfo = gson.toJson(borrowerInfos);
         }
 
-        String Name = borrowerInfos.get("Name").toString();
-        String Gender = borrowerInfos.get("Gender").toString();
-        String Address = borrowerInfos.get("Address").toString();
+        String name = borrowerInfos.get("Name").toString();
+        String gender = borrowerInfos.get("Gender").toString();
+        String address = borrowerInfos.get("Address").toString();
 
         String creditScore = "CreditScore";
         creditScore = getJsonObjectToString(creditScore, element, jsonData);
@@ -288,7 +280,7 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
             writeoffLoanStringArray = convertArrayintoStringArray(writeOffLoansArray);
         }
 
-        return CreditBureauReportData.instance(Name, Gender, Address, creditScore, borrowerInfo, activeLoanStringArray,
+        return CreditBureauReportData.instance(name, gender, address, creditScore, borrowerInfo, activeLoanStringArray,
                 writeoffLoanStringArray);
     }
 
@@ -311,10 +303,8 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
 
         String process = "UploadCreditReport";
 
-        String responseMessage = this.okHttpConnectionMethod(userName, password, subscriptionKey, subscriptionId, url, token, creditReport,
-                fileDetail, 0L, null, process);
-
-        return responseMessage;
+        return this.okHttpConnectionMethod(userName, password, subscriptionKey, subscriptionId, url, token, creditReport, fileDetail, 0L,
+                null, process);
     }
 
     private String[] convertArrayintoStringArray(JsonArray jsonResult) {
@@ -338,8 +328,8 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
         JsonElement element = reportObject.get("Data");
 
         if (element.isJsonNull()) {
-            String ResponseMessage = reportObject.get("ResponseMessage").getAsString();
-            handleAPIIntegrityIssues(ResponseMessage);
+            String responseMessage = reportObject.get("ResponseMessage").getAsString();
+            handleAPIIntegrityIssues(responseMessage);
         }
 
         // to fetch the Unique ID from Result
@@ -354,16 +344,16 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
                 JsonObject jobject = dataArray.get(0).getAsJsonObject();
 
                 String uniqueIdString = jobject.get("UniqueID").toString();
-                String TrimUniqueId = uniqueIdString.substring(1, uniqueIdString.length() - 1);
+                String trimUniqueId = uniqueIdString.substring(1, uniqueIdString.length() - 1);
 
-                uniqueID = Long.parseLong(TrimUniqueId);
+                uniqueID = Long.parseLong(trimUniqueId);
 
             } else if (dataArray.size() == 0) {
-                String ResponseMessage = reportObject.get("ResponseMessage").getAsString();
-                handleAPIIntegrityIssues(ResponseMessage);
+                String responseMessage = reportObject.get("ResponseMessage").getAsString();
+                handleAPIIntegrityIssues(responseMessage);
             } else {
-                String nrc = null;
-                List<String> arrlist = new ArrayList<String>();
+                String nrc;
+                List<String> arrlist = new ArrayList<>();
 
                 for (int i = 0; i < dataArray.size(); ++i) {
                     JsonObject data = dataArray.get(i).getAsJsonObject();
@@ -377,8 +367,8 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
             }
 
         } catch (IndexOutOfBoundsException e) {
-            String ResponseMessage = jsonObject.get("ResponseMessage").getAsString();
-            handleAPIIntegrityIssues(ResponseMessage);
+            String responseMessage = jsonObject.get("ResponseMessage").getAsString();
+            handleAPIIntegrityIssues(responseMessage);
         }
         return uniqueID;
     }
@@ -471,7 +461,9 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
     }
 
     public String getCreditBureauConfiguration(Integer creditBureauId, String configurationParameterName) {
-
+        List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource("ThitsaWorksCreditBureauIntegration");
         String creditBureauConfigurationValue = null;
 
         try {

@@ -90,7 +90,7 @@ public class CollateralWritePlatformServiceJpaRepositoryImpl implements Collater
             /**
              * Collaterals may be added only when the loan associated with them are yet to be approved
              **/
-            if (!loan.status().isSubmittedAndPendingApproval()) {
+            if (!loan.getStatus().isSubmittedAndPendingApproval()) {
                 throw new CollateralCannotBeCreatedException(
                         LoanCollateralCannotBeCreatedReason.LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE, loan.getId());
             }
@@ -136,7 +136,7 @@ public class CollateralWritePlatformServiceJpaRepositoryImpl implements Collater
             /**
              * Collaterals may be updated only when the loan associated with them are yet to be approved
              **/
-            if (!loan.status().isSubmittedAndPendingApproval()) {
+            if (!loan.getStatus().isSubmittedAndPendingApproval()) {
                 throw new CollateralCannotBeUpdatedException(
                         LoanCollateralCannotBeUpdatedReason.LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE, loan.getId());
             }
@@ -169,7 +169,7 @@ public class CollateralWritePlatformServiceJpaRepositoryImpl implements Collater
         /**
          * Collaterals may be deleted only when the loan associated with them are yet to be approved
          **/
-        if (!loan.status().isSubmittedAndPendingApproval()) {
+        if (!loan.getStatus().isSubmittedAndPendingApproval()) {
             throw new CollateralCannotBeDeletedException(
                     LoanCollateralCannotBeDeletedReason.LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE, loanId, collateralId);
         }

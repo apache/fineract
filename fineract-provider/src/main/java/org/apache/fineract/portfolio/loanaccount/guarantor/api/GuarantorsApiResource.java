@@ -89,7 +89,7 @@ public class GuarantorsApiResource {
             Arrays.asList(AccountDetailConstants.idParamName, AccountTransfersApiConstants.transferDescriptionParamName,
                     AccountTransfersApiConstants.currencyParamName));
 
-    private final String resourceNameForPermission = "GUARANTOR";
+    private static final String RESOURCE_NAME_FOR_PERMISSION = "GUARANTOR";
 
     private final GuarantorReadPlatformService guarantorReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
@@ -127,7 +127,7 @@ public class GuarantorsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String newGuarantorTemplate(@Context final UriInfo uriInfo, @PathParam("loanId") final Long loanId) {
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
 
         final List<EnumOptionData> guarantorTypeOptions = GuarantorEnumerations.guarantorType(GuarantorType.values());
         final Collection<CodeValueData> allowedClientRelationshipTypes = this.codeValueReadPlatformService
@@ -144,7 +144,7 @@ public class GuarantorsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveGuarantorDetails(@Context final UriInfo uriInfo, @PathParam("loanId") final Long loanId) {
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
 
         final List<GuarantorData> guarantorDatas = this.guarantorReadPlatformService.retrieveGuarantorsForValidLoan(loanId);
 
@@ -159,7 +159,7 @@ public class GuarantorsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveGuarantorDetails(@Context final UriInfo uriInfo, @PathParam("loanId") final Long loanId,
             @PathParam("guarantorId") final Long guarantorId) {
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
 
         GuarantorData guarantorData = this.guarantorReadPlatformService.retrieveGuarantor(loanId, guarantorId);
 
@@ -222,7 +222,7 @@ public class GuarantorsApiResource {
     public String accountsTemplate(@QueryParam("clientId") final Long clientId, @PathParam("loanId") final Long loanId,
             @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
 
         PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(PortfolioAccountType.SAVINGS.getValue(), clientId, null);
         Collection<PortfolioAccountData> accountLinkingOptions = null;

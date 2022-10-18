@@ -39,10 +39,14 @@ import org.springframework.stereotype.Component;
 @Component
 public final class RoleDataValidator {
 
+    public static final String ID = "id";
+    public static final String NAME = "name";
+    public static final String DESCRIPTION = "description";
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "name", "description"));
+    private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList(ID, NAME, DESCRIPTION));
+    public static final String ROLE = "role";
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -57,18 +61,18 @@ public final class RoleDataValidator {
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("role");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(ROLE);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final String name = this.fromApiJsonHelper.extractStringNamed("name", element);
-        baseDataValidator.reset().parameter("name").value(name).notBlank().notExceedingLengthOf(100);
+        final String name = this.fromApiJsonHelper.extractStringNamed(NAME, element);
+        baseDataValidator.reset().parameter(NAME).value(name).notBlank().notExceedingLengthOf(100);
 
-        final String description = this.fromApiJsonHelper.extractStringNamed("description", element);
-        baseDataValidator.reset().parameter("description").value(description).notBlank().notExceedingLengthOf(500);
+        final String description = this.fromApiJsonHelper.extractStringNamed(DESCRIPTION, element);
+        baseDataValidator.reset().parameter(DESCRIPTION).value(description).notBlank().notExceedingLengthOf(500);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -79,21 +83,21 @@ public final class RoleDataValidator {
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("role");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(ROLE);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        if (this.fromApiJsonHelper.parameterExists("name", element)) {
-            final String username = this.fromApiJsonHelper.extractStringNamed("name", element);
-            baseDataValidator.reset().parameter("name").value(username).notBlank().notExceedingLengthOf(100);
+        if (this.fromApiJsonHelper.parameterExists(NAME, element)) {
+            final String username = this.fromApiJsonHelper.extractStringNamed(NAME, element);
+            baseDataValidator.reset().parameter(NAME).value(username).notBlank().notExceedingLengthOf(100);
         }
 
-        if (this.fromApiJsonHelper.parameterExists("description", element)) {
-            final String description = this.fromApiJsonHelper.extractStringNamed("description", element);
-            baseDataValidator.reset().parameter("description").value(description).notBlank().notExceedingLengthOf(500);
+        if (this.fromApiJsonHelper.parameterExists(DESCRIPTION, element)) {
+            final String description = this.fromApiJsonHelper.extractStringNamed(DESCRIPTION, element);
+            baseDataValidator.reset().parameter(DESCRIPTION).value(description).notBlank().notExceedingLengthOf(500);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

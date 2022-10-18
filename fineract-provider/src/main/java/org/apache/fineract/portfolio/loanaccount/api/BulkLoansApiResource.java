@@ -59,10 +59,16 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Bulk Loans", description = "")
 public class BulkLoansApiResource {
 
-    private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("officeId", "fromLoanOfficerId", "assignmentDate",
-            "officeOptions", "loanOfficerOptions", "accountSummaryCollection"));
+    public static final String OFFICE_ID = "officeId";
+    public static final String FROM_LOAN_OFFICER_ID = "fromLoanOfficerId";
+    public static final String ASSIGNMENT_DATE = "assignmentDate";
+    public static final String OFFICE_OPTIONS = "officeOptions";
+    public static final String LOAN_OFFICER_OPTIONS = "loanOfficerOptions";
+    public static final String ACCOUNT_SUMMARY_COLLECTION = "accountSummaryCollection";
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(OFFICE_ID, FROM_LOAN_OFFICER_ID,
+            ASSIGNMENT_DATE, OFFICE_OPTIONS, LOAN_OFFICER_OPTIONS, ACCOUNT_SUMMARY_COLLECTION));
 
-    private final String resourceNameForPermissions = "LOAN";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "LOAN";
 
     private final PlatformSecurityContext context;
     private final StaffReadPlatformService staffReadPlatformService;
@@ -91,10 +97,10 @@ public class BulkLoansApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String loanReassignmentTemplate(@QueryParam("officeId") final Long officeId,
-            @QueryParam("fromLoanOfficerId") final Long loanOfficerId, @Context final UriInfo uriInfo) {
+    public String loanReassignmentTemplate(@QueryParam(OFFICE_ID) final Long officeId,
+            @QueryParam(FROM_LOAN_OFFICER_ID) final Long loanOfficerId, @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final Collection<OfficeData> offices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
 
@@ -113,7 +119,7 @@ public class BulkLoansApiResource {
                 LocalDate.now(DateUtils.getDateTimeZoneOfTenant()), offices, loanOfficers, staffAccountSummaryCollectionData);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, loanReassignmentData, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, loanReassignmentData, RESPONSE_DATA_PARAMETERS);
     }
 
     @POST

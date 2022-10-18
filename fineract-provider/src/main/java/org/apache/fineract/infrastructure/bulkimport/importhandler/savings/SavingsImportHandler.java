@@ -55,13 +55,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class SavingsImportHandler implements ImportHandler {
 
+    public static final String DAILY = "Daily";
+    public static final String MONTHLY = "Monthly";
+    public static final String QUARTERLY = "Quarterly";
+    public static final String SEMI_ANNUAL = "Semi-Annual";
+    public static final String ANNUALLY = "Annually";
+    public static final String BI_ANNUAL = "BiAnnual";
     private static final Logger LOG = LoggerFactory.getLogger(SavingsImportHandler.class);
-    private Workbook workbook;
-    private List<SavingsAccountData> savings;
-    private List<SavingsApproval> approvalDates;
-    private List<SavingsActivation> activationDates;
-    private List<String> statuses;
-
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
@@ -70,24 +70,24 @@ public class SavingsImportHandler implements ImportHandler {
     }
 
     @Override
-    public Count process(Workbook workbook, String locale, String dateFormat) {
-        this.workbook = workbook;
-        this.savings = new ArrayList<>();
-        this.approvalDates = new ArrayList<>();
-        this.activationDates = new ArrayList<>();
-        this.statuses = new ArrayList<>();
-        readExcelFile(locale, dateFormat);
-        return importEntity(dateFormat);
+    public Count process(final Workbook workbook, final String locale, final String dateFormat) {
+        List<SavingsAccountData> savings = new ArrayList<>();
+        List<SavingsApproval> approvalDates = new ArrayList<>();
+        List<SavingsActivation> activationDates = new ArrayList<>();
+        List<String> statuses = new ArrayList<>();
+        readExcelFile(workbook, savings, approvalDates, activationDates, statuses, locale, dateFormat);
+        return importEntity(workbook, savings, approvalDates, activationDates, statuses, dateFormat);
     }
 
-    public void readExcelFile(String locale, String dateFormat) {
+    public void readExcelFile(final Workbook workbook, final List<SavingsAccountData> savings, final List<SavingsApproval> approvalDates,
+            final List<SavingsActivation> activationDates, final List<String> statuses, final String locale, final String dateFormat) {
         Sheet savingsSheet = workbook.getSheet(TemplatePopulateImportConstants.SAVINGS_ACCOUNTS_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(savingsSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = savingsSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, SavingsConstants.STATUS_COL)) {
-                savings.add(readSavings(row, locale, dateFormat));
+                savings.add(readSavings(workbook, row, statuses, locale, dateFormat));
                 approvalDates.add(readSavingsApproval(row, locale, dateFormat));
                 activationDates.add(readSavingsActivation(row, locale, dateFormat));
             }
@@ -112,7 +112,8 @@ public class SavingsImportHandler implements ImportHandler {
         }
     }
 
-    private SavingsAccountData readSavings(Row row, String locale, String dateFormat) {
+    private SavingsAccountData readSavings(final Workbook workbook, final Row row, final List<String> statuses, final String locale,
+            final String dateFormat) {
         String productName = ImportHandlerUtils.readAsString(SavingsConstants.PRODUCT_COL, row);
         Long productId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME), productName);
         String fieldOfficerName = ImportHandlerUtils.readAsString(SavingsConstants.FIELD_OFFICER_NAME_COL, row);
@@ -129,15 +130,15 @@ public class SavingsImportHandler implements ImportHandler {
         Long interestCompoundingPeriodTypeId = null;
         EnumOptionData interestCompoundingPeriodTypeEnum = null;
         if (interestCompoundingPeriodType != null) {
-            if (interestCompoundingPeriodType.equalsIgnoreCase("Daily")) {
+            if (interestCompoundingPeriodType.equalsIgnoreCase(DAILY)) {
                 interestCompoundingPeriodTypeId = 1L;
-            } else if (interestCompoundingPeriodType.equalsIgnoreCase("Monthly")) {
+            } else if (interestCompoundingPeriodType.equalsIgnoreCase(MONTHLY)) {
                 interestCompoundingPeriodTypeId = 4L;
-            } else if (interestCompoundingPeriodType.equalsIgnoreCase("Quarterly")) {
+            } else if (interestCompoundingPeriodType.equalsIgnoreCase(QUARTERLY)) {
                 interestCompoundingPeriodTypeId = 5L;
-            } else if (interestCompoundingPeriodType.equalsIgnoreCase("Semi-Annual")) {
+            } else if (interestCompoundingPeriodType.equalsIgnoreCase(SEMI_ANNUAL)) {
                 interestCompoundingPeriodTypeId = 6L;
-            } else if (interestCompoundingPeriodType.equalsIgnoreCase("Annually")) {
+            } else if (interestCompoundingPeriodType.equalsIgnoreCase(ANNUALLY)) {
                 interestCompoundingPeriodTypeId = 7L;
             }
             interestCompoundingPeriodTypeEnum = new EnumOptionData(interestCompoundingPeriodTypeId, null, null);
@@ -146,13 +147,13 @@ public class SavingsImportHandler implements ImportHandler {
         Long interestPostingPeriodTypeId = null;
         EnumOptionData interestPostingPeriodTypeEnum = null;
         if (interestPostingPeriodType != null) {
-            if (interestPostingPeriodType.equalsIgnoreCase("Monthly")) {
+            if (interestPostingPeriodType.equalsIgnoreCase(MONTHLY)) {
                 interestPostingPeriodTypeId = 4L;
-            } else if (interestPostingPeriodType.equalsIgnoreCase("Quarterly")) {
+            } else if (interestPostingPeriodType.equalsIgnoreCase(QUARTERLY)) {
                 interestPostingPeriodTypeId = 5L;
-            } else if (interestPostingPeriodType.equalsIgnoreCase("Annually")) {
+            } else if (interestPostingPeriodType.equalsIgnoreCase(ANNUALLY)) {
                 interestPostingPeriodTypeId = 7L;
-            } else if (interestPostingPeriodType.equalsIgnoreCase("BiAnnual")) {
+            } else if (interestPostingPeriodType.equalsIgnoreCase(BI_ANNUAL)) {
                 interestPostingPeriodTypeId = 6L;
             }
             interestPostingPeriodTypeEnum = new EnumOptionData(interestPostingPeriodTypeId, null, null);
@@ -264,7 +265,8 @@ public class SavingsImportHandler implements ImportHandler {
 
     }
 
-    public Count importEntity(String dateFormat) {
+    public Count importEntity(final Workbook workbook, final List<SavingsAccountData> savings, final List<SavingsApproval> approvalDates,
+            final List<SavingsActivation> activationDates, final List<String> statuses, final String dateFormat) {
         Sheet savingsSheet = workbook.getSheet(TemplatePopulateImportConstants.SAVINGS_ACCOUNTS_SHEET_NAME);
         int successCount = 0;
         int errorCount = 0;
@@ -280,7 +282,7 @@ public class SavingsImportHandler implements ImportHandler {
                 progressLevel = getProgressLevel(status);
 
                 if (progressLevel == 0) {
-                    CommandProcessingResult result = importSavings(i, dateFormat);
+                    CommandProcessingResult result = importSavings(savings, i, dateFormat);
                     savingsId = result.getSavingsId();
                     progressLevel = 1;
                 } else {
@@ -289,11 +291,11 @@ public class SavingsImportHandler implements ImportHandler {
                 }
 
                 if (progressLevel <= 1) {
-                    progressLevel = importSavingsApproval(savingsId, i, dateFormat);
+                    progressLevel = importSavingsApproval(approvalDates, savingsId, i, dateFormat);
                 }
 
                 if (progressLevel <= 2) {
-                    progressLevel = importSavingsActivation(savingsId, i, dateFormat);
+                    progressLevel = importSavingsActivation(activationDates, savingsId, i, dateFormat);
                 }
                 successCount++;
                 statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);
@@ -302,15 +304,15 @@ public class SavingsImportHandler implements ImportHandler {
                 errorCount++;
                 LOG.error("Problem occurred in importEntity function", ex);
                 errorMessage = ImportHandlerUtils.getErrorMessage(ex);
-                writeSavingsErrorMessage(savingsId, errorMessage, progressLevel, statusCell, errorReportCell, row);
+                writeSavingsErrorMessage(workbook, savingsId, errorMessage, progressLevel, statusCell, errorReportCell, row);
             }
         }
         setReportHeaders(savingsSheet);
         return Count.instance(successCount, errorCount);
     }
 
-    private void writeSavingsErrorMessage(Long savingsId, String errorMessage, int progressLevel, Cell statusCell, Cell errorReportCell,
-            Row row) {
+    private void writeSavingsErrorMessage(final Workbook workbook, final Long savingsId, final String errorMessage, final int progressLevel,
+            final Cell statusCell, final Cell errorReportCell, final Row row) {
         String status = "";
 
         if (progressLevel == 0) {
@@ -340,7 +342,8 @@ public class SavingsImportHandler implements ImportHandler {
                 TemplatePopulateImportConstants.FAILURE_COL_REPORT_HEADER);
     }
 
-    private int importSavingsActivation(Long savingsId, int i, String dateFormat) {
+    private int importSavingsActivation(final List<SavingsActivation> activationDates, final Long savingsId, final int i,
+            final String dateFormat) {
         if (activationDates.get(i) != null) {
             GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
             gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
@@ -349,12 +352,13 @@ public class SavingsImportHandler implements ImportHandler {
                     .savingsAccountActivation(savingsId)//
                     .withJson(payload) //
                     .build(); //
-            final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
         return 3;
     }
 
-    private int importSavingsApproval(Long savingsId, int i, String dateFormat) {
+    private int importSavingsApproval(final List<SavingsApproval> approvalDates, final Long savingsId, final int i,
+            final String dateFormat) {
         if (approvalDates.get(i) != null) {
             GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
             gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
@@ -363,12 +367,12 @@ public class SavingsImportHandler implements ImportHandler {
                     .approveSavingsAccountApplication(savingsId)//
                     .withJson(payload) //
                     .build(); //
-            final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
         return 2;
     }
 
-    private CommandProcessingResult importSavings(int i, String dateFormat) {
+    private CommandProcessingResult importSavings(final List<SavingsAccountData> savings, final int i, final String dateFormat) {
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
         gsonBuilder.registerTypeAdapter(EnumOptionData.class, new EnumOptionDataIdSerializer());
@@ -379,8 +383,7 @@ public class SavingsImportHandler implements ImportHandler {
                 .createSavingsAccount() //
                 .withJson(payload) //
                 .build(); //
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return result;
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     private int getProgressLevel(String status) {
