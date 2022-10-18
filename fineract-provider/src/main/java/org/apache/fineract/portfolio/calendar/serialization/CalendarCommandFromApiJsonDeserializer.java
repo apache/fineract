@@ -50,7 +50,7 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = CalendarSupportedParameters.getAllValues();
+    private static final Set<String> SUPPORTED_PARAMETERS = CalendarSupportedParameters.getAllValues();
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -66,7 +66,7 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         final String title = this.fromApiJsonHelper.extractStringNamed(CalendarSupportedParameters.TITLE.getValue(), element);
@@ -100,7 +100,7 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -221,7 +221,7 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();

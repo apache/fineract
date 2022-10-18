@@ -59,7 +59,7 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Search API", description = "Search API allows to search scoped resources clients, loans and groups on specified fields.")
 public class SearchApiResource {
 
-    private final Set<String> searchResponseParameters = SearchResponseParameters.getAllValues();
+    private static final Set<String> SEARCH_RESPONSE_PARAMETERS = SearchResponseParameters.getAllValues();
 
     private final SearchReadPlatformService searchReadPlatformService;
     private final ToApiJsonSerializer<Object> toApiJsonSerializer;
@@ -109,7 +109,7 @@ public class SearchApiResource {
         final Collection<SearchData> searchResults = this.searchReadPlatformService.retriveMatchingData(searchConditions);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, searchResults, this.searchResponseParameters);
+        return this.toApiJsonSerializer.serialize(settings, searchResults, SEARCH_RESPONSE_PARAMETERS);
     }
 
     @POST

@@ -71,7 +71,7 @@ public class GlobalConfigurationApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("globalConfiguration"));
 
-    private final String resourceNameForPermissions = "CONFIGURATION";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "CONFIGURATION";
 
     private final PlatformSecurityContext context;
     private final ConfigurationReadPlatformService readPlatformService;
@@ -106,7 +106,7 @@ public class GlobalConfigurationApiResource {
     public String retrieveConfiguration(@Context final UriInfo uriInfo,
             @DefaultValue("false") @QueryParam("survey") @Parameter(description = "survey") final boolean survey) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final GlobalConfigurationData configurationData = this.readPlatformService.retrieveGlobalConfiguration(survey);
 
@@ -125,7 +125,7 @@ public class GlobalConfigurationApiResource {
     public String retrieveOne(@PathParam("configId") @Parameter(description = "configId") final Long configId,
             @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final GlobalConfigurationPropertyData configurationData = this.readPlatformService.retrieveGlobalConfiguration(configId);
 
@@ -143,7 +143,7 @@ public class GlobalConfigurationApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GlobalConfigurationPropertyData.class))) })
     public String retrieveOneByName(@PathParam("name") @Parameter(description = "name") final String name, @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final GlobalConfigurationPropertyData configurationData = this.readPlatformService.retrieveGlobalConfiguration(name);
 

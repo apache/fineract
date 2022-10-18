@@ -65,9 +65,9 @@ public class FundsApiResource {
     /**
      * The set of parameters that are supported in response for {@link CodeData}
      */
-    private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "name", "externalId"));
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "externalId"));
 
-    private final String resourceNameForPermissions = "FUND";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "FUND";
 
     private final PlatformSecurityContext context;
     private final FundReadPlatformService readPlatformService;
@@ -94,12 +94,12 @@ public class FundsApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = FundsApiResourceSwagger.GetFundsResponse.class)))) })
     public String retrieveFunds(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final Collection<FundData> funds = this.readPlatformService.retrieveAllFunds();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, funds, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, funds, RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
@@ -128,12 +128,12 @@ public class FundsApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = FundsApiResourceSwagger.GetFundsResponse.class))) })
     public String retreiveFund(@PathParam("fundId") @Parameter(description = "fundId") final Long fundId, @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final FundData fund = this.readPlatformService.retrieveFund(fundId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, fund, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, fund, RESPONSE_DATA_PARAMETERS);
     }
 
     @PUT

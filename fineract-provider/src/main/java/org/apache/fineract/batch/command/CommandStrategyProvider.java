@@ -35,8 +35,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class CommandStrategyProvider {
 
+    public static final String CREATE_TRANSACTION_LOAN_COMMAND_STRATEGY = "createTransactionLoanCommandStrategy";
     private final ApplicationContext applicationContext;
-    private final Map<CommandContext, String> commandStrategies = new ConcurrentHashMap<>();
+    private static final Map<CommandContext, String> commandStrategies = new ConcurrentHashMap<>();
 
     /**
      * Constructs a CommandStrategyProvider with argument of ApplicationContext type. It also initialize
@@ -63,13 +64,13 @@ public class CommandStrategyProvider {
      */
     public CommandStrategy getCommandStrategy(final CommandContext commandContext) {
 
-        if (this.commandStrategies.containsKey(commandContext)) {
-            return (CommandStrategy) this.applicationContext.getBean(this.commandStrategies.get(commandContext));
+        if (commandStrategies.containsKey(commandContext)) {
+            return (CommandStrategy) this.applicationContext.getBean(commandStrategies.get(commandContext));
         }
 
-        for (Map.Entry<CommandContext, String> entry : this.commandStrategies.entrySet()) {
+        for (Map.Entry<CommandContext, String> entry : commandStrategies.entrySet()) {
             if (commandContext.matcher(entry.getKey())) {
-                return (CommandStrategy) this.applicationContext.getBean(this.commandStrategies.get(entry.getKey()));
+                return (CommandStrategy) applicationContext.getBean(commandStrategies.get(entry.getKey()));
             }
         }
 
@@ -80,48 +81,45 @@ public class CommandStrategyProvider {
      * Contains various available command strategies in {@link org.apache.fineract.batch.command.internal}. Any new
      * command Strategy will have to be added within this function in order to initiate it within the constructor.
      */
-    private void init() {
-        this.commandStrategies.put(CommandContext.resource("clients").method("POST").build(), "createClientCommandStrategy");
-        this.commandStrategies.put(CommandContext.resource("clients\\/\\d+").method("PUT").build(), "updateClientCommandStrategy");
-        this.commandStrategies.put(CommandContext.resource("loans").method("POST").build(), "applyLoanCommandStrategy");
-        this.commandStrategies.put(CommandContext.resource("loans\\/\\d+").method("GET").build(), "getLoanByIdCommandStrategy");
-        this.commandStrategies.put(CommandContext.resource("loans/\\d+(\\?(\\w+(?:\\=[\\w,]+|&)+)+)").method("GET").build(),
+    private static void init() {
+        commandStrategies.put(CommandContext.resource("clients").method("POST").build(), "createClientCommandStrategy");
+        commandStrategies.put(CommandContext.resource("clients\\/\\d+").method("PUT").build(), "updateClientCommandStrategy");
+        commandStrategies.put(CommandContext.resource("loans").method("POST").build(), "applyLoanCommandStrategy");
+        commandStrategies.put(CommandContext.resource("loans\\/\\d+").method("GET").build(), "getLoanByIdCommandStrategy");
+        commandStrategies.put(CommandContext.resource("loans/\\d+(\\?(\\w+(?:\\=[\\w,]+|&)+)+)").method("GET").build(),
                 "getLoanByIdCommandStrategy");
-        this.commandStrategies.put(CommandContext.resource("savingsaccounts").method("POST").build(), "applySavingsCommandStrategy");
-        this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/charges").method("POST").build(), "createChargeCommandStrategy");
-        this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/charges").method("GET").build(),
-                "collectChargesCommandStrategy");
-        this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/charges\\/\\d+").method("GET").build(),
+        commandStrategies.put(CommandContext.resource("savingsaccounts").method("POST").build(), "applySavingsCommandStrategy");
+        commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/charges").method("POST").build(), "createChargeCommandStrategy");
+        commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/charges").method("GET").build(), "collectChargesCommandStrategy");
+        commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/charges\\/\\d+").method("GET").build(),
                 "getChargeByIdCommandStrategy");
-        this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\?command=repayment").method("POST").build(),
-                "createTransactionLoanCommandStrategy");
-        this.commandStrategies.put(
-                CommandContext.resource("loans\\/\\d+\\/transactions\\?command=creditBalanceRefund").method("POST").build(),
-                "createTransactionLoanCommandStrategy");
-        this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\?command=goodwillCredit").method("POST").build(),
-                "createTransactionLoanCommandStrategy");
-        this.commandStrategies.put(
-                CommandContext.resource("loans\\/\\d+\\/transactions\\?command=merchantIssuedRefund").method("POST").build(),
-                "createTransactionLoanCommandStrategy");
-        this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\?command=payoutRefund").method("POST").build(),
-                "createTransactionLoanCommandStrategy");
-        this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\/\\d+").method("POST").build(),
+        commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\?command=repayment").method("POST").build(),
+                CREATE_TRANSACTION_LOAN_COMMAND_STRATEGY);
+        commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\?command=creditBalanceRefund").method("POST").build(),
+                CREATE_TRANSACTION_LOAN_COMMAND_STRATEGY);
+        commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\?command=goodwillCredit").method("POST").build(),
+                CREATE_TRANSACTION_LOAN_COMMAND_STRATEGY);
+        commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\?command=merchantIssuedRefund").method("POST").build(),
+                CREATE_TRANSACTION_LOAN_COMMAND_STRATEGY);
+        commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\?command=payoutRefund").method("POST").build(),
+                CREATE_TRANSACTION_LOAN_COMMAND_STRATEGY);
+        commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\/\\d+").method("POST").build(),
                 "adjustTransactionCommandStrategy");
-        this.commandStrategies.put(CommandContext.resource("clients\\/\\d+\\?command=activate").method("POST").build(),
+        commandStrategies.put(CommandContext.resource("clients\\/\\d+\\?command=activate").method("POST").build(),
                 "activateClientCommandStrategy");
-        this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\?command=approve").method("POST").build(),
+        commandStrategies.put(CommandContext.resource("loans\\/\\d+\\?command=approve").method("POST").build(),
                 "approveLoanCommandStrategy");
-        this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\?command=disburse").method("POST").build(),
+        commandStrategies.put(CommandContext.resource("loans\\/\\d+\\?command=disburse").method("POST").build(),
                 "disburseLoanCommandStrategy");
-        this.commandStrategies.put(CommandContext.resource("rescheduleloans").method("POST").build(),
+        commandStrategies.put(CommandContext.resource("rescheduleloans").method("POST").build(),
                 "createLoanRescheduleRequestCommandStrategy");
-        this.commandStrategies.put(CommandContext.resource("rescheduleloans\\/\\d+\\?command=approve").method("POST").build(),
+        commandStrategies.put(CommandContext.resource("rescheduleloans\\/\\d+\\?command=approve").method("POST").build(),
                 "approveLoanRescheduleCommandStrategy");
-        this.commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\/\\d+").method("GET").build(),
+        commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\/\\d+").method("GET").build(),
                 "getTransactionByIdCommandStrategy");
-        this.commandStrategies.put(CommandContext.resource("datatables\\/[a-zA-Z0-9_]*\\/\\d+").method("GET").build(),
+        commandStrategies.put(CommandContext.resource("datatables\\/[a-zA-Z0-9_]*\\/\\d+").method("GET").build(),
                 "getDatatableEntryByAppTableIdCommandStrategy");
-        this.commandStrategies.put(
+        commandStrategies.put(
                 CommandContext.resource("datatables\\/[a-zA-Z0-9_]*\\/\\d+(\\?(\\w+(?:\\=[\\w,]+|&)+)+)").method("GET").build(),
                 "getDatatableEntryByAppTableIdCommandStrategy");
     }

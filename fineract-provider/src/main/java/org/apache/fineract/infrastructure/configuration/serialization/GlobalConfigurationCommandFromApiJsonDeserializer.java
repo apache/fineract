@@ -20,8 +20,8 @@ package org.apache.fineract.infrastructure.configuration.serialization;
 
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
-import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -43,7 +43,7 @@ public final class GlobalConfigurationCommandFromApiJsonDeserializer
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("globalConfiguration"));
+    private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(List.of("globalConfiguration"));
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -59,7 +59,7 @@ public final class GlobalConfigurationCommandFromApiJsonDeserializer
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         return this.fromApiJsonHelper.fromJson(json, UpdateGlobalConfigurationCommand.class);
     }

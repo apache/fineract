@@ -52,23 +52,30 @@ import org.springframework.stereotype.Component;
 @Component
 public class TaxValidator {
 
-    final Set<String> supportedTaxComponentCreateParameters = new HashSet<>(
-            Arrays.asList("dateFormat", "locale", TaxApiConstants.nameParamName, TaxApiConstants.percentageParamName,
+    public static final String DATE_FORMAT = "dateFormat";
+    public static final String LOCALE = "locale";
+    public static final String TAX_COMPONENT = "tax.component";
+    public static final String TAX_GROUP = "tax.group";
+    public static final String TOTAL_PERCENTAGE = "total.percentage";
+    public static final String GROUP_TOTAL = "group.total.";
+    public static final String COMPONENT = "component";
+    public static final String DATES_ARE_OVERLAPPING = "dates.are.overlapping";
+    public static final String COMPONENT_START_DATE = "component.start.date";
+    private static final Set<String> SUPPORTED_TAX_COMPONENT_CREATE_PARAMETERS = new HashSet<>(
+            Arrays.asList(DATE_FORMAT, LOCALE, TaxApiConstants.nameParamName, TaxApiConstants.percentageParamName,
                     TaxApiConstants.startDateParamName, TaxApiConstants.debitAccountTypeParamName, TaxApiConstants.debitAcountIdParamName,
                     TaxApiConstants.creditAccountTypeParamName, TaxApiConstants.creditAcountIdParamName));
-
-    final Set<String> supportedTaxComponentUpdateParameters = new HashSet<>(Arrays.asList("dateFormat", "locale",
+    private static final Set<String> SUPPORTED_TAX_COMPONENT_UPDATE_PARAMETERS = new HashSet<>(Arrays.asList(DATE_FORMAT, LOCALE,
             TaxApiConstants.nameParamName, TaxApiConstants.percentageParamName, TaxApiConstants.startDateParamName));
-
-    final Set<String> supportedTaxGroupParameters = new HashSet<>(
-            Arrays.asList("dateFormat", "locale", TaxApiConstants.nameParamName, TaxApiConstants.taxComponentsParamName));
-
-    final Set<String> supportedTaxGroupTaxComponentsCreateParameters = new HashSet<>(
+    private static final Set<String> SUPPORTED_TAX_GROUP_PARAMETERS = new HashSet<>(
+            Arrays.asList(DATE_FORMAT, LOCALE, TaxApiConstants.nameParamName, TaxApiConstants.taxComponentsParamName));
+    private static final Set<String> SUPPORTED_TAX_GROUP_TAX_COMPONENTS_CREATE_PARAMETERS = new HashSet<>(
             Arrays.asList(TaxApiConstants.taxComponentIdParamName, TaxApiConstants.startDateParamName));
-
-    final Set<String> supportedTaxGroupTaxComponentsUpdateParameters = new HashSet<>(Arrays.asList(TaxApiConstants.idParamName,
-            TaxApiConstants.taxComponentIdParamName, TaxApiConstants.startDateParamName, TaxApiConstants.endDateParamName));
-
+    private static final Set<String> SUPPORTED_TAX_GROUP_TAX_COMPONENTS_UPDATE_PARAMETERS = new HashSet<>(
+            Arrays.asList(TaxApiConstants.idParamName, TaxApiConstants.taxComponentIdParamName, TaxApiConstants.startDateParamName,
+                    TaxApiConstants.endDateParamName));
+    public static final String DOT = ".";
+    public static final String AT_INDEX = ".at.index.";
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -81,11 +88,13 @@ public class TaxValidator {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedTaxComponentCreateParameters);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_TAX_COMPONENT_CREATE_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("tax.component");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(TAX_COMPONENT);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
@@ -129,11 +138,13 @@ public class TaxValidator {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedTaxComponentUpdateParameters);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_TAX_COMPONENT_UPDATE_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("tax.component");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(TAX_COMPONENT);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
@@ -162,11 +173,13 @@ public class TaxValidator {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedTaxGroupParameters);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_TAX_GROUP_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("tax.group");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(TAX_GROUP);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
@@ -184,7 +197,7 @@ public class TaxValidator {
                 final JsonObject taxComponent = array.get(i - 1).getAsJsonObject();
                 final String arrayObjectJson = this.fromApiJsonHelper.toJson(taxComponent);
                 this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, arrayObjectJson,
-                        supportedTaxGroupTaxComponentsCreateParameters);
+                        SUPPORTED_TAX_GROUP_TAX_COMPONENTS_CREATE_PARAMETERS);
                 final Long taxComponentId = this.fromApiJsonHelper.extractLongNamed(TaxApiConstants.taxComponentIdParamName, taxComponent);
                 baseDataValidator.reset().parameter(TaxApiConstants.taxComponentsParamName)
                         .parameterAtIndexArray(TaxApiConstants.taxComponentIdParamName, i).value(taxComponentId).notNull()
@@ -200,11 +213,13 @@ public class TaxValidator {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedTaxGroupParameters);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_TAX_GROUP_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("tax.group");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(TAX_GROUP);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
@@ -225,33 +240,33 @@ public class TaxValidator {
                     final JsonObject taxComponent = array.get(i - 1).getAsJsonObject();
                     final String arrayObjectJson = this.fromApiJsonHelper.toJson(taxComponent);
                     this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, arrayObjectJson,
-                            supportedTaxGroupTaxComponentsUpdateParameters);
+                            SUPPORTED_TAX_GROUP_TAX_COMPONENTS_UPDATE_PARAMETERS);
                     final Long taxComponentId = this.fromApiJsonHelper.extractLongNamed(TaxApiConstants.taxComponentIdParamName,
                             taxComponent);
                     final Long taxMappingId = this.fromApiJsonHelper.extractLongNamed(TaxApiConstants.taxComponentIdParamName,
                             taxComponent);
                     if (taxMappingId == null) {
                         baseDataValidator.reset().parameter(
-                                TaxApiConstants.taxComponentsParamName + "." + TaxApiConstants.taxComponentIdParamName + ".at.index." + i)
+                                TaxApiConstants.taxComponentsParamName + DOT + TaxApiConstants.taxComponentIdParamName + AT_INDEX + i)
                                 .value(taxComponentId).notNull().longGreaterThanZero();
                     } else {
                         baseDataValidator.reset().parameter(
-                                TaxApiConstants.taxComponentsParamName + "." + TaxApiConstants.taxComponentIdParamName + ".at.index." + i)
+                                TaxApiConstants.taxComponentsParamName + DOT + TaxApiConstants.taxComponentIdParamName + AT_INDEX + i)
                                 .value(taxComponentId).longGreaterThanZero();
                         baseDataValidator.reset()
-                                .parameter(TaxApiConstants.taxComponentsParamName + "." + TaxApiConstants.idParamName + ".at.index." + i)
+                                .parameter(TaxApiConstants.taxComponentsParamName + DOT + TaxApiConstants.idParamName + AT_INDEX + i)
                                 .value(taxMappingId).longGreaterThanZero();
                     }
 
                     final LocalDate endDate = this.fromApiJsonHelper.extractLocalDateNamed(TaxApiConstants.endDateParamName, taxComponent,
                             dateFormat, locale);
                     baseDataValidator.reset()
-                            .parameter(TaxApiConstants.taxComponentsParamName + "." + TaxApiConstants.endDateParamName + ".at.index." + i)
+                            .parameter(TaxApiConstants.taxComponentsParamName + DOT + TaxApiConstants.endDateParamName + AT_INDEX + i)
                             .value(endDate).ignoreIfNull().validateDateAfter(DateUtils.getBusinessLocalDate());
                     final LocalDate startDate = this.fromApiJsonHelper.extractLocalDateNamed(TaxApiConstants.startDateParamName,
                             taxComponent, dateFormat, locale);
                     if (endDate != null && startDate != null) {
-                        baseDataValidator.reset().parameter(TaxApiConstants.taxComponentsParamName + ".at.index." + i)
+                        baseDataValidator.reset().parameter(TaxApiConstants.taxComponentsParamName + AT_INDEX + i)
                                 .failWithCode("start.date.end.date.both.should.not.be.present", startDate, endDate);
                     }
                 }
@@ -262,7 +277,7 @@ public class TaxValidator {
 
     public void validateTaxGroupEndDateAndTaxComponent(final TaxGroup taxGroup, final Set<TaxGroupMappings> groupMappings) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("tax.group");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(TAX_GROUP);
 
         for (TaxGroupMappings mapping : groupMappings) {
             if (mapping.getId() != null) {
@@ -286,23 +301,23 @@ public class TaxValidator {
 
     public void validateTaxGroup(final TaxGroup taxGroup) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("tax.group");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(TAX_GROUP);
         Set<TaxGroupMappings> groupMappings = taxGroup.getTaxGroupMappings();
-        validateGroupTotal(groupMappings, baseDataValidator, "total.percentage");
+        validateGroupTotal(groupMappings, baseDataValidator, TOTAL_PERCENTAGE);
         validateOverlappingComponents(groupMappings, baseDataValidator);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
     public void validateTaxComponentForUpdate(final TaxComponent taxComponent) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("tax.component");
-        validateGroupTotal(taxComponent.getTaxGroupMappings(), baseDataValidator, "group.total." + TaxApiConstants.percentageParamName);
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(TAX_COMPONENT);
+        validateGroupTotal(taxComponent.getTaxGroupMappings(), baseDataValidator, GROUP_TOTAL + TaxApiConstants.percentageParamName);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
     public void validateStartDate(final LocalDate existingStartDate, final JsonCommand command) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("tax.component");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(TAX_COMPONENT);
         validateStartDate(existingStartDate, command.localDateValueOfParameterNamed(TaxApiConstants.startDateParamName), baseDataValidator);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -319,12 +334,12 @@ public class TaxValidator {
             for (TaxGroupMappings groupMappings : mappings) {
                 if (groupMappingsOne.getTaxComponent().equals(groupMappings.getTaxComponent())) {
                     if (groupMappingsOne.endDate() == null && groupMappings.endDate() == null) {
-                        baseDataValidator.reset().parameter("component").failWithCode("dates.are.overlapping");
+                        baseDataValidator.reset().parameter(COMPONENT).failWithCode(DATES_ARE_OVERLAPPING);
                     } else if (groupMappingsOne.startDate().isAfter(groupMappings.startDate())) {
-                        baseDataValidator.reset().parameter("component.start.date").value(groupMappingsOne.startDate())
+                        baseDataValidator.reset().parameter(COMPONENT_START_DATE).value(groupMappingsOne.startDate())
                                 .validateDateAfter(groupMappings.endDate());
                     } else {
-                        baseDataValidator.reset().parameter("component.start.date").value(groupMappings.startDate())
+                        baseDataValidator.reset().parameter(COMPONENT_START_DATE).value(groupMappings.startDate())
                                 .validateDateAfter(groupMappingsOne.endDate());
                     }
                 }

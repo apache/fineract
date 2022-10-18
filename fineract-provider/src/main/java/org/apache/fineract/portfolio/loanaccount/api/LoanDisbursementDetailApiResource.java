@@ -51,10 +51,10 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Loan Disbursement Details", description = "")
 public class LoanDisbursementDetailApiResource {
 
-    private final Set<String> responseDataParameters = new HashSet<>(
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList("id", "expectedDisbursementDate", "actualDisbursementDate", "principal", "approvedPrincipal"));
 
-    private final String resourceNameForPermissions = "LOAN";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "LOAN";
 
     private final DefaultToApiJsonSerializer<DisbursementData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
@@ -109,12 +109,12 @@ public class LoanDisbursementDetailApiResource {
     public String retriveDetail(@PathParam("loanId") final Long loanId, @PathParam("disbursementId") final Long disbursementId,
             @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final DisbursementData disbursementData = this.loanReadPlatformService.retrieveLoanDisbursementDetail(loanId, disbursementId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, disbursementData, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, disbursementData, RESPONSE_DATA_PARAMETERS);
     }
 
 }

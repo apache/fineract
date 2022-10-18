@@ -66,7 +66,7 @@ public final class LoanApplicationTransitionApiJsonValidator {
                 Arrays.asList(LoanApiConstants.loanIdTobeApproved, LoanApiConstants.approvedLoanAmountParameterName,
                         LoanApiConstants.approvedOnDateParameterName, LoanApiConstants.disbursementNetDisbursalAmountParameterName,
                         LoanApiConstants.noteParameterName, LoanApiConstants.localeParameterName, LoanApiConstants.dateFormatParameterName,
-                        LoanApiConstants.disbursementDataParameterName, LoanApiConstants.disbursementDateParameterName));
+                        LoanApiConstants.disbursementDataParameterName, LoanApiConstants.expectedDisbursementDateParameterName));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
@@ -91,8 +91,9 @@ public final class LoanApplicationTransitionApiJsonValidator {
         baseDataValidator.reset().parameter(LoanApiConstants.approvedOnDateParameterName).value(approvedOnDate).notNull();
 
         final LocalDate expectedDisbursementDate = this.fromApiJsonHelper
-                .extractLocalDateNamed(LoanApiConstants.disbursementDateParameterName, element);
-        baseDataValidator.reset().parameter(LoanApiConstants.disbursementDateParameterName).value(expectedDisbursementDate).ignoreIfNull();
+                .extractLocalDateNamed(LoanApiConstants.expectedDisbursementDateParameterName, element);
+        baseDataValidator.reset().parameter(LoanApiConstants.expectedDisbursementDateParameterName).value(expectedDisbursementDate)
+                .ignoreIfNull();
 
         final String note = this.fromApiJsonHelper.extractStringNamed(LoanApiConstants.noteParameterName, element);
         baseDataValidator.reset().parameter(LoanApiConstants.noteParameterName).value(note).notExceedingLengthOf(1000);

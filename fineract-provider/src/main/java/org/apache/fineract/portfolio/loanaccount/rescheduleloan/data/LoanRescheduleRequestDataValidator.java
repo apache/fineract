@@ -93,7 +93,7 @@ public class LoanRescheduleRequestDataValidator {
 
         final JsonElement jsonElement = jsonCommand.parsedJson();
 
-        if (!loan.status().isActive()) {
+        if (!loan.getStatus().isActive()) {
             dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode("loan.is.not.active", "Loan is not active");
         }
 
@@ -266,7 +266,7 @@ public class LoanRescheduleRequestDataValidator {
         LoanRepaymentScheduleInstallment installment = null;
         if (loan != null) {
 
-            if (!loan.status().isActive()) {
+            if (!loan.getStatus().isActive()) {
                 dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode("loan.is.not.active", "Loan is not active");
             }
 

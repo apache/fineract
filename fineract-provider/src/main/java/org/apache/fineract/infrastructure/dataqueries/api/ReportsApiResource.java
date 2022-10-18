@@ -63,10 +63,10 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Reports", description = "Non-core reports can be added, updated and deleted.")
 public class ReportsApiResource {
 
-    private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "reportName", "reportType", "reportSubType",
-            "reportCategory", "description", "reportSql", "coreReport", "useReport", "reportParameters"));
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "reportName", "reportType",
+            "reportSubType", "reportCategory", "description", "reportSql", "coreReport", "useReport", "reportParameters"));
 
-    private final String resourceNameForPermissions = "REPORT";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "REPORT";
     private final PlatformSecurityContext context;
     private final ToApiJsonSerializer<ReportData> toApiJsonSerializer;
     private final ReadReportingService readReportingService;
@@ -95,12 +95,12 @@ public class ReportsApiResource {
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ReportsApiResourceSwagger.GetReportsResponse.class))))
     public String retrieveReportList(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final Collection<ReportData> result = this.readReportingService.retrieveReportList();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, result, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, result, RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -113,7 +113,7 @@ public class ReportsApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ReportsApiResourceSwagger.GetReportsResponse.class))) })
     public String retrieveReport(@PathParam("id") @Parameter(description = "id") final Long id, @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final ReportData result = this.readReportingService.retrieveReport(id);
 
@@ -123,7 +123,7 @@ public class ReportsApiResource {
             result.appendedTemplate(this.readReportingService.getAllowedParameters(),
                     this.reportingProcessServiceProvider.findAllReportingTypes());
         }
-        return this.toApiJsonSerializer.serialize(settings, result, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, result, RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -136,14 +136,14 @@ public class ReportsApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ReportsApiResourceSwagger.GetReportsTemplateResponse.class))) })
     public String retrieveOfficeTemplate(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final ReportData result = new ReportData();
         result.appendedTemplate(this.readReportingService.getAllowedParameters(),
                 this.reportingProcessServiceProvider.findAllReportingTypes());
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, result, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, result, RESPONSE_DATA_PARAMETERS);
     }
 
     @POST

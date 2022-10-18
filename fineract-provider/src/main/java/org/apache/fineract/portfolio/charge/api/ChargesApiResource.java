@@ -64,13 +64,13 @@ import org.springframework.stereotype.Component;
         + "At present we support defining charges for use with Client accounts and both loan and saving products.")
 public class ChargesApiResource {
 
-    private final Set<String> chargesDataParameters = new HashSet<>(Arrays.asList("id", "name", "amount", "currency", "penalty", "active",
-            "chargeAppliesTo", "chargeTimeType", "chargeCalculationType", "chargeCalculationTypeOptions", "chargeAppliesToOptions",
-            "chargeTimeTypeOptions", "currencyOptions", "loanChargeCalculationTypeOptions", "loanChargeTimeTypeOptions",
-            "savingsChargeCalculationTypeOptions", "savingsChargeTimeTypeOptions", "incomeAccount", "clientChargeCalculationTypeOptions",
-            "clientChargeTimeTypeOptions"));
+    private static final Set<String> CHARGES_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "amount", "currency", "penalty",
+            "active", "chargeAppliesTo", "chargeTimeType", "chargeCalculationType", "chargeCalculationTypeOptions",
+            "chargeAppliesToOptions", "chargeTimeTypeOptions", "currencyOptions", "loanChargeCalculationTypeOptions",
+            "loanChargeTimeTypeOptions", "savingsChargeCalculationTypeOptions", "savingsChargeTimeTypeOptions", "incomeAccount",
+            "clientChargeCalculationTypeOptions", "clientChargeTimeTypeOptions"));
 
-    private final String resourceNameForPermissions = "CHARGE";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "CHARGE";
 
     private final PlatformSecurityContext context;
     private final ChargeReadPlatformService readPlatformService;
@@ -98,12 +98,12 @@ public class ChargesApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ChargesApiResourceSwagger.GetChargesResponse.class)))) })
     public String retrieveAllCharges(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final Collection<ChargeData> charges = this.readPlatformService.retrieveAllCharges();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, charges, this.chargesDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, charges, CHARGES_DATA_PARAMETERS);
     }
 
     @GET
@@ -117,7 +117,7 @@ public class ChargesApiResource {
     public String retrieveCharge(@PathParam("chargeId") @Parameter(description = "chargeId") final Long chargeId,
             @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
@@ -127,7 +127,7 @@ public class ChargesApiResource {
             charge = ChargeData.withTemplate(charge, templateData);
         }
 
-        return this.toApiJsonSerializer.serialize(settings, charge, this.chargesDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, charge, CHARGES_DATA_PARAMETERS);
     }
 
     @GET
@@ -140,12 +140,12 @@ public class ChargesApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ChargesApiResourceSwagger.GetChargesTemplateResponse.class))) })
     public String retrieveNewChargeDetails(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final ChargeData charge = this.readPlatformService.retrieveNewChargeDetails();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, charge, this.chargesDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, charge, CHARGES_DATA_PARAMETERS);
     }
 
     @POST

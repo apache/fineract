@@ -45,7 +45,7 @@ import org.springframework.stereotype.Component;
 @ConditionalOnProperty("fineract.security.2fa.enabled")
 public class TwoFactorConfigurationApiResource {
 
-    private final String resourceNameForPermissions = "TWOFACTOR_CONFIG";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "TWOFACTOR_CONFIG";
 
     private final PlatformSecurityContext context;
     private final TwoFactorConfigurationService configurationService;
@@ -64,7 +64,7 @@ public class TwoFactorConfigurationApiResource {
 
     @GET
     public String retrieveAll() {
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
         Map<String, Object> configurationMap = configurationService.retrieveAll();
         return toApiJsonSerializer.serialize(configurationMap);
     }

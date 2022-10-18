@@ -18,13 +18,17 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
+import lombok.RequiredArgsConstructor;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.JobListener;
+import org.springframework.stereotype.Component;
 
 /**
  * Global job Listener class to Stop the temporary scheduler once job execution completes
  */
+@Component
+@RequiredArgsConstructor
 public class SchedulerStopListener implements JobListener {
 
     private static final String name = "Singlr Trigger Global Listener";
@@ -60,13 +64,7 @@ public class SchedulerStopListener implements JobListener {
     public void jobWasExecuted(final JobExecutionContext context, @SuppressWarnings("unused") final JobExecutionException jobException) {
         final String schedulerName = context.getTrigger().getJobDataMap().getString(SchedulerServiceConstants.SCHEDULER_NAME);
         if (schedulerName != null) {
-            final Thread newThread = new Thread(new Runnable() {
-
-                @Override
-                public void run() {
-                    SchedulerStopListener.this.jobRegisterService.stopScheduler(schedulerName);
-                }
-            });
+            final Thread newThread = new Thread(() -> SchedulerStopListener.this.jobRegisterService.stopScheduler(schedulerName));
             newThread.start();
         }
     }

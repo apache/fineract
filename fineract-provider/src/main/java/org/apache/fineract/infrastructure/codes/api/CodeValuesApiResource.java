@@ -73,7 +73,7 @@ public class CodeValuesApiResource {
             Arrays.asList(CodevalueJSONinputParams.CODEVALUE_ID.getValue(), CodevalueJSONinputParams.NAME.getValue(),
                     CodevalueJSONinputParams.POSITION.getValue(), CodevalueJSONinputParams.IS_MANDATORY.getValue(),
                     CodevalueJSONinputParams.DESCRIPTION.getValue()));
-    private final String resourceNameForPermissions = "CODEVALUE";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "CODEVALUE";
 
     private final PlatformSecurityContext context;
     private final CodeValueReadPlatformService readPlatformService;
@@ -102,7 +102,7 @@ public class CodeValuesApiResource {
     public String retrieveAllCodeValues(@Context final UriInfo uriInfo,
             @PathParam("codeId") @Parameter(description = "codeId") final Long codeId) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final Collection<CodeValueData> codeValues = this.readPlatformService.retrieveAllCodeValues(codeId);
 
@@ -122,7 +122,7 @@ public class CodeValuesApiResource {
             @PathParam("codeValueId") @Parameter(description = "codeValueId") final Long codeValueId,
             @PathParam("codeId") @Parameter(description = "codeId") final Long codeId) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final CodeValueData codeValue = this.readPlatformService.retrieveCodeValue(codeValueId);
 

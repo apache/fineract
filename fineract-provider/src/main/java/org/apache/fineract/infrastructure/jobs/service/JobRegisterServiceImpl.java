@@ -45,6 +45,7 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.configuration.JobLocator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean;
@@ -68,10 +69,11 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     @Autowired
     private SchedulerTriggerListener globalSchedulerTriggerListener;
 
-    private final HashMap<String, Scheduler> schedulers = new HashMap<>(4);
+    private static final HashMap<String, Scheduler> SCHEDULERS = new HashMap<>(4);
 
-    // This cannot be injected as Autowired due to circular dependency
-    private SchedulerStopListener schedulerStopListener = new SchedulerStopListener(this);
+    @Autowired
+    @Lazy
+    private SchedulerStopListener schedulerStopListener;
 
     @Autowired
     private FineractProperties fineractProperties;
@@ -93,14 +95,14 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
             jobDataMap.put(SchedulerServiceConstants.TRIGGER_TYPE_REFERENCE, triggerType);
             jobDataMap.put(SchedulerServiceConstants.TENANT_IDENTIFIER, ThreadLocalContextUtil.getTenant().getTenantIdentifier());
             final String schedulerName = getSchedulerName(scheduledJobDetail);
-            final Scheduler scheduler = this.schedulers.get(schedulerName);
+            final Scheduler scheduler = SCHEDULERS.get(schedulerName);
             final JobDetail jobDetail = createJobDetail(scheduledJobDetail);
             JobKey jobKey = jobDetail.getKey();
             if (scheduler == null || !scheduler.checkExists(jobKey)) {
                 final String tempSchedulerName = "temp" + scheduledJobDetail.getId();
                 final Scheduler tempScheduler = createScheduler(tempSchedulerName, 1, schedulerJobListener, schedulerStopListener);
                 jobDataMap.put(SchedulerServiceConstants.SCHEDULER_NAME, tempSchedulerName);
-                schedulers.put(tempSchedulerName, tempScheduler);
+                SCHEDULERS.put(tempSchedulerName, tempScheduler);
                 tempScheduler.addJob(jobDetail, true);
                 tempScheduler.triggerJob(jobKey, jobDataMap);
             } else {
@@ -120,13 +122,13 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
             final String jobIdentity = scheduledJobDetail.getJobKey();
             final JobKey jobKey = constructJobKey(jobIdentity);
             final String schedulername = getSchedulerName(scheduledJobDetail);
-            final Scheduler scheduler = this.schedulers.get(schedulername);
+            final Scheduler scheduler = SCHEDULERS.get(schedulername);
             if (scheduler != null) {
                 scheduler.deleteJob(jobKey);
             }
             scheduleJob(scheduledJobDetail);
             this.schedularWritePlatformService.saveOrUpdate(scheduledJobDetail);
-        } catch (final Throwable throwable) {
+        } catch (final Exception throwable) {
             final String stackTrace = getStackTraceAsString(throwable);
             scheduledJobDetail.setErrorLog(stackTrace);
             this.schedularWritePlatformService.saveOrUpdate(scheduledJobDetail);
@@ -158,7 +160,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
                             jobDetail.setMismatchedJob(false);
                         }
                         final String schedulerName = getSchedulerName(jobDetail);
-                        final Scheduler scheduler = this.schedulers.get(schedulerName);
+                        final Scheduler scheduler = SCHEDULERS.get(schedulerName);
                         if (scheduler != null) {
                             final String key = jobDetail.getJobKey();
                             final JobKey jobKey = constructJobKey(key);
@@ -244,7 +246,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
             scheduler.scheduleJob(jobDetail, trigger);
             scheduledJobDetails.setNextRunTime(trigger.getNextFireTime());
             scheduledJobDetails.setErrorLog(null);
-        } catch (final Throwable throwable) {
+        } catch (final Exception throwable) {
             scheduledJobDetails.setNextRunTime(null);
             final String stackTrace = getStackTraceAsString(throwable);
             scheduledJobDetails.setErrorLog(stackTrace);
@@ -255,7 +257,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
 
     @Override
     public void stopAllSchedulers() {
-        for (Scheduler scheduler : this.schedulers.values()) {
+        for (Scheduler scheduler : SCHEDULERS.values()) {
             try {
                 scheduler.shutdown();
             } catch (final SchedulerException e) {
@@ -266,21 +268,21 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
 
     private Scheduler getScheduler(final ScheduledJobDetail scheduledJobDetail) throws Exception {
         final String schedulername = getSchedulerName(scheduledJobDetail);
-        Scheduler scheduler = this.schedulers.get(schedulername);
+        Scheduler scheduler = SCHEDULERS.get(schedulername);
         if (scheduler == null) {
             int noOfThreads = SchedulerServiceConstants.DEFAULT_THREAD_COUNT;
             if (scheduledJobDetail.getSchedulerGroup() > 0) {
                 noOfThreads = SchedulerServiceConstants.GROUP_THREAD_COUNT;
             }
             scheduler = createScheduler(schedulername, noOfThreads, schedulerJobListener);
-            this.schedulers.put(schedulername, scheduler);
+            SCHEDULERS.put(schedulername, scheduler);
         }
         return scheduler;
     }
 
     @Override
     public void stopScheduler(final String name) {
-        final Scheduler scheduler = this.schedulers.remove(name);
+        final Scheduler scheduler = SCHEDULERS.remove(name);
         try {
             scheduler.shutdown();
         } catch (final SchedulerException e) {
@@ -363,7 +365,6 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
 
     private JobKey constructJobKey(final String Key) {
         final List<String> keyParams = Splitter.onPattern(SchedulerServiceConstants.JOB_KEY_SEPERATOR).splitToList(Key);
-        final JobKey jobKey = new JobKey(keyParams.get(0), keyParams.get(1));
-        return jobKey;
+        return new JobKey(keyParams.get(0), keyParams.get(1));
     }
 }

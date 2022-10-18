@@ -708,7 +708,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             checkClientOrGroupActive(existingLoanApplication);
 
-            final Set<LoanCharge> existingCharges = existingLoanApplication.charges();
+            final Set<LoanCharge> existingCharges = existingLoanApplication.getActiveCharges();
             Map<Long, LoanChargeData> chargesMap = new HashMap<>();
             for (LoanCharge charge : existingCharges) {
                 LoanChargeData chargeData = new LoanChargeData(charge.getId(), charge.getDueLocalDate(), charge.amountOrPercentage());
@@ -1131,7 +1131,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             }
 
             if (!isLinkedAccPresent) {
-                final Set<LoanCharge> charges = existingLoanApplication.charges();
+                final Set<LoanCharge> charges = existingLoanApplication.getActiveCharges();
                 for (final LoanCharge loanCharge : charges) {
                     if (loanCharge.getChargePaymentMode().isPaymentModeAccountTransfer()) {
                         final String errorMessage = "one of the charges requires linked savings account for payment";
@@ -1321,7 +1321,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         final JsonArray disbursementDataArray = command.arrayOfParameterNamed(LoanApiConstants.disbursementDataParameterName);
 
-        expectedDisbursementDate = command.localDateValueOfParameterNamed(LoanApiConstants.disbursementDateParameterName);
+        expectedDisbursementDate = command.localDateValueOfParameterNamed(LoanApiConstants.expectedDisbursementDateParameterName);
         if (expectedDisbursementDate == null) {
             expectedDisbursementDate = loan.getExpectedDisbursedOnLocalDate();
         }

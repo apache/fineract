@@ -58,8 +58,9 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Rate", description = "")
 public class RateApiResource {
 
-    private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "name", "percentage", "productApply", "active"));
-    private final String resourceNameForPermissions = "RATE";
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList("id", "name", "percentage", "productApply", "active"));
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "RATE";
     private final PlatformSecurityContext context;
     private final RateReadService readPlatformService;
     private final DefaultToApiJsonSerializer<RateData> toApiJsonSerializer;
@@ -83,13 +84,13 @@ public class RateApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveRate(@PathParam("rateId") Long rateId, @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final RateData rate = this.readPlatformService.retrieveOne(rateId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        return this.toApiJsonSerializer.serialize(settings, rate, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, rate, RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
@@ -109,13 +110,13 @@ public class RateApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String getAllRates(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         Collection<RateData> rates = this.readPlatformService.retrieveAllRates();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        return this.toApiJsonSerializer.serialize(settings, rates, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, rates, RESPONSE_DATA_PARAMETERS);
     }
 
     @PUT

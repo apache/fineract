@@ -611,7 +611,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     private void validateLoansAndSavingsForGroupOrCenterClose(final Group groupOrCenter, final LocalDate closureDate) {
         final Collection<Loan> groupLoans = this.loanRepositoryWrapper.findByGroupId(groupOrCenter.getId());
         for (final Loan loan : groupLoans) {
-            final LoanStatusMapper loanStatus = new LoanStatusMapper(loan.status().getValue());
+            final LoanStatusMapper loanStatus = new LoanStatusMapper(loan.getStatus().getValue());
             if (loanStatus.isOpen()) {
                 final String errorMessage = groupOrCenter.getGroupLevel().getLevelName() + " cannot be closed because of non-closed loans.";
                 throw new InvalidGroupStateTransitionException(groupOrCenter.getGroupLevel().getLevelName(), "close", "loan.not.closed",

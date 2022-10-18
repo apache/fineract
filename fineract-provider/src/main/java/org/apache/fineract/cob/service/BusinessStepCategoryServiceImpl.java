@@ -26,7 +26,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class BusinessStepCategoryServiceImpl implements BusinessStepCategoryService {
 
-    private final Map<BusinessStepCategory, Class<? extends COBBusinessStep>> businessSteps = Map.of(BusinessStepCategory.LOAN,
+    private static final Map<BusinessStepCategory, Class<? extends COBBusinessStep>> businessSteps = Map.of(BusinessStepCategory.LOAN,
             LoanCOBBusinessStep.class);
 
     @Override

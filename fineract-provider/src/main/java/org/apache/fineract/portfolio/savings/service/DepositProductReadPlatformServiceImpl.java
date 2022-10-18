@@ -44,12 +44,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class DepositProductReadPlatformServiceImpl implements DepositProductReadPlatformService {
 
+    private static final FixedDepositProductMapper FIXED_DEPOSIT_PRODUCT_MAPPER = new FixedDepositProductMapper();
+    private static final RecurringDepositProductMapper RECURRING_DEPOSIT_PRODUCT_MAPPER = new RecurringDepositProductMapper();
+    private static final DepositProductLookupMapper DEPOSIT_PRODUCT_LOOKUP_MAPPER = new DepositProductLookupMapper();
     private final PlatformSecurityContext context;
     private final JdbcTemplate jdbcTemplate;
     private final InterestRateChartReadPlatformService chartReadPlatformService;
-    private final FixedDepositProductMapper fixedDepositProductRowMapper = new FixedDepositProductMapper();
-    private final RecurringDepositProductMapper recurringDepositProductRowMapper = new RecurringDepositProductMapper();
-    private final DepositProductLookupMapper depositProductLookupsRowMapper = new DepositProductLookupMapper();
 
     @Autowired
     public DepositProductReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
@@ -73,7 +73,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
         sqlBuilder.append(depositProductMapper.schema());
         sqlBuilder.append(" where sp.deposit_type_enum = ? ");
 
-        return this.jdbcTemplate.query(sqlBuilder.toString(), depositProductMapper, new Object[] { depositAccountType.getValue() });
+        return this.jdbcTemplate.query(sqlBuilder.toString(), depositProductMapper, depositAccountType.getValue());
     }
 
     @Override
@@ -81,11 +81,10 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
 
         final StringBuilder sqlBuilder = new StringBuilder(400);
         sqlBuilder.append("select ");
-        sqlBuilder.append(this.depositProductLookupsRowMapper.schema());
+        sqlBuilder.append(DEPOSIT_PRODUCT_LOOKUP_MAPPER.schema());
         sqlBuilder.append(" where sp.deposit_type_enum = ? ");
 
-        return this.jdbcTemplate.query(sqlBuilder.toString(), this.depositProductLookupsRowMapper,
-                new Object[] { depositAccountType.getValue() });
+        return this.jdbcTemplate.query(sqlBuilder.toString(), DEPOSIT_PRODUCT_LOOKUP_MAPPER, depositAccountType.getValue());
     }
 
     @Override
@@ -103,8 +102,8 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             sqlBuilder.append(depositProductMapper.schema());
             sqlBuilder.append(" where sp.id = ? and sp.deposit_type_enum = ? ");
 
-            return this.jdbcTemplate.queryForObject(sqlBuilder.toString(), depositProductMapper,
-                    new Object[] { fixedDepositProductId, depositAccountType.getValue() });
+            return this.jdbcTemplate.queryForObject(sqlBuilder.toString(), depositProductMapper, fixedDepositProductId,
+                    depositAccountType.getValue());
 
         } catch (final EmptyResultDataAccessException e) {
             throw new FixedDepositProductNotFoundException(fixedDepositProductId, e);
@@ -125,12 +124,18 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
         return depositProduct;
     }
 
+    private DepositProductMapper getDepositProductMapper(final DepositAccountType depositAccountType) {
+        if (depositAccountType.isFixedDeposit()) {
+            return FIXED_DEPOSIT_PRODUCT_MAPPER;
+        } else if (depositAccountType.isRecurringDeposit()) {
+            return RECURRING_DEPOSIT_PRODUCT_MAPPER;
+        }
+        return null;
+    }
+
     private abstract static class DepositProductMapper implements RowMapper<DepositProductData> {
 
         private final String schemaSql;
-
-        @Override
-        public abstract DepositProductData mapRow(ResultSet rs, int rowNum) throws SQLException;
 
         protected DepositProductMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
@@ -367,14 +372,5 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
 
             return DepositProductData.lookup(id, name);
         }
-    }
-
-    private DepositProductMapper getDepositProductMapper(final DepositAccountType depositAccountType) {
-        if (depositAccountType.isFixedDeposit()) {
-            return this.fixedDepositProductRowMapper;
-        } else if (depositAccountType.isRecurringDeposit()) {
-            return this.recurringDepositProductRowMapper;
-        }
-        return null;
     }
 }

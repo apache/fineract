@@ -36,10 +36,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class ExternalServicesPropertiesCommandFromApiJsonDeserializer {
 
-    private final Set<String> s3SupportedParameters = S3JSONinputParams.getAllValues();
-    private final Set<String> smtpSupportedParameters = SMTPJSONinputParams.getAllValues();
-    private final Set<String> smsSupportedParameters = SMSJSONinputParams.getAllValues();
-    private final Set<String> notificationSupportedParameters = NotificationJSONinputParams.getAllValues();
+    private static final Set<String> S3_SUPPORTED_PARAMETERS = S3JSONinputParams.getAllValues();
+    private static final Set<String> SMTP_SUPPORTED_PARAMETERS = SMTPJSONinputParams.getAllValues();
+    private static final Set<String> SMS_SUPPORTED_PARAMETERS = SMSJSONinputParams.getAllValues();
+    private static final Set<String> NOTIFICATION_SUPPORTED_PARAMETERS = NotificationJSONinputParams.getAllValues();
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -52,34 +52,24 @@ public class ExternalServicesPropertiesCommandFromApiJsonDeserializer {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
         switch (externalServiceName) {
-            case "S3":
-                this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.s3SupportedParameters);
-            break;
-
-            case "SMTP":
-                this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.smtpSupportedParameters);
-            break;
-
-            case "SMS":
-                this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.smsSupportedParameters);
-            break;
-
-            case "NOTIFICATION":
-                this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.notificationSupportedParameters);
-            break;
-
-            default:
-                throw new ExternalServiceConfigurationNotFoundException(externalServiceName);
+            case "S3" -> this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, S3_SUPPORTED_PARAMETERS);
+            case "SMTP" -> this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SMTP_SUPPORTED_PARAMETERS);
+            case "SMS" -> this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SMS_SUPPORTED_PARAMETERS);
+            case "NOTIFICATION" -> this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, NOTIFICATION_SUPPORTED_PARAMETERS);
+            default -> throw new ExternalServiceConfigurationNotFoundException(externalServiceName);
         }
 
     }
 
     public Set<String> getNameKeys(final String json) {
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
         Map<String, String> jsonMap = this.fromApiJsonHelper.extractDataMap(typeOfMap, json);
-        Set<String> keyNames = jsonMap.keySet();
-        return keyNames;
+        return jsonMap.keySet();
     }
 }

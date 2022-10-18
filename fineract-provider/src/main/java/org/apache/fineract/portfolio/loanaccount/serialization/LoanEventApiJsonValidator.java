@@ -545,10 +545,10 @@ public final class LoanEventApiJsonValidator {
             throw new InvalidJsonException();
         }
 
-        final Set<String> disbursementParameters = new HashSet<>(
-                Arrays.asList("locale", "dateFormat", LoanApiConstants.disbursementDataParameterName,
-                        LoanApiConstants.approvedLoanAmountParameterName, LoanApiConstants.updatedDisbursementDateParameterName,
-                        LoanApiConstants.updatedDisbursementPrincipalParameterName, LoanApiConstants.disbursementDateParameterName));
+        final Set<String> disbursementParameters = new HashSet<>(Arrays.asList("locale", "dateFormat",
+                LoanApiConstants.disbursementDataParameterName, LoanApiConstants.approvedLoanAmountParameterName,
+                LoanApiConstants.updatedDisbursementDateParameterName, LoanApiConstants.updatedDisbursementPrincipalParameterName,
+                LoanApiConstants.expectedDisbursementDateParameterName));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
@@ -558,8 +558,8 @@ public final class LoanEventApiJsonValidator {
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         final LocalDate actualDisbursementDate = this.fromApiJsonHelper
-                .extractLocalDateNamed(LoanApiConstants.disbursementDateParameterName, element);
-        baseDataValidator.reset().parameter(LoanApiConstants.disbursementDateParameterName).value(actualDisbursementDate).notNull();
+                .extractLocalDateNamed(LoanApiConstants.expectedDisbursementDateParameterName, element);
+        baseDataValidator.reset().parameter(LoanApiConstants.expectedDisbursementDateParameterName).value(actualDisbursementDate).notNull();
 
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject());
         final BigDecimal principal = this.fromApiJsonHelper
@@ -569,7 +569,7 @@ public final class LoanEventApiJsonValidator {
         final BigDecimal approvedPrincipal = this.fromApiJsonHelper.extractBigDecimalNamed(LoanApiConstants.approvedLoanAmountParameterName,
                 element, locale);
         if (loanDisbursementDetails.actualDisbursementDate() != null) {
-            baseDataValidator.reset().parameter(LoanApiConstants.disbursementDateParameterName)
+            baseDataValidator.reset().parameter(LoanApiConstants.expectedDisbursementDateParameterName)
                     .failWithCode(LoanApiConstants.ALREADY_DISBURSED);
         }
 

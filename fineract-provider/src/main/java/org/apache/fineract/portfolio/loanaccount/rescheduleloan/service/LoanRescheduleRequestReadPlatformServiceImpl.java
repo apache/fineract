@@ -48,7 +48,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
 
     private final JdbcTemplate jdbcTemplate;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
-    private final LoanRescheduleRequestRowMapper loanRescheduleRequestRowMapper = new LoanRescheduleRequestRowMapper();
+    private static final LoanRescheduleRequestRowMapper LOAN_RESCHEDULE_REQUEST_ROW_MAPPER = new LoanRescheduleRequestRowMapper();
     private final CodeValueReadPlatformService codeValueReadPlatformService;
 
     @Autowired
@@ -99,7 +99,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
             sqlBuilder.append("tv.date_value as dateValue, ");
             sqlBuilder.append("tv.is_specific_to_installment as isSpecificToInstallment ");
 
-            sqlBuilder.append("from " + loanRescheduleRequestTableName() + " lr ");
+            sqlBuilder.append("from m_loan_reschedule_request lr ");
             sqlBuilder.append("left join m_code_value cv on cv.id = lr.reschedule_reason_cv_id ");
             sqlBuilder.append("left join m_appuser sbu on sbu.id = lr.submitted_by_user_id ");
             sqlBuilder.append("left join m_appuser abu on abu.id = lr.approved_by_user_id ");
@@ -114,10 +114,6 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
 
         public String schema() {
             return this.schema;
-        }
-
-        public String loanRescheduleRequestTableName() {
-            return "m_loan_reschedule_request";
         }
 
         @Override
@@ -225,18 +221,18 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
     @Override
     public List<LoanRescheduleRequestData> readLoanRescheduleRequests(Long loanId) {
         this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
-        final String sql = "select " + this.loanRescheduleRequestRowMapper.schema() + " where lr.loan_id = ?";
+        final String sql = "select " + LOAN_RESCHEDULE_REQUEST_ROW_MAPPER.schema() + " where lr.loan_id = ?";
 
-        return this.jdbcTemplate.query(sql, this.loanRescheduleRequestRowMapper, loanId); // NOSONAR
+        return this.jdbcTemplate.query(sql, LOAN_RESCHEDULE_REQUEST_ROW_MAPPER, loanId); // NOSONAR
     }
 
     @Override
     public LoanRescheduleRequestData readLoanRescheduleRequest(Long requestId) {
 
         try {
-            final String sql = "select " + this.loanRescheduleRequestRowMapper.schema() + " where lr.id = ?";
+            final String sql = "select " + LOAN_RESCHEDULE_REQUEST_ROW_MAPPER.schema() + " where lr.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, this.loanRescheduleRequestRowMapper, requestId); // NOSONAR
+            return this.jdbcTemplate.queryForObject(sql, LOAN_RESCHEDULE_REQUEST_ROW_MAPPER, requestId); // NOSONAR
         }
 
         catch (final EmptyResultDataAccessException e) {
@@ -247,8 +243,8 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
     @Override
     public List<LoanRescheduleRequestData> readLoanRescheduleRequests(Long loanId, Integer statusEnum) {
         this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
-        final String sql = "select " + this.loanRescheduleRequestRowMapper.schema() + " where lr.loan_id = ?" + " and lr.status_enum = ?";
-        return this.jdbcTemplate.query(sql, this.loanRescheduleRequestRowMapper, loanId, statusEnum); // NOSONAR
+        final String sql = "select " + LOAN_RESCHEDULE_REQUEST_ROW_MAPPER.schema() + " where lr.loan_id = ?" + " and lr.status_enum = ?";
+        return this.jdbcTemplate.query(sql, LOAN_RESCHEDULE_REQUEST_ROW_MAPPER, loanId, statusEnum); // NOSONAR
     }
 
     @Override

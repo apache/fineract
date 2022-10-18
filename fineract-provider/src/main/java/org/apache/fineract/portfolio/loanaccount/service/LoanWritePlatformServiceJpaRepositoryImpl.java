@@ -505,7 +505,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         }
 
-        final Set<LoanCharge> loanCharges = loan.charges();
+        final Set<LoanCharge> loanCharges = loan.getActiveCharges();
         final Map<Long, BigDecimal> disBuLoanCharges = new HashMap<>();
         for (final LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isDueAtDisbursement() && loanCharge.getChargePaymentMode().isPaymentModeAccountTransfer()
@@ -773,7 +773,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 }
                 postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
             }
-            final Set<LoanCharge> loanCharges = loan.charges();
+            final Set<LoanCharge> loanCharges = loan.getActiveCharges();
             final Map<Long, BigDecimal> disBuLoanCharges = new HashMap<>();
             for (final LoanCharge loanCharge : loanCharges) {
                 if (loanCharge.isDueAtDisbursement() && loanCharge.getChargePaymentMode().isPaymentModeAccountTransfer()
@@ -855,7 +855,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             if (loan.isTopup() && loan.getClientId() != null) {
                 final Long loanIdToClose = loan.getTopupLoanDetails().getLoanIdToClose();
                 final LocalDate expectedDisbursementDate = command
-                        .localDateValueOfParameterNamed(LoanApiConstants.disbursementDateParameterName);
+                        .localDateValueOfParameterNamed(LoanApiConstants.expectedDisbursementDateParameterName);
                 BigDecimal loanOutstanding = this.loanReadPlatformService
                         .retrieveLoanPrePaymentTemplate(LoanTransactionType.REPAYMENT, loanIdToClose, expectedDisbursementDate).getAmount();
                 BigDecimal netDisbursalAmount = loan.getApprovedPrincipal().subtract(loanOutstanding);
@@ -976,7 +976,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 loanCollateralManagement.setLoanTransactionData(loanTransaction);
                 ClientCollateralManagement clientCollateralManagement = loanCollateralManagement.getClientCollateralManagement();
 
-                if (loan.status().isClosed()) {
+                if (loan.getStatus().isClosed()) {
                     loanCollateralManagement.setIsReleased(true);
                     BigDecimal quantity = loanCollateralManagement.getQuantity();
                     clientCollateralManagement.updateQuantity(clientCollateralManagement.getQuantity().add(quantity));
@@ -1055,7 +1055,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanEventApiJsonValidator.validateTransaction(command.json());
 
         Loan loan = this.loanAssembler.assembleFrom(loanId);
-        if (loan.status().isClosed() && loan.getLoanSubStatus() != null
+        if (loan.getStatus().isClosed() && loan.getLoanSubStatus() != null
                 && loan.getLoanSubStatus().equals(LoanSubStatus.FORECLOSED.getValue())) {
             final String defaultUserMessage = "The loan cannot reopened as it is foreclosed.";
             throw new LoanForeclosureException("loan.cannot.be.reopened.as.it.is.foreclosured", defaultUserMessage, loanId);
@@ -1508,7 +1508,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             for (LoanCollateralManagement loanCollateralManagement : loanCollateralManagements) {
                 ClientCollateralManagement clientCollateralManagement = loanCollateralManagement.getClientCollateralManagement();
 
-                if (loan.status().isClosed()) {
+                if (loan.getStatus().isClosed()) {
                     loanCollateralManagement.setIsReleased(true);
                     BigDecimal quantity = loanCollateralManagement.getQuantity();
                     clientCollateralManagement.updateQuantity(clientCollateralManagement.getQuantity().add(quantity));
@@ -1573,7 +1573,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             for (LoanCollateralManagement loanCollateralManagement : loanCollateralManagements) {
                 ClientCollateralManagement clientCollateralManagement = loanCollateralManagement.getClientCollateralManagement();
 
-                if (loan.status().isClosed()) {
+                if (loan.getStatus().isClosed()) {
                     loanCollateralManagement.setIsReleased(true);
                     BigDecimal quantity = loanCollateralManagement.getQuantity();
                     clientCollateralManagement.updateQuantity(clientCollateralManagement.getQuantity().add(quantity));
@@ -1716,7 +1716,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     chargeDefinition.getName());
         } else if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
 
-            if (loanCharge.isInstalmentFee() && loan.status().isActive()) {
+            if (loanCharge.isInstalmentFee() && loan.getStatus().isActive()) {
                 final String defaultUserMessage = "installment charge addition not allowed after disbursement";
                 throw new LoanChargeCannotBeAddedException("loanCharge", "installment.charge", defaultUserMessage, null,
                         chargeDefinition.getName());
@@ -1797,7 +1797,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
          * we want to apply charge transactions only for those loans charges that are applied when a loan is active and
          * the loan product uses Upfront Accruals
          **/
-        if (loan.status().isActive() && loan.isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()) {
+        if (loan.getStatus().isActive() && loan.isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()) {
             final LoanTransaction applyLoanChargeTransaction = loan.handleChargeAppliedTransaction(loanCharge, null);
             this.loanTransactionRepository.saveAndFlush(applyLoanChargeTransaction);
         }
@@ -1816,7 +1816,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         // Charges may be edited only when the loan associated with them are
         // yet to be approved (are in submitted and pending status)
-        if (!loan.status().isSubmittedAndPendingApproval()) {
+        if (!loan.getStatus().isSubmittedAndPendingApproval()) {
             throw new LoanChargeCannotBeUpdatedException(LoanChargeCannotBeUpdatedReason.LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE,
                     loanCharge.getId());
         }
@@ -1968,9 +1968,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         LoanInstallmentCharge installmentChargeEntry = null;
 
         Loan loan = loanCharge.getLoan();
-        if (!(loan.isOpen() || loan.status().isClosedObligationsMet() || loan.status().isOverpaid())) {
+        if (!(loan.isOpen() || loan.getStatus().isClosedObligationsMet() || loan.getStatus().isOverpaid())) {
             final String errorMessage = "loan.charge.refund.invalid.status";
-            throw new LoanChargeRefundException(errorMessage, loan.status().toString());
+            throw new LoanChargeRefundException(errorMessage, loan.getStatus().toString());
         }
 
         if (dueDate != null && installmentNumber != null) {
@@ -2047,7 +2047,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         // Charges may be waived only when the loan associated with them are
         // active
-        if (!loan.status().isActive()) {
+        if (!loan.getStatus().isActive()) {
             throw new LoanChargeWaiveCannotBeReversedException(LoanChargeWaiveCannotUndoReason.LOAN_INACTIVE, loanCharge.getId());
         }
 
@@ -2172,7 +2172,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         // Charges may be waived only when the loan associated with them are
         // active
-        if (!loan.status().isActive()) {
+        if (!loan.getStatus().isActive()) {
             throw new LoanChargeCannotBeWaivedException(LoanChargeCannotBeWaivedReason.LOAN_INACTIVE, loanCharge.getId());
         }
 
@@ -2254,7 +2254,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         // Charges may be deleted only when the loan associated with them are
         // yet to be approved (are in submitted and pending status)
-        if (!loan.status().isSubmittedAndPendingApproval()) {
+        if (!loan.getStatus().isSubmittedAndPendingApproval()) {
             throw new LoanChargeCannotBeDeletedException(LoanChargeCannotBeDeletedReason.LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE,
                     loanCharge.getId());
         }
@@ -2288,7 +2288,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         // Charges may be waived only when the loan associated with them are
         // active
-        if (!loan.status().isActive()) {
+        if (!loan.getStatus().isActive()) {
             throw new LoanChargeCannotBePayedException(LoanChargeCannotBePayedReason.LOAN_INACTIVE, loanCharge.getId());
         }
 
@@ -2667,9 +2667,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                             existingReversedTransactionIds);
                     createAndSaveLoanScheduleArchive(loan, scheduleGeneratorDTO);
                 } else if (rescheduleBasedOnMeetingDates != null && rescheduleBasedOnMeetingDates) {
-                    loan.updateLoanRepaymentScheduleDates(calendar.getStartDateLocalDate(), calendar.getRecurrence(), isHolidayEnabled,
-                            holidays, workingDays, rescheduleBasedOnMeetingDates, presentMeetingDate, newMeetingDate,
-                            isSkipRepaymentOnFirstMonth, numberOfDays);
+                    loan.updateLoanRepaymentScheduleDates(calendar.getRecurrence(), isHolidayEnabled, holidays, workingDays,
+                            presentMeetingDate, newMeetingDate, isSkipRepaymentOnFirstMonth, numberOfDays);
                 } else {
                     loan.updateLoanRepaymentScheduleDates(calendar.getStartDateLocalDate(), calendar.getRecurrence(), isHolidayEnabled,
                             holidays, workingDays, isSkipRepaymentOnFirstMonth, numberOfDays);
@@ -3102,8 +3101,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final String errorMessage = "loan.product.does.not.support.multiple.disbursals";
             throw new LoanMultiDisbursementException(errorMessage);
         }
-        if (loan.isSubmittedAndPendingApproval() || loan.isClosed() || loan.isClosedWrittenOff() || loan.status().isClosedObligationsMet()
-                || loan.status().isOverpaid()) {
+        if (loan.isSubmittedAndPendingApproval() || loan.isClosed() || loan.isClosedWrittenOff()
+                || loan.getStatus().isClosedObligationsMet() || loan.getStatus().isOverpaid()) {
             final String errorMessage = "cannot.modify.tranches.if.loan.is.pendingapproval.closed.overpaid.writtenoff";
             throw new LoanMultiDisbursementException(errorMessage);
         }

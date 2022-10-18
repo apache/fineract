@@ -38,7 +38,7 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
     @Override
     public LoanStatus dryTransition(final LoanEvent loanEvent, final Loan loan) {
         LoanStatus nextStatus = getNextState(loanEvent, loan);
-        return nextStatus != null ? nextStatus : loan.status();
+        return nextStatus != null ? nextStatus : loan.getStatus();
     }
 
     @Override
@@ -64,7 +64,7 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
             return submittedTransition();
         }
 
-        LoanStatus from = loan.status();
+        LoanStatus from = loan.getStatus();
         LoanStatus newState = null;
 
         switch (loanEvent) {

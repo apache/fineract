@@ -54,8 +54,6 @@ import org.apache.fineract.portfolio.note.data.NoteData;
 import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.note.exception.NoteResourceNotSupportedException;
 import org.apache.fineract.portfolio.note.service.NoteReadPlatformService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -63,15 +61,18 @@ import org.springframework.stereotype.Component;
 @Path("/{resourceType}/{resourceId}/notes")
 @Component
 @Scope("singleton")
-
 @Tag(name = "Notes", description = "Notes API allows to enter notes for supported resources.")
 public class NotesApiResource {
 
-    private final Set<String> noteDataParemeters = new HashSet<>(
+    public static final String CLIENTNOTE = "CLIENTNOTE";
+    public static final String LOANNOTE = "LOANNOTE";
+    public static final String LOANTRANSACTIONNOTE = "LOANTRANSACTIONNOTE";
+    public static final String SAVINGNOTE = "SAVINGNOTE";
+    public static final String GROUPNOTE = "GROUPNOTE";
+    public static final String INVALIDNOTE = "INVALIDNOTE";
+    private static final Set<String> NOTE_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList("id", "clientId", "groupId", "loanId", "loanTransactionId", "depositAccountId", "savingAccountId", "noteType",
                     "note", "createdById", "createdByUsername", "createdOn", "updatedById", "updatedByUsername", "updatedOn"));
-
-    private static final Logger LOG = LoggerFactory.getLogger(NotesApiResource.class);
     private final PlatformSecurityContext context;
     private final NoteReadPlatformService readPlatformService;
     private final DefaultToApiJsonSerializer<NoteData> toApiJsonSerializer;
@@ -113,7 +114,7 @@ public class NotesApiResource {
         final Collection<NoteData> notes = this.readPlatformService.retrieveNotesByResource(resourceId, noteTypeId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, notes, this.noteDataParemeters);
+        return this.toApiJsonSerializer.serialize(settings, notes, NOTE_DATA_PARAMETERS);
     }
 
     @GET
@@ -143,7 +144,7 @@ public class NotesApiResource {
         final NoteData note = this.readPlatformService.retrieveNote(noteId, resourceId, noteTypeId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, note, this.noteDataParemeters);
+        return this.toApiJsonSerializer.serialize(settings, note, NOTE_DATA_PARAMETERS);
     }
 
     @POST
@@ -231,35 +232,32 @@ public class NotesApiResource {
 
     private CommandWrapper getResourceDetails(final NoteType type, final Long resourceId) {
         CommandWrapperBuilder resourceDetails = new CommandWrapperBuilder();
-        String resourceNameForPermissions = "INVALIDNOTE";
+        String resourceNameForPermissions;
         switch (type) {
-            case CLIENT:
-                resourceNameForPermissions = "CLIENTNOTE";
+            case CLIENT -> {
+                resourceNameForPermissions = CLIENTNOTE;
                 resourceDetails.withClientId(resourceId);
-            break;
-            case LOAN:
-                resourceNameForPermissions = "LOANNOTE";
+            }
+            case LOAN -> {
+                resourceNameForPermissions = LOANNOTE;
                 resourceDetails.withLoanId(resourceId);
-            break;
-            case LOAN_TRANSACTION:
-                resourceNameForPermissions = "LOANTRANSACTIONNOTE";
+            }
+            case LOAN_TRANSACTION -> {
+                resourceNameForPermissions = LOANTRANSACTIONNOTE;
                 // updating loanId, to distinguish saving transaction note and
                 // loan transaction note as we are using subEntityId for both.
                 resourceDetails.withLoanId(resourceId);
                 resourceDetails.withSubEntityId(resourceId);
-            break;
-            case SAVING_ACCOUNT:
-                resourceNameForPermissions = "SAVINGNOTE";
+            }
+            case SAVING_ACCOUNT -> {
+                resourceNameForPermissions = SAVINGNOTE;
                 resourceDetails.withSavingsId(resourceId);
-            break;
-            case GROUP:
-                resourceNameForPermissions = "GROUPNOTE";
+            }
+            case GROUP -> {
+                resourceNameForPermissions = GROUPNOTE;
                 resourceDetails.withGroupId(resourceId);
-            break;
-            default:
-                resourceNameForPermissions = "INVALIDNOTE";
-            break;
-
+            }
+            default -> resourceNameForPermissions = INVALIDNOTE;
         }
 
         return resourceDetails.withEntityName(resourceNameForPermissions).build();

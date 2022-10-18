@@ -23,14 +23,19 @@ public interface LoanApiConstants {
     String emiAmountParameterName = "fixedEmiAmount";
     String maxOutstandingBalanceParameterName = "maxOutstandingLoanBalance";
     String disbursementDataParameterName = "disbursementData";
-    String disbursementDateParameterName = "expectedDisbursementDate";
+    String expectedDisbursementDateParameterName = "expectedDisbursementDate";
     String disbursementPrincipalParameterName = "principal";
+    String principalParameterName = "principal";
     String disbursementReversedParameterName = "reversed";
     String disbursementNetDisbursalAmountParameterName = "netDisbursalAmount";
     String updatedDisbursementDateParameterName = "updatedExpectedDisbursementDate";
     String updatedDisbursementPrincipalParameterName = "updatedPrincipal";
     String disbursementIdParameterName = "id";
     String loanChargeIdParameterName = "loanChargeId";
+    String chargeIdParameterName = "chargeId";
+    String amountParameterName = "amount";
+    String chargeTimeTypeParameterName = "chargeTimeType";
+    String chargeCalculationTypeParameterName = "chargeCalculationType";
     String principalDisbursedParameterName = "transactionAmount";
     String chargesParameterName = "charges";
     String loanIdTobeApproved = "loanId";
@@ -73,8 +78,12 @@ public interface LoanApiConstants {
     String inArrearsToleranceParameterName = "inArrearsTolerance";
     String interestChargedFromDateParameterName = "interestChargedFromDate";
     String submittedOnDateParameterName = "submittedOnDate";
-    String submittedOnNoteParameterName = "interestChargedFromDate";
+    String submittedOnNoteParameterName = "submittedOnNote";
     String collateralParameterName = "collateral";
+    String collateralsParameterName = "collaterals";
+    String clientCollateralIdParameterName = "clientCollateralId";
+
+    String quantityParameterName = "quantity";
     String syncDisbursementWithMeetingParameterName = "syncDisbursementWithMeeting";
     String linkAccountIdParameterName = "linkAccountId";
     String createStandingInstructionAtDisbursementParameterName = "createStandingInstructionAtDisbursement";

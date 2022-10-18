@@ -50,10 +50,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class LoanRepaymentImportHandler implements ImportHandler {
 
+    public static final String SEPARATOR = "-";
+    public static final String EMPTY_STR = "";
     private static final Logger LOG = LoggerFactory.getLogger(LoanRepaymentImportHandler.class);
-    private Workbook workbook;
-    private List<LoanTransactionData> loanRepayments;
-    private Long loanAccountId;
     private final LoanReadPlatformService loanReadPlatformService;
 
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
@@ -66,29 +65,32 @@ public class LoanRepaymentImportHandler implements ImportHandler {
     }
 
     @Override
-    public Count process(Workbook workbook, String locale, String dateFormat) {
-        this.workbook = workbook;
-        this.loanRepayments = new ArrayList<>();
-        readExcelFile(locale, dateFormat);
-        return importEntity(dateFormat);
+    public Count process(final Workbook workbook, final String locale, final String dateFormat) {
+
+        List<LoanTransactionData> loanRepayments = readExcelFile(workbook, locale, dateFormat);
+        return importEntity(workbook, loanRepayments, dateFormat);
     }
 
-    public void readExcelFile(String locale, String dateFormat) {
+    private List<LoanTransactionData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
+        List<LoanTransactionData> loanRepayments = new ArrayList<>();
         Sheet loanRepaymentSheet = workbook.getSheet(TemplatePopulateImportConstants.LOAN_REPAYMENT_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(loanRepaymentSheet, LoanRepaymentConstants.AMOUNT_COL);
+        Long loanAccountId = null;
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = loanRepaymentSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, LoanRepaymentConstants.STATUS_COL)) {
-                loanRepayments.add(readLoanRepayment(row, locale, dateFormat));
+                loanRepayments.add(readLoanRepayment(workbook, loanAccountId, row, locale, dateFormat));
             }
         }
+        return loanRepayments;
     }
 
-    private LoanTransactionData readLoanRepayment(Row row, String locale, String dateFormat) {
+    private LoanTransactionData readLoanRepayment(final Workbook workbook, Long loanAccountId, final Row row, final String locale,
+            final String dateFormat) {
         String loanaccountInfo = ImportHandlerUtils.readAsString(LoanRepaymentConstants.LOAN_ACCOUNT_NO_COL, row);
         if (loanaccountInfo != null) {
-            List<String> loanAccountAr = Splitter.on('-').splitToList(loanaccountInfo);
+            List<String> loanAccountAr = Splitter.on(SEPARATOR).splitToList(loanaccountInfo);
             loanAccountId = this.loanReadPlatformService.retrieveLoanIdByAccountNumber(loanAccountAr.get(0));
         }
         BigDecimal repaymentAmount = null;
@@ -105,14 +107,14 @@ public class LoanRepaymentImportHandler implements ImportHandler {
         Integer receiptNumber = ImportHandlerUtils.readAsInt(LoanRepaymentConstants.RECEIPT_NO_COL, row);
         Integer bankNumber = ImportHandlerUtils.readAsInt(LoanRepaymentConstants.BANK_NO_COL, row);
         return LoanTransactionData.importInstance(repaymentAmount, repaymentDate, repaymentTypeId, accountNumber, checkNumber, routingCode,
-                receiptNumber, bankNumber, loanAccountId, "", row.getRowNum(), locale, dateFormat);
+                receiptNumber, bankNumber, loanAccountId, EMPTY_STR, row.getRowNum(), locale, dateFormat);
     }
 
-    public Count importEntity(String dateFormat) {
+    private Count importEntity(final Workbook workbook, final List<LoanTransactionData> loanRepayments, final String dateFormat) {
         Sheet loanRepaymentSheet = workbook.getSheet(TemplatePopulateImportConstants.LOAN_REPAYMENT_SHEET_NAME);
         int successCount = 0;
         int errorCount = 0;
-        String errorMessage = "";
+        String errorMessage;
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
 

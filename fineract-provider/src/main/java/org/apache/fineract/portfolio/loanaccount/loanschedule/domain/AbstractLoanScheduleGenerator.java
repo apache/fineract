@@ -2120,7 +2120,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
             // this is required to update total fee amounts in the
             // LoanScheduleModel
-            final BigDecimal chargesDueAtTimeOfDisbursement = deriveTotalChargesDueAtTimeOfDisbursement(loan.charges());
+            final BigDecimal chargesDueAtTimeOfDisbursement = deriveTotalChargesDueAtTimeOfDisbursement(loan.getActiveCharges());
             periods = createNewLoanScheduleListWithDisbursementDetails(loanApplicationTerms.fetchNumberOfRepaymentsAfterExceptions(),
                     loanApplicationTerms, chargesDueAtTimeOfDisbursement);
             MonetaryCurrency currency = outstandingBalance.getCurrency();
@@ -2399,7 +2399,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             loanApplicationTerms.setInterestTobeApproppriated(
                     Money.of(loan.getCurrency(), retainedInstallments.get(retainedInstallments.size() - 1).getRescheduleInterestPortion()));
         }
-        LoanScheduleModel loanScheduleModel = generate(mc, loanApplicationTerms, loan.charges(), holidayDetailDTO, loanScheduleParams);
+        LoanScheduleModel loanScheduleModel = generate(mc, loanApplicationTerms, loan.getActiveCharges(), holidayDetailDTO,
+                loanScheduleParams);
 
         for (LoanScheduleModelPeriod loanScheduleModelPeriod : loanScheduleModel.getPeriods()) {
             if (loanScheduleModelPeriod.isRepaymentPeriod()) {
@@ -2673,7 +2674,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         List<LoanTransaction> loanTransactions = loan.retreiveListOfTransactionsPostDisbursementExcludeAccruals();
 
         loanRepaymentScheduleTransactionProcessor.handleTransaction(loanApplicationTerms.getExpectedDisbursementDate(), loanTransactions,
-                currency, loanScheduleDTO.getInstallments(), loan.charges());
+                currency, loanScheduleDTO.getInstallments(), loan.getActiveCharges());
         Money feeCharges = Money.zero(currency);
         Money penaltyCharges = Money.zero(currency);
         Money totalPrincipal = Money.zero(currency);
