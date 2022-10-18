@@ -762,7 +762,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
         SavingsAccountCharge that = (SavingsAccountCharge) o;
         return (penaltyCharge == that.penaltyCharge) && (paid == that.paid) && (waived == that.waived) && (status == that.status)
                 && Objects.equals(savingsAccount, that.savingsAccount) && Objects.equals(charge, that.charge)
-                && Objects.equals(chargeTime, that.chargeTime)
+                && Objects.equals(chargeTime, that.chargeTime) && (dueDate != null && dueDate.compareTo(that.dueDate) == 0)
                         ? Boolean.TRUE
                         : Boolean.FALSE && Objects.equals(feeOnMonth, that.feeOnMonth) && Objects.equals(feeOnDay, that.feeOnDay)
                                 && Objects.equals(feeInterval, that.feeInterval)
@@ -789,19 +789,19 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
         if (ChargeCalculationType.fromInt(this.chargeCalculation).isFlat()) {
             amountPaybale = this.amount;
         } else if (ChargeCalculationType.fromInt(this.chargeCalculation).isPercentageOfAmount()) {
-
-            amountPaybale = transactionAmount.multiply(this.percentage).divide(BigDecimal.valueOf(100L), MoneyHelper.getRoundingMode());
-
             /*
             * Apply Computation min and max amount
             * configuration
             *
             * */
 
-            if(amountPaybale.compareTo(this.maxAmount) > 0){
+            if(transactionAmount.compareTo(this.maxAmount) > 0){
                 amountPaybale = this.maxAmount.multiply(this.percentage).divide(BigDecimal.valueOf(100L), MoneyHelper.getRoundingMode());
-            }else if(amountPaybale.compareTo(this.minAmount) > 0){
+            }else if(transactionAmount.compareTo(this.minAmount) > 0){
                 amountPaybale = this.minAmount.multiply(this.percentage).divide(BigDecimal.valueOf(100L), MoneyHelper.getRoundingMode());
+            }else{
+                //use the Transaction amount. Original implementation
+                amountPaybale = transactionAmount.multiply(this.percentage).divide(BigDecimal.valueOf(100L), MoneyHelper.getRoundingMode());
             }
         }
         return amountPaybale;
