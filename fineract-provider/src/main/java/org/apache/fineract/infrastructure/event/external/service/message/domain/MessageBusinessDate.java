@@ -16,26 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.business.domain;
+package org.apache.fineract.infrastructure.event.external.service.message.domain;
 
-import java.util.List;
+import java.time.LocalDate;
+import java.util.Objects;
+import lombok.Getter;
 
-public class BulkBusinessEvent extends AbstractBusinessEvent<List<BusinessEvent<?>>> {
+@Getter
+public class MessageBusinessDate {
 
-    private static final String CATEGORY = "Bulk";
-    public static final String TYPE = "BulkBusinessEvent";
+    private LocalDate businessDate;
 
-    public BulkBusinessEvent(List<BusinessEvent<?>> value) {
-        super(value);
-    }
-
-    @Override
-    public String getType() {
-        return TYPE;
-    }
-
-    @Override
-    public String getCategory() {
-        return CATEGORY;
+    public MessageBusinessDate(LocalDate businessDate) {
+        this.businessDate = Objects.requireNonNull(businessDate, "businessDate cannot be null");
     }
 }

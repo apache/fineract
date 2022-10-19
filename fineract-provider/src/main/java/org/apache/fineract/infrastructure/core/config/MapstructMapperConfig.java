@@ -16,26 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.business.domain;
+package org.apache.fineract.infrastructure.core.config;
 
-import java.util.List;
+import org.mapstruct.Builder;
+import org.mapstruct.MapperConfig;
+import org.mapstruct.MappingConstants;
+import org.mapstruct.ReportingPolicy;
 
-public class BulkBusinessEvent extends AbstractBusinessEvent<List<BusinessEvent<?>>> {
-
-    private static final String CATEGORY = "Bulk";
-    public static final String TYPE = "BulkBusinessEvent";
-
-    public BulkBusinessEvent(List<BusinessEvent<?>> value) {
-        super(value);
-    }
-
-    @Override
-    public String getType() {
-        return TYPE;
-    }
-
-    @Override
-    public String getCategory() {
-        return CATEGORY;
-    }
-}
+@MapperConfig(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.ERROR, builder = @Builder(disableBuilder = true))
+public class MapstructMapperConfig {}

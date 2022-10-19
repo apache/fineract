@@ -16,12 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.service.support;
+package org.apache.fineract.infrastructure.event.external.service.message.domain;
 
-import org.mapstruct.Builder;
-import org.mapstruct.MapperConfig;
-import org.mapstruct.MappingConstants;
-import org.mapstruct.ReportingPolicy;
+import java.time.OffsetDateTime;
+import java.util.Objects;
+import lombok.Getter;
 
-@MapperConfig(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.ERROR, builder = @Builder(disableBuilder = true))
-public class ExternalEventMapperConfig {}
+@Getter
+public class MessageCreatedAt {
+
+    private OffsetDateTime createdAt;
+
+    public MessageCreatedAt(OffsetDateTime createdAt) {
+        this.createdAt = Objects.requireNonNull(createdAt, "createdAt cannot be null");
+    }
+}

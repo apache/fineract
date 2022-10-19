@@ -19,19 +19,16 @@
 package org.apache.fineract.portfolio.delinquency.mapper;
 
 import java.util.List;
+import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.apache.fineract.portfolio.delinquency.data.LoanDelinquencyTagHistoryData;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyTagHistory;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", uses = DelinquencyRangeMapper.class)
+@Mapper(config = MapstructMapperConfig.class, uses = DelinquencyRangeMapper.class)
 public interface LoanDelinquencyTagMapper {
 
-    @Mapping(target = "id", source = "source.id")
     @Mapping(target = "loanId", source = "source.loan.id")
-    @Mapping(target = "delinquencyRange", source = "source.delinquencyRange")
-    @Mapping(target = "addedOnDate", source = "source.addedOnDate")
-    @Mapping(target = "liftedOnDate", source = "source.liftedOnDate")
     LoanDelinquencyTagHistoryData map(LoanDelinquencyTagHistory source);
 
     List<LoanDelinquencyTagHistoryData> map(List<LoanDelinquencyTagHistory> sources);

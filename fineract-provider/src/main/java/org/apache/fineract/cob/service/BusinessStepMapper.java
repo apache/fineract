@@ -21,11 +21,12 @@ package org.apache.fineract.cob.service;
 import java.util.List;
 import org.apache.fineract.cob.data.BusinessStep;
 import org.apache.fineract.cob.domain.BatchBusinessStep;
+import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 
-@Mapper(componentModel = "spring")
+@Mapper(config = MapstructMapperConfig.class)
 public interface BusinessStepMapper {
 
     @Mappings({ @Mapping(target = "order", source = "source.stepOrder") })

@@ -139,8 +139,17 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
         try {
             List<BusinessEvent<?>> recordedBusinessEvents = recordedEvents.get();
             if (isExternalEventPostingEnabled()) {
-                log.debug("Posting the BulkBusinessEvent for the recorded {} events", recordedBusinessEvents.size());
-                externalEventService.postEvent(new BulkBusinessEvent(recordedBusinessEvents));
+                if (recordedBusinessEvents.isEmpty()) {
+                    log.debug("Not posting a BulkBusinessEvent since there were no events recorded");
+                } else {
+                    if (recordedBusinessEvents.size() == 1) {
+                        log.debug("Posting a singular event instead of a BulkBusinessEvent since there was only a single event recorded");
+                        externalEventService.postEvent(recordedBusinessEvents.get(0));
+                    } else {
+                        log.debug("Posting the BulkBusinessEvent for the recorded {} events", recordedBusinessEvents.size());
+                        externalEventService.postEvent(new BulkBusinessEvent(recordedBusinessEvents));
+                    }
+                }
             }
         } finally {
             recordedEvents.remove();

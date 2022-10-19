@@ -18,19 +18,19 @@
  */
 package org.apache.fineract.infrastructure.event.external.service.message;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.avro.BulkMessageV1;
 import org.apache.fineract.avro.MessageV1;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEvent;
-import org.apache.fineract.infrastructure.event.external.service.message.domain.BulkMessageData;
+import org.apache.fineract.infrastructure.event.external.service.message.domain.MessageBusinessDate;
 import org.apache.fineract.infrastructure.event.external.service.message.domain.MessageCategory;
+import org.apache.fineract.infrastructure.event.external.service.message.domain.MessageCreatedAt;
 import org.apache.fineract.infrastructure.event.external.service.message.domain.MessageData;
 import org.apache.fineract.infrastructure.event.external.service.message.domain.MessageDataSchema;
 import org.apache.fineract.infrastructure.event.external.service.message.domain.MessageId;
@@ -50,28 +50,18 @@ public class MessageFactory implements InitializingBean {
     private static final String SOURCE_UUID = UUID.randomUUID().toString();
 
     public MessageV1 createMessage(MessageId id, MessageSource source, MessageType type, MessageCategory category,
-            MessageIdempotencyKey idempotencyKey, MessageDataSchema dataSchema, MessageData data) {
+            MessageCreatedAt createdAt, MessageBusinessDate businessDate, MessageIdempotencyKey idempotencyKey,
+            MessageDataSchema dataSchema, MessageData data) {
         MessageV1 result = new MessageV1();
         result.setId(id.getId());
         result.setSource(source.getSource());
         result.setType(type.getType());
         result.setCategory(category.getCategory());
-        result.setCreatedAt(getMessageCreatedAt());
+        result.setCreatedAt(getMessageCreatedAt(createdAt.getCreatedAt()));
+        result.setBusinessDate(getMessageBusinessDate(businessDate.getBusinessDate()));
         result.setTenantId(getTenantId());
         result.setIdempotencyKey(idempotencyKey.getIdempotencyKey());
         result.setDataschema(dataSchema.getDataSchema());
-        result.setData(data.getData());
-        return result;
-    }
-
-    public BulkMessageV1 createBulkMessage(MessageId id, MessageSource source, MessageType type, BulkMessageData data) {
-
-        BulkMessageV1 result = new BulkMessageV1();
-        result.setId(id.getId());
-        result.setSource(source.getSource());
-        result.setType(type.getType());
-        result.setCreatedAt(getMessageCreatedAt());
-        result.setTenantId(getTenantId());
         result.setData(data.getData());
         return result;
     }
@@ -81,20 +71,24 @@ public class MessageFactory implements InitializingBean {
         MessageSource source = new MessageSource(SOURCE_UUID);
         MessageType type = new MessageType(event.getType());
         MessageCategory category = new MessageCategory(event.getCategory());
+        MessageCreatedAt createdAt = new MessageCreatedAt(event.getCreatedAt());
+        MessageBusinessDate businessDate = new MessageBusinessDate(event.getBusinessDate());
         MessageIdempotencyKey idempotencyKey = new MessageIdempotencyKey(event.getIdempotencyKey());
         MessageDataSchema dataSchema = new MessageDataSchema(event.getSchema());
         MessageData data = new MessageData(byteBufferConverter.convert(event.getData()));
-        MessageV1 message = createMessage(id, source, type, category, idempotencyKey, dataSchema, data);
-        return message;
+        return createMessage(id, source, type, category, createdAt, businessDate, idempotencyKey, dataSchema, data);
     }
 
     private String getTenantId() {
         return ThreadLocalContextUtil.getTenant().getTenantIdentifier();
     }
 
-    private String getMessageCreatedAt() {
-        OffsetDateTime createdAt = DateUtils.getOffsetDateTimeOfTenant();
+    private String getMessageCreatedAt(OffsetDateTime createdAt) {
         return createdAt.withOffsetSameInstant(ZoneOffset.UTC).toLocalDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+    }
+
+    private String getMessageBusinessDate(LocalDate businessDate) {
+        return businessDate.format(DateTimeFormatter.ISO_LOCAL_DATE);
     }
 
     @Override

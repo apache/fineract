@@ -19,8 +19,10 @@
 package org.apache.fineract.infrastructure.event.business.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -93,7 +95,20 @@ class BusinessEventNotifierServiceImplTest {
     }
 
     @Test
-    public void testNotifyPostBusinessEventShouldNotifyPostListenersAndPostAnBulkExternalEventWhenRecordingEnabled() {
+    public void testNotifyPostBusinessEventShouldNotPostAnythingWhenNoEventWasRaisedExternalEventWhenRecordingEnabled() {
+        // given
+        configureExternalEventsProperties(true);
+        when(externalEventConfigurationRepository.findExternalEventConfigurationByTypeWithNotFoundDetection(Mockito.any()))
+                .thenReturn(new ExternalEventConfiguration("aType", true));
+        underTest.startExternalEventRecording();
+        // when
+        underTest.stopExternalEventRecording();
+        // then
+        verify(externalEventService, never()).postEvent(any());
+    }
+
+    @Test
+    public void testNotifyPostBusinessEventShouldNotifyPostListenersAndPostARegularExternalEventWhenRecordingEnabled() {
         // given
         configureExternalEventsProperties(true);
         when(externalEventConfigurationRepository.findExternalEventConfigurationByTypeWithNotFoundDetection(Mockito.any()))
@@ -107,12 +122,34 @@ class BusinessEventNotifierServiceImplTest {
         underTest.stopExternalEventRecording();
         // then
         verify(postListener).onBusinessEvent(event);
+        verify(externalEventService).postEvent(event);
+    }
+
+    @Test
+    public void testNotifyPostBusinessEventShouldNotifyPostListenersAndPostAnBulkExternalEventWhenRecordingEnabled() {
+        // given
+        configureExternalEventsProperties(true);
+        when(externalEventConfigurationRepository.findExternalEventConfigurationByTypeWithNotFoundDetection(Mockito.any()))
+                .thenReturn(new ExternalEventConfiguration("aType", true));
+        MockBusinessEvent event = new MockBusinessEvent();
+        MockBusinessEvent event2 = new MockBusinessEvent();
+        BusinessEventListener<MockBusinessEvent> postListener = mockListener();
+        underTest.addPostBusinessEventListener(MockBusinessEvent.class, postListener);
+        underTest.startExternalEventRecording();
+        underTest.notifyPostBusinessEvent(event);
+        underTest.notifyPostBusinessEvent(event2);
+        // when
+        underTest.stopExternalEventRecording();
+        // then
+        verify(postListener).onBusinessEvent(event);
+        verify(postListener).onBusinessEvent(event2);
 
         ArgumentCaptor<BulkBusinessEvent> argumentCaptor = ArgumentCaptor.forClass(BulkBusinessEvent.class);
         verify(externalEventService).postEvent(argumentCaptor.capture());
         BulkBusinessEvent capturedEvent = argumentCaptor.getValue();
-        assertThat(capturedEvent.get()).hasSize(1);
+        assertThat(capturedEvent.get()).hasSize(2);
         assertThat(capturedEvent.get().get(0)).isEqualTo(event);
+        assertThat(capturedEvent.get().get(1)).isEqualTo(event2);
     }
 
     @Test

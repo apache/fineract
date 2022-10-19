@@ -102,11 +102,11 @@ class SendAsynchronousEventsTaskletTest {
     @Test
     public void givenBatchSize2WhenTaskExecutionThenSend2Events() throws Exception {
         // given
-        List<ExternalEvent> events = Arrays.asList(new ExternalEvent("aType", "aCategory", "aSchema", new byte[0], "aIdemtpotencyKey"),
-                new ExternalEvent("aType", "aCategory", "aSchema", new byte[0], "aIdemtpotencyKey"));
+        List<ExternalEvent> events = Arrays.asList(new ExternalEvent("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey"),
+                new ExternalEvent("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey"));
         // Dummy Message
-        MessageV1 dummyMessage = new MessageV1(1, "aSource", "aType", "nocategory", "aCreateDate", "aTennantId", "anidempotencyKey",
-                "aSchema", Mockito.mock(ByteBuffer.class));
+        MessageV1 dummyMessage = new MessageV1(1, "aSource", "aType", "nocategory", "aCreateDate", "aBusinessDate", "aTenantId",
+                "anidempotencyKey", "aSchema", Mockito.mock(ByteBuffer.class));
 
         when(repository.findByStatusOrderById(Mockito.any(), Mockito.any())).thenReturn(events);
         when(messageFactory.createMessage(Mockito.any())).thenReturn(dummyMessage);
@@ -123,10 +123,10 @@ class SendAsynchronousEventsTaskletTest {
     @Test
     public void givenBatchSize2WhenEventSendFailsThenExecutionStops() throws Exception {
         // given
-        List<ExternalEvent> events = Arrays.asList(new ExternalEvent("aType", "aCategory", "aSchema", new byte[0], "aIdemtpotencyKey"),
-                new ExternalEvent("aType", "aCategory", "aSchema", new byte[0], "aIdemtpotencyKey"));
-        MessageV1 dummyMessage = new MessageV1(1, "aSource", "aType", "nocategory", "aCreateDate", "aTennantId", "anidempotencyKey",
-                "aSchema", Mockito.mock(ByteBuffer.class));
+        List<ExternalEvent> events = Arrays.asList(new ExternalEvent("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey"),
+                new ExternalEvent("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey"));
+        MessageV1 dummyMessage = new MessageV1(1, "aSource", "aType", "nocategory", "aCreateDate", "aBusinessDate", "aTenantId",
+                "anidempotencyKey", "aSchema", Mockito.mock(ByteBuffer.class));
         when(repository.findByStatusOrderById(Mockito.any(), Mockito.any())).thenReturn(events);
         when(messageFactory.createMessage(Mockito.any())).thenReturn(dummyMessage);
         when(byteBufferConverter.convert(Mockito.any(ByteBuffer.class))).thenReturn(new byte[0]);
@@ -143,9 +143,9 @@ class SendAsynchronousEventsTaskletTest {
     public void givenOneEventWhenEventSentThenEventStatusUpdates() throws Exception {
         // given
         ArgumentCaptor<ExternalEvent> externalEventArgumentCaptor = ArgumentCaptor.forClass(ExternalEvent.class);
-        List<ExternalEvent> events = Arrays.asList(new ExternalEvent("aType", "aCategory", "aSchema", new byte[0], "aIdemtpotencyKey"));
-        MessageV1 dummyMessage = new MessageV1(1, "aSource", "aType", "nocategory", "aCreateDate", "aTennantId", "anidempotencyKey",
-                "aSchema", Mockito.mock(ByteBuffer.class));
+        List<ExternalEvent> events = Arrays.asList(new ExternalEvent("aType", "aCategory", "aSchema", new byte[0], "aIdempotencyKey"));
+        MessageV1 dummyMessage = new MessageV1(1, "aSource", "aType", "nocategory", "aCreateDate", "aBusinessDate", "aTenantId",
+                "anidempotencyKey", "aSchema", Mockito.mock(ByteBuffer.class));
         when(repository.findByStatusOrderById(Mockito.any(), Mockito.any())).thenReturn(events);
         when(messageFactory.createMessage(Mockito.any())).thenReturn(dummyMessage);
         when(byteBufferConverter.convert(Mockito.any(ByteBuffer.class))).thenReturn(new byte[0]);
@@ -153,10 +153,10 @@ class SendAsynchronousEventsTaskletTest {
         // when
         resultStatus = this.underTest.execute(stepContribution, chunkContext);
         // then
+        verify(messageFactory).createMessage(Mockito.any());
         verify(repository).save(externalEventArgumentCaptor.capture());
         ExternalEvent externalEvent = externalEventArgumentCaptor.getValue();
         assertThat(externalEvent.getStatus()).isEqualTo(ExternalEventStatus.SENT);
         assertEquals(RepeatStatus.FINISHED, resultStatus);
     }
-
 }

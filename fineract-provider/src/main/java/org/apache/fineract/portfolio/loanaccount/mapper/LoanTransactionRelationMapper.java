@@ -19,17 +19,17 @@
 package org.apache.fineract.portfolio.loanaccount.mapper;
 
 import java.util.List;
+import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionRelationData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper(config = MapstructMapperConfig.class)
 public interface LoanTransactionRelationMapper {
 
     @Mapping(target = "fromLoanTransaction", source = "source.fromTransaction.id")
     @Mapping(target = "toLoanTransaction", source = "source.toTransaction.id")
-    @Mapping(target = "relationType", source = "source.relationType")
     @Mapping(target = "amount", source = "source.toTransaction.amount")
     @Mapping(target = "paymentType", source = "source.toTransaction.paymentDetail.paymentType.name")
     LoanTransactionRelationData map(LoanTransactionRelation source);
