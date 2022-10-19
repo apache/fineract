@@ -34,6 +34,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -55,7 +56,7 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             "currencyOptions", "chargeAppliesTo", "chargeTimeType", "chargeCalculationType", "chargeCalculationTypeOptions", "penalty",
             "active", "chargePaymentMode", "feeOnMonthDay", "feeInterval", "monthDayFormat", "minCap", "maxCap", "feeFrequency",
             "enableFreeWithdrawalCharge", "freeWithdrawalFrequency", "restartCountFrequency", "countFrequencyType", "paymentTypeId",
-            "enablePaymentType", ChargesApiConstants.glAccountIdParamName, ChargesApiConstants.taxGroupIdParamName));
+            "enablePaymentType","minAmount","maxAmount", ChargesApiConstants.glAccountIdParamName, ChargesApiConstants.taxGroupIdParamName));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -190,6 +191,24 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
                         .isOneOfTheseValues(ChargeCalculationType.validValuesForSavings());
             }
 
+            final ChargeCalculationType chargeCalculationTypeValue = ChargeCalculationType.fromInt(chargeCalculationType);
+
+            if((chargeCalculationTypeValue != null && chargeCalculationTypeValue.getValue().equals(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue())) &&
+                    (ctt != null && ctt.isWithdrawalFee())){
+
+            final BigDecimal minAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("minAmount", element.getAsJsonObject());
+            baseDataValidator.reset().parameter("minAmount").value(minAmount).notNull().positiveAmount();
+
+            final BigDecimal maxAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maxAmount", element.getAsJsonObject());
+            baseDataValidator.reset().parameter("maxAmount").value(maxAmount).notNull().positiveAmount();
+                if (maxAmount.compareTo(minAmount) < 0) {
+                    String message = "Minimum Amount [ %s ] can not be greater than Maximum Amount [ %s ] ";
+                    throw new GeneralPlatformDomainRuleException(
+                            String.format(message, minAmount, maxAmount),
+                            String.format(message, minAmount, maxAmount));
+                }
+            }
+
         } else if (appliesTo.isClientCharge()) {
             // client applicable validation
             final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeTimeType", element);
@@ -305,9 +324,9 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             final BigDecimal maxCap = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maxCap", element.getAsJsonObject());
             baseDataValidator.reset().parameter("maxCap").value(maxCap).notNull().positiveAmount();
         }
-
+         Integer chargeAppliesTo = null;
         if (this.fromApiJsonHelper.parameterExists("chargeAppliesTo", element)) {
-            final Integer chargeAppliesTo = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeAppliesTo", element);
+            chargeAppliesTo = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeAppliesTo", element);
             baseDataValidator.reset().parameter("chargeAppliesTo").value(chargeAppliesTo).notNull()
                     .isOneOfTheseValues(ChargeAppliesTo.validValues());
         }
@@ -344,18 +363,6 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             }
         }
 
-        if (this.fromApiJsonHelper.parameterExists("chargeAppliesTo", element)) {
-            final Integer chargeAppliesTo = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeAppliesTo", element);
-            baseDataValidator.reset().parameter("chargeAppliesTo").value(chargeAppliesTo).notNull()
-                    .isOneOfTheseValues(ChargeAppliesTo.validValues());
-        }
-
-        if (this.fromApiJsonHelper.parameterExists("chargeAppliesTo", element)) {
-            final Integer chargeAppliesTo = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeAppliesTo", element);
-            baseDataValidator.reset().parameter("chargeAppliesTo").value(chargeAppliesTo).notNull()
-                    .isOneOfTheseValues(ChargeAppliesTo.validValues());
-        }
-
         if (this.fromApiJsonHelper.parameterExists("chargeTimeType", element)) {
 
             final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeTimeType", element);
@@ -381,9 +388,9 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             final Integer feeInterval = this.fromApiJsonHelper.extractIntegerNamed("feeInterval", element, Locale.getDefault());
             baseDataValidator.reset().parameter("feeInterval").value(feeInterval).integerGreaterThanZero();
         }
-
+        Integer chargeCalculationType = null;
         if (this.fromApiJsonHelper.parameterExists("chargeCalculationType", element)) {
-            final Integer chargeCalculationType = this.fromApiJsonHelper.extractIntegerNamed("chargeCalculationType", element,
+            chargeCalculationType = this.fromApiJsonHelper.extractIntegerNamed("chargeCalculationType", element,
                     Locale.getDefault());
             baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType).notNull().inMinMaxRange(1, 5);
         }
@@ -425,7 +432,29 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             final Long taxGroupId = this.fromApiJsonHelper.extractLongNamed(ChargesApiConstants.taxGroupIdParamName, element);
             baseDataValidator.reset().parameter(ChargesApiConstants.taxGroupIdParamName).value(taxGroupId).notNull().longGreaterThanZero();
         }
+        if (chargeCalculationType != null && chargeAppliesTo != null) {
+            final ChargeAppliesTo appliesTo = ChargeAppliesTo.fromInt(chargeAppliesTo);
+            final ChargeCalculationType chargeCalculationTypeValue = ChargeCalculationType.fromInt(chargeCalculationType);
 
+        if (chargeCalculationTypeValue.getValue().equals(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue()) && appliesTo.isSavingsCharge()) { // Apply this Validation to savings Account charge with Percentage Calculation Type
+            BigDecimal minAmount = null;
+            if (this.fromApiJsonHelper.parameterExists("minAmount", element)) {
+                 minAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("minAmount", element.getAsJsonObject());
+                baseDataValidator.reset().parameter("minAmount").value(minAmount).notNull().positiveAmount();
+            }
+            BigDecimal maxAmount = null;
+            if (this.fromApiJsonHelper.parameterExists("maxAmount", element)) {
+                maxAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maxAmount", element.getAsJsonObject());
+                baseDataValidator.reset().parameter("maxAmount").value(maxAmount).notNull().positiveAmount();
+            }
+            if(maxAmount.compareTo(minAmount) < 0){
+                String message = "Minimum Amount [ %s ] can not be greater than Maximum Amount [ %s ] ";
+                throw new GeneralPlatformDomainRuleException(
+                        String.format(message, minAmount,maxAmount),
+                        String.format(message, minAmount,maxAmount));
+            }
+        }
+    }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
