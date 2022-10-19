@@ -19,18 +19,14 @@
 package org.apache.fineract.portfolio.delinquency.mapper;
 
 import java.util.List;
+import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRange;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
 
-@Mapper(componentModel = "spring")
+@Mapper(config = MapstructMapperConfig.class)
 public interface DelinquencyRangeMapper {
 
-    @Mappings({ @Mapping(target = "id", source = "source.id"), @Mapping(target = "classification", source = "source.classification"),
-            @Mapping(target = "minimumAgeDays", source = "source.minimumAgeDays"),
-            @Mapping(target = "maximumAgeDays", source = "source.maximumAgeDays") })
     DelinquencyRangeData map(DelinquencyRange source);
 
     List<DelinquencyRangeData> map(List<DelinquencyRange> sources);

@@ -19,20 +19,14 @@
 package org.apache.fineract.portfolio.paymenttype.mapper;
 
 import java.util.List;
+import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper(config = MapstructMapperConfig.class)
 public interface PaymentTypeMapper {
 
-    @Mapping(target = "id", source = "source.id")
-    @Mapping(target = "name", source = "source.name")
-    @Mapping(target = "description", source = "source.description")
-    @Mapping(target = "isCashPayment", source = "source.isCashPayment")
-    @Mapping(target = "codeName", source = "source.codeName")
-    @Mapping(target = "isSystemDefined", source = "source.isSystemDefined")
     PaymentTypeData map(PaymentType source);
 
     List<PaymentTypeData> map(List<PaymentType> sources);

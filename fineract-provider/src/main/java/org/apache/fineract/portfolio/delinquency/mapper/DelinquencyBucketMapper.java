@@ -19,16 +19,14 @@
 package org.apache.fineract.portfolio.delinquency.mapper;
 
 import java.util.List;
+import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
 
-@Mapper(componentModel = "spring")
+@Mapper(config = MapstructMapperConfig.class)
 public interface DelinquencyBucketMapper {
 
-    @Mappings({ @Mapping(target = "id", source = "source.id"), @Mapping(target = "name", source = "source.name") })
     DelinquencyBucketData map(DelinquencyBucket source);
 
     List<DelinquencyBucketData> map(List<DelinquencyBucket> sources);

@@ -109,7 +109,7 @@ public class BusinessDateValidatorTest {
     }
 
     @Test
-    public void validateAndParseUpdateWithRighDate() {
+    public void validateAndParseUpdateWithRightDate() {
         String json = "{\"type\":\"COB_DATE\", \"locale\":\"hu\",\"dateFormat\":\"yyyy-MM-dd\",\"date\":\"2022-06-11\"}";
         JsonCommand command = JsonCommand.from(json);
         BusinessDateData result = businessDateDataParserAndValidator.validateAndParseUpdate(command);

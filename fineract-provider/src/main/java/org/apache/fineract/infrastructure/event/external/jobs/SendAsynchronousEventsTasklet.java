@@ -70,14 +70,14 @@ public class SendAsynchronousEventsTasklet implements Tasklet {
     private List<ExternalEvent> getQueuedEventsBatch() {
         int readBatchSize = getBatchSize();
         Pageable batchSize = PageRequest.ofSize(readBatchSize);
-        List<ExternalEvent> events = repository.findByStatusOrderById(ExternalEventStatus.TO_BE_SENT, batchSize);
-        return events;
+        return repository.findByStatusOrderById(ExternalEventStatus.TO_BE_SENT, batchSize);
     }
 
     private void processEvents(List<ExternalEvent> queuedEvents) throws IOException {
         for (ExternalEvent event : queuedEvents) {
             MessageV1 message = messageFactory.createMessage(event);
-            eventProducer.sendEvent(byteBufferConverter.convert(message.toByteBuffer()));
+            byte[] byteMessage = byteBufferConverter.convert(message.toByteBuffer());
+            eventProducer.sendEvent(byteMessage);
             event.setStatus(ExternalEventStatus.SENT);
             event.setSentAt(DateUtils.getOffsetDateTimeOfTenant());
             repository.save(event);

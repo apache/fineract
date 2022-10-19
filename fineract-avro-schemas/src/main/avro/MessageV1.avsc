@@ -29,6 +29,11 @@
             "type": "string"
         },
         {
+            "name": "businessDate",
+            "doc": "The business date when the event has been raised; in ISO_LOCAL_DATE format. For example 2011-12-03",
+            "type": "string"
+        },
+        {
             "name": "tenantId",
             "doc": "The tenantId that the event has been sent from. For example default",
             "type": "string"
