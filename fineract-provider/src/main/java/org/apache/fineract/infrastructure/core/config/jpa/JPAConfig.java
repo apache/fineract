@@ -17,9 +17,13 @@
  * under the License.
  */
 
-package org.apache.fineract.infrastructure.core.config;
+package org.apache.fineract.infrastructure.core.config.jpa;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.apache.fineract.infrastructure.core.auditing.JpaAuditingHandlerRegistrar;
 import org.apache.fineract.infrastructure.core.domain.AuditorAwareImpl;
 import org.apache.fineract.infrastructure.core.persistence.DatabaseSelectingPersistenceUnitPostProcessor;
@@ -43,6 +47,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.persistenceunit.PersistenceUnitManager;
+import org.springframework.orm.jpa.persistenceunit.PersistenceUnitPostProcessor;
 import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -57,11 +62,13 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class JPAConfig extends JpaBaseConfiguration {
 
     private final DatabaseTypeResolver databaseTypeResolver;
+    private final Collection<EntityManagerFactoryCustomizer> emFactoryCustomizers;
 
     public JPAConfig(RoutingDataSource dataSource, JpaProperties properties, ObjectProvider<JtaTransactionManager> jtaTransactionManager,
-            DatabaseTypeResolver databaseTypeResolver) {
+            DatabaseTypeResolver databaseTypeResolver, Collection<EntityManagerFactoryCustomizer> customizers) {
         super(dataSource, properties, jtaTransactionManager);
         this.databaseTypeResolver = databaseTypeResolver;
+        this.emFactoryCustomizers = customizers;
     }
 
     @Override
@@ -70,9 +77,27 @@ public class JPAConfig extends JpaBaseConfiguration {
     @DependsOn("tenantDatabaseUpgradeService")
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(EntityManagerFactoryBuilder factoryBuilder) {
         Map<String, Object> vendorProperties = getVendorProperties();
-        customizeVendorProperties(vendorProperties);
-        return factoryBuilder.dataSource(getDataSource()).properties(vendorProperties).persistenceUnit("jpa-pu")
-                .packages("org.apache.fineract").jta(false).build();
+        String[] packagesToScan = getPackagesToScan();
+        return factoryBuilder.dataSource(getDataSource()).properties(vendorProperties).persistenceUnit("jpa-pu").packages(packagesToScan)
+                .jta(false).build();
+    }
+
+    @Override
+    protected Map<String, Object> getVendorProperties() {
+        Map<String, Object> vendorProperties = new HashMap<>();
+        vendorProperties.put(PersistenceUnitProperties.WEAVING, "static");
+        vendorProperties.put(PersistenceUnitProperties.PERSISTENCE_CONTEXT_CLOSE_ON_COMMIT, "true");
+        vendorProperties.put(PersistenceUnitProperties.CACHE_SHARED_DEFAULT, "false");
+        emFactoryCustomizers.forEach(c -> vendorProperties.putAll(c.additionalVendorProperties()));
+        return vendorProperties;
+    }
+
+    @Override
+    protected String[] getPackagesToScan() {
+        Set<String> packagesToScan = new HashSet<>();
+        packagesToScan.add("org.apache.fineract");
+        emFactoryCustomizers.forEach(c -> packagesToScan.addAll(c.additionalPackagesToScan()));
+        return packagesToScan.toArray(String[]::new);
     }
 
     @Override
@@ -80,19 +105,20 @@ public class JPAConfig extends JpaBaseConfiguration {
             ObjectProvider<PersistenceUnitManager> persistenceUnitManager,
             ObjectProvider<EntityManagerFactoryBuilderCustomizer> customizers) {
         EntityManagerFactoryBuilder builder = super.entityManagerFactoryBuilder(jpaVendorAdapter, persistenceUnitManager, customizers);
-        builder.setPersistenceUnitPostProcessors(new DatabaseSelectingPersistenceUnitPostProcessor(databaseTypeResolver));
+        builder.setPersistenceUnitPostProcessors(getPersistenceUnitPostProcessors());
         return builder;
+    }
+
+    private PersistenceUnitPostProcessor[] getPersistenceUnitPostProcessors() {
+        Set<PersistenceUnitPostProcessor> processors = new HashSet<>();
+        processors.add(new DatabaseSelectingPersistenceUnitPostProcessor(databaseTypeResolver));
+        emFactoryCustomizers.forEach(c -> processors.addAll(c.additionalPersistenceUnitPostProcessors()));
+        return processors.toArray(PersistenceUnitPostProcessor[]::new);
     }
 
     @Override
     protected AbstractJpaVendorAdapter createJpaVendorAdapter() {
         return new EclipseLinkJpaVendorAdapter();
-    }
-
-    @Override
-    protected Map<String, Object> getVendorProperties() {
-        return Map.of(PersistenceUnitProperties.WEAVING, "static", PersistenceUnitProperties.PERSISTENCE_CONTEXT_CLOSE_ON_COMMIT, "true",
-                PersistenceUnitProperties.CACHE_SHARED_DEFAULT, "false");
     }
 
     @Bean
