@@ -41,7 +41,7 @@ public class UnblockCreditsToSavingsAccountCommandHandler implements NewCommandS
     @Transactional
     @Override
     public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.writePlatformService.unblockCredits(command.getSavingsId());
+        return this.writePlatformService.unblockCredits(command.getSavingsId(), command);
     }
 
 }

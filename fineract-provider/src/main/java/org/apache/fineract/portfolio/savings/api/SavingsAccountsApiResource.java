@@ -46,12 +46,15 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.accounting.common.AccountingConstants;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookPopulatorService;
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookService;
+import org.apache.fineract.infrastructure.codes.data.CodeValueData;
+import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -75,6 +78,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountBlockNarrationHistoryData;
 
 @Path("/savingsaccounts")
 @Component
@@ -90,6 +94,7 @@ public class SavingsAccountsApiResource {
     private final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService;
     private final BulkImportWorkbookService bulkImportWorkbookService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
+    private final CodeValueReadPlatformService codeValueReadPlatformService;
 
     @Autowired
     public SavingsAccountsApiResource(final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
@@ -98,7 +103,8 @@ public class SavingsAccountsApiResource {
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService,
             final BulkImportWorkbookService bulkImportWorkbookService,
-            final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService) {
+            final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService,
+            final CodeValueReadPlatformService codeValueReadPlatformService) {
         this.savingsAccountReadPlatformService = savingsAccountReadPlatformService;
         this.context = context;
         this.toApiJsonSerializer = toApiJsonSerializer;
@@ -107,6 +113,7 @@ public class SavingsAccountsApiResource {
         this.savingsAccountChargeReadPlatformService = savingsAccountChargeReadPlatformService;
         this.bulkImportWorkbookService = bulkImportWorkbookService;
         this.bulkImportWorkbookPopulatorService = bulkImportWorkbookPopulatorService;
+        this.codeValueReadPlatformService = codeValueReadPlatformService;
     }
 
     @GET
@@ -230,12 +237,15 @@ public class SavingsAccountsApiResource {
 
         Collection<SavingsAccountTransactionData> transactions = null;
         Collection<SavingsAccountChargeData> charges = null;
+        Integer transactionCount = null;
+        Collection<CodeValueData> blockNarrationsOptions = null;
+        Collection<SavingsAccountBlockNarrationHistoryData> blockNarrationHistoryData = null;
 
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         if (!associationParameters.isEmpty()) {
 
             if (associationParameters.contains("all")) {
-                associationParameters.addAll(Arrays.asList(SavingsApiConstants.transactions, SavingsApiConstants.charges));
+                associationParameters.addAll(Arrays.asList(SavingsApiConstants.transactions, SavingsApiConstants.charges, SavingsApiConstants.blockNarrations));
             }
 
             if (associationParameters.contains(SavingsApiConstants.transactions)) {
@@ -255,6 +265,14 @@ public class SavingsAccountsApiResource {
                     charges = currentCharges;
                 }
             }
+
+            if(associationParameters.contains(SavingsApiConstants.blockNarrations)) {
+                mandatoryResponseParameters.add(SavingsApiConstants.blockNarrations);
+                blockNarrationsOptions = this.codeValueReadPlatformService
+                        .retrieveCodeValuesByCode(AccountingConstants.BLOCK_UNBLOCK_OPTION_CODE_NAME);
+                blockNarrationHistoryData = this.savingsAccountReadPlatformService.retrieveSavingsAccountBlockNarrationHistory(accountId);
+
+            }
         }
 
         SavingsAccountData templateData = null;
@@ -264,7 +282,7 @@ public class SavingsAccountsApiResource {
                     savingsAccount.productId(), staffInSelectedOfficeOnly);
         }
 
-        return SavingsAccountData.withTemplateOptions(savingsAccount, templateData, transactions, charges);
+        return SavingsAccountData.withTemplateOptions(savingsAccount, templateData, transactions, charges, blockNarrationsOptions, blockNarrationHistoryData);
     }
 
     @PUT
@@ -560,4 +578,5 @@ public class SavingsAccountsApiResource {
                 uploadedInputStream, fileDetail, locale, dateFormat);
         return this.toApiJsonSerializer.serialize(importDocumentId);
     }
+
 }

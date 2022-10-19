@@ -414,4 +414,7 @@ public final class AccountingConstants {
     public static final String INCOME_TAG_OPTION_CODE_NAME = "IncomeAccountTags";
     public static final String EXPENSES_TAG_OPTION_CODE_NAME = "ExpenseAccountTags";
 
+    // Block Unblock Narrations
+    public static final String BLOCK_UNBLOCK_OPTION_CODE_NAME = "SavingsAccountBlockUnblockNarration";
+
 }

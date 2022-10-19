@@ -29,6 +29,9 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.transact
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawBalanceParamName;
 
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import java.math.BigDecimal;
@@ -135,6 +138,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+
 @Service
 public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements SavingsAccountWritePlatformService {
 
@@ -167,6 +171,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final JdbcTemplate jdbcTemplate;
     private final SavingsAccountInterestPostingService savingsAccountInterestPostingService;
 
+    private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
+
     @Autowired
     public SavingsAccountWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final SavingsAccountRepositoryWrapper savingAccountRepositoryWrapper,
@@ -188,7 +194,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
             final AppUserRepositoryWrapper appuserRepository, final StandingInstructionRepository standingInstructionRepository,
             final BusinessEventNotifierService businessEventNotifierService, final GSIMRepositoy gsimRepository,
-            final JdbcTemplate jdbcTemplate, final SavingsAccountInterestPostingService savingsAccountInterestPostingService) {
+            final JdbcTemplate jdbcTemplate, final SavingsAccountInterestPostingService savingsAccountInterestPostingService,
+                                                               final CodeValueRepositoryWrapper codeValueRepositoryWrapper) {
         this.context = context;
         this.savingAccountRepositoryWrapper = savingAccountRepositoryWrapper;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
@@ -217,6 +224,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.gsimRepository = gsimRepository;
         this.jdbcTemplate = jdbcTemplate;
         this.savingsAccountInterestPostingService = savingsAccountInterestPostingService;
+        this.codeValueRepositoryWrapper = codeValueRepositoryWrapper;
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountWritePlatformServiceJpaRepositoryImpl.class);
@@ -1914,8 +1922,12 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final String reasonForBlock = command.stringValueOfParameterNamed(SavingsApiConstants.reasonForBlockParamName);
         validateReasonForHold(reasonForBlock);
         account.updateReason(reasonForBlock);
+        final String pndComment = command.stringValueOfParameterNamed("pndComment");
+        final Long narrationId = command.longValueOfParameterNamed("narrationId");
 
-        final Map<String, Object> changes = account.blockCredits(account.getSubStatus());
+        final CodeValue codeValue =  narrationId != null ? codeValueRepositoryWrapper.findOneWithNotFoundDetection(narrationId) : null;
+
+        final Map<String, Object> changes = account.blockCredits(account.getSubStatus(), codeValue, pndComment);
         if (!changes.isEmpty()) {
 
             this.savingAccountRepositoryWrapper.save(account);
@@ -1926,13 +1938,16 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     @Transactional
     @Override
-    public CommandProcessingResult unblockCredits(final Long savingsId) {
+    public CommandProcessingResult unblockCredits(final Long savingsId, final JsonCommand command) {
         this.context.authenticatedUser();
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
         checkClientOrGroupActive(account);
         account.updateReason(null);
-        final Map<String, Object> changes = account.unblockCredits();
+        final String pndComment = command.stringValueOfParameterNamed("pndComment");
+        final Long narrationId = command.longValueOfParameterNamed("narrationId");
+        final CodeValue codeValue =  narrationId != null ? codeValueRepositoryWrapper.findOneWithNotFoundDetection(narrationId) : null;
+        final Map<String, Object> changes = account.unblockCredits(codeValue, pndComment);
         if (!changes.isEmpty()) {
 
             this.savingAccountRepositoryWrapper.save(account);
@@ -1953,7 +1968,12 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         validateReasonForHold(reasonForBlock);
         account.updateReason(reasonForBlock);
 
-        final Map<String, Object> changes = account.blockDebits(account.getSubStatus());
+        final Long narrationId = command.longValueOfParameterNamed("narrationId");
+        final String pndComment = command.stringValueOfParameterNamed("pndComment");
+
+        final CodeValue codeValue =  narrationId != null ? codeValueRepositoryWrapper.findOneWithNotFoundDetection(narrationId) : null;
+
+        final Map<String, Object> changes = account.blockDebits(account.getSubStatus(), codeValue, pndComment);
         if (!changes.isEmpty()) {
 
             this.savingAccountRepositoryWrapper.save(account);
@@ -1964,15 +1984,20 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     @Transactional
     @Override
-    public CommandProcessingResult unblockDebits(final Long savingsId) {
+    public CommandProcessingResult unblockDebits(final Long savingsId, final JsonCommand command) {
         this.context.authenticatedUser();
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
         checkClientOrGroupActive(account);
 
+        final Long narrationId = command.longValueOfParameterNamed("narrationId");
+        final String pndComment = command.stringValueOfParameterNamed("pndComment");
+
+        final CodeValue codeValue =  narrationId != null ? codeValueRepositoryWrapper.findOneWithNotFoundDetection(narrationId) : null;
+
         account.updateReason(null);
 
-        final Map<String, Object> changes = account.unblockDebits();
+        final Map<String, Object> changes = account.unblockDebits(codeValue, pndComment);
         if (!changes.isEmpty()) {
 
             this.savingAccountRepositoryWrapper.save(account);

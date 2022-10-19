@@ -174,5 +174,8 @@ public class SavingsAccountRepositoryWrapper {
             account.loadLazyCollections();
         }
     }
+    public SavingsAccount findByAccountNumber(@Param("accountNumber") String accountNumber) {
+        return this.repository.findByAccountNumber(accountNumber) ;
+    }
 
 }
