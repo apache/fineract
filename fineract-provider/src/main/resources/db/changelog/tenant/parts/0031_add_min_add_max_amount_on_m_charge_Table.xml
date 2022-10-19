@@ -72,4 +72,30 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_min_amount_to_m_loan_charge_table">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan_charge" columnName="min_amount"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan_charge">
+            <column name="min_amount" type="decimal(19,6)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_max_amount_to_m_loan_charge_table">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan_charge" columnName="max_amount"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan_charge">
+            <column name="max_amount" type="decimal(19,6)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
