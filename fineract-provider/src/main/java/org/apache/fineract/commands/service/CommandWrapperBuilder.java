@@ -994,6 +994,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder markAsFraud(final Long loanId) {
+        this.actionName = "SETFRAUD";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId;
+        return this;
+    }
+
     public CommandWrapperBuilder updateDisbusementDate(final Long loanId, final Long disbursementId) {
         this.actionName = "UPDATE";
         this.entityName = "DISBURSEMENTDETAIL";

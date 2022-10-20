@@ -81,4 +81,5 @@
     <include file="parts/0059_add_spring_batch_loan_id_list_table.xml" relativeToChangelogFile="true"/>
     <include file="parts/0060_add_job_name_to_command_source.xml" relativeToChangelogFile="true"/>
     <include file="parts/0061_add_idempotency_key_to_command_source.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0062_add_fraud_attribute_to_loan.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

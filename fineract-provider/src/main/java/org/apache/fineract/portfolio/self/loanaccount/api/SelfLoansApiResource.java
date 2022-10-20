@@ -243,8 +243,8 @@ public class SelfLoansApiResource {
         if (clientId != null) {
             validateAppuserClientsMapping(clientId);
         }
-
-        return this.loansApiResource.modifyLoanApplication(loanId, apiRequestBodyAsJson);
+        final String command = null;
+        return this.loansApiResource.modifyLoanApplication(loanId, command, apiRequestBodyAsJson);
     }
 
     @POST

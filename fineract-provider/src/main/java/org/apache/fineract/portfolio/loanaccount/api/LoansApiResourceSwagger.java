@@ -972,6 +972,8 @@ final class LoansApiResourceSwagger {
         @Schema(description = "Set of charges")
         public Set<GetLoansLoanIdLoanChargeData> charges;
         public GetDelinquencyRangesResponse delinquencyRange;
+        @Schema(example = "false")
+        public Boolean fraud;
     }
 
     @Schema(description = "GetLoansResponse")
@@ -1169,6 +1171,8 @@ final class LoansApiResourceSwagger {
         public String interestChargedFromDate;
         @Schema(example = "true")
         public Boolean isEqualAmortization;
+        @Schema(example = "true")
+        public Boolean fraud;
         @Schema(example = "1")
         public Integer graceOnArrearsAgeing;
         @Schema(example = "1")

@@ -119,4 +119,6 @@ public interface LoanWritePlatformService {
 
     CommandProcessingResult creditBalanceRefund(Long loanId, JsonCommand command);
 
+    CommandProcessingResult markLoanAsFraud(Long loanId, JsonCommand command);
+
 }
