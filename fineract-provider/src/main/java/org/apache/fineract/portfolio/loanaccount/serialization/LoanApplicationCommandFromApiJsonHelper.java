@@ -95,7 +95,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             LoanApiConstants.applicationId, // glim specific
             LoanApiConstants.lastApplication, // glim specific
             LoanApiConstants.daysInYearTypeParameterName, LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName,
-            LoanApiConstants.DISALLOW_EXPECTED_DISBURSEMENTS));
+            LoanApiConstants.DISALLOW_EXPECTED_DISBURSEMENTS, LoanApiConstants.FRAUD_ATTRIBUTE_NAME));
     public static final String LOANAPPLICATION_UNDO = "loanapplication.undo";
 
     private final FromJsonHelper fromApiJsonHelper;

@@ -55,7 +55,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -75,6 +74,7 @@ import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamE
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant;
@@ -759,7 +759,7 @@ public class LoansApiResource {
             @QueryParam("command") @Parameter(description = "command") final String commandParam, @Context final UriInfo uriInfo,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
-        if (is(commandParam, "calculateLoanSchedule")) {
+        if (CommandParameterUtil.is(commandParam, "calculateLoanSchedule")) {
 
             final JsonElement parsedQuery = this.fromJsonHelper.parse(apiRequestBodyAsJson);
             final JsonQuery query = JsonQuery.from(apiRequestBodyAsJson, parsedQuery, this.fromJsonHelper);
@@ -786,13 +786,18 @@ public class LoansApiResource {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.PutLoansLoanIdResponse.class))) })
     public String modifyLoanApplication(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+            @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateLoanApplication(loanId).withJson(apiRequestBodyAsJson)
-                .build();
+        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
+        CommandWrapper commandRequest = null;
+        if (CommandParameterUtil.is(commandParam, LoanApiConstants.MARK_AS_FRAUD_COMMAND)) {
+            commandRequest = builder.markAsFraud(loanId).build();
+        } else {
+            commandRequest = builder.updateLoanApplication(loanId).build();
+        }
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
         return this.toApiJsonSerializer.serialize(result);
     }
 
@@ -837,29 +842,29 @@ public class LoansApiResource {
 
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
         CommandWrapper commandRequest = null;
-        if (is(commandParam, "reject")) {
+        if (CommandParameterUtil.is(commandParam, "reject")) {
             commandRequest = builder.rejectLoanApplication(loanId).build();
-        } else if (is(commandParam, "withdrawnByApplicant")) {
+        } else if (CommandParameterUtil.is(commandParam, "withdrawnByApplicant")) {
             commandRequest = builder.withdrawLoanApplication(loanId).build();
-        } else if (is(commandParam, "approve")) {
+        } else if (CommandParameterUtil.is(commandParam, "approve")) {
             commandRequest = builder.approveLoanApplication(loanId).build();
-        } else if (is(commandParam, "disburse")) {
+        } else if (CommandParameterUtil.is(commandParam, "disburse")) {
             commandRequest = builder.disburseLoanApplication(loanId).build();
-        } else if (is(commandParam, "disburseToSavings")) {
+        } else if (CommandParameterUtil.is(commandParam, "disburseToSavings")) {
             commandRequest = builder.disburseLoanToSavingsApplication(loanId).build();
-        } else if (is(commandParam, "undoapproval")) {
+        } else if (CommandParameterUtil.is(commandParam, "undoapproval")) {
             commandRequest = builder.undoLoanApplicationApproval(loanId).build();
-        } else if (is(commandParam, "undodisbursal")) {
+        } else if (CommandParameterUtil.is(commandParam, "undodisbursal")) {
             commandRequest = builder.undoLoanApplicationDisbursal(loanId).build();
-        } else if (is(commandParam, "undolastdisbursal")) {
+        } else if (CommandParameterUtil.is(commandParam, "undolastdisbursal")) {
             commandRequest = builder.undoLastDisbursalLoanApplication(loanId).build();
-        } else if (is(commandParam, "assignloanofficer")) {
+        } else if (CommandParameterUtil.is(commandParam, "assignloanofficer")) {
             commandRequest = builder.assignLoanOfficer(loanId).build();
-        } else if (is(commandParam, "unassignloanofficer")) {
+        } else if (CommandParameterUtil.is(commandParam, "unassignloanofficer")) {
             commandRequest = builder.unassignLoanOfficer(loanId).build();
-        } else if (is(commandParam, "recoverGuarantees")) {
+        } else if (CommandParameterUtil.is(commandParam, "recoverGuarantees")) {
             commandRequest = new CommandWrapperBuilder().recoverFromGuarantor(loanId).build();
-        } else if (is(commandParam, "assigndelinquency")) {
+        } else if (CommandParameterUtil.is(commandParam, "assigndelinquency")) {
             commandRequest = builder.assignDelinquency(loanId).build();
         }
 
@@ -869,10 +874,6 @@ public class LoansApiResource {
         CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
-    }
-
-    private boolean is(final String commandParam, final String commandValue) {
-        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
     }
 
     @GET
@@ -915,17 +916,17 @@ public class LoansApiResource {
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
         CommandWrapper commandRequest = null;
-        if (is(commandParam, "reject")) {
+        if (CommandParameterUtil.is(commandParam, "reject")) {
             commandRequest = builder.rejectGLIMApplication(glimId).build();
-        } else if (is(commandParam, "approve")) {
+        } else if (CommandParameterUtil.is(commandParam, "approve")) {
             commandRequest = builder.approveGLIMLoanApplication(glimId).build();
-        } else if (is(commandParam, "disburse")) {
+        } else if (CommandParameterUtil.is(commandParam, "disburse")) {
             commandRequest = builder.disburseGlimLoanApplication(glimId).build();
-        } else if (is(commandParam, "glimrepayment")) {
+        } else if (CommandParameterUtil.is(commandParam, "glimrepayment")) {
             commandRequest = builder.repaymentGlimLoanApplication(glimId).build();
-        } else if (is(commandParam, "undodisbursal")) {
+        } else if (CommandParameterUtil.is(commandParam, "undodisbursal")) {
             commandRequest = builder.undoGLIMLoanDisbursal(glimId).build();
-        } else if (is(commandParam, "undoapproval")) {
+        } else if (CommandParameterUtil.is(commandParam, "undoapproval")) {
             commandRequest = builder.undoGLIMLoanApproval(glimId).build();
         }
 

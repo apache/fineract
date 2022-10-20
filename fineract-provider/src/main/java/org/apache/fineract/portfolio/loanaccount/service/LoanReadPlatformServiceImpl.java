@@ -629,14 +629,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " l.penalty_charges_repaid_derived as penaltyChargesPaid,"
                     + " l.penalty_charges_waived_derived as penaltyChargesWaived,"
                     + " l.penalty_charges_writtenoff_derived as penaltyChargesWrittenOff,"
-                    + " l.penalty_charges_outstanding_derived as penaltyChargesOutstanding,"
+                    + " l.penalty_charges_outstanding_derived as penaltyChargesOutstanding, "
                     + " l.total_expected_repayment_derived as totalExpectedRepayment, l.total_repayment_derived as totalRepayment,"
                     + " l.total_expected_costofloan_derived as totalExpectedCostOfLoan, l.total_costofloan_derived as totalCostOfLoan,"
                     + " l.total_waived_derived as totalWaived, l.total_writtenoff_derived as totalWrittenOff,"
                     + " l.writeoff_reason_cv_id as writeoffReasonId, codev.code_value as writeoffReason,"
                     + " l.total_outstanding_derived as totalOutstanding, l.total_overpaid_derived as totalOverpaid,"
                     + " l.fixed_emi_amount as fixedEmiAmount, l.max_outstanding_loan_balance as outstandingLoanBalance,"
-                    + " l.loan_sub_status_id as loanSubStatusId, la.principal_overdue_derived as principalOverdue,"
+                    + " l.loan_sub_status_id as loanSubStatusId, la.principal_overdue_derived as principalOverdue, l.is_fraud as isFraud, "
                     + " la.interest_overdue_derived as interestOverdue, la.fee_charges_overdue_derived as feeChargesOverdue,"
                     + " la.penalty_charges_overdue_derived as penaltyChargesOverdue, la.total_overdue_derived as totalOverdue,"
                     + " la.overdue_since_date_derived as overdueSinceDate,"
@@ -989,6 +989,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             // Current Delinquency Range Data
             DelinquencyRangeData delinquencyRange = this.delinquencyReadPlatformService.retrieveCurrentDelinquencyTag(id);
 
+            final boolean isFraud = rs.getBoolean("isFraud");
+
             return LoanAccountData.basicLoanDetails(id, accountNo, status, externalId, clientId, clientAccountNo, clientName,
                     clientOfficeId, clientExternalId, groupData, loanType, loanProductId, loanProductName, loanProductDescription,
                     isLoanProductLinkedToFloatingRate, fundId, fundName, loanPurposeId, loanPurposeName, loanOfficerId, loanOfficerName,
@@ -1003,7 +1005,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     isNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled, interestRecalculationData,
                     createStandingInstructionAtDisbursement, isvariableInstallmentsAllowed, minimumGap, maximumGap, loanSubStatus,
                     canUseForTopup, isTopup, closureLoanId, closureLoanAccountNo, topupAmount, isEqualAmortization,
-                    fixedPrincipalPercentagePerInstallment, delinquencyRange, disallowExpectedDisbursements);
+                    fixedPrincipalPercentagePerInstallment, delinquencyRange, disallowExpectedDisbursements, isFraud);
         }
     }
 

@@ -518,6 +518,27 @@ public final class LoanEventApiJsonValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
+    public void validateMarkAsFraudLoan(final String json) {
+        if (StringUtils.isBlank(json)) {
+            return;
+        }
+        Set<String> transactionParameters = new HashSet<>(Arrays.asList(LoanApiConstants.FRAUD_ATTRIBUTE_NAME));
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, transactionParameters);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(LoanApiConstants.LOAN_FRAUD_DATAVALIDATOR_PREFIX);
+
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        final boolean isFraud = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.FRAUD_ATTRIBUTE_NAME, element);
+        baseDataValidator.reset().parameter(LoanApiConstants.FRAUD_ATTRIBUTE_NAME).value(isFraud).notNull();
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
     public void validateInstallmentChargeTransaction(final String json) {
 
         if (StringUtils.isBlank(json)) {

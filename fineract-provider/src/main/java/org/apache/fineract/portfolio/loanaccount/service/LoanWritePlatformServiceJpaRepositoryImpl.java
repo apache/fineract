@@ -3305,6 +3305,37 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Override
     @Transactional
+    public CommandProcessingResult markLoanAsFraud(Long loanId, JsonCommand command) {
+        this.loanEventApiJsonValidator.validateMarkAsFraudLoan(command.json());
+
+        Loan loan = this.loanAssembler.assembleFrom(loanId);
+        final Map<String, Object> changes = new LinkedHashMap<>();
+
+        if (!loan.isOpen()) {
+            throw new PlatformServiceUnavailableException("error.msg.loan.mark.as.fraud.not.allowed",
+                    "Loan Id: " + loanId + " mark as fraud is not allowed as loan status is not active", loan.getStatus().getCode());
+        }
+
+        final boolean fraud = command.booleanPrimitiveValueOfParameterNamed(LoanApiConstants.FRAUD_ATTRIBUTE_NAME);
+        if (loan.isFraud() != fraud) {
+            loan.markAsFraud(fraud);
+            this.loanRepository.save(loan);
+            changes.put(LoanApiConstants.FRAUD_ATTRIBUTE_NAME, fraud);
+        }
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(loan.getId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
+                .with(changes) //
+                .build();
+    }
+
+    @Override
+    @Transactional
     public CommandProcessingResult makeLoanRefund(Long loanId, JsonCommand command) {
 
         this.loanEventApiJsonValidator.validateNewRefundTransaction(command.json());

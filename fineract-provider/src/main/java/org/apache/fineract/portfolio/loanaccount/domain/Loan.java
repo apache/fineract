@@ -416,6 +416,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "is_topup", nullable = false)
     private boolean isTopup = false;
 
+    @Column(name = "is_fraud", nullable = false)
+    private boolean fraud = false;
+
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "loan", optional = true, orphanRemoval = true, fetch = FetchType.LAZY)
     private LoanTopupDetails loanTopupDetails;
 
@@ -6709,6 +6712,14 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public boolean isTopup() {
         return this.isTopup;
+    }
+
+    public void markAsFraud(final boolean value) {
+        this.fraud = value;
+    }
+
+    public boolean isFraud() {
+        return this.fraud;
     }
 
     public BigDecimal getFirstDisbursalAmount() {

@@ -161,7 +161,12 @@ public interface LoanApiConstants {
 
     String TRANSACTION_AMOUNT_PARAMNAME = "transactionAmount";
     String PAYMENT_TYPE_PARAMNAME = "paymentTypeId";
+    String FRAUD_ATTRIBUTE_NAME = "fraud";
 
     // Commands
     String CHARGEBACK_TRANSACTION_COMMAND = "chargeback";
+    String MARK_AS_FRAUD_COMMAND = "markAsFraud";
+
+    // Data Validator names
+    String LOAN_FRAUD_DATAVALIDATOR_PREFIX = "loans.fraud";
 }

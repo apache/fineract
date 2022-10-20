@@ -189,6 +189,7 @@ public final class LoanAccountData {
     private final Collection<LoanAccountSummaryData> clientActiveLoanOptions;
     private final Boolean canUseForTopup;
     private final boolean isTopup;
+    private final boolean fraud;
     private final Long closureLoanId;
     private final String closureLoanAccountNo;
     private final BigDecimal topupAmount;
@@ -433,6 +434,7 @@ public final class LoanAccountData {
         this.delinquent = null;
         this.delinquencyRange = null;
         this.disallowExpectedDisbursements = false;
+        this.fraud = false;
     }
 
     public static final Comparator<LoanAccountData> ClientNameComparator = new Comparator<LoanAccountData>() {
@@ -570,6 +572,7 @@ public final class LoanAccountData {
         final CollectionData delinquent = CollectionData.template();
         final DelinquencyRangeData delinquencyRange = null;
         final Boolean disallowExpectedDisbursements = false;
+        final boolean fraud = false;
 
         return new LoanAccountData(id, accountNo, status, externalId, clientId, clientAccountNo, clientName, clientOfficeId,
                 clientExternalId, group, loanType, loanProductId, loanProductName, loanProductDescription,
@@ -592,7 +595,7 @@ public final class LoanAccountData {
                 createStandingInstructionAtDisbursement, paidInAdvance, interestRatesPeriods, isVariableInstallmentsAllowed, minimumGap,
                 maximumGap, subStatus, canUseForTopup, clientActiveLoanOptions, isTopup, closureLoanId, closureLoanAccountNo, topupAmount,
                 isEqualAmortization, rates, isRatesEnabled, fixedPrincipalPercentagePerInstallment, delinquent, delinquencyRange,
-                disallowExpectedDisbursements);
+                disallowExpectedDisbursements, fraud);
     }
 
     /**
@@ -719,6 +722,7 @@ public final class LoanAccountData {
         final CollectionData delinquent = CollectionData.template();
         final DelinquencyRangeData delinquencyRange = null;
         final Boolean disallowExpectedDisbursements = false;
+        final boolean fraud = false;
 
         return new LoanAccountData(id, accountNo, status, externalId, clientId, clientAccountNo, clientName, clientOfficeId,
                 clientExternalId, group, loanType, loanProductId, loanProductName, loanProductDescription,
@@ -741,7 +745,7 @@ public final class LoanAccountData {
                 createStandingInstructionAtDisbursement, paidInAdvance, interestRatesPeriods, isVariableInstallmentsAllowed, minimumGap,
                 maximumGap, subStatus, canUseForTopup, clientActiveLoanOptions, isTopup, closureLoanId, closureLoanAccountNo, topupAmount,
                 isEqualAmortization, rates, isRatesEnabled, fixedPrincipalPercentagePerInstallment, delinquent, delinquencyRange,
-                disallowExpectedDisbursements);
+                disallowExpectedDisbursements, fraud);
     }
 
     public static LoanAccountData populateClientDefaults(final LoanAccountData acc, final LoanAccountData clientAcc) {
@@ -772,7 +776,8 @@ public final class LoanAccountData {
                 acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods, acc.isVariableInstallmentsAllowed,
                 acc.minimumGap, acc.maximumGap, acc.subStatus, acc.canUseForTopup, acc.clientActiveLoanOptions, acc.isTopup,
                 acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.isRatesEnabled,
-                acc.fixedPrincipalPercentagePerInstallment, acc.delinquent, acc.delinquencyRange, acc.disallowExpectedDisbursements);
+                acc.fixedPrincipalPercentagePerInstallment, acc.delinquent, acc.delinquencyRange, acc.disallowExpectedDisbursements,
+                acc.fraud);
     }
 
     /**
@@ -902,6 +907,7 @@ public final class LoanAccountData {
         final CollectionData delinquent = CollectionData.template();
         final DelinquencyRangeData delinquencyRange = null;
         final Boolean disallowExpectedDisbursements = false;
+        final Boolean fraud = false;
 
         return new LoanAccountData(id, accountNo, status, externalId, clientId, clientAccountNo, clientName, clientOfficeId,
                 clientExternalId, group, loanType, loanProductId, loanProductName, loanProductDescription,
@@ -924,7 +930,7 @@ public final class LoanAccountData {
                 createStandingInstructionAtDisbursement, paidInAdvance, interestRatesPeriods, isVariableInstallmentsAllowed, minimumGap,
                 maximumGap, subStatus, canUseForTopup, clientActiveLoanOptions, isTopup, closureLoanId, closureLoanAccountNo, topupAmount,
                 isEqualAmortization, rates, isRatesEnabled, fixedPrincipalPercentagePerInstallment, delinquent, delinquencyRange,
-                disallowExpectedDisbursements);
+                disallowExpectedDisbursements, fraud);
     }
 
     public static LoanAccountData populateGroupDefaults(final LoanAccountData acc, final LoanAccountData groupAcc) {
@@ -955,7 +961,8 @@ public final class LoanAccountData {
                 acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods, acc.isVariableInstallmentsAllowed,
                 acc.minimumGap, acc.maximumGap, acc.subStatus, acc.canUseForTopup, acc.clientActiveLoanOptions, acc.isTopup,
                 acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.isRatesEnabled,
-                acc.fixedPrincipalPercentagePerInstallment, acc.delinquent, acc.delinquencyRange, acc.disallowExpectedDisbursements);
+                acc.fixedPrincipalPercentagePerInstallment, acc.delinquent, acc.delinquencyRange, acc.disallowExpectedDisbursements,
+                acc.fraud);
     }
 
     public static LoanAccountData loanProductWithTemplateDefaults(final LoanProductData product,
@@ -1083,6 +1090,7 @@ public final class LoanAccountData {
         final Boolean isRatesEnabled = false;
         final CollectionData delinquent = CollectionData.template();
         final DelinquencyRangeData delinquencyRange = null;
+        final boolean fraud = false;
 
         return new LoanAccountData(id, accountNo, status, externalId, clientId, clientAccountNo, clientName, clientOfficeId,
                 clientExternalId, group, loanType, product.getId(), product.getName(), product.getDescription(),
@@ -1109,7 +1117,7 @@ public final class LoanAccountData {
                 interestRatesPeriods, product.isAllowVariableInstallments(), product.getMinimumGap(), product.getMaximumGap(), subStatus,
                 canUseForTopup, clientActiveLoanOptions, isTopup, closureLoanId, closureLoanAccountNo, topupAmount,
                 product.isEqualAmortization(), rates, isRatesEnabled, product.getFixedPrincipalPercentagePerInstallment(), delinquent,
-                delinquencyRange, product.getDisallowExpectedDisbursements());
+                delinquencyRange, product.getDisallowExpectedDisbursements(), fraud);
     }
 
     public static LoanAccountData populateLoanProductDefaults(final LoanAccountData acc, final LoanProductData product) {
@@ -1180,7 +1188,7 @@ public final class LoanAccountData {
                 product.isAllowVariableInstallments(), product.getMinimumGap(), product.getMaximumGap(), acc.subStatus, acc.canUseForTopup,
                 acc.clientActiveLoanOptions, acc.isTopup, acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount,
                 product.isEqualAmortization(), acc.rates, acc.isRatesEnabled, product.getFixedPrincipalPercentagePerInstallment(),
-                delinquent, delinquencyRange, product.getDisallowExpectedDisbursements());
+                delinquent, delinquencyRange, product.getDisallowExpectedDisbursements(), acc.fraud);
     }
 
     /*
@@ -1212,7 +1220,7 @@ public final class LoanAccountData {
             final Boolean isVariableInstallmentsAllowed, Integer minimumGap, Integer maximumGap, final EnumOptionData subStatus,
             final boolean canUseForTopup, final boolean isTopup, final Long closureLoanId, final String closureLoanAccountNo,
             final BigDecimal topupAmount, final boolean isEqualAmortization, final BigDecimal fixedPrincipalPercentagePerInstallment,
-            final DelinquencyRangeData delinquencyRange, final boolean disallowExpectedDisbursements) {
+            final DelinquencyRangeData delinquencyRange, final boolean disallowExpectedDisbursements, final boolean fraud) {
 
         final LoanScheduleData repaymentSchedule = null;
         final Collection<LoanTransactionData> transactions = null;
@@ -1274,7 +1282,7 @@ public final class LoanAccountData {
                 createStandingInstructionAtDisbursement, paidInAdvance, interestRatesPeriods, isVariableInstallmentsAllowed, minimumGap,
                 maximumGap, subStatus, canUseForTopup, clientActiveLoanOptions, isTopup, closureLoanId, closureLoanAccountNo, topupAmount,
                 isEqualAmortization, rates, isRatesEnabled, fixedPrincipalPercentagePerInstallment, delinquent, delinquencyRange,
-                disallowExpectedDisbursements);
+                disallowExpectedDisbursements, fraud);
     }
 
     /*
@@ -1324,7 +1332,7 @@ public final class LoanAccountData {
                 acc.createStandingInstructionAtDisbursement, paidInAdvance, interestRatesPeriods, acc.isVariableInstallmentsAllowed,
                 acc.minimumGap, acc.maximumGap, acc.subStatus, acc.canUseForTopup, clientActiveLoanOptions, acc.isTopup, acc.closureLoanId,
                 acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, rates, isRatesEnabled,
-                acc.fixedPrincipalPercentagePerInstallment, delinquent, acc.delinquencyRange, acc.disallowExpectedDisbursements);
+                acc.fixedPrincipalPercentagePerInstallment, delinquent, acc.delinquencyRange, acc.disallowExpectedDisbursements, acc.fraud);
     }
 
     public static LoanAccountData associationsAndTemplate(final LoanAccountData acc, final Collection<LoanProductData> productOptions,
@@ -1367,7 +1375,8 @@ public final class LoanAccountData {
                 acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods, acc.isVariableInstallmentsAllowed,
                 acc.minimumGap, acc.maximumGap, acc.subStatus, acc.canUseForTopup, acc.clientActiveLoanOptions, acc.isTopup,
                 acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.isRatesEnabled,
-                acc.fixedPrincipalPercentagePerInstallment, acc.delinquent, acc.delinquencyRange, acc.disallowExpectedDisbursements);
+                acc.fixedPrincipalPercentagePerInstallment, acc.delinquent, acc.delinquencyRange, acc.disallowExpectedDisbursements,
+                acc.fraud);
     }
 
     public static LoanAccountData associateMemberVariations(final LoanAccountData acc, final Map<Long, Integer> memberLoanCycle) {
@@ -1433,7 +1442,8 @@ public final class LoanAccountData {
                 acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods, acc.isVariableInstallmentsAllowed,
                 acc.minimumGap, acc.maximumGap, acc.subStatus, acc.canUseForTopup, acc.clientActiveLoanOptions, acc.isTopup,
                 acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.isRatesEnabled,
-                acc.fixedPrincipalPercentagePerInstallment, acc.delinquent, acc.delinquencyRange, acc.disallowExpectedDisbursements);
+                acc.fixedPrincipalPercentagePerInstallment, acc.delinquent, acc.delinquencyRange, acc.disallowExpectedDisbursements,
+                acc.fraud);
     }
 
     public static LoanAccountData withInterestRecalculationCalendarData(final LoanAccountData acc, final CalendarData calendarData,
@@ -1467,7 +1477,8 @@ public final class LoanAccountData {
                 acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods, acc.isVariableInstallmentsAllowed,
                 acc.minimumGap, acc.maximumGap, acc.subStatus, acc.canUseForTopup, acc.clientActiveLoanOptions, acc.isTopup,
                 acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.isRatesEnabled,
-                acc.fixedPrincipalPercentagePerInstallment, acc.delinquent, acc.delinquencyRange, acc.disallowExpectedDisbursements);
+                acc.fixedPrincipalPercentagePerInstallment, acc.delinquent, acc.delinquencyRange, acc.disallowExpectedDisbursements,
+                acc.fraud);
     }
 
     public static LoanAccountData withLoanCalendarData(final LoanAccountData acc, final CalendarData calendarData) {
@@ -1496,7 +1507,8 @@ public final class LoanAccountData {
                 acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods, acc.isVariableInstallmentsAllowed,
                 acc.minimumGap, acc.maximumGap, acc.subStatus, acc.canUseForTopup, acc.clientActiveLoanOptions, acc.isTopup,
                 acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.isRatesEnabled,
-                acc.fixedPrincipalPercentagePerInstallment, acc.delinquent, acc.delinquencyRange, acc.disallowExpectedDisbursements);
+                acc.fixedPrincipalPercentagePerInstallment, acc.delinquent, acc.delinquencyRange, acc.disallowExpectedDisbursements,
+                acc.fraud);
     }
 
     public static LoanAccountData withOriginalSchedule(final LoanAccountData acc, final LoanScheduleData originalSchedule) {
@@ -1526,7 +1538,8 @@ public final class LoanAccountData {
                 acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods, acc.isVariableInstallmentsAllowed,
                 acc.minimumGap, acc.maximumGap, acc.subStatus, acc.canUseForTopup, acc.clientActiveLoanOptions, acc.isTopup,
                 acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.isRatesEnabled,
-                acc.fixedPrincipalPercentagePerInstallment, acc.delinquent, acc.delinquencyRange, acc.disallowExpectedDisbursements);
+                acc.fixedPrincipalPercentagePerInstallment, acc.delinquent, acc.delinquencyRange, acc.disallowExpectedDisbursements,
+                acc.fraud);
     }
 
     private LoanAccountData(final Long id, //
@@ -1581,7 +1594,7 @@ public final class LoanAccountData {
             final Collection<LoanAccountSummaryData> clientActiveLoanOptions, final boolean isTopup, final Long closureLoanId,
             final String closureLoanAccountNo, final BigDecimal topupAmount, final boolean isEqualAmortization, final List<RateData> rates,
             final Boolean isRatesEnabled, final BigDecimal fixedPrincipalPercentagePerInstallment, final CollectionData delinquent,
-            final DelinquencyRangeData delinquencyRange, final Boolean disallowExpectedDisbursements) {
+            final DelinquencyRangeData delinquencyRange, final Boolean disallowExpectedDisbursements, final Boolean fraud) {
 
         this.id = id;
         this.accountNo = accountNo;
@@ -1772,6 +1785,7 @@ public final class LoanAccountData {
         this.delinquent = delinquent;
         this.delinquencyRange = delinquencyRange;
         this.disallowExpectedDisbursements = disallowExpectedDisbursements;
+        this.fraud = fraud;
     }
 
     public RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData() {
@@ -1910,4 +1924,5 @@ public final class LoanAccountData {
     public boolean isIsTopup() {
         return isTopup;
     }
+
 }

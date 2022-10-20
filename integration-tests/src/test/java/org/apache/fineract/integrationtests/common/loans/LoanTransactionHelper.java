@@ -147,6 +147,13 @@ public class LoanTransactionHelper {
         return GSON.fromJson(response, PutLoansLoanIdResponse.class);
     }
 
+    public PutLoansLoanIdResponse modifyLoanCommand(final Integer loanId, final String command, final String payload,
+            ResponseSpecification responseSpec) {
+        final String url = "/fineract-provider/api/v1/loans/" + loanId + "?" + Utils.TENANT_IDENTIFIER + "&command=" + command;
+        final String response = Utils.performServerPut(this.requestSpec, responseSpec, url, payload, null);
+        return GSON.fromJson(response, PutLoansLoanIdResponse.class);
+    }
+
     public ArrayList getLoanRepaymentSchedule(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer loanID) {
         final String URL = "/fineract-provider/api/v1/loans/" + loanID + "?associations=repaymentSchedule&" + Utils.TENANT_IDENTIFIER;
@@ -999,6 +1006,12 @@ public class LoanTransactionHelper {
         map.put("fromClientId", fromClientId.toString());
         map.put("fromOfficeId", "1");
         map.put("locale", "en");
+        return new Gson().toJson(map);
+    }
+
+    public String getLoanFraudPayloadAsJSON(final String attrName, final String attrValue) {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put(attrName, attrValue);
         return new Gson().toJson(map);
     }
 
