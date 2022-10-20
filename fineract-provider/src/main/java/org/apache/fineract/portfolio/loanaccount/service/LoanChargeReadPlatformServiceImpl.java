@@ -69,7 +69,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
                     + "c.currency_code as currencyCode, oc.name as currencyName, "
                     + "date(coalesce(dd.disbursedon_date,dd.expected_disburse_date)) as disbursementDate, "
                     + "oc.decimal_places as currencyDecimalPlaces, oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, "
-                    + "oc.internationalized_name_code as currencyNameCode from m_charge c "
+                    + "oc.internationalized_name_code as currencyNameCode,c.min_amount AS minAmount, c.max_amount AS maxAmount from m_charge c "
                     + "join m_organisation_currency oc on c.currency_code = oc.code " + "join m_loan_charge lc on lc.charge_id = c.id "
                     + "left join m_loan_tranche_disbursement_charge dc on dc.loan_charge_id=lc.id left join m_loan_disbursement_detail dd on dd.id=dc.disbursement_detail_id ";
         }
@@ -80,6 +80,8 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             final Long chargeId = rs.getLong("chargeId");
             final String name = rs.getString("name");
             final BigDecimal amount = rs.getBigDecimal("amountDue");
+            final BigDecimal minAmount = rs.getBigDecimal("minAmount");
+            final BigDecimal maxAmount = rs.getBigDecimal("maxAmount");
             final BigDecimal amountPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountPaid");
             final BigDecimal amountWaived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountWaived");
             final BigDecimal amountWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountWrittenOff");
@@ -110,7 +112,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             final int chargePaymentMode = rs.getInt("chargePaymentMode");
             final EnumOptionData paymentMode = ChargeEnumerations.chargePaymentMode(chargePaymentMode);
             final boolean paid = rs.getBoolean("paid");
-            final boolean waived = rs.getBoolean("waied");
+            final boolean waived = rs.getBoolean("waived");
             final BigDecimal minCap = rs.getBigDecimal("minCap");
             final BigDecimal maxCap = rs.getBigDecimal("maxCap");
             final BigDecimal amountOrPercentage = rs.getBigDecimal("amountOrPercentage");
@@ -123,7 +125,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
 
             return new LoanChargeData(id, chargeId, name, currency, amount, amountPaid, amountWaived, amountWrittenOff, amountOutstanding,
                     chargeTimeType, dueAsOfDate, chargeCalculationType, percentageOf, amountPercentageAppliedTo, penalty, paymentMode, paid,
-                    waived, null, minCap, maxCap, amountOrPercentage, null, externalId);
+                    waived, null, minCap, maxCap, amountOrPercentage, null, externalId,minAmount,maxAmount);
         }
     }
 
