@@ -52,6 +52,8 @@ public final class ChargeData implements Comparable<ChargeData>, Serializable {
     private final PaymentTypeData paymentTypeOptions;
     private final CurrencyData currency;
     private final BigDecimal amount;
+    private final BigDecimal minAmount;
+    private final BigDecimal maxAmount;
     private final EnumOptionData chargeTimeType;
     private final EnumOptionData chargeAppliesTo;
     private final EnumOptionData chargeCalculationType;
@@ -107,7 +109,7 @@ public final class ChargeData implements Comparable<ChargeData>, Serializable {
                 savingsChargeCalculationTypeOptions, savingsChargeTimeTypeOptions, clientChargeCalculationTypeOptions,
                 clientChargeTimeTypeOptions, null, null, null, null, null, feeFrequencyOptions, account, incomeOrLiabilityAccountOptions,
                 taxGroupOptions, shareChargeCalculationTypeOptions, shareChargeTimeTypeOptions, accountMappingForChargeConfig,
-                expenseAccountOptions, assetAccountOptions);
+                expenseAccountOptions, assetAccountOptions,null,null);
     }
 
     public static ChargeData withTemplate(final ChargeData charge, final ChargeData template) {
@@ -121,7 +123,7 @@ public final class ChargeData implements Comparable<ChargeData>, Serializable {
                 charge.feeOnMonthDay, charge.feeInterval, charge.minCap, charge.maxCap, charge.feeFrequency, template.feeFrequencyOptions,
                 charge.incomeOrLiabilityAccount, template.incomeOrLiabilityAccountOptions, template.taxGroupOptions,
                 template.shareChargeCalculationTypeOptions, template.shareChargeTimeTypeOptions, template.accountMappingForChargeConfig,
-                template.expenseAccountOptions, template.assetAccountOptions);
+                template.expenseAccountOptions, template.assetAccountOptions,charge.minAmount,charge.maxAmount);
     }
 
     public static ChargeData instance(final Long id, final String name, final BigDecimal amount, final CurrencyData currency,
@@ -130,7 +132,7 @@ public final class ChargeData implements Comparable<ChargeData>, Serializable {
             final boolean active, final boolean freeWithdrawal, final Integer freeWithdrawalChargeFrequency, final Integer restartFrequency,
             final Integer restartFrequencyEnum, final boolean isPaymentType, final PaymentTypeData paymentTypeOptions,
             final BigDecimal minCap, final BigDecimal maxCap, final EnumOptionData feeFrequency, final GLAccountData accountData,
-            TaxGroupData taxGroupData) {
+            TaxGroupData taxGroupData,final BigDecimal minAmount,final BigDecimal maxAmount) {
 
         final Collection<CurrencyData> currencyOptions = null;
         final List<EnumOptionData> chargeCalculationTypeOptions = null;
@@ -158,7 +160,7 @@ public final class ChargeData implements Comparable<ChargeData>, Serializable {
                 savingsChargeCalculationTypeOptions, savingsChargeTimeTypeOptions, clientChargeCalculationTypeOptions,
                 clientChargeTimeTypeOptions, feeOnMonthDay, feeInterval, minCap, maxCap, feeFrequency, feeFrequencyOptions, accountData,
                 incomeOrLiabilityAccountOptions, taxGroupOptions, shareChargeCalculationTypeOptions, shareChargeTimeTypeOptions,
-                accountMappingForChargeConfig, expenseAccountOptions, assetAccountOptions);
+                accountMappingForChargeConfig, expenseAccountOptions, assetAccountOptions,minAmount,maxAmount);
     }
 
     public static ChargeData lookup(final Long id, final String name, final boolean isPenalty) {
@@ -202,6 +204,8 @@ public final class ChargeData implements Comparable<ChargeData>, Serializable {
         final String accountMappingForChargeConfig = null;
         final List<GLAccountData> expenseAccountOptions = null;
         final List<GLAccountData> assetAccountOptions = null;
+        final BigDecimal minAmount = null;
+        final BigDecimal maxAmount = null;
 
         return new ChargeData(id, name, amount, currency, chargeTimeType, chargeAppliesTo, chargeCalculationType, chargePaymentMode,
                 penalty, active, freeWithdrawal, freeWithdrawalChargeFrequency, restartFrequency, restartFrequencyEnum, isPaymentType,
@@ -210,7 +214,7 @@ public final class ChargeData implements Comparable<ChargeData>, Serializable {
                 savingsChargeCalculationTypeOptions, savingsChargeTimeTypeOptions, clientChargeCalculationTypeOptions,
                 clientChargeTimeTypeOptions, feeOnMonthDay, feeInterval, minCap, maxCap, feeFrequency, feeFrequencyOptions, account,
                 incomeOrLiabilityAccountOptions, taxGroupOptions, shareChargeCalculationTypeOptions, shareChargeTimeTypeOptions,
-                accountMappingForChargeConfig, expenseAccountOptions, assetAccountOptions);
+                accountMappingForChargeConfig, expenseAccountOptions, assetAccountOptions,minAmount,maxAmount);
     }
 
     private ChargeData(final Long id, final String name, final BigDecimal amount, final CurrencyData currency,
@@ -229,7 +233,7 @@ public final class ChargeData implements Comparable<ChargeData>, Serializable {
             final Map<String, List<GLAccountData>> incomeOrLiabilityAccountOptions, final Collection<TaxGroupData> taxGroupOptions,
             final List<EnumOptionData> shareChargeCalculationTypeOptions, final List<EnumOptionData> shareChargeTimeTypeOptions,
             final String accountMappingForChargeConfig, final List<GLAccountData> expenseAccountOptions,
-            final List<GLAccountData> assetAccountOptions) {
+            final List<GLAccountData> assetAccountOptions,final BigDecimal minAmount,final BigDecimal maxAmount) {
         this.id = id;
         this.name = name;
         this.amount = amount;
@@ -272,6 +276,8 @@ public final class ChargeData implements Comparable<ChargeData>, Serializable {
         this.accountMappingForChargeConfig = accountMappingForChargeConfig;
         this.assetAccountOptions = assetAccountOptions;
         this.expenseAccountOptions = expenseAccountOptions;
+        this.minAmount = minAmount;
+        this.maxAmount = maxAmount;
     }
 
     @Override

@@ -104,6 +104,12 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
 
+    @Column(name = "min_amount", scale = 6, precision = 19)
+    private BigDecimal minAmount;
+
+    @Column(name = "max_amount", scale = 6, precision = 19)
+    private BigDecimal maxAmount;
+
     @Column(name = "amount_paid_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal amountPaid;
 
@@ -234,6 +240,8 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
 
         this.paid = determineIfFullyPaid();
         this.status = status;
+        this.minAmount = chargeDefinition.getMinAmount();
+        this.maxAmount = chargeDefinition.getMaxAmount();
     }
 
     public void resetPropertiesForRecurringFees() {
@@ -754,7 +762,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
         SavingsAccountCharge that = (SavingsAccountCharge) o;
         return (penaltyCharge == that.penaltyCharge) && (paid == that.paid) && (waived == that.waived) && (status == that.status)
                 && Objects.equals(savingsAccount, that.savingsAccount) && Objects.equals(charge, that.charge)
-                && Objects.equals(chargeTime, that.chargeTime) && dueDate.compareTo(that.dueDate) == 0
+                && Objects.equals(chargeTime, that.chargeTime) && (dueDate != null && dueDate.compareTo(that.dueDate) == 0)
                         ? Boolean.TRUE
                         : Boolean.FALSE && Objects.equals(feeOnMonth, that.feeOnMonth) && Objects.equals(feeOnDay, that.feeOnDay)
                                 && Objects.equals(feeInterval, that.feeInterval)
@@ -764,6 +772,8 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
                                 && Objects.equals(amountWaived, that.amountWaived)
                                 && Objects.equals(amountWrittenOff, that.amountWrittenOff)
                                 && Objects.equals(amountOutstanding, that.amountOutstanding)
+                                && Objects.equals(minAmount, that.minAmount)
+                                && Objects.equals(maxAmount, that.maxAmount)
                                 && inactivationDate.compareTo(that.inactivationDate) == 0 ? Boolean.TRUE : Boolean.FALSE;
     }
 
@@ -771,7 +781,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
     public int hashCode() {
         return Objects.hash(savingsAccount, charge, chargeTime, dueDate, feeOnMonth, feeOnDay, feeInterval, chargeCalculation, percentage,
                 amountPercentageAppliedTo, amount, amountPaid, amountWaived, amountWrittenOff, amountOutstanding, penaltyCharge, paid,
-                waived, status, inactivationDate);
+                waived, status, inactivationDate,minAmount,maxAmount);
     }
 
     public BigDecimal calculateWithdralFeeAmount(@NotNull BigDecimal transactionAmount) {
@@ -779,7 +789,20 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
         if (ChargeCalculationType.fromInt(this.chargeCalculation).isFlat()) {
             amountPaybale = this.amount;
         } else if (ChargeCalculationType.fromInt(this.chargeCalculation).isPercentageOfAmount()) {
-            amountPaybale = transactionAmount.multiply(this.percentage).divide(BigDecimal.valueOf(100L), MoneyHelper.getRoundingMode());
+            /*
+            * Apply Computation min and max amount
+            * configuration
+            *
+            * */
+
+            if(transactionAmount.compareTo(this.maxAmount) > 0){
+                amountPaybale = this.maxAmount.multiply(this.percentage).divide(BigDecimal.valueOf(100L), MoneyHelper.getRoundingMode());
+            }else if(transactionAmount.compareTo(this.minAmount) > 0){
+                amountPaybale = this.minAmount.multiply(this.percentage).divide(BigDecimal.valueOf(100L), MoneyHelper.getRoundingMode());
+            }else{
+                //use the Transaction amount. Original implementation
+                amountPaybale = transactionAmount.multiply(this.percentage).divide(BigDecimal.valueOf(100L), MoneyHelper.getRoundingMode());
+            }
         }
         return amountPaybale;
     }

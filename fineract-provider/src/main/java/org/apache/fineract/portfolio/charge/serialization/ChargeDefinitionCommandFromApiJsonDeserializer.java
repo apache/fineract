@@ -34,6 +34,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -55,7 +56,7 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             "currencyOptions", "chargeAppliesTo", "chargeTimeType", "chargeCalculationType", "chargeCalculationTypeOptions", "penalty",
             "active", "chargePaymentMode", "feeOnMonthDay", "feeInterval", "monthDayFormat", "minCap", "maxCap", "feeFrequency",
             "enableFreeWithdrawalCharge", "freeWithdrawalFrequency", "restartCountFrequency", "countFrequencyType", "paymentTypeId",
-            "enablePaymentType", ChargesApiConstants.glAccountIdParamName, ChargesApiConstants.taxGroupIdParamName));
+            "enablePaymentType","minAmount","maxAmount", ChargesApiConstants.glAccountIdParamName, ChargesApiConstants.taxGroupIdParamName));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -190,6 +191,7 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
                         .isOneOfTheseValues(ChargeCalculationType.validValuesForSavings());
             }
 
+
         } else if (appliesTo.isClientCharge()) {
             // client applicable validation
             final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeTimeType", element);
@@ -264,8 +266,57 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             final Long taxGroupId = this.fromApiJsonHelper.extractLongNamed(ChargesApiConstants.taxGroupIdParamName, element);
             baseDataValidator.reset().parameter(ChargesApiConstants.taxGroupIdParamName).value(taxGroupId).notNull().longGreaterThanZero();
         }
+        validateMinMaxConfigurationOnLoanAndSavingsAccountCharges(baseDataValidator, element, chargeCalculationType, appliesTo);
+
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    private void validateMinMaxConfigurationOnLoanAndSavingsAccountCharges(DataValidatorBuilder baseDataValidator, JsonElement element, Integer chargeCalculationType, ChargeAppliesTo appliesTo) {
+        final BigDecimal minAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("minAmount", element.getAsJsonObject());
+
+        final BigDecimal maxAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maxAmount", element.getAsJsonObject());
+
+
+        if (appliesTo.isSavingsCharge() || appliesTo.isLoanCharge()) {
+
+            final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeTimeType", element);
+            baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType).notNull();
+
+
+            final ChargeTimeType ctt = ChargeTimeType.fromInt(chargeTimeType);
+
+
+            final ChargeCalculationType chargeCalculationTypeValue = ChargeCalculationType.fromInt(chargeCalculationType);
+
+            if((appliesTo.isSavingsCharge() && chargeCalculationTypeValue.getValue().equals(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue()) &&   ctt.isWithdrawalFee()) ||
+              (appliesTo.isLoanCharge() && !ctt.isOnSpecifiedDueDate() && !chargeCalculationTypeValue.getValue().equals(ChargeCalculationType.FLAT.getValue()))){
+                validateMinMaxPolicyOnCharge(minAmount, maxAmount);
+            }else{
+                String message = "Minimum and Maximum Amount is not supported with given settings of [Applies To: " + appliesTo.name() +", charge time type :"+ ctt.name() + ", and Charge Calculation Type: "+ chargeCalculationTypeValue.name() +" ]";
+                minandmaxConfigurationAreNotSupported(minAmount, maxAmount, message);
+            }
+        }else{
+            String message = "Minimum and Maximum Amount is only supported on Loans and Savings Deposits  charges";
+            minandmaxConfigurationAreNotSupported(minAmount, maxAmount, message);
+        }
+    }
+
+    private void minandmaxConfigurationAreNotSupported(BigDecimal minAmount, BigDecimal maxAmount, String message) {
+        if(minAmount != null || maxAmount != null){
+            throw new GeneralPlatformDomainRuleException(
+                    String.format(message),
+                    String.format(message));
+        }
+    }
+
+    private void validateMinMaxPolicyOnCharge(BigDecimal minAmount, BigDecimal maxAmount) {
+        if (maxAmount.compareTo(minAmount) < 0) {
+            String message = "Minimum Amount [ %s ] can not be greater than Maximum Amount [ %s ] ";
+            throw new GeneralPlatformDomainRuleException(
+                    String.format(message, minAmount, maxAmount),
+                    String.format(message, minAmount, maxAmount));
+        }
     }
 
     public void validateForUpdate(final String json) {
@@ -305,9 +356,9 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             final BigDecimal maxCap = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maxCap", element.getAsJsonObject());
             baseDataValidator.reset().parameter("maxCap").value(maxCap).notNull().positiveAmount();
         }
-
+         Integer chargeAppliesTo = null;
         if (this.fromApiJsonHelper.parameterExists("chargeAppliesTo", element)) {
-            final Integer chargeAppliesTo = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeAppliesTo", element);
+            chargeAppliesTo = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeAppliesTo", element);
             baseDataValidator.reset().parameter("chargeAppliesTo").value(chargeAppliesTo).notNull()
                     .isOneOfTheseValues(ChargeAppliesTo.validValues());
         }
@@ -344,18 +395,6 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             }
         }
 
-        if (this.fromApiJsonHelper.parameterExists("chargeAppliesTo", element)) {
-            final Integer chargeAppliesTo = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeAppliesTo", element);
-            baseDataValidator.reset().parameter("chargeAppliesTo").value(chargeAppliesTo).notNull()
-                    .isOneOfTheseValues(ChargeAppliesTo.validValues());
-        }
-
-        if (this.fromApiJsonHelper.parameterExists("chargeAppliesTo", element)) {
-            final Integer chargeAppliesTo = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeAppliesTo", element);
-            baseDataValidator.reset().parameter("chargeAppliesTo").value(chargeAppliesTo).notNull()
-                    .isOneOfTheseValues(ChargeAppliesTo.validValues());
-        }
-
         if (this.fromApiJsonHelper.parameterExists("chargeTimeType", element)) {
 
             final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeTimeType", element);
@@ -381,9 +420,9 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             final Integer feeInterval = this.fromApiJsonHelper.extractIntegerNamed("feeInterval", element, Locale.getDefault());
             baseDataValidator.reset().parameter("feeInterval").value(feeInterval).integerGreaterThanZero();
         }
-
+        Integer chargeCalculationType = null;
         if (this.fromApiJsonHelper.parameterExists("chargeCalculationType", element)) {
-            final Integer chargeCalculationType = this.fromApiJsonHelper.extractIntegerNamed("chargeCalculationType", element,
+            chargeCalculationType = this.fromApiJsonHelper.extractIntegerNamed("chargeCalculationType", element,
                     Locale.getDefault());
             baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType).notNull().inMinMaxRange(1, 5);
         }
@@ -425,7 +464,8 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             final Long taxGroupId = this.fromApiJsonHelper.extractLongNamed(ChargesApiConstants.taxGroupIdParamName, element);
             baseDataValidator.reset().parameter(ChargesApiConstants.taxGroupIdParamName).value(taxGroupId).notNull().longGreaterThanZero();
         }
-
+        final ChargeAppliesTo appliesTo = ChargeAppliesTo.fromInt(chargeAppliesTo);
+        validateMinMaxConfigurationOnLoanAndSavingsAccountCharges(baseDataValidator, element, chargeCalculationType, appliesTo);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 

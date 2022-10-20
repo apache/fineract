@@ -88,6 +88,12 @@ public class LoanCharge extends AbstractPersistableCustom {
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
 
+    @Column(name = "min_amount", scale = 6, precision = 19)
+    private BigDecimal minAmount;
+
+    @Column(name = "max_amount", scale = 6, precision = 19)
+    private BigDecimal maxAmount;
+
     @Column(name = "amount_paid_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal amountPaid;
 
@@ -267,6 +273,8 @@ public class LoanCharge extends AbstractPersistableCustom {
 
         populateDerivedFields(loanPrincipal, chargeAmount, numberOfRepayments, loanCharge);
         this.paid = determineIfFullyPaid();
+        this.minAmount = chargeDefinition.getMinAmount();
+        this.maxAmount = chargeDefinition.getMaxAmount();
     }
 
     private void populateDerivedFields(final BigDecimal amountPercentageAppliedTo, final BigDecimal chargeAmount,
@@ -814,20 +822,6 @@ public class LoanCharge extends AbstractPersistableCustom {
         return this.charge;
     }
 
-    /*
-     * @Override public boolean equals(final Object obj) { if (obj == null) { return false; } if (obj == this) { return
-     * true; } if (obj.getClass() != getClass()) { return false; } final LoanCharge rhs = (LoanCharge) obj; return new
-     * EqualsBuilder().appendSuper(super.equals(obj)) // .append(getId(), rhs.getId()) // .append(this.charge.getId(),
-     * rhs.charge.getId()) // .append(this.amount, rhs.amount) // .append(getDueLocalDate(), rhs.getDueLocalDate()) //
-     * .isEquals(); }
-     *
-     * @Override public int hashCode() { return 1;
-     *
-     * return new HashCodeBuilder(3, 5) // .append(getId()) // .append(this.charge.getId()) //
-     * .append(this.amount).append(getDueLocalDate()) // .toHashCode();
-     *
-     * }
-     */
 
     public ChargePaymentMode getChargePaymentMode() {
         return ChargePaymentMode.fromInt(this.chargePaymentMode);
