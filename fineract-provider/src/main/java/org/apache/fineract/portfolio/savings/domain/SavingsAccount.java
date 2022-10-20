@@ -348,6 +348,12 @@ public class SavingsAccount extends AbstractPersistableCustom {
     @JoinColumn(name = "block_narration_id")
     private CodeValue blockNarration;
 
+    @Column(name = "num_of_credit_transaction")
+    private Long numOfCreditTransaction;
+
+    @Column(name = "num_of_debit_transaction")
+    private Long numOfDebitTransaction;
+
     protected SavingsAccount() {
         //
     }
@@ -449,6 +455,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
         // this.savingsOfficerHistory = null;
         this.withHoldTax = withHoldTax;
         this.taxGroup = product.getTaxGroup();
+        this.numOfCreditTransaction = product.getNumOfCreditTransaction();
+        this.numOfDebitTransaction = product.getNumOfDebitTransaction();
     }
 
     /**

@@ -18,38 +18,6 @@
  */
 package org.apache.fineract.portfolio.savings.data;
 
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.daysToDormancyParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.daysToEscheatParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.daysToInactiveParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.descriptionParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.digitsAfterDecimalParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.feeAmountParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.feeOnMonthDayParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.inMultiplesOfParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestCalculationDaysInYearTypeParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestCalculationTypeParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestCompoundingPeriodTypeParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestPostingPeriodTypeParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.isDormancyTrackingActiveParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lienAllowedParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.maxAllowedLienLimitParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minBalanceForInterestCalculationParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minOverdraftForInterestCalculationParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minRequiredOpeningBalanceParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nameParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateOverdraftParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.overdraftLimitParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.shortNameParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -82,6 +50,41 @@ import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.daysToDormancyParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.daysToEscheatParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.daysToInactiveParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.descriptionParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.digitsAfterDecimalParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.feeAmountParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.feeOnMonthDayParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.inMultiplesOfParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestCalculationDaysInYearTypeParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestCalculationTypeParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestCompoundingPeriodTypeParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestPostingPeriodTypeParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.isDormancyTrackingActiveParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lienAllowedParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.maxAllowedLienLimitParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minBalanceForInterestCalculationParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minOverdraftForInterestCalculationParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minRequiredOpeningBalanceParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nameParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateOverdraftParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.overdraftLimitParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.shortNameParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.isInterestPostingConfigUpdateParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.numberOfCreditTransactionsParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.numberOfDebitTransactionsParamName;
+
 @Component
 public class SavingsProductDataValidator {
 
@@ -107,7 +110,8 @@ public class SavingsProductDataValidator {
             nominalAnnualInterestRateOverdraftParamName, minOverdraftForInterestCalculationParamName,
             SavingsApiConstants.minRequiredBalanceParamName, SavingsApiConstants.enforceMinRequiredBalanceParamName,
             SavingsApiConstants.maxAllowedLienLimitParamName, SavingsApiConstants.lienAllowedParamName,
-            minBalanceForInterestCalculationParamName, withHoldTaxParamName, taxGroupIdParamName));
+            minBalanceForInterestCalculationParamName, withHoldTaxParamName, taxGroupIdParamName, isInterestPostingConfigUpdateParamName,
+            numberOfCreditTransactionsParamName, numberOfDebitTransactionsParamName));
 
     @Autowired
     public SavingsProductDataValidator(final FromJsonHelper fromApiJsonHelper) {
@@ -344,6 +348,16 @@ public class SavingsProductDataValidator {
             baseDataValidator.reset().parameter(minBalanceForInterestCalculationParamName).value(minBalanceForInterestCalculation)
                     .ignoreIfNull().zeroOrPositiveAmount();
         }
+
+        if (this.fromApiJsonHelper.parameterExists(numberOfCreditTransactionsParamName, element)) {
+            final Long numOfCreditTransaction = this.fromApiJsonHelper.extractLongNamed(numberOfCreditTransactionsParamName, element);
+            baseDataValidator.reset().parameter(numberOfCreditTransactionsParamName).value(numOfCreditTransaction).notNull().longGreaterThanZero();
+        }
+        if (this.fromApiJsonHelper.parameterExists(numberOfDebitTransactionsParamName, element)) {
+            final Long numOfDebitTransaction = this.fromApiJsonHelper.extractLongNamed(numberOfDebitTransactionsParamName, element);
+            baseDataValidator.reset().parameter(numberOfDebitTransactionsParamName).value(numOfDebitTransaction).notNull().longGreaterThanZero();
+        }
+
         validateTaxWithHoldingParams(baseDataValidator, element, true);
         validateLienParams(baseDataValidator, element);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -535,6 +549,15 @@ public class SavingsProductDataValidator {
                         .value(escheatLiabilityAccountId).notNull().integerGreaterThanZero();
             }
         }
+        if (this.fromApiJsonHelper.parameterExists(numberOfCreditTransactionsParamName, element)) {
+            final Long numOfCreditTransaction = this.fromApiJsonHelper.extractLongNamed(numberOfCreditTransactionsParamName, element);
+            baseDataValidator.reset().parameter(numberOfCreditTransactionsParamName).value(numOfCreditTransaction).notNull().longGreaterThanZero();
+        }
+        if (this.fromApiJsonHelper.parameterExists(numberOfDebitTransactionsParamName, element)) {
+            final Long numOfDebitTransaction = this.fromApiJsonHelper.extractLongNamed(numberOfDebitTransactionsParamName, element);
+            baseDataValidator.reset().parameter(numberOfDebitTransactionsParamName).value(numOfDebitTransaction).notNull().longGreaterThanZero();
+        }
+
 
         validatePaymentChannelFundSourceMappings(baseDataValidator, element);
         validateChargeToIncomeAccountMappings(baseDataValidator, element);

@@ -18,6 +18,28 @@
  */
 package org.apache.fineract.portfolio.savings.domain;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
+import org.apache.fineract.accounting.common.AccountingRuleType;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.portfolio.charge.domain.Charge;
+import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
+import org.apache.fineract.portfolio.charge.exception.ChargeCannotBeAppliedToException;
+import org.apache.fineract.portfolio.loanproduct.exception.InvalidCurrencyException;
+import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodType;
+import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYearType;
+import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
+import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
+import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
+import org.apache.fineract.portfolio.tax.domain.TaxGroup;
+import org.apache.fineract.portfolio.tax.domain.TaxGroupRepositoryWrapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargesParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
@@ -50,28 +72,11 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.shortNam
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.isInterestPostingConfigUpdateParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.numberOfCreditTransactionsParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.numberOfDebitTransactionsParamName;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.Set;
-import org.apache.fineract.accounting.common.AccountingRuleType;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
-import org.apache.fineract.portfolio.charge.domain.Charge;
-import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
-import org.apache.fineract.portfolio.charge.exception.ChargeCannotBeAppliedToException;
-import org.apache.fineract.portfolio.loanproduct.exception.InvalidCurrencyException;
-import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodType;
-import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYearType;
-import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
-import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
-import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
-import org.apache.fineract.portfolio.tax.domain.TaxGroup;
-import org.apache.fineract.portfolio.tax.domain.TaxGroupRepositoryWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+
 
 @Component
 public class SavingsProductAssembler {
@@ -193,12 +198,16 @@ public class SavingsProductAssembler {
         final Long daysToDormancy = command.longValueOfParameterNamed(daysToDormancyParamName);
         final Long daysToEscheat = command.longValueOfParameterNamed(daysToEscheatParamName);
 
+        final Boolean isInterestPostingConfigUpdate = command.booleanObjectValueOfParameterNamed(isInterestPostingConfigUpdateParamName);
+        final Long numOfCreditTransaction = command.longValueOfParameterNamed(numberOfCreditTransactionsParamName);
+        final Long numOfDebitTransaction = command.longValueOfParameterNamed(numberOfDebitTransactionsParamName);
+
         return SavingsProduct.createNew(name, shortName, description, currency, interestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer, accountingRuleType, charges,
                 allowOverdraft, overdraftLimit, enforceMinRequiredBalance, minRequiredBalance, lienAllowed, maxAllowedLienLimit,
                 minBalanceForInterestCalculation, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax,
-                taxGroup, isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat);
+                taxGroup, isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat, isInterestPostingConfigUpdate, numOfCreditTransaction, numOfDebitTransaction);
     }
 
     public Set<Charge> assembleListOfSavingsProductCharges(final JsonCommand command, final String savingsProductCurrencyCode) {

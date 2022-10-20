@@ -130,6 +130,7 @@ import org.apache.fineract.portfolio.savings.exception.TransactionUpdateNotAllow
 import org.apache.fineract.portfolio.transfer.api.TransferApiConstants;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -542,7 +543,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     @Override
     @Transactional
-    public CommandProcessingResult postInterest(final JsonCommand command) {
+    public CommandProcessingResult postInterest(@NotNull final JsonCommand command) {
 
         Long savingsId = command.getSavingsId();
         final boolean postInterestAs = command.booleanPrimitiveValueOfParameterNamed("isPostInterestAsOn");

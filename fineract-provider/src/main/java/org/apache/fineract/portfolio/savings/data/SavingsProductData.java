@@ -95,6 +95,10 @@ public final class SavingsProductData implements Serializable {
     private final Long daysToDormancy;
     private final Long daysToEscheat;
 
+    private final Boolean isInterestPostingConfigUpdate;
+    private final Long numOfCreditTransaction;
+    private final Long numOfDebitTransaction;
+
     public static SavingsProductData template(final CurrencyData currency, final EnumOptionData interestCompoundingPeriodType,
             final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
             final EnumOptionData interestCalculationDaysInYearType, final EnumOptionData accountingRule,
@@ -137,6 +141,9 @@ public final class SavingsProductData implements Serializable {
         final Long daysToInactive = null;
         final Long daysToDormancy = null;
         final Long daysToEscheat = null;
+        final Boolean isInterestPostingConfigUpdate = null;
+        final Long numOfCreditTransaction = null;
+        final Long numOfDebitTransaction = null;
 
         return new SavingsProductData(id, name, shortName, description, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
@@ -147,7 +154,8 @@ public final class SavingsProductData implements Serializable {
                 penaltyOptions, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, allowOverdraft, overdraftLimit,
                 minRequiredBalance, enforceMinRequiredBalance, maxAllowedLienLimit, lienAllowed, minBalanceForInterestCalculation,
                 nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax, taxGroup, taxGroupOptions,
-                isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat, accountMappingForPayment);
+                isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat, accountMappingForPayment, isInterestPostingConfigUpdate,
+                numOfCreditTransaction, numOfDebitTransaction);
     }
 
     public static SavingsProductData withCharges(final SavingsProductData product, final Collection<ChargeData> charges) {
@@ -165,7 +173,7 @@ public final class SavingsProductData implements Serializable {
                 product.minBalanceForInterestCalculation, product.nominalAnnualInterestRateOverdraft,
                 product.minOverdraftForInterestCalculation, product.withHoldTax, product.taxGroup, product.taxGroupOptions,
                 product.isDormancyTrackingActive, product.daysToInactive, product.daysToDormancy, product.daysToEscheat,
-                product.accountMappingForPayment);
+                product.accountMappingForPayment, product.isInterestPostingConfigUpdate, product.numOfCreditTransaction, product.numOfDebitTransaction);
     }
 
     /**
@@ -174,7 +182,7 @@ public final class SavingsProductData implements Serializable {
      *
      * @param taxGroupOptions
      *            TODO
-     * @param accountMapping
+     * @param accountMappingForPayment
      */
     public static SavingsProductData withTemplate(final SavingsProductData existingProduct, final Collection<CurrencyData> currencyOptions,
             final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
@@ -200,7 +208,8 @@ public final class SavingsProductData implements Serializable {
                 existingProduct.maxAllowedLienLimit, existingProduct.lienAllowed, existingProduct.minBalanceForInterestCalculation,
                 existingProduct.nominalAnnualInterestRateOverdraft, existingProduct.minOverdraftForInterestCalculation,
                 existingProduct.withHoldTax, existingProduct.taxGroup, taxGroupOptions, existingProduct.isDormancyTrackingActive,
-                existingProduct.daysToInactive, existingProduct.daysToDormancy, existingProduct.daysToEscheat, accountMappingForPayment);
+                existingProduct.daysToInactive, existingProduct.daysToDormancy, existingProduct.daysToEscheat, accountMappingForPayment,
+                existingProduct.isInterestPostingConfigUpdate, existingProduct.numOfCreditTransaction, existingProduct.numOfDebitTransaction);
     }
 
     public static SavingsProductData withAccountingDetails(final SavingsProductData existingProduct,
@@ -237,7 +246,8 @@ public final class SavingsProductData implements Serializable {
                 existingProduct.nominalAnnualInterestRateOverdraft, existingProduct.minOverdraftForInterestCalculation,
                 existingProduct.withHoldTax, existingProduct.taxGroup, existingProduct.taxGroupOptions,
                 existingProduct.isDormancyTrackingActive, existingProduct.daysToInactive, existingProduct.daysToDormancy,
-                existingProduct.daysToEscheat, existingProduct.accountMappingForPayment);
+                existingProduct.daysToEscheat, existingProduct.accountMappingForPayment, existingProduct.isInterestPostingConfigUpdate, existingProduct.numOfCreditTransaction,
+                existingProduct.numOfDebitTransaction);
     }
 
     public static SavingsProductData instance(final Long id, final String name, final String shortName, final String description,
@@ -250,7 +260,8 @@ public final class SavingsProductData implements Serializable {
             final boolean lienAllowed, final BigDecimal minBalanceForInterestCalculation,
             final BigDecimal nominalAnnualInterestRateOverdraft, final BigDecimal minOverdraftForInterestCalculation,
             final boolean withHoldTax, final TaxGroupData taxGroup, final Boolean isDormancyTrackingActive, final Long daysToInactive,
-            final Long daysToDormancy, final Long daysToEscheat) {
+            final Long daysToDormancy, final Long daysToEscheat, final Boolean isInterestPostingConfigUpdate, final Long numOfCreditTransaction,
+            final Long numOfDebitTransaction) {
 
         final Map<String, Object> accountingMappings = null;
         final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings = null;
@@ -282,7 +293,8 @@ public final class SavingsProductData implements Serializable {
                 penaltyOptions, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, allowOverdraft, overdraftLimit,
                 minRequiredBalance, enforceMinRequiredBalance, maxAllowedLienLimit, lienAllowed, minBalanceForInterestCalculation,
                 nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax, taxGroup, taxGroupOptions,
-                isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat, accountMappingForPayment);
+                isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat, accountMappingForPayment, isInterestPostingConfigUpdate,
+                numOfCreditTransaction, numOfDebitTransaction);
     }
 
     public static SavingsProductData lookup(final Long id, final String name) {
@@ -335,6 +347,9 @@ public final class SavingsProductData implements Serializable {
         final Long daysToDormancy = null;
         final Long daysToEscheat = null;
         final String accountMappingForPayment = null;
+        final Boolean isInterestPostingConfigUpdate = null;
+        final Long numOfCreditTransaction = null;
+        final Long numOfDebitTransaction = null;
 
         return new SavingsProductData(id, name, shortName, description, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
@@ -345,7 +360,8 @@ public final class SavingsProductData implements Serializable {
                 penaltyOptions, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, allowOverdraft, overdraftLimit,
                 minRequiredBalance, enforceMinRequiredBalance, maxAllowedLienLimit, lienAllowed, minBalanceForInterestCalculation,
                 nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax, taxGroup, taxGroupOptions,
-                isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat, accountMappingForPayment);
+                isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat, accountMappingForPayment, isInterestPostingConfigUpdate,
+                numOfCreditTransaction, numOfDebitTransaction);
     }
 
     public static SavingsProductData createForInterestPosting(final Long id, final EnumOptionData accountingRule) {
@@ -409,6 +425,9 @@ public final class SavingsProductData implements Serializable {
         this.daysToDormancy = null;
         this.daysToEscheat = null;
         this.accountMappingForPayment = null;
+        this.isInterestPostingConfigUpdate = null;
+        this.numOfCreditTransaction = null;
+        this.numOfDebitTransaction = null;
     }
 
     private SavingsProductData(final Long id, final String name, final String shortName, final String description,
@@ -433,7 +452,8 @@ public final class SavingsProductData implements Serializable {
             final BigDecimal nominalAnnualInterestRateOverdraft, final BigDecimal minOverdraftForInterestCalculation,
             final boolean withHoldTax, final TaxGroupData taxGroup, final Collection<TaxGroupData> taxGroupOptions,
             final Boolean isDormancyTrackingActive, final Long daysToInactive, final Long daysToDormancy, final Long daysToEscheat,
-            final String accountMappingForPayment) {
+            final String accountMappingForPayment, final Boolean isInterestPostingConfigUpdate, final Long numOfCreditTransaction,
+            final Long numOfDebitTransaction) {
         this.id = id;
         this.name = name;
         this.shortName = shortName;
@@ -493,6 +513,9 @@ public final class SavingsProductData implements Serializable {
         this.daysToDormancy = daysToDormancy;
         this.daysToEscheat = daysToEscheat;
         this.accountMappingForPayment = accountMappingForPayment;
+        this.isInterestPostingConfigUpdate = isInterestPostingConfigUpdate;
+        this.numOfCreditTransaction = numOfCreditTransaction;
+        this.numOfDebitTransaction = numOfDebitTransaction;
     }
 
     public boolean hasAccountingEnabled() {

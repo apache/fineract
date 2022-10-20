@@ -191,6 +191,8 @@ public class SavingsApiConstants {
 
     // Savings Dormancy
     public static final String isDormancyTrackingActiveParamName = "isDormancyTrackingActive";
+    public static final String isInterestPostingConfigUpdateParamName = "isInterestPostingConfigUpdate";
+
     public static final String daysToInactiveParamName = "daysToInactive";
     public static final String daysToDormancyParamName = "daysToDormancy";
     public static final String daysToEscheatParamName = "daysToEscheat";
@@ -202,4 +204,8 @@ public class SavingsApiConstants {
     public static final String ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE = "not.in.active.state";
 
     public static final String accountMappingForPaymentParamName = "accountMappingForPayment";
+
+    public static final String numberOfDebitTransactionsParamName = "numOfDebitTransaction";
+
+    public static final String numberOfCreditTransactionsParamName = "numOfCreditTransaction";
 }
