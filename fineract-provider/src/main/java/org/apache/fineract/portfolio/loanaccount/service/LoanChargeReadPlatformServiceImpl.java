@@ -67,7 +67,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
                     + "lc.due_for_collection_as_of_date as dueAsOfDate, " + "lc.charge_calculation_enum as chargeCalculation, "
                     + "lc.charge_payment_mode_enum as chargePaymentMode, " + "lc.is_paid_derived as paid, " + "lc.waived as waied, "
                     + "lc.min_cap as minCap, lc.max_cap as maxCap, " + "lc.charge_amount_or_percentage as amountOrPercentage, "
-                    + "c.currency_code as currencyCode, oc.name as currencyName, "
+                    + "lc.loan_id as loanId, c.currency_code as currencyCode, oc.name as currencyName, "
                     + "date(coalesce(dd.disbursedon_date,dd.expected_disburse_date)) as disbursementDate, "
                     + "oc.decimal_places as currencyDecimalPlaces, oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, "
                     + "oc.internationalized_name_code as currencyNameCode from m_charge c "
@@ -79,6 +79,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
         public LoanChargeData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             final Long id = rs.getLong("id");
             final Long chargeId = rs.getLong("chargeId");
+            final Long loanId = rs.getLong("loanId");
             final String name = rs.getString("name");
             final BigDecimal amount = rs.getBigDecimal("amountDue");
             final BigDecimal amountPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountPaid");
@@ -125,7 +126,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
 
             return new LoanChargeData(id, chargeId, name, currency, amount, amountPaid, amountWaived, amountWrittenOff, amountOutstanding,
                     chargeTimeType, submittedOnDate, dueAsOfDate, chargeCalculationType, percentageOf, amountPercentageAppliedTo, penalty,
-                    paymentMode, paid, waived, null, minCap, maxCap, amountOrPercentage, null, externalId);
+                    paymentMode, paid, waived, loanId, minCap, maxCap, amountOrPercentage, null, externalId);
         }
     }
 

@@ -148,6 +148,29 @@ public class ClientLoanIntegrationTest {
     }
 
     @Test
+    public void testAddingLoanChargeIncludesLoanIdInTheResponse() {
+        // given
+        loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Integer loanProductId = createLoanProduct(false, NONE);
+        Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+                String.valueOf(clientId), collateralId);
+        List<HashMap> collaterals = List.of(collaterals(clientCollateralId, BigDecimal.ONE));
+
+        Integer chargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
+                ChargesHelper.getLoanDisbursementJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT, "1"));
+        List<HashMap> charges = List.of(charges(chargeId, "1", null));
+        // when
+        Integer loanId = applyForLoanApplication(clientId, loanProductId, charges, null, "12,000.00", collaterals);
+        // then
+        List<HashMap> loanCharges = loanTransactionHelper.getLoanCharges(loanId);
+        Integer loanChargeId = (Integer) loanCharges.get(0).get("id");
+        HashMap loanChargeDetail = loanTransactionHelper.getLoanCharge(loanId, loanChargeId);
+        assertEquals(loanId, loanChargeDetail.get("loanId"));
+    }
+
+    @Test
     public void testLoanCharges_DISBURSEMENT_FEE() {
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
