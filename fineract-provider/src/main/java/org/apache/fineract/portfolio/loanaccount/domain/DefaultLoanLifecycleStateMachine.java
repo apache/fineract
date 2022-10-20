@@ -37,15 +37,16 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
 
     @Override
     public LoanStatus dryTransition(final LoanEvent loanEvent, final Loan loan) {
-        LoanStatus nextStatus = getNextState(loanEvent, loan);
-        return nextStatus != null ? nextStatus : loan.getStatus();
+        LoanStatus newStatus = getNextStatus(loanEvent, loan);
+        return newStatus != null ? newStatus : loan.getStatus();
     }
 
     @Override
     public void transition(final LoanEvent loanEvent, final Loan loan) {
-        LoanStatus newState = getNextState(loanEvent, loan);
-        if (newState != null) {
-            loan.setLoanStatus(newState.getValue());
+        LoanStatus newStatus = getNextStatus(loanEvent, loan);
+        if (newStatus != null) {
+            Integer newPlainStatus = newStatus.getValue();
+            loan.setLoanStatus(newPlainStatus);
 
             if (isNotLoanCreation(loanEvent)) {
                 // in case of Loan creation, a LoanCreatedBusinessEvent is also raised, no need to send a status change
@@ -58,7 +59,7 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
         return !LoanEvent.LOAN_CREATED.equals(loanEvent);
     }
 
-    private LoanStatus getNextState(LoanEvent loanEvent, Loan loan) {
+    private LoanStatus getNextStatus(LoanEvent loanEvent, Loan loan) {
         Integer plainFrom = loan.getPlainStatus();
         if (loanEvent.equals(LoanEvent.LOAN_CREATED) && plainFrom == null) {
             return submittedTransition();
@@ -134,10 +135,14 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
                 newState = transferInProgress();
             break;
             case LOAN_REJECT_TRANSFER:
-                newState = transferOnHold();
+                if (anyOfAllowedWhenComingFrom(from, LoanStatus.TRANSFER_IN_PROGRESS)) {
+                    newState = transferOnHold();
+                }
             break;
             case LOAN_WITHDRAW_TRANSFER:
-                newState = activeTransition();
+                if (anyOfAllowedWhenComingFrom(from, LoanStatus.TRANSFER_IN_PROGRESS)) {
+                    newState = activeTransition();
+                }
             break;
             case WRITE_OFF_OUTSTANDING_UNDO:
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED_WRITTEN_OFF)) {
@@ -145,7 +150,9 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
                 }
             break;
             case LOAN_CREDIT_BALANCE_REFUND:
-                newState = closeObligationsMetTransition();
+                if (anyOfAllowedWhenComingFrom(from, LoanStatus.OVERPAID)) {
+                    newState = closeObligationsMetTransition();
+                }
             break;
             case LOAN_CHARGE_ADDED:
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED_OBLIGATIONS_MET)) {
