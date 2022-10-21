@@ -270,15 +270,16 @@ public class LoanCharge extends AbstractPersistableCustom {
         if (chargePaymentMode != null) {
             this.chargePaymentMode = chargePaymentMode.getValue();
         }
-
-        populateDerivedFields(loanPrincipal, chargeAmount, numberOfRepayments, loanCharge);
-        this.paid = determineIfFullyPaid();
         this.minAmount = chargeDefinition.getMinAmount();
         this.maxAmount = chargeDefinition.getMaxAmount();
+
+        populateDerivedFields(loanPrincipal, chargeAmount, numberOfRepayments, loanCharge,this.minAmount,this.maxAmount);
+        this.paid = determineIfFullyPaid();
+
     }
 
     private void populateDerivedFields(final BigDecimal amountPercentageAppliedTo, final BigDecimal chargeAmount,
-            Integer numberOfRepayments, BigDecimal loanCharge) {
+            Integer numberOfRepayments, BigDecimal loanCharge,BigDecimal minAmount,BigDecimal maxAmount) {
 
         switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
             case INVALID:
@@ -310,6 +311,8 @@ public class LoanCharge extends AbstractPersistableCustom {
             case PERCENT_OF_AMOUNT_AND_INTEREST:
             case PERCENT_OF_INTEREST:
             case PERCENT_OF_DISBURSEMENT_AMOUNT:
+                this.minAmount = minAmount;
+                this.maxAmount = maxAmount;
                 this.percentage = chargeAmount;
                 this.amountPercentageAppliedTo = amountPercentageAppliedTo;
                 if (loanCharge.compareTo(BigDecimal.ZERO) == 0) {
@@ -635,7 +638,22 @@ public class LoanCharge extends AbstractPersistableCustom {
     }
 
     public BigDecimal percentageOf(final BigDecimal value) {
-        return percentageOf(value, this.percentage);
+        BigDecimal transactionAmountToConsider = BigDecimal.ZERO;
+        /**
+         * Logic to determine which value to use in the computation
+         * if a transaction amount is greater than min amount then use min amount
+         * and if max if greater that the transaction amount amount then use
+         * max amount else use the transaction amount
+         *
+         * **/
+        if(this.maxAmount != null && value.compareTo(this.maxAmount) > 0){
+            transactionAmountToConsider = this.maxAmount;
+        }else if(this.minAmount != null && value.compareTo(this.minAmount) > 0){
+            transactionAmountToConsider = this.minAmount;
+        } else{
+            transactionAmountToConsider = value;
+        }
+        return percentageOf(transactionAmountToConsider, this.percentage);
     }
 
     public static BigDecimal percentageOf(final BigDecimal value, final BigDecimal percentage) {
@@ -1069,4 +1087,11 @@ public class LoanCharge extends AbstractPersistableCustom {
         this.externalId = externalId;
     }
 
+    public BigDecimal getMinAmount() {
+        return minAmount;
+    }
+
+    public BigDecimal getMaxAmount() {
+        return maxAmount;
+    }
 }
