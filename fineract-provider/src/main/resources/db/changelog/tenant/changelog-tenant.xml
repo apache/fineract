@@ -48,5 +48,8 @@
     <include file="parts/0031_add_min_add_max_amount_on_m_charge_Table.xml" relativeToChangelogFile="true"/>
     <include file="parts/0031_add_codes_and_codevalue_for_blocknarration.xml" relativeToChangelogFile="true"/>
     <include file="parts/0032_savings_account_block_narration_history_table.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0033_add_fields_in_m_savings_product_table.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0034_add_fields_in_m_savings_account_table.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0035_add_entry_for_job_to_update_interest_config.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

@@ -130,6 +130,7 @@ import org.apache.fineract.portfolio.savings.exception.TransactionUpdateNotAllow
 import org.apache.fineract.portfolio.transfer.api.TransferApiConstants;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -542,7 +543,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     @Override
     @Transactional
-    public CommandProcessingResult postInterest(final JsonCommand command) {
+    public CommandProcessingResult postInterest(@NotNull final JsonCommand command) {
 
         Long savingsId = command.getSavingsId();
         final boolean postInterestAs = command.booleanPrimitiveValueOfParameterNamed("isPostInterestAsOn");
@@ -553,6 +554,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         checkClientOrGroupActive(account);
 
         this.savingsAccountTransactionDataValidator.validateTransactionWithPivotDate(transactionDate, account);
+
 
         if (postInterestAs == true) {
 
@@ -575,6 +577,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 if (transactionDate.isBefore(savingTransaction.getDateOf())) {
                     throw new PostInterestAsOnDateException(PostInterestAsOnExceptionType.LAST_TRANSACTION_DATE);
                 }
+
             }
 
             LocalDate today = DateUtils.getBusinessLocalDate();
@@ -622,26 +625,31 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             if (postInterestAs) {
                 postInterestOnDate = transactionDate;
             }
-            boolean postReversals = false;
-            account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
-                    postInterestOnDate, backdatedTxnsAllowedTill, postReversals);
 
-            if (!backdatedTxnsAllowedTill) {
-                List<SavingsAccountTransaction> transactions = account.getTransactions();
-                for (SavingsAccountTransaction accountTransaction : transactions) {
-                    if (accountTransaction.getId() == null) {
-                        this.savingsAccountTransactionRepository.save(accountTransaction);
+           boolean allowPosting = this.isQualifyForInterest(account.getMinBalanceForInterestCalculation(), account.getNumOfCreditTransaction(),
+                   account.getNumOfDebitTransaction(),  account.getTransactions(), account.getAccountBalance());
+            if(allowPosting) {
+                boolean postReversals = false;
+                account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
+                        postInterestOnDate, backdatedTxnsAllowedTill, postReversals);
+
+                if (!backdatedTxnsAllowedTill) {
+                    List<SavingsAccountTransaction> transactions = account.getTransactions();
+                    for (SavingsAccountTransaction accountTransaction : transactions) {
+                        if (accountTransaction.getId() == null) {
+                            this.savingsAccountTransactionRepository.save(accountTransaction);
+                        }
                     }
                 }
+
+                if (backdatedTxnsAllowedTill) {
+                    this.savingsAccountTransactionRepository.saveAll(account.getSavingsAccountTransactionsWithPivotConfig());
+                }
+
+                this.savingAccountRepositoryWrapper.saveAndFlush(account);
+
+                postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, backdatedTxnsAllowedTill);
             }
-
-            if (backdatedTxnsAllowedTill) {
-                this.savingsAccountTransactionRepository.saveAll(account.getSavingsAccountTransactionsWithPivotConfig());
-            }
-
-            this.savingAccountRepositoryWrapper.saveAndFlush(account);
-
-            postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, backdatedTxnsAllowedTill);
         }
     }
 
@@ -670,23 +678,27 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
             long startPosting = System.currentTimeMillis();
             LOG.info("Interest Posting Start Here at {}", startPosting);
+            List<SavingsAccountTransaction> accTransactions = this.savingsAccountTransactionRepository.findBySavingsAccountId(savingsAccountData.getId());
+            boolean allowPosting = this.isQualifyForInterest(savingsAccountData.getMinBalanceForInterestCalculation(), savingsAccountData.getNumOfCreditTransaction(),
+                    savingsAccountData.getNumOfDebitTransaction(), accTransactions, savingsAccountData.getSummary().getAccountBalance());
+            if(allowPosting) {
+                savingsAccountData = this.savingsAccountInterestPostingService.postInterest(mc, today, isInterestTransfer,
+                        isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill,
+                        savingsAccountData);
+                long endPosting = System.currentTimeMillis();
+                LOG.info("Interest Posting Ends within {}", endPosting - startPosting);
 
-            savingsAccountData = this.savingsAccountInterestPostingService.postInterest(mc, today, isInterestTransfer,
-                    isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill,
-                    savingsAccountData);
-            long endPosting = System.currentTimeMillis();
-            LOG.info("Interest Posting Ends within {}", endPosting - startPosting);
-
-            if (!backdatedTxnsAllowedTill) {
-                List<SavingsAccountTransactionData> transactions = savingsAccountData.getTransactions();
-                for (SavingsAccountTransactionData accountTransaction : transactions) {
-                    if (accountTransaction.getId() == null) {
-                        savingsAccountData.setNewSavingsAccountTransactionData(accountTransaction);
+                if (!backdatedTxnsAllowedTill) {
+                    List<SavingsAccountTransactionData> transactions = savingsAccountData.getTransactions();
+                    for (SavingsAccountTransactionData accountTransaction : transactions) {
+                        if (accountTransaction.getId() == null) {
+                            savingsAccountData.setNewSavingsAccountTransactionData(accountTransaction);
+                        }
                     }
                 }
+                savingsAccountData.setExistingTransactionIds(existingTransactionIds);
+                savingsAccountData.setExistingReversedTransactionIds(existingReversedTransactionIds);
             }
-            savingsAccountData.setExistingTransactionIds(existingTransactionIds);
-            savingsAccountData.setExistingReversedTransactionIds(existingReversedTransactionIds);
         }
         return savingsAccountData;
     }
@@ -2023,5 +2035,33 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         if (StringUtils.isBlank(reasonForBlock)) {
             throw new PlatformDataIntegrityException("Reason For Block is Mandatory", "error.msg.reason.for.block.mandatory");
         }
+    }
+
+    private boolean isQualifyForInterest(BigDecimal minBalance, Long numOfCredit, Long numOfDebit, List<SavingsAccountTransaction> transactions,
+                                         BigDecimal accountBalance){
+        Integer countOfCredit = 0;
+        Integer countOfDebit = 0;
+        boolean allowPosting = false;
+
+        if(minBalance != null || numOfCredit != null
+                || numOfDebit !=null){
+            for (SavingsAccountTransaction accountTransaction : transactions) {
+                if (accountTransaction.isCredit()) {
+                    countOfCredit++;
+                }else if (accountTransaction.isDebit()){
+                    countOfDebit++;
+                }
+            }
+            boolean balance = (accountBalance.compareTo(minBalance) > 0 ||
+                    accountBalance.compareTo(minBalance)==0) ? true :false;
+            boolean credit = countOfCredit >= numOfCredit ? true : false;
+            boolean debit = countOfDebit >= numOfDebit ? true : false;
+            if(balance && credit && debit){
+                allowPosting =true;
+            }
+        }else{
+            allowPosting = true;
+        }
+        return  allowPosting;
     }
 }

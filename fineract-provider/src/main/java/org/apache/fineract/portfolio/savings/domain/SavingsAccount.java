@@ -348,6 +348,12 @@ public class SavingsAccount extends AbstractPersistableCustom {
     @JoinColumn(name = "block_narration_id")
     private CodeValue blockNarration;
 
+    @Column(name = "num_of_credit_transaction")
+    private Long numOfCreditTransaction;
+
+    @Column(name = "num_of_debit_transaction")
+    private Long numOfDebitTransaction;
+
     protected SavingsAccount() {
         //
     }
@@ -449,6 +455,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
         // this.savingsOfficerHistory = null;
         this.withHoldTax = withHoldTax;
         this.taxGroup = product.getTaxGroup();
+        this.numOfCreditTransaction = product.getNumOfCreditTransaction();
+        this.numOfDebitTransaction = product.getNumOfDebitTransaction();
     }
 
     /**
@@ -996,6 +1004,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         }
 
         boolean isTransactionsModified = false;
+
         for (final SavingsAccountTransaction transaction : accountTransactionsSorted) {
             if (transaction.isReversed() || transaction.isReversalTransaction()) {
                 transaction.zeroBalanceFields();
@@ -1070,6 +1079,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
                 accountTransactionsSorted = retreiveListOfTransactions();
             }
         }
+
         resetAccountTransactionsEndOfDayBalances(accountTransactionsSorted, interestPostingUpToDate);
     }
 
@@ -3965,5 +3975,25 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     public boolean isWithHoldTax() {
         return this.withHoldTax;
+    }
+
+    public Long getNumOfCreditTransaction() {
+        return numOfCreditTransaction;
+    }
+
+    public Long getNumOfDebitTransaction() {
+        return numOfDebitTransaction;
+    }
+
+    public void setNumOfCreditTransaction(Long numOfCreditTransaction) {
+        this.numOfCreditTransaction = numOfCreditTransaction;
+    }
+
+    public void setNumOfDebitTransaction(Long numOfDebitTransaction) {
+        this.numOfDebitTransaction = numOfDebitTransaction;
+    }
+
+    public void setMinBalanceForInterestCalculation(BigDecimal minBalanceForInterestCalculation) {
+        this.minBalanceForInterestCalculation = minBalanceForInterestCalculation;
     }
 }
