@@ -1086,12 +1086,4 @@ public class LoanCharge extends AbstractPersistableCustom {
     public void setExternalId(String externalId) {
         this.externalId = externalId;
     }
-
-    public BigDecimal getMinAmount() {
-        return minAmount;
-    }
-
-    public BigDecimal getMaxAmount() {
-        return maxAmount;
-    }
 }
