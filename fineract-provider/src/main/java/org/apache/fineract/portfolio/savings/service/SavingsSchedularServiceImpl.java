@@ -45,6 +45,9 @@ import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
+import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
+import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -65,6 +68,8 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
     private final TransactionTemplate transactionTemplate;
     private Queue<List<SavingsAccountData>> queue = new ArrayDeque<>();
     private int queueSize = 1;
+
+    private final SavingsProductRepository savingsProductRepository;
 
     @Override
     @CronTarget(jobName = JobName.POST_INTEREST_FOR_SAVINGS)
@@ -267,6 +272,29 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
         if (null != savingsPendingEscheat && savingsPendingEscheat.size() > 0) {
             for (Long savingsId : savingsPendingEscheat) {
                 this.savingsAccountWritePlatformService.escheat(savingsId);
+            }
+        }
+    }
+
+    @Override
+    @CronTarget(jobName = JobName.UPDATE_SAVINGS_INTEREST_POSTING_QUALIFY_CONFIG)
+    public void updateSavingsInterestPostingQualifyConfig() {
+
+        List<SavingsProduct> products = this.savingsProductRepository.findAll();
+        log.info("Reading Savings Account Data!");
+        for (SavingsProduct product :products) {
+            List<SavingsAccount> savingsAccounts = this.savingsAccountRepository.findByProductIdAndStatus(product.getId(),
+                    ACTIVE.getValue(), product.getNumOfCreditTransaction(), product.getNumOfDebitTransaction(), product.minBalanceForInterestCalculation());
+            if(savingsAccounts.size() > 0){
+                if(product.isInterestPostingUpdate()) {
+                    for (SavingsAccount sav : savingsAccounts) {
+                        sav.setNumOfCreditTransaction(product.getNumOfCreditTransaction());
+                        sav.setNumOfDebitTransaction(product.getNumOfDebitTransaction());
+                        sav.setMinBalanceForInterestCalculation(product.minBalanceForInterestCalculation());
+                        this.savingsAccountRepository.saveAndFlush(sav);
+                        log.info("Successfully Updates Savings Account Data! number is" + sav.getId());
+                    }
+                }
             }
         }
     }

@@ -1146,4 +1146,12 @@ public final class SavingsAccountData implements Serializable {
     public void setLastSavingsAccountTransaction(SavingsAccountTransactionData lastSavingsAccountTransaction) {
         this.lastSavingsAccountTransaction = lastSavingsAccountTransaction;
     }
+
+    public Long getNumOfCreditTransaction() {
+        return numOfCreditTransaction;
+    }
+
+    public Long getNumOfDebitTransaction() {
+        return numOfDebitTransaction;
+    }
 }

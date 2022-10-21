@@ -49,4 +49,7 @@ public interface SavingsAccountTransactionRepository
 
     @Query("select sat from SavingsAccountTransaction sat where sat.refNo = :refNo")
     List<SavingsAccountTransaction> findAllTransactionByRefNo(@Param("refNo") String refNo);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<SavingsAccountTransaction> findBySavingsAccountId(@Param("savingsAccountId") Long savingsAccountId);
 }

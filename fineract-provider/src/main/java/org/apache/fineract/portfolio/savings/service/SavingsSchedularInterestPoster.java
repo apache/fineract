@@ -262,8 +262,8 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
                     savingsAccountSummaryData.getTotalFeeCharge(), savingsAccountSummaryData.getTotalPenaltyCharge(),
                     savingsAccountSummaryData.getTotalAnnualFees(), savingsAccountSummaryData.getAccountBalance(),
                     savingsAccountSummaryData.getTotalOverdraftInterestDerived(), savingsAccountSummaryData.getTotalWithholdTax(),
-                    Date.from(savingsAccountSummaryData.getLastInterestCalculationDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant())
-                            .toInstant()),
+                    savingsAccountSummaryData.getLastInterestCalculationDate() != null ? Date.from(savingsAccountSummaryData.getLastInterestCalculationDate().atStartOfDay(DateUtils.getDateTimeZoneOfTenant())
+                            .toInstant()) : null,
                     savingsAccountSummaryData.getInterestPostedTillDate() != null
                             ? Date.from(savingsAccountSummaryData.getInterestPostedTillDate()
                                     .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant())

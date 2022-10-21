@@ -27,4 +27,6 @@ public interface SavingsSchedularService {
 
     void updateSavingsDormancyStatus() throws JobExecutionException;
 
+    void updateSavingsInterestPostingQualifyConfig();
+
 }

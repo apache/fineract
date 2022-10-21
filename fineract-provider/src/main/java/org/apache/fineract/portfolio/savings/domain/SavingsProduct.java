@@ -811,6 +811,10 @@ public class SavingsProduct extends AbstractPersistableCustom {
         return null == this.isDormancyTrackingActive ? false : this.isDormancyTrackingActive;
     }
 
+    public boolean isInterestPostingUpdate() {
+        return null == this.isInterestPostingConfigUpdate ? false : this.isInterestPostingConfigUpdate;
+    }
+
     public Long getDaysToInactive() {
         return this.daysToInactive;
     }

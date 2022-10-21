@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.domain;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
@@ -176,6 +177,11 @@ public class SavingsAccountRepositoryWrapper {
     }
     public SavingsAccount findByAccountNumber(@Param("accountNumber") String accountNumber) {
         return this.repository.findByAccountNumber(accountNumber) ;
+    }
+
+    public List<SavingsAccount> findByProductIdAndStatus(@Param("productId") Long productId, @Param("status") Integer status, @Param("numOfCredit") Long numOfCredit,
+                                                         @Param("numOfDebit") Long numOfDebit, @Param("numOfDebit") BigDecimal minBalance) {
+        return this.repository.findByProductIdAndStatus(productId, status, numOfCredit, numOfDebit, minBalance) ;
     }
 
 }
