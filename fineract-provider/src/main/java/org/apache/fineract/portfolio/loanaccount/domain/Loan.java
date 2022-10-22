@@ -5656,7 +5656,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             } else if (loanTransaction.isChargeback()) {
                 Money transactionOutstanding = loanTransaction.getAmount(getCurrency());
                 if (!loanTransaction.getOverPaymentPortion(getCurrency()).isZero()) {
-                    transactionOutstanding = transactionOutstanding.minus(loanTransaction.getOverPaymentPortion(getCurrency()));
+                    transactionOutstanding = loanTransaction.getAmount(getCurrency())
+                            .minus(loanTransaction.getOverPaymentPortion(getCurrency()));
+                    if (transactionOutstanding.isLessThanZero()) {
+                        transactionOutstanding = Money.zero(getCurrency());
+                    }
                 }
                 outstanding = outstanding.plus(transactionOutstanding);
                 loanTransaction.updateOutstandingLoanBalance(outstanding.getAmount());
@@ -6120,11 +6124,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 .determineProcessor(this.transactionProcessingStrategy);
         final Money overpaidAmount = calculateTotalOverpayment(); // Before Transaction
         if (overpaidAmount.isGreaterThanZero()) {
-            Money difference = chargebackTransaction.getAmount(getCurrency()).minus(overpaidAmount);
-            if (difference.isLessThanZero()) {
-                difference = null;
-            }
-            chargebackTransaction.setOverPayments(difference);
+            chargebackTransaction.setOverPayments(overpaidAmount);
         }
 
         if (chargebackTransaction.isNotZero(loanCurrency())) {

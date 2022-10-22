@@ -1286,7 +1286,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanChargebackTransactionBusinessEvent(loanTransaction));
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(transactionId)
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(newTransaction.getId())
                 .withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId()).withGroupId(loan.getGroupId()).withLoanId(loanId)
                 .with(changes).build();
     }
