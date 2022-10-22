@@ -164,6 +164,22 @@ final class LoanTransactionsApiResourceSwagger {
         public String reversalExternalId;
         @Schema(example = "[2012, 5, 18]")
         public LocalDate reversedOnDate;
+        @Schema(example = "1000.00")
+        public Double netDisbursalAmount;
+        @Schema(example = "240.00")
+        public Double principalPortion;
+        @Schema(example = "23.90")
+        public Double feeChargesPortion;
+        @Schema(example = "12.80")
+        public Double penaltyChargesPortion;
+        @Schema(example = "33.00")
+        public Double overpaymentPortion;
+        @Schema(example = "55.50")
+        public Double unrecognizedIncomePortion;
+        @Schema(example = "100.00")
+        public Double outstandingLoanBalance;
+        @Schema(example = "[2012, 5, 18]")
+        public LocalDate possibleNextRepaymentDate;
         public Set<GetLoanTransactionRelation> transactionRelations;
     }
 

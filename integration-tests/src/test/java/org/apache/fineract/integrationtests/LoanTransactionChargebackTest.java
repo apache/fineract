@@ -97,11 +97,12 @@ public class LoanTransactionChargebackTest {
         assertNotNull(getLoansLoanIdResponse);
         loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.closed.obligations.met");
 
-        reviewLoanTransactionRelations(loanId, transactionId, 0);
+        reviewLoanTransactionRelations(loanId, transactionId, 0, Double.valueOf("0.00"));
 
         final Integer chargebackTransactionId = applyChargebackTransaction(loanId, transactionId, "1000.00", 0, responseSpec);
 
-        reviewLoanTransactionRelations(loanId, chargebackTransactionId, 1);
+        reviewLoanTransactionRelations(loanId, transactionId, 1, Double.valueOf("0.00"));
+        reviewLoanTransactionRelations(loanId, chargebackTransactionId, 0, Double.valueOf("1000.00"));
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
@@ -138,10 +139,11 @@ public class LoanTransactionChargebackTest {
                 loanId);
         assertNotNull(loanIdTransactionsResponse);
         final Integer transactionId = loanIdTransactionsResponse.getResourceId();
-        reviewLoanTransactionRelations(loanId, transactionId, 0);
+        reviewLoanTransactionRelations(loanId, transactionId, 0, Double.valueOf("666.67"));
 
         final Integer chargebackTransactionId = applyChargebackTransaction(loanId, transactionId, amount.toString(), 0, responseSpec);
-        reviewLoanTransactionRelations(loanId, transactionId, 1);
+        reviewLoanTransactionRelations(loanId, transactionId, 1, Double.valueOf("666.67"));
+        reviewLoanTransactionRelations(loanId, chargebackTransactionId, 0, Double.valueOf("1000.00"));
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
@@ -203,11 +205,12 @@ public class LoanTransactionChargebackTest {
         assertNotNull(getLoansLoanIdResponse);
         loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.closed.obligations.met");
 
-        reviewLoanTransactionRelations(loanId, transactionId, 0);
+        reviewLoanTransactionRelations(loanId, transactionId, 0, Double.valueOf("0.00"));
 
         Integer chargebackTransactionId = applyChargebackTransaction(loanId, transactionId, "500.00", 0, responseSpec);
 
-        reviewLoanTransactionRelations(loanId, transactionId, 1);
+        reviewLoanTransactionRelations(loanId, transactionId, 1, Double.valueOf("0.00"));
+        reviewLoanTransactionRelations(loanId, chargebackTransactionId, 0, Double.valueOf("500.00"));
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
@@ -231,7 +234,8 @@ public class LoanTransactionChargebackTest {
 
         chargebackTransactionId = applyChargebackTransaction(loanId, transactionId, "300.00", 0, responseSpec);
 
-        reviewLoanTransactionRelations(loanId, transactionId, 2);
+        reviewLoanTransactionRelations(loanId, transactionId, 2, Double.valueOf("0.00"));
+        reviewLoanTransactionRelations(loanId, chargebackTransactionId, 0, Double.valueOf("800.00"));
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
@@ -274,11 +278,12 @@ public class LoanTransactionChargebackTest {
         assertNotNull(getLoansLoanIdResponse);
         loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.overpaid");
 
-        reviewLoanTransactionRelations(loanId, transactionId, 0);
+        reviewLoanTransactionRelations(loanId, transactionId, 0, Double.valueOf("0.00"));
 
         final Integer chargebackTransactionId = applyChargebackTransaction(loanId, transactionId, "200.00", 0, responseSpec);
 
-        reviewLoanTransactionRelations(loanId, chargebackTransactionId, 1);
+        reviewLoanTransactionRelations(loanId, transactionId, 1, Double.valueOf("0.00"));
+        reviewLoanTransactionRelations(loanId, chargebackTransactionId, 0, Double.valueOf("100.00"));
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
@@ -307,11 +312,12 @@ public class LoanTransactionChargebackTest {
         assertNotNull(getLoansLoanIdResponse);
         loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.overpaid");
 
-        reviewLoanTransactionRelations(loanId, transactionId, 0);
+        reviewLoanTransactionRelations(loanId, transactionId, 0, Double.valueOf("0.00"));
 
         final Integer chargebackTransactionId = applyChargebackTransaction(loanId, transactionId, "100.00", 0, responseSpec);
 
-        reviewLoanTransactionRelations(loanId, chargebackTransactionId, 1);
+        reviewLoanTransactionRelations(loanId, transactionId, 1, Double.valueOf("0.00"));
+        reviewLoanTransactionRelations(loanId, chargebackTransactionId, 0, Double.valueOf("0.00"));
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
@@ -340,11 +346,12 @@ public class LoanTransactionChargebackTest {
         assertNotNull(getLoansLoanIdResponse);
         loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.overpaid");
 
-        reviewLoanTransactionRelations(loanId, transactionId, 0);
+        reviewLoanTransactionRelations(loanId, transactionId, 0, Double.valueOf("0.00"));
 
         final Integer chargebackTransactionId = applyChargebackTransaction(loanId, transactionId, "50.00", 0, responseSpec);
 
-        reviewLoanTransactionRelations(loanId, chargebackTransactionId, 1);
+        reviewLoanTransactionRelations(loanId, transactionId, 1, Double.valueOf("0.00"));
+        reviewLoanTransactionRelations(loanId, chargebackTransactionId, 0, Double.valueOf("0.00"));
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
@@ -374,7 +381,7 @@ public class LoanTransactionChargebackTest {
         loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.closed.obligations.met");
 
         // First round, empty array
-        reviewLoanTransactionRelations(loanId, transactionId, 0);
+        reviewLoanTransactionRelations(loanId, transactionId, 0, Double.valueOf("0.00"));
 
         applyChargebackTransaction(loanId, transactionId, "200.00", 0, responseSpec);
 
@@ -384,7 +391,7 @@ public class LoanTransactionChargebackTest {
         evaluateLoanSummaryAdjustments(getLoansLoanIdResponse, Double.valueOf("200.00"));
 
         // Second round, array size equal to 1
-        reviewLoanTransactionRelations(loanId, transactionId, 1);
+        reviewLoanTransactionRelations(loanId, transactionId, 1, Double.valueOf("0.00"));
 
         applyChargebackTransaction(loanId, transactionId, "300.00", 1, responseSpec);
 
@@ -394,7 +401,7 @@ public class LoanTransactionChargebackTest {
         evaluateLoanSummaryAdjustments(getLoansLoanIdResponse, Double.valueOf("500.00"));
 
         // Third round, array size equal to 2
-        reviewLoanTransactionRelations(loanId, transactionId, 2);
+        reviewLoanTransactionRelations(loanId, transactionId, 2, Double.valueOf("0.00"));
 
         applyChargebackTransaction(loanId, transactionId, "500.00", 0, responseSpec);
 
@@ -465,13 +472,19 @@ public class LoanTransactionChargebackTest {
         return postLoansTransactionCommandResponse.getResourceId();
     }
 
-    private void reviewLoanTransactionRelations(final Integer loanId, final Integer transactionId, final Integer expectedSize) {
+    private void reviewLoanTransactionRelations(final Integer loanId, final Integer transactionId, final Integer expectedSize,
+            final Double outstandingBalance) {
+        log.info("Loan Transaction Id: {} {}", loanId, transactionId);
+
         GetLoansLoanIdTransactionsTransactionIdResponse getLoansTransactionResponse = loanTransactionHelper.getLoanTransaction(loanId,
                 transactionId);
+        log.info("Loan with {} Chargeback Transactions and balance {}", getLoansTransactionResponse.getTransactionRelations().size(),
+                getLoansTransactionResponse.getOutstandingLoanBalance());
         assertNotNull(getLoansTransactionResponse);
         assertNotNull(getLoansTransactionResponse.getTransactionRelations());
         assertEquals(expectedSize, getLoansTransactionResponse.getTransactionRelations().size());
-        log.info("Loan with {} Chargeback Transactions", getLoansTransactionResponse.getTransactionRelations().size());
+        // Outstanding amount
+        assertEquals(outstandingBalance, getLoansTransactionResponse.getOutstandingLoanBalance());
     }
 
     private void evaluateLoanSummaryAdjustments(GetLoansLoanIdResponse getLoansLoanIdResponse, Double amountExpected) {
