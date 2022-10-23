@@ -31,6 +31,8 @@ public class FineractProperties {
 
     private String nodeId;
 
+    private String idempotencyKeyHeaderName;
+
     private FineractTenantProperties tenant;
 
     private FineractModeProperties mode;

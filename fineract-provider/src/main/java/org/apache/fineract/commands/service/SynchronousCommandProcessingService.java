@@ -38,6 +38,7 @@ import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.commands.provider.CommandHandlerProvider;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
@@ -49,6 +50,9 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Service
 @Slf4j
@@ -62,8 +66,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     private final CommandSourceRepository commandSourceRepository;
     private final ConfigurationDomainService configurationDomainService;
     private final CommandHandlerProvider commandHandlerProvider;
-
     private final IdempotencyKeyGenerator idempotencyKeyGenerator;
+    private final FineractProperties fineractProperties;
 
     @Transactional
     @Override
@@ -90,8 +94,19 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                     .orElseThrow(() -> new CommandNotFoundException(command.commandId()));
             commandSourceResult.markAsChecked(maker);
         } else {
+            String requestIdempotencyKey = null;
+            RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+            if (requestAttributes != null) {
+                if (requestAttributes instanceof ServletRequestAttributes) {
+                    requestIdempotencyKey = ((ServletRequestAttributes) requestAttributes).getRequest()
+                            .getHeader(fineractProperties.getIdempotencyKeyHeaderName());
+                }
+            }
+
             commandSourceResult = CommandSource.fullEntryFrom(wrapper, command, maker,
-                    wrapper.getIdempotencyKey() == null ? idempotencyKeyGenerator.create() : wrapper.getIdempotencyKey());
+                    wrapper.getIdempotencyKey() == null
+                            ? (requestIdempotencyKey == null ? idempotencyKeyGenerator.create() : requestIdempotencyKey)
+                            : wrapper.getIdempotencyKey());
         }
         commandSourceResult.updateResourceId(result.getResourceId());
         commandSourceResult.updateForAudit(result.getOfficeId(), result.getGroupId(), result.getClientId(), result.getLoanId(),
