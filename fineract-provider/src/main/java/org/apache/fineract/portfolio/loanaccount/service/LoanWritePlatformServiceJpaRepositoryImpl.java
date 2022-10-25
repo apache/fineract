@@ -3312,7 +3312,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Map<String, Object> changes = new LinkedHashMap<>();
 
         if (!loan.isOpen()) {
-            throw new PlatformServiceUnavailableException("error.msg.loan.mark.as.fraud.not.allowed",
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.mark.as.fraud.not.allowed",
                     "Loan Id: " + loanId + " mark as fraud is not allowed as loan status is not active", loan.getStatus().getCode());
         }
 
