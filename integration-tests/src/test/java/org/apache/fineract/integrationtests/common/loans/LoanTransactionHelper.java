@@ -22,8 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.linecorp.armeria.internal.shaded.guava.reflect.TypeToken;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.io.ByteArrayInputStream;
@@ -850,7 +850,7 @@ public class LoanTransactionHelper {
         map.put("interestType", "0");
         map.put("interestCalculationPeriodType", "1");
         map.put("expectedDisbursementDate", "20 September 2011");
-        map.put("transactionProcessingStrategyId", "1");
+        map.put("transactionProcessingStrategyCode", "mifos-standard-strategy");
         return new Gson().toJson(map);
     }
 

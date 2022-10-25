@@ -40,11 +40,11 @@ public class LoanProductTestBuilder {
     private static final String EQUAL_INSTALLMENTS = "1";
     private static final String DECLINING_BALANCE = "0";
     private static final String FLAT_BALANCE = "1";
-    public static final String DEFAULT_STRATEGY = "1";
-    public static final String INTEREST_PRINCIPAL_PENALTIES_FEES_ORDER_STRATEGY = "6";
-    // private static final String HEAVENS_FAMILY_STRATEGY ="2";
-    // private static final String CREO_CORE_STRATEGY ="3";
-    public static final String RBI_INDIA_STRATEGY = "4";
+    public static final String DEFAULT_STRATEGY = "mifos-standard-strategy";
+    public static final String INTEREST_PRINCIPAL_PENALTIES_FEES_ORDER_STRATEGY = "interest-principal-penalties-fees-order-strategy";
+    // private static final String HEAVENS_FAMILY_STRATEGY ="heavensfamily-strategy";
+    // private static final String CREO_CORE_STRATEGY ="creocore-strategy";
+    public static final String RBI_INDIA_STRATEGY = "rbi-india-strategy";
 
     public static final String RECALCULATION_FREQUENCY_TYPE_SAME_AS_REPAYMENT_PERIOD = "1";
     public static final String RECALCULATION_FREQUENCY_TYPE_DAILY = "2";
@@ -83,7 +83,7 @@ public class LoanProductTestBuilder {
     private String overdueDaysForNPA = "5";
     private String interestCalculationPeriodType = CALCULATION_PERIOD_SAME_AS_REPAYMENT_PERIOD;
     private String inArrearsTolerance = "0";
-    private String transactionProcessingStrategy = DEFAULT_STRATEGY;
+    private String transactionProcessingStrategyCode = DEFAULT_STRATEGY;
     private String accountingRule = NONE;
     private final String currencyCode = USD;
     private String amortizationType = EQUAL_INSTALLMENTS;
@@ -166,7 +166,7 @@ public class LoanProductTestBuilder {
         map.put("interestType", this.interestType);
         map.put("interestCalculationPeriodType", this.interestCalculationPeriodType);
         map.put("inArrearsTolerance", this.inArrearsTolerance);
-        map.put("transactionProcessingStrategyId", this.transactionProcessingStrategy);
+        map.put("transactionProcessingStrategyCode", this.transactionProcessingStrategyCode);
         map.put("accountingRule", this.accountingRule);
         map.put("minPrincipal", this.minPrincipal);
         map.put("maxPrincipal", this.maxPrincipal);
@@ -488,7 +488,7 @@ public class LoanProductTestBuilder {
     }
 
     public LoanProductTestBuilder withRepaymentStrategy(final String transactionProcessingStrategy) {
-        this.transactionProcessingStrategy = transactionProcessingStrategy;
+        this.transactionProcessingStrategyCode = transactionProcessingStrategy;
         return this;
     }
 

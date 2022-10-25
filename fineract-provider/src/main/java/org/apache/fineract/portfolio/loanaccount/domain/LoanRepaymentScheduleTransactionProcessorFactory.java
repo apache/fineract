@@ -18,56 +18,39 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import java.util.List;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.CreocoreLoanRepaymentScheduleTransactionProcessor;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.EarlyPaymentLoanRepaymentScheduleTransactionProcessor;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.FineractStyleLoanRepaymentScheduleTransactionProcessor;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.HeavensFamilyLoanRepaymentScheduleTransactionProcessor;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.RBILoanRepaymentScheduleTransactionProcessor;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
-import org.springframework.stereotype.Component;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionProcessingStrategyNotFoundException;
+import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrategyData;
+import org.springframework.beans.factory.annotation.Value;
 
-@Component
+@Slf4j
+@RequiredArgsConstructor
 public class LoanRepaymentScheduleTransactionProcessorFactory {
 
-    public LoanRepaymentScheduleTransactionProcessor determineProcessor(
-            final LoanTransactionProcessingStrategy transactionProcessingStrategy) {
+    private final LoanRepaymentScheduleTransactionProcessor defaultLoanRepaymentScheduleTransactionProcessor;
 
-        LoanRepaymentScheduleTransactionProcessor processor = new PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor();
+    private final List<LoanRepaymentScheduleTransactionProcessor> processors;
 
-        if (transactionProcessingStrategy != null) {
+    @Value("${fineract.loan.transactionprocessor.error-not-found-fail}")
+    private Boolean errorNotFoundFail;
 
-            if (transactionProcessingStrategy.isStandardStrategy()) {
-                processor = new FineractStyleLoanRepaymentScheduleTransactionProcessor();
-            }
+    public LoanRepaymentScheduleTransactionProcessor determineProcessor(final String transactionProcessingStrategy) {
 
-            if (transactionProcessingStrategy.isHeavensfamilyStrategy()) {
-                processor = new HeavensFamilyLoanRepaymentScheduleTransactionProcessor();
-            }
+        Optional<LoanRepaymentScheduleTransactionProcessor> processor = processors.stream()
+                .filter(p -> p.accept(transactionProcessingStrategy)).findFirst();
 
-            if (transactionProcessingStrategy.isEarlyPaymentStrategy()) {
-                processor = new EarlyPaymentLoanRepaymentScheduleTransactionProcessor();
-            }
-
-            if (transactionProcessingStrategy.isCreocoreStrategy()) {
-                processor = new CreocoreLoanRepaymentScheduleTransactionProcessor();
-            }
-
-            if (transactionProcessingStrategy.isIndianRBIStrategy()) {
-                processor = new RBILoanRepaymentScheduleTransactionProcessor();
-            }
-
-            if (transactionProcessingStrategy.isPrincipalInterestPenaltiesFeesOrderStrategy()) {
-                processor = new PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor();
-            }
-
-            if (transactionProcessingStrategy.isInterestPrincipalPenaltiesFeesOrderStrategy()) {
-                processor = new InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor();
-            }
+        if (processor.isEmpty() && Boolean.TRUE.equals(errorNotFoundFail)) {
+            throw new LoanTransactionProcessingStrategyNotFoundException(transactionProcessingStrategy);
+        } else {
+            return processor.orElse(defaultLoanRepaymentScheduleTransactionProcessor);
         }
+    }
 
-        return processor;
+    public List<TransactionProcessingStrategyData> getStrategies() {
+        return processors.stream().map(p -> new TransactionProcessingStrategyData(null, p.getCode(), p.getName())).toList();
     }
 }

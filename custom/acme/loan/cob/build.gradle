@@ -18,8 +18,8 @@
  */
 description = 'ACME Corp.: Fineract COB Loan'
 
-group = 'com.acme.fineract.cob'
+group = 'com.acme.fineract'
 
-archivesBaseName = 'acme-fineract-cob-loan'
+archivesBaseName = 'acme-fineract-loan-cob'
 
 apply from: 'dependencies.gradle'

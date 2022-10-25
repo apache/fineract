@@ -49,7 +49,7 @@ public interface LoanApiConstants {
     String rejectedOnDateParameterName = "rejectedOnDate";
     String withdrawnOnDateParameterName = "withdrawnOnDate";
 
-    String transactionProcessingStrategyIdParameterName = "transactionProcessingStrategyId";
+    String transactionProcessingStrategyCodeParameterName = "transactionProcessingStrategyCode";
     String loanPurposeIdParameterName = "loanPurposeId";
     String loanOfficerIdParameterName = "loanOfficerId";
     String fundIdParameterName = "fundId";
@@ -69,6 +69,7 @@ public interface LoanApiConstants {
     String interestCalculationPeriodTypeParameterName = "interestCalculationPeriodType";
     String interestTypeParameterName = "interestType";
     String amortizationTypeParameterName = "amortizationType";
+    String amortizationTypeOptionsParameterName = "amortizationTypeOptions";
     String repaymentFrequencyTypeParameterName = "repaymentFrequencyType";
     String loanTermFrequencyTypeParameterName = "loanTermFrequencyType";
     String loanTermFrequencyParameterName = "loanTermFrequency";

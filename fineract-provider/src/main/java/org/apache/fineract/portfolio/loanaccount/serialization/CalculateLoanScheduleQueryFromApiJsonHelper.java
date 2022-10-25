@@ -48,7 +48,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
             LoanApiConstants.clientIdParameterName, LoanApiConstants.groupIdParameterName, LoanApiConstants.loanTypeParameterName,
             LoanApiConstants.calendarIdParameterName, LoanApiConstants.productIdParameterName, LoanApiConstants.accountNoParameterName,
             LoanApiConstants.externalIdParameterName, LoanApiConstants.fundIdParameterName, LoanApiConstants.loanOfficerIdParameterName,
-            LoanApiConstants.loanPurposeIdParameterName, LoanApiConstants.transactionProcessingStrategyIdParameterName,
+            LoanApiConstants.loanPurposeIdParameterName, LoanApiConstants.transactionProcessingStrategyCodeParameterName,
             LoanApiConstants.principalParamName, LoanApiConstants.inArrearsToleranceParameterName,
             LoanApiConstants.interestRatePerPeriodParameterName, LoanApiConstants.repaymentEveryParameterName,
             LoanApiConstants.numberOfRepaymentsParameterName, LoanApiConstants.loanTermFrequencyParameterName,

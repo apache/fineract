@@ -43,8 +43,8 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
     @Column(name = "interest_method_enum")
     private Boolean interestType;
 
-    @Column(name = "loan_transaction_strategy_id")
-    private Boolean transactionProcessingStrategyId;
+    @Column(name = "loan_transaction_strategy_code")
+    private Boolean transactionProcessingStrategyCode;
 
     @Column(name = "interest_calculated_in_period_enum")
     private Boolean interestCalculationPeriodType;
@@ -62,7 +62,7 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
     private Boolean graceOnArrearsAgeing;
 
     private static final String[] supportedLoanConfigurableAttributes = { LoanProductConstants.amortizationTypeParamName,
-            LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyIdParamName,
+            LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyCodeParamName,
             LoanProductConstants.interestCalculationPeriodTypeParamName, LoanProductConstants.inArrearsToleranceParamName,
             LoanProductConstants.repaymentEveryParamName, LoanProductConstants.graceOnPrincipalAndInterestPaymentParamName,
             LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME };
@@ -77,7 +77,7 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
                 .getAsJsonPrimitive(LoanProductConstants.interestTypeParamName).getAsBoolean();
         final Boolean transactionProcessingStrategy = command.parsedJson().getAsJsonObject()
                 .getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName)
-                .getAsJsonPrimitive(LoanProductConstants.transactionProcessingStrategyIdParamName).getAsBoolean();
+                .getAsJsonPrimitive(LoanProductConstants.transactionProcessingStrategyCodeParamName).getAsBoolean();
         final Boolean interestCalcPeriod = command.parsedJson().getAsJsonObject()
                 .getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName)
                 .getAsJsonPrimitive(LoanProductConstants.interestCalculationPeriodTypeParamName).getAsBoolean();
@@ -116,7 +116,7 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
                 arrearsTolerance, repaymentEvery, graceOnPrincipalAndInterestPayment, graceOnArrearsAging);
     }
 
-    public LoanProductConfigurableAttributes(Boolean amortization, Boolean interestMethod, Boolean transactionProcessingStrategy,
+    public LoanProductConfigurableAttributes(Boolean amortization, Boolean interestMethod, Boolean transactionProcessingStrategyCode,
             Boolean interestCalcPeriod, Boolean arrearsTolerance, Boolean repaymentEvery, Boolean graceOnPrincipalAndInterestPayment,
             Boolean graceOnArrearsAging) {
         this.amortizationType = amortization;
@@ -126,7 +126,7 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
         this.interestCalculationPeriodType = interestCalcPeriod;
         this.graceOnPrincipalAndInterestPayment = graceOnPrincipalAndInterestPayment;
         this.repaymentEvery = repaymentEvery;
-        this.transactionProcessingStrategyId = transactionProcessingStrategy;
+        this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
     }
 
     protected LoanProductConfigurableAttributes() {
@@ -150,7 +150,7 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
     }
 
     public Boolean getTransactionProcessingStrategyBoolean() {
-        return transactionProcessingStrategyId;
+        return transactionProcessingStrategyCode;
     }
 
     public Boolean getInterestCalcPeriodBoolean() {
@@ -185,8 +185,8 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
         this.interestType = interestType;
     }
 
-    public void setTransactionProcessingStrategyId(Boolean transactionProcessingStrategyId) {
-        this.transactionProcessingStrategyId = transactionProcessingStrategyId;
+    public void setTransactionProcessingStrategyCode(Boolean transactionProcessingStrategyCode) {
+        this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
     }
 
     public void setInterestCalculationPeriodType(Boolean interestCalculationPeriodType) {
@@ -223,7 +223,7 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
 
         return Objects.equals(loanProduct, that.loanProduct) && Objects.equals(amortizationType, that.amortizationType)
                 && Objects.equals(interestType, that.interestType)
-                && Objects.equals(transactionProcessingStrategyId, that.transactionProcessingStrategyId)
+                && Objects.equals(transactionProcessingStrategyCode, that.transactionProcessingStrategyCode)
                 && Objects.equals(interestCalculationPeriodType, that.interestCalculationPeriodType)
                 && Objects.equals(inArrearsTolerance, that.inArrearsTolerance) && Objects.equals(repaymentEvery, that.repaymentEvery)
                 && Objects.equals(graceOnPrincipalAndInterestPayment, that.graceOnPrincipalAndInterestPayment)
@@ -232,7 +232,7 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
 
     @Override
     public int hashCode() {
-        return Objects.hash(loanProduct, amortizationType, interestType, transactionProcessingStrategyId, interestCalculationPeriodType,
+        return Objects.hash(loanProduct, amortizationType, interestType, transactionProcessingStrategyCode, interestCalculationPeriodType,
                 inArrearsTolerance, repaymentEvery, graceOnPrincipalAndInterestPayment, graceOnArrearsAgeing);
     }
 }

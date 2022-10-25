@@ -958,8 +958,8 @@ final class LoansApiResourceSwagger {
         public BigDecimal fixedPrincipalPercentagePerInstallment;
         public GetLoansLoanIdInterestType interestType;
         public GetLoansLoanIdInterestCalculationPeriodType interestCalculationPeriodType;
-        @Schema(example = "2")
-        public Integer transactionProcessingStrategyId;
+        @Schema(example = "mifos-standard-strategy")
+        public String transactionProcessingStrategyCode;
         public GetLoansLoanIdTimeline timeline;
         public GetLoansLoanIdSummary summary;
         public GetLoansLoanIdRepaymentSchedule repaymentSchedule;
@@ -1033,8 +1033,8 @@ final class LoansApiResourceSwagger {
         public Integer interestCalculationPeriodType;
         @Schema(example = "20 September 2011")
         public String expectedDisbursementDate;
-        @Schema(example = "2")
-        public Integer transactionProcessingStrategyId;
+        @Schema(example = "mifos-standard-strategy")
+        public String transactionProcessingStrategyCode;
         @Schema(example = "360", allowableValues = "1, 360, 364, 36")
         public Integer daysInYearType;
         @Schema(example = "individual")
@@ -1155,8 +1155,8 @@ final class LoansApiResourceSwagger {
         public BigDecimal fixedPrincipalPercentagePerInstallment;
         @Schema(example = "04 March 2014")
         public String expectedDisbursementDate;
-        @Schema(example = "1")
-        public Integer transactionProcessingStrategyId;
+        @Schema(example = "mifos-standard-strategy")
+        public String transactionProcessingStrategyCode;
         @Schema(example = "1")
         public Long linkAccountId;
         @Schema(example = "true")

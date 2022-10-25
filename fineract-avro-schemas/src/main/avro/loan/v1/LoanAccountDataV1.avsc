@@ -341,10 +341,10 @@
         },
         {
             "default": null,
-            "name": "transactionProcessingStrategyId",
+            "name": "transactionProcessingStrategyCode",
             "type": [
                 "null",
-                "long"
+                "string"
             ]
         },
         {

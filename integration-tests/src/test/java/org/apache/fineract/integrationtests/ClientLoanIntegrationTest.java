@@ -6299,7 +6299,7 @@ public class ClientLoanIntegrationTest {
     private void validateIfValuesAreNotOverridden(Integer loanID, Integer loanProductID) {
         String loanProductDetails = this.loanTransactionHelper.getLoanProductDetails(this.requestSpec, this.responseSpec, loanProductID);
         String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        List<String> comparisonAttributes = Arrays.asList("amortizationType", "interestType", "transactionProcessingStrategyId",
+        List<String> comparisonAttributes = Arrays.asList("amortizationType", "interestType", "transactionProcessingStrategyCode",
                 "interestCalculationPeriodType", "repaymentFrequencyType", "graceOnPrincipalPayment", "graceOnInterestPayment",
                 "inArrearsTolerance", "graceOnArrearsAgeing");
 
@@ -6313,7 +6313,7 @@ public class ClientLoanIntegrationTest {
     private JsonObject createLoanProductConfigurationDetail(JsonObject loanProductConfiguration, Boolean bool) {
         loanProductConfiguration.addProperty("amortizationType", bool);
         loanProductConfiguration.addProperty("interestType", bool);
-        loanProductConfiguration.addProperty("transactionProcessingStrategyId", bool);
+        loanProductConfiguration.addProperty("transactionProcessingStrategyCode", bool);
         loanProductConfiguration.addProperty("interestCalculationPeriodType", bool);
         loanProductConfiguration.addProperty("inArrearsTolerance", bool);
         loanProductConfiguration.addProperty("repaymentEvery", bool);

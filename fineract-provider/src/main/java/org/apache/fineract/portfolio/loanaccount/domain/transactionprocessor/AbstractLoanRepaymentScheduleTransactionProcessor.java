@@ -55,6 +55,11 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.imp
  */
 public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implements LoanRepaymentScheduleTransactionProcessor {
 
+    @Override
+    public boolean accept(String s) {
+        return getCode().equalsIgnoreCase(s) || getName().equalsIgnoreCase(s);
+    }
+
     /**
      * Provides support for passing all {@link LoanTransaction}'s so it will completely re-process the entire loan
      * schedule. This is required in cases where the {@link LoanTransaction} being processed is in the past and falls

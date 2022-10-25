@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -48,28 +50,25 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanCollateralManagementData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidAmountOfCollateralQuantity;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+@Slf4j
+@RequiredArgsConstructor
 @Service
 public class LoanImportHandler implements ImportHandler {
 
     public static final String EMPTY_STR = "";
-    private static final Logger LOG = LoggerFactory.getLogger(LoanImportHandler.class);
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
-    @Autowired
-    public LoanImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    }
+    private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
 
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
@@ -234,24 +233,17 @@ public class LoanImportHandler implements ImportHandler {
         if (ImportHandlerUtils.readAsDouble(LoanConstants.ARREARS_TOLERANCE_COL, row) != null) {
             arrearsTolerance = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(LoanConstants.ARREARS_TOLERANCE_COL, row));
         }
-        String repaymentStrategy = ImportHandlerUtils.readAsString(LoanConstants.REPAYMENT_STRATEGY_COL, row);
-        Long repaymentStrategyId = null;
-        if (repaymentStrategy != null) {
-            if (repaymentStrategy.equalsIgnoreCase("Penalties, Fees, Interest, Principal order")) {
-                repaymentStrategyId = 1L;
-            } else if (repaymentStrategy.equalsIgnoreCase("HeavensFamily Unique")) {
-                repaymentStrategyId = 2L;
-            } else if (repaymentStrategy.equalsIgnoreCase("Creocore Unique")) {
-                repaymentStrategyId = 3L;
-            } else if (repaymentStrategy.equalsIgnoreCase("Overdue/Due Fee/Int,Principal")) {
-                repaymentStrategyId = 4L;
-            } else if (repaymentStrategy.equalsIgnoreCase("Principal, Interest, Penalties, Fees Order")) {
-                repaymentStrategyId = 5L;
-            } else if (repaymentStrategy.equalsIgnoreCase("Interest, Principal, Penalties, Fees Order")) {
-                repaymentStrategyId = 6L;
-            } else if (repaymentStrategy.equalsIgnoreCase("Early Repayment Strategy")) {
-                repaymentStrategyId = 7L;
-            }
+
+        String loanRepaymentScheduleTransactionProcessorStrategy = ImportHandlerUtils.readAsString(LoanConstants.REPAYMENT_STRATEGY_COL,
+                row);
+
+        LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
+                .determineProcessor(loanRepaymentScheduleTransactionProcessorStrategy);
+
+        String repaymentStrategyCode = "mifos-standard-strategy";
+
+        if (loanRepaymentScheduleTransactionProcessor != null) {
+            repaymentStrategyCode = loanRepaymentScheduleTransactionProcessor.getCode();
         }
         Integer graceOnPrincipalPayment = ImportHandlerUtils.readAsInt(LoanConstants.GRACE_ON_PRINCIPAL_PAYMENT_COL, row);
         Integer graceOnInterestPayment = ImportHandlerUtils.readAsInt(LoanConstants.GRACE_ON_INTEREST_PAYMENT_COL, row);
@@ -355,7 +347,7 @@ public class LoanImportHandler implements ImportHandler {
                 return LoanAccountData.importInstanceIndividual(loanTypeEnumOption, clientId, productId, loanOfficerId, submittedOnDate,
                         fundId, principal, numberOfRepayments, repaidEvery, repaidEveryFrequencyEnums, loanTerm, loanTermFrequencyEnum,
                         nominalInterestRate, submittedOnDate, amortizationEnumOption, interestMethodEnum, interestCalculationPeriodEnum,
-                        arrearsTolerance, repaymentStrategyId, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
+                        arrearsTolerance, repaymentStrategyCode, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
                         interestChargedFromDate, firstRepaymentOnDate, row.getRowNum(), externalId, null, charges, linkAccountId, locale,
                         dateFormat, loanCollateralManagementData);
             } else if (loanType.equals("jlg")) {
@@ -364,7 +356,7 @@ public class LoanImportHandler implements ImportHandler {
                 return LoanAccountData.importInstanceIndividual(loanTypeEnumOption, clientId, productId, loanOfficerId, submittedOnDate,
                         fundId, principal, numberOfRepayments, repaidEvery, repaidEveryFrequencyEnums, loanTerm, loanTermFrequencyEnum,
                         nominalInterestRate, submittedOnDate, amortizationEnumOption, interestMethodEnum, interestCalculationPeriodEnum,
-                        arrearsTolerance, repaymentStrategyId, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
+                        arrearsTolerance, repaymentStrategyCode, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
                         interestChargedFromDate, firstRepaymentOnDate, row.getRowNum(), externalId, groupId, charges, linkAccountId, locale,
                         dateFormat, null);
             } else {
@@ -373,7 +365,7 @@ public class LoanImportHandler implements ImportHandler {
                 return LoanAccountData.importInstanceGroup(loanTypeEnumOption, groupIdforGroupLoan, productId, loanOfficerId,
                         submittedOnDate, fundId, principal, numberOfRepayments, repaidEvery, repaidEveryFrequencyEnums, loanTerm,
                         loanTermFrequencyEnum, nominalInterestRate, amortizationEnumOption, interestMethodEnum,
-                        interestCalculationPeriodEnum, arrearsTolerance, repaymentStrategyId, graceOnPrincipalPayment,
+                        interestCalculationPeriodEnum, arrearsTolerance, repaymentStrategyCode, graceOnPrincipalPayment,
                         graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, firstRepaymentOnDate, row.getRowNum(),
                         externalId, linkAccountId, locale, dateFormat);
             }
@@ -426,7 +418,7 @@ public class LoanImportHandler implements ImportHandler {
                 statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
             } catch (RuntimeException ex) {
                 errorCount++;
-                LOG.error("Problem occurred in importEntity function", ex);
+                log.error("Problem occurred in importEntity function", ex);
                 errorMessage = ImportHandlerUtils.getErrorMessage(ex);
                 writeLoanErrorMessage(workbook, loanId, errorMessage, progressLevel, statusCell, errorReportCell, row);
             }

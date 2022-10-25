@@ -18,11 +18,25 @@
  */
 package com.acme.fineract.loan.starter;
 
+import com.acme.fineract.loan.processor.AcmeLoanRepaymentScheduleTransactionProcessor;
+import java.util.List;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ComponentScans;
 
 @AutoConfiguration
-@ComponentScan("com.acme.fineract.loan.cob")
+@ComponentScans({ @ComponentScan("com.acme.fineract.loan.cob"), @ComponentScan("com.acme.fineract.loan.processor") })
 @ConditionalOnProperty("acme.loan.enabled")
-public class AcmeLoanAutoConfiguration {}
+public class AcmeLoanAutoConfiguration {
+
+    @Bean
+    public LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory(
+            AcmeLoanRepaymentScheduleTransactionProcessor defaultLoanRepaymentScheduleTransactionProcessor,
+            List<LoanRepaymentScheduleTransactionProcessor> processors) {
+        return new LoanRepaymentScheduleTransactionProcessorFactory(defaultLoanRepaymentScheduleTransactionProcessor, processors);
+    }
+}

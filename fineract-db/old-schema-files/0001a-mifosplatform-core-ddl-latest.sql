@@ -68,7 +68,6 @@ DROP TABLE IF EXISTS `m_savings_account`;
 DROP TABLE IF EXISTS `m_savings_account_transaction`;
 DROP TABLE IF EXISTS `m_savings_product`;
 DROP TABLE IF EXISTS `m_staff`;
-DROP TABLE IF EXISTS `ref_loan_transaction_processing_strategy`;
 DROP TABLE IF EXISTS `x_registered_table`;
 
 -- drop reporting related tables
@@ -100,18 +99,6 @@ CREATE TABLE `m_organisation_currency` (
   `display_symbol` varchar(10) DEFAULT NULL,
   `internationalized_name_code` varchar(50) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
-
-CREATE TABLE `ref_loan_transaction_processing_strategy` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `code` varchar(100) DEFAULT NULL,
-  `name` varchar(255) DEFAULT NULL,
-  `createdby_id` BIGINT DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` BIGINT DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `ltp_strategy_code` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 CREATE TABLE `c_configuration` (
@@ -482,9 +469,7 @@ CREATE TABLE `m_product_loan` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `unq_name` (`name`),
   KEY `FKA6A8A7D77240145` (`fund_id`),
-  KEY `FK_ltp_strategy` (`loan_transaction_strategy_id`),
-  CONSTRAINT `FKA6A8A7D77240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`),
-  CONSTRAINT `FK_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`)
+  CONSTRAINT `FKA6A8A7D77240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 CREATE TABLE `m_product_loan_charge` (
@@ -575,7 +560,6 @@ CREATE TABLE `m_loan` (
   KEY `FKB6F935D87179A0CB` (`client_id`),
   KEY `FKB6F935D8C8D4B434` (`product_id`),
   KEY `FK7C885877240145` (`fund_id`),
-  KEY `FK_loan_ltp_strategy` (`loan_transaction_strategy_id`),
   KEY `FK_m_loan_m_staff` (`loan_officer_id`),
   KEY `group_id` (`group_id`),
   KEY `FK_m_loanpurpose_codevalue` (`loanpurpose_cv_id`),
@@ -591,7 +575,6 @@ CREATE TABLE `m_loan` (
   CONSTRAINT `FK_approvedon_userid` FOREIGN KEY (`approvedon_userid`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_closedon_userid` FOREIGN KEY (`closedon_userid`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_disbursedon_userid` FOREIGN KEY (`disbursedon_userid`) REFERENCES `m_appuser` (`id`),
-  CONSTRAINT `FK_loan_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`),
   CONSTRAINT `FK_m_loanpurpose_codevalue` FOREIGN KEY (`loanpurpose_cv_id`) REFERENCES `m_code_value` (`id`),
   CONSTRAINT `FK_m_loan_m_staff` FOREIGN KEY (`loan_officer_id`) REFERENCES `m_staff` (`id`),
   CONSTRAINT `FK_rejectedon_userid` FOREIGN KEY (`rejectedon_userid`) REFERENCES `m_appuser` (`id`),

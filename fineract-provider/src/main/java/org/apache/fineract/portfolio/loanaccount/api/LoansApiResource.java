@@ -32,6 +32,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -102,6 +103,7 @@ import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.collateralmanagement.data.LoanCollateralResponseData;
 import org.apache.fineract.portfolio.collateralmanagement.service.LoanCollateralManagementReadPlatformService;
+import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.delinquency.api.DelinquencyApiResourceSwagger;
 import org.apache.fineract.portfolio.delinquency.data.LoanDelinquencyTagHistoryData;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
@@ -121,6 +123,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.data.PaidInAdvanceData;
 import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTemplateTypeRequiredException;
 import org.apache.fineract.portfolio.loanaccount.exception.NotSupportedLoanTemplateTypeException;
@@ -191,7 +194,7 @@ import org.springframework.util.CollectionUtils;
         + "Example Values: 0=Daily, 1=Same as repayment period\n" + "allowPartialPeriodInterestCalcualtion\n"
         + "This value will be supported along with interestCalculationPeriodType as Same as repayment period to calculate interest for partial periods. Example: Interest charged from is 5th of April , Principal is 10000 and interest is 1% per month then the interest will be (10000 * 1%)* (25/30) , it calculates for the month first then calculates exact periods between start date and end date(can be a decimal)\n"
         + "inArrearsTolerance\n" + "The amount that can be 'waived' at end of all loan payments because it is too small to worry about.\n"
-        + "This is also the tolerance amount assessed when determining if a loan is in arrears.\n" + "transactionProcessingStrategyId\n"
+        + "This is also the tolerance amount assessed when determining if a loan is in arrears.\n" + "transactionProcessingStrategyCode\n"
         + "An enumeration that indicates the type of transaction processing strategy to be used. This relates to functionality that is also known as Payment Application Logic.\n"
         + "A number of out of the box approaches exist, some are custom to specific MFIs, some are more general and indicate the order in which payments are processed.\n"
         + "\n"
@@ -213,7 +216,7 @@ public class LoansApiResource {
             "clientId", "group", "loanProductId", "loanProductName", "loanProductDescription", "isLoanProductLinkedToFloatingRate",
             "fundId", "fundName", "loanPurposeId", "loanPurposeName", "loanOfficerId", "loanOfficerName", "currency", "principal",
             "totalOverpaid", "inArrearsTolerance", "termFrequency", "termPeriodFrequencyType", "numberOfRepayments", "repaymentEvery",
-            "interestRatePerPeriod", "annualInterestRate", "repaymentFrequencyType", "transactionProcessingStrategyId",
+            "interestRatePerPeriod", "annualInterestRate", "repaymentFrequencyType", "transactionProcessingStrategyCode",
             "transactionProcessingStrategyName", "interestRateFrequencyType", "amortizationType", "interestType",
             "interestCalculationPeriodType", LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME,
             "expectedFirstRepaymentOnDate", "graceOnPrincipalPayment", "recurringMoratoriumOnPrincipalPeriods", "graceOnInterestPayment",
@@ -345,11 +348,15 @@ public class LoansApiResource {
             if (templateType.equals("individual") || templateType.equals("jlg")) {
 
                 if (clientId == null) {
-                    newLoanAccount = newLoanAccount == null ? LoanAccountData.emptyTemplate() : newLoanAccount;
+                    newLoanAccount = newLoanAccount == null ? LoanAccountData.collateralTemplate(null) : newLoanAccount;
                 } else {
                     final LoanAccountData loanAccountClientDetails = this.loanReadPlatformService.retrieveClientDetailsTemplate(clientId);
 
-                    officeId = loanAccountClientDetails.officeId();
+                    officeId = loanAccountClientDetails.getClientOfficeId();
+
+                    if (officeId == null && loanAccountClientDetails.getGroup() != null) {
+                        officeId = loanAccountClientDetails.getGroup().getOfficeId();
+                    }
                     newLoanAccount = newLoanAccount == null ? loanAccountClientDetails
                             : LoanAccountData.populateClientDefaults(newLoanAccount, loanAccountClientDetails);
                 }
@@ -364,7 +371,7 @@ public class LoansApiResource {
             } else if (templateType.equals("group")) {
 
                 final LoanAccountData loanAccountGroupData = this.loanReadPlatformService.retrieveGroupDetailsTemplate(groupId);
-                officeId = loanAccountGroupData.groupOfficeId();
+                officeId = loanAccountGroupData.getGroup() != null ? loanAccountGroupData.getGroup().getOfficeId() : null;
                 calendarOptions = this.loanReadPlatformService.retrieveCalendars(groupId);
                 newLoanAccount = newLoanAccount == null ? loanAccountGroupData
                         : LoanAccountData.populateGroupDefaults(newLoanAccount, loanAccountGroupData);
@@ -373,7 +380,7 @@ public class LoansApiResource {
             } else if (templateType.equals("jlgbulk")) {
                 // get group details along with members in that group
                 final LoanAccountData loanAccountGroupData = this.loanReadPlatformService.retrieveGroupAndMembersDetailsTemplate(groupId);
-                officeId = loanAccountGroupData.groupOfficeId();
+                officeId = loanAccountGroupData.getGroup() != null ? loanAccountGroupData.getGroup().getOfficeId() : null;
                 calendarOptions = this.loanReadPlatformService.retrieveCalendars(groupId);
                 newLoanAccount = newLoanAccount == null ? loanAccountGroupData
                         : LoanAccountData.populateGroupDefaults(newLoanAccount, loanAccountGroupData);
@@ -471,7 +478,8 @@ public class LoansApiResource {
             loanBasicDetails = LoanAccountData.withInterestRecalculationCalendarData(loanBasicDetails, calendarData,
                     compoundingCalendarData);
         }
-        if (loanBasicDetails.isMonthlyRepaymentFrequencyType()) {
+        if (loanBasicDetails.getRepaymentFrequencyType() != null
+                && loanBasicDetails.getRepaymentFrequencyType().getId().intValue() == PeriodFrequencyType.MONTHS.getValue()) {
             Collection<CalendarData> loanCalendarDatas = this.calendarReadPlatformService.retrieveCalendarsByEntity(loanId,
                     CalendarEntityType.LOANS.getValue(), null);
             CalendarData calendarData = null;
@@ -542,9 +550,13 @@ public class LoansApiResource {
 
             if (associationParameters.contains(DataTableApiConstant.repaymentScheduleAssociateParamName)) {
                 mandatoryResponseParameters.add(DataTableApiConstant.repaymentScheduleAssociateParamName);
-                final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData = loanBasicDetails.repaymentScheduleRelatedData();
+                final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData = loanBasicDetails.getTimeline()
+                        .repaymentScheduleRelatedData(loanBasicDetails.getCurrency(), loanBasicDetails.getPrincipal(),
+                                loanBasicDetails.getApprovedPrincipal(), loanBasicDetails.getInArrearsTolerance(),
+                                loanBasicDetails.getFeeChargesAtDisbursementCharged());
                 repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId, repaymentScheduleRelatedData,
-                        disbursementData, loanBasicDetails.isInterestRecalculationEnabled(), loanBasicDetails.getTotalPaidFeeCharges());
+                        disbursementData, loanBasicDetails.isInterestRecalculationEnabled(),
+                        loanBasicDetails.getSummary() != null ? loanBasicDetails.getSummary().getFeeChargesPaid() : BigDecimal.ZERO);
 
                 if (associationParameters.contains(DataTableApiConstant.futureScheduleAssociateParamName)
                         && loanBasicDetails.isInterestRecalculationEnabled()) {
@@ -553,7 +565,8 @@ public class LoansApiResource {
                 }
 
                 if (associationParameters.contains(DataTableApiConstant.originalScheduleAssociateParamName)
-                        && loanBasicDetails.isInterestRecalculationEnabled() && loanBasicDetails.isActive()) {
+                        && loanBasicDetails.isInterestRecalculationEnabled()
+                        && LoanStatus.fromInt(loanBasicDetails.getStatus().getId().intValue()).isActive()) {
                     mandatoryResponseParameters.add(DataTableApiConstant.originalScheduleAssociateParamName);
                     LoanScheduleData loanScheduleData = this.loanScheduleHistoryReadPlatformService.retrieveRepaymentArchiveSchedule(loanId,
                             repaymentScheduleRelatedData, disbursementData);
@@ -597,7 +610,7 @@ public class LoansApiResource {
 
             if (associationParameters.contains(DataTableApiConstant.collectionAssociateParamName)) {
                 mandatoryResponseParameters.add(DataTableApiConstant.collectionAssociateParamName);
-                if (loanBasicDetails.isActive()) {
+                if (LoanStatus.fromInt(loanBasicDetails.getStatus().getId().intValue()).isActive()) {
                     collectionData = this.loanReadPlatformService.retrieveLoanCollectionData(loanId);
                 }
             }
@@ -655,8 +668,12 @@ public class LoansApiResource {
             }
             chargeTemplate = this.loanChargeReadPlatformService.retrieveLoanChargeTemplate();
 
-            allowedLoanOfficers = this.loanReadPlatformService.retrieveAllowedLoanOfficers(loanBasicDetails.officeId(),
-                    staffInSelectedOfficeOnly);
+            Long officeId = loanBasicDetails.getClientOfficeId();
+
+            if (officeId == null && loanBasicDetails.getGroup() != null) {
+                officeId = loanBasicDetails.getGroup().getOfficeId();
+            }
+            allowedLoanOfficers = this.loanReadPlatformService.retrieveAllowedLoanOfficers(officeId, staffInSelectedOfficeOnly);
 
             loanPurposeOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("LoanPurpose");
             loanCollateralOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("LoanCollateral");
@@ -674,8 +691,8 @@ public class LoansApiResource {
                 mandatoryResponseParameters.add(DataTableApiConstant.linkedAccountAssociateParamName);
                 linkedAccount = this.accountAssociationsReadPlatformService.retriveLoanLinkedAssociation(loanId);
             }
-            if (loanBasicDetails.groupId() != null) {
-                calendarOptions = this.loanReadPlatformService.retrieveCalendars(loanBasicDetails.groupId());
+            if (loanBasicDetails.getGroup() != null && loanBasicDetails.getGroup().getId() != null) {
+                calendarOptions = this.loanReadPlatformService.retrieveCalendars(loanBasicDetails.getGroup().getId());
             }
 
             if (loanBasicDetails.getProduct().isCanUseForTopup() && loanBasicDetails.getClientId() != null) {
@@ -745,7 +762,7 @@ public class LoansApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Calculate loan repayment schedule | Submit a new Loan Application", description = "It calculates the loan repayment Schedule\n"
             + "Submits a new loan application\n"
-            + "Mandatory Fields: clientId, productId, principal, loanTermFrequency, loanTermFrequencyType, loanType, numberOfRepayments, repaymentEvery, repaymentFrequencyType, interestRatePerPeriod, amortizationType, interestType, interestCalculationPeriodType, transactionProcessingStrategyId, expectedDisbursementDate, submittedOnDate, loanType\n"
+            + "Mandatory Fields: clientId, productId, principal, loanTermFrequency, loanTermFrequencyType, loanType, numberOfRepayments, repaymentEvery, repaymentFrequencyType, interestRatePerPeriod, amortizationType, interestType, interestCalculationPeriodType, transactionProcessingStrategyCode, expectedDisbursementDate, submittedOnDate, loanType\n"
             + "Optional Fields: graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, linkAccountId, allowPartialPeriodInterestCalcualtion, fixedEmiAmount, maxOutstandingLoanBalance, disbursementData, graceOnArrearsAgeing, createStandingInstructionAtDisbursement (requires linkedAccountId if set to true)\n"
             + "Additional Mandatory Fields if interest recalculation is enabled for product and Rest frequency not same as repayment period: recalculationRestFrequencyDate\n"
             + "Additional Mandatory Fields if interest recalculation with interest/fee compounding is enabled for product and compounding frequency not same as repayment period: recalculationCompoundingFrequencyDate\n"

@@ -128,7 +128,6 @@ import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
 import org.apache.fineract.portfolio.loanproduct.exception.LinkedAccountRequiredException;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
@@ -605,7 +604,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             productRelatedDetail.setRepayEvery(loan.loanProduct().getLoanProductRelatedDetail().getRepayEvery());
         }
         if (!transactionProcessingStrategy) {
-            loan.updateTransactionProcessingStrategy(loan.loanProduct().getRepaymentStrategy());
+            loan.updateTransactionProcessingStrategy(loan.loanProduct().getRepaymentStrategy(),
+                    this.loanRepaymentScheduleTransactionProcessorFactory.determineProcessor(loan.loanProduct().getRepaymentStrategy())
+                            .getName());
         }
     }
 
@@ -933,12 +934,12 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 existingLoanApplication.updateLoanOfficerOnLoanApplication(newValue);
             }
 
-            final String strategyIdParamName = "transactionProcessingStrategyId";
-            if (changes.containsKey(strategyIdParamName)) {
-                final Long strategyId = command.longValueOfParameterNamed(strategyIdParamName);
-                final LoanTransactionProcessingStrategy strategy = this.loanAssembler.findStrategyByIdIfProvided(strategyId);
+            final String strategyCodeParamName = "transactionProcessingStrategyCode";
+            if (changes.containsKey(strategyCodeParamName)) {
+                final String strategy = command.stringValueOfParameterNamed(strategyCodeParamName);
 
-                existingLoanApplication.updateTransactionProcessingStrategy(strategy);
+                existingLoanApplication.updateTransactionProcessingStrategy(strategy,
+                        this.loanRepaymentScheduleTransactionProcessorFactory.determineProcessor(strategy).getName());
             }
 
             /**

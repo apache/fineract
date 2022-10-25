@@ -17,8 +17,6 @@
 -- under the License.
 --
 
-﻿DELETE FROM `ref_loan_transaction_processing_strategy` WHERE id in (1, 3, 4);
-
 INSERT INTO `m_code` (`code_name`, `is_system_defined`)
 VALUES
 ('FieldOfEmployment', '0'),

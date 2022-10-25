@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingConstants.LoanProductAccountingParams;
 import org.apache.fineract.accounting.common.AccountingRuleType;
@@ -43,7 +45,10 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
+import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrategyData;
 import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
@@ -53,9 +58,10 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductValueConditionType;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
 import org.apache.fineract.portfolio.loanproduct.exception.EqualAmortizationUnsupportedFeatureException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+@Slf4j
+@RequiredArgsConstructor
 @Component
 public final class LoanProductDataValidator {
 
@@ -78,7 +84,7 @@ public final class LoanProductDataValidator {
     public static final String INTEREST_TYPE = "interestType";
     public static final String INTEREST_CALCULATION_PERIOD_TYPE = "interestCalculationPeriodType";
     public static final String IN_ARREARS_TOLERANCE = "inArrearsTolerance";
-    public static final String TRANSACTION_PROCESSING_STRATEGY_ID = "transactionProcessingStrategyId";
+    public static final String TRANSACTION_PROCESSING_STRATEGY_CODE = "transactionProcessingStrategyCode";
     public static final String GRACE_ON_PRINCIPAL_PAYMENT = "graceOnPrincipalPayment";
     public static final String GRACE_ON_INTEREST_PAYMENT = "graceOnInterestPayment";
     public static final String GRACE_ON_INTEREST_CHARGED = "graceOnInterestCharged";
@@ -102,7 +108,7 @@ public final class LoanProductDataValidator {
             NUMBER_OF_REPAYMENTS, MIN_NUMBER_OF_REPAYMENTS, MAX_NUMBER_OF_REPAYMENTS, REPAYMENT_FREQUENCY_TYPE, INTEREST_RATE_PER_PERIOD,
             MIN_INTEREST_RATE_PER_PERIOD, MAX_INTEREST_RATE_PER_PERIOD, INTEREST_RATE_FREQUENCY_TYPE, AMORTIZATION_TYPE, INTEREST_TYPE,
             INTEREST_CALCULATION_PERIOD_TYPE, LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME,
-            IN_ARREARS_TOLERANCE, TRANSACTION_PROCESSING_STRATEGY_ID, GRACE_ON_PRINCIPAL_PAYMENT, "recurringMoratoriumOnPrincipalPeriods",
+            IN_ARREARS_TOLERANCE, TRANSACTION_PROCESSING_STRATEGY_CODE, GRACE_ON_PRINCIPAL_PAYMENT, "recurringMoratoriumOnPrincipalPeriods",
             GRACE_ON_INTEREST_PAYMENT, GRACE_ON_INTEREST_CHARGED, "charges", ACCOUNTING_RULE, INCLUDE_IN_BORROWER_CYCLE, "startDate",
             "closeDate", "externalId", IS_LINKED_TO_FLOATING_INTEREST_RATES, FLOATING_RATES_ID, INTEREST_RATE_DIFFERENTIAL,
             MIN_DIFFERENTIAL_LENDING_RATE, DEFAULT_DIFFERENTIAL_LENDING_RATE, MAX_DIFFERENTIAL_LENDING_RATE,
@@ -149,7 +155,7 @@ public final class LoanProductDataValidator {
             LoanProductConstants.OVER_APPLIED_NUMBER, LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME));
 
     private static final String[] SUPPORTED_LOAN_CONFIGURABLE_ATTRIBUTES = { LoanProductConstants.amortizationTypeParamName,
-            LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyIdParamName,
+            LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyCodeParamName,
             LoanProductConstants.interestCalculationPeriodTypeParamName, LoanProductConstants.inArrearsToleranceParamName,
             LoanProductConstants.repaymentEveryParamName, LoanProductConstants.graceOnPrincipalAndInterestPaymentParamName,
             LoanProductConstants.GRACE_ON_ARREARS_AGEING_PARAMETER_NAME };
@@ -161,10 +167,7 @@ public final class LoanProductDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
 
-    @Autowired
-    public LoanProductDataValidator(final FromJsonHelper fromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
-    }
+    private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
 
     public void validateForCreate(final String json) {
         if (StringUtils.isBlank(json)) {
@@ -310,9 +313,19 @@ public final class LoanProductDataValidator {
         final BigDecimal inArrearsTolerance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(IN_ARREARS_TOLERANCE, element);
         baseDataValidator.reset().parameter(IN_ARREARS_TOLERANCE).value(inArrearsTolerance).ignoreIfNull().zeroOrPositiveAmount();
 
-        final Long transactionProcessingStrategyId = this.fromApiJsonHelper.extractLongNamed(TRANSACTION_PROCESSING_STRATEGY_ID, element);
-        baseDataValidator.reset().parameter(TRANSACTION_PROCESSING_STRATEGY_ID).value(transactionProcessingStrategyId).notNull()
-                .integerGreaterThanZero();
+        final String transactionProcessingStrategyCode = this.fromApiJsonHelper.extractStringNamed(TRANSACTION_PROCESSING_STRATEGY_CODE,
+                element);
+        baseDataValidator.reset().parameter(TRANSACTION_PROCESSING_STRATEGY_CODE).value(transactionProcessingStrategyCode).notNull();
+
+        LoanRepaymentScheduleTransactionProcessor processor = loanRepaymentScheduleTransactionProcessorFactory
+                .determineProcessor(transactionProcessingStrategyCode);
+
+        if (processor == null) {
+            Object[] values = loanRepaymentScheduleTransactionProcessorFactory.getStrategies().stream()
+                    .map(TransactionProcessingStrategyData::getCode).toList().toArray(new String[0]);
+
+            baseDataValidator.reset().parameter(TRANSACTION_PROCESSING_STRATEGY_CODE).isOneOfTheseValues(values);
+        }
 
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME, element)) {
             final Long delinquencyBucketId = this.fromApiJsonHelper.extractLongNamed(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME,
@@ -1077,10 +1090,10 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(REPAYMENT_FREQUENCY_TYPE).value(repaymentFrequencyType).notNull().inMinMaxRange(0, 3);
         }
 
-        if (this.fromApiJsonHelper.parameterExists(TRANSACTION_PROCESSING_STRATEGY_ID, element)) {
-            final Long transactionProcessingStrategyId = this.fromApiJsonHelper.extractLongNamed(TRANSACTION_PROCESSING_STRATEGY_ID,
+        if (this.fromApiJsonHelper.parameterExists(TRANSACTION_PROCESSING_STRATEGY_CODE, element)) {
+            final String transactionProcessingStrategyCode = this.fromApiJsonHelper.extractStringNamed(TRANSACTION_PROCESSING_STRATEGY_CODE,
                     element);
-            baseDataValidator.reset().parameter(TRANSACTION_PROCESSING_STRATEGY_ID).value(transactionProcessingStrategyId).notNull()
+            baseDataValidator.reset().parameter(TRANSACTION_PROCESSING_STRATEGY_CODE).value(transactionProcessingStrategyCode).notNull()
                     .integerGreaterThanZero();
         }
 

@@ -107,7 +107,7 @@ public class LoanProductData implements Serializable {
     private final EnumOptionData interestCalculationPeriodType;
     private final Boolean allowPartialPeriodInterestCalculation;
     private final BigDecimal inArrearsTolerance;
-    private final Long transactionProcessingStrategyId;
+    private final String transactionProcessingStrategyCode;
     private final String transactionProcessingStrategyName;
     private final Integer graceOnPrincipalPayment;
     private final Integer recurringMoratoriumOnPrincipalPeriods;
@@ -228,7 +228,7 @@ public class LoanProductData implements Serializable {
         final Boolean allowPartialPeriodInterestCalcualtion = null;
         final Long fundId = null;
         final String fundName = null;
-        final Long transactionProcessingStrategyId = null;
+        final String transactionProcessingStrategyCode = null;
         final String transactionProcessingStrategyName = null;
         final Integer graceOnPrincipalPayment = null;
         final Integer recurringMoratoriumOnPrincipalPeriods = null;
@@ -281,7 +281,7 @@ public class LoanProductData implements Serializable {
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
                 minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType,
                 amortizationType, interestType, interestCalculationPeriodType, allowPartialPeriodInterestCalcualtion, fundId, fundName,
-                transactionProcessingStrategyId, transactionProcessingStrategyName, graceOnPrincipalPayment,
+                transactionProcessingStrategyCode, transactionProcessingStrategyName, graceOnPrincipalPayment,
                 recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, charges, accountingType,
                 includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId, principalVariations,
                 interestRateVariations, numberOfRepaymentVariations, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
@@ -331,7 +331,7 @@ public class LoanProductData implements Serializable {
         final Boolean allowPartialPeriodInterestCalcualtion = null;
         final Long fundId = null;
         final String fundName = null;
-        final Long transactionProcessingStrategyId = null;
+        final String transactionProcessingStrategyCode = null;
         final String transactionProcessingStrategyName = null;
         final Integer graceOnPrincipalPayment = null;
         final Integer recurringMoratoriumOnPrincipalPeriods = null;
@@ -386,7 +386,7 @@ public class LoanProductData implements Serializable {
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
                 minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType,
                 amortizationType, interestType, interestCalculationPeriodType, allowPartialPeriodInterestCalcualtion, fundId, fundName,
-                transactionProcessingStrategyId, transactionProcessingStrategyName, graceOnPrincipalPayment,
+                transactionProcessingStrategyCode, transactionProcessingStrategyName, graceOnPrincipalPayment,
                 recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, charges, accountingType,
                 includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId, principalVariations,
                 interestRateVariations, numberOfRepaymentVariations, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
@@ -441,7 +441,7 @@ public class LoanProductData implements Serializable {
         final Boolean allowPartialPeriodInterestCalcualtion = null;
         final Long fundId = null;
         final String fundName = null;
-        final Long transactionProcessingStrategyId = null;
+        final String transactionProcessingStrategyCode = null;
         final String transactionProcessingStrategyName = null;
 
         final Integer graceOnPrincipalPayment = null;
@@ -498,7 +498,7 @@ public class LoanProductData implements Serializable {
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
                 minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType,
                 amortizationType, interestType, interestCalculationPeriodType, allowPartialPeriodInterestCalcualtion, fundId, fundName,
-                transactionProcessingStrategyId, transactionProcessingStrategyName, graceOnPrincipalPayment,
+                transactionProcessingStrategyCode, transactionProcessingStrategyName, graceOnPrincipalPayment,
                 recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, charges, accountingType,
                 includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId, principalVariationsForBorrowerCycle,
                 interestRateVariationsForBorrowerCycle, numberOfRepaymentVariationsForBorrowerCycle, multiDisburseLoan, maxTrancheCount,
@@ -547,7 +547,7 @@ public class LoanProductData implements Serializable {
         final Boolean allowPartialPeriodInterestCalcualtion = null;
         final Long fundId = null;
         final String fundName = null;
-        final Long transactionProcessingStrategyId = null;
+        final String transactionProcessingStrategyCode = null;
         final String transactionProcessingStrategyName = null;
 
         final Integer graceOnPrincipalPayment = null;
@@ -604,7 +604,7 @@ public class LoanProductData implements Serializable {
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
                 minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType,
                 amortizationType, interestType, interestCalculationPeriodType, allowPartialPeriodInterestCalcualtion, fundId, fundName,
-                transactionProcessingStrategyId, transactionProcessingStrategyName, graceOnPrincipalPayment,
+                transactionProcessingStrategyCode, transactionProcessingStrategyName, graceOnPrincipalPayment,
                 recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, charges, accountingType,
                 includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId, principalVariationsForBorrowerCycle,
                 interestRateVariationsForBorrowerCycle, numberOfRepaymentVariationsForBorrowerCycle, multiDisburseLoan, maxTrancheCount,
@@ -638,7 +638,7 @@ public class LoanProductData implements Serializable {
             final BigDecimal maxInterestRatePerPeriod, final BigDecimal annualInterestRate, final EnumOptionData repaymentFrequencyType,
             final EnumOptionData interestRateFrequencyType, final EnumOptionData amortizationType, final EnumOptionData interestType,
             final EnumOptionData interestCalculationPeriodType, final Boolean allowPartialPeriodInterestCalculation, final Long fundId,
-            final String fundName, final Long transactionProcessingStrategyId, final String transactionProcessingStrategyName,
+            final String fundName, final String transactionProcessingStrategyCode, final String transactionProcessingStrategyName,
             final Integer graceOnPrincipalPayment, final Integer recurringMoratoriumOnPrincipalPeriods,
             final Integer graceOnInterestPayment, final Integer graceOnInterestCharged, final Collection<ChargeData> charges,
             final EnumOptionData accountingType, final boolean includeInBorrowerCycle, boolean useBorrowerCycle, final LocalDate startDate,
@@ -703,7 +703,7 @@ public class LoanProductData implements Serializable {
         this.allowPartialPeriodInterestCalculation = allowPartialPeriodInterestCalculation;
         this.fundId = fundId;
         this.fundName = fundName;
-        this.transactionProcessingStrategyId = transactionProcessingStrategyId;
+        this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
         this.transactionProcessingStrategyName = transactionProcessingStrategyName;
         this.charges = charges;
         this.accountingRule = accountingType;
@@ -858,10 +858,10 @@ public class LoanProductData implements Serializable {
         if (this.transactionProcessingStrategyOptions != null && this.transactionProcessingStrategyOptions.size() == 1) {
             final List<TransactionProcessingStrategyData> listOfOptions = new ArrayList<>(this.transactionProcessingStrategyOptions);
 
-            this.transactionProcessingStrategyId = listOfOptions.get(0).id();
-            this.transactionProcessingStrategyName = listOfOptions.get(0).name();
+            this.transactionProcessingStrategyCode = listOfOptions.get(0).getCode();
+            this.transactionProcessingStrategyName = listOfOptions.get(0).getName();
         } else {
-            this.transactionProcessingStrategyId = productData.transactionProcessingStrategyId;
+            this.transactionProcessingStrategyCode = productData.transactionProcessingStrategyCode;
             this.transactionProcessingStrategyName = productData.transactionProcessingStrategyName;
         }
 

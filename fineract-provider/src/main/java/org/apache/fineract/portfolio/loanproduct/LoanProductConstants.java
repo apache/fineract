@@ -115,7 +115,7 @@ public interface LoanProductConstants {
     String allowAttributeOverridesParamName = "allowAttributeOverrides";
     String amortizationTypeParamName = "amortizationType";
     String interestTypeParamName = "interestType";
-    String transactionProcessingStrategyIdParamName = "transactionProcessingStrategyId";
+    String transactionProcessingStrategyCodeParamName = "transactionProcessingStrategyCode";
     String interestCalculationPeriodTypeParamName = "interestCalculationPeriodType";
     String inArrearsToleranceParamName = "inArrearsTolerance";
     String repaymentEveryParamName = "repaymentEvery";

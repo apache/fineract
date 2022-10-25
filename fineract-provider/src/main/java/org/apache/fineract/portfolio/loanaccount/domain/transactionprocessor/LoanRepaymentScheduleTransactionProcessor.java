@@ -30,6 +30,12 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 
 public interface LoanRepaymentScheduleTransactionProcessor {
 
+    String getCode();
+
+    String getName();
+
+    boolean accept(String s);
+
     void handleTransaction(LoanTransaction loanTransaction, MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
             Set<LoanCharge> charges);
 
