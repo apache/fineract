@@ -23,6 +23,8 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
+import org.apache.fineract.client.models.PostChargesResponse;
+import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
@@ -82,6 +84,8 @@ public final class ChargesHelper {
     private static final String CURRENCY_CODE = "USD";
     public static final String FEE_ON_MONTH_DAY = "04 March";
     private static final String MONTH_DAY_FORMAT = "dd MMM";
+
+    private static final Gson GSON = new JSON().getGson();
 
     public static String getSavingsSpecifiedDueDateJSON() {
         final HashMap<String, Object> map = populateDefaultsForSavings();
@@ -383,6 +387,12 @@ public final class ChargesHelper {
     public static Integer createCharges(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String request) {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CHARGES_URL, request, "resourceId");
+    }
+
+    public static PostChargesResponse createLoanCharge(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String payload) {
+        final String response = Utils.performServerPost(requestSpec, responseSpec, CREATE_CHARGES_URL, payload, null);
+        return GSON.fromJson(response, PostChargesResponse.class);
     }
 
     public static ArrayList<HashMap> getCharges(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
