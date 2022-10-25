@@ -234,6 +234,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatformService {
 
+    public static final String AMOUNT = "amount";
     private final PlatformSecurityContext context;
     private final LoanEventApiJsonValidator loanEventApiJsonValidator;
     private final LoanUpdateCommandFromApiJsonDeserializer loanUpdateCommandFromApiJsonDeserializer;
@@ -277,6 +278,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final PostDatedChecksRepository postDatedChecksRepository;
     private final LoanDisbursementDetailsRepository loanDisbursementDetailsRepository;
     private final LoanRepaymentScheduleInstallmentRepository loanRepaymentScheduleInstallmentRepository;
+
+    private static boolean isPartOfThisInstallment(LoanCharge loanCharge, LoanRepaymentScheduleInstallment e) {
+        return e.getFromDate().isBefore(loanCharge.getDueDate()) && !loanCharge.getDueDate().isAfter(e.getDueDate());
+    }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
         return new DefaultLoanLifecycleStateMachine(LoanStatus.values(), businessEventNotifierService);
@@ -343,7 +348,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Set<LoanCollateralManagement> loanCollateralManagements = loan.getLoanCollateralManagements();
 
         // Get relevant loan collateral modules
-        if ((loanCollateralManagements != null && loanCollateralManagements.size() != 0)
+        if ((loanCollateralManagements != null && !loanCollateralManagements.isEmpty())
                 && AccountType.fromInt(loan.getLoanType()).isIndividualAccount()) {
 
             BigDecimal totalCollateral = BigDecimal.valueOf(0);
@@ -463,7 +468,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 loan.addLoanTransaction(disbursementTransaction);
             }
 
-            if (loan.getRepaymentScheduleInstallments().size() == 0) {
+            if (loan.getRepaymentScheduleInstallments().isEmpty()) {
                 /*
                  * If no schedule, generate one (applicable to non-tranche multi-disbursal loans)
                  */
@@ -578,7 +583,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
      *
      * @param loan
      *            the disbursed loan
-     *
      **/
     private void createStandingInstruction(Loan loan) {
 
@@ -877,15 +881,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
 
             // Remove All the Disbursement Details If the Loan Product is disabled and exists one
-            if (loan.loanProduct().isDisallowExpectedDisbursements()) {
-                if (!loan.getDisbursementDetails().isEmpty()) {
-                    List<LoanDisbursementDetails> reversedDisbursementDetails = new ArrayList<LoanDisbursementDetails>();
-                    for (LoanDisbursementDetails disbursementDetail : loan.getAllDisbursementDetails()) {
-                        disbursementDetail.reverse();
-                        reversedDisbursementDetails.add(disbursementDetail);
-                    }
-                    this.loanDisbursementDetailsRepository.saveAllAndFlush(reversedDisbursementDetails);
+            if (loan.loanProduct().isDisallowExpectedDisbursements() && !loan.getDisbursementDetails().isEmpty()) {
+                List<LoanDisbursementDetails> reversedDisbursementDetails = new ArrayList<>();
+                for (LoanDisbursementDetails disbursementDetail : loan.getAllDisbursementDetails()) {
+                    disbursementDetail.reverse();
+                    reversedDisbursementDetails.add(disbursementDetail);
                 }
+                this.loanDisbursementDetailsRepository.saveAllAndFlush(reversedDisbursementDetails);
             }
 
             businessEventNotifierService.notifyPostBusinessEvent(new LoanUndoDisbursalBusinessEvent(loan));
@@ -1924,10 +1926,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final Integer installmentNumber = installmentChargeEntry.getRepaymentInstallment().getInstallmentNumber();
             chargeAmountPaid = installmentChargeEntry.getAmountPaid(loanCurrency).getAmount();
             for (LoanChargePaidBy loanChargePaidBy : loanCharge.getLoanChargePaidBySet()) {
-                if (installmentNumber.equals(loanChargePaidBy.getInstallmentNumber())) {
-                    if (isRefundElementOfChargeRefund(loanChargePaidBy)) {
-                        chargeAmountRefunded = chargeAmountRefunded.add(loanChargePaidBy.getAmount());
-                    }
+                if (installmentNumber.equals(loanChargePaidBy.getInstallmentNumber()) && isRefundElementOfChargeRefund(loanChargePaidBy)) {
+                    chargeAmountRefunded = chargeAmountRefunded.add(loanChargePaidBy.getAmount());
                 }
             }
         } else {
@@ -1947,12 +1947,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         BigDecimal refundableAmount = chargeAmountPaid.subtract(chargeAmountRefunded);
-        if (transactionAmount != null) { // refund amount was provided.
-            if (transactionAmount.compareTo(refundableAmount) > 0) {
-                final String errorMessage = "loan.charge.transaction.amount.is.more.than.is.refundable";
-                final String details = "transactionAmount: " + transactionAmount + "  Refundable: " + refundableAmount;
-                throw new LoanChargeRefundException(errorMessage, details);
-            }
+        // refund amount was provided.
+        if (transactionAmount != null && transactionAmount.compareTo(refundableAmount) > 0) {
+            final String errorMessage = "loan.charge.transaction.amount.is.more.than.is.refundable";
+            final String details = "transactionAmount: " + transactionAmount + "  Refundable: " + refundableAmount;
+            throw new LoanChargeRefundException(errorMessage, details);
         }
 
         return refundableAmount;
@@ -2022,143 +2021,153 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Override
     public CommandProcessingResult undoWaiveLoanCharge(final JsonCommand command) {
 
-        LoanTransaction loanTransaction = this.loanTransactionRepository.findById(command.entityId())
-                .orElseThrow(() -> new LoanTransactionNotFoundException(command.entityId()));
-
+        LoanTransaction loanTransaction = this.loanTransactionRepository.findByIdAndLoanId(command.entityId(), command.getLoanId())
+                .orElseThrow(() -> new LoanTransactionNotFoundException(command.entityId(), command.getLoanId()));
         if (!loanTransaction.getTypeOf().getCode().equals(LoanTransactionType.WAIVE_CHARGES.getCode())) {
-            throw new InvalidLoanTransactionTypeException("Undo Waive Charge", "Waive an Installment Charge First",
-                    "Transaction is not a waive charge type.");
+            throw new InvalidLoanTransactionTypeException("transaction", "undo.waive.charge", "Transaction is not a waive charge type.");
+        }
+        if (!loanTransaction.isNotReversed()) {
+            throw new LoanChargeWaiveCannotBeReversedException(LoanChargeWaiveCannotUndoReason.ALREADY_REVERSED, loanTransaction.getId());
         }
 
         Set<LoanChargePaidBy> loanChargePaidBySet = loanTransaction.getLoanChargesPaid();
-        Integer installmentNumber = null;
-        Long loanChargeId = null;
-        final Long loanId = loanTransaction.getLoan().getId();
-
-        for (LoanChargePaidBy loanChargePaidBy : loanChargePaidBySet) {
-            installmentNumber = loanChargePaidBy.getInstallmentNumber();
-            loanChargeId = loanChargePaidBy.getLoanCharge().getId();
-            break;
+        LoanChargePaidBy loanChargePaidBy = loanChargePaidBySet.stream().findFirst().orElseThrow(LoanChargeNotFoundException::new);
+        final LoanCharge loanCharge = loanChargePaidBy.getLoanCharge();
+        // Validate loan charge is not already paid
+        if (loanCharge.isPaid()) {
+            throw new LoanChargeWaiveCannotBeReversedException(LoanChargeWaiveCannotUndoReason.ALREADY_PAID, loanCharge.getId());
         }
 
+        final Long loanId = loanTransaction.getLoan().getId();
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
-        final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
-
         // Charges may be waived only when the loan associated with them are
         // active
         if (!loan.getStatus().isActive()) {
             throw new LoanChargeWaiveCannotBeReversedException(LoanChargeWaiveCannotUndoReason.LOAN_INACTIVE, loanCharge.getId());
         }
 
-        // Validate loan charge is not already paid
-        if (loanCharge.isPaid()) {
-            throw new LoanChargeWaiveCannotBeReversedException(LoanChargeWaiveCannotUndoReason.ALREADY_PAID, loanCharge.getId());
-        }
-
         final Map<String, Object> changes = new LinkedHashMap<>(3);
 
         businessEventNotifierService.notifyPreBusinessEvent(new LoanWaiveChargeUndoBusinessEvent(loanCharge));
 
-        if (loanCharge.isInstalmentFee()) {
-            LoanInstallmentCharge chargePerInstallment;
-
-            // final Integer installmentNumber = command.integerValueOfParameterNamed("installmentNumber");
-            if (installmentNumber != null) {
-
-                // Get installment charge.
-                chargePerInstallment = loanCharge.getInstallmentLoanCharge(installmentNumber);
-
-                if (!loanTransaction.isNotReversed()) {
-                    throw new LoanChargeWaiveCannotBeReversedException(LoanChargeWaiveCannotUndoReason.ALREADY_REVERSED,
-                            loanTransaction.getId());
-                }
-
-                // Reverse waived transaction
-                loanTransaction.setReversed();
-
-                // Get installment amount waived.
-                BigDecimal amountWaived = chargePerInstallment.getAmountWaived(loan.getCurrency()).getAmount();
-
-                // Set manually adjusted value to `1`
-                loanTransaction.setManuallyAdjustedOrReversed();
-
-                // Save updated data
-                this.loanTransactionRepository.saveAndFlush(loanTransaction);
-
-                // Get installment outstanding amount
-                BigDecimal amountOutstandingPerInstallment = chargePerInstallment.getAmountOutstanding();
-
-                // Check whether the installment charge is not waived. If so throw new error
-                if (!chargePerInstallment.isWaived() || amountWaived == null) {
-                    throw new LoanChargeWaiveCannotBeReversedException(LoanChargeWaiveCannotUndoReason.NOT_WAIVED, loanChargeId);
-                }
-
-                // Get loan charge total amount waived
-                BigDecimal totalAmountWaved = loanCharge.getAmountWaived(loan.getCurrency()).getAmount();
-
-                // Get loan charge outstanding amount
-                BigDecimal amountOutstanding = loanCharge.getAmountOutstanding(loan.getCurrency()).getAmount();
-
-                // Add the amount waived to outstanding amount
-                loanCharge.resetOutstandingAmount(amountOutstanding.add(amountWaived));
-
-                // Subtract the amount waived from the existing amount waived.
-                loanCharge.setAmountWaived(totalAmountWaved.subtract(amountWaived));
-
-                // Add the amount waived to the outstanding amount of the installment
-                chargePerInstallment.resetOutstandingAmount(amountOutstandingPerInstallment.add(amountWaived));
-
-                // Set the amount waived value to ZERO
-                chargePerInstallment.resetAmountWaived(BigDecimal.ZERO);
-
-                // Reset waived flag
-                chargePerInstallment.undoWaiveFlag();
-
-                // Get the fee charges waived amount per installment
-                BigDecimal feeChargesWaivedAmount = chargePerInstallment.getInstallment().getFeeChargesWaived(loan.getCurrency())
-                        .getAmount();
-
-                // Subtract the amount waived from the existing fee charges waived amount.
-                chargePerInstallment.getInstallment().setFeeChargesWaived(feeChargesWaivedAmount.subtract(amountWaived));
-
-                // Update loan charge.
-                loanCharge.setInstallmentLoanCharge(chargePerInstallment, chargePerInstallment.getInstallment().getInstallmentNumber());
-
-                if (loanCharge.getAmount(loan.getCurrency()).compareTo(loanCharge.getAmountOutstanding(loan.getCurrency())) == 0
-                        && loanCharge.isWaived()) {
-                    loanCharge.undoWaived();
-                }
-
-                this.loanChargeRepository.saveAndFlush(loanCharge);
-
-                loan.updateLoanSummaryForUndoWaiveCharge(amountWaived);
-
-                changes.put("amount", amountWaived);
-
-            } else {
-                throw new InstallmentNotFoundException(command.entityId());
-            }
-        }
-
-        saveLoanWithDataIntegrityViolationChecks(loan);
+        undoWaivedCharge(changes, loan, loanTransaction, loanChargePaidBy);
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanWaiveChargeUndoBusinessEvent(loanCharge));
 
-        LoanTransaction loanTransactionData = this.loanTransactionRepository.getReferenceById(command.entityId());
-        changes.put("principalPortion", loanTransactionData.getPrincipalPortion());
-        changes.put("interestPortion", loanTransactionData.getInterestPortion(loan.getCurrency()));
-        changes.put("feeChargesPortion", loanTransactionData.getFeeChargesPortion(loan.getCurrency()));
-        changes.put("penaltyChargesPortion", loanTransactionData.getPenaltyChargesPortion(loan.getCurrency()));
-        changes.put("outstandingLoanBalance", loanTransactionData.getOutstandingLoanBalance());
-        changes.put("id", loanTransactionData.getId());
-        changes.put("date", loanTransactionData.getTransactionDate());
+        changes.put("principalPortion", loanTransaction.getPrincipalPortion());
+        changes.put("interestPortion", loanTransaction.getInterestPortion(loan.getCurrency()));
+        changes.put("feeChargesPortion", loanTransaction.getFeeChargesPortion(loan.getCurrency()));
+        changes.put("penaltyChargesPortion", loanTransaction.getPenaltyChargesPortion(loan.getCurrency()));
+        changes.put("outstandingLoanBalance", loanTransaction.getOutstandingLoanBalance());
+        changes.put("id", loanTransaction.getId());
+        changes.put("date", loanTransaction.getTransactionDate());
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
-                .withEntityId(loanChargeId) //
+                .withEntityId(loanCharge.getId()) //
                 .withLoanId(loanId) //
                 .with(changes).build();
+    }
+
+    private void undoWaivedCharge(final Map<String, Object> changes, final Loan loan, final LoanTransaction loanTransaction,
+            final LoanChargePaidBy loanChargePaidBy) {
+        switch (loanChargePaidBy.getLoanCharge().getChargeTimeType()) {
+            case SPECIFIED_DUE_DATE -> undoSpecifiedDueDateCharge(changes, loan, loanTransaction, loanChargePaidBy);
+            case INSTALMENT_FEE -> undoInstalmentFee(changes, loan, loanTransaction, loanChargePaidBy);
+            default -> throw new UnsupportedOperationException(
+                    "Undo waive charge is not support for this charge: " + loanChargePaidBy.getLoanCharge().getChargeTimeType());
+        }
+    }
+
+    private void undoInstalmentFee(Map<String, Object> changes, Loan loan, LoanTransaction loanTransaction,
+            LoanChargePaidBy loanChargePaidBy) {
+        final List<Long> existingTransactionIds = loan.findExistingTransactionIds();
+        final List<Long> existingReversedTransactionIds = loan.findExistingReversedTransactionIds();
+        LoanCharge loanCharge = loanChargePaidBy.getLoanCharge();
+        final Integer installmentNumber = loanChargePaidBy.getInstallmentNumber();
+        LoanInstallmentCharge chargePerInstallment;
+        // final Integer installmentNumber = command.integerValueOfParameterNamed("installmentNumber");
+        if (installmentNumber != null) {
+            // Get installment charge.
+            chargePerInstallment = loanCharge.getInstallmentLoanCharge(installmentNumber);
+            // Get installment amount waived.
+            BigDecimal amountWaived = chargePerInstallment.getAmountWaived(loan.getCurrency()).getAmount();
+            // Check whether the installment charge is not waived. If so throw new error
+            if (!chargePerInstallment.isWaived() || amountWaived == null) {
+                throw new LoanChargeWaiveCannotBeReversedException(LoanChargeWaiveCannotUndoReason.NOT_WAIVED, loanCharge.getId());
+            }
+            // Reverse waived transaction
+            loanTransaction.reverse();
+            // Set manually adjusted value to `1`
+            loanTransaction.setManuallyAdjustedOrReversed();
+            // Get loan charge outstanding amount
+            BigDecimal amountOutstanding = loanCharge.getAmountOutstanding(loan.getCurrency()).getAmount();
+            // Add the amount waived to outstanding amount
+            loanCharge.setOutstandingAmount(amountOutstanding.add(amountWaived));
+            // Get loan charge total amount waived
+            BigDecimal totalAmountWaved = loanCharge.getAmountWaived(loan.getCurrency()).getAmount();
+            // Subtract the amount waived from the existing amount waived.
+            loanCharge.setAmountWaived(totalAmountWaved.subtract(amountWaived));
+            // Get installment outstanding amount
+            BigDecimal amountOutstandingPerInstallment = chargePerInstallment.getAmountOutstanding();
+            // Add the amount waived to the outstanding amount of the installment
+            chargePerInstallment.setOutstandingAmount(amountOutstandingPerInstallment.add(amountWaived));
+            // Set the amount waived value to ZERO
+            chargePerInstallment.setAmountWaived(null);
+            // Reset waived flag
+            chargePerInstallment.undoWaiveFlag();
+            // Update installment balances
+            updateRepaymentInstalmentWithWaivedAmount(loanCharge, chargePerInstallment.getInstallment(), amountWaived);
+            // Update loan charge.
+            loanCharge.setInstallmentLoanCharge(chargePerInstallment, chargePerInstallment.getInstallment().getInstallmentNumber());
+            if (loanCharge.amount().compareTo(loanCharge.amountOutstanding()) == 0 && loanCharge.isWaived()) {
+                loanCharge.undoWaived();
+            }
+            loan.updateLoanSummaryForUndoWaiveCharge(amountWaived, loanCharge.isPenaltyCharge());
+            postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+            changes.put(AMOUNT, amountWaived);
+        } else {
+            throw new InstallmentNotFoundException(loanTransaction.getId());
+        }
+    }
+
+    private void undoSpecifiedDueDateCharge(final Map<String, Object> changes, final Loan loan, final LoanTransaction loanTransaction,
+            final LoanChargePaidBy loanChargePaidBy) {
+
+        final List<Long> existingTransactionIds = loan.findExistingTransactionIds();
+        final List<Long> existingReversedTransactionIds = loan.findExistingReversedTransactionIds();
+        LoanCharge loanCharge = loanChargePaidBy.getLoanCharge();
+        BigDecimal amountWaived = loanCharge.getAmountWaived(loan.getCurrency()).getAmount();
+        if (!loanCharge.isWaived() || amountWaived == null) {
+            throw new LoanChargeWaiveCannotBeReversedException(LoanChargeWaiveCannotUndoReason.NOT_WAIVED, loanCharge.getId());
+        }
+        loanTransaction.reverse();
+        loanTransaction.setManuallyAdjustedOrReversed();
+        loanCharge.setOutstandingAmount(loanCharge.amountOutstanding().add(amountWaived));
+        loanCharge.setAmountWaived(null);
+        loanCharge.undoWaived();
+        LoanRepaymentScheduleInstallment installment = loan.getRepaymentScheduleInstallments().stream()
+                .filter(e -> isPartOfThisInstallment(loanCharge, e)).findFirst().orElseThrow();
+        updateRepaymentInstalmentWithWaivedAmount(loanCharge, installment, amountWaived);
+        loan.updateLoanSummaryForUndoWaiveCharge(amountWaived, loanCharge.isPenaltyCharge());
+        postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+        changes.put(AMOUNT, amountWaived);
+    }
+
+    private void updateRepaymentInstalmentWithWaivedAmount(final LoanCharge loanCharge, final LoanRepaymentScheduleInstallment installment,
+            final BigDecimal amountWaived) {
+        if (loanCharge.isPenaltyCharge()) {
+            // Get the penalty charges waived amount per installment
+            BigDecimal penaltyChargesWaivedAmount = installment.getPenaltyChargesWaived(loanCharge.getLoan().getCurrency()).getAmount();
+            // Subtract the amount waived from the existing fee charges waived amount.
+            installment.setPenaltyChargesWaived(penaltyChargesWaivedAmount.subtract(amountWaived));
+        } else {
+            // Get the fee charges waived amount per installment
+            BigDecimal feeChargesWaivedAmount = installment.getFeeChargesWaived(loanCharge.getLoan().getCurrency()).getAmount();
+            // Subtract the amount waived from the existing fee charges waived amount.
+            installment.setFeeChargesWaived(feeChargesWaivedAmount.subtract(amountWaived));
+        }
     }
 
     @Transactional
@@ -2829,16 +2838,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     private void checkClientOrGroupActive(final Loan loan) {
         final Client client = loan.client();
-        if (client != null) {
-            if (client.isNotActive()) {
-                throw new ClientNotActiveException(client.getId());
-            }
+        if (client != null && client.isNotActive()) {
+            throw new ClientNotActiveException(client.getId());
         }
         final Group group = loan.group();
-        if (group != null) {
-            if (group.isNotActive()) {
-                throw new GroupNotActiveException(group.getId());
-            }
+        if (group != null && group.isNotActive()) {
+            throw new GroupNotActiveException(group.getId());
         }
     }
 
@@ -2950,7 +2955,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (diff < 1) {
             diff = 1L;
         }
-        LocalDate startDate = dueDate.plusDays(penaltyWaitPeriodValue.intValue() + 1);
+        LocalDate startDate = dueDate.plusDays(penaltyWaitPeriodValue + 1L);
         int frequencyNumber = 1;
         if (feeFrequency == null) {
             scheduleDates.put(frequencyNumber++, startDate.minusDays(diff));

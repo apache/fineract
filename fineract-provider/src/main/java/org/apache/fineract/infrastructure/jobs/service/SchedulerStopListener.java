@@ -18,20 +18,16 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
-import lombok.RequiredArgsConstructor;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.JobListener;
-import org.springframework.stereotype.Component;
 
 /**
  * Global job Listener class to Stop the temporary scheduler once job execution completes
  */
-@Component
-@RequiredArgsConstructor
 public class SchedulerStopListener implements JobListener {
 
-    private static final String name = "Singlr Trigger Global Listener";
+    private static final String SINGLE_TRIGGER_GLOBAL_LISTENER = "Single Trigger Global Listener";
 
     // MIFOSX-1184: This class cannot use constructor injection, because one of
     // its dependencies (SchedulerStopListener) has a circular dependency to
@@ -47,7 +43,7 @@ public class SchedulerStopListener implements JobListener {
 
     @Override
     public String getName() {
-        return name;
+        return SINGLE_TRIGGER_GLOBAL_LISTENER;
     }
 
     @Override

@@ -529,7 +529,14 @@ public class LoanTransactionHelper {
         return (Integer) response.get("resourceId");
     }
 
-    public Integer undoWaiveChargesForLoan(final Integer loanId, final Integer transactionId, final String body) {
+    public HashMap undoWaiveChargesForLoan(final Integer loanId, final Integer transactionId, final String body) {
+        log.info("--------------------------------- UNDO WAIVE CHARGES FOR LOAN --------------------------------");
+        final String TRANSAC_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/" + transactionId + "?"
+                + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerPut(requestSpec, responseSpec, TRANSAC_URL, body, "");
+    }
+
+    public Integer undoWaiveChargesForLoanReturnResourceId(final Integer loanId, final Integer transactionId, final String body) {
         log.info("--------------------------------- UNDO WAIVE CHARGES FOR LOAN --------------------------------");
         final String TRANSAC_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/" + transactionId + "?"
                 + Utils.TENANT_IDENTIFIER;

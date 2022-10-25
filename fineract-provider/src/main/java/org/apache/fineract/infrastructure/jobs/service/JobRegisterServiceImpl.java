@@ -45,7 +45,6 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.configuration.JobLocator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean;
@@ -72,10 +71,6 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     private static final HashMap<String, Scheduler> SCHEDULERS = new HashMap<>(4);
 
     @Autowired
-    @Lazy
-    private SchedulerStopListener schedulerStopListener;
-
-    @Autowired
     private FineractProperties fineractProperties;
 
     @Autowired
@@ -99,6 +94,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
             final JobDetail jobDetail = createJobDetail(scheduledJobDetail);
             JobKey jobKey = jobDetail.getKey();
             if (scheduler == null || !scheduler.checkExists(jobKey)) {
+                SchedulerStopListener schedulerStopListener = new SchedulerStopListener(this);
                 final String tempSchedulerName = "temp" + scheduledJobDetail.getId();
                 final Scheduler tempScheduler = createScheduler(tempSchedulerName, 1, schedulerJobListener, schedulerStopListener);
                 jobDataMap.put(SchedulerServiceConstants.SCHEDULER_NAME, tempSchedulerName);
@@ -112,7 +108,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         } catch (final Exception e) {
             final String msg = "Job execution failed for job with id:" + scheduledJobDetail.getId();
             log.error("{}", msg, e);
-            throw new PlatformInternalServerException("error.msg.sheduler.job.execution.failed", msg, scheduledJobDetail.getId(), e);
+            throw new PlatformInternalServerException("error.msg.scheduler.job.execution.failed", msg, scheduledJobDetail.getId(), e);
         }
 
     }

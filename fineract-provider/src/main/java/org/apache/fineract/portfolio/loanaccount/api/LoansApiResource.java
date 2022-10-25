@@ -35,6 +35,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -208,10 +209,10 @@ import org.springframework.util.CollectionUtils;
 @RequiredArgsConstructor
 public class LoansApiResource {
 
-    private final Set<String> loanDataParameters = new HashSet<>(Arrays.asList("id", "accountNo", "status", "externalId", "clientId",
-            "group", "loanProductId", "loanProductName", "loanProductDescription", "isLoanProductLinkedToFloatingRate", "fundId",
-            "fundName", "loanPurposeId", "loanPurposeName", "loanOfficerId", "loanOfficerName", "currency", "principal", "totalOverpaid",
-            "inArrearsTolerance", "termFrequency", "termPeriodFrequencyType", "numberOfRepayments", "repaymentEvery",
+    private static final Set<String> LOAN_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "accountNo", "status", "externalId",
+            "clientId", "group", "loanProductId", "loanProductName", "loanProductDescription", "isLoanProductLinkedToFloatingRate",
+            "fundId", "fundName", "loanPurposeId", "loanPurposeName", "loanOfficerId", "loanOfficerName", "currency", "principal",
+            "totalOverpaid", "inArrearsTolerance", "termFrequency", "termPeriodFrequencyType", "numberOfRepayments", "repaymentEvery",
             "interestRatePerPeriod", "annualInterestRate", "repaymentFrequencyType", "transactionProcessingStrategyId",
             "transactionProcessingStrategyName", "interestRateFrequencyType", "amortizationType", "interestType",
             "interestCalculationPeriodType", LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME,
@@ -228,10 +229,10 @@ public class LoansApiResource {
             LoanApiConstants.datatables, LoanProductConstants.RATES_PARAM_NAME, LoanApiConstants.MULTIDISBURSE_DETAILS_PARAMNAME,
             LoanApiConstants.EMI_AMOUNT_VARIATIONS_PARAMNAME, LoanApiConstants.COLLECTION_PARAMNAME));
 
-    private final Set<String> loanApprovalDataParameters = new HashSet<>(Arrays.asList("approvalDate", "approvalAmount"));
-    final Set<String> glimAccountsDataParameters = new HashSet<>(Arrays.asList("glimId", "groupId", "clientId", "parentLoanAccountNo",
-            "parentPrincipalAmount", "childLoanAccountNo", "childPrincipalAmount", "clientName"));
-    private final String resourceNameForPermissions = "LOAN";
+    private static final Set<String> LOAN_APPROVAL_DATA_PARAMETERS = new HashSet<>(Arrays.asList("approvalDate", "approvalAmount"));
+    private static final Set<String> GLIM_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(Arrays.asList("glimId", "groupId", "clientId",
+            "parentLoanAccountNo", "parentPrincipalAmount", "childLoanAccountNo", "childPrincipalAmount", "clientName"));
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "LOAN";
 
     private final PlatformSecurityContext context;
     private final LoanReadPlatformService loanReadPlatformService;
@@ -281,7 +282,7 @@ public class LoansApiResource {
             @QueryParam("templateType") @Parameter(description = "templateType") final String templateType,
             @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         LoanApprovalData loanApprovalTemplate = null;
 
@@ -293,7 +294,7 @@ public class LoansApiResource {
         }
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.loanApprovalDataToApiJsonSerializer.serialize(settings, loanApprovalTemplate, this.loanApprovalDataParameters);
+        return this.loanApprovalDataToApiJsonSerializer.serialize(settings, loanApprovalTemplate, LOAN_APPROVAL_DATA_PARAMETERS);
 
     }
 
@@ -315,7 +316,7 @@ public class LoansApiResource {
             @DefaultValue("false") @QueryParam("activeOnly") @Parameter(description = "activeOnly") final boolean onlyActive,
             @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         // template
         final Collection<LoanProductData> productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup(onlyActive);
@@ -412,7 +413,7 @@ public class LoansApiResource {
         newLoanAccount.setDatatables(datatableTemplates);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, newLoanAccount, this.loanDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, newLoanAccount, LOAN_DATA_PARAMETERS);
     }
 
     private Collection<PortfolioAccountData> getaccountLinkingOptions(final LoanAccountData newLoanAccount, final Long clientId,
@@ -448,7 +449,7 @@ public class LoansApiResource {
             @QueryParam("exclude") @Parameter(in = ParameterIn.QUERY, name = "exclude", description = "Optional Loan object relation list to be filtered in the response", required = false, example = "guarantors,futureSchedule") final String exclude,
             @QueryParam("fields") @Parameter(in = ParameterIn.QUERY, name = "fields", description = "Optional Loan attribute list to be in the response", required = false, example = "id,principal,annualInterestRate") final String fields,
             @Context final UriInfo uriInfo) {
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         LoanAccountData loanBasicDetails = this.loanReadPlatformService.retrieveOne(loanId);
         if (loanBasicDetails.isInterestRecalculationEnabled()) {
@@ -492,7 +493,7 @@ public class LoansApiResource {
         PortfolioAccountData linkedAccount = null;
         Collection<DisbursementData> disbursementData = null;
         Collection<LoanTermVariationsData> emiAmountVariations = null;
-        Collection<LoanCollateralResponseData> loanCollateralManagements = null;
+        Collection<LoanCollateralResponseData> loanCollateralManagements;
         Collection<LoanCollateralManagementData> loanCollateralManagementData = new ArrayList<>();
         CollectionData collectionData = CollectionData.template();
 
@@ -574,9 +575,6 @@ public class LoansApiResource {
                 for (LoanCollateralResponseData loanCollateralManagement : loanCollateralManagements) {
                     loanCollateralManagementData.add(loanCollateralManagement.toCommand());
                 }
-                if (CollectionUtils.isEmpty(loanCollateralManagements)) {
-                    loanCollateralManagements = null;
-                }
             }
 
             if (associationParameters.contains(DataTableApiConstant.meetingAssociateParamName)) {
@@ -606,7 +604,7 @@ public class LoansApiResource {
         }
 
         Collection<LoanProductData> productOptions = null;
-        LoanProductData product = null;
+        LoanProductData product;
         Collection<EnumOptionData> loanTermFrequencyTypeOptions = null;
         Collection<EnumOptionData> repaymentFrequencyTypeOptions = null;
         Collection<EnumOptionData> repaymentFrequencyNthDayTypeOptions = null;
@@ -624,7 +622,7 @@ public class LoansApiResource {
         Collection<CodeValueData> loanCollateralOptions = null;
         Collection<CalendarData> calendarOptions = null;
         Collection<PortfolioAccountData> accountLinkingOptions = null;
-        PaidInAdvanceData paidInAdvanceTemplate = null;
+        PaidInAdvanceData paidInAdvanceTemplate;
         Collection<LoanAccountSummaryData> clientActiveLoanOptions = null;
 
         final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
@@ -640,7 +638,7 @@ public class LoansApiResource {
 
             amortizationTypeOptions = this.dropdownReadPlatformService.retrieveLoanAmortizationTypeOptions();
             if (product.isLinkedToFloatingInterestRates()) {
-                interestTypeOptions = Arrays.asList(interestType(InterestMethod.DECLINING_BALANCE));
+                interestTypeOptions = Collections.singletonList(interestType(InterestMethod.DECLINING_BALANCE));
             } else {
                 interestTypeOptions = this.dropdownReadPlatformService.retrieveLoanInterestTypeOptions();
             }
@@ -710,7 +708,7 @@ public class LoansApiResource {
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);
-        return this.toApiJsonSerializer.serialize(settings, loanAccount, this.loanDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, loanAccount, LOAN_DATA_PARAMETERS);
     }
 
     @GET
@@ -731,7 +729,7 @@ public class LoansApiResource {
             @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder,
             @QueryParam("accountNo") @Parameter(description = "accountNo") final String accountNo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final SearchParameters searchParameters = SearchParameters.forLoans(sqlSearch, externalId, offset, limit, orderBy, sortOrder,
                 accountNo);
@@ -739,7 +737,7 @@ public class LoansApiResource {
         final Page<LoanAccountData> loanBasicDetails = this.loanReadPlatformService.retrieveAll(searchParameters);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, loanBasicDetails, this.loanDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, loanBasicDetails, LOAN_DATA_PARAMETERS);
     }
 
     @POST
@@ -767,7 +765,7 @@ public class LoansApiResource {
             final LoanScheduleModel loanSchedule = this.calculationPlatformService.calculateLoanSchedule(query, true);
 
             final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-            return this.loanScheduleToApiJsonSerializer.serialize(settings, loanSchedule.toData(), new HashSet<String>());
+            return this.loanScheduleToApiJsonSerializer.serialize(settings, loanSchedule.toData(), new HashSet<>());
         }
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createLoanApplication().withJson(apiRequestBodyAsJson).build();
@@ -889,10 +887,10 @@ public class LoansApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String getGlimRepaymentTemplate(@PathParam("glimId") final Long glimId, @Context final UriInfo uriInfo) {
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
         Collection<GlimRepaymentTemplate> glimRepaymentTemplate = this.glimAccountInfoReadPlatformService.findglimRepaymentTemplate(glimId);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.glimTemplateToApiJsonSerializer.serialize(settings, glimRepaymentTemplate, this.glimAccountsDataParameters);
+        return this.glimTemplateToApiJsonSerializer.serialize(settings, glimRepaymentTemplate, GLIM_ACCOUNTS_DATA_PARAMETERS);
     }
 
     @POST
