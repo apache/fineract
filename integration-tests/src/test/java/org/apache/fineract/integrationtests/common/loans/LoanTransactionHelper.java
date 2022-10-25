@@ -48,6 +48,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdSummary;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdResponse;
@@ -488,6 +489,14 @@ public class LoanTransactionHelper {
         final String ADD_CHARGES_URL = LOAN_ACCOUNT_URL + "/" + loanId + "/charges?" + Utils.TENANT_IDENTIFIER;
         final HashMap response = Utils.performServerPost(requestSpec, responseSpecParam, ADD_CHARGES_URL, request, "");
         return (Integer) response.get("resourceId");
+    }
+
+    public PostLoansLoanIdChargesResponse addChargeForLoan(final Integer loanId, final String payload,
+            final ResponseSpecification responseSpecParam) {
+        log.info("--------------------------------- ADD CHARGES FOR LOAN --------------------------------");
+        final String ADD_CHARGES_URL = LOAN_ACCOUNT_URL + "/" + loanId + "/charges?" + Utils.TENANT_IDENTIFIER;
+        final String response = Utils.performServerPost(requestSpec, responseSpecParam, ADD_CHARGES_URL, payload);
+        return GSON.fromJson(response, PostLoansLoanIdChargesResponse.class);
     }
 
     public Object addChargesForAllreadyDisursedLoan(final Integer loanId, final String request,
@@ -1157,6 +1166,22 @@ public class LoanTransactionHelper {
             log.info("Loan with Principal Outstanding Balance {} expected {}", getLoansLoanIdSummary.getPrincipalOutstanding(),
                     amountExpected);
             assertEquals(amountExpected, getLoansLoanIdSummary.getPrincipalOutstanding());
+        }
+    }
+
+    public void validateLoanFeesOustandingBalance(GetLoansLoanIdResponse getLoansLoanIdResponse, Double amountExpected) {
+        GetLoansLoanIdSummary getLoansLoanIdSummary = getLoansLoanIdResponse.getSummary();
+        if (getLoansLoanIdSummary != null) {
+            log.info("Loan with Fees Outstanding Balance {} expected {}", getLoansLoanIdSummary.getFeeChargesOutstanding(), amountExpected);
+            assertEquals(amountExpected, getLoansLoanIdSummary.getFeeChargesOutstanding());
+        }
+    }
+
+    public void validateLoanTotalOustandingBalance(GetLoansLoanIdResponse getLoansLoanIdResponse, Double amountExpected) {
+        GetLoansLoanIdSummary getLoansLoanIdSummary = getLoansLoanIdResponse.getSummary();
+        if (getLoansLoanIdSummary != null) {
+            log.info("Loan with Total Outstanding Balance {} expected {}", getLoansLoanIdSummary.getTotalOutstanding(), amountExpected);
+            assertEquals(amountExpected, getLoansLoanIdSummary.getTotalOutstanding());
         }
     }
 

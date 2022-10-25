@@ -894,4 +894,8 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         this.additional = true;
     }
 
+    public boolean isFirstPeriod() {
+        return (this.installmentNumber == 1);
+    }
+
 }
