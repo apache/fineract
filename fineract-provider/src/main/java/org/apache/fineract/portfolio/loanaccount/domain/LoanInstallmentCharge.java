@@ -185,7 +185,7 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom implements 
         Money amountPaidToDate = Money.of(incrementBy.getCurrency(), this.amountPaid);
         final Money amountOutstanding = Money.of(incrementBy.getCurrency(), this.amountOutstanding);
         Money amountPaidPreviously = amountPaidToDate;
-        Money amountPaidOnThisCharge = Money.zero(incrementBy.getCurrency());
+        Money amountPaidOnThisCharge;
         if (incrementBy.isGreaterThanOrEqualTo(amountOutstanding)) {
             amountPaidOnThisCharge = amountOutstanding;
             amountPaidToDate = amountPaidToDate.plus(amountOutstanding);
@@ -226,7 +226,7 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom implements 
         this.paid = false;
     }
 
-    public void resetAmountWaived(final BigDecimal amountWaived) {
+    public void setAmountWaived(final BigDecimal amountWaived) {
         this.amountWaived = amountWaived;
     }
 
@@ -234,7 +234,7 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom implements 
         this.waived = false;
     }
 
-    public void resetOutstandingAmount(final BigDecimal amountOutstanding) {
+    public void setOutstandingAmount(final BigDecimal amountOutstanding) {
         this.amountOutstanding = amountOutstanding;
     }
 
@@ -293,7 +293,7 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom implements 
 
         Money amountPaidToDate = Money.of(incrementBy.getCurrency(), this.amountPaid);
 
-        Money amountToDeductOnThisCharge = Money.zero(incrementBy.getCurrency());
+        Money amountToDeductOnThisCharge;
         if (incrementBy.isGreaterThanOrEqualTo(amountPaidToDate)) {
             amountToDeductOnThisCharge = amountPaidToDate;
             amountPaidToDate = Money.zero(incrementBy.getCurrency());

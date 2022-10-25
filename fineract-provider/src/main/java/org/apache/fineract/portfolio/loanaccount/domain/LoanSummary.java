@@ -35,7 +35,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
  */
 @Embeddable
 @Getter
-public final class LoanSummary {
+public class LoanSummary {
 
     // derived totals fields
     @Column(name = "principal_disbursed_derived", scale = 6, precision = 19)
@@ -126,7 +126,7 @@ public final class LoanSummary {
         return new LoanSummary(totalFeeChargesDueAtDisbursement);
     }
 
-    LoanSummary() {
+    protected LoanSummary() {
         //
     }
 
@@ -150,8 +150,16 @@ public final class LoanSummary {
         this.totalFeeChargesOutstanding = totalFeeChargesOutstanding;
     }
 
+    public void updatePenaltyChargeOutstanding(final BigDecimal totalPenaltyChargesOutstanding) {
+        this.totalPenaltyChargesOutstanding = totalPenaltyChargesOutstanding;
+    }
+
     public void updateFeeChargesWaived(final BigDecimal totalFeeChargesWaived) {
         this.totalFeeChargesWaived = totalFeeChargesWaived;
+    }
+
+    public void updatePenaltyChargesWaived(final BigDecimal totalPenaltyChargesWaived) {
+        this.totalPenaltyChargesWaived = totalPenaltyChargesWaived;
     }
 
     public boolean isRepaidInFull(final MonetaryCurrency currency) {
@@ -180,6 +188,14 @@ public final class LoanSummary {
 
     public BigDecimal getTotalOutstanding() {
         return this.totalOutstanding;
+    }
+
+    public void updateTotalOutstanding(final BigDecimal newTotalOutstanding) {
+        this.totalOutstanding = newTotalOutstanding;
+    }
+
+    public void updateTotalWaived(final BigDecimal totalWaived) {
+        this.totalWaived = totalWaived;
     }
 
     /**
@@ -217,7 +233,7 @@ public final class LoanSummary {
 
     public void updateSummary(final MonetaryCurrency currency, final Money principal,
             final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, final LoanSummaryWrapper summaryWrapper,
-            final Boolean disbursed, Set<LoanCharge> charges) {
+            Set<LoanCharge> charges) {
 
         this.totalPrincipalDisbursed = principal.getAmount();
         this.totalPrincipalAdjustments = summaryWrapper.calculateTotalPrincipalAdjusted(repaymentScheduleInstallments, currency)

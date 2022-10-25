@@ -358,7 +358,7 @@ public class LoanCharge extends AbstractPersistableCustom {
         }
     }
 
-    public void resetOutstandingAmount(final BigDecimal amountOutstanding) {
+    public void setOutstandingAmount(final BigDecimal amountOutstanding) {
         this.amountOutstanding = amountOutstanding;
     }
 
@@ -659,7 +659,7 @@ public class LoanCharge extends AbstractPersistableCustom {
      *          amount is within min and max cap
      */
     private BigDecimal minimumAndMaximumCap(final BigDecimal percentageOf) {
-        BigDecimal minMaxCap = BigDecimal.ZERO;
+        BigDecimal minMaxCap;
         if (this.minCap != null) {
             final int minimumCap = percentageOf.compareTo(this.minCap);
             if (minimumCap == -1) {
@@ -778,7 +778,7 @@ public class LoanCharge extends AbstractPersistableCustom {
      * @return Actual amount paid on this charge
      */
     public Money updatePaidAmountBy(final Money incrementBy, final Integer installmentNumber, final Money feeAmount) {
-        Money processAmount = Money.zero(incrementBy.getCurrency());
+        Money processAmount;
         if (isInstalmentFee()) {
             if (installmentNumber == null) {
                 processAmount = getUnpaidInstallmentLoanCharge().updatePaidAmountBy(incrementBy, feeAmount);
@@ -791,7 +791,7 @@ public class LoanCharge extends AbstractPersistableCustom {
         Money amountPaidToDate = Money.of(processAmount.getCurrency(), this.amountPaid);
         final Money amountOutstanding = Money.of(processAmount.getCurrency(), this.amountOutstanding);
 
-        Money amountPaidOnThisCharge = Money.zero(processAmount.getCurrency());
+        Money amountPaidOnThisCharge;
         if (processAmount.isGreaterThanOrEqualTo(amountOutstanding)) {
             amountPaidOnThisCharge = amountOutstanding;
             amountPaidToDate = amountPaidToDate.plus(amountOutstanding);
@@ -879,7 +879,7 @@ public class LoanCharge extends AbstractPersistableCustom {
 
     public LoanInstallmentCharge getInstallmentLoanCharge(final Integer installmentNumber) {
         for (final LoanInstallmentCharge loanChargePerInstallment : this.loanInstallmentCharge) {
-            if (installmentNumber.equals(loanChargePerInstallment.getRepaymentInstallment().getInstallmentNumber().intValue())) {
+            if (installmentNumber.equals(loanChargePerInstallment.getRepaymentInstallment().getInstallmentNumber())) {
                 return loanChargePerInstallment;
             }
         }
@@ -889,7 +889,7 @@ public class LoanCharge extends AbstractPersistableCustom {
     public void setInstallmentLoanCharge(final LoanInstallmentCharge loanInstallmentCharge, final Integer installmentNumber) {
         LoanInstallmentCharge loanInstallmentChargeToBeRemoved = null;
         for (final LoanInstallmentCharge loanChargePerInstallment : this.loanInstallmentCharge) {
-            if (installmentNumber.equals(loanChargePerInstallment.getRepaymentInstallment().getInstallmentNumber().intValue())) {
+            if (installmentNumber.equals(loanChargePerInstallment.getRepaymentInstallment().getInstallmentNumber())) {
                 loanInstallmentChargeToBeRemoved = loanChargePerInstallment;
                 break;
             }
@@ -1006,7 +1006,7 @@ public class LoanCharge extends AbstractPersistableCustom {
     }
 
     public Money undoPaidOrPartiallyAmountBy(final Money incrementBy, final Integer installmentNumber, final Money feeAmount) {
-        Money processAmount = Money.zero(incrementBy.getCurrency());
+        Money processAmount;
         if (isInstalmentFee()) {
             if (installmentNumber == null) {
                 processAmount = getLastPaidOrPartiallyPaidInstallmentLoanCharge(incrementBy.getCurrency()).undoPaidAmountBy(incrementBy,
@@ -1019,7 +1019,7 @@ public class LoanCharge extends AbstractPersistableCustom {
         }
         Money amountPaidToDate = Money.of(processAmount.getCurrency(), this.amountPaid);
 
-        Money amountDeductedOnThisCharge = Money.zero(processAmount.getCurrency());
+        Money amountDeductedOnThisCharge;
         if (processAmount.isGreaterThanOrEqualTo(amountPaidToDate)) {
             amountDeductedOnThisCharge = amountPaidToDate;
             amountPaidToDate = Money.zero(processAmount.getCurrency());
@@ -1084,6 +1084,10 @@ public class LoanCharge extends AbstractPersistableCustom {
 
     public void setExternalId(String externalId) {
         this.externalId = externalId;
+    }
+
+    public ChargeTimeType getChargeTimeType() {
+        return ChargeTimeType.fromInt(this.chargeTime);
     }
 
 }

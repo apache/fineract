@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
@@ -716,15 +715,6 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
         }
     }
 
-    public static Comparator<LoanRepaymentScheduleInstallment> installmentNumberComparator = new Comparator<LoanRepaymentScheduleInstallment>() {
-
-        @Override
-        public int compare(LoanRepaymentScheduleInstallment arg0, LoanRepaymentScheduleInstallment arg1) {
-
-            return arg0.getInstallmentNumber().compareTo(arg1.getInstallmentNumber());
-        }
-    };
-
     public BigDecimal getTotalPaidInAdvance() {
         return this.totalPaidInAdvance;
     }
@@ -742,7 +732,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     public Money unpayPenaltyChargesComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
 
         final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
-        Money penaltyPortionOfTransactionDeducted = Money.zero(currency);
+        Money penaltyPortionOfTransactionDeducted;
 
         final Money penaltyChargesCompleted = getPenaltyChargesPaid(currency);
         if (transactionAmountRemaining.isGreaterThanOrEqualTo(penaltyChargesCompleted)) {
@@ -761,7 +751,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     public Money unpayFeeChargesComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
 
         final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
-        Money feePortionOfTransactionDeducted = Money.zero(currency);
+        Money feePortionOfTransactionDeducted;
 
         final Money feeChargesCompleted = getFeeChargesPaid(currency);
         if (transactionAmountRemaining.isGreaterThanOrEqualTo(feeChargesCompleted)) {
@@ -782,7 +772,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     public Money unpayInterestComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
 
         final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
-        Money interestPortionOfTransactionDeducted = Money.zero(currency);
+        Money interestPortionOfTransactionDeducted;
 
         final Money interestCompleted = getInterestPaid(currency);
         if (transactionAmountRemaining.isGreaterThanOrEqualTo(interestCompleted)) {
@@ -803,7 +793,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     public Money unpayPrincipalComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
 
         final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
-        Money principalPortionOfTransactionDeducted = Money.zero(currency);
+        Money principalPortionOfTransactionDeducted;
 
         final Money principalCompleted = getPrincipalCompleted(currency);
         if (transactionAmountRemaining.isGreaterThanOrEqualTo(principalCompleted)) {
@@ -880,6 +870,10 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
 
     public void setFeeChargesWaived(final BigDecimal newFeeChargesCharged) {
         this.feeChargesWaived = newFeeChargesCharged;
+    }
+
+    public void setPenaltyChargesWaived(final BigDecimal newPenaltyChargesCharged) {
+        this.penaltyChargesWaived = newPenaltyChargesCharged;
     }
 
     public Set<LoanInstallmentCharge> getInstallmentCharges() {

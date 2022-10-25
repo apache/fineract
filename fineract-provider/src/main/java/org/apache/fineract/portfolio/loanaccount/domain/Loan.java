@@ -567,9 +567,16 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return this.summary;
     }
 
-    public void updateLoanSummaryForUndoWaiveCharge(final BigDecimal amountWaived) {
-        this.summary.updateFeeChargesWaived(this.summary.getTotalFeeChargesWaived().subtract(amountWaived));
-        this.summary.updateFeeChargeOutstanding(this.summary.getTotalFeeChargesOutstanding().add(amountWaived));
+    public void updateLoanSummaryForUndoWaiveCharge(final BigDecimal amountWaived, final boolean isPenalty) {
+        if (isPenalty) {
+            this.summary.updatePenaltyChargesWaived(this.summary.getTotalPenaltyChargesWaived().subtract(amountWaived));
+            this.summary.updatePenaltyChargeOutstanding(this.summary.getTotalPenaltyChargesOutstanding().add(amountWaived));
+        } else {
+            this.summary.updateFeeChargesWaived(this.summary.getTotalFeeChargesWaived().subtract(amountWaived));
+            this.summary.updateFeeChargeOutstanding(this.summary.getTotalFeeChargesOutstanding().add(amountWaived));
+        }
+        this.summary.updateTotalOutstanding(this.summary.getTotalOutstanding().add(amountWaived));
+        this.summary.updateTotalWaived(this.summary.getTotalWaived().subtract(amountWaived));
     }
 
     private BigDecimal deriveSumTotalOfChargesDueAtDisbursement() {
@@ -1377,7 +1384,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
             final Money principal = this.loanRepaymentScheduleDetail.getPrincipal();
             this.summary.updateSummary(loanCurrency(), principal, getRepaymentScheduleInstallments(), this.loanSummaryWrapper,
-                    isDisbursed(), this.charges);
+                    this.charges);
             updateLoanOutstandingBalances();
         }
     }
@@ -2051,20 +2058,22 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
         if (submittedOn.isAfter(DateUtils.getBusinessLocalDate())) {
             final String errorMessage = "The date on which a loan is submitted cannot be in the future.";
-            throw new InvalidLoanStateTransitionException("submittal", "cannot.be.a.future.date", errorMessage, submittedOn);
+            throw new InvalidLoanStateTransitionException("submittal", "cannot.be.a.future.date", errorMessage, submittedOn,
+                    DateUtils.getBusinessLocalDate());
         }
 
         if (this.client != null && this.client.isActivatedAfter(submittedOn)) {
             final String errorMessage = "The date on which a loan is submitted cannot be earlier than client's activation date.";
-            throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.client.activation.date", errorMessage,
-                    submittedOn);
+            throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.client.activation.date", errorMessage, submittedOn,
+                    client.getActivationLocalDate());
         }
 
         validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_CREATED, submittedOn);
 
         if (this.group != null && this.group.isActivatedAfter(submittedOn)) {
             final String errorMessage = "The date on which a loan is submitted cannot be earlier than groups's activation date.";
-            throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.group.activation.date", errorMessage, submittedOn);
+            throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.group.activation.date", errorMessage, submittedOn,
+                    group.getActivationLocalDate());
         }
 
         if (submittedOn.isAfter(getExpectedDisbursedOnLocalDate())) {
