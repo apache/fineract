@@ -20,7 +20,6 @@ package org.apache.fineract.infrastructure.jobs.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -58,7 +57,7 @@ public class InlineJobResource {
     @Operation(summary = "Starts an inline Job", description = "Starts an inline Job")
     @RequestBody(content = @Content(schema = @Schema(implementation = InlineJobResourceSwagger.InlineJobRequest.class)))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = InlineJobResourceSwagger.InlineJobResponse.class)))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InlineJobResourceSwagger.InlineJobResponse.class))) })
     public String executeInlineJob(@PathParam("jobName") @Parameter(description = "jobName") final String jobName,
             @Parameter(hidden = true) final String jsonRequestBody) {
 
