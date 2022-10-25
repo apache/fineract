@@ -482,8 +482,8 @@ final class SelfLoansApiResourceSwagger {
         public GetLoansLoanIdAmortizationType amortizationType;
         public GetLoansLoanIdInterestType interestType;
         public GetLoansLoanIdInterestCalculationPeriodType interestCalculationPeriodType;
-        @Schema(example = "2")
-        public Integer transactionProcessingStrategyId;
+        @Schema(example = "mifos-standard-strategy")
+        public String transactionProcessingStrategyCode;
         public GetLoansLoanIdTimeline timeline;
         public GetLoansLoanIdSummary summary;
     }
@@ -694,8 +694,8 @@ final class SelfLoansApiResourceSwagger {
         public Integer interestType;
         @Schema(example = "1")
         public Integer interestCalculationPeriodType;
-        @Schema(example = "1")
-        public Integer transactionProcessingStrategyId;
+        @Schema(example = "mifos-standard-strategy")
+        public String transactionProcessingStrategyCode;
         @Schema(example = "10 Jun 2013")
         public String expectedDisbursementDate;
         @Schema(example = "10 Jun 2013")
@@ -758,8 +758,8 @@ final class SelfLoansApiResourceSwagger {
         public Integer amortizationType;
         @Schema(example = "04 March 2014")
         public String expectedDisbursementDate;
-        @Schema(example = "1")
-        public Integer transactionProcessingStrategyId;
+        @Schema(example = "mifos-standard-strategy")
+        public String transactionProcessingStrategyCode;
     }
 
     @Schema(description = "PutSelfLoansLoanIdResponse")

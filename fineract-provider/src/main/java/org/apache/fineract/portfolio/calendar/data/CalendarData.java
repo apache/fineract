@@ -24,8 +24,9 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.calendar.domain.CalendarFrequencyType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarRemindBy;
@@ -35,57 +36,55 @@ import org.apache.fineract.portfolio.calendar.service.CalendarEnumerations;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.common.domain.NthDayType;
 
-/**
- * Immutable data object representing a Calendar.
- */
-@Getter
-@EqualsAndHashCode
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class CalendarData implements Serializable {
 
-    private final Long id;
-    private final Long calendarInstanceId;
-    private final Long entityId;
-    private final EnumOptionData entityType;
+    private Long id;
+    private Long calendarInstanceId;
+    private Long entityId;
+    private EnumOptionData entityType;
     private String title;
-    private final String description;
-    private final String location;
-    private final LocalDate startDate;
-    private final LocalDate endDate;
-    private final LocalTime meetingTime;
-    private final Integer duration;
-    private final EnumOptionData type;
-    private final boolean repeating;
-    private final String recurrence;
-    private final EnumOptionData frequency;
-    private final Integer interval;
-    private final EnumOptionData repeatsOnDay;
-    private final EnumOptionData repeatsOnNthDayOfMonth;
-    private final EnumOptionData remindBy;
-    private final Integer firstReminder;
-    private final Integer secondReminder;
-    private final Collection<LocalDate> recurringDates;
-    private final Collection<LocalDate> nextTenRecurringDates;
-    private final String humanReadable;
-    private final LocalDate recentEligibleMeetingDate;
+    private String description;
+    private String location;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private LocalTime meetingTime;
+    private Integer duration;
+    private EnumOptionData type;
+    private boolean repeating;
+    private String recurrence;
+    private EnumOptionData frequency;
+    private Integer interval;
+    private EnumOptionData repeatsOnDay;
+    private EnumOptionData repeatsOnNthDayOfMonth;
+    private EnumOptionData remindBy;
+    private Integer firstReminder;
+    private Integer secondReminder;
+    private Collection<LocalDate> recurringDates;
+    private Collection<LocalDate> nextTenRecurringDates;
+    private String humanReadable;
+    private LocalDate recentEligibleMeetingDate;
 
-    private final OffsetDateTime createdDate;
-    private final OffsetDateTime lastUpdatedDate;
-    private final Long createdByUserId;
-    private final String createdByUsername;
-    private final Long lastUpdatedByUserId;
-    private final String lastUpdatedByUsername;
-    private final Integer repeatsOnDayOfMonth;
+    private OffsetDateTime createdDate;
+    private OffsetDateTime lastUpdatedDate;
+    private Long createdByUserId;
+    private String createdByUsername;
+    private Long lastUpdatedByUserId;
+    private String lastUpdatedByUsername;
+    private Integer repeatsOnDayOfMonth;
 
     // template related
-    final List<EnumOptionData> entityTypeOptions;
-    final List<EnumOptionData> calendarTypeOptions;
-    final List<EnumOptionData> remindByOptions;
-    final List<EnumOptionData> frequencyOptions;
-    final List<EnumOptionData> repeatsOnDayOptions;
-    final List<EnumOptionData> frequencyNthDayTypeOptions;
+    private List<EnumOptionData> entityTypeOptions;
+    private List<EnumOptionData> calendarTypeOptions;
+    private List<EnumOptionData> remindByOptions;
+    private List<EnumOptionData> frequencyOptions;
+    private List<EnumOptionData> repeatsOnDayOptions;
+    private List<EnumOptionData> frequencyNthDayTypeOptions;
 
     // import fields
-    private transient Integer rowIndex;
+    private Integer rowIndex;
     private String dateFormat;
     private String locale;
     private String centerId;

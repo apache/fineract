@@ -109,8 +109,8 @@ final class LoanProductsApiResourceSwagger {
         public Integer interestType;
         @Schema(example = "1")
         public Integer interestCalculationPeriodType;
-        @Schema(example = "1")
-        public Long transactionProcessingStrategyId;
+        @Schema(example = "mifos-standard-strategy")
+        public String transactionProcessingStrategyCode;
         @Schema(example = "false")
         public Boolean isLinkedToFloatingInterestRates;
         @Schema(example = "false")
@@ -227,7 +227,7 @@ final class LoanProductsApiResourceSwagger {
             @Schema(example = "true")
             public boolean interestType;
             @Schema(example = "true")
-            public boolean transactionProcessingStrategyId;
+            public boolean transactionProcessingStrategyCode;
             @Schema(example = "true")
             public boolean interestCalculationPeriodType;
             @Schema(example = "true")
@@ -503,8 +503,8 @@ final class LoanProductsApiResourceSwagger {
         public BigDecimal fixedPrincipalPercentagePerInstallment;
         public GetLoanProductsInterestType interestType;
         public GetLoansProductsInterestCalculationPeriodType interestCalculationPeriodType;
-        @Schema(example = "1")
-        public Long transactionProcessingStrategyId;
+        @Schema(example = "mifos-standard-strategy")
+        public String transactionProcessingStrategy;
         @Schema(example = "Mifos style")
         public String transactionProcessingStrategyName;
         @Schema(example = "[]")
@@ -1211,8 +1211,8 @@ final class LoanProductsApiResourceSwagger {
         public BigDecimal fixedPrincipalPercentagePerInstallment;
         public GetLoanProductsTemplateResponse.GetLoanProductsInterestTemplateType interestType;
         public GetLoanProductsResponse.GetLoansProductsInterestCalculationPeriodType interestCalculationPeriodType;
-        @Schema(example = "1")
-        public Long transactionProcessingStrategyId;
+        @Schema(example = "mifos-standard-strategy")
+        public String transactionProcessingStrategyCode;
         @Schema(example = "Mifos style")
         public String transactionProcessingStrategyName;
         @Schema(example = "[]")

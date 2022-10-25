@@ -31,6 +31,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class AcmeNoopBusinessStep implements LoanCOBBusinessStep, InitializingBean {
 
+    private static final String ENUM_STYLED_NAME = "ACME_LOAN_NOOP";
+
+    private static final String HUMAN_READABLE_NAME = "ACME Loan Noop";
+
     // NOTE: just to demonstrate that dependency injection is working
     private final LoanAccountDomainService loanAccountDomainService;
 
@@ -46,11 +50,11 @@ public class AcmeNoopBusinessStep implements LoanCOBBusinessStep, InitializingBe
 
     @Override
     public String getEnumStyledName() {
-        return "ACME_LOAN_NOOP";
+        return ENUM_STYLED_NAME;
     }
 
     @Override
     public String getHumanReadableName() {
-        return "ACME Loan Noop";
+        return HUMAN_READABLE_NAME;
     }
 }

@@ -82,9 +82,11 @@ public class LoanProduct extends AbstractPersistableCustom {
     @JoinColumn(name = "fund_id")
     private Fund fund;
 
-    @ManyToOne
-    @JoinColumn(name = "loan_transaction_strategy_id")
-    private LoanTransactionProcessingStrategy transactionProcessingStrategy;
+    @Column(name = "loan_transaction_strategy_code", nullable = false)
+    private String transactionProcessingStrategyCode;
+
+    @Column(name = "loan_transaction_strategy_name")
+    private String transactionProcessingStrategyName;
 
     @Column(name = "name", nullable = false, unique = true)
     private String name;
@@ -200,7 +202,7 @@ public class LoanProduct extends AbstractPersistableCustom {
     @JoinColumn(name = "delinquency_bucket_id")
     private DelinquencyBucket delinquencyBucket;
 
-    public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
+    public static LoanProduct assembleFromJson(final Fund fund, final String loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate,
             final List<Rate> productRates) {
 
@@ -568,8 +570,8 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.loanProductMinMaxConstraints = null;
     }
 
-    public LoanProduct(final Fund fund, final LoanTransactionProcessingStrategy transactionProcessingStrategy, final String name,
-            final String shortName, final String description, final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
+    public LoanProduct(final Fund fund, final String transactionProcessingStrategyCode, final String name, final String shortName,
+            final String description, final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
             final BigDecimal defaultMinPrincipal, final BigDecimal defaultMaxPrincipal,
             final BigDecimal defaultNominalInterestRatePerPeriod, final BigDecimal defaultMinNominalInterestRatePerPeriod,
             final BigDecimal defaultMaxNominalInterestRatePerPeriod, final PeriodFrequencyType interestPeriodFrequencyType,
@@ -599,7 +601,7 @@ public class LoanProduct extends AbstractPersistableCustom {
             final boolean allowApprovedDisbursedAmountsOverApplied, final String overAppliedCalculationType,
             final Integer overAppliedNumber) {
         this.fund = fund;
-        this.transactionProcessingStrategy = transactionProcessingStrategy;
+        this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
         this.name = name.trim();
         this.shortName = shortName.trim();
         if (StringUtils.isNotBlank(description)) {
@@ -743,12 +745,16 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.fund = fund;
     }
 
-    public void update(final LoanTransactionProcessingStrategy strategy) {
-        this.transactionProcessingStrategy = strategy;
+    public void setTransactionProcessingStrategyCode(final String transactionProcessingStrategyCode) {
+        this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
     }
 
-    public LoanTransactionProcessingStrategy getRepaymentStrategy() {
-        return this.transactionProcessingStrategy;
+    public void setTransactionProcessingStrategyName(final String transactionProcessingStrategyName) {
+        this.transactionProcessingStrategyName = transactionProcessingStrategyName;
+    }
+
+    public String getRepaymentStrategy() {
+        return this.transactionProcessingStrategyCode;
     }
 
     public boolean hasCurrencyCodeOf(final String currencyCode) {
@@ -884,14 +890,10 @@ public class LoanProduct extends AbstractPersistableCustom {
             actualChanges.put(fundIdParamName, newValue);
         }
 
-        Long existingStrategyId = null;
-        if (this.transactionProcessingStrategy != null) {
-            existingStrategyId = this.transactionProcessingStrategy.getId();
-        }
-        final String transactionProcessingStrategyParamName = "transactionProcessingStrategyId";
-        if (command.isChangeInLongParameterNamed(transactionProcessingStrategyParamName, existingStrategyId)) {
-            final Long newValue = command.longValueOfParameterNamed(transactionProcessingStrategyParamName);
-            actualChanges.put(transactionProcessingStrategyParamName, newValue);
+        final String transactionProcessingStrategyCodeParamName = "transactionProcessingStrategyCode";
+        if (command.isChangeInStringParameterNamed(transactionProcessingStrategyCodeParamName, this.transactionProcessingStrategyCode)) {
+            final String newValue = command.stringValueOfParameterNamed(transactionProcessingStrategyCodeParamName);
+            actualChanges.put(transactionProcessingStrategyCodeParamName, newValue);
         }
 
         final String chargesParamName = "charges";
@@ -1035,11 +1037,11 @@ public class LoanProduct extends AbstractPersistableCustom {
                 }
 
                 if (command.parsedJson().getAsJsonObject().getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName)
-                        .getAsJsonPrimitive(LoanProductConstants.transactionProcessingStrategyIdParamName)
+                        .getAsJsonPrimitive(LoanProductConstants.transactionProcessingStrategyCodeParamName)
                         .getAsBoolean() != this.loanConfigurableAttributes.getTransactionProcessingStrategyBoolean()) {
-                    this.loanConfigurableAttributes.setTransactionProcessingStrategyId(
+                    this.loanConfigurableAttributes.setTransactionProcessingStrategyCode(
                             command.parsedJson().getAsJsonObject().getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName)
-                                    .getAsJsonPrimitive(LoanProductConstants.transactionProcessingStrategyIdParamName).getAsBoolean());
+                                    .getAsJsonPrimitive(LoanProductConstants.transactionProcessingStrategyCodeParamName).getAsBoolean());
                 }
 
                 if (command.parsedJson().getAsJsonObject().getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName)

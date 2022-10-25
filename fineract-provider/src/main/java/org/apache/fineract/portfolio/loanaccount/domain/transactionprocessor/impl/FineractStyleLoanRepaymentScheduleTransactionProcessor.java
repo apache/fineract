@@ -40,6 +40,20 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Loa
 @SuppressWarnings("unused")
 public class FineractStyleLoanRepaymentScheduleTransactionProcessor extends AbstractLoanRepaymentScheduleTransactionProcessor {
 
+    private static final String STRATEGY_CODE = "mifos-standard-strategy";
+
+    private static final String STRATEGY_NAME = "Penalties, Fees, Interest, Principal order";
+
+    @Override
+    public String getCode() {
+        return STRATEGY_CODE;
+    }
+
+    @Override
+    public String getName() {
+        return STRATEGY_NAME;
+    }
+
     @Override
     protected boolean isTransactionInAdvanceOfInstallment(final int currentInstallmentIndex,
             final List<LoanRepaymentScheduleInstallment> installments, final LocalDate transactionDate, final Money transactionAmount) {

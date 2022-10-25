@@ -18,7 +18,9 @@
  */
 
 dependencies {
+    implementation(project(':fineract-provider'))
     implementation(project(':custom:acme:loan:cob'))
+    implementation(project(':custom:acme:loan:processor'))
     implementation('org.springframework.boot:spring-boot-starter')
     testImplementation(project(':fineract-provider'))
     testImplementation('org.springframework.boot:spring-boot-starter-jdbc')

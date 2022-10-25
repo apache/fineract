@@ -43,6 +43,20 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Loa
  */
 public class RBILoanRepaymentScheduleTransactionProcessor extends AbstractLoanRepaymentScheduleTransactionProcessor {
 
+    private static final String STRATEGY_CODE = "rbi-india-strategy";
+
+    private static final String STRATEGY_NAME = "Overdue/Due Fee/Int,Principal";
+
+    @Override
+    public String getCode() {
+        return STRATEGY_CODE;
+    }
+
+    @Override
+    public String getName() {
+        return STRATEGY_NAME;
+    }
+
     /**
      * For creocore, early is defined as any date before the installment due date
      */

@@ -2406,7 +2406,6 @@ CREATE TABLE IF NOT EXISTS `m_loan` (
   KEY `FKB6F935D87179A0CB` (`client_id`),
   KEY `FKB6F935D8C8D4B434` (`product_id`),
   KEY `FK7C885877240145` (`fund_id`),
-  KEY `FK_loan_ltp_strategy` (`loan_transaction_strategy_id`),
   KEY `FK_m_loan_m_staff` (`loan_officer_id`),
   KEY `group_id` (`group_id`),
   KEY `FK_m_loanpurpose_codevalue` (`loanpurpose_cv_id`),
@@ -2424,7 +2423,6 @@ CREATE TABLE IF NOT EXISTS `m_loan` (
   CONSTRAINT `FK_approvedon_userid` FOREIGN KEY (`approvedon_userid`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_closedon_userid` FOREIGN KEY (`closedon_userid`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_disbursedon_userid` FOREIGN KEY (`disbursedon_userid`) REFERENCES `m_appuser` (`id`),
-  CONSTRAINT `FK_loan_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`),
   CONSTRAINT `FK_m_loan_m_staff` FOREIGN KEY (`loan_officer_id`) REFERENCES `m_staff` (`id`),
   CONSTRAINT `FK_m_loanpurpose_codevalue` FOREIGN KEY (`loanpurpose_cv_id`) REFERENCES `m_code_value` (`id`),
   CONSTRAINT `FK_rejectedon_userid` FOREIGN KEY (`rejectedon_userid`) REFERENCES `m_appuser` (`id`),
@@ -4104,7 +4102,7 @@ INSERT INTO `m_portfolio_command_source` (`id`, `action_name`, `entity_name`, `o
     (24, 'CREATE', 'USER', 1, NULL, NULL, NULL, NULL, '/users/template', 5, NULL, '{"sendPasswordToEmail":true,"officeId":1,"username":"janej","firstname":"Jane","lastname":"J","email":"janej@123.com","roles":["1"]}', 1, '2014-03-07 20:07:48', NULL, NULL, 1, NULL, NULL),
     (25, 'CREATE', 'STAFF', 3, NULL, NULL, NULL, NULL, '/staff/template', 3, NULL, '{"isLoanOfficer":true,"officeId":3,"firstname":"John","lastname":"K"}', 1, '2014-03-07 20:08:28', NULL, NULL, 1, NULL, NULL),
     (26, 'CREATE', 'FUND', NULL, NULL, NULL, NULL, NULL, '/funds/template', 1, NULL, '{"name":"Loan from Central Bank"}', 1, '2014-03-10 10:11:50', NULL, NULL, 1, NULL, NULL),
-    (27, 'CREATE', 'LOANPRODUCT', NULL, NULL, NULL, NULL, NULL, '/loanproducts/template', 1, NULL, '{"currencyCode":"USD","includeInBorrowerCycle":"false","useBorrowerCycle":"false","digitsAfterDecimal":"2","inMultiplesOf":"0","repaymentFrequencyType":1,"interestRateFrequencyType":3,"amortizationType":1,"interestType":1,"interestCalculationPeriodType":1,"transactionProcessingStrategyId":1,"principalVariationsForBorrowerCycle":[],"interestRateVariationsForBorrowerCycle":[],"numberOfRepaymentVariationsForBorrowerCycle":[],"multiDisburseLoan":false,"fundSourceAccountId":31,"loanPortfolioAccountId":32,"transfersInSuspenseAccountId":33,"interestOnLoanAccountId":36,"incomeFromFeeAccountId":37,"incomeFromPenaltyAccountId":38,"writeOffAccountId":41,"overpaymentLiabilityAccountId":30,"accountingRule":"2","name":"Income Generating Loan","shortName":"IGL","fundId":1,"minPrincipal":"10000","principal":"10000","maxPrincipal":"10000","minNumberOfRepayments":"25","numberOfRepayments":"25","maxNumberOfRepayments":"25","repaymentEvery":"1","minInterestRatePerPeriod":"26","interestRatePerPeriod":"26","maxInterestRatePerPeriod":"26","paymentChannelToFundSourceMappings":[],"feeToIncomeAccountMappings":[],"penaltyToIncomeAccountMappings":[],"charges":[],"dateFormat":"dd MMMM yyyy","locale":"en","startDate":"01 January 2010"}', 1, '2014-03-10 10:16:39', NULL, NULL, 1, NULL, NULL),
+    (27, 'CREATE', 'LOANPRODUCT', NULL, NULL, NULL, NULL, NULL, '/loanproducts/template', 1, NULL, '{"currencyCode":"USD","includeInBorrowerCycle":"false","useBorrowerCycle":"false","digitsAfterDecimal":"2","inMultiplesOf":"0","repaymentFrequencyType":1,"interestRateFrequencyType":3,"amortizationType":1,"interestType":1,"interestCalculationPeriodType":1,"transactionProcessingStrategyCode":"mifos-standard-strategy","principalVariationsForBorrowerCycle":[],"interestRateVariationsForBorrowerCycle":[],"numberOfRepaymentVariationsForBorrowerCycle":[],"multiDisburseLoan":false,"fundSourceAccountId":31,"loanPortfolioAccountId":32,"transfersInSuspenseAccountId":33,"interestOnLoanAccountId":36,"incomeFromFeeAccountId":37,"incomeFromPenaltyAccountId":38,"writeOffAccountId":41,"overpaymentLiabilityAccountId":30,"accountingRule":"2","name":"Income Generating Loan","shortName":"IGL","fundId":1,"minPrincipal":"10000","principal":"10000","maxPrincipal":"10000","minNumberOfRepayments":"25","numberOfRepayments":"25","maxNumberOfRepayments":"25","repaymentEvery":"1","minInterestRatePerPeriod":"26","interestRatePerPeriod":"26","maxInterestRatePerPeriod":"26","paymentChannelToFundSourceMappings":[],"feeToIncomeAccountMappings":[],"penaltyToIncomeAccountMappings":[],"charges":[],"dateFormat":"dd MMMM yyyy","locale":"en","startDate":"01 January 2010"}', 1, '2014-03-10 10:16:39', NULL, NULL, 1, NULL, NULL),
     (28, 'CREATE', 'SAVINGSPRODUCT', NULL, NULL, NULL, NULL, NULL, '/savingsproducts/template', 1, NULL, '{"currencyCode":"USD","digitsAfterDecimal":2,"interestCompoundingPeriodType":1,"interestPostingPeriodType":4,"interestCalculationType":1,"interestCalculationDaysInYearType":365,"savingsReferenceAccountId":31,"overdraftPortfolioControlId":32,"savingsControlAccountId":30,"incomeFromFeeAccountId":36,"incomeFromPenaltyAccountId":37,"incomeFromInterestId":38,"interestOnSavingsAccountId":41,"writeOffAccountId":42,"accountingRule":"2","name":"Voluntary savings","shortName":"VS","description":"Save money","inMultiplesOf":"0","nominalAnnualInterestRate":"9.5","minRequiredOpeningBalance":"1000","lockinPeriodFrequency":"1","lockinPeriodFrequencyType":1,"withdrawalFeeForTransfers":"false","paymentChannelToFundSourceMappings":[],"feeToIncomeAccountMappings":[],"penaltyToIncomeAccountMappings":[],"charges":[],"locale":"en","transfersInSuspenseAccountId":30}', 1, '2014-03-10 10:21:16', NULL, NULL, 1, NULL, NULL),
     (29, 'UPDATE', 'SAVINGSPRODUCT', NULL, NULL, NULL, NULL, NULL, '/savingsproducts/1', 1, NULL, '{"shortName":"VS","penaltyToIncomeAccountMappings":"[]","paymentChannelToFundSourceMappings":"[]","feeToIncomeAccountMappings":"[]"}', 1, '2014-03-10 10:21:51', NULL, NULL, 1, NULL, NULL),
     (30, 'CREATE', 'CODEVALUE', NULL, NULL, NULL, NULL, NULL, '/codes/3/codevalues/template', 10, NULL, '{"name":"Cattle Rearing","position":"104"}', 1, '2014-03-10 10:27:02', NULL, NULL, 1, NULL, NULL),
@@ -4145,7 +4143,7 @@ INSERT INTO `m_portfolio_command_source` (`id`, `action_name`, `entity_name`, `o
     (65, 'UPDATE', 'GLACCOUNT', NULL, NULL, NULL, NULL, NULL, '/glaccounts/2', 2, NULL, '{"usage":1}', 1, '2014-05-01 16:25:56', NULL, NULL, 1, NULL, NULL),
     (66, 'UPDATE', 'LOANPRODUCT', NULL, NULL, NULL, NULL, NULL, '/loanproducts/1', 1, NULL, '{"inMultiplesOf":0,"penaltyToIncomeAccountMappings":"[]","paymentChannelToFundSourceMappings":"[]","feeToIncomeAccountMappings":"[]"}', 1, '2014-05-01 16:26:06', NULL, NULL, 1, NULL, NULL),
     (67, 'UPDATE', 'LOANPRODUCT', NULL, NULL, NULL, NULL, NULL, '/loanproducts/1', 1, NULL, '{"inMultiplesOf":0,"overpaymentLiabilityAccountId":2,"penaltyToIncomeAccountMappings":"[]","paymentChannelToFundSourceMappings":"[]","transfersInSuspenseAccountId":17,"feeToIncomeAccountMappings":"[]"}', 1, '2014-05-01 16:26:37', NULL, NULL, 1, NULL, NULL),
-    (68, 'CREATE', 'LOAN', 2, NULL, 8, 1, NULL, '/loans', 1, NULL, '{"clientId":"8","productId":1,"disbursementData":[],"fundId":1,"principal":10000,"loanTermFrequency":25,"loanTermFrequencyType":1,"numberOfRepayments":25,"repaymentEvery":1,"repaymentFrequencyType":1,"interestRatePerPeriod":26,"amortizationType":1,"interestType":1,"interestCalculationPeriodType":1,"transactionProcessingStrategyId":1,"locale":"en","dateFormat":"dd MMMM yyyy","loanType":"individual","expectedDisbursementDate":"16 June 2014","submittedOnDate":"02 June 2014","charges":[{"chargeId":1,"amount":500}]}', 1, '2014-06-11 09:17:45', NULL, NULL, 1, NULL, NULL),
+    (68, 'CREATE', 'LOAN', 2, NULL, 8, 1, NULL, '/loans', 1, NULL, '{"clientId":"8","productId":1,"disbursementData":[],"fundId":1,"principal":10000,"loanTermFrequency":25,"loanTermFrequencyType":1,"numberOfRepayments":25,"repaymentEvery":1,"repaymentFrequencyType":1,"interestRatePerPeriod":26,"amortizationType":1,"interestType":1,"interestCalculationPeriodType":1,"transactionProcessingStrategyCode":"mifos-standard-strategy","locale":"en","dateFormat":"dd MMMM yyyy","loanType":"individual","expectedDisbursementDate":"16 June 2014","submittedOnDate":"02 June 2014","charges":[{"chargeId":1,"amount":500}]}', 1, '2014-06-11 09:17:45', NULL, NULL, 1, NULL, NULL),
     (69, 'APPROVE', 'LOAN', 2, NULL, 8, 1, NULL, '/loans/1', 1, NULL, '{"status":{"id":200,"code":"loanStatusType.approved","value":"Approved","pendingApproval":false,"waitingForDisbursal":true,"active":false,"closedObligationsMet":false,"closedWrittenOff":false,"closedRescheduled":false,"closed":false,"overpaid":false},"locale":"en","dateFormat":"dd MMMM yyyy","approvedOnDate":"11 June 2014"}', 1, '2014-06-11 09:18:16', NULL, NULL, 1, NULL, NULL),
     (70, 'CREATE', 'FINANCIALACTIVITYACCOUNT', NULL, NULL, NULL, NULL, NULL, '/organizationglaccounts/template', 2, NULL, '{"financialActivityId":100,"glAccountId":33}', 1, '2014-06-16 16:54:20', NULL, NULL, 1, NULL, NULL),
     (71, 'UPDATE', 'FINANCIALACTIVITYACCOUNT', NULL, NULL, NULL, NULL, NULL, '/organizationglaccounts/2', 2, NULL, '{"glAccountId":32}', 1, '2014-06-16 16:57:17', NULL, NULL, 1, NULL, NULL),
@@ -4216,9 +4214,7 @@ CREATE TABLE IF NOT EXISTS `m_product_loan` (
   UNIQUE KEY `unq_short_name` (`short_name`),
   UNIQUE KEY `external_id_UNIQUE` (`external_id`),
   KEY `FKA6A8A7D77240145` (`fund_id`),
-  KEY `FK_ltp_strategy` (`loan_transaction_strategy_id`),
-  CONSTRAINT `FKA6A8A7D77240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`),
-  CONSTRAINT `FK_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`)
+  CONSTRAINT `FKA6A8A7D77240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=UTF8MB4;
 
 -- Dumping data for table mifostenant-reference.m_product_loan: ~1 rows (approximately)
@@ -5749,30 +5745,6 @@ INSERT INTO `ppi_scores` (`id`, `score_from`, `score_to`) VALUES
     (19, 90, 94),
     (20, 95, 100);
 /*!40000 ALTER TABLE `ppi_scores` ENABLE KEYS */;
-
-
--- Dumping structure for table mifostenant-reference.ref_loan_transaction_processing_strategy
-DROP TABLE IF EXISTS `ref_loan_transaction_processing_strategy`;
-CREATE TABLE IF NOT EXISTS `ref_loan_transaction_processing_strategy` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `code` varchar(100) DEFAULT NULL,
-  `name` varchar(255) DEFAULT NULL,
-  `sort_order` INT DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `ltp_strategy_code` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=UTF8MB4;
-
--- Dumping data for table mifostenant-reference.ref_loan_transaction_processing_strategy: ~7 rows (approximately)
-/*!40000 ALTER TABLE `ref_loan_transaction_processing_strategy` DISABLE KEYS */;
-INSERT INTO `ref_loan_transaction_processing_strategy` (`id`, `code`, `name`, `sort_order`) VALUES
-    (1, 'mifos-standard-strategy', 'Penalties, Fees, Interest, Principal order', 1),
-    (2, 'heavensfamily-strategy', 'HeavensFamily Unique', 6),
-    (3, 'creocore-strategy', 'Creocore Unique', 7),
-    (4, 'rbi-india-strategy', 'Overdue/Due Fee/Int,Principal', 2),
-    (5, 'principal-interest-penalties-fees-order-strategy', 'Principal, Interest, Penalties, Fees Order', 3),
-    (6, 'interest-principal-penalties-fees-order-strategy', 'Interest, Principal, Penalties, Fees Order', 4),
-    (7, 'early-repayment-strategy', 'Early Repayment Strategy', 5);
-/*!40000 ALTER TABLE `ref_loan_transaction_processing_strategy` ENABLE KEYS */;
 
 
 -- Dumping structure for table mifostenant-reference.rpt_sequence

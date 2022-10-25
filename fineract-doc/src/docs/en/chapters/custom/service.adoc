@@ -1,0 +1,5 @@
+= Custom Services
+
+NOTE: We are still trying to figure out which internal services make most sense to be pluggable. Please join the discussion and let us know if you have a specific requirement.
+
+include::service-note.adoc[leveloffset=+1]

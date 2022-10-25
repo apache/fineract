@@ -34,15 +34,15 @@ import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.repaymentFrequencyType;
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.rescheduleStrategyType;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.common.domain.DayOfWeekType;
 import org.apache.fineract.portfolio.common.domain.NthDayType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionProcessingStrategyRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrategyData;
 import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
@@ -51,22 +51,14 @@ import org.apache.fineract.portfolio.loanproduct.domain.InterestRecalculationCom
 import org.apache.fineract.portfolio.loanproduct.domain.LoanPreClosureInterestCalculationStrategy;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductValueConditionType;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlatformService {
 
-    private final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository;
-
-    @Autowired
-    public LoanDropdownReadPlatformServiceImpl(
-            final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository) {
-        this.loanTransactionProcessingStrategyRepository = loanTransactionProcessingStrategyRepository;
-    }
+    private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
 
     @Override
     public List<EnumOptionData> retrieveLoanAmortizationTypeOptions() {
@@ -125,15 +117,7 @@ public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlat
 
     @Override
     public Collection<TransactionProcessingStrategyData> retrieveTransactionProcessingStrategies() {
-
-        final Collection<TransactionProcessingStrategyData> strategyOptions = new ArrayList<>();
-        Sort sort = Sort.by("sortOrder");
-        final List<LoanTransactionProcessingStrategy> strategies = this.loanTransactionProcessingStrategyRepository.findAll(sort);
-        for (final LoanTransactionProcessingStrategy strategy : strategies) {
-            strategyOptions.add(strategy.toData());
-        }
-
-        return strategyOptions;
+        return loanRepaymentScheduleTransactionProcessorFactory.getStrategies();
     }
 
     @Override

@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -46,18 +48,22 @@ import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollatera
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidAmountOfCollateralQuantity;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidAmountOfCollaterals;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
+import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrategyData;
 import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.exception.EqualAmortizationUnsupportedFeatureException;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+@Slf4j
+@RequiredArgsConstructor
 @Component
 public final class LoanApplicationCommandFromApiJsonHelper {
 
@@ -72,8 +78,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             LoanApiConstants.numberOfRepaymentsParameterName, LoanApiConstants.repaymentEveryParameterName,
             LoanApiConstants.repaymentFrequencyTypeParameterName, LoanApiConstants.repaymentFrequencyNthDayTypeParameterName,
             LoanApiConstants.repaymentFrequencyDayOfWeekTypeParameterName, LoanApiConstants.interestRatePerPeriodParameterName,
-            LoanApiConstants.amortizationTypeParameterName, LoanApiConstants.interestTypeParameterName,
-            LoanApiConstants.isFloatingInterestRate, LoanApiConstants.interestRateDifferential,
+            LoanApiConstants.amortizationTypeParameterName, LoanApiConstants.amortizationTypeOptionsParameterName,
+            LoanApiConstants.interestTypeParameterName, LoanApiConstants.isFloatingInterestRate, LoanApiConstants.interestRateDifferential,
             LoanApiConstants.interestCalculationPeriodTypeParameterName,
             LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME,
             LoanApiConstants.interestRateFrequencyTypeParameterName, LoanApiConstants.expectedDisbursementDateParameterName,
@@ -84,7 +90,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             LoanApiConstants.externalIdParameterName, LoanApiConstants.fundIdParameterName, LoanApiConstants.loanOfficerIdParameterName, // optional
             LoanApiConstants.loanPurposeIdParameterName, LoanApiConstants.inArrearsToleranceParameterName,
             LoanApiConstants.chargesParameterName, LoanApiConstants.collateralParameterName, // optional
-            LoanApiConstants.transactionProcessingStrategyIdParameterName, // settings
+            LoanApiConstants.transactionProcessingStrategyCodeParameterName, // settings
             LoanApiConstants.calendarIdParameterName, // optional
             LoanApiConstants.syncDisbursementWithMeetingParameterName, // optional
             LoanApiConstants.linkAccountIdParameterName, LoanApiConstants.disbursementDataParameterName,
@@ -102,14 +108,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
     private final CalculateLoanScheduleQueryFromApiJsonHelper apiJsonHelper;
     private final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper;
 
-    @Autowired
-    public LoanApplicationCommandFromApiJsonHelper(final FromJsonHelper fromApiJsonHelper,
-            final CalculateLoanScheduleQueryFromApiJsonHelper apiJsonHelper,
-            final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.apiJsonHelper = apiJsonHelper;
-        this.clientCollateralManagementRepositoryWrapper = clientCollateralManagementRepositoryWrapper;
-    }
+    private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
 
     public void validateForCreate(final String json, final boolean isMeetingMandatoryForJLGLoans, final LoanProduct loanProduct) {
         if (StringUtils.isBlank(json)) {
@@ -388,10 +387,19 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                     .notExceedingLengthOf(500);
         }
 
-        final Long transactionProcessingStrategyId = this.fromApiJsonHelper
-                .extractLongNamed(LoanApiConstants.transactionProcessingStrategyIdParameterName, element);
-        baseDataValidator.reset().parameter(LoanApiConstants.transactionProcessingStrategyIdParameterName)
-                .value(transactionProcessingStrategyId).notNull().integerGreaterThanZero();
+        final String transactionProcessingStrategy = this.fromApiJsonHelper
+                .extractStringNamed(LoanApiConstants.transactionProcessingStrategyCodeParameterName, element);
+        baseDataValidator.reset().parameter(LoanApiConstants.transactionProcessingStrategyCodeParameterName)
+                .value(transactionProcessingStrategy).notNull();
+        LoanRepaymentScheduleTransactionProcessor processor = loanRepaymentScheduleTransactionProcessorFactory
+                .determineProcessor(transactionProcessingStrategy);
+
+        if (processor == null) {
+            Object[] values = loanRepaymentScheduleTransactionProcessorFactory.getStrategies().stream()
+                    .map(TransactionProcessingStrategyData::getCode).toList().toArray(new String[0]);
+
+            baseDataValidator.reset().parameter(LoanApiConstants.transactionProcessingStrategyCodeParameterName).isOneOfTheseValues(values);
+        }
 
         if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.linkAccountIdParameterName, element)) {
             final Long linkAccountId = this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.linkAccountIdParameterName, element);
@@ -626,12 +634,22 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                     .integerGreaterThanZero();
         }
 
-        if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.transactionProcessingStrategyIdParameterName, element)) {
+        if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.transactionProcessingStrategyCodeParameterName, element)) {
             atLeastOneParameterPassedForUpdate = true;
-            final Long transactionProcessingStrategyId = this.fromApiJsonHelper
-                    .extractLongNamed(LoanApiConstants.transactionProcessingStrategyIdParameterName, element);
-            baseDataValidator.reset().parameter(LoanApiConstants.transactionProcessingStrategyIdParameterName)
-                    .value(transactionProcessingStrategyId).notNull().integerGreaterThanZero();
+            final String transactionProcessingStrategy = this.fromApiJsonHelper
+                    .extractStringNamed(LoanApiConstants.transactionProcessingStrategyCodeParameterName, element);
+            baseDataValidator.reset().parameter(LoanApiConstants.transactionProcessingStrategyCodeParameterName)
+                    .value(transactionProcessingStrategy).notNull();
+            LoanRepaymentScheduleTransactionProcessor processor = loanRepaymentScheduleTransactionProcessorFactory
+                    .determineProcessor(transactionProcessingStrategy);
+
+            if (processor == null) {
+                Object[] values = loanRepaymentScheduleTransactionProcessorFactory.getStrategies().stream()
+                        .map(TransactionProcessingStrategyData::getCode).toList().toArray(new String[0]);
+
+                baseDataValidator.reset().parameter(LoanApiConstants.transactionProcessingStrategyCodeParameterName)
+                        .isOneOfTheseValues(values);
+            }
         }
 
         BigDecimal principal = null;

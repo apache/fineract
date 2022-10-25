@@ -1,0 +1,3 @@
+= Outlook
+
+If this *proof of concept* is accepted we could prepare more of Fineract's internal services to be replaceable. This approach works already very well even if we don't have proper JAR libraries published on Maven Central. It's an important goal to separate customized code from Fineract's internals to have soon real modules.

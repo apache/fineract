@@ -22,9 +22,15 @@ import org.apache.fineract.avro.loan.v1.LoanAccountDataV1;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroMapperConfig;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(config = AvroMapperConfig.class)
 public interface LoanAccountDataMapper {
 
+    // TODO: avoid prefix "is" in class attributes; I would recommend to fix this also in the Avro structures
+    @Mapping(source = "loanProductLinkedToFloatingRate", target = "isLoanProductLinkedToFloatingRate")
+    @Mapping(source = "floatingInterestRate", target = "isFloatingInterestRate")
+    @Mapping(source = "topup", target = "isTopup")
+    @Mapping(source = "interestRecalculationEnabled", target = "isInterestRecalculationEnabled")
     LoanAccountDataV1 map(LoanAccountData source);
 }

@@ -18,8 +18,8 @@
  */
 description = 'ACME Corp.: Fineract COB Starter'
 
-group = 'com.acme.fineract.cob'
+group = 'com.acme.fineract'
 
-archivesBaseName = 'acme-fineract-cob-starter'
+archivesBaseName = 'acme-fineract-loan-starter'
 
 apply from: 'dependencies.gradle'
