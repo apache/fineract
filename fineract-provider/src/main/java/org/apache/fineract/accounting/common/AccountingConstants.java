@@ -178,7 +178,8 @@ public final class AccountingConstants {
     public enum CashAccountsForSavings {
 
         SAVINGS_REFERENCE(1), SAVINGS_CONTROL(2), INTEREST_ON_SAVINGS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), TRANSFERS_SUSPENSE(
-                10), OVERDRAFT_PORTFOLIO_CONTROL(11), INCOME_FROM_INTEREST(12), LOSSES_WRITTEN_OFF(13), ESCHEAT_LIABILITY(14);
+                10), OVERDRAFT_PORTFOLIO_CONTROL(11), INCOME_FROM_INTEREST(12), LOSSES_WRITTEN_OFF(13), ESCHEAT_LIABILITY(14),PENALTIES_RECEIVABLE(50),
+        INTEREST_RECEIVABLE(51),FEES_RECEIVABLE(52),INTEREST_PAYABLE(53);
 
         private final Integer value;
 
@@ -226,7 +227,9 @@ public final class AccountingConstants {
                                                                                 "overdraftPortfolioControlId"), INCOME_FROM_INTEREST(
                                                                                         "incomeFromInterestId"), LOSSES_WRITTEN_OFF(
                                                                                                 "writeOffAccountId"), ESCHEAT_LIABILITY(
-                                                                                                        "escheatLiabilityId");
+                                                                                                        "escheatLiabilityId"),PENALTIES_RECEIVABLE(
+                                                                                                                "receivablePenaltyAccountId"),INTEREST_RECEIVABLE("receivableInterestAccountId"), FEES_RECEIVABLE("receivableFeeAccountId"),
+                                                                                                                             INTEREST_PAYABLE("interestPayableAccountId");
 
         private final String value;
 
@@ -253,7 +256,9 @@ public final class AccountingConstants {
                                         "charge"), INCOME_ACCOUNT_ID("incomeAccount"), OVERDRAFT_PORTFOLIO_CONTROL(
                                                 "overdraftPortfolioControl"), INCOME_FROM_INTEREST(
                                                         "incomeFromInterest"), LOSSES_WRITTEN_OFF(
-                                                                "writeOffAccount"), ESCHEAT_LIABILITY("escheatLiabilityAccount");
+                                                                "writeOffAccount"), ESCHEAT_LIABILITY("escheatLiabilityAccount"),PENALTIES_RECEIVABLE(
+                                                                            "receivablePenaltyAccountId"),INTEREST_RECEIVABLE("receivableInterestAccountId"), FEES_RECEIVABLE("receivableFeeAccountId"),
+                                                                                        INTEREST_PAYABLE("interestPayableAccountId");
 
         private final String value;
 

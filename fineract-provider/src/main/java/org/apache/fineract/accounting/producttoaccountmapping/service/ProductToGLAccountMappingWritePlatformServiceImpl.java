@@ -170,67 +170,93 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
             case NONE:
             break;
             case CASH_BASED:
+                cashBasedSavingsAccountProductGLTracking(savingProductId, command, accountType, element);
+                break;
+            case ACCRUAL_PERIODIC:
                 // asset
                 this.savingsProductToGLAccountMappingHelper.saveSavingsToAssetAccountMapping(element,
-                        SavingProductAccountingParams.SAVINGS_REFERENCE.getValue(), savingProductId,
-                        CashAccountsForSavings.SAVINGS_REFERENCE.getValue());
+                        SavingProductAccountingParams.PENALTIES_RECEIVABLE.getValue(), savingProductId,
+                        CashAccountsForSavings.PENALTIES_RECEIVABLE.getValue());
 
-                if (!accountType.equals(DepositAccountType.RECURRING_DEPOSIT) && !accountType.equals(DepositAccountType.FIXED_DEPOSIT)) {
-                    this.savingsProductToGLAccountMappingHelper.saveSavingsToAssetAccountMapping(element,
-                            SavingProductAccountingParams.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), savingProductId,
-                            CashAccountsForSavings.OVERDRAFT_PORTFOLIO_CONTROL.getValue());
-                }
+                this.savingsProductToGLAccountMappingHelper.saveSavingsToAssetAccountMapping(element,
+                        SavingProductAccountingParams.INTEREST_RECEIVABLE.getValue(), savingProductId,
+                        CashAccountsForSavings.INTEREST_RECEIVABLE.getValue());
 
-                // income
-                this.savingsProductToGLAccountMappingHelper.saveSavingsToIncomeAccountMapping(element,
-                        SavingProductAccountingParams.INCOME_FROM_FEES.getValue(), savingProductId,
-                        CashAccountsForSavings.INCOME_FROM_FEES.getValue());
+                this.savingsProductToGLAccountMappingHelper.saveSavingsToAssetAccountMapping(element,
+                        SavingProductAccountingParams.FEES_RECEIVABLE.getValue(), savingProductId,
+                        CashAccountsForSavings.FEES_RECEIVABLE.getValue());
 
-                this.savingsProductToGLAccountMappingHelper.saveSavingsToIncomeAccountMapping(element,
-                        SavingProductAccountingParams.INCOME_FROM_PENALTIES.getValue(), savingProductId,
-                        CashAccountsForSavings.INCOME_FROM_PENALTIES.getValue());
-
-                if (!accountType.equals(DepositAccountType.RECURRING_DEPOSIT) && !accountType.equals(DepositAccountType.FIXED_DEPOSIT)) {
-                    this.savingsProductToGLAccountMappingHelper.saveSavingsToIncomeAccountMapping(element,
-                            SavingProductAccountingParams.INCOME_FROM_INTEREST.getValue(), savingProductId,
-                            CashAccountsForSavings.INCOME_FROM_INTEREST.getValue());
-                }
-
-                // expenses
-                this.savingsProductToGLAccountMappingHelper.saveSavingsToExpenseAccountMapping(element,
-                        SavingProductAccountingParams.INTEREST_ON_SAVINGS.getValue(), savingProductId,
-                        CashAccountsForSavings.INTEREST_ON_SAVINGS.getValue());
-
-                if (!accountType.equals(DepositAccountType.RECURRING_DEPOSIT) && !accountType.equals(DepositAccountType.FIXED_DEPOSIT)) {
-                    this.savingsProductToGLAccountMappingHelper.saveSavingsToExpenseAccountMapping(element,
-                            SavingProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(), savingProductId,
-                            CashAccountsForSavings.LOSSES_WRITTEN_OFF.getValue());
-                }
 
                 // liability
                 this.savingsProductToGLAccountMappingHelper.saveSavingsToLiabilityAccountMapping(element,
-                        SavingProductAccountingParams.SAVINGS_CONTROL.getValue(), savingProductId,
-                        CashAccountsForSavings.SAVINGS_CONTROL.getValue());
-                this.savingsProductToGLAccountMappingHelper.saveSavingsToLiabilityAccountMapping(element,
-                        SavingProductAccountingParams.TRANSFERS_SUSPENSE.getValue(), savingProductId,
-                        CashAccountsForSavings.TRANSFERS_SUSPENSE.getValue());
+                        SavingProductAccountingParams.INTEREST_PAYABLE.getValue(), savingProductId,
+                        CashAccountsForSavings.INTEREST_PAYABLE.getValue());
 
-                final Boolean isDormancyTrackingActive = this.fromApiJsonHelper.extractBooleanNamed(isDormancyTrackingActiveParamName,
-                        element);
-                if (null != isDormancyTrackingActive && isDormancyTrackingActive) {
-                    this.savingsProductToGLAccountMappingHelper.saveSavingsToLiabilityAccountMapping(element,
-                            SavingProductAccountingParams.ESCHEAT_LIABILITY.getValue(), savingProductId,
-                            CashAccountsForSavings.ESCHEAT_LIABILITY.getValue());
-                }
-
-                // advanced accounting mappings
-                this.savingsProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, savingProductId, null);
-                this.savingsProductToGLAccountMappingHelper.saveChargesToIncomeAccountMappings(command, element, savingProductId, null);
-            break;
+                cashBasedSavingsAccountProductGLTracking(savingProductId, command, accountType, element);
+                break;
             default:
             break;
         }
 
+    }
+
+    private void cashBasedSavingsAccountProductGLTracking(Long savingProductId, JsonCommand command, DepositAccountType accountType, JsonElement element) {
+        // asset
+        this.savingsProductToGLAccountMappingHelper.saveSavingsToAssetAccountMapping(element,
+                SavingProductAccountingParams.SAVINGS_REFERENCE.getValue(), savingProductId,
+                CashAccountsForSavings.SAVINGS_REFERENCE.getValue());
+
+        if (!accountType.equals(DepositAccountType.RECURRING_DEPOSIT) && !accountType.equals(DepositAccountType.FIXED_DEPOSIT)) {
+            this.savingsProductToGLAccountMappingHelper.saveSavingsToAssetAccountMapping(element,
+                    SavingProductAccountingParams.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), savingProductId,
+                    CashAccountsForSavings.OVERDRAFT_PORTFOLIO_CONTROL.getValue());
+        }
+
+        // income
+        this.savingsProductToGLAccountMappingHelper.saveSavingsToIncomeAccountMapping(element,
+                SavingProductAccountingParams.INCOME_FROM_FEES.getValue(), savingProductId,
+                CashAccountsForSavings.INCOME_FROM_FEES.getValue());
+
+        this.savingsProductToGLAccountMappingHelper.saveSavingsToIncomeAccountMapping(element,
+                SavingProductAccountingParams.INCOME_FROM_PENALTIES.getValue(), savingProductId,
+                CashAccountsForSavings.INCOME_FROM_PENALTIES.getValue());
+
+        if (!accountType.equals(DepositAccountType.RECURRING_DEPOSIT) && !accountType.equals(DepositAccountType.FIXED_DEPOSIT)) {
+            this.savingsProductToGLAccountMappingHelper.saveSavingsToIncomeAccountMapping(element,
+                    SavingProductAccountingParams.INCOME_FROM_INTEREST.getValue(), savingProductId,
+                    CashAccountsForSavings.INCOME_FROM_INTEREST.getValue());
+        }
+
+        // expenses
+        this.savingsProductToGLAccountMappingHelper.saveSavingsToExpenseAccountMapping(element,
+                SavingProductAccountingParams.INTEREST_ON_SAVINGS.getValue(), savingProductId,
+                CashAccountsForSavings.INTEREST_ON_SAVINGS.getValue());
+
+        if (!accountType.equals(DepositAccountType.RECURRING_DEPOSIT) && !accountType.equals(DepositAccountType.FIXED_DEPOSIT)) {
+            this.savingsProductToGLAccountMappingHelper.saveSavingsToExpenseAccountMapping(element,
+                    SavingProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(), savingProductId,
+                    CashAccountsForSavings.LOSSES_WRITTEN_OFF.getValue());
+        }
+
+        // liability
+        this.savingsProductToGLAccountMappingHelper.saveSavingsToLiabilityAccountMapping(element,
+                SavingProductAccountingParams.SAVINGS_CONTROL.getValue(), savingProductId,
+                CashAccountsForSavings.SAVINGS_CONTROL.getValue());
+        this.savingsProductToGLAccountMappingHelper.saveSavingsToLiabilityAccountMapping(element,
+                SavingProductAccountingParams.TRANSFERS_SUSPENSE.getValue(), savingProductId,
+                CashAccountsForSavings.TRANSFERS_SUSPENSE.getValue());
+
+        final Boolean isDormancyTrackingActive = this.fromApiJsonHelper.extractBooleanNamed(isDormancyTrackingActiveParamName,
+                element);
+        if (null != isDormancyTrackingActive && isDormancyTrackingActive) {
+            this.savingsProductToGLAccountMappingHelper.saveSavingsToLiabilityAccountMapping(element,
+                    SavingProductAccountingParams.ESCHEAT_LIABILITY.getValue(), savingProductId,
+                    CashAccountsForSavings.ESCHEAT_LIABILITY.getValue());
+        }
+
+        // advanced accounting mappings
+        this.savingsProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, savingProductId, null);
+        this.savingsProductToGLAccountMappingHelper.saveChargesToIncomeAccountMappings(command, element, savingProductId, null);
     }
 
     @Override
