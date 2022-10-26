@@ -25,6 +25,6 @@ public interface NotificationMapperWritePlatformService {
     Long create(NotificationMapper notificationMapper);
 
     void markAllNotificationsForAUserAsRead(Long userId);
-    
-    void markASingleNotificationForAUserAsRead(Long userId,Long notificationId);
+
+    void markASingleNotificationForAUserAsRead(Long userId, Long notificationId);
 }
