@@ -3590,4 +3590,11 @@ public class CommandWrapperBuilder {
         this.jobName = jobName;
         return this;
     }
+
+    public CommandWrapperBuilder updateExternalEventConfigurations() {
+        this.actionName = "UPDATE";
+        this.entityName = "EXTERNAL_EVENT_CONFIGURATION";
+        this.href = "/externaleventconfiguration";
+        return this;
+    }
 }
