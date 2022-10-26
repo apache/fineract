@@ -19,5 +19,20 @@
 package org.apache.fineract.notification.domain;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface NotificationMapperRepository extends JpaRepository<NotificationMapper, Long> {}
+public interface NotificationMapperRepository extends JpaRepository<NotificationMapper, Long> {
+
+    @Transactional
+    @Modifying(flushAutomatically = true)
+    @Query("UPDATE NotificationMapper n SET n.isRead = true WHERE n.userId.id = :userId")
+    void markAllNotificationsForAUserAsRead(@Param("userId") Long userId);
+
+    @Transactional
+    @Modifying(flushAutomatically = true)
+    @Query("UPDATE NotificationMapper n SET n.isRead = true WHERE n.userId.id = :userId AND n.notification.id = :notificationId")
+    void markASingleNotificationForAUserAsRead(@Param("userId") Long userId, @Param("notificationId") Long notificationId);
+}

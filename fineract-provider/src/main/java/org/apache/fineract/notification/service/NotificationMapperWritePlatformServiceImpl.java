@@ -38,4 +38,16 @@ public class NotificationMapperWritePlatformServiceImpl implements NotificationM
         this.notificationMapperRepository.saveAndFlush(notificationMapper);
         return notificationMapper.getId();
     }
+
+    @Override
+    public void markAllNotificationsForAUserAsRead(Long userId) {
+        notificationMapperRepository.markAllNotificationsForAUserAsRead(userId);
+        
+    }
+
+    @Override
+    public void markASingleNotificationForAUserAsRead(Long userId, Long notificationId) {
+        notificationMapperRepository.markASingleNotificationForAUserAsRead(userId, notificationId);
+        
+    }
 }

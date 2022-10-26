@@ -29,6 +29,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -42,7 +43,9 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.notification.data.NotificationData;
+import org.apache.fineract.notification.service.NotificationMapperWritePlatformService;
 import org.apache.fineract.notification.service.NotificationReadPlatformService;
+import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.stereotype.Component;
 
 @Path("/notifications")
@@ -53,6 +56,7 @@ public class NotificationApiResource {
 
     private final PlatformSecurityContext context;
     private final NotificationReadPlatformService notificationReadPlatformService;
+    private final NotificationMapperWritePlatformService notificationMapperWritePlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final ToApiJsonSerializer<NotificationData> toApiJsonSerializer;
 
@@ -85,7 +89,17 @@ public class NotificationApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public void update() {
-        this.context.authenticatedUser();
-        this.notificationReadPlatformService.updateNotificationReadStatus();
+        final AppUser user = this.context.authenticatedUser();
+        this.notificationMapperWritePlatformService.markAllNotificationsForAUserAsRead(user.getId());;
+    }
+
+
+    @PUT
+    @Path("{notificationId}")
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    public void updateOne(@PathParam("notificationId") @Parameter(description = "notificationId") final Long notificationId){
+        final AppUser user = this.context.authenticatedUser();
+        this.notificationMapperWritePlatformService.markASingleNotificationForAUserAsRead(user.getId(),notificationId);
     }
 }
