@@ -82,4 +82,5 @@
     <include file="parts/0060_add_job_name_to_command_source.xml" relativeToChangelogFile="true"/>
     <include file="parts/0061_add_idempotency_key_to_command_source.xml" relativeToChangelogFile="true"/>
     <include file="parts/0062_add_fraud_attribute_to_loan.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0063_add_permissions_for_external_event_configuration.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
