@@ -27,8 +27,10 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.ws.rs.HttpMethod;
 import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
@@ -801,19 +803,81 @@ public final class BatchHelper {
      *            the name of datatable
      * @param queryParameter
      *            the query parameters
+     * @param referenceId
+     *            the reference id
      * @return the {@link BatchRequest}
      */
-    public static BatchRequest getDatatableByIdRequest(final Long loanId, final String datatableName, final String queryParameter) {
+    public static BatchRequest getDatatableByIdRequest(final Long loanId, final String datatableName, final String queryParameter,
+            final Long referenceId) {
         final BatchRequest br = new BatchRequest();
         String relativeUrl = String.format("datatables/%s/%s", datatableName, loanId);
         if (queryParameter != null) {
             relativeUrl = relativeUrl + "?" + queryParameter;
         }
 
-        br.setRequestId(4568L);
+        br.setRequestId(4571L);
+        br.setReference(referenceId);
         br.setRelativeUrl(relativeUrl);
         br.setMethod(HttpMethod.GET);
         br.setBody("{}");
+
+        return br;
+    }
+
+    /**
+     * Creates and returns a batch request to create datatable entry.
+     *
+     * @param loanId
+     *            the loan id
+     * @param datatableName
+     *            the name of datatable
+     * @param columnNames
+     *            the column names
+     * @return the {@link BatchRequest}
+     */
+    public static BatchRequest createDatatableEntryRequest(final Long loanId, final String datatableName, final List<String> columnNames) {
+        final BatchRequest br = new BatchRequest();
+        final String relativeUrl = String.format("datatables/%s/%s", datatableName, loanId);
+        final Map<String, Object> datatableEntryMap = new HashMap<>();
+        datatableEntryMap.putAll(columnNames.stream().collect(Collectors.toMap(v -> v, v -> Utils.randomNameGenerator("VAL_", 3))));
+        final String datatableEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
+        LOG.info("CreateDataTableEntry map : {}", datatableEntryRequestJsonString);
+
+        br.setRequestId(4569L);
+        br.setRelativeUrl(relativeUrl);
+        br.setMethod(HttpMethod.POST);
+        br.setBody(datatableEntryRequestJsonString);
+
+        return br;
+    }
+
+    /**
+     * Creates and returns a batch request to create datatable entry.
+     *
+     * @param loanId
+     *            the loan id
+     * @param datatableName
+     *            the name of datatable
+     * @param datatableEntryId
+     *            the resource id of the datatable entry
+     * @param columnNames
+     *            the column names
+     * @return the {@link BatchRequest}
+     */
+    public static BatchRequest updateDatatableEntryByEntryIdRequest(final Long loanId, final String datatableName,
+            final Long datatableEntryId, final List<String> columnNames) {
+        final BatchRequest br = new BatchRequest();
+        final String relativeUrl = String.format("datatables/%s/%s/%s", datatableName, loanId, datatableEntryId);
+        final Map<String, Object> datatableEntryMap = new HashMap<>();
+        datatableEntryMap.putAll(columnNames.stream().collect(Collectors.toMap(v -> v, v -> Utils.randomNameGenerator("VAL_", 3))));
+        final String datatableEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
+        LOG.info("UpdateDataTableEntry map : {}", datatableEntryRequestJsonString);
+
+        br.setRequestId(4570L);
+        br.setReference(4569L);
+        br.setRelativeUrl(relativeUrl);
+        br.setMethod(HttpMethod.PUT);
+        br.setBody(datatableEntryRequestJsonString);
 
         return br;
     }

@@ -119,6 +119,10 @@ public class CommandStrategyProvider {
                 "getTransactionByIdCommandStrategy");
         commandStrategies.put(CommandContext.resource("datatables\\/[a-zA-Z0-9_]*\\/\\d+").method("GET").build(),
                 "getDatatableEntryByAppTableIdCommandStrategy");
+        commandStrategies.put(CommandContext.resource("datatables\\/[a-zA-Z0-9_]*\\/\\d+").method("POST").build(),
+                "createDatatableEntryCommandStrategy");
+        commandStrategies.put(CommandContext.resource("datatables\\/[a-zA-Z0-9_]*\\/\\d+\\/\\d+").method("PUT").build(),
+                "updateDatatableEntryOneToManyCommandStrategy");
         commandStrategies.put(
                 CommandContext.resource("datatables\\/[a-zA-Z0-9_]*\\/\\d+(\\?(\\w+(?:\\=[\\w,]+|&)+)+)").method("GET").build(),
                 "getDatatableEntryByAppTableIdCommandStrategy");

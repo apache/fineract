@@ -33,6 +33,7 @@ import org.apache.fineract.batch.command.internal.ApproveLoanRescheduleCommandSt
 import org.apache.fineract.batch.command.internal.CollectChargesCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateChargeCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateClientCommandStrategy;
+import org.apache.fineract.batch.command.internal.CreateDatatableEntryCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateLoanRescheduleRequestCommandStrategy;
 import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy;
 import org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy;
@@ -42,6 +43,7 @@ import org.apache.fineract.batch.command.internal.GetLoanByIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.GetTransactionByIdCommandStrategy;
 import org.apache.fineract.batch.command.internal.UnknownCommandStrategy;
 import org.apache.fineract.batch.command.internal.UpdateClientCommandStrategy;
+import org.apache.fineract.batch.command.internal.UpdateDatatableEntryOneToManyCommandStrategy;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -99,7 +101,11 @@ public class CommandStrategyProviderTest {
                 Arguments.of("datatables/test_dt_table/123", HttpMethod.GET, "getDatatableEntryByAppTableIdCommandStrategy",
                         mock(GetDatatableEntryByAppTableIdCommandStrategy.class)),
                 Arguments.of("datatables/test_dt_table/123?genericResultSet=true", HttpMethod.GET,
-                        "getDatatableEntryByAppTableIdCommandStrategy", mock(GetDatatableEntryByAppTableIdCommandStrategy.class)));
+                        "getDatatableEntryByAppTableIdCommandStrategy", mock(GetDatatableEntryByAppTableIdCommandStrategy.class)),
+                Arguments.of("datatables/test_dt_table/123", HttpMethod.POST, "createDatatableEntryCommandStrategy",
+                        mock(CreateDatatableEntryCommandStrategy.class)),
+                Arguments.of("datatables/test_dt_table/123/1", HttpMethod.PUT, "updateDatatableEntryOneToManyCommandStrategy",
+                        mock(UpdateDatatableEntryOneToManyCommandStrategy.class)));
     }
 
     /**
