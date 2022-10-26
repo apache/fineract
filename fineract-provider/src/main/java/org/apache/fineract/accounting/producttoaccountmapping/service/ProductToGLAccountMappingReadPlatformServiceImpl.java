@@ -188,7 +188,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
 
     @Override
     public Map<String, Object> fetchAccountMappingDetailsForSavingsProduct(final Long savingsProductId, final Integer accountingType) {
-        final Map<String, Object> accountMappingDetails = new LinkedHashMap<>(8);
+        final Map<String, Object> accountMappingDetails = new LinkedHashMap<>(15);
 
         final ProductToGLAccountMappingMapper rm = new ProductToGLAccountMappingMapper();
         final String sql = "select " + rm.schema() + " and product_id = ? and payment_type is null and mapping.charge_id is null ";
@@ -208,27 +208,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
                 final String glCode = (String) productToGLAccountMap.get("glCode");
                 final GLAccountData gLAccountData = new GLAccountData(glAccountId, glAccountName, glCode);
 
-                if (glAccountForSavings.equals(CashAccountsForSavings.SAVINGS_REFERENCE)) {
-                    accountMappingDetails.put(SavingProductAccountingDataParams.SAVINGS_REFERENCE.getValue(), gLAccountData);
-                } else if (glAccountForSavings.equals(CashAccountsForSavings.SAVINGS_CONTROL)) {
-                    accountMappingDetails.put(SavingProductAccountingDataParams.SAVINGS_CONTROL.getValue(), gLAccountData);
-                } else if (glAccountForSavings.equals(CashAccountsForSavings.INCOME_FROM_FEES)) {
-                    accountMappingDetails.put(SavingProductAccountingDataParams.INCOME_FROM_FEES.getValue(), gLAccountData);
-                } else if (glAccountForSavings.equals(CashAccountsForSavings.INCOME_FROM_PENALTIES)) {
-                    accountMappingDetails.put(SavingProductAccountingDataParams.INCOME_FROM_PENALTIES.getValue(), gLAccountData);
-                } else if (glAccountForSavings.equals(CashAccountsForSavings.TRANSFERS_SUSPENSE)) {
-                    accountMappingDetails.put(SavingProductAccountingDataParams.TRANSFERS_SUSPENSE.getValue(), gLAccountData);
-                } else if (glAccountForSavings.equals(CashAccountsForSavings.INTEREST_ON_SAVINGS)) {
-                    accountMappingDetails.put(SavingProductAccountingDataParams.INTEREST_ON_SAVINGS.getValue(), gLAccountData);
-                } else if (glAccountForSavings.equals(CashAccountsForSavings.OVERDRAFT_PORTFOLIO_CONTROL)) {
-                    accountMappingDetails.put(SavingProductAccountingDataParams.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), gLAccountData);
-                } else if (glAccountForSavings.equals(CashAccountsForSavings.LOSSES_WRITTEN_OFF)) {
-                    accountMappingDetails.put(SavingProductAccountingDataParams.LOSSES_WRITTEN_OFF.getValue(), gLAccountData);
-                } else if (glAccountForSavings.equals(CashAccountsForSavings.INCOME_FROM_INTEREST)) {
-                    accountMappingDetails.put(SavingProductAccountingDataParams.INCOME_FROM_INTEREST.getValue(), gLAccountData);
-                } else if (glAccountForSavings.equals(CashAccountsForSavings.ESCHEAT_LIABILITY)) {
-                    accountMappingDetails.put(SavingProductAccountingDataParams.ESCHEAT_LIABILITY.getValue(), gLAccountData);
-                }
+                getAccountMappingDetails(accountMappingDetails, glAccountForSavings, gLAccountData);
             }
         }else if(AccountingRuleType.ACCRUAL_PERIODIC.getValue().equals(accountingType)){
 
@@ -242,38 +222,44 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
                 final String glCode = (String) productToGLAccountMap.get("glCode");
                 final GLAccountData gLAccountData = new GLAccountData(glAccountId, glAccountName, glCode);
 
-                if (glAccountForSavings.equals(CashAccountsForSavings.SAVINGS_REFERENCE)) {
-                    accountMappingDetails.put(SavingProductAccountingDataParams.SAVINGS_REFERENCE.getValue(), gLAccountData);
-                } else if (glAccountForSavings.equals(CashAccountsForSavings.SAVINGS_CONTROL)) {
-                    accountMappingDetails.put(SavingProductAccountingDataParams.SAVINGS_CONTROL.getValue(), gLAccountData);
-                }else if (glAccountForSavings.equals(CashAccountsForSavings.INTEREST_RECEIVABLE)) {
+                getAccountMappingDetails(accountMappingDetails, glAccountForSavings, gLAccountData);
+
+                 if (glAccountForSavings.equals(CashAccountsForSavings.INTEREST_RECEIVABLE)) {
                     accountMappingDetails.put(SavingProductAccountingDataParams.INTEREST_RECEIVABLE.getValue(), gLAccountData);
                 } else if (glAccountForSavings.equals(CashAccountsForSavings.FEES_RECEIVABLE)) {
                     accountMappingDetails.put(SavingProductAccountingDataParams.FEES_RECEIVABLE.getValue(), gLAccountData);
                 } else if (glAccountForSavings.equals(CashAccountsForSavings.PENALTIES_RECEIVABLE)) {
                     accountMappingDetails.put(SavingProductAccountingDataParams.PENALTIES_RECEIVABLE.getValue(), gLAccountData);
-                } else if (glAccountForSavings.equals(CashAccountsForSavings.INCOME_FROM_FEES)) {
-                    accountMappingDetails.put(SavingProductAccountingDataParams.INCOME_FROM_FEES.getValue(), gLAccountData);
-                } else if (glAccountForSavings.equals(CashAccountsForSavings.INCOME_FROM_PENALTIES)) {
-                    accountMappingDetails.put(SavingProductAccountingDataParams.INCOME_FROM_PENALTIES.getValue(), gLAccountData);
-                } else if (glAccountForSavings.equals(CashAccountsForSavings.TRANSFERS_SUSPENSE)) {
-                    accountMappingDetails.put(SavingProductAccountingDataParams.TRANSFERS_SUSPENSE.getValue(), gLAccountData);
-                } else if (glAccountForSavings.equals(CashAccountsForSavings.INTEREST_ON_SAVINGS)) {
-                    accountMappingDetails.put(SavingProductAccountingDataParams.INTEREST_ON_SAVINGS.getValue(), gLAccountData);
-                } else if (glAccountForSavings.equals(CashAccountsForSavings.OVERDRAFT_PORTFOLIO_CONTROL)) {
-                    accountMappingDetails.put(SavingProductAccountingDataParams.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), gLAccountData);
-                } else if (glAccountForSavings.equals(CashAccountsForSavings.LOSSES_WRITTEN_OFF)) {
-                    accountMappingDetails.put(SavingProductAccountingDataParams.LOSSES_WRITTEN_OFF.getValue(), gLAccountData);
-                } else if (glAccountForSavings.equals(CashAccountsForSavings.INCOME_FROM_INTEREST)) {
-                    accountMappingDetails.put(SavingProductAccountingDataParams.INCOME_FROM_INTEREST.getValue(), gLAccountData);
-                } else if (glAccountForSavings.equals(CashAccountsForSavings.ESCHEAT_LIABILITY)) {
-                    accountMappingDetails.put(SavingProductAccountingDataParams.ESCHEAT_LIABILITY.getValue(), gLAccountData);
                 } else if (glAccountForSavings.equals(CashAccountsForSavings.INTEREST_PAYABLE)) {
                     accountMappingDetails.put(SavingProductAccountingDataParams.INTEREST_PAYABLE.getValue(), gLAccountData);
                 }
             }
         }
         return accountMappingDetails;
+    }
+
+    private void getAccountMappingDetails(Map<String, Object> accountMappingDetails, CashAccountsForSavings glAccountForSavings, GLAccountData gLAccountData) {
+        if (glAccountForSavings.equals(CashAccountsForSavings.SAVINGS_REFERENCE)) {
+            accountMappingDetails.put(SavingProductAccountingDataParams.SAVINGS_REFERENCE.getValue(), gLAccountData);
+        } else if (glAccountForSavings.equals(CashAccountsForSavings.SAVINGS_CONTROL)) {
+            accountMappingDetails.put(SavingProductAccountingDataParams.SAVINGS_CONTROL.getValue(), gLAccountData);
+        } else if (glAccountForSavings.equals(CashAccountsForSavings.INCOME_FROM_FEES)) {
+            accountMappingDetails.put(SavingProductAccountingDataParams.INCOME_FROM_FEES.getValue(), gLAccountData);
+        } else if (glAccountForSavings.equals(CashAccountsForSavings.INCOME_FROM_PENALTIES)) {
+            accountMappingDetails.put(SavingProductAccountingDataParams.INCOME_FROM_PENALTIES.getValue(), gLAccountData);
+        } else if (glAccountForSavings.equals(CashAccountsForSavings.TRANSFERS_SUSPENSE)) {
+            accountMappingDetails.put(SavingProductAccountingDataParams.TRANSFERS_SUSPENSE.getValue(), gLAccountData);
+        } else if (glAccountForSavings.equals(CashAccountsForSavings.INTEREST_ON_SAVINGS)) {
+            accountMappingDetails.put(SavingProductAccountingDataParams.INTEREST_ON_SAVINGS.getValue(), gLAccountData);
+        } else if (glAccountForSavings.equals(CashAccountsForSavings.OVERDRAFT_PORTFOLIO_CONTROL)) {
+            accountMappingDetails.put(SavingProductAccountingDataParams.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), gLAccountData);
+        } else if (glAccountForSavings.equals(CashAccountsForSavings.LOSSES_WRITTEN_OFF)) {
+            accountMappingDetails.put(SavingProductAccountingDataParams.LOSSES_WRITTEN_OFF.getValue(), gLAccountData);
+        } else if (glAccountForSavings.equals(CashAccountsForSavings.INCOME_FROM_INTEREST)) {
+            accountMappingDetails.put(SavingProductAccountingDataParams.INCOME_FROM_INTEREST.getValue(), gLAccountData);
+        } else if (glAccountForSavings.equals(CashAccountsForSavings.ESCHEAT_LIABILITY)) {
+            accountMappingDetails.put(SavingProductAccountingDataParams.ESCHEAT_LIABILITY.getValue(), gLAccountData);
+        }
     }
 
     @Override
