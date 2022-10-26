@@ -23,6 +23,8 @@ import org.apache.fineract.notification.domain.NotificationMapper;
 public interface NotificationMapperWritePlatformService {
 
     Long create(NotificationMapper notificationMapper);
+
     void markAllNotificationsForAUserAsRead(Long userId);
+    
     void markASingleNotificationForAUserAsRead(Long userId,Long notificationId);
 }

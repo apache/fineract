@@ -90,7 +90,7 @@ public class NotificationApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public void update() {
         final AppUser user = this.context.authenticatedUser();
-        this.notificationMapperWritePlatformService.markAllNotificationsForAUserAsRead(user.getId());;
+        this.notificationMapperWritePlatformService.markAllNotificationsForAUserAsRead(user.getId());
     }
 
 
@@ -98,7 +98,7 @@ public class NotificationApiResource {
     @Path("{notificationId}")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    public void updateOne(@PathParam("notificationId") @Parameter(description = "notificationId") final Long notificationId){
+    public void updateOne(@PathParam("notificationId") @Parameter(description = "notificationId") final Long notificationId) {
         final AppUser user = this.context.authenticatedUser();
         this.notificationMapperWritePlatformService.markASingleNotificationForAUserAsRead(user.getId(),notificationId);
     }

@@ -42,12 +42,10 @@ public class NotificationMapperWritePlatformServiceImpl implements NotificationM
     @Override
     public void markAllNotificationsForAUserAsRead(Long userId) {
         notificationMapperRepository.markAllNotificationsForAUserAsRead(userId);
-        
     }
 
     @Override
     public void markASingleNotificationForAUserAsRead(Long userId, Long notificationId) {
         notificationMapperRepository.markASingleNotificationForAUserAsRead(userId, notificationId);
-        
     }
 }
