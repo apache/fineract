@@ -93,13 +93,12 @@ public class NotificationApiResource {
         this.notificationMapperWritePlatformService.markAllNotificationsForAUserAsRead(user.getId());
     }
 
-
     @PUT
     @Path("{notificationId}")
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
     public void updateOne(@PathParam("notificationId") @Parameter(description = "notificationId") final Long notificationId) {
         final AppUser user = this.context.authenticatedUser();
-        this.notificationMapperWritePlatformService.markASingleNotificationForAUserAsRead(user.getId(),notificationId);
+        this.notificationMapperWritePlatformService.markASingleNotificationForAUserAsRead(user.getId(), notificationId);
     }
 }
