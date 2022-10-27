@@ -22,30 +22,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.useradministration.domain.AppUser;
-import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 @Slf4j
 @RequiredArgsConstructor
-public class InitialisationTasklet implements Tasklet {
-
-    private final AppUserRepositoryWrapper userRepository;
+public class ResetContextTasklet implements Tasklet {
 
     @Override
     public RepeatStatus execute(@NotNull StepContribution contribution, @NotNull ChunkContext chunkContext) throws Exception {
-        AppUser user = userRepository.fetchSystemUser();
-        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, user.getPassword(),
-                new NullAuthoritiesMapper().mapAuthorities(user.getAuthorities()));
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        ThreadLocalContextUtil.setActionContext(ActionContext.COB);
+        ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         return RepeatStatus.FINISHED;
     }
 }

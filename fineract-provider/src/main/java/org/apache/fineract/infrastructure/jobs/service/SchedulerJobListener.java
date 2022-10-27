@@ -24,6 +24,7 @@ import java.util.HashMap;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
+import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobRunHistory;
@@ -67,6 +68,7 @@ public class SchedulerJobListener implements JobListener {
                 authoritiesMapper.mapAuthorities(user.getAuthorities()));
         SecurityContextHolder.getContext().setAuthentication(auth);
         HashMap<BusinessDateType, LocalDate> businessDates = businessDateReadPlatformService.getBusinessDates();
+        ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         ThreadLocalContextUtil.setBusinessDates(businessDates);
     }
 

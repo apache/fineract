@@ -103,7 +103,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
         task.start();
 
         try {
-
+            ThreadLocalContextUtil.reset();
             if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
                 // ignore to allow 'preflight' requests from AJAX applications
                 // in different origin (domain name)
@@ -157,6 +157,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
             response.addHeader("WWW-Authenticate", "Basic realm=\"" + "Fineract Platform API" + "\"");
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         } finally {
+            ThreadLocalContextUtil.reset();
             task.stop();
             final PlatformRequestLog log = PlatformRequestLog.from(task, request);
             LOG.debug("{}", this.toApiJsonSerializer.serialize(log));

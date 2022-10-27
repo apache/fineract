@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
@@ -57,6 +58,7 @@ public class JobSchedulerServiceImpl implements ApplicationListener<ContextRefre
         for (final FineractPlatformTenant tenant : allTenants) {
             ThreadLocalContextUtil.setTenant(tenant);
             HashMap<BusinessDateType, LocalDate> businessDates = businessDateReadPlatformService.getBusinessDates();
+            ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
             ThreadLocalContextUtil.setBusinessDates(businessDates);
             final List<ScheduledJobDetail> scheduledJobDetails = schedularWritePlatformService
                     .retrieveAllJobs(fineractProperties.getNodeId());

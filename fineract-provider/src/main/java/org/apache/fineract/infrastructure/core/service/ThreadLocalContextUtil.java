@@ -116,4 +116,12 @@ public final class ThreadLocalContextUtil {
         setBusinessDates(fineractContext.getBusinessDateContext());
         setActionContext(fineractContext.getActionContext());
     }
+
+    public static void reset() {
+        contextHolder.remove();
+        tenantContext.remove();
+        authTokenContext.remove();
+        businessDateContext.remove();
+        actionContext.remove();
+    }
 }

@@ -19,6 +19,7 @@
 package org.apache.fineract.cob.loan;
 
 import org.apache.fineract.cob.COBBusinessStepService;
+import org.apache.fineract.cob.common.ResetContextTasklet;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.listener.InlineCOBLoanItemListener;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
@@ -83,7 +84,7 @@ public class LoanInlineCOBConfig {
     @Bean(name = "loanInlineCOBJob")
     public Job loanInlineCOBJob() {
         return jobBuilderFactory.get(LoanCOBConstant.INLINE_LOAN_COB_JOB_NAME) //
-                .start(inlineCOBBuildExecutionContextStep()).next(inlineLoanCOBStep()) //
+                .start(inlineCOBBuildExecutionContextStep()).next(inlineLoanCOBStep()).next(inlineCOBResetContextStep()) //
                 .incrementer(new RunIdIncrementer()) //
                 .build();
     }
@@ -99,6 +100,11 @@ public class LoanInlineCOBConfig {
     }
 
     @Bean
+    public Step inlineCOBResetContextStep() {
+        return stepBuilderFactory.get("Reset context - Step").tasklet(inlineCOBResetContext()).build();
+    }
+
+    @Bean
     public InlineCOBLoanItemWriter inlineCobWorkerItemWriter() {
         InlineCOBLoanItemWriter repositoryItemWriter = new InlineCOBLoanItemWriter(accountLockRepository);
         repositoryItemWriter.setRepository(loanRepository);
@@ -108,6 +114,11 @@ public class LoanInlineCOBConfig {
     @Bean
     public InlineCOBLoanItemListener inlineCobLoanItemListener() {
         return new InlineCOBLoanItemListener(accountLockRepository, transactionTemplate);
+    }
+
+    @Bean
+    public ResetContextTasklet inlineCOBResetContext() {
+        return new ResetContextTasklet();
     }
 
     @Bean
