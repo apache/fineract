@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.notification.domain;
 
+import java.util.Collection;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -35,4 +37,7 @@ public interface NotificationMapperRepository extends JpaRepository<Notification
     @Modifying(flushAutomatically = true)
     @Query("UPDATE NotificationMapper n SET n.isRead = true WHERE n.userId.id = :userId AND n.notification.id = :notificationId")
     void markASingleNotificationForAUserAsRead(@Param("userId") Long userId, @Param("notificationId") Long notificationId);
+
+    @Query("SELECT n FROM NotificationMapper n WHERE n.userId.id = :userId AND n.isRead=false")
+    Collection<NotificationMapper> getUnreadNotificationsForAUser(@Param("userId") Long userId);
 }

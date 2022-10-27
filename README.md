@@ -160,7 +160,7 @@ To do this, you need to create the Eclipse project files and import the project 
 1. Create Eclipse project files into the Fineract project by running `./gradlew cleanEclipse eclipse`
 2. Import the fineract-provider project into your Eclipse workspace (File->Import->General->Existing Projects into Workspace, choose root directory fineract/fineract-provider)
 3. Do a clean build of the project in Eclipse (Project->Clean...)
-3. Run / debug Fineract by right clicking on org.apache.fineract.ServerApplication class and choosing Run As / Debug As -> Java Application. All normal Eclipse debugging features (breakpoints, watchpoints etc) should work as expected.
+4. Run / debug Fineract by right clicking on org.apache.fineract.ServerApplication class and choosing Run As / Debug As -> Java Application. All normal Eclipse debugging features (breakpoints, watchpoints etc) should work as expected.
 
 If you change the project settings (dependencies etc) in Gradle, you should redo step 1 and refresh the project in Eclipse.
 
