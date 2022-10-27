@@ -20,6 +20,7 @@ package org.apache.fineract.cob.loan;
 
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.common.InitialisationTasklet;
+import org.apache.fineract.cob.common.ResetContextTasklet;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.listener.ChunkProcessingLoanItemListener;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
@@ -74,7 +75,7 @@ public class LoanCOBWorkerConfiguration {
     @Bean
     public Flow flow() {
         return new FlowBuilder<Flow>("cobFlow").start(initialisationStep(null)).next(applyLockStep(null)).next(loanBusinessStep(null))
-                .build();
+                .next(resetContextStep(null)).build();
     }
 
     @Bean
@@ -100,6 +101,12 @@ public class LoanCOBWorkerConfiguration {
     }
 
     @Bean
+    @StepScope
+    public Step resetContextStep(@Value("#{stepExecutionContext['partition']}") String partitionName) {
+        return localStepBuilderFactory.get("Reset context - Step:" + partitionName).tasklet(resetContext()).build();
+    }
+
+    @Bean
     public InitialisationTasklet initialiseContext() {
         return new InitialisationTasklet(userRepository);
     }
@@ -112,6 +119,11 @@ public class LoanCOBWorkerConfiguration {
     @Bean
     public ApplyLoanLockTasklet applyLock() {
         return new ApplyLoanLockTasklet(accountLockRepository);
+    }
+
+    @Bean
+    public ResetContextTasklet resetContext() {
+        return new ResetContextTasklet();
     }
 
     @Bean

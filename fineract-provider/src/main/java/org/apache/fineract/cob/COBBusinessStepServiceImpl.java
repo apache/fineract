@@ -54,6 +54,7 @@ public class COBBusinessStepServiceImpl implements COBBusinessStepService {
         businessEventNotifierService.startExternalEventRecording();
         for (String businessStep : executionMap.values()) {
             try {
+                ThreadLocalContextUtil.setActionContext(ActionContext.COB);
                 COBBusinessStep<S> businessStepBean = (COBBusinessStep<S>) applicationContext.getBean(businessStep);
                 item = businessStepBean.execute(item);
             } catch (Exception e) {
