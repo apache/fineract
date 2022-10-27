@@ -67,7 +67,7 @@ public class JobSchedulerServiceImpl implements ApplicationListener<ContextRefre
                 jobDetails.setTriggerMisfired(false);
                 schedularWritePlatformService.saveOrUpdate(jobDetails);
             }
-            final SchedulerDetail schedulerDetail = schedularWritePlatformService.retriveSchedulerDetail();
+            final SchedulerDetail schedulerDetail = schedularWritePlatformService.retrieveSchedulerDetail();
             if (schedulerDetail.isResetSchedulerOnBootup()) {
                 schedulerDetail.setSuspended(false);
                 schedularWritePlatformService.updateSchedulerDetail(schedulerDetail);

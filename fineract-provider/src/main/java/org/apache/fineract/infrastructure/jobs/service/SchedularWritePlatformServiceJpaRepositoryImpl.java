@@ -103,10 +103,10 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
     }
 
     @Override
-    public SchedulerDetail retriveSchedulerDetail() {
+    public SchedulerDetail retrieveSchedulerDetail() {
         SchedulerDetail schedulerDetail = null;
         final List<SchedulerDetail> schedulerDetailList = this.schedulerDetailRepository.findAll();
-        if (schedulerDetailList != null) {
+        if (schedulerDetailList != null && schedulerDetailList.size() > 0) {
             schedulerDetail = schedulerDetailList.get(0);
         }
         return schedulerDetail;
@@ -142,7 +142,7 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
                 && scheduledJobDetail.getNextRunTime().after(new Date()))) {
             isStopExecution = true;
         }
-        final SchedulerDetail schedulerDetail = retriveSchedulerDetail();
+        final SchedulerDetail schedulerDetail = retrieveSchedulerDetail();
         if (triggerType.equals(SchedulerServiceConstants.TRIGGER_TYPE_CRON) && schedulerDetail.isSuspended()) {
             scheduledJobDetail.setTriggerMisfired(true);
             isStopExecution = true;
