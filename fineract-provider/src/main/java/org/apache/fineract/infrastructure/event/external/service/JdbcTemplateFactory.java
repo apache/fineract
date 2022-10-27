@@ -16,15 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.exception;
+package org.apache.fineract.infrastructure.event.external.service;
 
-public class ExternalEventConfigurationNotFoundException extends RuntimeException {
+import javax.sql.DataSource;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.service.migration.TenantDataSourceFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
 
-    public ExternalEventConfigurationNotFoundException() {
-        super("All external events are not configured");
-    }
+@RequiredArgsConstructor
+@Component
+public class JdbcTemplateFactory {
 
-    public ExternalEventConfigurationNotFoundException(final String externalEventType) {
-        super("Configuration not found for external event " + externalEventType);
+    private final TenantDataSourceFactory tenantDataSourceFactory;
+
+    public JdbcTemplate create(FineractPlatformTenant tenant) {
+        DataSource tenantDataSource = tenantDataSourceFactory.create(tenant);
+        return new JdbcTemplate(tenantDataSource);
     }
 }
