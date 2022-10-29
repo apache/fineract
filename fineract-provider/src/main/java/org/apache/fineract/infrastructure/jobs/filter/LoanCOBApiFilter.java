@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.jobs.filter;
 
 import com.google.common.base.Splitter;
-import com.sun.research.ws.wadl.HTTPMethods;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
@@ -40,6 +39,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepositor
 import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringAccount;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.http.HttpStatus;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -50,7 +50,7 @@ public class LoanCOBApiFilter extends OncePerRequestFilter {
     private final GLIMAccountInfoRepository glimAccountInfoRepository;
     private final LoanAccountLockService loanAccountLockService;
 
-    private static final List<HTTPMethods> HTTP_METHODS = List.of(HTTPMethods.POST, HTTPMethods.PUT, HTTPMethods.DELETE);
+    private static final List<HttpMethod> HTTP_METHODS = List.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE);
     private static final Function<String, Boolean> URL_FUNCTION = s -> s.matches("/loans/\\d+.*") || s.matches("/loans/glimAccount/\\d+.*");
     private static final Integer LOAN_ID_INDEX_IN_URL = 2;
     private static final Integer GLIM_ID_INDEX_IN_URL = 3;
@@ -121,7 +121,7 @@ public class LoanCOBApiFilter extends OncePerRequestFilter {
         if (StringUtils.isBlank(request.getPathInfo())) {
             return false;
         }
-        return HTTP_METHODS.contains(HTTPMethods.fromValue(request.getMethod())) && URL_FUNCTION.apply(request.getPathInfo());
+        return HTTP_METHODS.contains(HttpMethod.valueOf(request.getMethod())) && URL_FUNCTION.apply(request.getPathInfo());
     }
 
     private boolean isGlim(Supplier<Stream<String>> streamSupplier) {
