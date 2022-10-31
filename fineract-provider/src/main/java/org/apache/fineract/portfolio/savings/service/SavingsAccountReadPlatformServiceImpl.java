@@ -1890,4 +1890,16 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         return this.jdbcTemplate.query(sql, this.savingsAccountBlockNarrationHistoryMapper, new Object[] { savingsId });
     }
 
+    @Override
+    public List<Long> retrieveActiveSavingsAccrualAccounts(Long accountType) {
+        StringBuilder sql = new StringBuilder(" SELECT distinct msa.id ");
+        sql.append(" FROM m_savings_account msa ");
+        sql.append(" JOIN m_savings_product msp ON msp.id = msa.product_id ");
+        sql.append(" WHERE msa.status_enum = 300 AND msp.accounting_type = 3 ");
+        sql.append(" and (msa.nominal_annual_interest_rate != 0 or msa.allow_overdraft = 1 or msa.account_balance_derived <= 0) ");
+        sql.append(" AND msa.deposit_type_enum = ? ");
+
+        return this.jdbcTemplate.queryForList(sql.toString(), Long.class, accountType);
+    }
+
 }

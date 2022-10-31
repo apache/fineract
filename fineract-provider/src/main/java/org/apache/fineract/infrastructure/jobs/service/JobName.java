@@ -50,7 +50,8 @@ public enum JobName {
                                                                                                                                                                                                                             "Execute All Dirty Jobs"), INCREASE_BUSINESS_DATE_BY_1_DAY(
                                                                                                                                                                                                                                     "Increase Business Date by 1 day"), INCREASE_COB_DATE_BY_1_DAY(
                                                                                                                                                                                                                                             "Increase COB Date by 1 day"),
-    UPDATE_SAVINGS_INTEREST_POSTING_QUALIFY_CONFIG("Update Savings Interest Posting Qualify Config");
+    UPDATE_SAVINGS_INTEREST_POSTING_QUALIFY_CONFIG("Update Savings Interest Posting Qualify Config"),
+    POST_ACCRUAL_INTEREST_FOR_SAVINGS("Post Accrual Interest for Savings");
 
     private final String name;
 

@@ -16,27 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.scheduledjobs.service;
+package org.apache.fineract.infrastructure.jobs.service;
 
-import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 
-public interface ScheduledJobRunnerService {
 
-    void applyAnnualFeeForSavings();
+public interface JobRunner<T> {
 
-    void applyDueChargesForSavings() throws JobExecutionException;
-
-    void updateNPA();
-
-    void updateMaturityDetailsOfDepositAccounts();
-
-    void generateRDSchedule();
-
-    void postDividends() throws JobExecutionException;
-
-    void updateTrialBalanceDetails() throws JobExecutionException;
-
-    void executeMissMatchedJobs() throws JobExecutionException;
-
-    void postAccrualInterestForSavings() throws JobExecutionException;
+    void runJob(final T jobDetails, final StringBuilder sb);
+    
 }

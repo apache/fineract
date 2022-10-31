@@ -421,5 +421,110 @@ public final class AccountingConstants {
 
     // Block Unblock Narrations
     public static final String BLOCK_UNBLOCK_OPTION_CODE_NAME = "SavingsAccountBlockUnblockNarration";
+    /*** Accounting placeholders for accrual based accounting for savings products ***/
+    public static enum ACCRUAL_ACCOUNTS_FOR_SAVINGS {
 
+        SAVINGS_REFERENCE(1), SAVINGS_CONTROL(2), INTEREST_ON_SAVINGS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), TRANSFERS_SUSPENSE(
+                10), OVERDRAFT_PORTFOLIO_CONTROL(11), INCOME_FROM_INTEREST(12), LOSSES_WRITTEN_OFF(13), ESCHEAT_LIABILITY(
+                14), INTEREST_RECEIVABLE(51), FEES_RECEIVABLE(52), PENALTIES_RECEIVABLE(50), INTEREST_PAYABLE(53);
+
+        private final Integer value;
+
+        private ACCRUAL_ACCOUNTS_FOR_SAVINGS(final Integer value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return name().replaceAll("_", " ");
+        }
+
+        public Integer getValue() {
+            return this.value;
+        }
+
+        private static final Map<Integer, ACCRUAL_ACCOUNTS_FOR_SAVINGS> intToEnumMap = new HashMap<>();
+        static {
+            for (final ACCRUAL_ACCOUNTS_FOR_SAVINGS type : ACCRUAL_ACCOUNTS_FOR_SAVINGS.values()) {
+                intToEnumMap.put(type.value, type);
+            }
+        }
+
+        public static ACCRUAL_ACCOUNTS_FOR_SAVINGS fromInt(final int i) {
+            final ACCRUAL_ACCOUNTS_FOR_SAVINGS type = intToEnumMap.get(Integer.valueOf(i));
+            return type;
+        }
+    }
+
+    public  enum FINANCIAL_ACTIVITY {
+        ASSET_TRANSFER(100, "assetTransfer", GLAccountType.ASSET), LIABILITY_TRANSFER(200, "liabilityTransfer", GLAccountType.LIABILITY), CASH_AT_MAINVAULT(
+                101, "cashAtMainVault", GLAccountType.ASSET), CASH_AT_TELLER(102, "cashAtTeller", GLAccountType.ASSET), OPENING_BALANCES_TRANSFER_CONTRA(
+                300, "openingBalancesTransferContra", GLAccountType.EQUITY), ASSET_FUND_SOURCE(103, "fundSource", GLAccountType.ASSET), PAYABLE_DIVIDENDS(
+                201, "payableDividends", GLAccountType.LIABILITY);
+
+        private final Integer value;
+        private final String code;
+        private final GLAccountType mappedGLAccountType;
+        private static List<FinancialActivityData> financialActivities;
+
+        private FINANCIAL_ACTIVITY(final Integer value, final String code, final GLAccountType mappedGLAccountType) {
+            this.value = value;
+            this.code = code;
+            this.mappedGLAccountType = mappedGLAccountType;
+        }
+
+        @Override
+        public String toString() {
+            return name().replaceAll("_", " ");
+        }
+
+        public Integer getValue() {
+            return this.value;
+        }
+
+        public String getCode() {
+            return this.code;
+        }
+
+        public GLAccountType getMappedGLAccountType() {
+            return mappedGLAccountType;
+        }
+
+        public String getValueAsString() {
+            return this.value.toString();
+        }
+
+        private static final Map<Integer, FINANCIAL_ACTIVITY> intToEnumMap = new HashMap<>();
+        static {
+            for (final FINANCIAL_ACTIVITY type : FINANCIAL_ACTIVITY.values()) {
+                intToEnumMap.put(type.value, type);
+            }
+        }
+
+        public static FINANCIAL_ACTIVITY fromInt(final int financialActivityId) {
+            final FINANCIAL_ACTIVITY type = intToEnumMap.get(Integer.valueOf(financialActivityId));
+            return type;
+        }
+
+        public static FinancialActivityData toFinancialActivityData(final int financialActivityId) {
+            final FINANCIAL_ACTIVITY type = fromInt(financialActivityId);
+            return convertToFinancialActivityData(type);
+        }
+
+        public static List<FinancialActivityData> getAllFinancialActivities() {
+            if (financialActivities == null) {
+                financialActivities = new ArrayList<>();
+                for (final FINANCIAL_ACTIVITY type : FINANCIAL_ACTIVITY.values()) {
+                    FinancialActivityData financialActivityData = convertToFinancialActivityData(type);
+                    financialActivities.add(financialActivityData);
+                }
+            }
+            return financialActivities;
+        }
+
+        private static FinancialActivityData convertToFinancialActivityData(final FINANCIAL_ACTIVITY type) {
+            FinancialActivityData financialActivityData = new FinancialActivityData(type.value, type.code, type.getMappedGLAccountType());
+            return financialActivityData;
+        }
+    }
 }

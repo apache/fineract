@@ -70,5 +70,6 @@ public interface SavingsAccountReadPlatformService {
 
     List<SavingsAccountTransactionData> retrieveAllTransactionData(List<String> refNo);
     Collection<SavingsAccountBlockNarrationHistoryData> retrieveSavingsAccountBlockNarrationHistory(Long savingsId);
+    List<Long> retrieveActiveSavingsAccrualAccounts(Long accountType);
 
 }

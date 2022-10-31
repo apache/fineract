@@ -24,10 +24,12 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
 import org.apache.fineract.accounting.closure.domain.GLClosureRepository;
+import org.apache.fineract.accounting.common.AccountingConstants;
 import org.apache.fineract.accounting.common.AccountingConstants.AccrualAccountsForLoan;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForLoan;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForSavings;
@@ -1300,5 +1302,69 @@ public class AccountingProcessorHelper {
 
     private GLAccount getGLAccountById(final Long accountId) {
         return this.accountRepositoryWrapper.findOneWithNotFoundDetection(accountId);
+    }
+
+    public void createAccrualBasedJournalEntriesAndReversalsForSavings(final Office office, final String currencyCode,
+                                                                       final Integer accountTypeToBeDebited, final Integer accountTypeToBeCredited, final Long savingsProductId,
+                                                                       final Long paymentTypeId, final Long loanId, final String transactionId, final LocalDate transactionDate, final BigDecimal amount,
+                                                                       final Boolean isReversal) {
+        int accountTypeToDebitId = accountTypeToBeDebited;
+        int accountTypeToCreditId = accountTypeToBeCredited;
+        // reverse debits and credits for reversals
+        if (isReversal) {
+            accountTypeToDebitId = accountTypeToBeCredited;
+            accountTypeToCreditId = accountTypeToBeDebited;
+        }
+        createJournalEntriesForSavings(office, currencyCode, accountTypeToDebitId, accountTypeToCreditId, savingsProductId, paymentTypeId,
+                loanId, transactionId, transactionDate, amount);
+    }
+
+    public void createAccrualBasedJournalEntriesAndReversalsForSavingsTax(final Office office, final String currencyCode,
+                                                                          final AccountingConstants.ACCRUAL_ACCOUNTS_FOR_SAVINGS accountTypeToBeDebited, final AccountingConstants.ACCRUAL_ACCOUNTS_FOR_SAVINGS accountTypeToBeCredited,
+                                                                          final Long savingsProductId, final Long paymentTypeId, final Long savingsId, final String transactionId,
+                                                                          final LocalDate transactionDate, final BigDecimal amount, final Boolean isReversal, final List<TaxPaymentDTO> taxDetails) {
+
+        for (TaxPaymentDTO taxPaymentDTO : taxDetails) {
+            if (taxPaymentDTO.getAmount() != null) {
+                if (taxPaymentDTO.getCreditAccountId() == null) {
+                    createCashBasedCreditJournalEntriesAndReversalsForSavings(office, currencyCode, accountTypeToBeCredited.getValue(),
+                            savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, taxPaymentDTO.getAmount(),
+                            isReversal);
+                } else {
+                    createCashBasedCreditJournalEntriesAndReversalsForSavings(office, currencyCode, taxPaymentDTO.getCreditAccountId(),
+                            savingsId, transactionId, transactionDate, taxPaymentDTO.getAmount(), isReversal);
+                }
+            }
+        }
+        createCashBasedDebitJournalEntriesAndReversalsForSavings(office, currencyCode, accountTypeToBeDebited.getValue(), savingsProductId,
+                paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal);
+    }
+
+    public void createAccrualBasedJournalEntriesAndReversalsForSavingsCharges(final Office office, final String currencyCode,
+                                                                              final AccountingConstants.ACCRUAL_ACCOUNTS_FOR_SAVINGS accountTypeToBeDebited, final AccountingConstants.ACCRUAL_ACCOUNTS_FOR_SAVINGS accountTypeToBeCredited,
+                                                                              final Long savingsProductId, final Long paymentTypeId, final Long loanId, final String transactionId,
+                                                                              final LocalDate transactionDate, final BigDecimal totalAmount, final Boolean isReversal,
+                                                                              final List<ChargePaymentDTO> chargePaymentDTOs) {
+
+        if (chargePaymentDTOs.size() != 1) {
+            return;
+        }
+        ChargePaymentDTO chargePaymentDTO = chargePaymentDTOs.get(0);
+
+        final GLAccount chargeSpecificAccount = getLinkedGLAccountForSavingsCharges(savingsProductId, accountTypeToBeCredited.getValue(),
+                chargePaymentDTO.getChargeId());
+        final GLAccount savingsControlAccount = getLinkedGLAccountForSavingsProduct(savingsProductId, accountTypeToBeDebited.getValue(),
+                paymentTypeId);
+        if (isReversal) {
+            createDebitJournalEntryForSavings(office, currencyCode, chargeSpecificAccount, loanId, transactionId, transactionDate,
+                    totalAmount);
+            createCreditJournalEntryForSavings(office, currencyCode, savingsControlAccount, loanId, transactionId, transactionDate,
+                    totalAmount);
+        } else {
+            createDebitJournalEntryForSavings(office, currencyCode, savingsControlAccount, loanId, transactionId, transactionDate,
+                    totalAmount);
+            createCreditJournalEntryForSavings(office, currencyCode, chargeSpecificAccount, loanId, transactionId, transactionDate,
+                    totalAmount);
+        }
     }
 }

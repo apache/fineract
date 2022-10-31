@@ -50,4 +50,18 @@ public class SavingsTransactionDTO {
     public boolean isOverdraftTransaction() {
         return this.overdraftAmount != null && this.overdraftAmount.doubleValue() > 0;
     }
+
+    public BigDecimal getAmount() {
+        if(this.amount == null){
+            return BigDecimal.ZERO;
+        }
+        return amount;
+    }
+
+    public BigDecimal getOverdraftAmount() {
+        if(this.overdraftAmount == null){
+            return BigDecimal.ZERO;
+        }
+        return overdraftAmount;
+    }
 }

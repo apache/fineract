@@ -40,7 +40,9 @@ public enum SavingsAccountTransactionType {
     REJECT_TRANSFER(15, "savingsAccountTransactionType.rejectTransfer"), WRITTEN_OFF(16, "savingsAccountTransactionType.writtenoff"), //
     OVERDRAFT_INTEREST(17, "savingsAccountTransactionType.overdraftInterest"), //
     WITHHOLD_TAX(18, "savingsAccountTransactionType.withholdTax"), ESCHEAT(19, "savingsAccountTransactionType.escheat"), AMOUNT_HOLD(20,
-            "savingsAccountTransactionType.onHold"), AMOUNT_RELEASE(21, "savingsAccountTransactionType.release");
+            "savingsAccountTransactionType.onHold"), AMOUNT_RELEASE(21, "savingsAccountTransactionType.release"),
+    ACCRUAL_INTEREST_POSTING(22, "savingsAccountTransactionType.accrualInterestPosting"), //
+    OVERDRAFT_ACCRUAL_INTEREST(25, "savingsAccountTransactionType.overdraftAccrualInterest");
 
     private final Integer value;
     private final String code;

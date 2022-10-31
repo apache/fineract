@@ -145,6 +145,16 @@ public final class SavingsEnumerations {
                 optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.INTEREST_POSTING.getValue().longValue(),
                         SavingsAccountTransactionType.INTEREST_POSTING.getCode(), "Interest posting");
             break;
+            case ACCRUAL_INTEREST_POSTING:
+                optionData = new SavingsAccountTransactionEnumData(
+                        SavingsAccountTransactionType.ACCRUAL_INTEREST_POSTING.getValue().longValue(),
+                        SavingsAccountTransactionType.ACCRUAL_INTEREST_POSTING.getCode(), "Accrual Interest posting");
+                break;
+            case OVERDRAFT_ACCRUAL_INTEREST:
+                optionData = new SavingsAccountTransactionEnumData(
+                        SavingsAccountTransactionType.OVERDRAFT_ACCRUAL_INTEREST.getValue().longValue(),
+                        SavingsAccountTransactionType.OVERDRAFT_ACCRUAL_INTEREST.getCode(), "Overdraft Accrual posting");
+                break;
             case WITHDRAWAL_FEE:
                 optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.WITHDRAWAL_FEE.getValue().longValue(),
                         SavingsAccountTransactionType.WITHDRAWAL_FEE.getCode(), "Withdrawal fee");
