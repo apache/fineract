@@ -12,3 +12,4 @@ include::editor.adoc[leveloffset=+1]
 
 include::antora.adoc[leveloffset=+1]
 
+include::contributing.adoc[leveloffset=+1]

@@ -1,0 +1,118 @@
+= Contribution Guidelines
+
+== Background
+
+Fineract as a mission-critical core banking system provides a difficult balance to strike when rapidly building a differentiated product on top of an open source project. While challenging to balance the need for secrecy and time to market for one’s solution versus the transparency and contribution to the open source project, when upstream contribution is done right it unlocks enormous economic value for not just you the innovator but the entire ecosystem as a whole. Fineract is:
+
+* Monolithic codebase
+* No modules, libraries on Maven Central
+* Need to fork upstream Git repository for private customizations
+* Infrequent releases (once per year)
+* No way to fully/partially replace existing business logic without refactoring (modules, “auto-configuration”)
+* Good package structure, but not always following best practices for clean architecture
+* Too many dependencies between business logic and API layer
+* Two database query technologies (plain SQL in strings, JPA/OQL)
+* Handcrafted SQL database independence tools (MySQL, PostgreSQL)
+
+== Automated Enhancements and Checks on Pull Requests
+
+This part of the document describes documentation related to automated code checks, static analysis, and other build-level automation that has been introduced to improve code quality and reduce friction of upstream contribution.
+
+At build time (on developer's machine) for each pull request, we enforce code conventions using checkstyle.xml through Checkstyle and fineract-formatting-preferences.xml through Spotless and then at build time on the CI/CD server we are running Sonarqube and Error Prone for Static Analysis.
+
+The general enabled tools to implement automation of code quality are:
+
+* **Linting**: As code format checker Google code formatter is used. It can be used to ingest config of Eclipse IDE and follows code formatting practices by Google.
+
+* **Static Analysis**: Errorprone by Google is used to find anti patterns in code by statically analysing the code. Rules like UndefinedEquals check, SameNameButDifferent check, ClassCanBeStatic check, MixedMutabilityReturnType error, BigDecimalEquals error, JdkObsolete error,  Warnings CompareToZero, StringSplitter check and a few more. With **-Werror** Errorprone compiler warnings are shown as errors. Definition of enabled check can be found on Errorprone's bugpattern URL like: https://errorprone.info/bugpattern/ClassCanBeStatic.
+
+* **Tests**: Unit test and integrations test are main types of test which runs on the code to automatically test the changes added. With current setting, tools and their configuratio, it is not feasible to show test coverage, the reason why it isn't present in Apache:Fineract. The testing methodolgy includes fuzzy testing and random testing. It is encouraged and required by the contributors to add test for the code, at least a few unit test while creating a pull request.
+
+* **Code Quality Checks**: Fineract futher extends code quality checks with SonarQube.
+
+* **Others**: SpotBugs, Jacoco, Modernizer, PMD, and Checkstyle are also enabled and used to catch any obvious programming error bugs. They are configured to run automatically during the normal Gradle build, and fail if there are any violations detected.
+
+Code cleanup cycles are conducted by maintainers to cleanup and further enhance existing and newly added code.
+
+== Upstream Contribution Process: The Apache Way
+
+This part explains upstream contribution process and ensuring that contributors know how to properly configure GitHub to sync their downstream codebase with upstream project and do development in an upstream-first manner that is aligned with Apache Way.
+
+=== Contributing Apache Way
+
+We know that putting into practice the Apache Way can be difficult and will share our firsthand experiences so others in the community can do the same and reap the economic benefits both internally as well as externally across the entire community.
+
+This part is aimed primarily towards developers but also business development staff as well to understand the benefits and virtues of upstream contribution but primarily to be aware of the norms, tactics, and techniques to successfully put upstream contribution into practice without significant drag on development velocity and release frequency and stability.
+
+* Create fork of Fineract and not a fork based on a specific version: Most forks are based on develop branch which is because we we didn’t have hotfix releases. Forking from dev branch with high volume of changes threatens stability of production branch. Fineract community doesn’t know what fixes are happening downstream in these private forks.
+
+* Hot-Fix releases: Hot-fix releases moves partners/customizers away from strategy of forking from development.Hot fix releases are relatively cheap and can get out faster - changes are small and based on major releases. Max of 3 pull requests per hotfix release are allowed. Since changes are small, review is happening as part of discussion on pull request or mailing list. Easier for implementers to test rather than move from 1.7.0 to 1.8.0 with major changes that are getting implemented.
+
+* Scenario 1.7 → 1.8 release: Partner wants to build new feature and contribute as well - starts from 1.7 rather than dev,  won’t there be major conflicts when both features try to ship on 1.8. When upstream is quickly becoming divergent from previous stable release. Database migration should be done with liquibase. Better to create separate package with folders/customizations - one place to see private and secret stuff not intermixed with existing codebase.
+
+** Separate gradle plugin
+** For services that are completely new, nothing is upstream
+** When fineract boots, picks up annotation and injects everywhere required but no way to intercept these mechanics to put in own code.
+** Picked up by spring boot and automatically injected where needed:
+*** Remove @service annotation from default annotations and call service implemented in fineract default implementation.
+***Default implemetnations can be changed with a little more infrastructure code → auto-configuration in Spring Boot.With auto-configuration, say there’s a loan service java interface and if its required elsewhere, have a default implementation. If no other implementation use, default, if another, hold back the default and use the alternative. This has certain structure - smalles business logic unit is java service with 2 to 20 functions.
+
+* Organize code in modules
+
+* Scenario Only need Feature XYZ, but have to run whole platform: Use specific packages that they needed - dont’ have to consume resources used by other packages.
+
+=== Processes/Best Practices
+
+* Branching/Release Management Strategy:  Single important rule - downstream repositories can only be based on a release tag - major release or hotfix - only be a proper release. If conservative, contribute 2 times - once on the hotfix release and the dev branch.
+
+* Distinguish between 2 types of commercial customers: Integrators that need to follow rules like Vodafone - like to base on facts that are put in place, a release that is already done and has name  - development branch is not already done. If more agile, could base on latest development branch. Others that are more agile and could base on Future 1.9.
+
+* If you have the service replacement mechanism, in their existing code take loan service that they know have changed, copy complete source code into different module/package, rename it to service/class and say it extends default implementation. All functions are overwritten so half functions might not need to be represented in this customization, doesn’t matter. Put all code in new package that extends.
+
+* With codebase, just do git-pull, upgrade from 1.4 to 1.8, customization is now in a separate place, if something is wrong, compiler will tell you (i.e. loan service has 3 more functions and default implementation doesn’t have it. Compiler will tell.
+
+** Function signatures service are still same
+** Rest interact fine with specific service.
+
+=== Diverging Too Far From Upstream
+
+* If you continued your customizations downstream on the develop branch then create a new branch (“acme-customizations”) and move all your changes from downstream develop branch
+* Reset your downstream develop branch (should contain the same as upstream)
+* Do a full synchronization of your downstream repository with upstream
+* Create a new downstream branch for your future main development; e. g. “acme-develop”; this branch should be based on the version you want to upgrade to (“git checkout -b acme-develop 1.7.0”)
+* Create a new branch that will be used to merge your changes; e. g. “upgrade-1.7.0” based on your future main development branch (“git checkout -b upgrade-1.7.0 acme-develop”)
+* Merge your changes to the upgrade branch (“git checkout upgrade-1.7.0 && git merge acme-customizations”)
+* Fix all Git conflicts and take the opportunity to rearrange/refactor code according to our recommendations to avoid/minimize future conflicts; this might take a while…
+* Once you are done, create a downstream pull request based on “upgrade-1.7.0”, build, test, approve and finally merge the pull request with your downstream main development branch “acme-develop”
+
+== Git Commands: Downstream Fork (Recommended)
+
+* Create a for from upstream Fineract in your Github organization via Github UI
+* git clone git@github.com:acme/fineract.git && cd fineract
+* git remote add upstream git@github.com:apache/fineract
+* git fetch upstream && git checkout develop && git merge upstream/develop
+* git checkout -b acme-develop 1.7.0
+* Set your downstream main branch in Github settings to “acme-develop”
+* Continue developing on “acme-develop”
+* When a new release (e. g. 1.8.0) appears upstream…
+* git fetch upstream && git checkout develop && git merge upstream/develop
+* git checkout -b upgrade-1.8.0 acme-develop
+* git checkout upgrade-1.8.0
+* git merge 1.8.0
+* Fix all conflicts, when done create downstream pull request, build, test, approve, merge into “acme-develop”
+
+== Git Commands: Downstream Fork (latest, greatest)
+
+* Create a for from upstream Fineract in your Github organization via Github UI
+* git clone git@github.com:acme/fineract.git && cd fineract
+* git remote add upstream git@github.com:apache/fineract
+* git fetch upstream && git checkout develop && git merge upstream/develop
+* git checkout -b acme-develop develop
+* Set your downstream main branch in Github settings to “acme-develop”
+* Continue developing on “acme-develop”
+* When a change appears upstream…
+* git fetch upstream && git checkout develop && git merge upstream/develop
+* git checkout -b merge-upstream acme-develop
+* git checkout merge-upstream
+* git merge develop
+* Fix all conflicts, when done create downstream pull request, build, test, approve, merge into “acme-develop”
