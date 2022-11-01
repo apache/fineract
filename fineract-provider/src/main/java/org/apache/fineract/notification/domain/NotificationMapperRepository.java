@@ -20,13 +20,15 @@ package org.apache.fineract.notification.domain;
 
 import java.util.Collection;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-public interface NotificationMapperRepository extends JpaRepository<NotificationMapper, Long> {
+public interface NotificationMapperRepository extends PagingAndSortingRepository<NotificationMapper, Long> {
 
     @Transactional
     @Modifying(flushAutomatically = true)
@@ -40,4 +42,16 @@ public interface NotificationMapperRepository extends JpaRepository<Notification
 
     @Query("SELECT n FROM NotificationMapper n WHERE n.userId.id = :userId AND n.isRead=false")
     Collection<NotificationMapper> getUnreadNotificationsForAUser(@Param("userId") Long userId);
+
+    @Query("SELECT n FROM NotificationMapper n WHERE n.userId.id = :userId")
+    Collection<NotificationMapper> getAllNotificationsForAUser(@Param("userId") Long userId);
+
+    @Query("SELECT n.notification FROM NotificationMapper n WHERE n.userId.id = :userId")
+    Page<Notification> getAllNotificationsForAUserWithParameters(Long userId, Pageable pageable);
+
+    @Query("SELECT n.notification FROM NotificationMapper n WHERE n.userId.id = :userId AND n.isRead = false")
+    Page<Notification> getUnreadNotificationsForAUserWithParameters(Long userId, Pageable pageable);
+
+    void saveAndFlush(NotificationMapper notificationMapper);
+    
 }

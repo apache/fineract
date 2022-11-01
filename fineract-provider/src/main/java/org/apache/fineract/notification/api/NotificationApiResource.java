@@ -25,7 +25,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -36,17 +38,20 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
-import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
-import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.infrastructure.core.service.SearchParameters;
+
+import org.apache.fineract.infrastructure.core.serialization.CommandProcessingResultJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.notification.data.NotificationData;
+import org.apache.fineract.notification.domain.Notification;
+import org.apache.fineract.notification.domain.NotificationMapperRepository;
 import org.apache.fineract.notification.service.NotificationMapperWritePlatformService;
-import org.apache.fineract.notification.service.NotificationReadPlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
+
+
 
 @Path("/notifications")
 @Component
@@ -55,10 +60,12 @@ import org.springframework.stereotype.Component;
 public class NotificationApiResource {
 
     private final PlatformSecurityContext context;
-    private final NotificationReadPlatformService notificationReadPlatformService;
+    private final NotificationMapperRepository notificationMapperRepository;
     private final NotificationMapperWritePlatformService notificationMapperWritePlatformService;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final ToApiJsonSerializer<NotificationData> toApiJsonSerializer;
+    private final CommandProcessingResultJsonSerializer commandProcessingResultJsonSerializer;
+    
+    //private final ApiRequestParameterHelper apiRequestParameterHelper;
+    //private final ToApiJsonSerializer<NotificationData> toApiJsonSerializer;
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -66,23 +73,33 @@ public class NotificationApiResource {
     @Operation
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = NotificationApiResourceSwagger.GetNotificationsResponse.class))) })
-    public String getAllNotifications(@Context final UriInfo uriInfo,
-            @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
-            @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
-            @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
-            @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder,
-            @QueryParam("isRead") @Parameter(description = "isRead") final boolean isRead) {
+    public String getAllNotifications(
+            @Context final UriInfo uriInfo,
+            @DefaultValue("id") @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
+            @DefaultValue("200") @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
+            @DefaultValue("0") @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
+            @DefaultValue("desc") @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder,
+            @DefaultValue("false") @QueryParam("isRead") @Parameter(description = "isRead") final boolean isRead) {
 
-        this.context.authenticatedUser();
-        final Page<NotificationData> notificationData;
-        final SearchParameters searchParameters = SearchParameters.forPagination(offset, limit, orderBy, sortOrder);
+        AppUser user = this.context.authenticatedUser();
+        //final Page<NotificationData> notificationData;
+        Sort.Direction sortDirection = sortOrder.compareToIgnoreCase("asc") == 1 ? Sort.Direction.ASC : (sortOrder.compareToIgnoreCase("desc") == 1 ? Sort.Direction.DESC:Sort.DEFAULT_DIRECTION); 
+        Pageable pageable = PageRequest.of(offset, limit, sortDirection, orderBy);
+        Page<Notification> page;
+        //final SearchParameters searchParameters = SearchParameters.forPagination(offset, limit, orderBy, sortOrder);
         if (!isRead) {
-            notificationData = this.notificationReadPlatformService.getAllUnreadNotifications(searchParameters);
-        } else {
-            notificationData = this.notificationReadPlatformService.getAllNotifications(searchParameters);
+            page = notificationMapperRepository.getUnreadNotificationsForAUserWithParameters(user.getId(), pageable);        } 
+        else {
+            page = notificationMapperRepository.getAllNotificationsForAUserWithParameters(user.getId(), pageable);
         }
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, notificationData);
+        
+        
+        String response = commandProcessingResultJsonSerializer.serialize(page);
+        response = response.replace("content", "pageItems");
+        response = response.replace("totalElements", "totalFilteredRecords");
+        response = response.replaceAll("notificationContent", "content");
+        response = response.replaceAll("objectIdentifier", "objectId");
+        return response;
     }
 
     @PUT

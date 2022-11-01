@@ -41,7 +41,7 @@ public class NotificationMapperReadRepositoryWrapperImpl implements Notification
 
     @Override
     public List<NotificationMapper> fetchAllNotifications() {
-        return this.notificationMapperRepository.findAll();
+        return (List<NotificationMapper>) this.notificationMapperRepository.findAll();
     }
 
     @Override

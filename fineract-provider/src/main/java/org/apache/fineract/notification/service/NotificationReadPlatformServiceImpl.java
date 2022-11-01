@@ -20,8 +20,8 @@ package org.apache.fineract.notification.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
@@ -32,8 +32,7 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.notification.cache.CacheNotificationResponseHeader;
 import org.apache.fineract.notification.data.NotificationData;
-import org.apache.fineract.notification.domain.NotificationMapper;
-import org.apache.fineract.notification.domain.NotificationMapperRepository;
+import org.apache.fineract.notification.data.NotificationMapperData;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -45,14 +44,13 @@ public class NotificationReadPlatformServiceImpl implements NotificationReadPlat
     private HashMap<Long, HashMap<Long, CacheNotificationResponseHeader>> tenantNotificationResponseHeaderCache = new HashMap<>();
 
     private final NotificationDataRow notificationDataRow = new NotificationDataRow();
-    
+    private final NotificationMapperRow notificationMapperRow = new NotificationMapperRow();
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final ColumnValidator columnValidator;
     private final PaginationHelper paginationHelper;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
-    private final NotificationMapperRepository notificationMapperRepository;
 
     @Override
     public boolean hasUnreadNotifications(Long appUserId) {
@@ -96,8 +94,9 @@ public class NotificationReadPlatformServiceImpl implements NotificationReadPlat
     }
 
     private boolean checkForUnreadNotifications(Long appUserId) {
-        
-        Collection<NotificationMapper> notificationMappers = this.notificationMapperRepository.getUnreadNotificationsForAUser(appUserId);
+        String sql = "SELECT id, notification_id as notificationId, user_id as userId, is_read as isRead, created_at "
+                + "as createdAt FROM notification_mapper WHERE user_id = ? AND is_read = false";
+        List<NotificationMapperData> notificationMappers = this.jdbcTemplate.query(sql, notificationMapperRow, appUserId);
         return notificationMappers.size() > 0;
     }
 
@@ -160,7 +159,30 @@ public class NotificationReadPlatformServiceImpl implements NotificationReadPlat
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), params, this.notificationDataRow);
     }
 
-    
+    private static final class NotificationMapperRow implements RowMapper<NotificationMapperData> {
+
+        @Override
+        public NotificationMapperData mapRow(ResultSet rs, int rowNum) throws SQLException {
+            NotificationMapperData notificationMapperData = new NotificationMapperData();
+
+            final Long id = rs.getLong("id");
+            notificationMapperData.setId(id);
+
+            final Long notificationId = rs.getLong("notificationId");
+            notificationMapperData.setNotificationId(notificationId);
+
+            final Long userId = rs.getLong("userId");
+            notificationMapperData.setUserId(userId);
+
+            final boolean isRead = rs.getBoolean("isRead");
+            notificationMapperData.setRead(isRead);
+
+            final String createdAt = rs.getString("createdAt");
+            notificationMapperData.setCreatedAt(createdAt);
+
+            return notificationMapperData;
+        }
+    }
 
     private static final class NotificationDataRow implements RowMapper<NotificationData> {
 
