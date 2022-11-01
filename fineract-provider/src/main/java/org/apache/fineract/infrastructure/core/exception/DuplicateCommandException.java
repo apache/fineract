@@ -16,23 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.commands.data;
+package org.apache.fineract.infrastructure.core.exception;
 
-import java.util.Collection;
-import java.util.List;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.apache.fineract.useradministration.data.AppUserData;
 
-/**
- * Immutable data object representing audit search results.
- */
-@RequiredArgsConstructor
-@Getter
-public final class AuditSearchData {
+public class DuplicateCommandException extends AbstractPlatformException {
 
-    private final Collection<AppUserData> appUsers;
-    private final List<String> actionNames;
-    private final List<String> entityNames;
-    private final Collection<ProcessingResultLookup> statuses;
+    private final String action;
+    private final String entity;
+    private final String idempotencyKey;
+    @Getter
+    private final String response;
+
+    public DuplicateCommandException(String action, String entity, String idempotencyKey, String response) {
+        super(null, null);
+        this.action = action;
+        this.entity = entity;
+        this.idempotencyKey = idempotencyKey;
+        this.response = response;
+    }
+
+    @Override
+    public String getMessage() {
+        return "DuplicateCommandException{" + "action='" + action + '\'' + ", entity='" + entity + '\'' + ", idempotencyKey='"
+                + idempotencyKey + "'}";
+    }
 }

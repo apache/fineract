@@ -88,6 +88,7 @@ public class JPAConfig extends JpaBaseConfiguration {
         vendorProperties.put(PersistenceUnitProperties.WEAVING, "static");
         vendorProperties.put(PersistenceUnitProperties.PERSISTENCE_CONTEXT_CLOSE_ON_COMMIT, "true");
         vendorProperties.put(PersistenceUnitProperties.CACHE_SHARED_DEFAULT, "false");
+        vendorProperties.put(PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS, JpaExceptionHandler.class.getCanonicalName());
         emFactoryCustomizers.forEach(c -> vendorProperties.putAll(c.additionalVendorProperties()));
         return vendorProperties;
     }

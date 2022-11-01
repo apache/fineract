@@ -26,4 +26,7 @@
     <Match>
         <Package name="~.*\.domain"/>
     </Match>
+    <Match>
+        <Class name="org.apache.fineract.infrastructure.core.config.jpa.JpaExceptionHandler" />
+    </Match>
 </FindBugsFilter>

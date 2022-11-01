@@ -16,23 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.commands.data;
-
-import java.util.Collection;
-import java.util.List;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.apache.fineract.useradministration.data.AppUserData;
+package org.apache.fineract.infrastructure.core.exception;
 
 /**
- * Immutable data object representing audit search results.
+ * Exception thrown when command is sent with same action, entity and idempotency key
  */
-@RequiredArgsConstructor
-@Getter
-public final class AuditSearchData {
+public class CommandUnderProcessingException extends DuplicateCommandException {
 
-    private final Collection<AppUserData> appUsers;
-    private final List<String> actionNames;
-    private final List<String> entityNames;
-    private final Collection<ProcessingResultLookup> statuses;
+    public CommandUnderProcessingException(String action, String entity, String idempotencyKey, String response) {
+        super(action, entity, idempotencyKey, response);
+    }
 }

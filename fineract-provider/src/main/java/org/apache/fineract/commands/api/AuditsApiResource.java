@@ -162,15 +162,15 @@ public class AuditsApiResource {
         final AuditSearchData auditSearchData = this.auditReadPlatformService.retrieveSearchTemplate("audit");
 
         final Set<String> RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE = new HashSet<>(
-                Arrays.asList("appUsers", "actionNames", "entityNames", "processingResults"));
+                Arrays.asList("appUsers", "actionNames", "entityNames", "status"));
 
         return this.toApiJsonSerializerSearchTemplate.serialize(settings, auditSearchData, RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE);
     }
 
     private SQLBuilder getExtraCriteria(final String actionName, final String entityName, final Long resourceId, final Long makerId,
             final String makerDateTimeFrom, final String makerDateTimeTo, final Long checkerId, final String checkerDateTimeFrom,
-            final String checkerDateTimeTo, final Integer processingResult, final Integer officeId, final Integer groupId,
-            final Integer clientId, final Integer loanId, final Integer savingsAccountId) {
+            final String checkerDateTimeTo, final Integer status, final Integer officeId, final Integer groupId, final Integer clientId,
+            final Integer loanId, final Integer savingsAccountId) {
 
         SQLBuilder extraCriteria = new SQLBuilder();
         extraCriteria.addNonNullCriteria("aud.action_name = ", actionName);
@@ -184,7 +184,7 @@ public class AuditsApiResource {
         extraCriteria.addNonNullCriteria("aud.made_on_date <= ", makerDateTimeTo);
         extraCriteria.addNonNullCriteria("aud.checked_on_date >= ", checkerDateTimeFrom);
         extraCriteria.addNonNullCriteria("aud.checked_on_date <= ", checkerDateTimeTo);
-        extraCriteria.addNonNullCriteria("aud.processing_result_enum = ", processingResult);
+        extraCriteria.addNonNullCriteria("aud.status = ", status);
         extraCriteria.addNonNullCriteria("aud.office_id = ", officeId);
         extraCriteria.addNonNullCriteria("aud.group_id = ", groupId);
         extraCriteria.addNonNullCriteria("aud.client_id = ", clientId);
