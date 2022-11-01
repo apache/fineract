@@ -25,7 +25,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -38,7 +37,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
-
 import org.apache.fineract.infrastructure.core.serialization.CommandProcessingResultJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.notification.domain.Notification;
@@ -51,8 +49,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
-
-
 @Path("/notifications")
 @Component
 @Tag(name = "Notification", description = "")
@@ -63,9 +59,9 @@ public class NotificationApiResource {
     private final NotificationMapperRepository notificationMapperRepository;
     private final NotificationMapperWritePlatformService notificationMapperWritePlatformService;
     private final CommandProcessingResultJsonSerializer commandProcessingResultJsonSerializer;
-    
-    //private final ApiRequestParameterHelper apiRequestParameterHelper;
-    //private final ToApiJsonSerializer<NotificationData> toApiJsonSerializer;
+
+    // private final ApiRequestParameterHelper apiRequestParameterHelper;
+    // private final ToApiJsonSerializer<NotificationData> toApiJsonSerializer;
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -73,8 +69,7 @@ public class NotificationApiResource {
     @Operation
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = NotificationApiResourceSwagger.GetNotificationsResponse.class))) })
-    public String getAllNotifications(
-            @Context final UriInfo uriInfo,
+    public String getAllNotifications(@Context final UriInfo uriInfo,
             @DefaultValue("id") @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
             @DefaultValue("200") @QueryParam("limit") @Parameter(description = "limit") final Integer limit,
             @DefaultValue("0") @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
@@ -82,18 +77,18 @@ public class NotificationApiResource {
             @DefaultValue("false") @QueryParam("isRead") @Parameter(description = "isRead") final boolean isRead) {
 
         AppUser user = this.context.authenticatedUser();
-        //final Page<NotificationData> notificationData;
-        Sort.Direction sortDirection = sortOrder.compareToIgnoreCase("asc") == 1 ? Sort.Direction.ASC : (sortOrder.compareToIgnoreCase("desc") == 1 ? Sort.Direction.DESC:Sort.DEFAULT_DIRECTION); 
+        // final Page<NotificationData> notificationData;
+        Sort.Direction sortDirection = sortOrder.compareToIgnoreCase("asc") == 1 ? Sort.Direction.ASC
+                : (sortOrder.compareToIgnoreCase("desc") == 1 ? Sort.Direction.DESC : Sort.DEFAULT_DIRECTION);
         Pageable pageable = PageRequest.of(offset, limit, sortDirection, orderBy);
         Page<Notification> page;
-        //final SearchParameters searchParameters = SearchParameters.forPagination(offset, limit, orderBy, sortOrder);
+        // final SearchParameters searchParameters = SearchParameters.forPagination(offset, limit, orderBy, sortOrder);
         if (!isRead) {
-            page = notificationMapperRepository.getUnreadNotificationsForAUserWithParameters(user.getId(), pageable);        } 
-        else {
+            page = notificationMapperRepository.getUnreadNotificationsForAUserWithParameters(user.getId(), pageable);
+        } else {
             page = notificationMapperRepository.getAllNotificationsForAUserWithParameters(user.getId(), pageable);
         }
-        
-        
+
         String response = commandProcessingResultJsonSerializer.serialize(page);
         response = response.replace("content", "pageItems");
         response = response.replace("totalElements", "totalFilteredRecords");
