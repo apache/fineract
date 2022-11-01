@@ -830,7 +830,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 } else {
                     LoanChargeData chargeData = chargesMap.get(loanCharge.getId());
                     if (loanCharge.amountOrPercentage().compareTo(chargeData.amountOrPercentage()) != 0
-                            || (loanCharge.isSpecifiedDueDate() && !loanCharge.getDueLocalDate().equals(chargeData.getDueDate()))) {
+                            || ((loanCharge.isSpecifiedDueDate() || loanCharge.isDisburseToSavings()) && !loanCharge.getDueLocalDate().equals(chargeData.getDueDate()))) {
                         isChargeModified = true;
                     }
                 }

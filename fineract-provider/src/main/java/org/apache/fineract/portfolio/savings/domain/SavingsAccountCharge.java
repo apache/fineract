@@ -789,19 +789,18 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
         if (ChargeCalculationType.fromInt(this.chargeCalculation).isFlat()) {
             amountPaybale = this.amount;
         } else if (ChargeCalculationType.fromInt(this.chargeCalculation).isPercentageOfAmount()) {
+
+            amountPaybale = transactionAmount.multiply(this.percentage).divide(BigDecimal.valueOf(100L), MoneyHelper.getRoundingMode());
             /*
             * Apply Computation min and max amount
             * configuration
             *
             * */
 
-            if(transactionAmount.compareTo(this.maxAmount) > 0){
-                amountPaybale = this.maxAmount.multiply(this.percentage).divide(BigDecimal.valueOf(100L), MoneyHelper.getRoundingMode());
-            }else if(transactionAmount.compareTo(this.minAmount) > 0){
-                amountPaybale = this.minAmount.multiply(this.percentage).divide(BigDecimal.valueOf(100L), MoneyHelper.getRoundingMode());
-            }else{
-                //use the Transaction amount. Original implementation
-                amountPaybale = transactionAmount.multiply(this.percentage).divide(BigDecimal.valueOf(100L), MoneyHelper.getRoundingMode());
+            if(amountPaybale.compareTo(this.maxAmount) > 0){
+                amountPaybale = this.maxAmount;
+            }else if(amountPaybale.compareTo(this.minAmount) > 0){
+                amountPaybale = this.minAmount;
             }
         }
         return amountPaybale;

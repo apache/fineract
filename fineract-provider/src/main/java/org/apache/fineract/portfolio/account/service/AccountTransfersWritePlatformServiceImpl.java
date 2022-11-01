@@ -24,6 +24,8 @@ import static org.apache.fineract.portfolio.account.AccountDetailConstants.toAcc
 import static org.apache.fineract.portfolio.account.AccountDetailConstants.toAccountTypeParamName;
 import static org.apache.fineract.portfolio.account.api.AccountTransfersApiConstants.transferAmountParamName;
 import static org.apache.fineract.portfolio.account.api.AccountTransfersApiConstants.transferDateParamName;
+import static org.apache.fineract.portfolio.account.api.AccountTransfersApiConstants.transferDescriptionParamName;
+import static org.apache.fineract.portfolio.account.api.AccountTransfersApiConstants.DisburseToSavingsCharges;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -31,6 +33,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -51,6 +55,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidPaidInAdvanceAmountException;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
@@ -174,12 +179,34 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             final Long toLoanAccountId = command.longValueOfParameterNamed(toAccountIdParamName);
             final Loan toLoanAccount = this.loanAccountAssembler.assembleFrom(toLoanAccountId);
 
+            final String description = command.stringValueOfParameterNamed(transferDescriptionParamName);
+
             final Boolean isHolidayValidationDone = false;
             final HolidayDetailDTO holidayDetailDto = null;
             final boolean isRecoveryRepayment = false;
-            final LoanTransaction loanRepaymentTransaction = this.loanAccountDomainService.makeRepayment(LoanTransactionType.REPAYMENT,
-                    toLoanAccount, new CommandProcessingResultBuilder(), transactionDate, transactionAmount, paymentDetail, null, null,
-                    isRecoveryRepayment, isAccountTransfer, holidayDetailDto, isHolidayValidationDone);
+
+            LoanTransaction loanRepaymentTransaction = null;
+
+            if (description.equals(DisburseToSavingsCharges)) {
+                BigDecimal chargeAmount = BigDecimal.ZERO;
+                Set<LoanCharge> charges = toLoanAccount.charges();
+                for (LoanCharge charge : charges) {
+                    if (charge.isDisburseToSavings()) {
+                        if (charge.getAmountPaid(toLoanAccount.getCurrency()).isZero()) {
+
+                            chargeAmount = charge.getAmount(toLoanAccount.getCurrency()).getAmount();
+
+                            loanRepaymentTransaction = this.loanAccountDomainService.makeRepayment(LoanTransactionType.REPAYMENT,
+                                    toLoanAccount, new CommandProcessingResultBuilder(), transactionDate, chargeAmount , paymentDetail, null, null,
+                                    isRecoveryRepayment, isAccountTransfer, holidayDetailDto, isHolidayValidationDone);
+                        }
+                    }
+                }
+            } else {
+                 loanRepaymentTransaction = this.loanAccountDomainService.makeRepayment(LoanTransactionType.REPAYMENT,
+                        toLoanAccount, new CommandProcessingResultBuilder(), transactionDate, transactionAmount, paymentDetail, null, null,
+                        isRecoveryRepayment, isAccountTransfer, holidayDetailDto, isHolidayValidationDone);
+            }
 
             final AccountTransferDetails accountTransferDetails = this.accountTransferAssembler.assembleSavingsToLoanTransfer(command,
                     fromSavingsAccount, toLoanAccount, withdrawal, loanRepaymentTransaction);
