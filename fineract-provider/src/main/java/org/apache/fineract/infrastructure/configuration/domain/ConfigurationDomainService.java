@@ -120,4 +120,8 @@ public interface ConfigurationDomainService {
     boolean isReversalTransactionAllowed();
 
     Long retrieveExternalEventsPurgeDaysCriteria();
+
+    Long retrieveRepaymentDueDays();
+
+    Long retrieveRepaymentOverdueDays();
 }

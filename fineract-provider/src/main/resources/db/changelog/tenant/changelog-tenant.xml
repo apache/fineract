@@ -86,4 +86,5 @@
     <include file="parts/0064_refactor_loan_transaction_strategy.xml" relativeToChangelogFile="true"/>
     <include file="parts/0065_add_bypass_loan_write_transaction_permission.xml" relativeToChangelogFile="true"/>
     <include file="parts/0066_delinquency_classification_chargeback.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0067_add_configurations_for_repayment_due_business_steps.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
