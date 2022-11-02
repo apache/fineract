@@ -13,6 +13,14 @@
         },
         {
             "default": null,
+            "name": "loanId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
             "name": "officeId",
             "type": [
                 "null",
