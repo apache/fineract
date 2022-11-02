@@ -1253,12 +1253,12 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                 case PERCENT_OF_AMOUNT_AND_INTEREST:
                     if (loanCharge.isInstalmentFee()) {
                         errorcode = "installment." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_PRINCIPAL_CALCULATION_TYPE;
-                    } else if (loanCharge.isSpecifiedDueDate()) {
+                    } else if (loanCharge.isSpecifiedDueDate() || loanCharge.isDisburseToSavings()) {
                         errorcode = "specific." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_INTEREST_CALCULATION_TYPE;
                     }
                 break;
                 case PERCENT_OF_INTEREST:
-                    if (loanCharge.isSpecifiedDueDate()) {
+                    if (loanCharge.isSpecifiedDueDate() || loanCharge.isDisburseToSavings()) {
                         errorcode = "specific." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_INTEREST_CALCULATION_TYPE;
                     }
                 break;

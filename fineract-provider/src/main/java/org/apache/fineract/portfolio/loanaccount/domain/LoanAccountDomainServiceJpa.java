@@ -596,7 +596,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             }
 
             for (final LoanCharge loanCharge : loanCharges) {
-                if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(installment.getFromDate(), chargesTillDate)) {
+                if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(installment.getFromDate(), chargesTillDate)
+                        || loanCharge.isDueForCollectionForDisburseToSavingsAndIncluding(installment.getFromDate())) {
                     if (loanCharge.isFeeCharge()) {
                         dueDateFeeIncome = dueDateFeeIncome.add(loanCharge.amount());
                     } else if (loanCharge.isPenaltyCharge()) {
@@ -738,7 +739,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 for (LoanCharge loanCharge : loan.charges()) {
                     if (loanCharge.isActive() && !loanCharge.isPaid()
                             && (loanCharge.isDueForCollectionFromAndUpToAndIncluding(fromDate, foreClosureDate)
-                                    || loanCharge.isInstalmentFee())) {
+                                    || loanCharge.isInstalmentFee() || loanCharge.isDueForCollectionForDisburseToSavingsAndIncluding(fromDate))) {
                         final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(accrualTransaction, loanCharge,
                                 loanCharge.getAmountOutstanding(currency).getAmount(), null);
                         accrualCharges.add(loanChargePaidBy);

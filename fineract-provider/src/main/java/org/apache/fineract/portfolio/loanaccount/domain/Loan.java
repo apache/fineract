@@ -396,6 +396,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "fixed_principal_percentage_per_installment", scale = 2, precision = 5, nullable = true)
     private BigDecimal fixedPrincipalPercentagePerInstallment;
 
+    @Transient
+    private boolean isDisburseToSavingsLoan = false;
+
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
             final LoanTransactionProcessingStrategy transactionProcessingStrategy,
@@ -598,8 +601,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                     getId(), loanCharge.name());
         }
 
-        validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate(false));
 
+        if(loanCharge.isDisburseToSavings()) {
+            validateChargeHasValidDisburseToSavingsIfApplicable(loanCharge, getDisbursementDate());
+        }else {
+            validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate(false));
+        }
         loanCharge.update(this);
 
         final BigDecimal amount = calculateAmountPercentageAppliedTo(loanCharge);
@@ -715,8 +722,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         LocalDate startDate = getDisbursementDate();
         List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
         for (final LoanRepaymentScheduleInstallment installment : installments) {
-            if (installmentNumber == null && charge.isDueForCollectionFromAndUpToAndIncluding(startDate, installment.getDueDate())) {
-
+            if (installmentNumber == null && (charge.isDueForCollectionFromAndUpToAndIncluding(startDate, installment.getDueDate())
+                    || charge.isDueForCollectionForDisburseToSavingsAndIncluding(startDate))){
                 chargePaymentInstallments.add(installment);
                 break;
             } else if (installmentNumber != null && installment.getInstallmentNumber().equals(installmentNumber)) {
@@ -752,11 +759,20 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     private void validateChargeHasValidSpecifiedDateIfApplicable(final LoanCharge loanCharge, final LocalDate disbursementDate,
             final LocalDate lastRepaymentPeriodDueDate) {
-        if (loanCharge.isSpecifiedDueDate()
+        if ((loanCharge.isSpecifiedDueDate() || loanCharge.isDisburseToSavings())
                 && !loanCharge.isDueForCollectionFromAndUpToAndIncluding(disbursementDate, lastRepaymentPeriodDueDate)) {
             final String defaultUserMessage = "This charge with specified due date cannot be added as the it is not in schedule range.";
             throw new LoanChargeCannotBeAddedException("loanCharge", "specified.due.date.outside.range", defaultUserMessage,
                     getDisbursementDate(), lastRepaymentPeriodDueDate, loanCharge.name());
+        }
+    }
+
+    private void validateChargeHasValidDisburseToSavingsIfApplicable(final LoanCharge loanCharge, final LocalDate disbursementDate) {
+        if ((loanCharge.isSpecifiedDueDate() || loanCharge.isDisburseToSavings())
+                && !loanCharge.isDueForCollectionForDisburseToSavingsAndIncluding(disbursementDate)) {
+            final String defaultUserMessage = "This charge with Disburse To Savings cannot be added as the it is not in schedule range.";
+            throw new LoanChargeCannotBeAddedException("loanCharge", "disbusre.to.savings.outside.range", defaultUserMessage,
+                    getDisbursementDate(), loanCharge.name());
         }
     }
 
@@ -1700,7 +1716,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         if (loanCharge.isActive()) {
             clearLoanInstallmentChargesBeforeRegeneration(loanCharge);
             loanCharge.update(chargeAmt, loanCharge.getDueLocalDate(), amount, fetchNumberOfInstallmensAfterExceptions(), totalChargeAmt);
-            validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate(false));
+            if(loanCharge.isDisburseToSavings()) {
+                validateChargeHasValidDisburseToSavingsIfApplicable(loanCharge, getDisbursementDate());
+            }else {
+                validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate(false));
+            }
         }
 
     }
@@ -5495,7 +5515,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         List<LoanCharge> loanCharges = new ArrayList<>();
         List<LoanInstallmentCharge> loanInstallmentCharges = new ArrayList<>();
         for (LoanCharge loanCharge : this.charges()) {
-            if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(fromDate, toDate)) {
+            if ((loanCharge.isDueForCollectionFromAndUpToAndIncluding(fromDate, toDate)
+                    || loanCharge.isDueForCollectionForDisburseToSavingsAndIncluding(fromDate))) {
                 if (loanCharge.isPenaltyCharge() && !loanCharge.isInstalmentFee()) {
                     penalties = penalties.add(loanCharge.amount());
                     loanCharges.add(loanCharge);
@@ -6479,7 +6500,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         interestAccountedForCurrentPeriod = installment.getInterestWaived(getCurrency()).plus(installment.getInterestPaid(getCurrency()));
         for (LoanCharge loanCharge : this.charges) {
             if (loanCharge.isActive() && !loanCharge.isDueAtDisbursement()) {
-                if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(installment.getFromDate(), paymentDate)) {
+                if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(installment.getFromDate(), paymentDate)
+                        || loanCharge.isDueForCollectionForDisburseToSavingsAndIncluding(installment.getFromDate())) {
                     if (loanCharge.isPenaltyCharge()) {
                         penaltyForCurrentPeriod = penaltyForCurrentPeriod.plus(loanCharge.getAmount(getCurrency()));
                         penaltyAccoutedForCurrentPeriod = penaltyAccoutedForCurrentPeriod
