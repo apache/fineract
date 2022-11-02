@@ -220,6 +220,16 @@ public class ExternalEventConfigurationHelper {
         loanRemoveOfficerBusinessEvent.put("enabled", false);
         defaults.add(loanRemoveOfficerBusinessEvent);
 
+        Map<String, Object> loanRepaymentDueBusinessEvent = new HashMap<>();
+        loanRepaymentDueBusinessEvent.put("type", "LoanRepaymentDueBusinessEvent");
+        loanRepaymentDueBusinessEvent.put("enabled", false);
+        defaults.add(loanRepaymentDueBusinessEvent);
+
+        Map<String, Object> loanRepaymentOverdueBusinessEvent = new HashMap<>();
+        loanRepaymentOverdueBusinessEvent.put("type", "LoanRepaymentOverdueBusinessEvent");
+        loanRepaymentOverdueBusinessEvent.put("enabled", false);
+        defaults.add(loanRepaymentOverdueBusinessEvent);
+
         Map<String, Object> loanRescheduledDueCalendarChangeBusinessEvent = new HashMap<>();
         loanRescheduledDueCalendarChangeBusinessEvent.put("type", "LoanRescheduledDueCalendarChangeBusinessEvent");
         loanRescheduledDueCalendarChangeBusinessEvent.put("enabled", false);
