@@ -35,12 +35,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class CommandStrategyProvider {
 
-    public static final String CREATE_TRANSACTION_LOAN_COMMAND_STRATEGY = "createTransactionLoanCommandStrategy";
     private final ApplicationContext applicationContext;
     private static final Map<CommandContext, String> commandStrategies = new ConcurrentHashMap<>();
 
     /**
-     * Constructs a CommandStrategyProvider with argument of ApplicationContext type. It also initialize
+     * Constructs a CommandStrategyProvider with argument of ApplicationContext type. It also initializes
      * commandStrategies using init() function by filling it with available CommandStrategies in
      * {@link org.apache.fineract.batch.command.internal}.
      *
@@ -56,7 +55,7 @@ public class CommandStrategyProvider {
 
     /**
      * Returns an appropriate commandStrategy after determining it using the CommandContext of the request. If no such
-     * Strategy is found then a default strategy is returned back.
+     * Strategy is found then a default strategy is returned.
      *
      * @param commandContext
      * @return CommandStrategy
@@ -93,16 +92,8 @@ public class CommandStrategyProvider {
         commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/charges").method("GET").build(), "collectChargesCommandStrategy");
         commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/charges\\/\\d+").method("GET").build(),
                 "getChargeByIdCommandStrategy");
-        commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\?command=repayment").method("POST").build(),
-                CREATE_TRANSACTION_LOAN_COMMAND_STRATEGY);
-        commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\?command=creditBalanceRefund").method("POST").build(),
-                CREATE_TRANSACTION_LOAN_COMMAND_STRATEGY);
-        commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\?command=goodwillCredit").method("POST").build(),
-                CREATE_TRANSACTION_LOAN_COMMAND_STRATEGY);
-        commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\?command=merchantIssuedRefund").method("POST").build(),
-                CREATE_TRANSACTION_LOAN_COMMAND_STRATEGY);
-        commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\?command=payoutRefund").method("POST").build(),
-                CREATE_TRANSACTION_LOAN_COMMAND_STRATEGY);
+        commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\?(\\w+(\\=[\\w]+))").method("POST").build(),
+                "createTransactionLoanCommandStrategy");
         commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\/\\d+").method("POST").build(),
                 "adjustTransactionCommandStrategy");
         commandStrategies.put(CommandContext.resource("clients\\/\\d+\\?command=activate").method("POST").build(),

@@ -212,6 +212,8 @@ final class LoanTransactionsApiResourceSwagger {
         public String receiptNumber;
         @Schema(example = "ban123")
         public String bankNumber;
+        @Schema(example = "3")
+        public Integer loanChargeId;
 
     }
 
