@@ -1,6 +1,38 @@
-[[testing-cucumber]]
 = Cucumber
 
-TBD
+Cucumber is a test framework based on Behavior-Driven Development (BDD). Tests are written in plain text with very basic syntax rules. Installation instructions can be found at https://cucumber.io/docs/installation/ for Java as Cucumber-Java.
+
+Cucumber supports:
+
+* Selenium WebDriver
+* API Automation using Karate https://karatelabs.github.io/karate/
+* Can be run on a build server
+* Defining anti-patterns avoiding common minstakes and pitfalls
+* Parallel execution using multiple threads to reduce test times
+
+Cucumber enables developers to write test cases that anyone can easily understand regardless of their technical knowledge. It allows to create high-level specficiations or scenarios that can be run and tested using Gherkin, a natural programming platform. At their core, these scenarios are written in a human readable format called Given-When-Then.
+
+As an example:
+
+*Given*: A customer wants to use a read instance.
+
+*When*: Customer enters the required parameters.
+
+*Then*: The customer will see the preview or background check only a read instance is used, instead of write or batch manager instance.
+
+An example test can be found here: https://github.com/apache/fineract/blob/develop/fineract-provider/src/test/java/org/apache/fineract/infrastructure/core/InstanceTypeStepDefinitions.java#L30-L45
+
+This breaks down testing to feature testing, feature design, and feature implementation, i.e., into small, manageable steps.
+
+Gherkin, a plain English text language helps construct a standard, understandable test script. Gherkin allows developers, product owners, testers, business analysts to write test scripts based on the view point of the feature, and track the progress made to implement the feature. Given-When-Then, And, But, Background are a few examples of Gherkin keywords.
+
+1. Describe behavior
+2. Write step definition
+3. Run and fail
+4. Write code to make step pass
+5. Run and pass
+
+You can find the cheatsheet to work with Cucumber in below given document.
+
 
 include::cucumber-cheatsheet.adoc[leveloffset=+1]
