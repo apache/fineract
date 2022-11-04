@@ -18,27 +18,24 @@
  */
 package org.apache.fineract.infrastructure.event.external.service.serialization.serializer.client;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.generic.GenericContainer;
 import org.apache.fineract.avro.client.v1.ClientDataV1;
+import org.apache.fineract.avro.generator.ByteBufferSerializable;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.client.ClientBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.client.ClientDataMapper;
-import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
-import org.apache.fineract.infrastructure.event.external.service.support.ByteBufferConverter;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventSerializer;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class ClientBusinessEventSerializer implements BusinessEventSerializer {
+public class ClientBusinessEventSerializer extends AbstractBusinessEventSerializer {
 
     private final ClientReadPlatformService service;
     private final ClientDataMapper mapper;
-    private final ByteBufferConverter byteBufferConverter;
 
     @Override
     public <T> boolean canSerialize(BusinessEvent<T> event) {
@@ -46,12 +43,10 @@ public class ClientBusinessEventSerializer implements BusinessEventSerializer {
     }
 
     @Override
-    public <T> byte[] serialize(BusinessEvent<T> rawEvent) throws IOException {
+    protected <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
         ClientBusinessEvent event = (ClientBusinessEvent) rawEvent;
         ClientData data = service.retrieveOne(event.get().getId());
-        ClientDataV1 avroDto = mapper.map(data);
-        ByteBuffer buffer = avroDto.toByteBuffer();
-        return byteBufferConverter.convert(buffer);
+        return mapper.map(data);
     }
 
     @Override
