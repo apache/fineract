@@ -18,14 +18,13 @@
  */
 package org.apache.fineract.infrastructure.event.external.service.serialization.serializer.loan;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.generic.GenericContainer;
+import org.apache.fineract.avro.generator.ByteBufferSerializable;
 import org.apache.fineract.avro.loan.v1.LoanChargeDeletedV1;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.charge.LoanDeleteChargeBusinessEvent;
-import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventSerializer;
 import org.apache.fineract.infrastructure.event.external.service.support.ByteBufferConverter;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.springframework.core.Ordered;
@@ -35,7 +34,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Order(Ordered.LOWEST_PRECEDENCE - 1)
-public class LoanChargeDeletedBusinessEventSerializer implements BusinessEventSerializer {
+public class LoanChargeDeletedBusinessEventSerializer extends AbstractBusinessEventSerializer {
 
     private final ByteBufferConverter byteBufferConverter;
 
@@ -45,14 +44,12 @@ public class LoanChargeDeletedBusinessEventSerializer implements BusinessEventSe
     }
 
     @Override
-    public <T> byte[] serialize(BusinessEvent<T> rawEvent) throws IOException {
+    protected <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
         LoanDeleteChargeBusinessEvent event = (LoanDeleteChargeBusinessEvent) rawEvent;
         LoanCharge loanCharge = event.get();
         Long id = loanCharge.getId();
         Long chargeId = loanCharge.getCharge().getId();
-        LoanChargeDeletedV1 avroDto = new LoanChargeDeletedV1(id, chargeId);
-        ByteBuffer buffer = avroDto.toByteBuffer();
-        return byteBufferConverter.convert(buffer);
+        return new LoanChargeDeletedV1(id, chargeId);
     }
 
     @Override

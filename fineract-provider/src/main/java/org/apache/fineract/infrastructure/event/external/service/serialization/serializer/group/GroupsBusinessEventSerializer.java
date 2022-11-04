@@ -18,24 +18,21 @@
  */
 package org.apache.fineract.infrastructure.event.external.service.serialization.serializer.group;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.generic.GenericContainer;
+import org.apache.fineract.avro.generator.ByteBufferSerializable;
 import org.apache.fineract.avro.generic.v1.CommandProcessingResultV1;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.group.GroupsBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.generic.CommandProcessingResultMapper;
-import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
-import org.apache.fineract.infrastructure.event.external.service.support.ByteBufferConverter;
+import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventSerializer;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class GroupsBusinessEventSerializer implements BusinessEventSerializer {
+public class GroupsBusinessEventSerializer extends AbstractBusinessEventSerializer {
 
     private final CommandProcessingResultMapper mapper;
-    private final ByteBufferConverter byteBufferConverter;
 
     @Override
     public <T> boolean canSerialize(BusinessEvent<T> event) {
@@ -43,11 +40,9 @@ public class GroupsBusinessEventSerializer implements BusinessEventSerializer {
     }
 
     @Override
-    public <T> byte[] serialize(BusinessEvent<T> rawEvent) throws IOException {
+    protected <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
         GroupsBusinessEvent event = (GroupsBusinessEvent) rawEvent;
-        CommandProcessingResultV1 avroDto = mapper.map(event.get());
-        ByteBuffer buffer = avroDto.toByteBuffer();
-        return byteBufferConverter.convert(buffer);
+        return mapper.map(event.get());
     }
 
     @Override
