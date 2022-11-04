@@ -2313,6 +2313,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     int period = periodNumber;
                     if (!lastInstallmentDate.isEqual(installment.getDueDate())) {
                         period--;
+                        periodNumber = period;
                     }
                     reducePrincipal = fetchEarlyPaidAmount(installment.getPrincipal(currency), principalPortionCalculated, reducePrincipal,
                             loanApplicationTerms, totalCumulativePrincipal, period, mc);

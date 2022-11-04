@@ -60,7 +60,7 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
             final double interestCalculationGraceOnRepaymentPeriodFraction, final Money totalCumulativePrincipal,
             @SuppressWarnings("unused") final Money totalCumulativeInterest,
             @SuppressWarnings("unused") final Money totalInterestDueForLoan, final Money cumulatingInterestPaymentDueToGrace,
-            final Money outstandingBalance, final LoanApplicationTerms loanApplicationTerms, final int periodNumber, final MathContext mc,
+            final Money outstandingBalance, final LoanApplicationTerms loanApplicationTerms, int periodNumber, final MathContext mc,
             final TreeMap<LocalDate, Money> principalVariation, final Map<LocalDate, Money> compoundingMap, final LocalDate periodStartDate,
             final LocalDate periodEndDate, final Collection<LoanTermVariationsData> termVariations) {
 
@@ -157,7 +157,6 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
         // update cumulative fields for principal & interest
         final Money interestBroughtFowardDueToGrace = cumulatingInterestDueToGrace;
         final Money totalCumulativePrincipalToDate = totalCumulativePrincipal.plus(principalForThisInstallment);
-
         // adjust if needed
         principalForThisInstallment = loanApplicationTerms.adjustPrincipalIfLastRepaymentPeriod(principalForThisInstallment,
                 totalCumulativePrincipalToDate, periodNumber);
