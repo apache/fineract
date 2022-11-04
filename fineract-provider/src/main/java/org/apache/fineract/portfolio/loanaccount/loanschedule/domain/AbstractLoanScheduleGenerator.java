@@ -2199,7 +2199,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                         }
                         isFirstRepayment = false;
                         LocalDate prevLastInstDate = lastInstallmentDate;
-                        originalRepaymentDate = actualRepaymentDate.plusMonths(1);
+                        originalRepaymentDate = actualRepaymentDate;
                         lastInstallmentDate = this.scheduledDateGenerator
                                 .adjustRepaymentDate(actualRepaymentDate, loanApplicationTerms, holidayDetailDTO).getChangedScheduleDate();
                         LocalDate modifiedLastInstDate = null;
