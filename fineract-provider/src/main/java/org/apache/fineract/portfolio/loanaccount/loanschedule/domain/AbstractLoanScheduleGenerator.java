@@ -1867,7 +1867,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     && isInterestChargedFromDateSameAsDisbursalDateEnabled) {
                 periodStartDateApplicableForInterest = expectedDisbursementDate;
             } else if (periodStartDate.isEqual(loanApplicationTerms.getExpectedDisbursementDate())) {
-                periodStartDateApplicableForInterest = idealDisbursementDate;
+                periodStartDateApplicableForInterest = periodStartDate;
             }
         }
         return periodStartDateApplicableForInterest;
