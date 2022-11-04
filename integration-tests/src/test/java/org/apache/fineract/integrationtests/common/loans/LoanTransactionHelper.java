@@ -943,4 +943,13 @@ public class LoanTransactionHelper {
         return Utils.performServerOutputTemplateLocationGet(requestSpec, responseSpec,
                 "/fineract-provider/api/v1/imports/getOutputTemplateLocation" + "?" + Utils.TENANT_IDENTIFIER, importDocumentId);
     }
+
+    public boolean checkForLastInstallmentLessThanEMI(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer loanID, final Float emiAmount) {
+        ArrayList<HashMap> loanSchedule = this.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+        String principal = String.valueOf(loanSchedule.get(loanSchedule.size() - 1).get("principalOriginalDue"));
+        String interest = String.valueOf(loanSchedule.get(loanSchedule.size() - 1).get("interestOriginalDue"));
+        Float amount = Float.parseFloat(principal) + Float.parseFloat(interest);
+        return amount.compareTo(emiAmount) <= 0;
+    }
 }
