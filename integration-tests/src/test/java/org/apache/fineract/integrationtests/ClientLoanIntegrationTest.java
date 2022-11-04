@@ -64,6 +64,7 @@ import org.apache.fineract.integrationtests.common.savings.AccountTransferHelper
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -5904,7 +5905,7 @@ public class ClientLoanIntegrationTest {
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
         GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "42", true);
-
+        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "43", true);
         final String loanDisbursementDate = "28 January 2021";
         String firstRepayment = "01 March 2021";
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
@@ -5952,11 +5953,11 @@ public class ClientLoanIntegrationTest {
         addRepaymentValues(expectedvalues, convertStringDateToCalender("03 May 2021"), 0, false, "198.41", "2021.59", "0.0", "0.0");
         this.loanTransactionHelper.makeRepayment("04 May 2021", 2220.0F, loanID);
 
-        addRepaymentValues(expectedvalues, convertStringDateToCalender("04 May 2021"), 0, false, "0.0", "63.17", "0.0", "0.0");
-        this.loanTransactionHelper.makeRepayment("01 June 2021", 2220.0F, loanID);
+        addRepaymentValues(expectedvalues, convertStringDateToCalender("04 May 2021"), 0, false, "0.0", "61.88", "0.0", "0.0");
+        this.loanTransactionHelper.makeRepayment("01 June 2021", 61.88F, loanID);
 
-        addRepaymentValues(expectedvalues, convertStringDateToCalender("01 June 2021"), 0, false, "424.28", "1732.55", "0.0", "0.0");
-        addRepaymentValues(expectedvalues, convertStringDateToCalender("01 July 2021"), 0, false, "446.97", "1773.03", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, convertStringDateToCalender("01 June 2021"), 0, false, "487.45", "1732.55", "0.0", "0.0");
+        addRepaymentValues(expectedvalues, convertStringDateToCalender("01 July 2021"), 0, false, "459.37", "1760.63", "0.0", "0.0");
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         Assertions.assertNotNull(loanSchedule);
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
@@ -6011,6 +6012,78 @@ public class ClientLoanIntegrationTest {
         List<Map<String, Object>> expectedvalues = new ArrayList<>();
         addRepaymentValues(expectedvalues, convertStringDateToCalender("27 May 2022"), 0, false, "600.72", "479.28", "0.0", "0.0");
         this.loanTransactionHelper.makeRepayment("27 May 2022", 1080.00F, loanID);
+
+        loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+        Assertions.assertNotNull(loanSchedule);
+        verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
+        WorkingDaysHelper.updateWorkingDays(this.requestSpec, this.responseSpec);
+    }
+
+    @Test
+    public void testLoanScheduleWithInterestRecalculationForLateRepaymentOfLateRepaymentInstallments() {
+        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        WorkingDaysHelper.updateWorkingDaysWeekDays(this.requestSpec, this.responseSpec);
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
+        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "42", true);
+        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "43", true);
+        final String loanDisbursementDate = "06 May 2022";
+        String firstRepayment = "27 May 2022";
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        String principalAmount = "7800.00";
+        String rateOfInterest = "8.9";
+        String numberOfRepayments = "12";
+        final Integer loanProductID = createLoanProductWithInterestRecalculationAndCompoundingDetails(
+                LoanProductTestBuilder.INTEREST_PRINCIPAL_PENALTIES_FEES_ORDER_STRATEGY,
+                LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
+                LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS,
+                LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_SAME_AS_REPAYMENT_PERIOD,
+                LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE, null, "12", numberOfRepayments, principalAmount,
+                rateOfInterest);
+
+        final Integer loanID = applyForLoanApplicationForInterestRecalculation(clientID, loanProductID, loanDisbursementDate,
+                LoanApplicationTestBuilder.INTEREST_PRINCIPAL_PENALTIES_FEES_ORDER_STRATEGY, firstRepayment, numberOfRepayments,
+                principalAmount, rateOfInterest);
+
+        Assertions.assertNotNull(loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+        LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
+        loanStatusHashMap = this.loanTransactionHelper.approveLoan(loanDisbursementDate, loanID);
+        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+
+        LOG.info("-------------------------------DISBURSE LOAN-------------------------------------------");
+        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(loanDisbursementDate, loanID,
+                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
+        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+
+        ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+        Assertions.assertNotNull(loanSchedule);
+
+        List<Map<String, Object>> expectedvalues = new ArrayList<>();
+        addRepaymentValues(expectedvalues, convertStringDateToCalender("27 May 2022"), 0, false, "600.72", "479.28", "0.0", "0.0");
+        this.loanTransactionHelper.makeRepayment("27 May 2022", 1080.0F, loanID);
+
+        addRepaymentValues(expectedvalues, convertStringDateToCalender("27 June 2022"), 0, false, "426.98", "653.02", "0.0", "0.0");
+        this.loanTransactionHelper.makeRepayment("27 June 2022", 1080.0F, loanID);
+
+        addRepaymentValues(expectedvalues, convertStringDateToCalender("27 July 2022"), 0, false, "485.52", "594.48", "0.0", "0.0");
+        this.loanTransactionHelper.makeRepayment("27 July 2022", 1080.0F, loanID);
+
+        addRepaymentValues(expectedvalues, convertStringDateToCalender("29 August 2022"), 0, false, "472.96", "607.04", "0.0", "0.0");
+        this.loanTransactionHelper.makeRepayment("30 August 2022", 1080.0F, loanID);
+
+        addRepaymentValues(expectedvalues, convertStringDateToCalender("30 August 2022"), 0, false, "0.0", "17.01", "0.0", "0.0");
+        this.loanTransactionHelper.makeRepayment("01 September 2022", 17.01F, loanID);
+
+        addRepaymentValues(expectedvalues, convertStringDateToCalender("01 September 2022"), 0, false, "0.0", "34.02", "0.0", "0.0");
+        this.loanTransactionHelper.makeRepayment("01 September 2022", 34.02F, loanID);
+        addRepaymentValues(expectedvalues, convertStringDateToCalender("27 September 2022"), 0, false, "637.7", "442.3", "0.0", "0.0");
+        this.loanTransactionHelper.makeRepayment("27 September 2022", 1080.0F, loanID);
 
         loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
         Assertions.assertNotNull(loanSchedule);
@@ -6138,4 +6211,11 @@ public class ClientLoanIntegrationTest {
 
         return dayOfMonth;
     }
+
+    @AfterEach
+    public void tearDown() {
+        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+    }
+
 }
