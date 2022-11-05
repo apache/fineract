@@ -38,6 +38,7 @@ public final class AppUserData {
     private final String lastname;
     private final String email;
     private final Boolean passwordNeverExpires;
+    private String bankVerificationNumber;
 
     // import fields
     private List<Long> roles;
@@ -62,6 +63,7 @@ public final class AppUserData {
                 rowIndex);
     }
 
+
     private AppUserData(Long officeId, Long staffId, String username, String firstname, String lastname, String email,
             Boolean sendPasswordToEmail, Boolean passwordNeverExpires, List<Long> roleIds, Integer rowIndex) {
         this.id = null;
@@ -84,6 +86,7 @@ public final class AppUserData {
         this.isSelfServiceUser = null;
         this.clients = null;
     }
+
 
     public Integer getRowIndex() {
         return rowIndex;
@@ -111,6 +114,34 @@ public final class AppUserData {
         return new AppUserData(id, username, email, officeId, officeName, firstname, lastname, availableRoles, selfServiceRoles,
                 selectedRoles, null, staff, passwordNeverExpire, isSelfServiceUser);
     }
+    private AppUserData(final Long id, final String username, final String email, final Long officeId, final String officeName,
+                        final String firstname, final String lastname, final Collection<RoleData> availableRoles,
+                        final Collection<RoleData> selfServiceRoles, final Collection<RoleData> selectedRoles,
+                        final Collection<OfficeData> allowedOffices, final StaffData staff, final Boolean passwordNeverExpire,
+                        final Boolean isSelfServiceUser, final String bankVerificationNumber) {
+        this.id = id;
+        this.username = username;
+        this.officeId = officeId;
+        this.officeName = officeName;
+        this.firstname = firstname;
+        this.lastname = lastname;
+        this.email = email;
+        this.allowedOffices = allowedOffices;
+        this.availableRoles = availableRoles;
+        this.selfServiceRoles = selfServiceRoles;
+        this.selectedRoles = selectedRoles;
+        this.staff = staff;
+        this.passwordNeverExpires = passwordNeverExpire;
+        this.isSelfServiceUser = isSelfServiceUser;
+        this.bankVerificationNumber = bankVerificationNumber;
+    }
+    public static AppUserData instance(final Long id, final String username, final String email, final Long officeId,
+                                       final String officeName, final String firstname, final String lastname, final Collection<RoleData> availableRoles,
+                                       final Collection<RoleData> selfServiceRoles, final Collection<RoleData> selectedRoles, final StaffData staff,
+                                       final Boolean passwordNeverExpire, final Boolean isSelfServiceUser, final String bankVerificationNumber) {
+        return new AppUserData(id, username, email, officeId, officeName, firstname, lastname, availableRoles, selfServiceRoles,
+                selectedRoles, null, staff, passwordNeverExpire, isSelfServiceUser, bankVerificationNumber);
+    }
 
     private AppUserData(final Long id, final String username, final String email, final Long officeId, final String officeName,
             final String firstname, final String lastname, final Collection<RoleData> availableRoles,
@@ -132,6 +163,7 @@ public final class AppUserData {
         this.passwordNeverExpires = passwordNeverExpire;
         this.isSelfServiceUser = isSelfServiceUser;
     }
+
 
     public boolean hasIdentifyOf(final Long createdById) {
         return this.id.equals(createdById);
