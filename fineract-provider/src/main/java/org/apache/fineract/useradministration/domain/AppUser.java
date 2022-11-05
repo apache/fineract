@@ -92,6 +92,8 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
     @Column(name = "is_deleted", nullable = false)
     private boolean deleted;
 
+    @Column(name = "bank_verification_number", nullable = false, length = 11)
+    private String bankVerificationNumber;
     @ManyToOne
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
@@ -151,11 +153,12 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
         final String email = command.stringValueOfParameterNamed("email");
         final String firstname = command.stringValueOfParameterNamed("firstname");
         final String lastname = command.stringValueOfParameterNamed("lastname");
+        final String bankVerificationNumber = command.stringValueOfParameterNamed("bankVerificationNumber");
 
         final boolean isSelfServiceUser = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER);
 
         return new AppUser(userOffice, user, allRoles, email, firstname, lastname, linkedStaff, passwordNeverExpire, isSelfServiceUser,
-                clients, cannotChangePassword);
+                clients, cannotChangePassword, bankVerificationNumber);
     }
 
     protected AppUser() {
@@ -186,6 +189,30 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
         this.appUserClientMappings = createAppUserClientMappings(clients);
         this.cannotChangePassword = cannotChangePassword;
     }
+    public AppUser(final Office office, final User user, final Set<Role> roles, final String email, final String firstname,
+                   final String lastname, final Staff staff, final boolean passwordNeverExpire, final boolean isSelfServiceUser,
+                   final Collection<Client> clients, final Boolean cannotChangePassword, String bankVerificationNumber) {
+        this.office = office;
+        this.email = email.trim();
+        this.username = user.getUsername().trim();
+        this.firstname = firstname.trim();
+        this.lastname = lastname.trim();
+        this.password = user.getPassword().trim();
+        this.accountNonExpired = user.isAccountNonExpired();
+        this.accountNonLocked = user.isAccountNonLocked();
+        this.credentialsNonExpired = user.isCredentialsNonExpired();
+        this.enabled = user.isEnabled();
+        this.roles = roles;
+        this.firstTimeLoginRemaining = true;
+        this.lastTimePasswordUpdated = DateUtils.getLocalDateOfTenant();
+        this.staff = staff;
+        this.passwordNeverExpires = passwordNeverExpire;
+        this.isSelfServiceUser = isSelfServiceUser;
+        this.appUserClientMappings = createAppUserClientMappings(clients);
+        this.cannotChangePassword = cannotChangePassword;
+        this.bankVerificationNumber = bankVerificationNumber.trim();
+    }
+
 
     public EnumOptionData organisationalRoleData() {
         EnumOptionData organisationalRole = null;
@@ -283,6 +310,13 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
             final String newValue = command.stringValueOfParameterNamed(firstnameParamName);
             actualChanges.put(firstnameParamName, newValue);
             this.firstname = newValue;
+        }
+
+        final String bankVerificationNumberParamName = "bankVerificationNumber";
+        if (command.isChangeInStringParameterNamed(bankVerificationNumberParamName, this.bankVerificationNumber)) {
+            final String newValue = command.stringValueOfParameterNamed(bankVerificationNumberParamName);
+            actualChanges.put(bankVerificationNumberParamName, newValue);
+            this.bankVerificationNumber = newValue;
         }
 
         final String lastnameParamName = "lastname";
@@ -468,6 +502,9 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
 
     public LocalDate getLastTimePasswordUpdated() {
         return this.lastTimePasswordUpdated;
+    }
+    public String getBankVerificationNumber() {
+        return this.bankVerificationNumber;
     }
 
     public boolean canNotApproveLoanInPast() {
