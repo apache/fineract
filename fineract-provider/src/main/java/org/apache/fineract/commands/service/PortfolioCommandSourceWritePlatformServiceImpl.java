@@ -19,8 +19,6 @@
 package org.apache.fineract.commands.service;
 
 import com.google.gson.JsonElement;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.security.SecureRandom;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.commands.domain.CommandSource;
@@ -28,16 +26,12 @@ import org.apache.fineract.commands.domain.CommandSourceRepository;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.exception.CommandNotAwaitingApprovalException;
 import org.apache.fineract.commands.exception.CommandNotFoundException;
-import org.apache.fineract.commands.exception.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.service.SchedulerJobRunnerReadService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.dao.CannotAcquireLockException;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,8 +40,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class PortfolioCommandSourceWritePlatformServiceImpl implements PortfolioCommandSourceWritePlatformService {
 
-    private static final SecureRandom RANDOM = new SecureRandom();
-
     private final PlatformSecurityContext context;
     private final CommandSourceRepository commandSourceRepository;
     private final FromJsonHelper fromApiJsonHelper;
@@ -55,12 +47,10 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
     private final SchedulerJobRunnerReadService schedulerJobRunnerReadService;
 
     @Override
-    @SuppressWarnings("AvoidHidingCauseException")
-    @SuppressFBWarnings(value = {
-            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public CommandProcessingResult logCommandSource(final CommandWrapper wrapper) {
 
         boolean isApprovedByChecker = false;
+
         // check if is update of own account details
         if (wrapper.isUpdateOfOwnUserDetails(this.context.authenticatedUser(wrapper).getId())) {
             // then allow this operation to proceed.
@@ -76,47 +66,13 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         validateIsUpdateAllowed();
 
         final String json = wrapper.getJson();
-        CommandProcessingResult result = null;
-        JsonCommand command;
-        int numberOfRetries = 0;
-        int maxNumberOfRetries = ThreadLocalContextUtil.getTenant().getConnection().getMaxRetriesOnDeadlock();
-        int maxIntervalBetweenRetries = ThreadLocalContextUtil.getTenant().getConnection().getMaxIntervalBetweenRetries();
         final JsonElement parsedCommand = this.fromApiJsonHelper.parse(json);
-        command = JsonCommand.from(json, parsedCommand, this.fromApiJsonHelper, wrapper.getEntityName(), wrapper.getEntityId(),
+        JsonCommand command = JsonCommand.from(json, parsedCommand, this.fromApiJsonHelper, wrapper.getEntityName(), wrapper.getEntityId(),
                 wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getSavingsId(),
                 wrapper.getTransactionId(), wrapper.getHref(), wrapper.getProductId(), wrapper.getCreditBureauId(),
                 wrapper.getOrganisationCreditBureauId(), wrapper.getJobName());
-        while (numberOfRetries <= maxNumberOfRetries) {
-            try {
-                result = this.processAndLogCommandService.executeCommand(wrapper, command, isApprovedByChecker);
-                numberOfRetries = maxNumberOfRetries + 1;
-            } catch (CannotAcquireLockException | ObjectOptimisticLockingFailureException exception) {
-                log.debug("The following command {} has been retried  {} time(s)", command.json(), numberOfRetries);
-                /***
-                 * Fail if the transaction has been retired for maxNumberOfRetries
-                 **/
-                if (numberOfRetries >= maxNumberOfRetries) {
-                    log.warn("The following command {} has been retried for the max allowed attempts of {} and will be rolled back",
-                            command.json(), numberOfRetries);
-                    throw exception;
-                }
-                /***
-                 * Else sleep for a random time (between 1 to 10 seconds) and continue
-                 **/
-                try {
-                    int randomNum = RANDOM.nextInt(maxIntervalBetweenRetries + 1);
-                    Thread.sleep(1000 + (randomNum * 1000));
-                    numberOfRetries = numberOfRetries + 1;
-                } catch (InterruptedException e) {
-                    throw exception;
-                }
-            } catch (final RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
-                numberOfRetries = maxNumberOfRetries + 1;
-                result = this.processAndLogCommandService.logCommand(e.getCommandSourceResult());
-            }
-        }
 
-        return result;
+        return this.processAndLogCommandService.executeCommand(wrapper, command, isApprovedByChecker);
     }
 
     @Override
@@ -168,9 +124,8 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         return commandSourceInput;
     }
 
-    private boolean validateIsUpdateAllowed() {
-        return this.schedulerJobRunnerReadService.isUpdatesAllowed();
-
+    private void validateIsUpdateAllowed() {
+        this.schedulerJobRunnerReadService.isUpdatesAllowed();
     }
 
     @Override

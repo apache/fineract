@@ -17,23 +17,11 @@
 # under the License.
 #
 
-Feature: Commands Provider
+Feature: Commands Service
 
-  @template
-  Scenario Outline: Verify that command providers are injected
-    Given A command handler for entity <entity> and action <action>
-    When The user processes the command with ID <id>
-    Then The command ID matches <id>
+  Scenario: Verify that command source write service are working with fallback function
+    Given A command source write service
+    When The user executes the command via a command write service with exceptions
+    Then The command processing service should fallback as expected
+    Then The command processing service execute function should be called 3 times
 
-    Examples:
-      | id  | entity | action |
-      | 815 | HUMAN  | UPDATE |
-
-  @template
-  Scenario Outline: Verify that command no command handler is provided
-    Given A missing command handler for entity <entity> and action <action>
-    Then The system should throw an exception
-
-    Examples:
-      | entity   | action      |
-      | WHATEVER | DOSOMETHING |

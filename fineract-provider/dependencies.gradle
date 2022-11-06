@@ -84,6 +84,8 @@ dependencies {
             'org.springdoc:springdoc-openapi-common',
             'org.springdoc:springdoc-openapi-security',
             'org.mapstruct:mapstruct',
+
+            'io.github.resilience4j:resilience4j-spring-boot2',
             )
 
     implementation ('org.apache.commons:commons-email') {

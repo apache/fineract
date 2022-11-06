@@ -18,11 +18,10 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.HashMap;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
@@ -34,18 +33,14 @@ import org.quartz.JobKey;
 import org.quartz.Trigger;
 import org.quartz.Trigger.CompletedExecutionInstruction;
 import org.quartz.TriggerListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-@Component
+@Slf4j
 @RequiredArgsConstructor
+@Component
 public class SchedulerTriggerListener implements TriggerListener {
-
-    private static final Logger LOG = LoggerFactory.getLogger(SchedulerTriggerListener.class);
-    private static final SecureRandom random = new SecureRandom();
 
     private final SchedularWritePlatformService schedularService;
     private final TenantDetailsService tenantDetailsService;
@@ -59,12 +54,10 @@ public class SchedulerTriggerListener implements TriggerListener {
 
     @Override
     public void triggerFired(Trigger trigger, JobExecutionContext context) {
-        LOG.debug("triggerFired() trigger={}, context={}", trigger, context);
+        log.debug("triggerFired() trigger={}, context={}", trigger, context);
     }
 
     @Override
-    @SuppressFBWarnings(value = {
-            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public boolean vetoJobExecution(final Trigger trigger, final JobExecutionContext context) {
         final String tenantIdentifier = trigger.getJobDataMap().getString(SchedulerServiceConstants.TENANT_IDENTIFIER);
@@ -79,43 +72,22 @@ public class SchedulerTriggerListener implements TriggerListener {
         if (context.getMergedJobDataMap().containsKey(SchedulerServiceConstants.TRIGGER_TYPE_REFERENCE)) {
             triggerType = context.getMergedJobDataMap().getString(SchedulerServiceConstants.TRIGGER_TYPE_REFERENCE);
         }
-        Integer maxNumberOfRetries = ThreadLocalContextUtil.getTenant().getConnection().getMaxRetriesOnDeadlock();
-        Integer maxIntervalBetweenRetries = ThreadLocalContextUtil.getTenant().getConnection().getMaxIntervalBetweenRetries();
-        Integer numberOfRetries = 0;
-        boolean vetoJob = false;
-        while (numberOfRetries <= maxNumberOfRetries) {
-            try {
-                vetoJob = this.schedularService.processJobDetailForExecution(jobKey, triggerType);
-                numberOfRetries = maxNumberOfRetries + 1;
-            } catch (Exception exception) { // Adding generic exception as it
-                                            // depends on JPA provider
-                LOG.warn("vetoJobExecution() not able to acquire the lock to update job running status at retry {} (of {}) for JobKey: {}",
-                        numberOfRetries, maxNumberOfRetries, jobKey, exception);
-                try {
-                    int randomNum = random.nextInt(maxIntervalBetweenRetries + 1);
-                    Thread.sleep(1000 + (randomNum * 1000));
-                    numberOfRetries = numberOfRetries + 1;
-                } catch (InterruptedException e) {
-                    LOG.error("vetoJobExecution() caught an InterruptedException", e);
-                }
-            }
-        }
+        boolean vetoJob = this.schedularService.processJobDetailForExecution(jobKey, triggerType);
         if (vetoJob) {
-            LOG.warn(
-                    "vetoJobExecution() WILL veto the execution (returning vetoJob == true; the job's execute method will NOT be called); "
-                            + "maxNumberOfRetries={}, tenant={}, jobKey={}, triggerType={}, trigger={}, context={}",
-                    maxNumberOfRetries, tenantIdentifier, jobKey, triggerType, trigger, context);
+            log.warn(
+                    "vetoJobExecution() WILL veto the execution (returning vetoJob == true; the job's execute method will NOT be called); tenant={}, jobKey={}, triggerType={}, trigger={}, context={}",
+                    tenantIdentifier, jobKey, triggerType, trigger, context);
         }
         return vetoJob;
     }
 
     @Override
     public void triggerMisfired(final Trigger trigger) {
-        LOG.error("triggerMisfired() trigger={}", trigger);
+        log.error("triggerMisfired() trigger={}", trigger);
     }
 
     @Override
     public void triggerComplete(Trigger trigger, JobExecutionContext context, CompletedExecutionInstruction triggerInstructionCode) {
-        LOG.debug("triggerComplete() trigger={}, context={}, completedExecutionInstruction={}", trigger, context, triggerInstructionCode);
+        log.debug("triggerComplete() trigger={}, context={}, completedExecutionInstruction={}", trigger, context, triggerInstructionCode);
     }
 }
