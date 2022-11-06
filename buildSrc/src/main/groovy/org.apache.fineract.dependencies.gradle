@@ -187,5 +187,7 @@ dependencyManagement {
         dependency 'org.mapstruct:mapstruct-processor:1.5.3.Final'
 
         dependency "org.apache.avro:avro:1.11.1"
+
+        dependency "io.github.resilience4j:resilience4j-spring-boot2:1.7.1"
     }
 }

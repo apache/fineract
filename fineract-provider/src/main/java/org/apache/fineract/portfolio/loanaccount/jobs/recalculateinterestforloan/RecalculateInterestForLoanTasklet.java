@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.loanaccount.jobs.recalculateinterestforloan;
 
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,7 +31,6 @@ import java.util.concurrent.Future;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
@@ -45,8 +43,6 @@ import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.dao.CannotAcquireLockException;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -56,7 +52,6 @@ public class RecalculateInterestForLoanTasklet implements Tasklet {
     private final LoanWritePlatformService loanWritePlatformService;
     private final RecalculateInterestPoster recalculateInterestPoster;
     private final OfficeReadPlatformService officeReadPlatformService;
-    private static final SecureRandom random = new SecureRandom();
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
@@ -75,45 +70,16 @@ public class RecalculateInterestForLoanTasklet implements Tasklet {
 
             recalculateInterest(office, threadPoolSize, batchSize);
         } else {
-            int maxNumberOfRetries = ThreadLocalContextUtil.getTenant().getConnection().getMaxRetriesOnDeadlock();
-            int maxIntervalBetweenRetries = ThreadLocalContextUtil.getTenant().getConnection().getMaxIntervalBetweenRetries();
             Collection<Long> loanIds = loanReadPlatformService.fetchLoansForInterestRecalculation();
-            int i = 0;
             if (!loanIds.isEmpty()) {
                 List<Throwable> errors = new ArrayList<>();
                 for (Long loanId : loanIds) {
                     log.debug("recalculateInterest: Loan ID = {}", loanId);
-                    int numberOfRetries = 0;
-                    while (numberOfRetries <= maxNumberOfRetries) {
-                        try {
-                            loanWritePlatformService.recalculateInterest(loanId);
-                            numberOfRetries = maxNumberOfRetries + 1;
-                        } catch (CannotAcquireLockException | ObjectOptimisticLockingFailureException exception) {
-                            log.debug("Recalulate interest job has been retried {} time(s)", numberOfRetries);
-                            if (numberOfRetries >= maxNumberOfRetries) {
-                                log.error(
-                                        "Recalulate interest job has been retried for the max allowed attempts of {} and will be rolled back",
-                                        numberOfRetries);
-                                errors.add(exception);
-                                break;
-                            }
-                            try {
-                                int randomNum = random.nextInt(maxIntervalBetweenRetries + 1);
-                                Thread.sleep(1000 + (randomNum * 1000L));
-                                numberOfRetries = numberOfRetries + 1;
-                            } catch (InterruptedException e) {
-                                log.error("Interest recalculation for loans retry failed due to InterruptedException", e);
-                                errors.add(e);
-                                break;
-                            }
-                        } catch (Exception e) {
-                            log.error("Interest recalculation for loans failed for account {}", loanId, e);
-                            numberOfRetries = maxNumberOfRetries + 1;
-                            errors.add(e);
-                        }
-                        i++;
+                    try {
+                        loanWritePlatformService.recalculateInterest(loanId);
+                    } catch (Exception e) {
+                        errors.add(e);
                     }
-                    log.debug("recalculateInterest: Loans count {}", i);
                 }
                 if (!errors.isEmpty()) {
                     throw new JobExecutionException(errors);

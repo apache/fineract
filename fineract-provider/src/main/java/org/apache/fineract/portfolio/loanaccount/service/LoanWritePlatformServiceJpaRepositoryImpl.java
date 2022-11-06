@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import io.github.resilience4j.retry.annotation.Retry;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -39,7 +40,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
-import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.exceptions.LoanAccountLockCannotBeOverruledException;
 import org.apache.fineract.cob.service.LoanAccountLockService;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
@@ -281,7 +281,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final PostDatedChecksRepository postDatedChecksRepository;
     private final LoanDisbursementDetailsRepository loanDisbursementDetailsRepository;
     private final LoanRepaymentScheduleInstallmentRepository loanRepaymentScheduleInstallmentRepository;
-    private final LoanAccountLockRepository loanAccountLockRepository;
     private final LoanAccountLockService loanAccountLockService;
 
     private static boolean isPartOfThisInstallment(LoanCharge loanCharge, LoanRepaymentScheduleInstallment e) {
@@ -3217,6 +3216,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Transactional
     @Override
+    @Retry(name = "recalculateInterest", fallbackMethod = "fallbackRecalculateInterest")
     public void recalculateInterest(final long loanId) {
         Loan loan = this.loanAssembler.assembleFrom(loanId);
         LocalDate recalculateFrom = loan.fetchInterestRecalculateFromDate();
@@ -3250,6 +3250,18 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         this.guarantorDomainService.transaferFundsFromGuarantor(loan);
         return new CommandProcessingResultBuilder().withLoanId(loanId).build();
+    }
+
+    @SuppressWarnings("unused")
+    private void fallbackRecalculateInterest(Throwable t) {
+        // NOTE: allow caller to catch the exceptions
+
+        if (t instanceof RuntimeException re) {
+            throw re;
+        }
+
+        // NOTE: wrap throwable only if really necessary
+        throw new RuntimeException(t);
     }
 
     private void updateLoanTransaction(final Long loanTransactionId, final LoanTransaction newLoanTransaction) {
