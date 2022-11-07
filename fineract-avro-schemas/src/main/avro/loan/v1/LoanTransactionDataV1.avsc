@@ -21,6 +21,14 @@
         },
         {
             "default": null,
+            "name": "externalLoanId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
             "name": "officeId",
             "type": [
                 "null",
