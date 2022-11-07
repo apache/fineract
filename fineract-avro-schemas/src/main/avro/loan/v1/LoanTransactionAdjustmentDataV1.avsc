@@ -1,0 +1,23 @@
+{
+    "name": "LoanTransactionAdjustmentDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "default": null,
+            "name": "transactionToAdjust",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.LoanTransactionDataV1"
+            ]
+        },
+        {
+            "default": null,
+            "name": "newTransactionDetail",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.LoanTransactionDataV1"
+            ]
+        }
+    ]
+}

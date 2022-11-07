@@ -87,7 +87,7 @@ public final class ResultsetColumnHeaderData implements Serializable {
                 displayType = "DECIMAL";
             } else if (isAnyText()) {
                 displayType = "TEXT";
-            } else if (isBit()) {
+            } else if (isBit() || isBoolean()) {
                 displayType = "BOOLEAN";
             } else {
                 throw new PlatformDataIntegrityException("error.msg.invalid.lookup.type",
@@ -229,6 +229,10 @@ public final class ResultsetColumnHeaderData implements Serializable {
 
     private boolean isBit() {
         return "bit".equalsIgnoreCase(this.columnType);
+    }
+
+    private boolean isBoolean() {
+        return "boolean".equalsIgnoreCase(this.columnType) || "bool".equalsIgnoreCase(this.columnType);
     }
 
     public String getColumnName() {

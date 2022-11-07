@@ -103,7 +103,7 @@ public final class PaymentDetail extends AbstractPersistableCustom {
     }
 
     public PaymentDetailData toData() {
-        final PaymentTypeData paymentTypeData = this.paymentType.toData();
+        final PaymentTypeData paymentTypeData = null; // this.paymentType.toData();
         final PaymentDetailData paymentDetailData = new PaymentDetailData(getId(), paymentTypeData, this.accountNumber, this.checkNumber,
                 this.routingCode, this.receiptNumber, this.bankNumber);
         return paymentDetailData;

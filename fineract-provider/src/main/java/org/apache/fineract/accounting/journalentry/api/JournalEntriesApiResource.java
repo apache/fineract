@@ -79,10 +79,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class JournalEntriesApiResource {
 
-    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList("id", "officeId", "officeName", "glAccountName", "glAccountId", "glAccountCode", "glAccountType",
-                    "transactionDate", "entryType", "amount", "transactionId", "manualEntry", "entityType", "entityId", "createdByUserId",
-                    "createdDate", "createdByUserName", "comments", "reversed", "referenceNumber", "currency", "transactionDetails"));
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "officeId", "officeName", "glAccountName",
+            "glAccountId", "glAccountCode", "glAccountType", "transactionDate", "entryType", "amount", "transactionId", "manualEntry",
+            "entityType", "entityId", "createdByUserId", "createdDate", "submittedOnDate", "createdByUserName", "comments", "reversed",
+            "referenceNumber", "currency", "transactionDetails"));
 
     private final String resourceNameForPermission = "JOURNALENTRY";
 
@@ -111,6 +111,8 @@ public class JournalEntriesApiResource {
             @QueryParam("manualEntriesOnly") @Parameter(description = "manualEntriesOnly") final Boolean onlyManualEntries,
             @QueryParam("fromDate") @Parameter(description = "fromDate") final DateParam fromDateParam,
             @QueryParam("toDate") @Parameter(description = "toDate") final DateParam toDateParam,
+            @QueryParam("submittedOnDateFrom") @Parameter(description = "submittedOnDateFrom") final DateParam submittedOnDateFromParam,
+            @QueryParam("submittedOnDateTo") @Parameter(description = "submittedOnDateTo") final DateParam submittedOnDateToParam,
             @QueryParam("transactionId") @Parameter(description = "transactionId") final String transactionId,
             @QueryParam("entityType") @Parameter(description = "entityType") final Integer entityType,
             @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
@@ -135,13 +137,23 @@ public class JournalEntriesApiResource {
             toDate = toDateParam.getDate("toDate", dateFormat, locale);
         }
 
+        LocalDate submittedOnDateFrom = null;
+        if (submittedOnDateFromParam != null) {
+            submittedOnDateFrom = submittedOnDateFromParam.getDate("submittedOnDateFrom", dateFormat, locale);
+        }
+        LocalDate submittedOnDateTo = null;
+        if (submittedOnDateToParam != null) {
+            submittedOnDateTo = submittedOnDateToParam.getDate("submittedOnDateTo", dateFormat, locale);
+        }
+
         final SearchParameters searchParameters = SearchParameters.forJournalEntries(officeId, offset, limit, orderBy, sortOrder, loanId,
                 savingsId);
         JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData(transactionDetails,
                 runningBalance);
 
         final Page<JournalEntryData> glJournalEntries = this.journalEntryReadPlatformService.retrieveAll(searchParameters, glAccountId,
-                onlyManualEntries, fromDate, toDate, transactionId, entityType, associationParametersData);
+                onlyManualEntries, fromDate, toDate, submittedOnDateFrom, submittedOnDateTo, transactionId, entityType,
+                associationParametersData);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.apiJsonSerializerService.serialize(settings, glJournalEntries, RESPONSE_DATA_PARAMETERS);
     }
@@ -155,7 +167,7 @@ public class JournalEntriesApiResource {
             + "journalentries/1?transactionDetails=true")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = JournalEntryData.class))) })
-    public String retreiveJournalEntryById(
+    public String retrieveJournalEntryById(
             @PathParam("journalEntryId") @Parameter(description = "journalEntryId") final Long journalEntryId,
             @Context final UriInfo uriInfo,
             @QueryParam("runningBalance") @Parameter(description = "runningBalance") final boolean runningBalance,
@@ -185,7 +197,7 @@ public class JournalEntriesApiResource {
     public String createGLJournalEntry(@Parameter(hidden = true) final String jsonRequestBody,
             @QueryParam("command") @Parameter(description = "command") final String commandParam) {
 
-        CommandProcessingResult result = null;
+        CommandProcessingResult result;
         if (is(commandParam, "updateRunningBalance")) {
             final CommandWrapper commandRequest = new CommandWrapperBuilder().updateRunningBalanceForJournalEntry()
                     .withJson(jsonRequestBody).build();
@@ -213,7 +225,7 @@ public class JournalEntriesApiResource {
     public String createReversalJournalEntry(@Parameter(hidden = true) final String jsonRequestBody,
             @PathParam("transactionId") @Parameter(description = "transactionId") final String transactionId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam) {
-        CommandProcessingResult result = null;
+        CommandProcessingResult result;
         if (is(commandParam, "reverse")) {
             final CommandWrapper commandRequest = new CommandWrapperBuilder().reverseJournalEntry(transactionId).withJson(jsonRequestBody)
                     .build();
@@ -234,8 +246,8 @@ public class JournalEntriesApiResource {
         this.context.authenticatedUser();
         String transactionId = "P" + entryId;
         SearchParameters params = SearchParameters.forPagination(offset, limit);
-        Page<JournalEntryData> entries = this.journalEntryReadPlatformService.retrieveAll(params, null, null, null, null, transactionId,
-                PortfolioProductType.PROVISIONING.getValue(), null);
+        Page<JournalEntryData> entries = this.journalEntryReadPlatformService.retrieveAll(params, null, null, null, null, null, null,
+                transactionId, PortfolioProductType.PROVISIONING.getValue(), null);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.apiJsonSerializerService.serialize(settings, entries, RESPONSE_DATA_PARAMETERS);
     }

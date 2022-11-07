@@ -1,0 +1,96 @@
+{
+  "approve": {
+    "binding": [
+      {
+        "name": "James Daily",
+        "email": "jamespdailey@gmail.com"
+      },
+      {
+        "name": "Arnold Galovics",
+        "email": "arnold@apache.org"
+      },
+      {
+        "name": "Avik Ganguly",
+        "email": "avik@fynarfin.io"
+      },
+      {
+        "name": "Ed Cable",
+        "email": "edcable@mifos.org"
+      },
+      {
+        "name": "Aleksandar Vidakovic",
+        "email": "aleks@apache.org"
+      },
+      {
+        "name": "Terence Monteiro",
+        "email": "terence.placker@gmail.com"
+      },
+      {
+        "name": "Awasum Yannick",
+        "email": "awasum@apache.org"
+      }
+    ],
+    "nonBinding": [
+      {
+        "name": "Victor Manuel Romero Rodriguez",
+        "email": "victor.romero@fintecheando.mx"
+      },
+      {
+        "name": "Bruce Tushabe",
+        "email": "brucetushabe@gmail.com"
+      },
+      {
+        "name": "Kigred",
+        "email": "kigred.developer@gmail.com"
+      },
+      {
+        "name": "Bharath Gowda",
+        "email": "bgowda@mifos.org"
+      },
+      {
+        "name": "Robert Jakech",
+        "email": "robert@fiter.io"
+      },
+      {
+        "name": "Arthur Magezi",
+        "email": "artmagezi@gmail.com"
+      },
+      {
+        "name": "Robert Ippez",
+        "email": "ippezrobert@gmail.com"
+      },
+      {
+        "name": "Sifiso Mtetwa",
+        "email": "sifiso@skyburgsystems.org"
+      },
+      {
+        "name": "Zayad A. Said",
+        "email": "zayyad@intrasofttechnologies.com"
+      },
+      {
+        "name": "Hitech Prajapati",
+        "email": "hitesh.kams.prajapati@gmail.com"
+      },
+      {
+        "name": "Kelvin Ikome",
+        "email": "kelvin@ciniter.com"
+      },
+      {
+        "name": "Nasser Kaze",
+        "email": "kazenasser@gmail.com"
+      }
+    ]
+  },
+  "disapprove": {
+    "binding": [
+    ],
+    "nonBinding": [
+    ]
+  },
+  "noOpinion": {
+    "binding": [
+    ],
+    "nonBinding": [
+    ]
+  }
+}

@@ -35,6 +35,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.adhocquery.data.AdHocData;
 import org.apache.fineract.adhocquery.service.AdHocReadPlatformService;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -45,7 +46,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -53,6 +53,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 @Tag(name = "AdhocQuery Api", description = "")
+@RequiredArgsConstructor
 public class AdHocApiResource {
 
     /**
@@ -66,17 +67,6 @@ public class AdHocApiResource {
     private final DefaultToApiJsonSerializer<AdHocData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-
-    @Autowired
-    public AdHocApiResource(final PlatformSecurityContext context, final AdHocReadPlatformService readPlatformService,
-            final DefaultToApiJsonSerializer<AdHocData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.context = context;
-        this.adHocReadPlatformService = readPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -105,10 +95,7 @@ public class AdHocApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createAdHocQuery(final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .createAdHoc() //
-                .withJson(apiRequestBodyAsJson) //
-                .build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createAdHoc().withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
@@ -137,10 +124,7 @@ public class AdHocApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String update(@PathParam("adHocId") @Parameter(description = "adHocId") final Long adHocId, final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .updateAdHoc(adHocId) //
-                .withJson(apiRequestBodyAsJson) //
-                .build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateAdHoc(adHocId).withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
@@ -159,9 +143,7 @@ public class AdHocApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteAdHocQuery(@PathParam("adHocId") @Parameter(description = "adHocId") final Long adHocId) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .deleteAdHoc(adHocId) //
-                .build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteAdHoc(adHocId).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

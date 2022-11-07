@@ -122,9 +122,15 @@ public class JsonParserHelper {
             if (object.has(parameterName) && object.get(parameterName).isJsonPrimitive()) {
                 modifiedParameters.add(parameterName);
                 final JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
-                final String valueAsString = primitive.getAsString();
-                if (StringUtils.isNotBlank(valueAsString)) {
-                    value = convertFrom(valueAsString, parameterName, locale);
+                if (!primitive.isJsonNull()) {
+                    if (primitive.isNumber()) {
+                        value = primitive.getAsBigDecimal();
+                    } else {
+                        final String valueAsString = primitive.getAsString();
+                        if (StringUtils.isNotBlank(valueAsString)) {
+                            value = convertFrom(valueAsString, parameterName, locale);
+                        }
+                    }
                 }
             }
         }

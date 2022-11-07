@@ -47,15 +47,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class CollectionSheetGenerateCommandFromApiJsonDeserializer {
 
+    public static final String COLLECTIONSHEET = "collectionsheet";
     /**
      * The parameters supported for this command.
      */
-    final Set<String> supportedParameters = new HashSet<>(
+    private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(
             Arrays.asList(transactionDateParamName, localeParamName, dateFormatParamName, calendarIdParamName));
-
     private static final Set<String> INDIVIDUAL_COLLECTIONSHEET_SUPPORTED_PARAMS = new HashSet<>(
             Arrays.asList(transactionDateParamName, localeParamName, dateFormatParamName, officeIdParamName, staffIdParamName));
-
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -69,13 +68,15 @@ public class CollectionSheetGenerateCommandFromApiJsonDeserializer {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("collectionsheet");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(COLLECTIONSHEET);
 
         final String transactionDateStr = this.fromApiJsonHelper.extractStringNamed(transactionDateParamName, element);
         baseDataValidator.reset().parameter(transactionDateParamName).value(transactionDateStr).notBlank();
@@ -100,13 +101,15 @@ public class CollectionSheetGenerateCommandFromApiJsonDeserializer {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, INDIVIDUAL_COLLECTIONSHEET_SUPPORTED_PARAMS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("collectionsheet");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(COLLECTIONSHEET);
 
         final String transactionDateStr = this.fromApiJsonHelper.extractStringNamed(transactionDateParamName, element);
         baseDataValidator.reset().parameter(transactionDateParamName).value(transactionDateStr).notBlank();

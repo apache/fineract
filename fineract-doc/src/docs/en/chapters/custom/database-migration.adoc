@@ -1,0 +1,21 @@
+= Custom Database Migration
+
+If database migrations are needed as part of your customizations then you can add your own migration scripts. This is again based on conventions:
+
+1. Create folders `db/custom-changelog` in one of your `resources` folders; we recommend using the resources folder in your starter library, but actually any of your custom libs will do.
+2. Under `db/custom-changelog` create an XML changelog file, e. g. `changelog-acme-note.xml`; you are free to choose a name for this file, but we recommend being consistent to avoid classpath conflicts.
+3. Under `db/custom-changelog` create a folder `parts` for your specific changelogs
+
+[plantuml, format=svg]
+----
+include::{diagramsdir}/custom-db-migration-folder-structure.puml[]
+----
+
+And here an example migration script:
+
+[source,xml]
+----
+include::{rootdir}/custom/acme/note/starter/src/main/resources/db/custom-changelog/0001_acme_note_initial.xml[lines=22..]
+----
+
+IMPORTANT: By default, custom database migration changelogs are executed in context `tenant_db`. That makes sure your changes will be applied to the tenant database (read: main database and not the tenant store database). In theory you could also target the tenant configuration database, but it's not recommended to do that.

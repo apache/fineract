@@ -23,6 +23,7 @@ import java.time.MonthDay;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import javax.persistence.Column;
@@ -390,7 +391,7 @@ public class Charge extends AbstractPersistableCustom {
     public Map<String, Object> update(final JsonCommand command) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
 
-        final String localeAsInput = command.locale();
+        final Locale locale = command.extractLocale();
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charges");
@@ -411,9 +412,9 @@ public class Charge extends AbstractPersistableCustom {
 
         final String amountParamName = "amount";
         if (command.isChangeInBigDecimalParameterNamed(amountParamName, this.amount)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(amountParamName);
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(amountParamName, locale);
             actualChanges.put(amountParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
+            actualChanges.put("locale", locale.getLanguage());
             this.amount = newValue;
         }
 
@@ -421,7 +422,7 @@ public class Charge extends AbstractPersistableCustom {
         if (command.isChangeInIntegerParameterNamed(chargeTimeParamName, this.chargeTimeType)) {
             final Integer newValue = command.integerValueOfParameterNamed(chargeTimeParamName);
             actualChanges.put(chargeTimeParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
+            actualChanges.put("locale", locale.getLanguage());
             this.chargeTimeType = ChargeTimeType.fromInt(newValue).getValue();
 
             if (isSavingsCharge()) {
@@ -510,7 +511,7 @@ public class Charge extends AbstractPersistableCustom {
         if (command.isChangeInIntegerParameterNamed(chargeCalculationParamName, this.chargeCalculation)) {
             final Integer newValue = command.integerValueOfParameterNamed(chargeCalculationParamName);
             actualChanges.put(chargeCalculationParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
+            actualChanges.put("locale", locale.getLanguage());
             this.chargeCalculation = ChargeCalculationType.fromInt(newValue).getValue();
 
             if (isSavingsCharge()) {
@@ -540,7 +541,7 @@ public class Charge extends AbstractPersistableCustom {
             if (command.isChangeInIntegerParameterNamed(paymentModeParamName, this.chargePaymentMode)) {
                 final Integer newValue = command.integerValueOfParameterNamed(paymentModeParamName);
                 actualChanges.put(paymentModeParamName, newValue);
-                actualChanges.put("locale", localeAsInput);
+                actualChanges.put("locale", locale.getLanguage());
                 this.chargePaymentMode = ChargePaymentMode.fromInt(newValue).getValue();
             }
         }
@@ -551,14 +552,14 @@ public class Charge extends AbstractPersistableCustom {
             final Integer dayOfMonthValue = monthDay.getDayOfMonth();
             if (!this.feeOnDay.equals(dayOfMonthValue)) {
                 actualChanges.put("feeOnMonthDay", actualValueEntered);
-                actualChanges.put("locale", localeAsInput);
+                actualChanges.put("locale", locale.getLanguage());
                 this.feeOnDay = dayOfMonthValue;
             }
 
             final Integer monthOfYear = monthDay.getMonthValue();
             if (!this.feeOnMonth.equals(monthOfYear)) {
                 actualChanges.put("feeOnMonthDay", actualValueEntered);
-                actualChanges.put("locale", localeAsInput);
+                actualChanges.put("locale", locale.getLanguage());
                 this.feeOnMonth = monthOfYear;
             }
         }
@@ -567,7 +568,7 @@ public class Charge extends AbstractPersistableCustom {
         if (command.isChangeInIntegerParameterNamed(feeInterval, this.feeInterval)) {
             final Integer newValue = command.integerValueOfParameterNamed(feeInterval);
             actualChanges.put(feeInterval, newValue);
-            actualChanges.put("locale", localeAsInput);
+            actualChanges.put("locale", locale.getLanguage());
             this.feeInterval = newValue;
         }
 
@@ -575,7 +576,7 @@ public class Charge extends AbstractPersistableCustom {
         if (command.isChangeInIntegerParameterNamed(feeFrequency, this.feeFrequency)) {
             final Integer newValue = command.integerValueOfParameterNamed(feeFrequency);
             actualChanges.put(feeFrequency, newValue);
-            actualChanges.put("locale", localeAsInput);
+            actualChanges.put("locale", locale.getLanguage());
             this.feeFrequency = newValue;
         }
 
@@ -602,14 +603,14 @@ public class Charge extends AbstractPersistableCustom {
             if (command.isChangeInBigDecimalParameterNamed(minCapParamName, this.minCap)) {
                 final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(minCapParamName);
                 actualChanges.put(minCapParamName, newValue);
-                actualChanges.put("locale", localeAsInput);
+                actualChanges.put("locale", locale.getLanguage());
                 this.minCap = newValue;
             }
             final String maxCapParamName = "maxCap";
             if (command.isChangeInBigDecimalParameterNamed(maxCapParamName, this.maxCap)) {
                 final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(maxCapParamName);
                 actualChanges.put(maxCapParamName, newValue);
-                actualChanges.put("locale", localeAsInput);
+                actualChanges.put("locale", locale.getLanguage());
                 this.maxCap = newValue;
             }
 
@@ -660,7 +661,7 @@ public class Charge extends AbstractPersistableCustom {
         final EnumOptionData feeFrequencyType = ChargeEnumerations.chargePaymentMode(this.feeFrequency);
         GLAccountData accountData = null;
         if (account != null) {
-            accountData = new GLAccountData(account.getId(), account.getName(), account.getGlCode());
+            accountData = new GLAccountData().setId(account.getId()).setName(account.getName()).setGlCode(account.getGlCode());
         }
         TaxGroupData taxGroupData = null;
         if (this.taxGroup != null) {
@@ -669,7 +670,7 @@ public class Charge extends AbstractPersistableCustom {
 
         PaymentTypeData paymentTypeData = null;
         if (this.paymentType != null) {
-            paymentTypeData = PaymentTypeData.instance(paymentType.getId(), paymentType.getPaymentName());
+            paymentTypeData = PaymentTypeData.instance(paymentType.getId(), paymentType.getName());
         }
 
         final CurrencyData currency = new CurrencyData(this.currencyCode, null, 0, 0, null, null);

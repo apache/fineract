@@ -59,7 +59,7 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Tax Group", description = "This defines the Tax Group")
 public class TaxGroupApiResource {
 
-    private final String resourceNameForPermissions = "TAXGROUP";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "TAXGROUP";
 
     private final PlatformSecurityContext context;
     private final TaxReadPlatformService readPlatformService;
@@ -86,7 +86,7 @@ public class TaxGroupApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = TaxGroupApiResourceSwagger.GetTaxesGroupResponse.class)))) })
     public String retrieveAllTaxGroups(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final Collection<TaxGroupData> taxGroupDatas = this.readPlatformService.retrieveAllTaxGroups();
 
@@ -104,7 +104,7 @@ public class TaxGroupApiResource {
     public String retrieveTaxGroup(@PathParam("taxGroupId") @Parameter(description = "taxGroupId") final Long taxGroupId,
             @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         TaxGroupData taxGroupData = null;
@@ -122,7 +122,7 @@ public class TaxGroupApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveTemplate(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final TaxGroupData taxGroupData = this.readPlatformService.retrieveTaxGroupTemplate();
 

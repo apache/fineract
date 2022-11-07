@@ -40,9 +40,9 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
-import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
-import org.apache.fineract.infrastructure.jobs.service.JobName;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -65,8 +65,9 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
 
     private final GLJournalEntryMapper entryMapper = new GLJournalEntryMapper();
 
+    private final PlatformSecurityContext platformSecurityContext;
+
     @Override
-    @CronTarget(jobName = JobName.ACCOUNTING_RUNNING_BALANCE_UPDATE)
     public void updateRunningBalance() {
         String dateFinder = "select MIN(je.entry_date) as entityDate from acc_gl_journal_entry  je "
                 + "where je.is_running_balance_calculated=false ";
@@ -80,7 +81,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
 
     @Override
     public CommandProcessingResult updateOfficeRunningBalance(JsonCommand command) {
-        this.dataValidator.validateForUpdateRunningbalance(command);
+        this.dataValidator.validateForUpdateRunningBalance(command);
         final Long officeId = this.fromApiJsonHelper.extractLongNamed(JournalEntryJsonInputParams.OFFICE_ID.getValue(),
                 command.parsedJson());
         CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder()
@@ -141,7 +142,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
         for (Map<String, Object> entries : officesRunningBalanceList) {
             Long accountId = Long.parseLong(entries.get("accountId").toString());
             Long officeId = Long.parseLong(entries.get("officeId").toString());
-            Map<Long, BigDecimal> runningBalance = null;
+            Map<Long, BigDecimal> runningBalance;
             if (officesRunningBalance.containsKey(officeId)) {
                 runningBalance = officesRunningBalance.get(officeId);
             } else {
@@ -153,15 +154,17 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
             }
         }
 
-        List<JournalEntryData> entryDatas = jdbcTemplate.query(entryMapper.organizationRunningBalanceSchema(), entryMapper, entityDate);
-        if (entryDatas.size() > 0) {
+        List<JournalEntryData> entryDataList = jdbcTemplate.query(entryMapper.organizationRunningBalanceSchema(), entryMapper, entityDate);
+        if (entryDataList.size() > 0) {
             // run a batch update of 1000 SQL statements at a time
-            final Integer batchUpdateSize = 1000;
-            ArrayList<String> updateSql = new ArrayList<>();
+            final int batchUpdateSize = 1000;
+            List<Object[]> params = new ArrayList<>();
             int batchIndex = 0;
-            for (int index = 0; index < entryDatas.size(); index++) {
-                JournalEntryData entryData = entryDatas.get(index);
-                Map<Long, BigDecimal> officeRunningBalanceMap = null;
+            String sql = "UPDATE acc_gl_journal_entry SET is_running_balance_calculated=?, organization_running_balance=?,"
+                    + "office_running_balance=?, last_modified_by=?, last_modified_on_utc=?  WHERE  id=?";
+            for (int index = 0; index < entryDataList.size(); index++) {
+                JournalEntryData entryData = entryDataList.get(index);
+                Map<Long, BigDecimal> officeRunningBalanceMap;
                 if (officesRunningBalance.containsKey(entryData.getOfficeId())) {
                     officeRunningBalanceMap = officesRunningBalance.get(entryData.getOfficeId());
                 } else {
@@ -170,18 +173,15 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
                 }
                 BigDecimal officeRunningBalance = calculateRunningBalance(entryData, officeRunningBalanceMap);
                 BigDecimal runningBalance = calculateRunningBalance(entryData, runningBalanceMap);
-                String sql = "UPDATE acc_gl_journal_entry SET is_running_balance_calculated=true, organization_running_balance="
-                        + runningBalance + ",office_running_balance=" + officeRunningBalance + " WHERE  id=" + entryData.getId();
-                updateSql.add(sql);
+
+                params.add(new Object[] { Boolean.TRUE, runningBalance, officeRunningBalance,
+                        platformSecurityContext.authenticatedUser().getId(), DateUtils.getOffsetDateTimeOfTenant(), entryData.getId() });
                 batchIndex++;
-                if (batchIndex == batchUpdateSize || index == entryDatas.size() - 1) {
-                    // run a batch update of the 1000 update SQL statements
-                    String[] batch = new String[updateSql.size()];
-                    updateSql.toArray(batch);
-                    this.jdbcTemplate.batchUpdate(batch);
+                if (batchIndex == batchUpdateSize || index == entryDataList.size() - 1) {
+                    this.jdbcTemplate.batchUpdate(sql, params);
                     // reset counter and string array
                     batchIndex = 0;
-                    updateSql.clear();
+                    params.clear();
                 }
             }
         }
@@ -204,15 +204,17 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
                 runningBalanceMap.put(accountId, (BigDecimal) entries.get("runningBalance"));
             }
         }
-        List<JournalEntryData> entryDatas = jdbcTemplate.query(entryMapper.officeRunningBalanceSchema(), entryMapper, officeId, entityDate);
-        String[] updateSql = new String[entryDatas.size()];
-        int i = 0;
-        for (JournalEntryData entryData : entryDatas) {
+        List<JournalEntryData> entryDataList = jdbcTemplate.query(entryMapper.officeRunningBalanceSchema(), entryMapper, officeId,
+                entityDate);
+        List<Object[]> params = new ArrayList<>();
+
+        String sql = "UPDATE acc_gl_journal_entry SET office_running_balance=?, last_modified_by=?, last_modified_on_utc=? WHERE id=?";
+        for (JournalEntryData entryData : entryDataList) {
             BigDecimal runningBalance = calculateRunningBalance(entryData, runningBalanceMap);
-            String sql = "UPDATE acc_gl_journal_entry SET office_running_balance=" + runningBalance + " WHERE id=" + entryData.getId();
-            updateSql[i++] = sql;
+            params.add(new Object[] { runningBalance, platformSecurityContext.authenticatedUser().getId(),
+                    DateUtils.getOffsetDateTimeOfTenant(), entryData.getId() });
         }
-        this.jdbcTemplate.batchUpdate(updateSql);
+        this.jdbcTemplate.batchUpdate(sql, params);
     }
 
     private BigDecimal calculateRunningBalance(JournalEntryData entry, Map<Long, BigDecimal> runningBalanceMap) {
@@ -220,30 +222,18 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
         if (runningBalanceMap.containsKey(entry.getGlAccountId())) {
             runningBalance = runningBalanceMap.get(entry.getGlAccountId());
         }
-        GLAccountType accounttype = GLAccountType.fromInt(entry.getGlAccountType().getId().intValue());
+        GLAccountType accountType = GLAccountType.fromInt(entry.getGlAccountType().getId().intValue());
         JournalEntryType entryType = JournalEntryType.fromInt(entry.getEntryType().getId().intValue());
         boolean isIncrease = false;
-        switch (accounttype) {
+        switch (accountType) {
             case ASSET:
-                if (entryType.isDebitType()) {
-                    isIncrease = true;
-                }
-            break;
-            case EQUITY:
-                if (entryType.isCreditType()) {
-                    isIncrease = true;
-                }
-            break;
             case EXPENSE:
                 if (entryType.isDebitType()) {
                     isIncrease = true;
                 }
             break;
+            case EQUITY:
             case INCOME:
-                if (entryType.isCreditType()) {
-                    isIncrease = true;
-                }
-            break;
             case LIABILITY:
                 if (entryType.isCreditType()) {
                     isIncrease = true;

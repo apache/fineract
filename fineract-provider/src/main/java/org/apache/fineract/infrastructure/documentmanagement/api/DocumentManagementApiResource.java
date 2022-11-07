@@ -71,10 +71,10 @@ import org.springframework.stereotype.Component;
         + "Groups: URL Pattern as groups")
 public class DocumentManagementApiResource {
 
-    private final Set<String> responseDataParameters = new HashSet<>(
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList("id", "parentEntityType", "parentEntityId", "name", "fileName", "size", "type", "description"));
 
-    private final String systemEntityType = "DOCUMENT";
+    private static final String SYSTEM_ENTITY_TYPE = "DOCUMENT";
 
     private final PlatformSecurityContext context;
     private final DocumentReadPlatformService documentReadPlatformService;
@@ -107,12 +107,12 @@ public class DocumentManagementApiResource {
             @PathParam("entityType") @Parameter(description = "entityType") final String entityType,
             @PathParam("entityId") @Parameter(description = "entityId") final Long entityId) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.systemEntityType);
+        this.context.authenticatedUser().validateHasReadPermission(SYSTEM_ENTITY_TYPE);
 
         final Collection<DocumentData> documentDatas = this.documentReadPlatformService.retrieveAllDocuments(entityType, entityId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, documentDatas, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, documentDatas, RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
@@ -202,12 +202,12 @@ public class DocumentManagementApiResource {
             @PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
             @PathParam("documentId") @Parameter(description = "documentId") final Long documentId, @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.systemEntityType);
+        this.context.authenticatedUser().validateHasReadPermission(SYSTEM_ENTITY_TYPE);
 
         final DocumentData documentData = this.documentReadPlatformService.retrieveDocument(entityType, entityId, documentId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, documentData, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, documentData, RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -221,7 +221,7 @@ public class DocumentManagementApiResource {
             @PathParam("entityId") @Parameter(description = "entityId") final Long entityId,
             @PathParam("documentId") @Parameter(description = "documentId") final Long documentId) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.systemEntityType);
+        this.context.authenticatedUser().validateHasReadPermission(SYSTEM_ENTITY_TYPE);
         final FileData fileData = this.documentReadPlatformService.retrieveFileData(entityType, entityId, documentId);
         return ContentResources.fileDataToResponse(fileData, "attachment");
     }

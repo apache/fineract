@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import lombok.Getter;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 
@@ -33,11 +34,15 @@ import org.apache.fineract.organisation.monetary.domain.Money;
  *
  */
 @Embeddable
-public final class LoanSummary {
+@Getter
+public class LoanSummary {
 
     // derived totals fields
     @Column(name = "principal_disbursed_derived", scale = 6, precision = 19)
     private BigDecimal totalPrincipalDisbursed;
+
+    @Column(name = "principal_adjustments_derived", scale = 6, precision = 19)
+    private BigDecimal totalPrincipalAdjustments;
 
     @Column(name = "principal_repaid_derived", scale = 6, precision = 19)
     private BigDecimal totalPrincipalRepaid;
@@ -121,7 +126,7 @@ public final class LoanSummary {
         return new LoanSummary(totalFeeChargesDueAtDisbursement);
     }
 
-    LoanSummary() {
+    protected LoanSummary() {
         //
     }
 
@@ -145,8 +150,16 @@ public final class LoanSummary {
         this.totalFeeChargesOutstanding = totalFeeChargesOutstanding;
     }
 
+    public void updatePenaltyChargeOutstanding(final BigDecimal totalPenaltyChargesOutstanding) {
+        this.totalPenaltyChargesOutstanding = totalPenaltyChargesOutstanding;
+    }
+
     public void updateFeeChargesWaived(final BigDecimal totalFeeChargesWaived) {
         this.totalFeeChargesWaived = totalFeeChargesWaived;
+    }
+
+    public void updatePenaltyChargesWaived(final BigDecimal totalPenaltyChargesWaived) {
+        this.totalPenaltyChargesWaived = totalPenaltyChargesWaived;
     }
 
     public boolean isRepaidInFull(final MonetaryCurrency currency) {
@@ -177,11 +190,20 @@ public final class LoanSummary {
         return this.totalOutstanding;
     }
 
+    public void updateTotalOutstanding(final BigDecimal newTotalOutstanding) {
+        this.totalOutstanding = newTotalOutstanding;
+    }
+
+    public void updateTotalWaived(final BigDecimal totalWaived) {
+        this.totalWaived = totalWaived;
+    }
+
     /**
      * All fields but <code>totalFeeChargesDueAtDisbursement</code> should be reset.
      */
     public void zeroFields() {
         this.totalPrincipalDisbursed = BigDecimal.ZERO;
+        this.totalPrincipalAdjustments = BigDecimal.ZERO;
         this.totalPrincipalRepaid = BigDecimal.ZERO;
         this.totalPrincipalWrittenOff = BigDecimal.ZERO;
         this.totalPrincipalOutstanding = BigDecimal.ZERO;
@@ -211,14 +233,17 @@ public final class LoanSummary {
 
     public void updateSummary(final MonetaryCurrency currency, final Money principal,
             final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, final LoanSummaryWrapper summaryWrapper,
-            final Boolean disbursed, Set<LoanCharge> charges) {
+            Set<LoanCharge> charges) {
 
         this.totalPrincipalDisbursed = principal.getAmount();
+        this.totalPrincipalAdjustments = summaryWrapper.calculateTotalPrincipalAdjusted(repaymentScheduleInstallments, currency)
+                .getAmount();
         this.totalPrincipalRepaid = summaryWrapper.calculateTotalPrincipalRepaid(repaymentScheduleInstallments, currency).getAmount();
         this.totalPrincipalWrittenOff = summaryWrapper.calculateTotalPrincipalWrittenOff(repaymentScheduleInstallments, currency)
                 .getAmount();
 
-        this.totalPrincipalOutstanding = principal.minus(this.totalPrincipalRepaid).minus(this.totalPrincipalWrittenOff).getAmount();
+        this.totalPrincipalOutstanding = principal.plus(this.totalPrincipalAdjustments).minus(this.totalPrincipalRepaid)
+                .minus(this.totalPrincipalWrittenOff).getAmount();
 
         final Money totalInterestCharged = summaryWrapper.calculateTotalInterestCharged(repaymentScheduleInstallments, currency);
         this.totalInterestCharged = totalInterestCharged.getAmount();

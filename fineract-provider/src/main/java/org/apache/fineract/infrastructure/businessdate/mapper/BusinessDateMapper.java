@@ -21,14 +21,15 @@ package org.apache.fineract.infrastructure.businessdate.mapper;
 import java.util.List;
 import org.apache.fineract.infrastructure.businessdate.data.BusinessDateData;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDate;
+import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 
-@Mapper(componentModel = "spring")
+@Mapper(config = MapstructMapperConfig.class)
 public interface BusinessDateMapper {
 
-    @Mappings({ @Mapping(target = "businessDateType", source = "source.type"), @Mapping(target = "date", source = "source.date") })
+    @Mappings({ @Mapping(target = "description", source = "source.type.description") })
     BusinessDateData map(BusinessDate source);
 
     List<BusinessDateData> map(List<BusinessDate> sources);

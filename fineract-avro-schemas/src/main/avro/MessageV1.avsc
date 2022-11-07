@@ -1,0 +1,57 @@
+{
+    "name": "MessageV1",
+    "namespace": "org.apache.fineract.avro",
+    "type": "record",
+    "fields": [
+        {
+            "name": "id",
+            "doc": "The ID of the message to be sent",
+            "type": "int"
+        },
+        {
+            "name": "source",
+            "doc": "A unique identifier of the source service",
+            "type": "string"
+        },
+        {
+            "name": "type",
+            "doc": "The type of event the payload refers to. For example LoanApprovedBusinessEvent",
+            "type": "string"
+        },
+        {
+            "name": "category",
+            "doc": "The category of event the payload refers to. For example LOAN",
+            "type": "string"
+        },
+        {
+            "name": "createdAt",
+            "doc": "The UTC time of when the event has been raised; in ISO_LOCAL_DATE_TIME format. For example 2011-12-03T10:15:30",
+            "type": "string"
+        },
+        {
+            "name": "businessDate",
+            "doc": "The business date when the event has been raised; in ISO_LOCAL_DATE format. For example 2011-12-03",
+            "type": "string"
+        },
+        {
+            "name": "tenantId",
+            "doc": "The tenantId that the event has been sent from. For example default",
+            "type": "string"
+        },
+        {
+            "name": "idempotencyKey",
+            "doc": "The idempotency key for this particular event for consumer de-duplication",
+            "type": "string"
+        },
+        {
+            "name": "dataschema",
+            "doc": "The fully qualified name of the schema of the event payload. For example org.apache.fineract.avro.loan.v1.LoanAccountDataV1",
+            "type": "string"
+        },
+        {
+            "name": "data",
+            "doc": "The payload data serialized into Avro bytes",
+            "type": "bytes"
+        }
+    ]
+}

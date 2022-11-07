@@ -20,8 +20,6 @@ package org.apache.fineract.infrastructure.hooks.processor;
 
 import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.apiKeyName;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -54,7 +52,7 @@ public class TwilioHookProcessor implements HookProcessor {
     public void process(final Hook hook, final String payload, final String entityName, final String actionName,
             final FineractContext context) throws IOException {
 
-        final SmsProviderData smsProviderData = new SmsProviderData(hook.getHookConfig());
+        final SmsProviderData smsProviderData = new SmsProviderData(hook.getConfig());
 
         sendRequest(smsProviderData, payload, entityName, actionName, hook, context);
     }
@@ -80,11 +78,11 @@ public class TwilioHookProcessor implements HookProcessor {
         }
 
         if (apiKey != null && !apiKey.equals("")) {
-            JsonObject json = null;
+            JsonObject json;
             if (hook.getUgdTemplate() != null) {
                 entityName = "sms";
                 actionName = "send";
-                json = processUgdTemplate(payload, hook, context.getAuthTokenContext());
+                json = processUgdTemplate(payload, hook);
                 if (json == null) {
                     return;
                 }
@@ -96,8 +94,7 @@ public class TwilioHookProcessor implements HookProcessor {
         }
     }
 
-    private JsonObject processUgdTemplate(final String payload, final Hook hook, final String authToken)
-            throws JsonParseException, JsonMappingException, IOException {
+    private JsonObject processUgdTemplate(final String payload, final Hook hook) throws IOException {
         JsonObject json = null;
         @SuppressWarnings("unchecked")
         final HashMap<String, Object> map = new ObjectMapper().readValue(payload, HashMap.class);
@@ -107,7 +104,6 @@ public class TwilioHookProcessor implements HookProcessor {
             final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
             final String mobileNo = client.mobileNo();
             if (mobileNo != null && !mobileNo.isEmpty()) {
-                this.templateMergeService.setAuthToken(authToken);
                 final String compiledMessage = this.templateMergeService.compile(hook.getUgdTemplate(), map).replace("<p>", "")
                         .replace("</p>", "");
                 final Map<String, String> jsonMap = new HashMap<>();

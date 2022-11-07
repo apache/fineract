@@ -122,7 +122,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
         Collection<FineractEntityToEntityMappingData> entityAccessData = null;
         GetOneEntityMapper mapper = new GetOneEntityMapper();
 
-        if (includeAllSubOffices && firstEntityType.getTable().equals("m_office")) {
+        if (includeAllSubOffices && firstEntityType.getTableName().equals("m_office")) {
             sql += " where firstentity.hierarchy like ? order by firstEntity.hierarchy";
             entityAccessData = this.jdbcTemplate.query(sql, mapper, new Object[] { fromEntityId, fromEntityId, hierarchySearchString });
         } else {
@@ -147,7 +147,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
         FineractEntityType firstEntityType = FineractEntityType.OFFICE;
         FineractEntityRelation fineractEntityRelation = fineractEntityRelationRepository
-                .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS.toStr());
+                .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS.getStr());
         Long relId = fineractEntityRelation.getId();
         return getSQLQueryInClause_WithListOfIDsForEntityAccess(firstEntityType, relId, officeId, includeAllOffices);
     }
@@ -157,7 +157,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
         FineractEntityType firstEntityType = FineractEntityType.OFFICE;
         FineractEntityRelation fineractEntityRelation = fineractEntityRelationRepository
-                .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_SAVINGS_PRODUCTS.toStr());
+                .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_SAVINGS_PRODUCTS.getStr());
         Long relId = fineractEntityRelation.getId();
 
         return getSQLQueryInClause_WithListOfIDsForEntityAccess(firstEntityType, relId, officeId, includeAllOffices);
@@ -168,7 +168,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
         FineractEntityType firstEntityType = FineractEntityType.OFFICE;
         FineractEntityRelation fineractEntityRelation = fineractEntityRelationRepository
-                .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_CHARGES.toStr());
+                .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_CHARGES.getStr());
         Long relId = fineractEntityRelation.getId();
 
         return getSQLQueryInClause_WithListOfIDsForEntityAccess(firstEntityType, relId, officeId, includeAllOffices);

@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.savings.data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
+import lombok.Getter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -35,6 +36,7 @@ import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 /**
  * Immutable data object representing a Recurring Deposit account.
  */
+@Getter
 public final class RecurringDepositAccountData extends DepositAccountData {
 
     // additional fields
@@ -602,4 +604,11 @@ public final class RecurringDepositAccountData extends DepositAccountData {
         return new HashCodeBuilder(17, 37).append(this.id).append(this.accountNo).toHashCode();
     }
 
+    public boolean isIsMandatoryDeposit() {
+        return this.isMandatoryDeposit;
+    }
+
+    public boolean isIsCalendarInherited() {
+        return this.isCalendarInherited;
+    }
 }

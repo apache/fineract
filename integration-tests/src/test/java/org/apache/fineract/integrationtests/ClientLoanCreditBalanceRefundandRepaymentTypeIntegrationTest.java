@@ -153,7 +153,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
 
         LOG.info("-------------------------------DISBURSE LOAN -------------------------------------------"); //
         // String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan(submitApproveDisburseDate, loanID, principal);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(submitApproveDisburseDate, loanID, principal);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
         return loanID;
     }
@@ -263,7 +263,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
                 disbursedLoanID, "resourceId");
         Assertions.assertNotNull(resourceId);
 
-        HashMap creditBalanceRefundMap = this.loanTransactionHelper.getLoanTransactionDetails(disbursedLoanID, resourceId);
+        HashMap creditBalanceRefundMap = (HashMap) this.loanTransactionHelper.getLoanTransactionDetails(disbursedLoanID, resourceId, "");
         Assertions.assertNotNull(creditBalanceRefundMap.get("externalId"));
         Assertions.assertEquals(creditBalanceRefundMap.get("externalId"), externalId, "Incorrect External Id Saved");
 
@@ -347,7 +347,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest {
         HashMap loanStatusHashMap = (HashMap) this.loanTransactionHelper.makeRepaymentTypePayment(repaymentTransactionType,
                 "06 January 2022", 200.00f, this.disbursedLoanID, "");
         Integer newTransactionId = (Integer) loanStatusHashMap.get("resourceId");
-        loanStatusHashMap = this.loanTransactionHelper.getLoanTransactionDetails(this.disbursedLoanID, newTransactionId);
+        loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanTransactionDetails(this.disbursedLoanID, newTransactionId, "");
 
         HashMap typeMap = (HashMap) loanStatusHashMap.get("type");
         Boolean isTypeCorrect = (Boolean) typeMap.get(repaymentTransactionType);

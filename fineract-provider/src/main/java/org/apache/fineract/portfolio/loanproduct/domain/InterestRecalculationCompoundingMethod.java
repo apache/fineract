@@ -50,8 +50,7 @@ public enum InterestRecalculationCompoundingMethod {
     }
 
     public static InterestRecalculationCompoundingMethod fromInt(final Integer ruleTypeValue) {
-        final InterestRecalculationCompoundingMethod type = intToEnumMap.get(ruleTypeValue);
-        return type;
+        return intToEnumMap.get(ruleTypeValue);
     }
 
     InterestRecalculationCompoundingMethod(final Integer value, final String code) {

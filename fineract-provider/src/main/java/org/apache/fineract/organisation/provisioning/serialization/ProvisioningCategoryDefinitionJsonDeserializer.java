@@ -39,11 +39,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProvisioningCategoryDefinitionJsonDeserializer {
 
+    public static final String CATEGORYNAME = "categoryname";
+    public static final String CATEGORYDESCRIPTION = "categorydescription";
+    public static final String PROVISIONINGCATEGORIES = "provisioningcategories";
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("categoryname", "categorydescription"));
-
+    private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList(CATEGORYNAME, CATEGORYDESCRIPTION));
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -55,15 +57,17 @@ public class ProvisioningCategoryDefinitionJsonDeserializer {
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
         }
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("provisioningcategories");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(PROVISIONINGCATEGORIES);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final String name = this.fromApiJsonHelper.extractStringNamed("categoryname", element);
-        baseDataValidator.reset().parameter("categoryname").value(name).notBlank().notExceedingLengthOf(100);
+        final String name = this.fromApiJsonHelper.extractStringNamed(CATEGORYNAME, element);
+        baseDataValidator.reset().parameter(CATEGORYNAME).value(name).notBlank().notExceedingLengthOf(100);
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
@@ -73,16 +77,18 @@ public class ProvisioningCategoryDefinitionJsonDeserializer {
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
         }
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("provisioningcategories");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(PROVISIONINGCATEGORIES);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        if (this.fromApiJsonHelper.parameterExists("categoryname", element)) {
-            final String categoryName = this.fromApiJsonHelper.extractStringNamed("categoryname", element);
-            baseDataValidator.reset().parameter("categoryname").value(categoryName).notBlank().notExceedingLengthOf(100);
+        if (this.fromApiJsonHelper.parameterExists(CATEGORYNAME, element)) {
+            final String categoryName = this.fromApiJsonHelper.extractStringNamed(CATEGORYNAME, element);
+            baseDataValidator.reset().parameter(CATEGORYNAME).value(categoryName).notBlank().notExceedingLengthOf(100);
         }
 
         if (!dataValidationErrors.isEmpty()) {

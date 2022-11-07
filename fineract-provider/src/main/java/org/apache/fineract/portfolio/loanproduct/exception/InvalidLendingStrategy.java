@@ -26,6 +26,6 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 public class InvalidLendingStrategy extends AbstractPlatformDomainRuleException {
 
     public InvalidLendingStrategy(final Integer strategyId) {
-        super("error.msg.unsupported.lending.strategy", "Stratagy code [" + strategyId + "] passed is not valid.");
+        super("error.msg.unsupported.lending.strategy", "Strategy code [" + strategyId + "] passed is not valid.");
     }
 }

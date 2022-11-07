@@ -18,22 +18,20 @@
  */
 package org.apache.fineract.infrastructure.survey.data;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+
 /**
  * Created by Cieyou on 3/12/14.
  */
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class LikelihoodData {
 
-    final long resourceId;
-    final String likeliHoodName;
-    final String likeliHoodCode;
-    final long enabled;
-
-    public LikelihoodData(final long resourceId, final String likeliHoodName, final String likeliHoodCode, final long enabled) {
-        this.resourceId = resourceId;
-        this.likeliHoodName = likeliHoodName;
-        this.likeliHoodCode = likeliHoodCode;
-        this.enabled = enabled;
-
-    }
-
+    long resourceId;
+    String likeliHoodName;
+    String likeliHoodCode;
+    long enabled;
 }

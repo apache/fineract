@@ -18,12 +18,15 @@
  */
 package org.apache.fineract.infrastructure.jobs.data;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class SchedulerDetailData {
 
     @SuppressWarnings("unused")
-    private final boolean active;
-
-    public SchedulerDetailData(final boolean active) {
-        this.active = active;
-    }
+    private boolean active;
 }

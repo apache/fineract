@@ -26,6 +26,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class LoanChargeNotFoundException extends AbstractPlatformResourceNotFoundException {
 
+    public LoanChargeNotFoundException() {
+        super("error.msg.loanCharge.invalid", "Loan charge cannot be found");
+    }
+
     public LoanChargeNotFoundException(final Long id) {
         super("error.msg.loanCharge.id.invalid", "Loan charge with identifier " + id + " does not exist", id);
     }

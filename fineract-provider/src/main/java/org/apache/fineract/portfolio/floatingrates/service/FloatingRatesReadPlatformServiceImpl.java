@@ -23,7 +23,7 @@ import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateData;
@@ -106,9 +106,10 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
         private final StringBuilder sqlQuery = new StringBuilder().append("rate.id as id, ").append("rate.name as name, ")
                 .append("rate.is_base_lending_rate as isBaseLendingRate, ").append("rate.is_active as isActive, ")
                 .append("crappu.username as createdBy, ").append("rate.created_date as createdOn, ")
-                .append("moappu.username as modifiedBy, ").append("rate.lastmodified_date as modifiedOn ")
-                .append("FROM m_floating_rates as rate ").append("LEFT JOIN m_appuser as crappu on rate.createdby_id = crappu.id ")
-                .append("LEFT JOIN m_appuser as moappu on rate.lastmodifiedby_id = moappu.id ");
+                .append("rate.created_on_utc as createdOnUTC, ").append("moappu.username as modifiedBy, ")
+                .append("rate.lastmodified_date as modifiedOn, ").append("rate.last_modified_on_utc as modifiedOnUTC ")
+                .append("FROM m_floating_rates as rate ").append("LEFT JOIN m_appuser as crappu on rate.created_by = crappu.id ")
+                .append("LEFT JOIN m_appuser as moappu on rate.last_modified_by = moappu.id ");
 
         FloatingRateRowMapper(final boolean addRatePeriods) {
             this.addRatePeriods = addRatePeriods;
@@ -121,15 +122,19 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
             final boolean isBaseLendingRate = rs.getBoolean("isBaseLendingRate");
             final boolean isActive = rs.getBoolean("isActive");
             final String createdBy = rs.getString("createdBy");
-            final LocalDate createdOn = JdbcSupport.getLocalDate(rs, "createdOn");
+            final OffsetDateTime createdOnLocal = JdbcSupport.getOffsetDateTime(rs, "createdOn");
+            final OffsetDateTime createdOnUtc = JdbcSupport.getOffsetDateTime(rs, "createdOnUTC");
             final String modifiedBy = rs.getString("modifiedBy");
-            final LocalDate modifiedOn = JdbcSupport.getLocalDate(rs, "modifiedOn");
+            final OffsetDateTime modifiedOnLocal = JdbcSupport.getOffsetDateTime(rs, "modifiedOn");
+            final OffsetDateTime modifiedOnUtc = JdbcSupport.getOffsetDateTime(rs, "modifiedOnUTC");
             List<FloatingRatePeriodData> ratePeriods = null;
+            final OffsetDateTime createdOn = createdOnUtc != null ? createdOnUtc : createdOnLocal;
+            final OffsetDateTime modifiedOn = modifiedOnUtc != null ? modifiedOnUtc : modifiedOnLocal;
             if (addRatePeriods) {
                 FloatingRatePeriodRowMapper ratePeriodMapper = new FloatingRatePeriodRowMapper();
                 final String sql = "select " + ratePeriodMapper.schema()
                         + " where period.is_active = true and period.floating_rates_id = ? " + " order by period.from_date desc ";
-                ratePeriods = jdbcTemplate.query(sql, ratePeriodMapper, new Object[] { id }); // NOSONAR
+                ratePeriods = jdbcTemplate.query(sql, ratePeriodMapper, id); // NOSONAR
             }
             return new FloatingRateData(id, name, isBaseLendingRate, isActive, createdBy, createdOn, modifiedBy, modifiedOn, ratePeriods,
                     null);
@@ -146,10 +151,11 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
                 .append("period.interest_rate as interestRate, ")
                 .append("period.is_differential_to_base_lending_rate as isDifferentialToBaseLendingRate, ")
                 .append("period.is_active as isActive, ").append("crappu.username as createdBy, ")
-                .append("period.created_date as createdOn, ").append("moappu.username as modifiedBy, ")
-                .append("period.lastmodified_date as modifiedOn ").append("FROM m_floating_rates_periods as period ")
-                .append("LEFT JOIN m_appuser as crappu on period.createdby_id = crappu.id ")
-                .append("LEFT JOIN m_appuser as moappu on period.lastmodifiedby_id = moappu.id ");
+                .append("period.created_date as createdOn, ").append("period.created_on_utc as createdOnUTC, ")
+                .append("moappu.username as modifiedBy, ").append("period.lastmodified_date as modifiedOn, ")
+                .append("period.last_modified_on_utc as modifiedOnUTC ").append("FROM m_floating_rates_periods as period ")
+                .append("LEFT JOIN m_appuser as crappu on period.created_by = crappu.id ")
+                .append("LEFT JOIN m_appuser as moappu on period.last_modified_by = moappu.id ");
 
         @Override
         public FloatingRatePeriodData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
@@ -159,9 +165,13 @@ public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPl
             final boolean isDifferentialToBaseLendingRate = rs.getBoolean("isDifferentialToBaseLendingRate");
             final boolean isActive = rs.getBoolean("isActive");
             final String createdBy = rs.getString("createdBy");
-            final LocalDateTime createdOn = JdbcSupport.getLocalDateTime(rs, "createdOn");
+            final OffsetDateTime createdOnLocal = JdbcSupport.getOffsetDateTime(rs, "createdOn");
+            final OffsetDateTime createdOnUtc = JdbcSupport.getOffsetDateTime(rs, "createdOnUTC");
             final String modifiedBy = rs.getString("modifiedBy");
-            final LocalDateTime modifiedOn = JdbcSupport.getLocalDateTime(rs, "modifiedOn");
+            final OffsetDateTime modifiedOnLocal = JdbcSupport.getOffsetDateTime(rs, "modifiedOn");
+            final OffsetDateTime modifiedOnUtc = JdbcSupport.getOffsetDateTime(rs, "modifiedOnUTC");
+            final OffsetDateTime createdOn = createdOnUtc != null ? createdOnUtc : createdOnLocal;
+            final OffsetDateTime modifiedOn = modifiedOnUtc != null ? modifiedOnUtc : modifiedOnLocal;
             return new FloatingRatePeriodData(id, fromDate, interestRate, isDifferentialToBaseLendingRate, isActive, createdBy, createdOn,
                     modifiedBy, modifiedOn);
         }

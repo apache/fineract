@@ -42,11 +42,22 @@ import org.springframework.stereotype.Component;
 @Component
 public final class StaffCommandFromApiJsonDeserializer {
 
+    public static final String FIRSTNAME = "firstname";
+    public static final String LASTNAME = "lastname";
+    public static final String OFFICE_ID = "officeId";
+    public static final String EXTERNAL_ID = "externalId";
+    public static final String MOBILE_NO = "mobileNo";
+    public static final String IS_LOAN_OFFICER = "isLoanOfficer";
+    public static final String IS_ACTIVE = "isActive";
+    public static final String JOINING_DATE = "joiningDate";
+    public static final String DATE_FORMAT = "dateFormat";
+    public static final String LOCALE = "locale";
+    public static final String FORCE_STATUS = "forceStatus";
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("firstname", "lastname", "officeId", "externalId",
-            "mobileNo", "isLoanOfficer", "isActive", "joiningDate", "dateFormat", "locale", "forceStatus"));
+    private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList(FIRSTNAME, LASTNAME, OFFICE_ID, EXTERNAL_ID,
+            MOBILE_NO, IS_LOAN_OFFICER, IS_ACTIVE, JOINING_DATE, DATE_FORMAT, LOCALE, FORCE_STATUS));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -64,22 +75,24 @@ public final class StaffCommandFromApiJsonDeserializer {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("staff");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final Long officeId = this.fromApiJsonHelper.extractLongNamed("officeId", element);
-        baseDataValidator.reset().parameter("officeId").value(officeId).notNull().integerGreaterThanZero();
+        final Long officeId = this.fromApiJsonHelper.extractLongNamed(OFFICE_ID, element);
+        baseDataValidator.reset().parameter(OFFICE_ID).value(officeId).notNull().integerGreaterThanZero();
 
-        final String firstname = this.fromApiJsonHelper.extractStringNamed("firstname", element);
-        baseDataValidator.reset().parameter("firstname").value(firstname).notBlank().notExceedingLengthOf(50);
+        final String firstname = this.fromApiJsonHelper.extractStringNamed(FIRSTNAME, element);
+        baseDataValidator.reset().parameter(FIRSTNAME).value(firstname).notBlank().notExceedingLengthOf(50);
 
-        final String lastname = this.fromApiJsonHelper.extractStringNamed("lastname", element);
-        baseDataValidator.reset().parameter("lastname").value(lastname).notBlank().notExceedingLengthOf(50);
+        final String lastname = this.fromApiJsonHelper.extractStringNamed(LASTNAME, element);
+        baseDataValidator.reset().parameter(LASTNAME).value(lastname).notBlank().notExceedingLengthOf(50);
 
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.mobileNoParamName, element)) {
             final String mobileNo = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.mobileNoParamName, element);
@@ -87,32 +100,32 @@ public final class StaffCommandFromApiJsonDeserializer {
                     .notExceedingLengthOf(50);
         }
 
-        if (this.fromApiJsonHelper.parameterExists("isLoanOfficer", element)) {
-            final String loanOfficerFlag = this.fromApiJsonHelper.extractStringNamed("isLoanOfficer", element);
-            baseDataValidator.reset().parameter("isLoanOfficer").trueOrFalseRequired(loanOfficerFlag);
+        if (this.fromApiJsonHelper.parameterExists(IS_LOAN_OFFICER, element)) {
+            final String loanOfficerFlag = this.fromApiJsonHelper.extractStringNamed(IS_LOAN_OFFICER, element);
+            baseDataValidator.reset().parameter(IS_LOAN_OFFICER).trueOrFalseRequired(loanOfficerFlag);
         }
 
-        if (this.fromApiJsonHelper.parameterExists("isActive", element)) {
-            final String activeFlag = this.fromApiJsonHelper.extractStringNamed("isActive", element);
-            baseDataValidator.reset().parameter("isActive").trueOrFalseRequired(activeFlag);
+        if (this.fromApiJsonHelper.parameterExists(IS_ACTIVE, element)) {
+            final String activeFlag = this.fromApiJsonHelper.extractStringNamed(IS_ACTIVE, element);
+            baseDataValidator.reset().parameter(IS_ACTIVE).trueOrFalseRequired(activeFlag);
         }
 
-        final LocalDate joiningDate = this.fromApiJsonHelper.extractLocalDateNamed("joiningDate", element);
-        baseDataValidator.reset().parameter("joiningDate").value(joiningDate).notNull();
+        final LocalDate joiningDate = this.fromApiJsonHelper.extractLocalDateNamed(JOINING_DATE, element);
+        baseDataValidator.reset().parameter(JOINING_DATE).value(joiningDate).notNull();
 
-        if (this.fromApiJsonHelper.parameterExists("dateFormat", element)) {
-            final String dateFormat = this.fromApiJsonHelper.extractStringNamed("dateFormat", element);
-            baseDataValidator.reset().parameter("dateFormat").value(dateFormat).notBlank();
+        if (this.fromApiJsonHelper.parameterExists(DATE_FORMAT, element)) {
+            final String dateFormat = this.fromApiJsonHelper.extractStringNamed(DATE_FORMAT, element);
+            baseDataValidator.reset().parameter(DATE_FORMAT).value(dateFormat).notBlank();
         }
 
-        if (this.fromApiJsonHelper.parameterExists("locale", element)) {
-            final String locale = this.fromApiJsonHelper.extractStringNamed("locale", element);
-            baseDataValidator.reset().parameter("locale").value(locale).notBlank();
+        if (this.fromApiJsonHelper.parameterExists(LOCALE, element)) {
+            final String locale = this.fromApiJsonHelper.extractStringNamed(LOCALE, element);
+            baseDataValidator.reset().parameter(LOCALE).value(locale).notBlank();
         }
 
-        if (this.fromApiJsonHelper.parameterExists("externalId", element)) {
-            final String externalId = this.fromApiJsonHelper.extractStringNamed("externalId", element);
-            baseDataValidator.reset().parameter("externalId").value(externalId).notBlank().notExceedingLengthOf(100);
+        if (this.fromApiJsonHelper.parameterExists(EXTERNAL_ID, element)) {
+            final String externalId = this.fromApiJsonHelper.extractStringNamed(EXTERNAL_ID, element);
+            baseDataValidator.reset().parameter(EXTERNAL_ID).value(externalId).notBlank().notExceedingLengthOf(100);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -127,26 +140,28 @@ public final class StaffCommandFromApiJsonDeserializer {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("staff");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
-        if (this.fromApiJsonHelper.parameterExists("officeId", element)) {
-            final Long officeId = this.fromApiJsonHelper.extractLongNamed("officeId", element);
-            baseDataValidator.reset().parameter("officeId").value(officeId).notNull().integerGreaterThanZero();
+        if (this.fromApiJsonHelper.parameterExists(OFFICE_ID, element)) {
+            final Long officeId = this.fromApiJsonHelper.extractLongNamed(OFFICE_ID, element);
+            baseDataValidator.reset().parameter(OFFICE_ID).value(officeId).notNull().integerGreaterThanZero();
         }
 
-        if (this.fromApiJsonHelper.parameterExists("firstname", element)) {
-            final String firstname = this.fromApiJsonHelper.extractStringNamed("firstname", element);
-            baseDataValidator.reset().parameter("firstname").value(firstname).notBlank().notExceedingLengthOf(50);
+        if (this.fromApiJsonHelper.parameterExists(FIRSTNAME, element)) {
+            final String firstname = this.fromApiJsonHelper.extractStringNamed(FIRSTNAME, element);
+            baseDataValidator.reset().parameter(FIRSTNAME).value(firstname).notBlank().notExceedingLengthOf(50);
         }
 
-        if (this.fromApiJsonHelper.parameterExists("lastname", element)) {
-            final String lastname = this.fromApiJsonHelper.extractStringNamed("lastname", element);
-            baseDataValidator.reset().parameter("lastname").value(lastname).notBlank().notExceedingLengthOf(50);
+        if (this.fromApiJsonHelper.parameterExists(LASTNAME, element)) {
+            final String lastname = this.fromApiJsonHelper.extractStringNamed(LASTNAME, element);
+            baseDataValidator.reset().parameter(LASTNAME).value(lastname).notBlank().notExceedingLengthOf(50);
         }
 
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.mobileNoParamName, element)) {
@@ -154,21 +169,21 @@ public final class StaffCommandFromApiJsonDeserializer {
             baseDataValidator.reset().parameter(ClientApiConstants.mobileNoParamName).value(mobileNo).notExceedingLengthOf(50);
         }
 
-        if (this.fromApiJsonHelper.parameterExists("isLoanOfficer", element)) {
-            final String loanOfficerFlag = this.fromApiJsonHelper.extractStringNamed("isLoanOfficer", element);
-            baseDataValidator.reset().parameter("isLoanOfficer").trueOrFalseRequired(loanOfficerFlag);
+        if (this.fromApiJsonHelper.parameterExists(IS_LOAN_OFFICER, element)) {
+            final String loanOfficerFlag = this.fromApiJsonHelper.extractStringNamed(IS_LOAN_OFFICER, element);
+            baseDataValidator.reset().parameter(IS_LOAN_OFFICER).trueOrFalseRequired(loanOfficerFlag);
         }
 
-        if (this.fromApiJsonHelper.parameterExists("isActive", element)) {
-            final String activeFlagStr = this.fromApiJsonHelper.extractStringNamed("isActive", element);
-            baseDataValidator.reset().parameter("isActive").trueOrFalseRequired(activeFlagStr);
+        if (this.fromApiJsonHelper.parameterExists(IS_ACTIVE, element)) {
+            final String activeFlagStr = this.fromApiJsonHelper.extractStringNamed(IS_ACTIVE, element);
+            baseDataValidator.reset().parameter(IS_ACTIVE).trueOrFalseRequired(activeFlagStr);
 
-            final Boolean activeFlag = this.fromApiJsonHelper.extractBooleanNamed("isActive", element);
+            final Boolean activeFlag = this.fromApiJsonHelper.extractBooleanNamed(IS_ACTIVE, element);
 
             // Need to add here check to see if any clients, group, account and
             // loans are assigned to this staff if staff is being set to
             // inactive --LJB
-            final Boolean forceStatus = this.fromApiJsonHelper.extractBooleanNamed("forceStatus", element);
+            final Boolean forceStatus = this.fromApiJsonHelper.extractBooleanNamed(FORCE_STATUS, element);
             if ((!activeFlag && forceStatus == null) || (!activeFlag && forceStatus)) {
                 Object[] result = staffReadPlatformService.hasAssociatedItems(staffId);
 
@@ -177,27 +192,27 @@ public final class StaffCommandFromApiJsonDeserializer {
                 }
 
             }
-            baseDataValidator.reset().parameter("isActive").value(activeFlag).notNull();
+            baseDataValidator.reset().parameter(IS_ACTIVE).value(activeFlag).notNull();
         }
 
-        if (this.fromApiJsonHelper.parameterExists("joiningDate", element)) {
-            final LocalDate joiningDate = this.fromApiJsonHelper.extractLocalDateNamed("joiningDate", element);
-            baseDataValidator.reset().parameter("joiningDate").value(joiningDate).notNull();
+        if (this.fromApiJsonHelper.parameterExists(JOINING_DATE, element)) {
+            final LocalDate joiningDate = this.fromApiJsonHelper.extractLocalDateNamed(JOINING_DATE, element);
+            baseDataValidator.reset().parameter(JOINING_DATE).value(joiningDate).notNull();
         }
 
-        if (this.fromApiJsonHelper.parameterExists("dateFormat", element)) {
-            final String dateFormat = this.fromApiJsonHelper.extractStringNamed("dateFormat", element);
-            baseDataValidator.reset().parameter("dateFormat").value(dateFormat).notBlank();
+        if (this.fromApiJsonHelper.parameterExists(DATE_FORMAT, element)) {
+            final String dateFormat = this.fromApiJsonHelper.extractStringNamed(DATE_FORMAT, element);
+            baseDataValidator.reset().parameter(DATE_FORMAT).value(dateFormat).notBlank();
         }
 
-        if (this.fromApiJsonHelper.parameterExists("locale", element)) {
-            final String locale = this.fromApiJsonHelper.extractStringNamed("locale", element);
-            baseDataValidator.reset().parameter("locale").value(locale).notBlank();
+        if (this.fromApiJsonHelper.parameterExists(LOCALE, element)) {
+            final String locale = this.fromApiJsonHelper.extractStringNamed(LOCALE, element);
+            baseDataValidator.reset().parameter(LOCALE).value(locale).notBlank();
         }
 
-        if (this.fromApiJsonHelper.parameterExists("externalId", element)) {
-            final String externalId = this.fromApiJsonHelper.extractStringNamed("externalId", element);
-            baseDataValidator.reset().parameter("externalId").value(externalId).notBlank().notExceedingLengthOf(100);
+        if (this.fromApiJsonHelper.parameterExists(EXTERNAL_ID, element)) {
+            final String externalId = this.fromApiJsonHelper.extractStringNamed(EXTERNAL_ID, element);
+            baseDataValidator.reset().parameter(EXTERNAL_ID).value(externalId).notBlank().notExceedingLengthOf(100);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

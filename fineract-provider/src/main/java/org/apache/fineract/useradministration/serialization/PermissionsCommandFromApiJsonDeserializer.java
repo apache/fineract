@@ -42,7 +42,7 @@ public final class PermissionsCommandFromApiJsonDeserializer extends AbstractFro
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("permissions"));
+    private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList("permissions"));
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -58,7 +58,7 @@ public final class PermissionsCommandFromApiJsonDeserializer extends AbstractFro
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         return this.fromApiJsonHelper.fromJson(json, PermissionsCommand.class);
     }

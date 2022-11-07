@@ -68,7 +68,7 @@ public class CodesApiResource {
      * The set of parameters that are supported in response for {@link CodeData}
      */
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "systemDefined"));
-    private final String resourceNameForPermissions = "CODE";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "CODE";
 
     private final PlatformSecurityContext context;
     private final CodeReadPlatformService readPlatformService;
@@ -95,7 +95,7 @@ public class CodesApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = CodesApiResourceSwagger.GetCodesResponse.class)))) })
     public String retrieveCodes(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final Collection<CodeData> codes = this.readPlatformService.retrieveAllCodes();
 

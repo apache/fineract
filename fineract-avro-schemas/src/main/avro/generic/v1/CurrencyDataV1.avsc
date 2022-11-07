@@ -1,0 +1,63 @@
+{
+    "name": "CurrencyDataV1",
+    "namespace": "org.apache.fineract.avro.generic.v1",
+    "type": "record",
+    "fields": [
+        {
+            "default": null,
+            "name": "code",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "name",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "decimalPlaces",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "default": null,
+            "name": "inMultiplesOf",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "default": null,
+            "name": "displaySymbol",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "nameCode",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "displayLabel",
+            "type": [
+                "null",
+                "string"
+            ]
+        }
+    ]
+}

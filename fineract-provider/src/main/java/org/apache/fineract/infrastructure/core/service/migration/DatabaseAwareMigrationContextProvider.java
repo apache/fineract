@@ -27,7 +27,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class DatabaseAwareMigrationContextProvider {
 
-    private final Map<DatabaseType, String> contextMapping = Map.of(DatabaseType.MYSQL, "mysql", DatabaseType.POSTGRESQL, "postgresql");
+    private static final Map<DatabaseType, String> CONTEXT_MAPPING = Map.of(DatabaseType.MYSQL, "mysql", DatabaseType.POSTGRESQL,
+            "postgresql");
 
     private final DatabaseTypeResolver databaseTypeResolver;
 
@@ -38,7 +39,7 @@ public class DatabaseAwareMigrationContextProvider {
 
     public String provide() {
         DatabaseType databaseType = databaseTypeResolver.databaseType();
-        String context = contextMapping.get(databaseType);
+        String context = CONTEXT_MAPPING.get(databaseType);
         if (context == null) {
             throw new IllegalStateException("Database is not supported");
         }

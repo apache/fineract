@@ -38,12 +38,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.portfolio.address.data.AddressData;
 import org.apache.fineract.portfolio.address.data.FieldConfigurationData;
 import org.apache.fineract.portfolio.address.service.FieldConfigurationReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,30 +56,24 @@ import org.springframework.stereotype.Component;
         + "add regular expression for validation")
 public class EntityFieldConfigurationApiResources {
 
-    private final Set<String> responseDataParameters = new HashSet<>(
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList("clientAddressId", "client_id", "address_id", "address_type_id", "isActive", "fieldConfigurationId", "entity",
                     "table", "field", "is_enabled", "is_mandatory", "validation_regex"));
-    private final String resourceNameForPermissions = "Address";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "Address";
     private final PlatformSecurityContext context;
-    private final DefaultToApiJsonSerializer<AddressData> toApiJsonSerializer;
     private final FieldConfigurationReadPlatformService readPlatformServicefld;
     private final DefaultToApiJsonSerializer<FieldConfigurationData> toApiJsonSerializerfld;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
     public EntityFieldConfigurationApiResources(final PlatformSecurityContext context,
-            final DefaultToApiJsonSerializer<AddressData> toApiJsonSerializer,
             final FieldConfigurationReadPlatformService readPlatformServicefld,
             final DefaultToApiJsonSerializer<FieldConfigurationData> toApiJsonSerializerfld,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+            final ApiRequestParameterHelper apiRequestParameterHelper) {
         this.context = context;
-        this.toApiJsonSerializer = toApiJsonSerializer;
         this.readPlatformServicefld = readPlatformServicefld;
         this.toApiJsonSerializerfld = toApiJsonSerializerfld;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
 
     @GET
@@ -92,12 +84,12 @@ public class EntityFieldConfigurationApiResources {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EntityFieldConfigurationApiResourcesSwagger.GetFieldConfigurationEntityResponse.class)))) })
     public String getAddresses(@PathParam("entity") @Parameter(description = "entity") final String entityname,
             @Context final UriInfo uriInfo) {
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final Collection<FieldConfigurationData> fldconfig = this.readPlatformServicefld.retrieveFieldConfiguration(entityname);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializerfld.serialize(settings, fldconfig, this.responseDataParameters);
+        return this.toApiJsonSerializerfld.serialize(settings, fldconfig, RESPONSE_DATA_PARAMETERS);
 
     }
 

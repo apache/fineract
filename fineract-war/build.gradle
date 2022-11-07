@@ -63,6 +63,9 @@ distributions {
             from ("$rootDir/fineract-client/build/libs/") {
                 include 'fineract-client-*.jar'
             }
+            from ("$rootDir/fineract-avro-schemas/build/libs/") {
+                include 'fineract-avro-schemas-*.jar'
+            }
             from ("$rootDir/fineract-provider/build/libs/") {
                 include 'fineract-provider-*.jar'
                 exclude 'fineract-provider-*-plain.jar'
@@ -87,7 +90,7 @@ distributions {
         distributionBaseName = 'apache-fineract-src'
         contents {
             from "$rootDir/"
-            exclude '**/build' , '.git', '**/.gradle', '.github', '**/.settings', '**/.project', '**/.classpath', '.idea', 'out', '._.DS_Store', '.DS_Store', 'WebContent', '**/.externalToolbuilders', '.theia', '.gitpod.yml', '.travis.yml', 'LICENSE_RELEASE', 'NOTICE_RELEASE', '**/licenses', '*.class', '**/bin', '*.log', '.dockerignore', '**/.gitkeep'
+            exclude '**/build' , '.git', '**/.gradle', '.github', '**/.settings', '**/.project', '**/.classpath', '.idea', 'out', '._.DS_Store', '.DS_Store', 'WebContent', '**/.externalToolbuilders', '.theia', '.gitpod.yml', 'LICENSE_RELEASE', 'NOTICE_RELEASE', '**/licenses', '*.class', '**/bin', '*.log', '.dockerignore', '**/.gitkeep'
             rename ('LICENSE_SOURCE', 'LICENSE')
             rename ('NOTICE_SOURCE', 'NOTICE')
         }
@@ -101,4 +104,4 @@ distributions {
 binaryDistZip.enabled false
 srcDistZip.enabled false
 // NOTE: Gradle suggested these dependencies
-binaryDistTar.dependsOn(war, ':fineract-client:jar', ':fineract-provider:build', ':fineract-doc:doc')
+binaryDistTar.dependsOn(war, ':fineract-client:jar', ':fineract-avro-schemas:jar', ':fineract-provider:build', ':fineract-doc:doc')

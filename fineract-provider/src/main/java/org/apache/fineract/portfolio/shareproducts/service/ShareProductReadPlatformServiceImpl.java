@@ -45,7 +45,7 @@ import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.products.data.ProductData;
 import org.apache.fineract.portfolio.products.exception.ProductNotFoundException;
-import org.apache.fineract.portfolio.products.service.ProductReadPlatformService;
+import org.apache.fineract.portfolio.products.service.ShareProductReadPlatformService;
 import org.apache.fineract.portfolio.shareaccounts.service.SharesEnumerations;
 import org.apache.fineract.portfolio.shareproducts.data.ShareProductData;
 import org.apache.fineract.portfolio.shareproducts.data.ShareProductMarketPriceData;
@@ -56,7 +56,7 @@ import org.springframework.stereotype.Service;
 
 @Service(value = "shareReadPlatformService")
 @RequiredArgsConstructor
-public class ShareProductReadPlatformServiceImpl implements ProductReadPlatformService {
+public class ShareProductReadPlatformServiceImpl implements ShareProductReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final CurrencyReadPlatformService currencyReadPlatformService;

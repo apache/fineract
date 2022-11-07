@@ -54,6 +54,7 @@ import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateDTO;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRatePeriodData;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRate;
@@ -78,12 +79,14 @@ import org.apache.fineract.portfolio.rate.domain.Rate;
 public class LoanProduct extends AbstractPersistableCustom {
 
     @ManyToOne
-    @JoinColumn(name = "fund_id", nullable = true)
+    @JoinColumn(name = "fund_id")
     private Fund fund;
 
-    @ManyToOne
-    @JoinColumn(name = "loan_transaction_strategy_id", nullable = true)
-    private LoanTransactionProcessingStrategy transactionProcessingStrategy;
+    @Column(name = "loan_transaction_strategy_code", nullable = false)
+    private String transactionProcessingStrategyCode;
+
+    @Column(name = "loan_transaction_strategy_name")
+    private String transactionProcessingStrategyName;
 
     @Column(name = "name", nullable = false, unique = true)
     private String name;
@@ -118,36 +121,36 @@ public class LoanProduct extends AbstractPersistableCustom {
     private boolean useBorrowerCycle;
 
     @Embedded
-    private LoanProductTrancheDetails loanProducTrancheDetails;
+    private LoanProductTrancheDetails loanProductTrancheDetails;
 
-    @Column(name = "start_date", nullable = true)
+    @Column(name = "start_date")
     private LocalDate startDate;
 
-    @Column(name = "close_date", nullable = true)
+    @Column(name = "close_date")
     private LocalDate closeDate;
 
-    @Column(name = "external_id", length = 100, nullable = true, unique = true)
+    @Column(name = "external_id", length = 100, unique = true)
     private String externalId;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanProduct", orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<LoanProductBorrowerCycleVariations> borrowerCycleVariations = new HashSet<>();
 
-    @Column(name = "overdue_days_for_npa", nullable = true)
+    @Column(name = "overdue_days_for_npa")
     private Integer overdueDaysForNPA;
 
-    @Column(name = "min_days_between_disbursal_and_first_repayment", nullable = true)
+    @Column(name = "min_days_between_disbursal_and_first_repayment")
     private Integer minimumDaysBetweenDisbursalAndFirstRepayment;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", orphanRemoval = true, fetch = FetchType.EAGER)
     private LoanProductInterestRecalculationDetails productInterestRecalculationDetails;
 
     @Column(name = "hold_guarantee_funds")
     private boolean holdGuaranteeFunds;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", orphanRemoval = true, fetch = FetchType.EAGER)
     private LoanProductGuaranteeDetails loanProductGuaranteeDetails;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", orphanRemoval = true)
     private LoanProductConfigurableAttributes loanConfigurableAttributes;
 
     @Column(name = "principal_threshold_for_last_installment", scale = 2, precision = 5, nullable = false)
@@ -159,19 +162,19 @@ public class LoanProduct extends AbstractPersistableCustom {
     @Column(name = "can_define_fixed_emi_amount")
     private boolean canDefineInstallmentAmount;
 
-    @Column(name = "instalment_amount_in_multiples_of", nullable = true)
+    @Column(name = "instalment_amount_in_multiples_of")
     private Integer installmentAmountInMultiplesOf;
 
     @Column(name = "is_linked_to_floating_interest_rates", nullable = false)
     private boolean isLinkedToFloatingInterestRate;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", orphanRemoval = true, fetch = FetchType.EAGER)
     private LoanProductFloatingRates floatingRates;
 
     @Column(name = "allow_variabe_installments", nullable = false)
     private boolean allowVariabeInstallments;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", orphanRemoval = true, fetch = FetchType.EAGER)
     private LoanProductVariableInstallmentConfig variableInstallmentConfig;
 
     @Column(name = "sync_expected_with_disbursement_date")
@@ -180,7 +183,7 @@ public class LoanProduct extends AbstractPersistableCustom {
     @Column(name = "can_use_for_topup", nullable = false)
     private boolean canUseForTopup = false;
 
-    @Column(name = "fixed_principal_percentage_per_installment", scale = 2, precision = 5, nullable = true)
+    @Column(name = "fixed_principal_percentage_per_installment", scale = 2, precision = 5)
     private BigDecimal fixedPrincipalPercentagePerInstallment;
 
     @Column(name = "disallow_expected_disbursements", nullable = false)
@@ -189,13 +192,17 @@ public class LoanProduct extends AbstractPersistableCustom {
     @Column(name = "allow_approved_disbursed_amounts_over_applied", nullable = false)
     private boolean allowApprovedDisbursedAmountsOverApplied;
 
-    @Column(name = "over_applied_calculation_type", nullable = true)
+    @Column(name = "over_applied_calculation_type")
     private String overAppliedCalculationType;
 
-    @Column(name = "over_applied_number", nullable = true)
+    @Column(name = "over_applied_number")
     private Integer overAppliedNumber;
 
-    public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "delinquency_bucket_id")
+    private DelinquencyBucket delinquencyBucket;
+
+    public static LoanProduct assembleFromJson(final Fund fund, final String loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate,
             final List<Rate> productRates) {
 
@@ -284,7 +291,7 @@ public class LoanProduct extends AbstractPersistableCustom {
         final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations = new HashSet<>();
 
         if (useBorrowerCycle) {
-            populateBorrowerCyclevariations(command, loanProductBorrowerCycleVariations);
+            populateBorrowerCycleVariations(command, loanProductBorrowerCycleVariations);
         }
 
         final boolean multiDisburseLoan = command
@@ -346,24 +353,20 @@ public class LoanProduct extends AbstractPersistableCustom {
         final boolean syncExpectedWithDisbursementDate = command.booleanPrimitiveValueOfParameterNamed("syncExpectedWithDisbursementDate");
 
         final boolean canUseForTopup = command.parameterExists(LoanProductConstants.CAN_USE_FOR_TOPUP)
-                ? command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.CAN_USE_FOR_TOPUP)
-                : false;
+                && command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.CAN_USE_FOR_TOPUP);
 
         final boolean isEqualAmortization = command.parameterExists(LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM)
-                ? command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM)
-                : false;
+                && command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM);
 
         BigDecimal fixedPrincipalPercentagePerInstallment = command
                 .bigDecimalValueOfParameterNamed(LoanProductConstants.fixedPrincipalPercentagePerInstallmentParamName);
 
         final boolean disallowExpectedDisbursements = command.parameterExists(LoanProductConstants.DISALLOW_EXPECTED_DISBURSEMENTS)
-                ? command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.DISALLOW_EXPECTED_DISBURSEMENTS)
-                : false;
+                && command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.DISALLOW_EXPECTED_DISBURSEMENTS);
 
         final boolean allowApprovedDisbursedAmountsOverApplied = command
                 .parameterExists(LoanProductConstants.ALLOW_APPROVED_DISBURSED_AMOUNTS_OVER_APPLIED)
-                        ? command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ALLOW_APPROVED_DISBURSED_AMOUNTS_OVER_APPLIED)
-                        : false;
+                && command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ALLOW_APPROVED_DISBURSED_AMOUNTS_OVER_APPLIED);
 
         final String overAppliedCalculationType = command
                 .stringValueOfParameterNamedAllowingNull(LoanProductConstants.OVER_APPLIED_CALCULATION_TYPE);
@@ -398,11 +401,7 @@ public class LoanProduct extends AbstractPersistableCustom {
         }
     }
 
-    /**
-     * @param command
-     * @param loanProductBorrowerCycleVariations
-     */
-    private static void populateBorrowerCyclevariations(final JsonCommand command,
+    private static void populateBorrowerCycleVariations(final JsonCommand command,
             final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations) {
         assemblePrincipalVariations(command, loanProductBorrowerCycleVariations);
 
@@ -411,39 +410,27 @@ public class LoanProduct extends AbstractPersistableCustom {
         assembleInterestRateVariations(command, loanProductBorrowerCycleVariations);
     }
 
-    /**
-     * @param command
-     * @param loanProductBorrowerCycleVariations
-     */
     private static void assembleInterestRateVariations(final JsonCommand command,
             final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations) {
-        assembleVaritions(command, loanProductBorrowerCycleVariations, LoanProductParamType.INTERESTRATE.getValue(),
+        assembleVariations(command, loanProductBorrowerCycleVariations, LoanProductParamType.INTERESTRATE.getValue(),
                 LoanProductConstants.INTEREST_RATE_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME);
 
     }
 
-    /**
-     * @param command
-     * @param loanProductBorrowerCycleVariations
-     */
     private static void assembleRepaymentVariations(final JsonCommand command,
             final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations) {
-        assembleVaritions(command, loanProductBorrowerCycleVariations, LoanProductParamType.REPAYMENT.getValue(),
+        assembleVariations(command, loanProductBorrowerCycleVariations, LoanProductParamType.REPAYMENT.getValue(),
                 LoanProductConstants.NUMBER_OF_REPAYMENT_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME);
 
     }
 
-    /**
-     * @param command
-     * @param loanProductBorrowerCycleVariations
-     */
     private static void assemblePrincipalVariations(final JsonCommand command,
             final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations) {
-        assembleVaritions(command, loanProductBorrowerCycleVariations, LoanProductParamType.PRINCIPAL.getValue(),
+        assembleVariations(command, loanProductBorrowerCycleVariations, LoanProductParamType.PRINCIPAL.getValue(),
                 LoanProductConstants.PRINCIPAL_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME);
     }
 
-    private static void assembleVaritions(final JsonCommand command,
+    private static void assembleVariations(final JsonCommand command,
             final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations, Integer paramType,
             String variationParameterName) {
         if (command.parameterExists(variationParameterName)) {
@@ -492,11 +479,11 @@ public class LoanProduct extends AbstractPersistableCustom {
     private Map<String, Object> updateBorrowerCycleVariations(final JsonCommand command) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(20);
         List<Long> variationIds = fetchAllVariationIds();
-        updateBorrowerCycleVaritions(command, LoanProductParamType.PRINCIPAL.getValue(),
+        updateBorrowerCycleVariations(command, LoanProductParamType.PRINCIPAL.getValue(),
                 LoanProductConstants.PRINCIPAL_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME, actualChanges, variationIds);
-        updateBorrowerCycleVaritions(command, LoanProductParamType.INTERESTRATE.getValue(),
+        updateBorrowerCycleVariations(command, LoanProductParamType.INTERESTRATE.getValue(),
                 LoanProductConstants.INTEREST_RATE_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME, actualChanges, variationIds);
-        updateBorrowerCycleVaritions(command, LoanProductParamType.REPAYMENT.getValue(),
+        updateBorrowerCycleVariations(command, LoanProductParamType.REPAYMENT.getValue(),
                 LoanProductConstants.NUMBER_OF_REPAYMENT_VARIATIONS_FOR_BORROWER_CYCLE_PARAMETER_NAME, actualChanges, variationIds);
         for (Long id : variationIds) {
             this.borrowerCycleVariations.remove(fetchLoanProductBorrowerCycleVariationById(id));
@@ -512,7 +499,7 @@ public class LoanProduct extends AbstractPersistableCustom {
         return list;
     }
 
-    private void updateBorrowerCycleVaritions(final JsonCommand command, Integer paramType, String variationParameterName,
+    private void updateBorrowerCycleVariations(final JsonCommand command, Integer paramType, String variationParameterName,
             final Map<String, Object> actualChanges, List<Long> variationIds) {
         if (command.parameterExists(variationParameterName)) {
             final JsonArray variationArray = command.arrayOfParameterNamed(variationParameterName);
@@ -574,18 +561,8 @@ public class LoanProduct extends AbstractPersistableCustom {
         }
     }
 
-    private void clearVariations(LoanProductParamType paramType, boolean clearAll) {
-        if (clearAll) {
-            this.borrowerCycleVariations.clear();
-        } else {
-            Set<LoanProductBorrowerCycleVariations> remove = new HashSet<>();
-            for (LoanProductBorrowerCycleVariations borrowerCycleVariations : this.borrowerCycleVariations) {
-                if (paramType.equals(borrowerCycleVariations.getParamType())) {
-                    remove.add(borrowerCycleVariations);
-                }
-            }
-            this.borrowerCycleVariations.removeAll(remove);
-        }
+    private void clearVariations() {
+        this.borrowerCycleVariations.clear();
     }
 
     public LoanProduct() {
@@ -593,8 +570,8 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.loanProductMinMaxConstraints = null;
     }
 
-    public LoanProduct(final Fund fund, final LoanTransactionProcessingStrategy transactionProcessingStrategy, final String name,
-            final String shortName, final String description, final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
+    public LoanProduct(final Fund fund, final String transactionProcessingStrategyCode, final String name, final String shortName,
+            final String description, final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
             final BigDecimal defaultMinPrincipal, final BigDecimal defaultMaxPrincipal,
             final BigDecimal defaultNominalInterestRatePerPeriod, final BigDecimal defaultMinNominalInterestRatePerPeriod,
             final BigDecimal defaultMaxNominalInterestRatePerPeriod, final PeriodFrequencyType interestPeriodFrequencyType,
@@ -624,7 +601,7 @@ public class LoanProduct extends AbstractPersistableCustom {
             final boolean allowApprovedDisbursedAmountsOverApplied, final String overAppliedCalculationType,
             final Integer overAppliedNumber) {
         this.fund = fund;
-        this.transactionProcessingStrategy = transactionProcessingStrategy;
+        this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
         this.name = name.trim();
         this.shortName = shortName.trim();
         if (StringUtils.isNotBlank(description)) {
@@ -637,13 +614,13 @@ public class LoanProduct extends AbstractPersistableCustom {
             this.charges = charges;
         }
 
-        this.isLinkedToFloatingInterestRate = isLinkedToFloatingInterestRates == null ? false : isLinkedToFloatingInterestRates;
+        this.isLinkedToFloatingInterestRate = isLinkedToFloatingInterestRates != null && isLinkedToFloatingInterestRates;
         if (isLinkedToFloatingInterestRate) {
             this.floatingRates = new LoanProductFloatingRates(floatingRate, this, interestRateDifferential, minDifferentialLendingRate,
                     maxDifferentialLendingRate, defaultDifferentialLendingRate, isFloatingInterestRateCalculationAllowed);
         }
 
-        this.allowVariabeInstallments = isVariableInstallmentsAllowed == null ? false : isVariableInstallmentsAllowed;
+        this.allowVariabeInstallments = isVariableInstallmentsAllowed != null && isVariableInstallmentsAllowed;
 
         if (allowVariabeInstallments) {
             this.variableInstallmentConfig = new LoanProductVariableInstallmentConfig(this, minimumGapBetweenInstallments,
@@ -682,7 +659,7 @@ public class LoanProduct extends AbstractPersistableCustom {
             loanConfigurableAttributes.updateLoanProduct(this);
         }
 
-        this.loanProducTrancheDetails = new LoanProductTrancheDetails(multiDisburseLoan, maxTrancheCount, outstandingLoanBalance);
+        this.loanProductTrancheDetails = new LoanProductTrancheDetails(multiDisburseLoan, maxTrancheCount, outstandingLoanBalance);
         this.overdueDaysForNPA = overdueDaysForNPA;
         this.productInterestRecalculationDetails = productInterestRecalculationDetails;
         this.minimumDaysBetweenDisbursalAndFirstRepayment = minimumDaysBetweenDisbursalAndFirstRepayment;
@@ -768,12 +745,16 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.fund = fund;
     }
 
-    public void update(final LoanTransactionProcessingStrategy strategy) {
-        this.transactionProcessingStrategy = strategy;
+    public void setTransactionProcessingStrategyCode(final String transactionProcessingStrategyCode) {
+        this.transactionProcessingStrategyCode = transactionProcessingStrategyCode;
     }
 
-    public LoanTransactionProcessingStrategy getRepaymentStrategy() {
-        return this.transactionProcessingStrategy;
+    public void setTransactionProcessingStrategyName(final String transactionProcessingStrategyName) {
+        this.transactionProcessingStrategyName = transactionProcessingStrategyName;
+    }
+
+    public String getRepaymentStrategy() {
+        return this.transactionProcessingStrategyCode;
     }
 
     public boolean hasCurrencyCodeOf(final String currencyCode) {
@@ -909,14 +890,10 @@ public class LoanProduct extends AbstractPersistableCustom {
             actualChanges.put(fundIdParamName, newValue);
         }
 
-        Long existingStrategyId = null;
-        if (this.transactionProcessingStrategy != null) {
-            existingStrategyId = this.transactionProcessingStrategy.getId();
-        }
-        final String transactionProcessingStrategyParamName = "transactionProcessingStrategyId";
-        if (command.isChangeInLongParameterNamed(transactionProcessingStrategyParamName, existingStrategyId)) {
-            final Long newValue = command.longValueOfParameterNamed(transactionProcessingStrategyParamName);
-            actualChanges.put(transactionProcessingStrategyParamName, newValue);
+        final String transactionProcessingStrategyCodeParamName = "transactionProcessingStrategyCode";
+        if (command.isChangeInStringParameterNamed(transactionProcessingStrategyCodeParamName, this.transactionProcessingStrategyCode)) {
+            final String newValue = command.stringValueOfParameterNamed(transactionProcessingStrategyCodeParamName);
+            actualChanges.put(transactionProcessingStrategyCodeParamName, newValue);
         }
 
         final String chargesParamName = "charges";
@@ -943,7 +920,7 @@ public class LoanProduct extends AbstractPersistableCustom {
         if (this.useBorrowerCycle) {
             actualChanges.putAll(updateBorrowerCycleVariations(command));
         } else {
-            clearVariations(null, true);
+            clearVariations();
         }
         final String dateFormatAsInput = command.dateFormat();
         final String localeAsInput = command.locale();
@@ -977,7 +954,7 @@ public class LoanProduct extends AbstractPersistableCustom {
             actualChanges.put(accountingTypeParamName, newValue);
             this.externalId = newValue;
         }
-        loanProducTrancheDetails.update(command, actualChanges, localeAsInput);
+        loanProductTrancheDetails.update(command, actualChanges, localeAsInput);
 
         if (command.isChangeInIntegerParameterNamed(LoanProductConstants.OVERDUE_DAYS_FOR_NPA_PARAMETER_NAME, this.overdueDaysForNPA)) {
             final Integer newValue = command.integerValueOfParameterNamed(LoanProductConstants.OVERDUE_DAYS_FOR_NPA_PARAMETER_NAME);
@@ -1001,9 +978,16 @@ public class LoanProduct extends AbstractPersistableCustom {
             this.syncExpectedWithDisbursementDate = newValue;
         }
 
-        /**
-         * Update interest recalculation settings
-         */
+        Long delinquencyBucketId = null;
+        if (this.delinquencyBucket != null) {
+            delinquencyBucketId = this.delinquencyBucket.getId();
+        }
+        if (command.isChangeInLongParameterNamed(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME, delinquencyBucketId)) {
+            final Long newValue = command.longValueOfParameterNamed(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME);
+            actualChanges.put(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME, newValue);
+        }
+
+        // Update interest recalculation settings
         final boolean isInterestRecalculationEnabledChanged = actualChanges
                 .containsKey(LoanProductConstants.IS_INTEREST_RECALCULATION_ENABLED_PARAMETER_NAME);
 
@@ -1053,11 +1037,11 @@ public class LoanProduct extends AbstractPersistableCustom {
                 }
 
                 if (command.parsedJson().getAsJsonObject().getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName)
-                        .getAsJsonPrimitive(LoanProductConstants.transactionProcessingStrategyIdParamName)
+                        .getAsJsonPrimitive(LoanProductConstants.transactionProcessingStrategyCodeParamName)
                         .getAsBoolean() != this.loanConfigurableAttributes.getTransactionProcessingStrategyBoolean()) {
-                    this.loanConfigurableAttributes.setTransactionProcessingStrategyId(
+                    this.loanConfigurableAttributes.setTransactionProcessingStrategyCode(
                             command.parsedJson().getAsJsonObject().getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName)
-                                    .getAsJsonPrimitive(LoanProductConstants.transactionProcessingStrategyIdParamName).getAsBoolean());
+                                    .getAsJsonPrimitive(LoanProductConstants.transactionProcessingStrategyCodeParamName).getAsBoolean());
                 }
 
                 if (command.parsedJson().getAsJsonObject().getAsJsonObject(LoanProductConstants.allowAttributeOverridesParamName)
@@ -1310,15 +1294,15 @@ public class LoanProduct extends AbstractPersistableCustom {
     }
 
     public boolean isMultiDisburseLoan() {
-        return this.loanProducTrancheDetails.isMultiDisburseLoan();
+        return this.loanProductTrancheDetails.isMultiDisburseLoan();
     }
 
     public BigDecimal outstandingLoanBalance() {
-        return this.loanProducTrancheDetails.outstandingLoanBalance();
+        return this.loanProductTrancheDetails.outstandingLoanBalance();
     }
 
     public Integer maxTrancheCount() {
-        return this.loanProducTrancheDetails.maxTrancheCount();
+        return this.loanProductTrancheDetails.maxTrancheCount();
     }
 
     public boolean isInterestRecalculationEnabled() {
@@ -1384,27 +1368,28 @@ public class LoanProduct extends AbstractPersistableCustom {
                 if (cycleVariation.getBorrowerCycleNumber().equals(cycleNumber)
                         && cycleVariation.getValueConditionType().equals(LoanProductValueConditionType.EQUAL)) {
                     switch (cycleVariation.getParamType()) {
-                        case PRINCIPAL:
+                        case PRINCIPAL -> {
                             borrowerCycleVariations.put(LoanProductConstants.PRINCIPAL, cycleVariation.getDefaultValue());
                             borrowerCycleVariations.put(LoanProductConstants.MIN_PRINCIPAL, cycleVariation.getMinValue());
                             borrowerCycleVariations.put(LoanProductConstants.MAX_PRINCIPAL, cycleVariation.getMaxValue());
                             principalCycleUsed = cycleVariation.getBorrowerCycleNumber();
-                        break;
-                        case INTERESTRATE:
+                        }
+                        case INTERESTRATE -> {
                             borrowerCycleVariations.put(LoanProductConstants.INTEREST_RATE_PER_PERIOD, cycleVariation.getDefaultValue());
                             borrowerCycleVariations.put(LoanProductConstants.MIN_INTEREST_RATE_PER_PERIOD, cycleVariation.getMinValue());
                             borrowerCycleVariations.put(LoanProductConstants.MAX_INTEREST_RATE_PER_PERIOD, cycleVariation.getMaxValue());
                             interestCycleUsed = cycleVariation.getBorrowerCycleNumber();
-                        break;
-                        case REPAYMENT:
+                        }
+                        case REPAYMENT -> {
                             borrowerCycleVariations.put(LoanProductConstants.MAX_INTEREST_RATE_PER_PERIOD,
                                     cycleVariation.getDefaultValue());
                             borrowerCycleVariations.put(LoanProductConstants.MIN_NUMBER_OF_REPAYMENTS, cycleVariation.getMinValue());
                             borrowerCycleVariations.put(LoanProductConstants.MAX_NUMBER_OF_REPAYMENTS, cycleVariation.getMaxValue());
                             repaymentCycleUsed = cycleVariation.getBorrowerCycleNumber();
-                        break;
-                        default:
-                        break;
+                        }
+                        case INVALID -> {
+
+                        }
                     }
                 } else if (cycleVariation.getBorrowerCycleNumber() < cycleNumber
                         && cycleVariation.getValueConditionType().equals(LoanProductValueConditionType.GREATERTHAN)) {
@@ -1574,8 +1559,16 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.overAppliedNumber = overAppliedNumber;
     }
 
-    public void setLoanProducTrancheDetails(LoanProductTrancheDetails loanProducTrancheDetails) {
-        this.loanProducTrancheDetails = loanProducTrancheDetails;
+    public void setLoanProductTrancheDetails(LoanProductTrancheDetails loanProducTrancheDetails) {
+        this.loanProductTrancheDetails = loanProducTrancheDetails;
+    }
+
+    public DelinquencyBucket getDelinquencyBucket() {
+        return delinquencyBucket;
+    }
+
+    public void setDelinquencyBucket(DelinquencyBucket delinquencyBucket) {
+        this.delinquencyBucket = delinquencyBucket;
     }
 
 }

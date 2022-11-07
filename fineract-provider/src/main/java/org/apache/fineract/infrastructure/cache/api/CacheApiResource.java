@@ -27,9 +27,9 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -64,8 +64,8 @@ import org.springframework.stereotype.Component;
         + "By default caching is set to No Caching. Switching between caches results in the cache been clear e.g. from Single node to No cache and back again would clear down the single node cache.")
 public class CacheApiResource {
 
-    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id"));
-    private final String resourceNameForPermissions = "CACHE";
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(List.of("id"));
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "CACHE";
 
     private final PlatformSecurityContext context;
     private final DefaultToApiJsonSerializer<CacheData> toApiJsonSerializer;
@@ -92,7 +92,7 @@ public class CacheApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = CacheApiResourceSwagger.GetCachesResponse.class)))) })
     public String retrieveAll(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final Collection<CacheData> codes = this.cacheService.retrieveAll();
 

@@ -384,16 +384,22 @@ public class SavingsAccountAssembler {
 
         // Update last running balance on account level
         final boolean backdatedTxnsAllowedTill = this.configurationDomainService.retrievePivotDateConfig();
-        if (backdatedTxnsAllowedTill && account.getTransactions() != null && account.getSummary().getInterestPostedTillDate() != null) {
+        if (backdatedTxnsAllowedTill && account.getSavingsAccountTransactionData() != null
+                && account.getSummary().getInterestPostedTillDate() != null) {
             List<SavingsAccountTransactionData> removalList = new ArrayList<>();
 
-            for (int i = 0; i < account.getTransactions().size(); i++) {
-                SavingsAccountTransactionData savingsAccountTransaction = account.getTransactions().get(i);
+            for (int i = 0; i < account.getSavingsAccountTransactionData().size(); i++) {
+                SavingsAccountTransactionData savingsAccountTransaction = account.getSavingsAccountTransactionData().get(i);
                 removalList.add(savingsAccountTransaction);
-                account.getSummary().setRunningBalanceOnPivotDate(savingsAccountTransaction.getRunningBalance());
-                account.setLastSavingsAccountTransaction(savingsAccountTransaction);
+                if ((savingsAccountTransaction.isInterestPostingAndNotReversed()
+                        || savingsAccountTransaction.isOverdraftInterestAndNotReversed())
+                        && !savingsAccountTransaction.isReversalTransaction()) {
+                    account.getSummary().setRunningBalanceOnPivotDate(savingsAccountTransaction.getRunningBalance());
+                    account.setLastSavingsAccountTransaction(savingsAccountTransaction);
+                    break;
+                }
             }
-            account.getTransactions().removeAll(removalList);
+            account.getSavingsAccountTransactionData().removeAll(removalList);
         } else {
             account.getSummary().setRunningBalanceOnPivotDate(BigDecimal.ZERO);
         }

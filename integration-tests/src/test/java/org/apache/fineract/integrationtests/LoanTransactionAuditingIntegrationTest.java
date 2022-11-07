@@ -99,7 +99,7 @@ public class LoanTransactionAuditingIntegrationTest {
         LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
         loanStatusHashMap = this.loanTransactionHelper.approveLoan("11 July 2022", loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan("11 July 2022", loanID, "10000");
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("11 July 2022", loanID, "10000");
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         OffsetDateTime now = OffsetDateTime.now(ZoneId.of("Asia/Kolkata"));
@@ -187,7 +187,7 @@ public class LoanTransactionAuditingIntegrationTest {
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
                 .withExpectedDisbursementDate(submittedOnDate) //
                 .withSubmittedOnDate(submittedOnDate) //
-                .withwithRepaymentStrategy(repaymentStrategy) //
+                .withRepaymentStrategy(repaymentStrategy) //
                 .withCharges(charges).build(clientID.toString(), loanProductID.toString(), savingsId);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }

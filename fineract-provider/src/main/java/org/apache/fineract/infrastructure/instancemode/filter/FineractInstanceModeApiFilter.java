@@ -43,7 +43,10 @@ public class FineractInstanceModeApiFilter extends OncePerRequestFilter {
 
     private static final List<ExceptionListItem> EXCEPTION_LIST = List.of(
             item(FineractProperties.FineractModeProperties::isBatchManagerEnabled, pi -> pi.startsWith("/jobs")),
-            item(p -> true, pi -> pi.startsWith("/instance-mode")));
+            item(p -> true, pi -> pi.startsWith("/instance-mode")),
+            // Batches with all GET requests need to be allowed in read-only instances, hence this check will be moved
+            // under the Api Resource.
+            item(p -> true, pi -> pi.startsWith("/batches")));
 
     private final FineractProperties fineractProperties;
 

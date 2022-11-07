@@ -36,7 +36,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceService {
 
-    private final Map<Long, DataSource> tenantToDataSourceMap = new HashMap<>(1);
+    private static final Map<Long, DataSource> TENANT_TO_DATA_SOURCE_MAP = new HashMap<>(1);
     private final DataSource tenantDataSource;
 
     private final DataSourcePerTenantServiceFactory dataSourcePerTenantServiceFactory;
@@ -51,25 +51,25 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
     @Override
     public DataSource retrieveDataSource() {
         // default to tenant database datasource
-        DataSource tenantDataSource = this.tenantDataSource;
+        DataSource actualDataSource = this.tenantDataSource;
 
         final FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
         if (tenant != null) {
             final FineractPlatformTenantConnection tenantConnection = tenant.getConnection();
 
-            synchronized (this.tenantToDataSourceMap) {
+            synchronized (TENANT_TO_DATA_SOURCE_MAP) {
                 // if tenantConnection information available switch to the
                 // appropriate datasource for that tenant.
-                DataSource possibleDS = this.tenantToDataSourceMap.get(tenantConnection.getConnectionId());
+                DataSource possibleDS = TENANT_TO_DATA_SOURCE_MAP.get(tenantConnection.getConnectionId());
                 if (possibleDS != null) {
-                    tenantDataSource = possibleDS;
+                    actualDataSource = possibleDS;
                 } else {
-                    tenantDataSource = dataSourcePerTenantServiceFactory.createNewDataSourceFor(tenantConnection);
-                    this.tenantToDataSourceMap.put(tenantConnection.getConnectionId(), tenantDataSource);
+                    actualDataSource = dataSourcePerTenantServiceFactory.createNewDataSourceFor(tenantConnection);
+                    TENANT_TO_DATA_SOURCE_MAP.put(tenantConnection.getConnectionId(), actualDataSource);
                 }
             }
         }
 
-        return tenantDataSource;
+        return actualDataSource;
     }
 }

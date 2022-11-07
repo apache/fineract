@@ -102,12 +102,12 @@ public final class ProcessorHelper {
 
             @Override
             public void onResponse(@SuppressWarnings("unused") Call call, retrofit2.Response response) {
-                LOG.info("URL: {} - Status: {}", url, response.code());
+                LOG.debug("URL: {} - Status: {}", url, response.code());
             }
 
             @Override
             public void onFailure(@SuppressWarnings("unused") Call call, Throwable t) {
-                LOG.error("URL: {} - Retrofit failure occured", url, t);
+                LOG.error("URL: {} - Retrofit failure occurred", url, t);
             }
         };
     }
@@ -129,7 +129,7 @@ public final class ProcessorHelper {
 
             @Override
             public void onResponse(@SuppressWarnings("unused") Call call, retrofit2.Response response) {
-                LOG.info("URL: {} - Status: {}", url, response.code());
+                LOG.debug("URL: {} - Status: {}", url, response.code());
             }
 
             @Override

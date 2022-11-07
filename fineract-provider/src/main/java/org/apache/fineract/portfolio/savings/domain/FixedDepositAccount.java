@@ -388,7 +388,7 @@ public class FixedDepositAccount extends SavingsAccount {
                 throw new PlatformApiDataValidationException(dataValidationErrors);
             }
         }
-        final List<SavingsAccountTransaction> savingsAccountTransactions = retreiveListOfTransactions();
+        final List<SavingsAccountTransaction> savingsAccountTransactions = retrieveListOfTransactions();
         if (savingsAccountTransactions.size() > 0) {
             final SavingsAccountTransaction accountTransaction = savingsAccountTransactions.get(savingsAccountTransactions.size() - 1);
             if (accountTransaction.isAfter(closedDate)) {
@@ -473,7 +473,7 @@ public class FixedDepositAccount extends SavingsAccount {
             }
         }
 
-        final List<SavingsAccountTransaction> savingsAccountTransactions = retreiveListOfTransactions();
+        final List<SavingsAccountTransaction> savingsAccountTransactions = retrieveListOfTransactions();
         if (savingsAccountTransactions.size() > 0) {
             final SavingsAccountTransaction accountTransaction = savingsAccountTransactions.get(savingsAccountTransactions.size() - 1);
             if (accountTransaction.isAfter(closedDate)) {

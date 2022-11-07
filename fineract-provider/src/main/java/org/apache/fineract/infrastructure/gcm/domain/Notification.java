@@ -21,6 +21,9 @@ package org.apache.fineract.infrastructure.gcm.domain;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * GCM message notification part.
@@ -49,20 +52,24 @@ import java.util.List;
  *
  * </code>
  */
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class Notification implements Serializable {
 
-    private final String title;
-    private final String body;
-    private final String icon;
-    private final String sound;
-    private final Integer badge;
-    private final String tag;
-    private final String color;
-    private final String clickAction;
-    private final String bodyLocKey;
-    private final List<String> bodyLocArgs;
-    private final String titleLocKey;
-    private final List<String> titleLocArgs;
+    private static final long serialVersionUID = 1L;
+    private String title;
+    private String body;
+    private String icon;
+    private String sound;
+    private Integer badge;
+    private String tag;
+    private String color;
+    private String clickAction;
+    private String bodyLocKey;
+    private List<String> bodyLocArgs;
+    private String titleLocKey;
+    private List<String> titleLocArgs;
 
     public static final class Builder {
 
@@ -194,90 +201,6 @@ public final class Notification implements Serializable {
         bodyLocArgs = builder.bodyLocArgs;
         titleLocKey = builder.titleLocKey;
         titleLocArgs = builder.titleLocArgs;
-    }
-
-    /**
-     * Gets the title.
-     */
-    public String getTitle() {
-        return title;
-    }
-
-    /**
-     * Gets the body.
-     */
-    public String getBody() {
-        return body;
-    }
-
-    /**
-     * Gets the icon.
-     */
-    public String getIcon() {
-        return icon;
-    }
-
-    /**
-     * Gets the sound.
-     */
-    public String getSound() {
-        return sound;
-    }
-
-    /**
-     * Gets the badge.
-     */
-    public Integer getBadge() {
-        return badge;
-    }
-
-    /**
-     * Gets the tag.
-     */
-    public String getTag() {
-        return tag;
-    }
-
-    /**
-     * Gets the color.
-     */
-    public String getColor() {
-        return color;
-    }
-
-    /**
-     * Gets the click action.
-     */
-    public String getClickAction() {
-        return clickAction;
-    }
-
-    /**
-     * Gets the body localization key.
-     */
-    public String getBodyLocKey() {
-        return bodyLocKey;
-    }
-
-    /**
-     * Gets the body localization values list, which is immutable.
-     */
-    public List<String> getBodyLocArgs() {
-        return bodyLocArgs;
-    }
-
-    /**
-     * Gets the title localization key.
-     */
-    public String getTitleLocKey() {
-        return titleLocKey;
-    }
-
-    /**
-     * Gets the title localization values list, which is immutable.
-     */
-    public List<String> getTitleLocArgs() {
-        return titleLocArgs;
     }
 
     @Override

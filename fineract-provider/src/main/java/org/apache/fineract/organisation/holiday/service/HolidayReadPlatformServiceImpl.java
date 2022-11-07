@@ -79,7 +79,8 @@ public class HolidayReadPlatformServiceImpl implements HolidayReadPlatformServic
             final Integer reschedulingType = JdbcSupport.getInteger(rs, "reschedulingType");
             final EnumOptionData status = HolidayEnumerations.holidayStatusType(statusEnum);
 
-            return new HolidayData(id, name, description, fromDate, toDate, repaymentsScheduleTO, status, reschedulingType);
+            return new HolidayData().setId(id).setName(name).setDescription(description).setFromDate(fromDate).setToDate(toDate)
+                    .setRepaymentsRescheduledTo(repaymentsScheduleTO).setStatus(status).setReschedulingType(reschedulingType);
         }
 
     }
@@ -89,7 +90,7 @@ public class HolidayReadPlatformServiceImpl implements HolidayReadPlatformServic
             final LocalDate toDate) {
         this.context.authenticatedUser();
 
-        final DateTimeFormatter df = DateUtils.DEFAULT_DATE_FORMATER;
+        final DateTimeFormatter df = DateUtils.DEFAULT_DATE_FORMATTER;
 
         final Object[] objectArray = new Object[3];
         int arrayPos = 0;

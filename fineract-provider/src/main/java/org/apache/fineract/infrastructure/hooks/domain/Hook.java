@@ -38,6 +38,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
@@ -46,7 +50,11 @@ import org.springframework.util.CollectionUtils;
 
 @Entity
 @Table(name = "m_hook")
-public class Hook extends AbstractAuditableCustom {
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
+public final class Hook extends AbstractAuditableCustom {
 
     @Column(name = "name", nullable = false, length = 100)
     private String name;
@@ -67,8 +75,6 @@ public class Hook extends AbstractAuditableCustom {
     @ManyToOne(optional = true)
     @JoinColumn(name = "ugd_template_id", referencedColumnName = "id", nullable = true)
     private Template ugdTemplate;
-
-    protected Hook() {}
 
     public static Hook fromJson(final JsonCommand command, final HookTemplate template, final Set<HookConfiguration> config,
             final Set<HookResource> events, final Template ugdTemplate) {
@@ -103,24 +109,16 @@ public class Hook extends AbstractAuditableCustom {
 
     private Set<HookConfiguration> associateConfigWithThisHook(final Set<HookConfiguration> config) {
         for (final HookConfiguration hookConfiguration : config) {
-            hookConfiguration.update(this);
+            hookConfiguration.setHook(this);
         }
         return config;
     }
 
     private Set<HookResource> associateEventsWithThisHook(final Set<HookResource> events) {
         for (final HookResource hookResource : events) {
-            hookResource.update(this);
+            hookResource.setHook(this);
         }
         return events;
-    }
-
-    public HookTemplate getHookTemplate() {
-        return this.template;
-    }
-
-    public Template getUgdTemplate() {
-        return this.ugdTemplate;
     }
 
     public Long getUgdTemplateId() {
@@ -129,10 +127,6 @@ public class Hook extends AbstractAuditableCustom {
             templateId = this.ugdTemplate.getId();
         }
         return templateId;
-    }
-
-    public Set<HookConfiguration> getHookConfig() {
-        return this.config;
     }
 
     public Map<String, Object> update(final JsonCommand command) {
@@ -199,10 +193,6 @@ public class Hook extends AbstractAuditableCustom {
         this.config.clear();
         this.config.addAll(associateConfigWithThisHook(newHookConfig));
         return true;
-    }
-
-    public void updateUgdTemplate(final Template ugdTemplate) {
-        this.ugdTemplate = ugdTemplate;
     }
 
 }

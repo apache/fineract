@@ -58,9 +58,9 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Currency", description = "Application related configuration around viewing/updating the currencies permitted for use within the MFI.")
 public class CurrenciesApiResource {
 
-    private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("selectedCurrencyOptions", "currencyOptions"));
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("selectedCurrencyOptions", "currencyOptions"));
 
-    private final String resourceNameForPermissions = "CURRENCY";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "CURRENCY";
 
     private final PlatformSecurityContext context;
     private final OrganisationCurrencyReadPlatformService readPlatformService;
@@ -89,12 +89,12 @@ public class CurrenciesApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CurrenciesApiResourceSwagger.GetCurrenciesResponse.class))) })
     public String retrieveCurrencies(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final ApplicationCurrencyConfigurationData configurationData = this.readPlatformService.retrieveCurrencyConfiguration();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, configurationData, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, configurationData, RESPONSE_DATA_PARAMETERS);
     }
 
     @PUT

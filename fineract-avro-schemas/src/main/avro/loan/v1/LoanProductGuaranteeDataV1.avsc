@@ -1,0 +1,47 @@
+{
+    "name": "LoanProductGuaranteeDataV1",
+    "namespace": "org.apache.fineract.avro.loan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "default": null,
+            "name": "id",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "productId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "mandatoryGuarantee",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "minimumGuaranteeFromOwnFunds",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "minimumGuaranteeFromGuarantor",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        }
+    ]
+}

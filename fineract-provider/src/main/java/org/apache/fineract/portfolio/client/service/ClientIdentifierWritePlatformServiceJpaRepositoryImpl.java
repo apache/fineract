@@ -86,7 +86,7 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
             final CodeValue documentType = this.codeValueRepository
                     .findOneWithNotFoundDetection(clientIdentifierCommand.getDocumentTypeId());
             documentTypeId = documentType.getId();
-            documentTypeLabel = documentType.label();
+            documentTypeLabel = documentType.getLabel();
 
             final ClientIdentifier clientIdentifier = ClientIdentifier.fromJson(client, documentType, command);
 
@@ -136,7 +136,7 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
                 }
 
                 documentTypeId = documentType.getId();
-                documentTypeLabel = documentType.label();
+                documentTypeLabel = documentType.getLabel();
                 clientIdentifierForUpdate.update(documentType);
             }
 

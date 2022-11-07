@@ -42,12 +42,25 @@ import org.springframework.stereotype.Component;
 @Component
 public final class UserDataValidator {
 
+    public static final String USERNAME = "username";
+    public static final String FIRSTNAME = "firstname";
+    public static final String LASTNAME = "lastname";
+    public static final String PASSWORD = "password";
+    public static final String REPEAT_PASSWORD = "repeatPassword";
+    public static final String EMAIL = "email";
+    public static final String OFFICE_ID = "officeId";
+    public static final String NOT_SELECTED_ROLES = "notSelectedRoles";
+    public static final String ROLES = "roles";
+    public static final String SEND_PASSWORD_TO_EMAIL = "sendPasswordToEmail";
+    public static final String STAFF_ID = "staffId";
+    public static final String PASSWORD_NEVER_EXPIRES = "passwordNeverExpires";
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("username", "firstname", "lastname", "password",
-            "repeatPassword", "email", "officeId", "notSelectedRoles", "roles", "sendPasswordToEmail", "staffId", "passwordNeverExpires",
+    private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList(USERNAME, FIRSTNAME, LASTNAME, PASSWORD,
+            REPEAT_PASSWORD, EMAIL, OFFICE_ID, NOT_SELECTED_ROLES, ROLES, SEND_PASSWORD_TO_EMAIL, STAFF_ID, PASSWORD_NEVER_EXPIRES,
             AppUserConstants.IS_SELF_SERVICE_USER, AppUserConstants.CLIENTS));
+    public static final String PASSWORD_NEVER_EXPIRE = "passwordNeverExpire";
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -64,56 +77,58 @@ public final class UserDataValidator {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("user");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final String username = this.fromApiJsonHelper.extractStringNamed("username", element);
-        baseDataValidator.reset().parameter("username").value(username).notBlank().notExceedingLengthOf(100);
+        final String username = this.fromApiJsonHelper.extractStringNamed(USERNAME, element);
+        baseDataValidator.reset().parameter(USERNAME).value(username).notBlank().notExceedingLengthOf(100);
 
-        final String firstname = this.fromApiJsonHelper.extractStringNamed("firstname", element);
-        baseDataValidator.reset().parameter("firstname").value(firstname).notBlank().notExceedingLengthOf(100);
+        final String firstname = this.fromApiJsonHelper.extractStringNamed(FIRSTNAME, element);
+        baseDataValidator.reset().parameter(FIRSTNAME).value(firstname).notBlank().notExceedingLengthOf(100);
 
-        final String lastname = this.fromApiJsonHelper.extractStringNamed("lastname", element);
-        baseDataValidator.reset().parameter("lastname").value(lastname).notBlank().notExceedingLengthOf(100);
+        final String lastname = this.fromApiJsonHelper.extractStringNamed(LASTNAME, element);
+        baseDataValidator.reset().parameter(LASTNAME).value(lastname).notBlank().notExceedingLengthOf(100);
 
-        final Boolean sendPasswordToEmail = this.fromApiJsonHelper.extractBooleanNamed("sendPasswordToEmail", element);
+        final Boolean sendPasswordToEmail = this.fromApiJsonHelper.extractBooleanNamed(SEND_PASSWORD_TO_EMAIL, element);
         if (sendPasswordToEmail != null) {
             if (sendPasswordToEmail.booleanValue()) {
-                final String email = this.fromApiJsonHelper.extractStringNamed("email", element);
-                baseDataValidator.reset().parameter("email").value(email).notBlank().notExceedingLengthOf(100);
+                final String email = this.fromApiJsonHelper.extractStringNamed(EMAIL, element);
+                baseDataValidator.reset().parameter(EMAIL).value(email).notBlank().notExceedingLengthOf(100);
             } else {
-                final String password = this.fromApiJsonHelper.extractStringNamed("password", element);
-                final String repeatPassword = this.fromApiJsonHelper.extractStringNamed("repeatPassword", element);
+                final String password = this.fromApiJsonHelper.extractStringNamed(PASSWORD, element);
+                final String repeatPassword = this.fromApiJsonHelper.extractStringNamed(REPEAT_PASSWORD, element);
                 final PasswordValidationPolicy validationPolicy = this.passwordValidationPolicy.findActivePasswordValidationPolicy();
                 final String regex = validationPolicy.getRegex();
                 final String description = validationPolicy.getDescription();
-                baseDataValidator.reset().parameter("password").value(password).matchesRegularExpression(regex, description);
+                baseDataValidator.reset().parameter(PASSWORD).value(password).matchesRegularExpression(regex, description);
 
                 if (StringUtils.isNotBlank(password)) {
-                    baseDataValidator.reset().parameter("password").value(password).equalToParameter("repeatPassword", repeatPassword);
+                    baseDataValidator.reset().parameter(PASSWORD).value(password).equalToParameter(REPEAT_PASSWORD, repeatPassword);
                 }
             }
         } else {
-            baseDataValidator.reset().parameter("sendPasswordToEmail").value(sendPasswordToEmail).trueOrFalseRequired(false);
+            baseDataValidator.reset().parameter(SEND_PASSWORD_TO_EMAIL).value(sendPasswordToEmail).trueOrFalseRequired(false);
         }
 
-        final Long officeId = this.fromApiJsonHelper.extractLongNamed("officeId", element);
-        baseDataValidator.reset().parameter("officeId").value(officeId).notNull().integerGreaterThanZero();
+        final Long officeId = this.fromApiJsonHelper.extractLongNamed(OFFICE_ID, element);
+        baseDataValidator.reset().parameter(OFFICE_ID).value(officeId).notNull().integerGreaterThanZero();
 
-        if (this.fromApiJsonHelper.parameterExists("staffId", element)) {
-            final Long staffId = this.fromApiJsonHelper.extractLongNamed("staffId", element);
-            baseDataValidator.reset().parameter("staffId").value(staffId).notNull().integerGreaterThanZero();
+        if (this.fromApiJsonHelper.parameterExists(STAFF_ID, element)) {
+            final Long staffId = this.fromApiJsonHelper.extractLongNamed(STAFF_ID, element);
+            baseDataValidator.reset().parameter(STAFF_ID).value(staffId).notNull().integerGreaterThanZero();
         }
 
         if (this.fromApiJsonHelper.parameterExists(AppUserConstants.PASSWORD_NEVER_EXPIRES, element)) {
             final boolean passwordNeverExpire = this.fromApiJsonHelper.extractBooleanNamed(AppUserConstants.PASSWORD_NEVER_EXPIRES,
                     element);
-            baseDataValidator.reset().parameter("passwordNeverExpire").value(passwordNeverExpire).validateForBooleanValue();
+            baseDataValidator.reset().parameter(PASSWORD_NEVER_EXPIRE).value(passwordNeverExpire).validateForBooleanValue();
         }
 
         Boolean isSelfServiceUser = null;
@@ -139,8 +154,8 @@ public final class UserDataValidator {
             }
         }
 
-        final String[] roles = this.fromApiJsonHelper.extractArrayNamed("roles", element);
-        baseDataValidator.reset().parameter("roles").value(roles).arrayNotEmpty();
+        final String[] roles = this.fromApiJsonHelper.extractArrayNamed(ROLES, element);
+        baseDataValidator.reset().parameter(ROLES).value(roles).arrayNotEmpty();
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -156,66 +171,68 @@ public final class UserDataValidator {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("user");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        if (this.fromApiJsonHelper.parameterExists("officeId", element)) {
-            final Long officeId = this.fromApiJsonHelper.extractLongNamed("officeId", element);
-            baseDataValidator.reset().parameter("officeId").value(officeId).notNull().integerGreaterThanZero();
+        if (this.fromApiJsonHelper.parameterExists(OFFICE_ID, element)) {
+            final Long officeId = this.fromApiJsonHelper.extractLongNamed(OFFICE_ID, element);
+            baseDataValidator.reset().parameter(OFFICE_ID).value(officeId).notNull().integerGreaterThanZero();
         }
 
-        if (this.fromApiJsonHelper.parameterExists("staffId", element)) {
-            final Long staffId = this.fromApiJsonHelper.extractLongNamed("staffId", element);
-            baseDataValidator.reset().parameter("staffId").value(staffId).ignoreIfNull().integerGreaterThanZero();
+        if (this.fromApiJsonHelper.parameterExists(STAFF_ID, element)) {
+            final Long staffId = this.fromApiJsonHelper.extractLongNamed(STAFF_ID, element);
+            baseDataValidator.reset().parameter(STAFF_ID).value(staffId).ignoreIfNull().integerGreaterThanZero();
         }
 
-        if (this.fromApiJsonHelper.parameterExists("username", element)) {
-            final String username = this.fromApiJsonHelper.extractStringNamed("username", element);
-            baseDataValidator.reset().parameter("username").value(username).notBlank().notExceedingLengthOf(100);
+        if (this.fromApiJsonHelper.parameterExists(USERNAME, element)) {
+            final String username = this.fromApiJsonHelper.extractStringNamed(USERNAME, element);
+            baseDataValidator.reset().parameter(USERNAME).value(username).notBlank().notExceedingLengthOf(100);
         }
 
-        if (this.fromApiJsonHelper.parameterExists("firstname", element)) {
-            final String firstname = this.fromApiJsonHelper.extractStringNamed("firstname", element);
-            baseDataValidator.reset().parameter("firstname").value(firstname).notBlank().notExceedingLengthOf(100);
+        if (this.fromApiJsonHelper.parameterExists(FIRSTNAME, element)) {
+            final String firstname = this.fromApiJsonHelper.extractStringNamed(FIRSTNAME, element);
+            baseDataValidator.reset().parameter(FIRSTNAME).value(firstname).notBlank().notExceedingLengthOf(100);
         }
 
-        if (this.fromApiJsonHelper.parameterExists("lastname", element)) {
-            final String lastname = this.fromApiJsonHelper.extractStringNamed("lastname", element);
-            baseDataValidator.reset().parameter("lastname").value(lastname).notBlank().notExceedingLengthOf(100);
+        if (this.fromApiJsonHelper.parameterExists(LASTNAME, element)) {
+            final String lastname = this.fromApiJsonHelper.extractStringNamed(LASTNAME, element);
+            baseDataValidator.reset().parameter(LASTNAME).value(lastname).notBlank().notExceedingLengthOf(100);
         }
 
-        if (this.fromApiJsonHelper.parameterExists("email", element)) {
-            final String email = this.fromApiJsonHelper.extractStringNamed("email", element);
-            baseDataValidator.reset().parameter("email").value(email).notBlank().notExceedingLengthOf(100);
+        if (this.fromApiJsonHelper.parameterExists(EMAIL, element)) {
+            final String email = this.fromApiJsonHelper.extractStringNamed(EMAIL, element);
+            baseDataValidator.reset().parameter(EMAIL).value(email).notBlank().notExceedingLengthOf(100);
         }
 
-        if (this.fromApiJsonHelper.parameterExists("roles", element)) {
-            final String[] roles = this.fromApiJsonHelper.extractArrayNamed("roles", element);
-            baseDataValidator.reset().parameter("roles").value(roles).arrayNotEmpty();
+        if (this.fromApiJsonHelper.parameterExists(ROLES, element)) {
+            final String[] roles = this.fromApiJsonHelper.extractArrayNamed(ROLES, element);
+            baseDataValidator.reset().parameter(ROLES).value(roles).arrayNotEmpty();
         }
 
-        if (this.fromApiJsonHelper.parameterExists("password", element)) {
-            final String password = this.fromApiJsonHelper.extractStringNamed("password", element);
-            final String repeatPassword = this.fromApiJsonHelper.extractStringNamed("repeatPassword", element);
+        if (this.fromApiJsonHelper.parameterExists(PASSWORD, element)) {
+            final String password = this.fromApiJsonHelper.extractStringNamed(PASSWORD, element);
+            final String repeatPassword = this.fromApiJsonHelper.extractStringNamed(REPEAT_PASSWORD, element);
 
             final PasswordValidationPolicy validationPolicy = this.passwordValidationPolicy.findActivePasswordValidationPolicy();
             final String regex = validationPolicy.getRegex();
             final String description = validationPolicy.getDescription();
-            baseDataValidator.reset().parameter("password").value(password).matchesRegularExpression(regex, description);
+            baseDataValidator.reset().parameter(PASSWORD).value(password).matchesRegularExpression(regex, description);
 
             if (StringUtils.isNotBlank(password)) {
-                baseDataValidator.reset().parameter("password").value(password).equalToParameter("repeatPassword", repeatPassword);
+                baseDataValidator.reset().parameter(PASSWORD).value(password).equalToParameter(REPEAT_PASSWORD, repeatPassword);
             }
         }
 
-        if (this.fromApiJsonHelper.parameterExists("passwordNeverExpire", element)) {
-            final boolean passwordNeverExpire = this.fromApiJsonHelper.extractBooleanNamed("passwordNeverExpire", element);
-            baseDataValidator.reset().parameter("passwordNeverExpire").value(passwordNeverExpire).validateForBooleanValue();
+        if (this.fromApiJsonHelper.parameterExists(PASSWORD_NEVER_EXPIRE, element)) {
+            final boolean passwordNeverExpire = this.fromApiJsonHelper.extractBooleanNamed(PASSWORD_NEVER_EXPIRE, element);
+            baseDataValidator.reset().parameter(PASSWORD_NEVER_EXPIRE).value(passwordNeverExpire).validateForBooleanValue();
         }
 
         Boolean isSelfServiceUser = null;

@@ -34,6 +34,20 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Loa
  */
 public class EarlyPaymentLoanRepaymentScheduleTransactionProcessor extends AbstractLoanRepaymentScheduleTransactionProcessor {
 
+    public static final String STRATEGY_CODE = "early-repayment-strategy";
+
+    private static final String STRATEGY_NAME = "Early Repayment Strategy";
+
+    @Override
+    public String getCode() {
+        return STRATEGY_CODE;
+    }
+
+    @Override
+    public String getName() {
+        return STRATEGY_NAME;
+    }
+
     /**
      * For early/'in advance' repayments, pay off in the same way as on-time payments, interest first, principal,
      * penalties and charges.

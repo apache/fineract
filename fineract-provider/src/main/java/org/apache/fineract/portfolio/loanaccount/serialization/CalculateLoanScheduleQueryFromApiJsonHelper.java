@@ -44,11 +44,11 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
     /**
      * The parameters supported for this command.
      */
-    final Set<String> supportedParameters = new HashSet<>(Arrays.asList(LoanApiConstants.idParameterName,
+    static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList(LoanApiConstants.idParameterName,
             LoanApiConstants.clientIdParameterName, LoanApiConstants.groupIdParameterName, LoanApiConstants.loanTypeParameterName,
             LoanApiConstants.calendarIdParameterName, LoanApiConstants.productIdParameterName, LoanApiConstants.accountNoParameterName,
             LoanApiConstants.externalIdParameterName, LoanApiConstants.fundIdParameterName, LoanApiConstants.loanOfficerIdParameterName,
-            LoanApiConstants.loanPurposeIdParameterName, LoanApiConstants.transactionProcessingStrategyIdParameterName,
+            LoanApiConstants.loanPurposeIdParameterName, LoanApiConstants.transactionProcessingStrategyCodeParameterName,
             LoanApiConstants.principalParamName, LoanApiConstants.inArrearsToleranceParameterName,
             LoanApiConstants.interestRatePerPeriodParameterName, LoanApiConstants.repaymentEveryParameterName,
             LoanApiConstants.numberOfRepaymentsParameterName, LoanApiConstants.loanTermFrequencyParameterName,
@@ -56,7 +56,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
             LoanApiConstants.amortizationTypeParameterName, LoanApiConstants.interestTypeParameterName,
             LoanApiConstants.interestCalculationPeriodTypeParameterName,
             LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME,
-            LoanApiConstants.interestRateFrequencyTypeParameterName, LoanApiConstants.disbursementDateParameterName,
+            LoanApiConstants.interestRateFrequencyTypeParameterName, LoanApiConstants.expectedDisbursementDateParameterName,
             LoanApiConstants.repaymentsStartingFromDateParameterName, LoanApiConstants.graceOnPrincipalPaymentParameterName,
             LoanApiConstants.graceOnInterestPaymentParameterName, LoanApiConstants.graceOnInterestChargedParameterName,
             LoanApiConstants.interestChargedFromDateParameterName, LoanApiConstants.submittedOnDateParameterName,
@@ -84,26 +84,26 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final String loanTermFrequencyParameterName = "loanTermFrequency";
+        final String loanTermFrequencyParameterName = LoanApiConstants.loanTermFrequencyParameterName;
         final Integer loanTermFrequency = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(loanTermFrequencyParameterName, element);
 
-        final String loanTermFrequencyTypeParameterName = "loanTermFrequencyType";
+        final String loanTermFrequencyTypeParameterName = LoanApiConstants.loanTermFrequencyTypeParameterName;
         final Integer loanTermFrequencyType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(loanTermFrequencyTypeParameterName,
                 element);
 
-        final String numberOfRepaymentsParameterName = "numberOfRepayments";
+        final String numberOfRepaymentsParameterName = LoanApiConstants.numberOfRepaymentsParameterName;
         final Integer numberOfRepayments = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(numberOfRepaymentsParameterName, element);
 
-        final String repaymentEveryParameterName = "repaymentEvery";
+        final String repaymentEveryParameterName = LoanApiConstants.repaymentEveryParameterName;
         final Integer repaymentEvery = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(repaymentEveryParameterName, element);
 
-        final String repaymentEveryFrequencyTypeParameterName = "repaymentFrequencyType";
+        final String repaymentEveryFrequencyTypeParameterName = LoanApiConstants.repaymentFrequencyTypeParameterName;
         final Integer repaymentEveryType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(repaymentEveryFrequencyTypeParameterName,
                 element);
 
@@ -113,12 +113,12 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
         validateSelectedPeriodFrequencyTypeIsTheSame(dataValidationErrors, loanTermFrequency, loanTermFrequencyType, numberOfRepayments,
                 repaymentEvery, repaymentEveryType);
 
-        final String expectedDisbursementDateParameterName = "expectedDisbursementDate";
+        final String expectedDisbursementDateParameterName = LoanApiConstants.expectedDisbursementDateParameterName;
         final LocalDate expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed(expectedDisbursementDateParameterName,
                 element);
 
         LocalDate repaymentsStartingFromDate = null;
-        final String repaymentsStartingFromDateParameterName = "repaymentsStartingFromDate";
+        final String repaymentsStartingFromDateParameterName = LoanApiConstants.repaymentsStartingFromDateParameterName;
         if (this.fromApiJsonHelper.parameterExists(repaymentsStartingFromDateParameterName, element)) {
             repaymentsStartingFromDate = this.fromApiJsonHelper.extractLocalDateNamed(repaymentsStartingFromDateParameterName, element);
         }
@@ -144,14 +144,14 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
         } else {
             if (loanTermFrequency != null && repaymentEvery != null && numberOfRepayments != null) {
                 final int suggestsedLoanTerm = repaymentEvery * numberOfRepayments;
-                if (loanTermFrequency.intValue() < suggestsedLoanTerm) {
+                if (loanTermFrequency < suggestsedLoanTerm) {
                     final ApiParameterError error = ApiParameterError.parameterError(
                             "validation.msg.loan.loanTermFrequency.less.than.repayment.structure.suggests",
                             "The parameter loanTermFrequency is less than the suggest loan term as indicated by numberOfRepayments and repaymentEvery.",
                             "loanTermFrequency", loanTermFrequency, numberOfRepayments, repaymentEvery);
                     dataValidationErrors.add(error);
                 } else {
-                    if (loanTermFrequency.intValue() > suggestsedLoanTerm) {
+                    if (loanTermFrequency > suggestsedLoanTerm) {
                         final ApiParameterError error = ApiParameterError.parameterError(
                                 "validation.msg.loan.loanTermFrequency.greater.than.repayment.structure.suggests",
                                 "The parameter loanTermFrequency is greater than the suggested loan term as indicated by numberOfRepayments and repaymentEvery.",
@@ -166,14 +166,13 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
 
     private void validateRepaymentsStartingFromDateIsAfterDisbursementDate(final List<ApiParameterError> dataValidationErrors,
             final LocalDate expectedDisbursementDate, final LocalDate repaymentsStartingFromDate) {
-        if (expectedDisbursementDate != null) {
-            if (repaymentsStartingFromDate != null && expectedDisbursementDate.isAfter(repaymentsStartingFromDate)) {
-                final ApiParameterError error = ApiParameterError.parameterError(
-                        "validation.msg.loan.expectedDisbursementDate.cannot.be.after.first.repayment.date",
-                        "The parameter expectedDisbursementDate has a date which falls after the date for repaymentsStartingFromDate.",
-                        "expectedDisbursementDate", expectedDisbursementDate, repaymentsStartingFromDate);
-                dataValidationErrors.add(error);
-            }
+        if (expectedDisbursementDate != null && repaymentsStartingFromDate != null
+                && expectedDisbursementDate.isAfter(repaymentsStartingFromDate)) {
+            final ApiParameterError error = ApiParameterError.parameterError(
+                    "validation.msg.loan.expectedDisbursementDate.cannot.be.after.first.repayment.date",
+                    "The parameter expectedDisbursementDate has a date which falls after the date for repaymentsStartingFromDate.",
+                    "expectedDisbursementDate", expectedDisbursementDate, repaymentsStartingFromDate);
+            dataValidationErrors.add(error);
         }
     }
 }

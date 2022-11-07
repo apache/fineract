@@ -44,7 +44,7 @@ public class RateDefinitionCommandFromApiJsonDeserializer {
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<>(
+    private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(
             Arrays.asList("id", "name", "percentage", "productApply", "active", "approveUser", "locale"));
 
     private final FromJsonHelper fromApiJsonHelper;
@@ -61,7 +61,7 @@ public class RateDefinitionCommandFromApiJsonDeserializer {
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
@@ -87,7 +87,7 @@ public class RateDefinitionCommandFromApiJsonDeserializer {
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(RateApiConstants.rate);

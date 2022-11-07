@@ -416,7 +416,7 @@ public class Sender {
             String regId = unsentRegIds.get(i);
             Result result = results.get(i);
             allResults.put(regId, result);
-            String error = result.getErrorCodeName();
+            String error = result.getErrorCode();
             if (error != null && (error.equals(GcmConstants.ERROR_UNAVAILABLE) || error.equals(GcmConstants.ERROR_INTERNAL_SERVER_ERROR))) {
                 newUnsentRegIds.add(regId);
             }
@@ -537,8 +537,8 @@ public class Sender {
         setJsonField(mapRequest, PARAM_TIME_TO_LIVE, message.getTimeToLive());
         setJsonField(mapRequest, PARAM_COLLAPSE_KEY, message.getCollapseKey());
         setJsonField(mapRequest, PARAM_RESTRICTED_PACKAGE_NAME, message.getRestrictedPackageName());
-        setJsonField(mapRequest, PARAM_DELAY_WHILE_IDLE, message.isDelayWhileIdle());
-        setJsonField(mapRequest, PARAM_DRY_RUN, message.isDryRun());
+        setJsonField(mapRequest, PARAM_DELAY_WHILE_IDLE, message.getDelayWhileIdle());
+        setJsonField(mapRequest, PARAM_DRY_RUN, message.getDryRun());
         Map<String, String> payload = message.getData();
         if (!payload.isEmpty()) {
             mapRequest.put(JSON_PAYLOAD, payload);

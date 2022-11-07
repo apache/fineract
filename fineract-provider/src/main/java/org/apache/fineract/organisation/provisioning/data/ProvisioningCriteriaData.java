@@ -21,19 +21,27 @@ package org.apache.fineract.organisation.provisioning.data;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 @SuppressWarnings("unused")
 public final class ProvisioningCriteriaData implements Comparable<ProvisioningCriteriaData>, Serializable {
 
-    private final Long criteriaId;
-    private final String criteriaName;
-    private final String createdBy;
-    private final Collection<LoanProductData> loanProducts;
+    private static final long serialVersionUID = 1L;
+
+    private Long criteriaId;
+    private String criteriaName;
+    private String createdBy;
+    private Collection<LoanProductData> loanProducts;
     private Collection<LoanProductData> selectedLoanProducts;
-    private final Collection<ProvisioningCriteriaDefinitionData> definitions;
-    private final Collection<GLAccountData> glAccounts;
+    private Collection<ProvisioningCriteriaDefinitionData> definitions;
+    private Collection<GLAccountData> glAccounts;
 
     private ProvisioningCriteriaData(final Long criteriaId, final String criteriaName, final Collection<LoanProductData> loanProducts,
             Collection<ProvisioningCriteriaDefinitionData> definitions, Collection<GLAccountData> glAccounts, final String createdBy) {
@@ -61,14 +69,16 @@ public final class ProvisioningCriteriaData implements Comparable<ProvisioningCr
             final Collection<LoanProductData> loanProducts, final List<ProvisioningCriteriaDefinitionData> definitions) {
         Collection<GLAccountData> glAccounts = null;
         String createdBy = null;
-        return new ProvisioningCriteriaData(criteriaId, criteriaName, loanProducts, definitions, glAccounts, createdBy);
+        return new ProvisioningCriteriaData().setCriteriaId(criteriaId).setCriteriaName(criteriaName).setLoanProducts(loanProducts)
+                .setDefinitions(definitions).setGlAccounts(glAccounts).setCreatedBy(createdBy);
     }
 
     public static ProvisioningCriteriaData toLookup(final Long criteriaId, final String criteriaName, String createdBy) {
         Collection<GLAccountData> glAccounts = null;
         Collection<LoanProductData> loanProducts = null;
         List<ProvisioningCriteriaDefinitionData> definitions = null;
-        return new ProvisioningCriteriaData(criteriaId, criteriaName, loanProducts, definitions, glAccounts, createdBy);
+        return new ProvisioningCriteriaData().setCriteriaId(criteriaId).setCriteriaName(criteriaName).setLoanProducts(loanProducts)
+                .setDefinitions(definitions).setGlAccounts(glAccounts).setCreatedBy(createdBy);
     }
 
     public static ProvisioningCriteriaData toTemplate(final Collection<ProvisioningCriteriaDefinitionData> definitions,
@@ -76,7 +86,8 @@ public final class ProvisioningCriteriaData implements Comparable<ProvisioningCr
         Long criteriaId = null;
         String criteriaName = null;
         String createdBy = null;
-        return new ProvisioningCriteriaData(criteriaId, criteriaName, loanProducts, definitions, glAccounts, createdBy);
+        return new ProvisioningCriteriaData().setCriteriaId(criteriaId).setCriteriaName(criteriaName).setLoanProducts(loanProducts)
+                .setDefinitions(definitions).setGlAccounts(glAccounts).setCreatedBy(createdBy);
     }
 
     public static ProvisioningCriteriaData toTemplate(final ProvisioningCriteriaData data,

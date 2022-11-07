@@ -20,39 +20,23 @@ package org.apache.fineract.infrastructure.campaigns.email.data;
 
 import java.io.File;
 import java.util.List;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class EmailMessageWithAttachmentData {
 
-    private final String to;
-    private final String text;
-    private final String subject;
-    private final List<File> attachments;
-
-    private EmailMessageWithAttachmentData(final String to, final String text, final String subject, final List<File> attachments) {
-        this.to = to;
-        this.text = text;
-        this.subject = subject;
-        this.attachments = attachments;
-    }
+    private String to;
+    private String text;
+    private String subject;
+    private List<File> attachments;
 
     public static EmailMessageWithAttachmentData createNew(final String to, final String text, final String subject,
             final List<File> attachments) {
-        return new EmailMessageWithAttachmentData(to, text, subject, attachments);
+        return new EmailMessageWithAttachmentData().setTo(to).setText(text).setSubject(subject).setAttachments(attachments);
     }
 
-    public String getTo() {
-        return this.to;
-    }
-
-    public String getText() {
-        return this.text;
-    }
-
-    public String getSubject() {
-        return this.subject;
-    }
-
-    public List<File> getAttachments() {
-        return this.attachments;
-    }
 }

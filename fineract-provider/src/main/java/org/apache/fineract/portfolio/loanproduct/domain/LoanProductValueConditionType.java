@@ -44,17 +44,11 @@ public enum LoanProductValueConditionType {
     public static LoanProductValueConditionType fromInt(final Integer type) {
         LoanProductValueConditionType loanProductParamType = LoanProductValueConditionType.INVALID;
         if (type != null) {
-            switch (type) {
-                case 2:
-                    loanProductParamType = EQUAL;
-                break;
-                case 3:
-                    loanProductParamType = GREATERTHAN;
-                break;
-                default:
-                    loanProductParamType = INVALID;
-                break;
-            }
+            loanProductParamType = switch (type) {
+                case 2 -> EQUAL;
+                case 3 -> GREATERTHAN;
+                default -> INVALID;
+            };
         }
         return loanProductParamType;
     }
@@ -63,7 +57,7 @@ public enum LoanProductValueConditionType {
         return LoanProductValueConditionType.EQUAL.getValue().equals(this.value);
     }
 
-    public boolean isValueConditionTypeGreterThan() {
+    public boolean isValueConditionTypeGreaterThan() {
         return LoanProductValueConditionType.GREATERTHAN.getValue().equals(this.value);
     }
 

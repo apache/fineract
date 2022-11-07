@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -35,7 +36,7 @@ import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
 /**
  * Immutable data object representing Savings Account summary information.
  */
-@SuppressWarnings("unused")
+@Getter
 public class SavingsAccountSummaryData implements Serializable {
 
     private final CurrencyData currency;
@@ -83,66 +84,6 @@ public class SavingsAccountSummaryData implements Serializable {
 
     public void setPrevInterestPostedTillDate(LocalDate interestPostedTillDate) {
         this.prevInterestPostedTillDate = interestPostedTillDate;
-    }
-
-    public LocalDate getPrevInterestPostedTillDate() {
-        return this.prevInterestPostedTillDate;
-    }
-
-    public LocalDate getInterestPostedTillDate() {
-        return this.interestPostedTillDate;
-    }
-
-    public BigDecimal getTotalInterestPosted() {
-        return this.totalInterestPosted;
-    }
-
-    public BigDecimal getTotalWithdrawalFees() {
-        return this.totalWithdrawalFees;
-    }
-
-    public BigDecimal getTotalInterestEarned() {
-        return this.totalInterestEarned;
-    }
-
-    public BigDecimal getTotalDeposits() {
-        return this.totalDeposits;
-    }
-
-    public BigDecimal getTotalWithdrawals() {
-        return this.totalWithdrawals;
-    }
-
-    public BigDecimal getTotalFeeCharge() {
-        return this.totalFeeCharge;
-    }
-
-    public BigDecimal getAvailableBalance() {
-        return this.availableBalance;
-    }
-
-    public BigDecimal getAccountBalance() {
-        return accountBalance;
-    }
-
-    public BigDecimal getTotalOverdraftInterestDerived() {
-        return this.totalOverdraftInterestDerived;
-    }
-
-    public BigDecimal getTotalWithholdTax() {
-        return this.totalWithholdTax;
-    }
-
-    public BigDecimal getTotalPenaltyCharge() {
-        return this.totalPenaltyCharge;
-    }
-
-    public BigDecimal getTotalAnnualFees() {
-        return this.totalAnnualFees;
-    }
-
-    public LocalDate getLastInterestCalculationDate() {
-        return this.lastInterestCalculationDate;
     }
 
     public BigDecimal getRunningBalanceOnPivotDate() {

@@ -72,11 +72,11 @@ public class CenterSheetPopulator extends AbstractWorkbookPopulator {
         Row row = centerSheet.createRow(rowIndex);
         for (OfficeData office : offices) {
             startIndex = rowIndex + 1;
-            writeString(OFFICE_NAME_COL, row, office.name());
+            writeString(OFFICE_NAME_COL, row, office.getName());
             ArrayList<String> centersList = new ArrayList<String>();
 
-            if (officeToCenters.containsKey(office.name().trim().replaceAll("[ )(]", "_"))) {
-                centersList = officeToCenters.get(office.name().trim().replaceAll("[ )(]", "_"));
+            if (officeToCenters.containsKey(office.getName().trim().replaceAll("[ )(]", "_"))) {
+                centersList = officeToCenters.get(office.getName().trim().replaceAll("[ )(]", "_"));
                 if (!centersList.isEmpty()) {
                     for (String centerName : centersList) {
                         writeString(CENTER_NAME_COL, row, centerName);

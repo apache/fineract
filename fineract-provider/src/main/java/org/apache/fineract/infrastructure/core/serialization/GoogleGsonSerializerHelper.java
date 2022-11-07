@@ -96,6 +96,10 @@ public final class GoogleGsonSerializerHelper {
         return serializer.toJson(singleDataObject);
     }
 
+    public Gson createSimpleGson() {
+        return createGsonBuilder().create();
+    }
+
     public static GsonBuilder createGsonBuilder() {
         return createGsonBuilder(false);
     }

@@ -213,13 +213,13 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
 
             if (accountToDebitId != null && changesOnly.containsKey(AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue())) {
                 final GLAccount accountToDebit = this.accountRepositoryWrapper.findOneWithNotFoundDetection(accountToDebitId);
-                accountingRule.updateDebitAccount(accountToDebit);
+                accountingRule.setAccountToDebit(accountToDebit);
                 accountingRule.updateTags(JournalEntryType.CREDIT);
             }
 
             if (accountToCreditId != null && changesOnly.containsKey(AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue())) {
                 final GLAccount accountToCredit = this.accountRepositoryWrapper.findOneWithNotFoundDetection(accountToCreditId);
-                accountingRule.updateCreditAccount(accountToCredit);
+                accountingRule.setAccountToCredit(accountToCredit);
                 accountingRule.updateTags(JournalEntryType.DEBIT);
             }
 
@@ -233,9 +233,9 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
                     List<AccountingTagRule> accountingTagRules = new ArrayList<>();
                     accountingTagRules = saveDebitOrCreditTags(creditTagsToAdd, JournalEntryType.CREDIT, accountingTagRules);
                     accountingRule.updateAccountingRuleForTags(accountingTagRules);
-                    accountingRule.updateCreditAccount(null);
+                    accountingRule.setAccountToCredit(null);
                     if (allowMultipleCreditEntries) {
-                        accountingRule.updateAllowMultipleCreditEntries(allowMultipleCreditEntries);
+                        accountingRule.setAllowMultipleCreditEntries(allowMultipleCreditEntries);
                     }
                     changesOnly.put(AccountingRuleJsonInputParams.CREDIT_ACCOUNT_TAGS.getValue(), creditTagsToAdd);
                 }
@@ -250,9 +250,9 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
                     List<AccountingTagRule> accountingTagRules = new ArrayList<>();
                     accountingTagRules = saveDebitOrCreditTags(debitTagsToAdd, JournalEntryType.DEBIT, accountingTagRules);
                     accountingRule.updateAccountingRuleForTags(accountingTagRules);
-                    accountingRule.updateDebitAccount(null);
+                    accountingRule.setAccountToDebit(null);
                     if (allowMultipleDebitEntries) {
-                        accountingRule.updateAllowMultipleDebitEntries(allowMultipleDebitEntries);
+                        accountingRule.setAllowMultipleDebitEntries(allowMultipleDebitEntries);
                     }
                     changesOnly.put(AccountingRuleJsonInputParams.DEBIT_ACCOUNT_TAGS.getValue(), debitTagsToAdd);
                 }
@@ -298,7 +298,7 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
         if (!tagsToRemove.isEmpty()) {
             for (final String tagId : tagsToRemove) {
                 for (final AccountingTagRule accountingTagRule : existingTags) {
-                    if (tagId.equals(accountingTagRule.getTagId().toString())) {
+                    if (tagId.equals(accountingTagRule.getTagId().getId().toString())) {
                         accountsToRemove.put(accountingTagRule.getId(), accountingTagRule);
                     }
                 }
@@ -311,7 +311,7 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
     private Set<String> retrieveExistingTagIds(final Set<AccountingTagRule> existingCreditTags) {
         final Set<String> existingCreditTagIds = new HashSet<>();
         for (final AccountingTagRule accountingTagRule : existingCreditTags) {
-            existingCreditTagIds.add(accountingTagRule.getTagId().toString());
+            existingCreditTagIds.add(accountingTagRule.getTagId().getId().toString());
         }
         return existingCreditTagIds;
     }

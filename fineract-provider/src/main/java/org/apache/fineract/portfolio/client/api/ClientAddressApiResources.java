@@ -62,11 +62,12 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Clients Address", description = "Address module is an optional module and can be configured into the system by using GlobalConfiguration setting: enable-address. In order to activate Address module, we need to enable the configuration, enable-address by setting its value to true.")
 public class ClientAddressApiResources {
 
-    private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("addressId", "street", "addressLine1", "addressLine2",
-            "addressLine3", "townVillage", "city", "countyDistrict", "stateProvinceId", "countryId", "postalCode", "latitude", "longitude",
-            "createdBy", "createdOn", "updatedBy", "updatedOn", "clientAddressId", "client_id", "address_id", "address_type_id", "isActive",
-            "fieldConfigurationId", "entity", "table", "field", "is_enabled", "is_mandatory", "validation_regex"));
-    private final String resourceNameForPermissions = "Address";
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList("addressId", "street", "addressLine1", "addressLine2", "addressLine3", "townVillage", "city", "countyDistrict",
+                    "stateProvinceId", "countryId", "postalCode", "latitude", "longitude", "createdBy", "createdOn", "updatedBy",
+                    "updatedOn", "clientAddressId", "client_id", "address_id", "address_type_id", "isActive", "fieldConfigurationId",
+                    "entity", "table", "field", "is_enabled", "is_mandatory", "validation_regex"));
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "Address";
     private final PlatformSecurityContext context;
     private final AddressReadPlatformServiceImpl readPlatformService;
     private final DefaultToApiJsonSerializer<AddressData> toApiJsonSerializer;
@@ -89,12 +90,12 @@ public class ClientAddressApiResources {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String getAddressesTemplate(@Context final UriInfo uriInfo) {
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final AddressData template = this.readPlatformService.retrieveTemplate();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, template, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, template, RESPONSE_DATA_PARAMETERS);
 
     }
 
@@ -131,7 +132,7 @@ public class ClientAddressApiResources {
             @PathParam("clientid") @Parameter(description = "clientId") final long clientid, @Context final UriInfo uriInfo) {
         Collection<AddressData> address;
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         // TODO: This is quite a confusing implementation with all these checks
         // These have to be considered as filtering criterias instead
@@ -146,7 +147,7 @@ public class ClientAddressApiResources {
         }
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, address, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, address, RESPONSE_DATA_PARAMETERS);
 
     }
 

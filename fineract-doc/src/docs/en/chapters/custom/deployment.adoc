@@ -1,0 +1,12 @@
+= Deploying Custom Modules
+
+Custom modules (better: the JAR files) only need to be dropped in Fineract's `libs` folder if you run Fineract from the Spring Boot JAR file. Dynamic loading of external JARs is provided since Fineract version 1.5.0. For your convenience we've created a separate Docker image module that automatically includes your custom modules (see `custom/docker`). You can build this Docker image with
+
+[source,bash]
+----
+./gradlew :custom:docker:jibDockerBuild
+----
+
+The Docker image with included custom modules is called `fineract-custom`.
+
+NOTE: We'll provide soon a way to customize the Docker image parameters (image name, JVM implementation, JVM args, ports etc.).

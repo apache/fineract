@@ -57,7 +57,7 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Loan Rescheduling", description = "Loan Term Variations provides the ability to change due dates, amounts and number of instalments before loan approval.")
 public class LoanScheduleApiResource {
 
-    private final String resourceNameForPermissions = "LOAN";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "LOAN";
     private final PlatformSecurityContext context;
     private final DefaultToApiJsonSerializer<LoanScheduleData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
@@ -94,12 +94,12 @@ public class LoanScheduleApiResource {
 
         CommandWrapper commandRequest = null;
         if (is(commandParam, "calculateLoanSchedule")) {
-            this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+            this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
             final LoanScheduleData loanSchedule = this.calculationPlatformService.generateLoanScheduleForVariableInstallmentRequest(loanId,
                     apiRequestBodyAsJson);
 
             final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-            return this.toApiJsonSerializer.serialize(settings, loanSchedule, new HashSet<String>());
+            return this.toApiJsonSerializer.serialize(settings, loanSchedule, new HashSet<>());
         } else if (is(commandParam, "addVariations")) {
             commandRequest = new CommandWrapperBuilder().createScheduleExceptions(loanId).withJson(apiRequestBodyAsJson).build();
         } else if (is(commandParam, "deleteVariations")) {

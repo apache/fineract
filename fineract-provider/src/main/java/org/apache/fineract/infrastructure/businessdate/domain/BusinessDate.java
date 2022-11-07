@@ -28,12 +28,18 @@ import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 import lombok.Getter;
-import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 
 @Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 @Entity
 @Table(name = "m_business_date", uniqueConstraints = { @UniqueConstraint(name = "uq_business_date_type", columnNames = { "type" }) })
-public class BusinessDate extends AbstractAuditableCustom {
+public class BusinessDate extends AbstractAuditableWithUTCDateTimeCustom {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
@@ -45,20 +51,8 @@ public class BusinessDate extends AbstractAuditableCustom {
     @Version
     private Long version;
 
-    protected BusinessDate() {
-        // TODO Auto-generated constructor stub
-    }
-
-    protected BusinessDate(@NotNull BusinessDateType type, @NotNull LocalDate date) {
-        this.type = type;
-        this.date = date;
-    }
-
     public static BusinessDate instance(@NotNull BusinessDateType businessDateType, @NotNull LocalDate date) {
-        return new BusinessDate(businessDateType, date);
+        return new BusinessDate().setType(businessDateType).setDate(date);
     }
 
-    public void updateDate(LocalDate date) {
-        this.date = date;
-    }
 }

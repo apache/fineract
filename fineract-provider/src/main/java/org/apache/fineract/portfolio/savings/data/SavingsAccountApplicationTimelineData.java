@@ -20,11 +20,14 @@ package org.apache.fineract.portfolio.savings.data;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Immutable data object represent the important time-line events of a savings account application.
  */
-@SuppressWarnings("unused")
+@Getter
+@RequiredArgsConstructor
 public class SavingsAccountApplicationTimelineData implements Serializable {
 
     private final LocalDate submittedOnDate;
@@ -84,43 +87,5 @@ public class SavingsAccountApplicationTimelineData implements Serializable {
                 withdrawnByFirstname, withdrawnByLastname, approvedOnDate, approvedByUsername, approvedByFirstname, approvedByLastname,
                 activatedOnDate, activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate, closedByUsername,
                 closedByFirstname, closedByLastname);
-    }
-
-    public SavingsAccountApplicationTimelineData(final LocalDate submittedOnDate, final String submittedByUsername,
-            final String submittedByFirstname, final String submittedByLastname, final LocalDate rejectedOnDate,
-            final String rejectedByUsername, final String rejectedByFirstname, final String rejectedByLastname,
-            final LocalDate withdrawnOnDate, final String withdrawnByUsername, final String withdrawnByFirstname,
-            final String withdrawnByLastname, final LocalDate approvedOnDate, final String approvedByUsername,
-            final String approvedByFirstname, final String approvedByLastname, final LocalDate activatedOnDate,
-            final String activatedByUsername, final String activatedByFirstname, final String activatedByLastname,
-            final LocalDate closedOnDate, final String closedByUsername, final String closedByFirstname, final String closedByLastname) {
-        this.submittedOnDate = submittedOnDate;
-        this.submittedByUsername = submittedByUsername;
-        this.submittedByFirstname = submittedByFirstname;
-        this.submittedByLastname = submittedByLastname;
-        this.rejectedOnDate = rejectedOnDate;
-        this.rejectedByUsername = rejectedByUsername;
-        this.rejectedByFirstname = rejectedByFirstname;
-        this.rejectedByLastname = rejectedByLastname;
-        this.withdrawnOnDate = withdrawnOnDate;
-        this.withdrawnByUsername = withdrawnByUsername;
-        this.withdrawnByFirstname = withdrawnByFirstname;
-        this.withdrawnByLastname = withdrawnByLastname;
-        this.approvedOnDate = approvedOnDate;
-        this.approvedByUsername = approvedByUsername;
-        this.approvedByFirstname = approvedByFirstname;
-        this.approvedByLastname = approvedByLastname;
-        this.activatedOnDate = activatedOnDate;
-        this.activatedByUsername = activatedByUsername;
-        this.activatedByFirstname = activatedByFirstname;
-        this.activatedByLastname = activatedByLastname;
-        this.closedOnDate = closedOnDate;
-        this.closedByUsername = closedByUsername;
-        this.closedByFirstname = closedByFirstname;
-        this.closedByLastname = closedByLastname;
-    }
-
-    public LocalDate getActivatedOnDate() {
-        return activatedOnDate;
     }
 }

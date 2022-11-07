@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Iterator;
 import lombok.RequiredArgsConstructor;
@@ -369,7 +369,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         final OfficeData officeData = this.officeReadPlatformService.retrieveOffice(defaultOfficeId);
         String officeName = "";
         if (officeData != null) {
-            officeName = officeData.name();
+            officeName = officeData.getName();
         }
 
         TellerData tellerData = findTeller(tellerId);
@@ -564,11 +564,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
             final LocalDate startDate = JdbcSupport.getLocalDate(rs, "start_date");
             final LocalDate endDate = JdbcSupport.getLocalDate(rs, "end_date");
-            final Integer fullDayFromDB = rs.getInt("full_day");
-            Boolean fullDay = false;
-            if (fullDayFromDB == 1) {
-                fullDay = true;
-            }
+            final Boolean fullDay = rs.getBoolean("full_day");
             final String startTime = rs.getString("start_time");
             final String endTime = rs.getString("end_time");
 
@@ -662,7 +658,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             sqlBuilder.append(" left join m_loan loan on loan_txn.loan_id = loan.id ");
             sqlBuilder.append(" left join m_client cl on loan.client_id = cl.id ");
             sqlBuilder.append(" left join m_office o on cl.office_id = o.id ");
-            sqlBuilder.append(" left join m_appuser user on loan_txn.createdby_id = user.id ");
+            sqlBuilder.append(" left join m_appuser user on loan_txn.created_by = user.id ");
             sqlBuilder.append(" left join m_staff staff on user.staff_id = staff.id ");
             sqlBuilder.append(" left join m_cashiers c on c.staff_id = staff.id ");
             sqlBuilder.append(" left join m_payment_detail payDetails on payDetails.id = loan_txn.payment_detail_id ");
@@ -698,7 +694,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
                     " left join r_enum_value renum on cli_txn.transaction_type_enum = renum.enum_id AND renum.enum_name = 'client_transaction_type_enum' ");
             sqlBuilder.append(" left join m_client cl on cli_txn.client_id = cl.id ");
             sqlBuilder.append(" left join m_office o on cl.office_id = o.id ");
-            sqlBuilder.append(" left join m_appuser user on cli_txn.appuser_id = user.id ");
+            sqlBuilder.append(" left join m_appuser user on cli_txn.created_by = user.id ");
             sqlBuilder.append(" left join m_staff staff on user.staff_id = staff.id ");
             sqlBuilder.append(" left join m_cashiers c on c.staff_id = staff.id ");
             sqlBuilder.append(" left join m_payment_detail payDetails on payDetails.id = cli_txn.payment_detail_id ");
@@ -719,13 +715,13 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             final String txnNote = rs.getString("txn_note");
             final String entityType = rs.getString("entity_type");
             final Long entityId = rs.getLong("entity_id");
-            final LocalDateTime createdLocalDate = JdbcSupport.getLocalDateTime(rs, "created_date");
+            final OffsetDateTime createdLocalDate = JdbcSupport.getOffsetDateTime(rs, "created_date");
 
             LocalDate txnDate = null;
             if (txnLocalDate != null) {
                 txnDate = txnLocalDate;
             }
-            LocalDateTime createdDate = null;
+            OffsetDateTime createdDate = null;
             if (createdLocalDate != null) {
                 createdDate = createdLocalDate;
             }
@@ -827,7 +823,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             sqlBuilder.append("    left join m_loan loan on loan_txn.loan_id = loan.id ");
             sqlBuilder.append("    left join m_client cl on loan.client_id = cl.id ");
             sqlBuilder.append("    left join m_office o on cl.office_id = o.id ");
-            sqlBuilder.append("    left join m_appuser user on loan_txn.createdby_id = user.id ");
+            sqlBuilder.append("    left join m_appuser user on loan_txn.created_by = user.id ");
             sqlBuilder.append("    left join m_staff staff on user.staff_id = staff.id ");
             sqlBuilder.append("    left join m_cashiers c on c.staff_id = staff.id ");
             sqlBuilder.append(" left join m_payment_detail payDetails on payDetails.id = loan_txn.payment_detail_id ");
@@ -864,7 +860,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
                     "    left join r_enum_value renum ON cli_txn.transaction_type_enum = renum.enum_id AND renum.enum_name = 'client_transaction_type_enum' ");
             sqlBuilder.append("    left join m_client cl ON cli_txn.client_id = cl.id ");
             sqlBuilder.append("    left join m_office o ON cl.office_id = o.id ");
-            sqlBuilder.append("    left join m_appuser user ON cli_txn.appuser_id = user.id ");
+            sqlBuilder.append("    left join m_appuser user ON cli_txn.created_by = user.id ");
             sqlBuilder.append("    left join m_staff staff ON user.staff_id = staff.id ");
             sqlBuilder.append("    left join m_cashiers c ON c.staff_id = staff.id ");
             sqlBuilder.append(" left join m_payment_detail payDetails on payDetails.id = cli_txn.payment_detail_id ");

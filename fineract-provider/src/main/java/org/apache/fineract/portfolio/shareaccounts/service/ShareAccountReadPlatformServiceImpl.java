@@ -46,7 +46,7 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.products.constants.ProductsApiConstants;
 import org.apache.fineract.portfolio.products.data.ProductData;
-import org.apache.fineract.portfolio.products.service.ProductReadPlatformService;
+import org.apache.fineract.portfolio.products.service.ShareProductReadPlatformService;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
@@ -79,7 +79,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
     private final ShareAccountChargeReadPlatformService shareAccountChargeReadPlatformService;
     private final PurchasedSharesReadPlatformService purchasedSharesReadPlatformService;
     private final JdbcTemplate jdbcTemplate;
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private final PaginationHelper shareAccountDataPaginationHelper;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
 
@@ -108,7 +108,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
     public ShareAccountData retrieveTemplate(Long clientId, Long productId) {
         ShareAccountData toReturn = null;
         String serviceName = "share" + ProductsApiConstants.READPLATFORM_NAME;
-        ProductReadPlatformService service = (ProductReadPlatformService) this.applicationContext.getBean(serviceName);
+        ShareProductReadPlatformService service = (ShareProductReadPlatformService) this.applicationContext.getBean(serviceName);
         ClientData client = this.clientReadPlatformService.retrieveOne(clientId);
 
         if (productId != null) {
@@ -121,14 +121,14 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
             final Collection<EnumOptionData> minimumActivePeriodFrequencyTypeOptions = this.shareProductDropdownReadPlatformService
                     .retrieveMinimumActivePeriodFrequencyTypeOptions();
             final Collection<SavingsAccountData> clientSavingsAccounts = this.savingsAccountReadPlatformService
-                    .retrieveActiveForLookup(clientId, DepositAccountType.SAVINGS_DEPOSIT, productData.getCurrency().code());
-            toReturn = new ShareAccountData(client.id(), client.displayName(), productData.getCurrency(), charges, marketPrice,
+                    .retrieveActiveForLookup(clientId, DepositAccountType.SAVINGS_DEPOSIT, productData.getCurrency().getCode());
+            toReturn = new ShareAccountData(client.getId(), client.getDisplayName(), productData.getCurrency(), charges, marketPrice,
                     minimumActivePeriodFrequencyTypeOptions, lockinPeriodFrequencyTypeOptions, clientSavingsAccounts,
-                    productData.getNominaltShares());
+                    productData.getNominalShares());
         } else {
             Collection<ProductData> productOptions = service.retrieveAllForLookup();
             final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveSharesApplicableCharges();
-            toReturn = new ShareAccountData(client.id(), client.displayName(), productOptions, chargeOptions);
+            toReturn = new ShareAccountData(client.getId(), client.getDisplayName(), productOptions, chargeOptions);
         }
         return toReturn;
     }
@@ -139,7 +139,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         if (marketDataSet != null && !marketDataSet.isEmpty()) {
             LocalDate currentDate = DateUtils.getBusinessLocalDate();
             for (ShareProductMarketPriceData data : marketDataSet) {
-                LocalDate futureDate = data.getStartDate();
+                LocalDate futureDate = data.getFromDate();
                 if (currentDate.isAfter(futureDate)) {
                     marketValue = data.getShareValue();
                 }
@@ -155,9 +155,9 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
 
         ShareAccountMapper mapper = new ShareAccountMapper(charges, purchasedShares);
         String query = "select " + mapper.schema() + "where sa.id=?";
-        ShareAccountData data = (ShareAccountData) this.jdbcTemplate.queryForObject(query, mapper, new Object[] { id }); // NOSONAR
+        ShareAccountData data = (ShareAccountData) this.jdbcTemplate.queryForObject(query, mapper, id); // NOSONAR
         String serviceName = "share" + ProductsApiConstants.READPLATFORM_NAME;
-        ProductReadPlatformService service = (ProductReadPlatformService) this.applicationContext.getBean(serviceName);
+        ShareProductReadPlatformService service = (ShareProductReadPlatformService) this.applicationContext.getBean(serviceName);
         final ShareProductData productData = (ShareProductData) service.retrieveOne(data.getProductId(), false);
         final BigDecimal currentMarketPrice = deriveMarketPrice(productData);
         data.setCurrentMarketPrice(currentMarketPrice);
@@ -170,7 +170,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
                     .retrieveLockinPeriodFrequencyTypeOptions();
             final Collection<EnumOptionData> minimumActivePeriodFrequencyTypeOptions = lockinPeriodFrequencyTypeOptions;
             final Collection<SavingsAccountData> clientSavingsAccounts = this.savingsAccountReadPlatformService
-                    .retrieveActiveForLookup(data.getClientId(), DepositAccountType.SAVINGS_DEPOSIT, productData.getCurrency().code());
+                    .retrieveActiveForLookup(data.getClientId(), DepositAccountType.SAVINGS_DEPOSIT, productData.getCurrency().getCode());
             Collection<ProductData> productOptions = service.retrieveAllForLookup();
             final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveSharesApplicableCharges();
             data = ShareAccountData.template(data, productOptions, chargeOptions, clientSavingsAccounts, lockinPeriodFrequencyTypeOptions,
@@ -182,7 +182,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
     private Collection<ShareAccountDividendData> retrieveAssociatedDividends(final Long shareAccountId) {
         ShareAccountDividendRowMapper mapper = new ShareAccountDividendRowMapper();
         String query = "select " + mapper.schema() + "where sadd.account_id=?";
-        return this.jdbcTemplate.query(query, mapper, new Object[] { shareAccountId }); // NOSONAR
+        return this.jdbcTemplate.query(query, mapper, shareAccountId); // NOSONAR
     }
 
     @Override
@@ -222,7 +222,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         params.add(id);
         params.add(ShareAccountStatusType.ACTIVE.getValue());
         if (fetchInActiveAccounts) {
-            String formattedStartDate = formatter.format(startDate);
+            String formattedStartDate = DATE_TIME_FORMATTER.format(startDate);
             sb.append(" and (sa.status_enum = ? or (sa.status_enum = ? ");
             sb.append(" and sa.closed_date > '" + formattedStartDate + "')) ");
             params.add(ShareAccountStatusType.CLOSED.getValue());

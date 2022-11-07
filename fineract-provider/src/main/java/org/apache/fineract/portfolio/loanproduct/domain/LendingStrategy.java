@@ -30,7 +30,7 @@ import java.util.Map;
  */
 public enum LendingStrategy {
 
-    INDIVIDUAL_LOAN(100, "lendingStrategy.individaulLoan", "individaulLoan"), //
+    INDIVIDUAL_LOAN(100, "lendingStrategy.individualLoan", "individualLoan"), //
     GROUP_LOAN(200, "lendingStrategy.groupLoan", "groupLoan"), //
     JOINT_LIABILITY_LOAN(300, "lendingStrategy.joinLiabilityLoan", "joinLiabilityLoan"), //
     LINKED_LOAN(400, "lendingStrategy.linkedLoan", "linkedLoan"), //
@@ -68,8 +68,7 @@ public enum LendingStrategy {
     }
 
     public static LendingStrategy fromInt(final int i) {
-        final LendingStrategy type = intToEnumMap.get(Integer.valueOf(i));
-        return type;
+        return intToEnumMap.get(i);
     }
 
     public static int getMinValue() {
@@ -82,7 +81,7 @@ public enum LendingStrategy {
 
     @Override
     public String toString() {
-        return name().toString();
+        return name();
     }
 
     public Integer getId() {

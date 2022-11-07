@@ -18,9 +18,13 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
+import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.CREATED_DATE_DB_FIELD;
+import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.LAST_MODIFIED_DATE_DB_FIELD;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -65,7 +69,7 @@ public class LoanRepaymentScheduleHistory extends AbstractPersistableCustom {
     private BigDecimal penaltyCharges;
 
     @Column(name = "created_date")
-    private LocalDateTime createdOnDate;
+    private LocalDateTime oldCreatedOnDate;
 
     @Column(name = "createdby_id")
     private Long createdByUser;
@@ -74,7 +78,13 @@ public class LoanRepaymentScheduleHistory extends AbstractPersistableCustom {
     private Long lastModifiedByUser;
 
     @Column(name = "lastmodified_date")
-    private LocalDateTime lastModifiedOnDate;
+    private LocalDateTime oldLastModifiedOnDate;
+
+    @Column(name = CREATED_DATE_DB_FIELD)
+    private OffsetDateTime createdDate;
+
+    @Column(name = LAST_MODIFIED_DATE_DB_FIELD)
+    private OffsetDateTime lastModifiedDate;
 
     @Column(name = "version")
     private Integer version;
@@ -90,8 +100,9 @@ public class LoanRepaymentScheduleHistory extends AbstractPersistableCustom {
     private LoanRepaymentScheduleHistory(final Loan loan, final LoanRescheduleRequest loanRescheduleRequest,
             final Integer installmentNumber, final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal,
             final BigDecimal interestCharged, final BigDecimal feeChargesCharged, final BigDecimal penaltyCharges,
-            final LocalDateTime createdOnDate, final Long createdByUser, final Long lastModifiedByUser,
-            final LocalDateTime lastModifiedOnDate, final Integer version) {
+            final LocalDateTime oldCreatedOnDate, final Long createdByUser, final Long lastModifiedByUser,
+            final LocalDateTime oldLastModifiedOnDate, final Integer version, final OffsetDateTime createdDate,
+            final OffsetDateTime lastModifiedDate) {
 
         this.loan = loan;
         this.loanRescheduleRequest = loanRescheduleRequest;
@@ -102,11 +113,13 @@ public class LoanRepaymentScheduleHistory extends AbstractPersistableCustom {
         this.interestCharged = interestCharged;
         this.feeChargesCharged = feeChargesCharged;
         this.penaltyCharges = penaltyCharges;
-        this.createdOnDate = createdOnDate;
+        this.oldCreatedOnDate = oldCreatedOnDate;
         this.createdByUser = createdByUser;
         this.lastModifiedByUser = lastModifiedByUser;
-        this.lastModifiedOnDate = lastModifiedOnDate;
+        this.oldLastModifiedOnDate = oldLastModifiedOnDate;
         this.version = version;
+        this.createdDate = createdDate;
+        this.lastModifiedDate = lastModifiedDate;
     }
 
     /**
@@ -115,12 +128,13 @@ public class LoanRepaymentScheduleHistory extends AbstractPersistableCustom {
     public static LoanRepaymentScheduleHistory instance(final Loan loan, final LoanRescheduleRequest loanRescheduleRequest,
             final Integer installmentNumber, final LocalDate fromDate, final LocalDate dueDate, final BigDecimal principal,
             final BigDecimal interestCharged, final BigDecimal feeChargesCharged, final BigDecimal penaltyCharges,
-            final LocalDateTime createdOnDate, final Long createdByUser, final Long lastModifiedByUser,
-            final LocalDateTime lastModifiedOnDate, final Integer version) {
+            final LocalDateTime oldCreatedOnDate, final Long createdByUser, final Long lastModifiedByUser,
+            final LocalDateTime oldLastModifiedOnDate, final Integer version, final OffsetDateTime createdDate,
+            final OffsetDateTime lastModifiedDate) {
 
         return new LoanRepaymentScheduleHistory(loan, loanRescheduleRequest, installmentNumber, fromDate, dueDate, principal,
-                interestCharged, feeChargesCharged, penaltyCharges, createdOnDate, createdByUser, lastModifiedByUser, lastModifiedOnDate,
-                version);
+                interestCharged, feeChargesCharged, penaltyCharges, oldCreatedOnDate, createdByUser, lastModifiedByUser,
+                oldLastModifiedOnDate, version, createdDate, lastModifiedDate);
 
     }
 

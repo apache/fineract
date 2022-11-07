@@ -53,9 +53,9 @@ public class SavingsAccountSheetPopulator extends AbstractWorkbookPopulator {
         int rowIndex = 1;
         for (SavingsAccountData savings : savingsAccountDataList) {
             Row row = savingsSheet.createRow(rowIndex++);
-            writeLong(SAVINGS_ACCOUNT_ID_COL, row, savings.id());
+            writeLong(SAVINGS_ACCOUNT_ID_COL, row, savings.getId());
             writeString(SAVING_ACCOUNT_NO, row, savings.getAccountNo());
-            writeString(CURRENCY_COL, row, savings.currency().code());
+            writeString(CURRENCY_COL, row, savings.getCurrency().getCode());
             writeString(CLIENT_NAME, row, savings.getClientName());
         }
     }

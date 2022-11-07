@@ -93,11 +93,11 @@ public class GroupSheetPopulator extends AbstractWorkbookPopulator {
         Row row = groupSheet.createRow(rowIndex);
         for (OfficeData office : offices) {
             startIndex = rowIndex + 1;
-            writeString(OFFICE_NAME_COL, row, office.name());
+            writeString(OFFICE_NAME_COL, row, office.getName());
             ArrayList<String> groupsList = new ArrayList<>();
 
-            if (officeToGroups.containsKey(office.name().trim().replaceAll("[ )(]", "_"))) {
-                groupsList = officeToGroups.get(office.name().trim().replaceAll("[ )(]", "_"));
+            if (officeToGroups.containsKey(office.getName().trim().replaceAll("[ )(]", "_"))) {
+                groupsList = officeToGroups.get(office.getName().trim().replaceAll("[ )(]", "_"));
             }
 
             if (!groupsList.isEmpty()) {

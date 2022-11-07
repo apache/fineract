@@ -20,7 +20,9 @@ package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.Getter;
 
+@Getter
 public class LoanInstallmentChargeData {
 
     private final Integer installmentNumber;
@@ -70,36 +72,7 @@ public class LoanInstallmentChargeData {
         this.amountUnrecognized = amountUnrecognized;
     }
 
-    public Integer getInstallmentNumber() {
-        return this.installmentNumber;
-    }
-
-    public LocalDate getDueDate() {
-        return this.dueDate;
-    }
-
     public boolean isPaymentPending() {
         return !(this.paid || this.waived);
     }
-
-    public BigDecimal getAmountOutstanding() {
-        return this.amountOutstanding;
-    }
-
-    public BigDecimal getAmount() {
-        return this.amount;
-    }
-
-    public BigDecimal getAmountWaived() {
-        return this.amountWaived;
-    }
-
-    public BigDecimal getAmountAccrued() {
-        return this.amountAccrued;
-    }
-
-    public BigDecimal getAmountUnrecognized() {
-        return this.amountUnrecognized;
-    }
-
 }

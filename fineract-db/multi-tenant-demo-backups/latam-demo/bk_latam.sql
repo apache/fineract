@@ -859,7 +859,6 @@ CREATE TABLE `m_loan` (
   KEY `FKB6F935D87179A0CB` (`client_id`),
   KEY `FKB6F935D8C8D4B434` (`product_id`),
   KEY `FK7C885877240145` (`fund_id`),
-  KEY `FK_loan_ltp_strategy` (`loan_transaction_strategy_id`),
   KEY `FK_m_loan_m_staff` (`loan_officer_id`),
   KEY `group_id` (`group_id`),
   KEY `FK_m_loan_guarantor` (`guarantor_id`),
@@ -867,7 +866,6 @@ CREATE TABLE `m_loan` (
   CONSTRAINT `FK7C885877240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`),
   CONSTRAINT `FKB6F935D87179A0CB` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
   CONSTRAINT `FKB6F935D8C8D4B434` FOREIGN KEY (`product_id`) REFERENCES `m_product_loan` (`id`),
-  CONSTRAINT `FK_loan_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`),
   CONSTRAINT `FK_m_loan_m_staff` FOREIGN KEY (`loan_officer_id`) REFERENCES `m_staff` (`id`),
   CONSTRAINT `m_loan_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
@@ -1343,9 +1341,7 @@ CREATE TABLE `m_product_loan` (
   `loan_transaction_strategy_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FKA6A8A7D77240145` (`fund_id`),
-  KEY `FK_ltp_strategy` (`loan_transaction_strategy_id`),
-  CONSTRAINT `FKA6A8A7D77240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`),
-  CONSTRAINT `FK_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`)
+  CONSTRAINT `FKA6A8A7D77240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1685,36 +1681,6 @@ LOCK TABLES `r_enum_value` WRITE;
 /*!40000 ALTER TABLE `r_enum_value` DISABLE KEYS */;
 INSERT INTO `r_enum_value` VALUES ('amortization_method_enum',0,'Equal principle payments','Equal principle payments'),('amortization_method_enum',1,'Equal installments','Equal installments'),('interest_calculated_in_period_enum',0,'Daily','Daily'),('interest_calculated_in_period_enum',1,'Same as repayment period','Same as repayment period'),('interest_method_enum',0,'Declining Balance','Declining Balance'),('interest_method_enum',1,'Flat','Flat'),('interest_period_frequency_enum',2,'Per month','Per month'),('interest_period_frequency_enum',3,'Per year','Per year'),('loan_status_id',100,'Submitted and awaiting approval','Submitted and awaiting approval'),('loan_status_id',200,'Approved','Approved'),('loan_status_id',300,'Active','Active'),('loan_status_id',400,'Withdrawn by client','Withdrawn by client'),('loan_status_id',500,'Rejected','Rejected'),('loan_status_id',600,'Closed','Closed'),('loan_status_id',700,'Overpaid','Overpaid'),('loan_transaction_strategy_id',1,'mifos-standard-strategy','Mifos style'),('loan_transaction_strategy_id',2,'heavensfamily-strategy','Heavensfamily'),('loan_transaction_strategy_id',3,'creocore-strategy','Creocore'),('loan_transaction_strategy_id',4,'rbi-india-strategy','RBI (India)'),('processing_result_enum',0,'invalid','Invalid'),('processing_result_enum',1,'processed','Processed'),('processing_result_enum',2,'awaiting.approval','Awaiting Approval'),('processing_result_enum',3,'rejected','Rejected'),('repayment_period_frequency_enum',0,'Days','Days'),('repayment_period_frequency_enum',1,'Weeks','Weeks'),('repayment_period_frequency_enum',2,'Months','Months'),('term_period_frequency_enum',0,'Days','Days'),('term_period_frequency_enum',1,'Weeks','Weeks'),('term_period_frequency_enum',2,'Months','Months'),('term_period_frequency_enum',3,'Years','Years');
 /*!40000 ALTER TABLE `r_enum_value` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `ref_loan_transaction_processing_strategy`
---
-
-DROP TABLE IF EXISTS `ref_loan_transaction_processing_strategy`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `ref_loan_transaction_processing_strategy` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `code` varchar(100) DEFAULT NULL,
-  `name` varchar(255) DEFAULT NULL,
-  `createdby_id` BIGINT DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` BIGINT DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `ltp_strategy_code` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=UTF8MB4;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `ref_loan_transaction_processing_strategy`
---
-
-LOCK TABLES `ref_loan_transaction_processing_strategy` WRITE;
-/*!40000 ALTER TABLE `ref_loan_transaction_processing_strategy` DISABLE KEYS */;
-INSERT INTO `ref_loan_transaction_processing_strategy` VALUES (1,'mifos-standard-strategy','Mifos style',NULL,NULL,NULL,NULL),(2,'heavensfamily-strategy','Heavensfamily',NULL,NULL,NULL,NULL),(3,'creocore-strategy','Creocore',NULL,NULL,NULL,NULL),(4,'rbi-india-strategy','RBI (India)',NULL,NULL,NULL,NULL);
-/*!40000 ALTER TABLE `ref_loan_transaction_processing_strategy` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --

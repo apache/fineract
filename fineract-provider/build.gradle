@@ -26,6 +26,7 @@ apply plugin: 'com.gorylenko.gradle-git-properties'
 apply plugin: 'io.swagger.core.v3.swagger-gradle-plugin'
 apply plugin: 'com.google.cloud.tools.jib'
 
+check.dependsOn('cucumber')
 
 compileJava.doLast {
     def mainSS = sourceSets.main
@@ -149,9 +150,9 @@ configurations {
     driver
 }
 dependencies {
-    driver 'org.mariadb.jdbc:mariadb-java-client:2.7.6'
-    driver 'org.postgresql:postgresql:42.4.0'
-    driver 'mysql:mysql-connector-java:8.0.29'
+    driver 'org.mariadb.jdbc:mariadb-java-client:3.0.8'
+    driver 'org.postgresql:postgresql:42.5.0'
+    driver 'mysql:mysql-connector-java:8.0.31'
 }
 
 URLClassLoader loader = GroovyObject.class.classLoader
@@ -221,8 +222,8 @@ bootRun {
     ]
 
     dependencies {
-        implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.6'
-        implementation 'org.postgresql:postgresql:42.4.0'
+        implementation 'org.mariadb.jdbc:mariadb-java-client:3.0.8'
+        implementation 'org.postgresql:postgresql:42.5.0'
     }
 }
 
@@ -285,8 +286,8 @@ jib {
     allowInsecureRegistries = true
 
     dependencies {
-        implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.6'
-        implementation 'org.postgresql:postgresql:42.4.0'
+        implementation 'org.mariadb.jdbc:mariadb-java-client:3.0.8'
+        implementation 'org.postgresql:postgresql:42.5.0'
     }
 
     pluginExtensions {
@@ -324,5 +325,5 @@ checkstyleMain.dependsOn resolve
 checkstyleTest.dependsOn resolve
 rat.dependsOn prepareInputYaml
 spotbugsTest.dependsOn resolve
-compileTestJava.dependsOn ':fineract-client:processResources'
+compileTestJava.dependsOn ':fineract-client:processResources', ':fineract-avro-schemas:processResources'
 bootJarMainClassName.dependsOn resolve

@@ -368,7 +368,7 @@ public class ClientEntityWorkbookPopulator extends AbstractWorkbookPopulator {
             Integer[] officeNameToBeginEndIndexesOfStaff = personnelSheetPopulator.getOfficeNameToBeginEndIndexesOfStaff().get(i);
             if (officeNameToBeginEndIndexesOfStaff != null) {
                 Name name = clientWorkbook.createName();
-                setSanitized(name, "Staff_" + offices.get(i).name());
+                setSanitized(name, "Staff_" + offices.get(i).getName());
                 name.setRefersToFormula(TemplatePopulateImportConstants.STAFF_SHEET_NAME + "!$B$" + officeNameToBeginEndIndexesOfStaff[0]
                         + ":$B$" + officeNameToBeginEndIndexesOfStaff[1]);
             }

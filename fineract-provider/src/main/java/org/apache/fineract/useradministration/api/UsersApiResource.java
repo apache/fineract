@@ -77,10 +77,10 @@ public class UsersApiResource {
     /**
      * The set of parameters that are supported in response for {@link AppUserData}.
      */
-    private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "officeId", "officeName", "username", "firstname",
-            "lastname", "email", "allowedOffices", "availableRoles", "selectedRoles", "staff"));
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "officeId", "officeName", "username",
+            "firstname", "lastname", "email", "allowedOffices", "availableRoles", "selectedRoles", "staff"));
 
-    private final String resourceNameForPermissions = "USER";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "USER";
 
     private final PlatformSecurityContext context;
     private final AppUserReadPlatformService readPlatformService;
@@ -117,12 +117,12 @@ public class UsersApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAll(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final Collection<AppUserData> users = this.readPlatformService.retrieveAllUsers();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, users, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, users, RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -135,7 +135,7 @@ public class UsersApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveOne(@PathParam("userId") @Parameter(description = "userId") final Long userId, @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions, userId);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS, userId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
@@ -145,7 +145,7 @@ public class UsersApiResource {
             user = AppUserData.template(user, offices);
         }
 
-        return this.toApiJsonSerializer.serialize(settings, user, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, user, RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -158,12 +158,12 @@ public class UsersApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String template(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final AppUserData user = this.readPlatformService.retrieveNewUserDetails();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, user, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, user, RESPONSE_DATA_PARAMETERS);
     }
 
     @POST

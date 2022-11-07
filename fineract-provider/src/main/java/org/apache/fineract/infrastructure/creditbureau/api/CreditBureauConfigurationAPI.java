@@ -60,9 +60,9 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Credit Bureau Configuration", description = "")
 public class CreditBureauConfigurationAPI {
 
-    private final Set<String> responseDataParameters = new HashSet<>(
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList("creditBureauId", "alias", "country", "creditBureauProductId", "startDate", "endDate", "isActive"));
-    private final String resourceNameForPermissions = "CreditBureau";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "CreditBureau";
     private final PlatformSecurityContext context;
     private final CreditBureauReadPlatformService readPlatformService;
     private final DefaultToApiJsonSerializer<CreditBureauData> toApiJsonSerializer;
@@ -105,12 +105,12 @@ public class CreditBureauConfigurationAPI {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String getCreditBureau(@Context final UriInfo uriInfo) {
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final Collection<CreditBureauData> creditBureau = this.readPlatformService.retrieveCreditBureau();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, creditBureau, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, creditBureau, RESPONSE_DATA_PARAMETERS);
 
     }
 
@@ -119,14 +119,14 @@ public class CreditBureauConfigurationAPI {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String getCreditBureauLoanProductMapping(@Context final UriInfo uriInfo) {
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final Collection<CreditBureauLoanProductMappingData> creditBureauLoanProductMapping = this.readPlatformServiceCreditBureauLoanProduct
                 .readCreditBureauLoanProductMapping();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializerCreditBureauLoanProduct.serialize(settings, creditBureauLoanProductMapping,
-                this.responseDataParameters);
+                RESPONSE_DATA_PARAMETERS);
 
     }
 
@@ -135,13 +135,13 @@ public class CreditBureauConfigurationAPI {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String getOrganisationCreditBureau(@Context final UriInfo uriInfo) {
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final Collection<OrganisationCreditBureauData> organisationCreditBureau = this.readPlatformServiceOrganisationCreditBureau
                 .retrieveOrgCreditBureau();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializerOrganisationCreditBureau.serialize(settings, organisationCreditBureau, this.responseDataParameters);
+        return this.toApiJsonSerializerOrganisationCreditBureau.serialize(settings, organisationCreditBureau, RESPONSE_DATA_PARAMETERS);
 
     }
 
@@ -152,7 +152,7 @@ public class CreditBureauConfigurationAPI {
     public String getConfiguration(@PathParam("organisationCreditBureauId") final Long organisationCreditBureauId,
             @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final Collection<CreditBureauConfigurationData> configurationData = this.creditBureauConfiguration
                 .readConfigurationByOrganisationCreditBureauId(organisationCreditBureauId);
@@ -165,14 +165,14 @@ public class CreditBureauConfigurationAPI {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String fetchLoanProducts(@Context final UriInfo uriInfo) {
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final Collection<CreditBureauLoanProductMappingData> creditBureauLoanProductMapping = this.readPlatformServiceCreditBureauLoanProduct
                 .fetchLoanProducts();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializerCreditBureauLoanProduct.serialize(settings, creditBureauLoanProductMapping,
-                this.responseDataParameters);
+                RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -180,14 +180,14 @@ public class CreditBureauConfigurationAPI {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String fetchMappingByLoanProductId(@Context final UriInfo uriInfo, @PathParam("loanProductId") final Long loanProductId) {
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final CreditBureauLoanProductMappingData creditBureauLoanProductMapping = this.readPlatformServiceCreditBureauLoanProduct
                 .readMappingByLoanId(loanProductId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializerCreditBureauLoanProduct.serialize(settings, creditBureauLoanProductMapping,
-                this.responseDataParameters);
+                RESPONSE_DATA_PARAMETERS);
     }
 
     @PUT

@@ -4740,7 +4740,7 @@ Content-Type: application/json Request Body:
                 \"amortizationType\": 1,
                 \"interestType\": 0,
                 \"interestCalculationPeriodType\": 1,
-                \"transactionProcessingStrategyId\": 1,
+                \"transactionProcessingStrategyCode\": \"mifos-standard-strategy\",
                 \"expectedDisbursementDate\": \"10 Jun 2013\",
                 \"submittedOnDate\": \"10 Jun 2013\"
               }"
@@ -10339,7 +10339,7 @@ GET  https://DomainName/fineract-provider/api/v1/groups/{groupId}/glimaccounts
 							</td>
 						</tr>
 <tr class=alt>
-	<td>transactionProcessingStrategyId</td>
+	<td>transactionProcessingStrategyCode</td>
 </tr>
 <tr>
 	<td class=fielddesc>
@@ -10541,7 +10541,7 @@ GET https://DomainName/api/v1/loans/template?templateType=individual&clientId=1&
     "code": "interestCalculationPeriodType.same.as.repayment.period",
     "value": "Same as repayment period"
   },
-  "transactionProcessingStrategyId": 2,
+  "transactionProcessingStrategyCode": "mifos-standard-strategy",
   "timeline": {
     "expectedDisbursementDate": [
       2013,
@@ -10973,7 +10973,7 @@ GET https://DomainName/api/v1/loans/{loanId}
     "code": "interestCalculationPeriodType.same.as.repayment.period",
     "value": "Same as repayment period"
   },
-  "transactionProcessingStrategyId": 2,
+  "transactionProcessingStrategyCode": "mifos-standard-strategy",
   "timeline": {
     "submittedOnDate": [
       2012,
@@ -11265,7 +11265,7 @@ GET https://DomainName/fineract-provider/api/v1/loans
         "code": "interestCalculationPeriodType.same.as.repayment.period",
         "value": "Same as repayment period"
       },
-      "transactionProcessingStrategyId": 2,
+      "transactionProcessingStrategyCode": "mifos-standard-strategy",
       "timeline": {
         "submittedOnDate": [
           2012,
@@ -11417,7 +11417,7 @@ No Request Body:
   "interestCalculationPeriodType": 0,
   "amortizationType": 1,
   "expectedDisbursementDate": "04 March 2014",
-  "transactionProcessingStrategyId": 1
+  "transactionProcessingStrategyCode": "mifos-standard-strategy"
 }
 					</code>
 					<code class="method-response">
@@ -11449,7 +11449,7 @@ No Request Body:
 								repaymentFrequencyType, interestRatePerPeriod,
 								amortizationType, interestType,
 								interestCalculationPeriodType, expectedDisbursementDate,
-								transactionProcessingStrategyId</td>
+								transactionProcessingStrategyCode</td>
 						</tr>
 					</table>
 				</div>
@@ -11476,7 +11476,7 @@ Request Body:
     "interestType": 0,
     "interestCalculationPeriodType": 1,
     "expectedDisbursementDate": "20 September 2011",
-    "transactionProcessingStrategyId": 2
+    "transactionProcessingStrategyCode": "mifos-standard-strategy"
 }
 					</code>
 					<code class="method-response">
@@ -11598,7 +11598,7 @@ Request Body:
 								loanTermFrequencyType, loanType, numberOfRepayments, repaymentEvery,
 								repaymentFrequencyType, interestRatePerPeriod,
 								amortizationType, interestType,
-								interestCalculationPeriodType, transactionProcessingStrategyId,
+								interestCalculationPeriodType, transactionProcessingStrategyCode,
 								expectedDisbursementDate, submittedOnDate, loanType</td>
 						</tr>
 					</table>
@@ -11663,7 +11663,7 @@ Request Body:
     "amortizationType": 1,
     "interestType": 0,
     "interestCalculationPeriodType": 1,
-    "transactionProcessingStrategyId": 1,
+    "transactionProcessingStrategyCode": "mifos-standard-strategy",
     "expectedDisbursementDate": "10 Jun 2013",
     "submittedOnDate": "10 Jun 2013",
     "linkAccountId" : "1",
@@ -12222,7 +12222,7 @@ Content-Type: application/json
     </tr>
     <tr class=alt>
     <td>interestRatePerPeriod, expectedDisbursementDate, clientId, groupId, productId, totalLoan, loanType, interestType,
-    principal, charges, transactionProcessingStrategyId, submittedOnDate, amortizationType, repaymentFrequencyType,
+    principal, charges, transactionProcessingStrategyCode, submittedOnDate, amortizationType, repaymentFrequencyType,
     loanTermFrequencyType, loanTermFrequency, repaymentEvery, numberOfRepayments, interestCalculationPeriodType,
     isParentAccount, locale,dateFormat</td>
     </tr>
@@ -12250,7 +12250,7 @@ Request Body:
   "locale":"en_GB",
   "principal":"1000.00",
   "charges":[],
-  "transactionProcessingStrategyId":"1",
+  "transactionProcessingStrategyCode":"mifos-standard-strategy",
   "submittedOnDate":"10 June 2020",
   "amortizationType":"1",
   "repaymentFrequencyType":"2",
@@ -15740,7 +15740,7 @@ Request Body:
 
 
 <tr class=alt>
-	<td>transactionProcessingStrategyId</td>
+	<td>transactionProcessingStrategyCode</td>
 </tr>
 <tr>
 	<td class=fielddesc>
@@ -15986,7 +15986,7 @@ GET https://DomainName/api/v1/loanproducts
       "code": "interestCalculationPeriodType.same.as.repayment.period",
       "value": "Same as repayment period"
     },
-    "transactionProcessingStrategyId": 1,
+    "transactionProcessingStrategyCode": "mifos-standard-strategy",
     "transactionProcessingStrategyName": "Mifos style",
     "principalVariationsForBorrowerCycle": [],
     "interestRateVariationsForBorrowerCycle": [],
@@ -16989,7 +16989,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
     "code": "interestCalculationPeriodType.same.as.repayment.period",
     "value": "Same as repayment period"
   },
-  "transactionProcessingStrategyId": 1,
+  "transactionProcessingStrategyCode": "mifos-standard-strategy",
   "transactionProcessingStrategyName": "Mifos style",
   "charges": [],
   "principalVariationsForBorrowerCycle": [
@@ -17162,7 +17162,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							<td>name, shortName, currencyCode, digitsAfterDecimal, inMultiplesOf, principal,
 								numberOfRepayments, repaymentEvery, repaymentFrequencyType,
 								interestRatePerPeriod, interestRateFrequencyType, amortizationType, interestType,
-								interestCalculationPeriodType, transactionProcessingStrategyId,
+								interestCalculationPeriodType, transactionProcessingStrategyCode,
 								accountingRule, isInterestRecalculationEnabled, daysInYearType, daysInMonthType</td>
 						</tr>
 					</table>
@@ -17277,7 +17277,7 @@ Request Body:
 "amortizationType":1,
 "interestType":0,
 "interestCalculationPeriodType":1,
-"transactionProcessingStrategyId":1,
+"transactionProcessingStrategyCode":"mifos-standard-strategy",
 "principalVariationsForBorrowerCycle":[],
 "interestRateVariationsForBorrowerCycle":[],
 "numberOfRepaymentVariationsForBorrowerCycle":[
@@ -17299,7 +17299,7 @@ Request Body:
 "allowAttributeOverrides":
 	{amortizationType : true,
 	 interestType : true,
-	 transactionProcessingStrategyId : false,
+	 transactionProcessingStrategyCode : false,
 	 interestCalculationPeriodType : true,
 	 inArrearsTolerance : false,
 	 repaymentEvery : true,
@@ -17355,7 +17355,7 @@ Request Body:
     "numberOfRepayments": "12",
     "repaymentEvery": "1",
     "repaymentFrequencyType": 2,
-    "transactionProcessingStrategyId": 1,
+    "transactionProcessingStrategyCode": "mifos-standard-strategy",
     "interestRatePerPeriod": "1.75",
     "interestRateFrequencyType": 2,
     "amortizationType": 1,
@@ -17422,7 +17422,7 @@ Request Body:
     "numberOfRepayments": "12",
     "repaymentEvery": "1",
     "repaymentFrequencyType": 2,
-    "transactionProcessingStrategyId": 1,
+    "transactionProcessingStrategyCode": "mifos-standard-strategy",
     "interestRatePerPeriod": "1.75",
     "interestRateFrequencyType": 2,
     "amortizationType": 1,
@@ -47942,7 +47942,7 @@ GET https://DomainName/api/v1/self/loans/template?templateType=individual&client
     "code": "interestCalculationPeriodType.same.as.repayment.period",
     "value": "Same as repayment period"
   },
-  "transactionProcessingStrategyId": 2,
+  "transactionProcessingStrategyCode": "mifos-standard-strategy",
   "timeline": {
     "expectedDisbursementDate": [
       2013,
@@ -48192,7 +48192,7 @@ GET https://DomainName/api/v1/self/loans/template?templateType=individual&client
 								repaymentFrequencyType, interestRatePerPeriod,
 								amortizationType, interestType,
 								interestCalculationPeriodType, expectedDisbursementDate,
-								transactionProcessingStrategyId</td>
+								transactionProcessingStrategyCode</td>
 						</tr>
 					</table>
 				</div>
@@ -48219,7 +48219,7 @@ Request Body:
     "interestType": 0,
     "interestCalculationPeriodType": 1,
     "expectedDisbursementDate": "20 September 2011",
-    "transactionProcessingStrategyId": 2
+    "transactionProcessingStrategyCode": "mifos-standard-strategy"
 }
 					</code>
 					<code class="method-response">
@@ -48343,7 +48343,7 @@ Request Body:
 								loanTermFrequencyType, loanType, numberOfRepayments, repaymentEvery,
 								repaymentFrequencyType, interestRatePerPeriod,
 								amortizationType, interestType,
-								interestCalculationPeriodType, transactionProcessingStrategyId,
+								interestCalculationPeriodType, transactionProcessingStrategyCode,
 								expectedDisbursementDate, submittedOnDate, loanType</td>
 						</tr>
 					</table>
@@ -48400,7 +48400,7 @@ Request Body:
     "amortizationType": 1,
     "interestType": 0,
     "interestCalculationPeriodType": 1,
-    "transactionProcessingStrategyId": 1,
+    "transactionProcessingStrategyCode": "mifos-standard-strategy",
     "expectedDisbursementDate": "10 Jun 2013",
     "submittedOnDate": "10 Jun 2013",
     "linkAccountId" : "1",
@@ -48553,7 +48553,7 @@ GET https://DomainName/api/v1/self/loans/{loanId}
     "code": "interestCalculationPeriodType.same.as.repayment.period",
     "value": "Same as repayment period"
   },
-  "transactionProcessingStrategyId": 2,
+  "transactionProcessingStrategyCode": "mifos-standard-strategy",
   "timeline": {
     "submittedOnDate": [
       2012,
@@ -48722,7 +48722,7 @@ No Request Body:
   "interestCalculationPeriodType": 0,
   "amortizationType": 1,
   "expectedDisbursementDate": "04 March 2014",
-  "transactionProcessingStrategyId": 1
+  "transactionProcessingStrategyCode": "mifos-standard-strategy"
 }
 					</code>
 					<code class="method-response">
@@ -51635,7 +51635,7 @@ No Request Body:
 
 
 <tr class=alt>
-	<td>transactionProcessingStrategyId</td>
+	<td>transactionProcessingStrategyCode</td>
 </tr>
 <tr>
 	<td class=fielddesc>
@@ -51929,7 +51929,7 @@ GET https://DomainName/api/v1/self/loanproducts/{productId}?clientId={clientId}
     "code": "interestCalculationPeriodType.same.as.repayment.period",
     "value": "Same as repayment period"
   },
-  "transactionProcessingStrategyId": 1,
+  "transactionProcessingStrategyCode": "mifos-standard-strategy",
   "transactionProcessingStrategyName": "Mifos style",
   "charges": [],
   "principalVariationsForBorrowerCycle": [

@@ -118,6 +118,10 @@ public class LoanRepaymentScheduleProcessingWrapper {
                     cumulative = cumulative.plus(loanChargeAmt);
                 } else if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd)) {
                     cumulative = cumulative.plus(loanCharge.amount());
+                    // Special case for Loan Charges (Due Date) added the same disbursement date
+                } else if (period.isFirstPeriod()
+                        && loanCharge.isDueForCollectionFromIncludingAndUpToAndIncluding(periodStart, periodEnd)) {
+                    cumulative = cumulative.plus(loanCharge.amount());
                 }
             }
         }

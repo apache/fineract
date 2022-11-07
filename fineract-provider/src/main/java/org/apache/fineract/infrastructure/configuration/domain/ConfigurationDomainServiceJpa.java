@@ -40,6 +40,9 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
 
     public static final String ENABLE_BUSINESS_DATE = "enable_business_date";
     public static final String ENABLE_AUTOMATIC_COB_DATE_ADJUSTMENT = "enable_automatic_cob_date_adjustment";
+    public static final String EXTERNAL_EVENTS_PURGE_DAYS = "purge-external-events-older-than-days";
+    private static final String DAYS_BEFORE_REPAYMENT_IS_DUE = "days-before-repayment-is-due";
+    private static final String DAYS_AFTER_REPAYMENT_IS_OVERDUE = "days-after-repayment-is-overdue";
     private final PermissionRepository permissionRepository;
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
     private final PlatformCacheRepository cacheTypeRepository;
@@ -124,7 +127,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     @Override
     public void updateCache(final CacheType cacheType) {
         this.cacheTypeRepository.findById(1L).ifPresent(cache -> {
-            cache.update(cacheType);
+            cache.setCacheType(cacheType.getValue());
             this.cacheTypeRepository.save(cache);
         });
     }
@@ -245,7 +248,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     }
 
     @Override
-    public boolean isPaymnetypeApplicableforDisbursementCharge() {
+    public boolean isPaymentTypeApplicableForDisbursementCharge() {
         final String propertyName = "paymenttype-applicable-for-disbursement-charges";
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
         return property.isEnabled();
@@ -372,13 +375,13 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final String propertyName = "allow-backdated-transaction-before-interest-posting-date-for-days";
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
         if (property.getValue() == null) {
-            return Long.valueOf(0);
+            return 0L;
         }
         return property.getValue();
     }
 
     @Cacheable(value = "configByName", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#propertyName)")
-    private GlobalConfigurationPropertyData getGlobalConfigurationPropertyData(final String propertyName) {
+    public GlobalConfigurationPropertyData getGlobalConfigurationPropertyData(final String propertyName) {
         String identifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
         String key = identifier + "_" + propertyName;
         if (!configurations.containsKey(key)) {
@@ -450,5 +453,24 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final String propertyName = "enable-post-reversal-txns-for-reverse-transactions";
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
         return property.isEnabled();
+    }
+
+    @Override
+    public Long retrieveExternalEventsPurgeDaysCriteria() {
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(EXTERNAL_EVENTS_PURGE_DAYS);
+        return property.getValue();
+
+    }
+
+    @Override
+    public Long retrieveRepaymentDueDays() {
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(DAYS_BEFORE_REPAYMENT_IS_DUE);
+        return property.getValue();
+    }
+
+    @Override
+    public Long retrieveRepaymentOverdueDays() {
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(DAYS_AFTER_REPAYMENT_IS_OVERDUE);
+        return property.getValue();
     }
 }

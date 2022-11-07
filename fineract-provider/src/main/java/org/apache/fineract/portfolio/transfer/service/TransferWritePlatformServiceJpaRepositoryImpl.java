@@ -238,7 +238,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
          **/
         final List<Loan> allClientJLGLoans = this.loanRepositoryWrapper.findByClientIdAndGroupId(client.getId(), sourceGroup.getId());
         for (final Loan loan : allClientJLGLoans) {
-            if (loan.status().isActiveOrAwaitingApprovalOrDisbursal()) {
+            if (loan.getStatus().isActiveOrAwaitingApprovalOrDisbursal()) {
                 loan.updateGroup(destinationGroup);
                 if (inheritDestinationGroupLoanOfficer != null && inheritDestinationGroupLoanOfficer == true
                         && destinationGroupLoanOfficer != null) {

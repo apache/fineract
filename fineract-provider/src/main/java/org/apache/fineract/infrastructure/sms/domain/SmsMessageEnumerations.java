@@ -22,9 +22,7 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public final class SmsMessageEnumerations {
 
-    private SmsMessageEnumerations() {
-
-    }
+    private SmsMessageEnumerations() {}
 
     public static EnumOptionData status(final Integer statusId) {
         return status(SmsMessageStatusType.fromInt(statusId));

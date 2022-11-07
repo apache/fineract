@@ -42,15 +42,12 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
-import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.portfolio.collateralmanagement.data.CollateralManagementData;
-import org.apache.fineract.portfolio.collateralmanagement.service.ClientCollateralManagementReadPlatformService;
 import org.apache.fineract.portfolio.collateralmanagement.service.CollateralManagementReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -64,31 +61,21 @@ public class CollateralManagementApiResource {
 
     private final DefaultToApiJsonSerializer<CollateralManagementData> apiJsonSerializerService;
     private final DefaultToApiJsonSerializer<CurrencyData> apiJsonSerializerServiceForCurrency;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final PlatformSecurityContext context;
-    private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final CollateralManagementReadPlatformService collateralManagementReadPlatformService;
-    private final String collateralReadPermission = "COLLATERAL_PRODUCT";
-    private final ClientCollateralManagementReadPlatformService clientCollateralManagementReadPlatformService;
     private final CurrencyReadPlatformService currencyReadPlatformService;
 
     @Autowired
     public CollateralManagementApiResource(final DefaultToApiJsonSerializer<CollateralManagementData> apiJsonSerializerService,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService, final PlatformSecurityContext context,
-            final CodeValueReadPlatformService codeValueReadPlatformService,
             final CollateralManagementReadPlatformService collateralManagementReadPlatformService,
-            final ClientCollateralManagementReadPlatformService clientCollateralManagementReadPlatformService,
             final CurrencyReadPlatformService currencyReadPlatformService,
             final DefaultToApiJsonSerializer<CurrencyData> apiJsonSerializerServiceForCurrency) {
         this.apiJsonSerializerService = apiJsonSerializerService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.context = context;
-        this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.collateralManagementReadPlatformService = collateralManagementReadPlatformService;
-        this.clientCollateralManagementReadPlatformService = clientCollateralManagementReadPlatformService;
         this.currencyReadPlatformService = currencyReadPlatformService;
         this.apiJsonSerializerServiceForCurrency = apiJsonSerializerServiceForCurrency;
     }

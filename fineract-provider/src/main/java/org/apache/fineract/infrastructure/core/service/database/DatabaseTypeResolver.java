@@ -28,10 +28,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class DatabaseTypeResolver implements InitializingBean {
 
-    private final Map<String, DatabaseType> driverMapping = Map.of("org.mariadb.jdbc.Driver", DatabaseType.MYSQL, "com.mysql.jdbc.Driver",
-            DatabaseType.MYSQL, "com.mysql.cj.jdbc.Driver", DatabaseType.MYSQL, "org.postgresql.Driver", DatabaseType.POSTGRESQL);
+    private static final Map<String, DatabaseType> DRIVER_MAPPING = Map.of("org.mariadb.jdbc.Driver", DatabaseType.MYSQL,
+            "com.mysql.jdbc.Driver", DatabaseType.MYSQL, "com.mysql.cj.jdbc.Driver", DatabaseType.MYSQL, "org.postgresql.Driver",
+            DatabaseType.POSTGRESQL);
 
-    private final AtomicReference<DatabaseType> currentDatabaseType = new AtomicReference<>();
+    private static final AtomicReference<DatabaseType> currentDatabaseType = new AtomicReference<>();
     private final HikariConfig hikariConfig;
 
     @Autowired
@@ -45,7 +46,7 @@ public class DatabaseTypeResolver implements InitializingBean {
     }
 
     private DatabaseType determineDatabaseType(String driverClassName) {
-        DatabaseType databaseType = driverMapping.get(driverClassName);
+        DatabaseType databaseType = DRIVER_MAPPING.get(driverClassName);
         if (databaseType == null) {
             throw new IllegalArgumentException("The driver's class is not supported " + driverClassName);
         }

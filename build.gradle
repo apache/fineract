@@ -23,6 +23,7 @@ buildscript {
         retrofitVersion = '2.9.0'
         okhttpVersion = '4.9.3'
         oltuVersion = '1.0.1'
+        fineractCustomProjects = []
         fineractJavaProjects = subprojects.findAll{
             [
                 'fineract-api',
@@ -31,13 +32,12 @@ buildscript {
                 'twofactor-tests',
                 'oauth2-tests',
                 'fineract-client',
-                'core',
-                'service',
-                'starter'
+                'fineract-avro-schemas'
             ].contains(it.name)
         }
         fineractPublishProjects = subprojects.findAll{
             [
+                'fineract-avro-schemas',
                 'fineract-client'
             ].contains(it.name)
         }
@@ -58,15 +58,15 @@ buildscript {
 plugins {
     id "org.barfuin.gradle.taskinfo" version "1.4.0"
     id 'com.adarshr.test-logger' version '3.2.0'
-    id 'com.diffplug.spotless' version '6.8.0' apply false
-    id 'org.nosphere.apache.rat' version '0.7.1' apply false
+    id 'com.diffplug.spotless' version '6.11.0' apply false
+    id 'org.nosphere.apache.rat' version '0.8.0' apply false
     id 'com.github.hierynomus.license' version '0.16.1' apply false
     id 'com.github.jk1.dependency-license-report' version '2.1' apply false
-    id 'org.openapi.generator' version '6.0.1' apply false
-    id 'org.zeroturnaround.gradle.jrebel' version '1.1.11' apply false
-    id 'org.springframework.boot' version '2.7.1' apply false
+    id 'org.openapi.generator' version '6.2.0' apply false
+    id 'org.zeroturnaround.gradle.jrebel' version '1.1.12' apply false
+    id 'org.springframework.boot' version '2.7.5' apply false
     id 'net.ltgt.errorprone' version '2.0.2' apply false
-    id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.1' apply false
+    id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.4' apply false
     id 'com.gorylenko.gradle-git-properties' version '2.4.1' apply false
     id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.pdf' version '3.3.2' apply false
@@ -74,12 +74,13 @@ plugins {
     id 'org.asciidoctor.jvm.revealjs' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.gems' version '3.3.2' apply false
     id 'org.asciidoctor.kindlegen.base' version '3.2.0' apply false
-    id 'com.google.cloud.tools.jib' version '3.2.1' apply false
+    id 'com.google.cloud.tools.jib' version '3.3.0' apply false
     id 'fr.brouillard.oss.gradle.jgitver' version '0.10.0-rc03'
     id 'org.sonarqube' version '3.4.0.2513'
     id 'com.github.andygoossens.modernizer' version '1.6.2' apply false
-    id 'com.github.spotbugs' version '5.0.9' apply false
+    id 'com.github.spotbugs' version '5.0.13' apply false
     id 'se.thinkcode.cucumber-runner' version '0.0.11' apply false
+    id "com.github.davidmc24.gradle.plugin.avro-base" version "1.5.0" apply false
 }
 
 apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.release.gradle"
@@ -152,6 +153,8 @@ allprojects  {
             "**/banner.txt",
             "**/build.gradle.mustache",
             "**/pom.mustache",
+            "**/avro/**/*.java",
+            "**/org/apache/fineract/client/**/*.java"
         ])
         strictCheck true
     }
@@ -246,7 +249,25 @@ allprojects  {
             "**/git.properties",
             ".mailmap",
             '**/images/diag-*.svg',
+            '**/*.avsc',
+            "**/generated/**/*MapperImpl.java"
         ]
+    }
+}
+
+// NOTE: dynamically load all custom modules
+file("${rootDir}/custom").eachDir { companyDir ->
+    if('build' != companyDir.name && 'docker' != companyDir.name) {
+        file("${rootDir}/custom/${companyDir.name}").eachDir { categoryDir ->
+            if('build' != categoryDir.name) {
+                file("${rootDir}/custom/${companyDir.name}/${categoryDir.name}").eachDir { moduleDir ->
+                    if('build' != moduleDir.name) {
+                        project.fineractJavaProjects.add(project(":custom:${companyDir.name}:${categoryDir.name}:${moduleDir.name}"))
+                        project.fineractCustomProjects.add(project(":custom:${companyDir.name}:${categoryDir.name}:${moduleDir.name}"))
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -375,7 +396,7 @@ configure(project.fineractJavaProjects) {
     // Configuration for the Checkstyle plugin
     // https://docs.gradle.org/current/userguide/checkstyle_plugin.html
     dependencies {
-        checkstyle 'com.puppycrawl.tools:checkstyle:10.3.1'
+        checkstyle 'com.puppycrawl.tools:checkstyle:10.3.4'
         checkstyle 'com.github.sevntu-checkstyle:sevntu-checks:1.42.0'
     }
 
@@ -397,7 +418,7 @@ configure(project.fineractJavaProjects) {
     // Configuration for the errorprone plugin
     // https://github.com/tbroyer/gradle-errorprone-plugin
     dependencies {
-        errorprone "com.google.errorprone:error_prone_core:2.14.0"
+        errorprone "com.google.errorprone:error_prone_core:2.15.0"
     }
 
     tasks.withType(JavaCompile) {
@@ -416,6 +437,8 @@ configure(project.fineractJavaProjects) {
                     "InvalidBlockTag",
                     "JavaUtilDate", // TODO FINERACT-1298
                     "ReturnValueIgnored",
+                    "DirectInvocationOnMock",
+                    "CanIgnoreReturnValueSuggester",
                     "SameNameButDifferent", // Until errorprone recognizes Lombok
                     "MultiVariableDeclaration" // Until errorprone recognizes Lombok
                     )
@@ -513,6 +536,9 @@ configure(project.fineractJavaProjects) {
             exclude(module: "slf4j-api")
         }
 
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+
         testImplementation( 'org.mockito:mockito-core',
                 'org.mockito:mockito-junit-jupiter',
                 'org.junit.jupiter:junit-jupiter-api',
@@ -532,7 +558,6 @@ configure(project.fineractJavaProjects) {
 
     test {
         useJUnitPlatform()
-        dependsOn 'cucumber'
 
         if (project.hasProperty('excludeTests')) {
             filter {
@@ -585,6 +610,63 @@ configure(project.fineractJavaProjects) {
         violationLogLevel="error"
         javaVersion = project.targetCompatibility
         ignoreGeneratedClasses = true
+    }
+}
+
+configure(project.fineractCustomProjects) {
+    compileJava {
+        dependsOn = []
+    }
+
+    dependencies {
+        implementation (
+                'org.springframework:spring-context',
+                'ch.qos.logback:logback-core',
+                'org.slf4j:slf4j-api',
+                'org.slf4j:log4j-over-slf4j',
+                'org.slf4j:jul-to-slf4j',
+                )
+        implementation ("ch.qos.logback:logback-classic") {
+            exclude(module: "slf4j-api")
+        }
+
+        compileOnly('org.projectlombok:lombok')
+        annotationProcessor('org.projectlombok:lombok')
+        annotationProcessor('org.mapstruct:mapstruct-processor')
+        annotationProcessor('org.springframework.boot:spring-boot-autoconfigure-processor')
+        annotationProcessor('org.springframework.boot:spring-boot-configuration-processor')
+
+        testImplementation ('org.springframework.boot:spring-boot-starter-test') {
+            exclude group: 'com.jayway.jsonpath', module: 'json-path'
+            exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+            exclude group: 'jakarta.activation'
+            exclude group: 'javax.activation'
+            exclude group: 'org.skyscreamer'
+        }
+        testImplementation( 'org.mockito:mockito-core',
+                'org.mockito:mockito-inline',
+                'org.mockito:mockito-junit-jupiter',
+                'org.junit.jupiter:junit-jupiter-api',
+                'org.junit.jupiter:junit-jupiter-engine',
+                'org.junit.platform:junit-platform-runner', // required to be able to run tests directly under Eclipse, see FINERACT-943 & FINERACT-1021
+                'org.bouncycastle:bcpkix-jdk15to18',
+                'org.bouncycastle:bcprov-jdk15to18',
+                'org.awaitility:awaitility',
+                'com.google.truth:truth',
+                'com.google.truth.extensions:truth-java8-extension',
+                'io.github.classgraph:classgraph',
+                'io.cucumber:cucumber-core',
+                'io.cucumber:cucumber-java',
+                'io.cucumber:cucumber-java8',
+                'io.cucumber:cucumber-junit-platform-engine',
+                'io.cucumber:cucumber-spring',
+                )
+
+        testCompileOnly('org.projectlombok:lombok')
+        testAnnotationProcessor('org.projectlombok:lombok')
+        testAnnotationProcessor('org.mapstruct:mapstruct-processor')
+        testAnnotationProcessor('org.springframework.boot:spring-boot-autoconfigure-processor')
+        testAnnotationProcessor('org.springframework.boot:spring-boot-configuration-processor')
     }
 }
 

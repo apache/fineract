@@ -49,7 +49,7 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.portfolio.products.constants.ProductsApiConstants;
 import org.apache.fineract.portfolio.products.data.ProductData;
 import org.apache.fineract.portfolio.products.exception.ResourceNotFoundException;
-import org.apache.fineract.portfolio.products.service.ProductReadPlatformService;
+import org.apache.fineract.portfolio.products.service.ShareProductReadPlatformService;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -87,7 +87,7 @@ public class ProductsApiResource {
             @Context final UriInfo uriInfo) {
         String serviceName = productType + ProductsApiConstants.READPLATFORM_NAME;
         try {
-            ProductReadPlatformService service = (ProductReadPlatformService) this.applicationContext.getBean(serviceName);
+            ShareProductReadPlatformService service = (ShareProductReadPlatformService) this.applicationContext.getBean(serviceName);
             ProductData data = service.retrieveTemplate();
             final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
             return this.toApiJsonSerializer.serialize(settings, data, service.getResponseDataParams());
@@ -108,7 +108,7 @@ public class ProductsApiResource {
             @PathParam("type") @Parameter(description = "type") final String productType, @Context final UriInfo uriInfo) {
         try {
             String serviceName = productType + ProductsApiConstants.READPLATFORM_NAME;
-            ProductReadPlatformService service = (ProductReadPlatformService) this.applicationContext.getBean(serviceName);
+            ShareProductReadPlatformService service = (ShareProductReadPlatformService) this.applicationContext.getBean(serviceName);
             final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
             ProductData data = service.retrieveOne(productId, settings.isTemplate());
             return this.toApiJsonSerializer.serialize(settings, data, service.getResponseDataParams());
@@ -129,7 +129,7 @@ public class ProductsApiResource {
             @QueryParam("limit") @Parameter(description = "limit") final Integer limit, @Context final UriInfo uriInfo) {
         try {
             String serviceName = productType + ProductsApiConstants.READPLATFORM_NAME;
-            ProductReadPlatformService service = (ProductReadPlatformService) this.applicationContext.getBean(serviceName);
+            ShareProductReadPlatformService service = (ShareProductReadPlatformService) this.applicationContext.getBean(serviceName);
             Page<ProductData> data = service.retrieveAllProducts(offset, limit);
             final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
             return this.toApiJsonSerializer.serialize(settings, data, service.getResponseDataParams());

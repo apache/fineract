@@ -1,0 +1,32 @@
+{
+    "name": "BulkMessageItemV1",
+    "namespace": "org.apache.fineract.avro",
+    "type": "record",
+    "fields": [
+        {
+            "name": "id",
+            "doc": "The ID of the message to be sent",
+            "type": "int"
+        },
+        {
+            "name": "type",
+            "doc": "The type of event the payload refers to. For example LoanApprovedBusinessEvent",
+            "type": "string"
+        },
+        {
+            "name": "category",
+            "doc": "The category of event the payload refers to. For example LOAN",
+            "type": "string"
+        },
+        {
+            "name": "dataschema",
+            "doc": "The fully qualified name of the schema of the event payload. For example org.apache.fineract.avro.loan.v1.LoanAccountDataV1",
+            "type": "string"
+        },
+        {
+            "name": "data",
+            "doc": "The payload data serialized into Avro bytes",
+            "type": "bytes"
+        }
+    ]
+}

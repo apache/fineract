@@ -73,7 +73,7 @@ public class LoanTermVariations extends AbstractPersistableCustom {
         this.decimalValue = decimalValue;
         this.dateValue = dateValue;
         this.isSpecificToInstallment = isSpecificToInstallment;
-        this.onLoanStatus = loan.status().getValue();
+        this.onLoanStatus = loan.getStatus().getValue();
         this.isActive = true;
         this.parent = null;
     }
@@ -114,7 +114,7 @@ public class LoanTermVariations extends AbstractPersistableCustom {
     }
 
     public LoanTermVariationsData toData() {
-        EnumOptionData type = LoanEnumerations.loanvariationType(this.termType);
+        EnumOptionData type = LoanEnumerations.loanVariationType(this.termType);
         return new LoanTermVariationsData(getId(), type, this.termApplicableFrom, this.decimalValue, this.dateValue,
                 this.isSpecificToInstallment);
     }

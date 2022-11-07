@@ -930,7 +930,6 @@ CREATE TABLE `m_loan` (
   KEY `FKB6F935D87179A0CB` (`client_id`),
   KEY `FKB6F935D8C8D4B434` (`product_id`),
   KEY `FK7C885877240145` (`fund_id`),
-  KEY `FK_loan_ltp_strategy` (`loan_transaction_strategy_id`),
   KEY `FK_m_loan_m_staff` (`loan_officer_id`),
   KEY `group_id` (`group_id`),
   KEY `FK_m_loanpurpose_codevalue` (`loanpurpose_cv_id`),
@@ -946,7 +945,6 @@ CREATE TABLE `m_loan` (
   CONSTRAINT `FK_approvedon_userid` FOREIGN KEY (`approvedon_userid`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_closedon_userid` FOREIGN KEY (`closedon_userid`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_disbursedon_userid` FOREIGN KEY (`disbursedon_userid`) REFERENCES `m_appuser` (`id`),
-  CONSTRAINT `FK_loan_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`),
   CONSTRAINT `FK_m_loanpurpose_codevalue` FOREIGN KEY (`loanpurpose_cv_id`) REFERENCES `m_code_value` (`id`),
   CONSTRAINT `FK_m_loan_m_staff` FOREIGN KEY (`loan_officer_id`) REFERENCES `m_staff` (`id`),
   CONSTRAINT `FK_rejectedon_userid` FOREIGN KEY (`rejectedon_userid`) REFERENCES `m_appuser` (`id`),
@@ -1399,7 +1397,7 @@ CREATE TABLE `m_portfolio_command_source` (
 
 LOCK TABLES `m_portfolio_command_source` WRITE;
 /*!40000 ALTER TABLE `m_portfolio_command_source` DISABLE KEYS */;
-INSERT INTO `m_portfolio_command_source` VALUES (1,'CREATE','CLIENT',2,NULL,1,NULL,NULL,'/clients/template',1,NULL,'{\"officeId\":\"2\",\"firstname\":\"Test\",\"middlename\":\"\",\"lastname\":\"One\",\"fullname\":\"\",\"externalId\":\"\",\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\",\"joinedDate\":\"2011-02-01\"}',1,'2013-04-05 12:38:05',NULL,NULL,1),(2,'CREATE','LOAN',2,NULL,1,1,NULL,'/loans',1,NULL,'{\"clientId\":\"1\",\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\",\"productId\":\"1\",\"loanOfficerId\":\"2\",\"submittedOnDate\":\"2011-04-01\",\"loanPurposeId\":\"25\",\"principal\":\"1,000,000.00\",\"loanTermFrequency\":\"12\",\"loanTermFrequencyType\":\"2\",\"numberOfRepayments\":\"12\",\"repaymentEvery\":\"1\",\"repaymentFrequencyType\":\"2\",\"interestRatePerPeriod\":\"24\",\"interestRateFrequencyType\":\"3\",\"expectedDisbursementDate\":\"2011-04-01\",\"amortizationType\":\"1\",\"interestType\":\"1\",\"interestCalculationPeriodType\":\"1\",\"inArrearsTolerance\":\"\",\"transactionProcessingStrategyId\":\"2\",\"repaymentsStartingFromDate\":\"\",\"interestChargedFromDate\":\"\",\"charges\":[{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-05-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-06-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-07-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-08-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-09-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-10-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-11-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-12-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2012-01-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2012-02-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2012-03-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2012-04-01\"}],\"collateral\":[{\"id\":\"\",\"type\":\"23\",\"description\":\" small description.\",\"value\":\"\"}]}',1,'2013-04-05 12:41:57',NULL,NULL,1),(3,'APPROVE','LOAN',2,NULL,1,1,NULL,'/loans/1',1,NULL,'{\"status\":{\"id\":200,\"code\":\"loanStatusType.approved\",\"value\":\"Approved\",\"pendingApproval\":false,\"waitingForDisbursal\":true,\"active\":false,\"closedObligationsMet\":false,\"closedWrittenOff\":false,\"closedRescheduled\":false,\"closed\":false,\"overpaid\":false},\"locale\":\"en\",\"dateFormat\":\"yyyy-MM-dd\",\"approvedOnDate\":\"2011-04-01\"}',1,'2013-04-05 12:42:09',NULL,NULL,1);
+INSERT INTO `m_portfolio_command_source` VALUES (1,'CREATE','CLIENT',2,NULL,1,NULL,NULL,'/clients/template',1,NULL,'{\"officeId\":\"2\",\"firstname\":\"Test\",\"middlename\":\"\",\"lastname\":\"One\",\"fullname\":\"\",\"externalId\":\"\",\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\",\"joinedDate\":\"2011-02-01\"}',1,'2013-04-05 12:38:05',NULL,NULL,1),(2,'CREATE','LOAN',2,NULL,1,1,NULL,'/loans',1,NULL,'{\"clientId\":\"1\",\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\",\"productId\":\"1\",\"loanOfficerId\":\"2\",\"submittedOnDate\":\"2011-04-01\",\"loanPurposeId\":\"25\",\"principal\":\"1,000,000.00\",\"loanTermFrequency\":\"12\",\"loanTermFrequencyType\":\"2\",\"numberOfRepayments\":\"12\",\"repaymentEvery\":\"1\",\"repaymentFrequencyType\":\"2\",\"interestRatePerPeriod\":\"24\",\"interestRateFrequencyType\":\"3\",\"expectedDisbursementDate\":\"2011-04-01\",\"amortizationType\":\"1\",\"interestType\":\"1\",\"interestCalculationPeriodType\":\"1\",\"inArrearsTolerance\":\"\",\"transactionProcessingStrategy\":\"heavensfamily-strategy\",\"repaymentsStartingFromDate\":\"\",\"interestChargedFromDate\":\"\",\"charges\":[{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-05-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-06-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-07-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-08-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-09-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-10-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-11-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-12-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2012-01-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2012-02-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2012-03-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2012-04-01\"}],\"collateral\":[{\"id\":\"\",\"type\":\"23\",\"description\":\" small description.\",\"value\":\"\"}]}',1,'2013-04-05 12:41:57',NULL,NULL,1),(3,'APPROVE','LOAN',2,NULL,1,1,NULL,'/loans/1',1,NULL,'{\"status\":{\"id\":200,\"code\":\"loanStatusType.approved\",\"value\":\"Approved\",\"pendingApproval\":false,\"waitingForDisbursal\":true,\"active\":false,\"closedObligationsMet\":false,\"closedWrittenOff\":false,\"closedRescheduled\":false,\"closed\":false,\"overpaid\":false},\"locale\":\"en\",\"dateFormat\":\"yyyy-MM-dd\",\"approvedOnDate\":\"2011-04-01\"}',1,'2013-04-05 12:42:09',NULL,NULL,1);
 /*!40000 ALTER TABLE `m_portfolio_command_source` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1435,9 +1433,7 @@ CREATE TABLE `m_product_loan` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `unq_name` (`name`),
   KEY `FKA6A8A7D77240145` (`fund_id`),
-  KEY `FK_ltp_strategy` (`loan_transaction_strategy_id`),
-  CONSTRAINT `FKA6A8A7D77240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`),
-  CONSTRAINT `FK_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`)
+  CONSTRAINT `FKA6A8A7D77240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=UTF8MB4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1707,36 +1703,6 @@ LOCK TABLES `r_enum_value` WRITE;
 /*!40000 ALTER TABLE `r_enum_value` DISABLE KEYS */;
 INSERT INTO `r_enum_value` VALUES ('amortization_method_enum',0,'Equal principle payments','Equal principle payments'),('amortization_method_enum',1,'Equal installments','Equal installments'),('interest_calculated_in_period_enum',0,'Daily','Daily'),('interest_calculated_in_period_enum',1,'Same as repayment period','Same as repayment period'),('interest_method_enum',0,'Declining Balance','Declining Balance'),('interest_method_enum',1,'Flat','Flat'),('interest_period_frequency_enum',2,'Per month','Per month'),('interest_period_frequency_enum',3,'Per year','Per year'),('loan_status_id',100,'Submitted and awaiting approval','Submitted and awaiting approval'),('loan_status_id',200,'Approved','Approved'),('loan_status_id',300,'Active','Active'),('loan_status_id',400,'Withdrawn by client','Withdrawn by client'),('loan_status_id',500,'Rejected','Rejected'),('loan_status_id',600,'Closed','Closed'),('loan_status_id',601,'Written-Off','Written-Off'),('loan_status_id',602,'Rescheduled','Rescheduled'),('loan_status_id',700,'Overpaid','Overpaid'),('loan_transaction_strategy_id',1,'mifos-standard-strategy','Mifos style'),('loan_transaction_strategy_id',2,'heavensfamily-strategy','Heavensfamily'),('loan_transaction_strategy_id',3,'creocore-strategy','Creocore'),('loan_transaction_strategy_id',4,'rbi-india-strategy','RBI (India)'),('processing_result_enum',0,'invalid','Invalid'),('processing_result_enum',1,'processed','Processed'),('processing_result_enum',2,'awaiting.approval','Awaiting Approval'),('processing_result_enum',3,'rejected','Rejected'),('repayment_period_frequency_enum',0,'Days','Days'),('repayment_period_frequency_enum',1,'Weeks','Weeks'),('repayment_period_frequency_enum',2,'Months','Months'),('term_period_frequency_enum',0,'Days','Days'),('term_period_frequency_enum',1,'Weeks','Weeks'),('term_period_frequency_enum',2,'Months','Months'),('term_period_frequency_enum',3,'Years','Years'),('transaction_type_enum',1,'Disbursement','Disbursement'),('transaction_type_enum',2,'Repayment','Repayment'),('transaction_type_enum',3,'Contra','Contra'),('transaction_type_enum',4,'Waive Interest','Waive Interest'),('transaction_type_enum',5,'Repayment At Disbursement','Repayment At Disbursement'),('transaction_type_enum',6,'Write-Off','Write-Off'),('transaction_type_enum',7,'Marked for Rescheduling','Marked for Rescheduling'),('transaction_type_enum',8,'Recovery Repayment','Recovery Repayment'),('transaction_type_enum',9,'Waive Charges','Waive Charges'),('transaction_type_enum',10,'Apply Charges','Apply Charges'),('transaction_type_enum',11,'Apply Interest','Apply Interest');
 /*!40000 ALTER TABLE `r_enum_value` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `ref_loan_transaction_processing_strategy`
---
-
-DROP TABLE IF EXISTS `ref_loan_transaction_processing_strategy`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = UTF8MB4 */;
-CREATE TABLE `ref_loan_transaction_processing_strategy` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `code` varchar(100) DEFAULT NULL,
-  `name` varchar(255) DEFAULT NULL,
-  `createdby_id` BIGINT DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` BIGINT DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `ltp_strategy_code` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=UTF8MB4;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `ref_loan_transaction_processing_strategy`
---
-
-LOCK TABLES `ref_loan_transaction_processing_strategy` WRITE;
-/*!40000 ALTER TABLE `ref_loan_transaction_processing_strategy` DISABLE KEYS */;
-INSERT INTO `ref_loan_transaction_processing_strategy` VALUES (2,'heavensfamily-strategy','Heavensfamily',NULL,NULL,NULL,NULL);
-/*!40000 ALTER TABLE `ref_loan_transaction_processing_strategy` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --

@@ -43,11 +43,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class PocketDataValidator {
 
-    private final Set<String> linkingAccountsSupportedParameters = new HashSet<>(Arrays.asList(PocketApiConstants.accountIdParamName,
-            PocketApiConstants.accountTypeParamName, PocketApiConstants.accountsDetail));
+    private static final Set<String> LINKING_ACCOUNTS_SUPPORTED_PARAMETERS = new HashSet<>(Arrays
+            .asList(PocketApiConstants.accountIdParamName, PocketApiConstants.accountTypeParamName, PocketApiConstants.accountsDetail));
 
-    private final Set<String> delinkingAccountsSupportedParameters = new HashSet<>(
-            Arrays.asList(PocketApiConstants.pocketAccountMappingList));
+    private static final Set<String> DELINKING_ACCOUNTS_SUPPORTED_PARAMETERS = new HashSet<>(
+            List.of(PocketApiConstants.pocketAccountMappingList));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -62,7 +62,7 @@ public class PocketDataValidator {
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.linkingAccountsSupportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, LINKING_ACCOUNTS_SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -97,7 +97,7 @@ public class PocketDataValidator {
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.delinkingAccountsSupportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, DELINKING_ACCOUNTS_SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)

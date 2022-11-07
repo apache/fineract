@@ -1,0 +1,119 @@
+{
+    "name": "AccountTransferDataV1",
+    "namespace": "org.apache.fineract.avro.savings.v1",
+    "type": "record",
+    "fields": [
+        {
+            "default": null,
+            "name": "id",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "default": null,
+            "name": "reversed",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "default": null,
+            "name": "currency",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.CurrencyDataV1"
+            ]
+        },
+        {
+            "default": null,
+            "name": "transferAmount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "transferDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "transferDescription",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "fromOffice",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.office.v1.OfficeDataV1"
+            ]
+        },
+        {
+            "default": null,
+            "name": "fromClient",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.client.v1.ClientDataV1"
+            ]
+        },
+        {
+            "default": null,
+            "name": "fromAccountType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "default": null,
+            "name": "fromAccount",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.portfolio.v1.PortfolioAccountDataV1"
+            ]
+        },
+        {
+            "default": null,
+            "name": "toOffice",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.office.v1.OfficeDataV1"
+            ]
+        },
+        {
+            "default": null,
+            "name": "toClient",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.client.v1.ClientDataV1"
+            ]
+        },
+        {
+            "default": null,
+            "name": "toAccountType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.EnumOptionDataV1"
+            ]
+        },
+        {
+            "default": null,
+            "name": "toAccount",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.portfolio.v1.PortfolioAccountDataV1"
+            ]
+        }
+    ]
+}

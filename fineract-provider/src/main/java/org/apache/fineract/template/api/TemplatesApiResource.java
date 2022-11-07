@@ -28,9 +28,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -81,9 +78,13 @@ import org.springframework.stereotype.Component;
         + "UGDs can be assigned to an entity like client or loan and be of a type like Document or SMS. The entity and type of a UGD is only there for the convenience of user agents (UIs), in order to know where to show UGDs for the user (i.e. which tab). The Template Engine back-end runner does not actually need this metadata.")
 public class TemplatesApiResource {
 
-    private final Set<String> responseTemplatesDataParameters = new HashSet<>(Arrays.asList("id"));
-    private final Set<String> responseTemplateDataParameters = new HashSet<>(Arrays.asList("id", "entities", "types", "template"));
-    private final String resourceNameForPermission = "template";
+    public static final String ID = "id";
+    public static final String ENTITIES = "entities";
+    public static final String TYPES = "types";
+    public static final String PARAM_TEMPLATE = "template";
+    private static final Set<String> RESPONSE_TEMPLATES_DATA_PARAMETERS = new HashSet<>(List.of(ID));
+    private static final Set<String> RESPONSE_TEMPLATE_DATA_PARAMETERS = new HashSet<>(List.of(ID, ENTITIES, TYPES, PARAM_TEMPLATE));
+    private static final String RESOURCE_NAME_FOR_PERMISSION = PARAM_TEMPLATE;
 
     private final PlatformSecurityContext context;
     private final DefaultToApiJsonSerializer<Template> toApiJsonSerializer;
@@ -120,11 +121,11 @@ public class TemplatesApiResource {
             @DefaultValue("-1") @QueryParam("entityId") @Parameter(description = "entityId") final int entityId,
             @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
 
         // FIXME - we dont use the ORM when doing fetches - we write SQL and
         // fetch through JDBC returning data to be serialized to JSON
-        List<Template> templates = new ArrayList<>();
+        List<Template> templates;
 
         if (typeId != -1 && entityId != -1) {
             templates = this.templateService.getAllByEntityAndType(TemplateEntity.values()[entityId], TemplateType.values()[typeId]);
@@ -133,11 +134,11 @@ public class TemplatesApiResource {
         }
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, templates, this.responseTemplatesDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, templates, RESPONSE_TEMPLATES_DATA_PARAMETERS);
     }
 
     @GET
-    @Path("template")
+    @Path(PARAM_TEMPLATE)
     @Operation(summary = "Retrieve UGD Details Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for UGDs. The UGD data returned consists of any or all of:\n"
             + "\n" + "ARGUMENTS\n" + "name String entity String type String text String optional mappers Mapper optional\n"
             + "Example Request:\n" + "\n" + "templates/template")
@@ -145,12 +146,12 @@ public class TemplatesApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = TemplatesApiResourcesSwagger.GetTemplatesTemplateResponse.class))) })
     public String template(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
 
         final TemplateData templateData = TemplateData.template();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.templateDataApiJsonSerializer.serialize(settings, templateData, this.responseTemplatesDataParameters);
+        return this.templateDataApiJsonSerializer.serialize(settings, templateData, RESPONSE_TEMPLATES_DATA_PARAMETERS);
     }
 
     @POST
@@ -175,24 +176,24 @@ public class TemplatesApiResource {
     public String retrieveOne(@PathParam("templateId") @Parameter(description = "templateId") final Long templateId,
             @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
 
         final Template template = this.templateService.findOneById(templateId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, template, this.responseTemplatesDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, template, RESPONSE_TEMPLATES_DATA_PARAMETERS);
     }
 
     @GET
     @Path("{templateId}/template")
     public String getTemplateByTemplate(@PathParam("templateId") final Long templateId, @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
 
         final TemplateData template = TemplateData.template(this.templateService.findOneById(templateId));
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.templateDataApiJsonSerializer.serialize(settings, template, this.responseTemplateDataParameters);
+        return this.templateDataApiJsonSerializer.serialize(settings, template, RESPONSE_TEMPLATE_DATA_PARAMETERS);
     }
 
     @PUT
@@ -229,7 +230,7 @@ public class TemplatesApiResource {
     @Path("{templateId}")
     @Produces({ MediaType.TEXT_HTML })
     public String mergeTemplate(@PathParam("templateId") final Long templateId, @Context final UriInfo uriInfo,
-            final String apiRequestBodyAsJson) throws MalformedURLException, IOException {
+            final String apiRequestBodyAsJson) throws IOException {
 
         final Template template = this.templateService.findOneById(templateId);
 

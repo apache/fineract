@@ -20,16 +20,18 @@ package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.Getter;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 /**
  * Immutable data object representing loan summary information.
  */
-@SuppressWarnings("unused")
+@Getter
 public class LoanSummaryData {
 
     private final CurrencyData currency;
     private final BigDecimal principalDisbursed;
+    private final BigDecimal principalAdjustments;
     private final BigDecimal principalPaid;
     private final BigDecimal principalWrittenOff;
     private final BigDecimal principalOutstanding;
@@ -66,20 +68,22 @@ public class LoanSummaryData {
     private final Long writeoffReasonId;
     private final String writeoffReason;
 
-    public LoanSummaryData(final CurrencyData currency, final BigDecimal principalDisbursed, final BigDecimal principalPaid,
-            final BigDecimal principalWrittenOff, final BigDecimal principalOutstanding, final BigDecimal principalOverdue,
-            final BigDecimal interestCharged, final BigDecimal interestPaid, final BigDecimal interestWaived,
-            final BigDecimal interestWrittenOff, final BigDecimal interestOutstanding, final BigDecimal interestOverdue,
-            final BigDecimal feeChargesCharged, final BigDecimal feeChargesDueAtDisbursementCharged, final BigDecimal feeChargesPaid,
-            final BigDecimal feeChargesWaived, final BigDecimal feeChargesWrittenOff, final BigDecimal feeChargesOutstanding,
-            final BigDecimal feeChargesOverdue, final BigDecimal penaltyChargesCharged, final BigDecimal penaltyChargesPaid,
-            final BigDecimal penaltyChargesWaived, final BigDecimal penaltyChargesWrittenOff, final BigDecimal penaltyChargesOutstanding,
-            final BigDecimal penaltyChargesOverdue, final BigDecimal totalExpectedRepayment, final BigDecimal totalRepayment,
-            final BigDecimal totalExpectedCostOfLoan, final BigDecimal totalCostOfLoan, final BigDecimal totalWaived,
-            final BigDecimal totalWrittenOff, final BigDecimal totalOutstanding, final BigDecimal totalOverdue,
-            final LocalDate overdueSinceDate, final Long writeoffReasonId, final String writeoffReason, final BigDecimal totalRecovered) {
+    public LoanSummaryData(final CurrencyData currency, final BigDecimal principalDisbursed, final BigDecimal principalAdjustments,
+            final BigDecimal principalPaid, final BigDecimal principalWrittenOff, final BigDecimal principalOutstanding,
+            final BigDecimal principalOverdue, final BigDecimal interestCharged, final BigDecimal interestPaid,
+            final BigDecimal interestWaived, final BigDecimal interestWrittenOff, final BigDecimal interestOutstanding,
+            final BigDecimal interestOverdue, final BigDecimal feeChargesCharged, final BigDecimal feeChargesDueAtDisbursementCharged,
+            final BigDecimal feeChargesPaid, final BigDecimal feeChargesWaived, final BigDecimal feeChargesWrittenOff,
+            final BigDecimal feeChargesOutstanding, final BigDecimal feeChargesOverdue, final BigDecimal penaltyChargesCharged,
+            final BigDecimal penaltyChargesPaid, final BigDecimal penaltyChargesWaived, final BigDecimal penaltyChargesWrittenOff,
+            final BigDecimal penaltyChargesOutstanding, final BigDecimal penaltyChargesOverdue, final BigDecimal totalExpectedRepayment,
+            final BigDecimal totalRepayment, final BigDecimal totalExpectedCostOfLoan, final BigDecimal totalCostOfLoan,
+            final BigDecimal totalWaived, final BigDecimal totalWrittenOff, final BigDecimal totalOutstanding,
+            final BigDecimal totalOverdue, final LocalDate overdueSinceDate, final Long writeoffReasonId, final String writeoffReason,
+            final BigDecimal totalRecovered) {
         this.currency = currency;
         this.principalDisbursed = principalDisbursed;
+        this.principalAdjustments = principalAdjustments;
         this.principalPaid = principalPaid;
         this.principalWrittenOff = principalWrittenOff;
         this.principalOutstanding = principalOutstanding;
@@ -115,13 +119,5 @@ public class LoanSummaryData {
         this.writeoffReasonId = writeoffReasonId;
         this.writeoffReason = writeoffReason;
         this.totalRecovered = totalRecovered;
-    }
-
-    public BigDecimal getTotalOutstanding() {
-        return this.totalOutstanding;
-    }
-
-    public BigDecimal getTotalPaidFeeCharges() {
-        return feeChargesPaid;
     }
 }

@@ -95,7 +95,7 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
         String[] currencyCode = new String[currencies.size()];
         int currencyIndex = 0;
         for (CurrencyData currencies : currencies) {
-            currencyCode[currencyIndex] = currencies.code();
+            currencyCode[currencyIndex] = currencies.getCode();
             currencyIndex++;
         }
         return currencyCode;
@@ -246,13 +246,13 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
             startIndex = rowIndex + 1;
             if (chartOfAccountsSheet.getRow(rowIndex) != null) {
                 Row row = chartOfAccountsSheet.getRow(rowIndex);
-                writeString(ChartOfAcountsConstants.LOOKUP_OFFICE_COL, row, office.name());
+                writeString(ChartOfAcountsConstants.LOOKUP_OFFICE_COL, row, office.getName());
                 writeLong(ChartOfAcountsConstants.LOOKUP_OFFICE_ID_COL, row, office.getId());
                 rowIndex++;
 
             } else {
                 Row row = chartOfAccountsSheet.createRow(rowIndex);
-                writeString(ChartOfAcountsConstants.LOOKUP_OFFICE_COL, row, office.name());
+                writeString(ChartOfAcountsConstants.LOOKUP_OFFICE_COL, row, office.getName());
                 writeLong(ChartOfAcountsConstants.LOOKUP_OFFICE_ID_COL, row, office.getId());
                 rowIndex++;
             }

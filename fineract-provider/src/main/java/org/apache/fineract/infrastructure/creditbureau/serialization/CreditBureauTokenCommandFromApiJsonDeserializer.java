@@ -34,21 +34,25 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CreditBureauTokenCommandFromApiJsonDeserializer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CreditBureauTokenCommandFromApiJsonDeserializer.class);
-
-    private final Set<String> supportedParameters = new HashSet<>(
-            Arrays.asList("access_token", "token_type", "expires_in", "userName", ".issued", ".expires"));
-
-    private final Set<String> supportedTokenConfigParameters = new HashSet<>(
-            Arrays.asList("userName", "password", "subscriptionId", "subscriptionKey"));
+    public static final String ACCESS_TOKEN = "access_token";
+    public static final String TOKEN_TYPE = "token_type";
+    public static final String EXPIRES_IN = "expires_in";
+    public static final String USER_NAME = "userName";
+    public static final String ISSUED = ".issued";
+    public static final String EXPIRES = ".expires";
+    public static final String PASSWORD = "password";
+    public static final String SUBSCRIPTION_ID = "subscriptionId";
+    public static final String SUBSCRIPTION_KEY = "subscriptionKey";
+    private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(
+            Arrays.asList(ACCESS_TOKEN, TOKEN_TYPE, EXPIRES_IN, USER_NAME, ISSUED, EXPIRES));
+    private static final Set<String> SUPPORTED_TOKEN_CONFIG_PARAMETERS = new HashSet<>(
+            Arrays.asList(USER_NAME, PASSWORD, SUBSCRIPTION_ID, SUBSCRIPTION_KEY));
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -61,31 +65,33 @@ public class CreditBureauTokenCommandFromApiJsonDeserializer {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("tokens");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final String access_token = this.fromApiJsonHelper.extractStringNamed("access_token", element);
-        baseDataValidator.reset().parameter("access_token").value(access_token).notBlank().notExceedingLengthOf(1000);
+        final String access_token = this.fromApiJsonHelper.extractStringNamed(ACCESS_TOKEN, element);
+        baseDataValidator.reset().parameter(ACCESS_TOKEN).value(access_token).notBlank().notExceedingLengthOf(1000);
 
-        final String token_type = this.fromApiJsonHelper.extractStringNamed("token_type", element);
-        baseDataValidator.reset().parameter("token_type").value(token_type).notBlank().notExceedingLengthOf(100);
+        final String token_type = this.fromApiJsonHelper.extractStringNamed(TOKEN_TYPE, element);
+        baseDataValidator.reset().parameter(TOKEN_TYPE).value(token_type).notBlank().notExceedingLengthOf(100);
 
-        final String expires_in = this.fromApiJsonHelper.extractStringNamed("expires_in", element);
-        baseDataValidator.reset().parameter("expires_in").value(expires_in).notBlank().notExceedingLengthOf(100);
+        final String expires_in = this.fromApiJsonHelper.extractStringNamed(EXPIRES_IN, element);
+        baseDataValidator.reset().parameter(EXPIRES_IN).value(expires_in).notBlank().notExceedingLengthOf(100);
 
-        final String userName = this.fromApiJsonHelper.extractStringNamed("userName", element);
-        baseDataValidator.reset().parameter("userName").value(userName).notBlank().notExceedingLengthOf(100);
+        final String userName = this.fromApiJsonHelper.extractStringNamed(USER_NAME, element);
+        baseDataValidator.reset().parameter(USER_NAME).value(userName).notBlank().notExceedingLengthOf(100);
 
-        final String issued = this.fromApiJsonHelper.extractStringNamed(".issued", element);
-        baseDataValidator.reset().parameter(".issued").value(issued).notBlank().notExceedingLengthOf(100);
+        final String issued = this.fromApiJsonHelper.extractStringNamed(ISSUED, element);
+        baseDataValidator.reset().parameter(ISSUED).value(issued).notBlank().notExceedingLengthOf(100);
 
-        final String expires = this.fromApiJsonHelper.extractStringNamed(".expires", element);
-        baseDataValidator.reset().parameter(".expires").value(expires).notBlank().notExceedingLengthOf(100);
+        final String expires = this.fromApiJsonHelper.extractStringNamed(EXPIRES, element);
+        baseDataValidator.reset().parameter(EXPIRES).value(expires).notBlank().notExceedingLengthOf(100);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -95,25 +101,27 @@ public class CreditBureauTokenCommandFromApiJsonDeserializer {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedTokenConfigParameters);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_TOKEN_CONFIG_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("configdata");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final String userName = this.fromApiJsonHelper.extractStringNamed("userName", element);
-        baseDataValidator.reset().parameter("userName").value(userName).notBlank().notExceedingLengthOf(1000);
+        final String userName = this.fromApiJsonHelper.extractStringNamed(USER_NAME, element);
+        baseDataValidator.reset().parameter(USER_NAME).value(userName).notBlank().notExceedingLengthOf(1000);
 
-        final String password = this.fromApiJsonHelper.extractStringNamed("password", element);
-        baseDataValidator.reset().parameter("password").value(password).notBlank().notExceedingLengthOf(100);
+        final String password = this.fromApiJsonHelper.extractStringNamed(PASSWORD, element);
+        baseDataValidator.reset().parameter(PASSWORD).value(password).notBlank().notExceedingLengthOf(100);
 
-        final String subscriptionId = this.fromApiJsonHelper.extractStringNamed("subscriptionId", element);
-        baseDataValidator.reset().parameter("subscriptionId").value(subscriptionId).notBlank().notExceedingLengthOf(100);
+        final String subscriptionId = this.fromApiJsonHelper.extractStringNamed(SUBSCRIPTION_ID, element);
+        baseDataValidator.reset().parameter(SUBSCRIPTION_ID).value(subscriptionId).notBlank().notExceedingLengthOf(100);
 
-        final String subscriptionKey = this.fromApiJsonHelper.extractStringNamed("subscriptionKey", element);
-        baseDataValidator.reset().parameter("subscriptionKey").value(subscriptionKey).notBlank().notExceedingLengthOf(100);
+        final String subscriptionKey = this.fromApiJsonHelper.extractStringNamed(SUBSCRIPTION_KEY, element);
+        baseDataValidator.reset().parameter(SUBSCRIPTION_KEY).value(subscriptionKey).notBlank().notExceedingLengthOf(100);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

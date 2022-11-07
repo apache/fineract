@@ -44,10 +44,10 @@ public class LoanProductBorrowerCycleVariations extends AbstractPersistableCusto
     @Column(name = "value_condition", nullable = false)
     private Integer valueConditionType;
 
-    @Column(name = "min_value", scale = 6, precision = 19, nullable = true)
+    @Column(name = "min_value", scale = 6, precision = 19)
     private BigDecimal minValue;
 
-    @Column(name = "max_value", scale = 6, precision = 19, nullable = true)
+    @Column(name = "max_value", scale = 6, precision = 19)
     private BigDecimal maxValue;
 
     @Column(name = "default_value", scale = 6, precision = 19, nullable = false)

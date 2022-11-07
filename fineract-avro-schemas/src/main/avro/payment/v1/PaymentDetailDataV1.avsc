@@ -1,0 +1,63 @@
+{
+    "name": "PaymentDetailDataV1",
+    "namespace": "org.apache.fineract.avro.payment.v1",
+    "type": "record",
+    "fields": [
+        {
+            "default": null,
+            "name": "id",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "paymentType",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.payment.v1.PaymentTypeDataV1"
+            ]
+        },
+        {
+            "default": null,
+            "name": "accountNumber",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "checkNumber",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "routingCode",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "receiptNumber",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "bankNumber",
+            "type": [
+                "null",
+                "string"
+            ]
+        }
+    ]
+}

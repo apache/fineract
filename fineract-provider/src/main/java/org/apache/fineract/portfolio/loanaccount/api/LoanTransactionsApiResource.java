@@ -44,7 +44,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
-import org.apache.commons.lang3.StringUtils;
+import lombok.AllArgsConstructor;
 import org.apache.fineract.accounting.journalentry.api.DateParam;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -54,6 +54,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentScheduleInstallmentData;
@@ -63,18 +64,18 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanChargePaidByReadPla
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Path("/loans/{loanId}/transactions")
 @Component
+@AllArgsConstructor
 @Scope("singleton")
 @Tag(name = "Loan Transactions", description = "Capabilities include loan repayment's, interest waivers and the ability to 'adjust' an existing transaction. An 'adjustment' of a transaction is really a 'reversal' of existing transaction followed by creation of a new transaction with the provided details.")
 public class LoanTransactionsApiResource {
 
-    private final Set<String> responseDataParameters = new HashSet<>(
-            Arrays.asList("id", "type", "date", "currency", "amount", "externalId"));
+    private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "type", "date", "currency", "amount", "externalId",
+            LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME, LoanApiConstants.REVERSED_ON_DATE_PARAMNAME));
 
     private final String resourceNameForPermissions = "LOAN";
 
@@ -85,26 +86,6 @@ public class LoanTransactionsApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
     private final LoanChargePaidByReadPlatformService loanChargePaidByReadPlatformService;
-
-    @Autowired
-    public LoanTransactionsApiResource(final PlatformSecurityContext context, final LoanReadPlatformService loanReadPlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final DefaultToApiJsonSerializer<LoanTransactionData> toApiJsonSerializer,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            PaymentTypeReadPlatformService paymentTypeReadPlatformService,
-            LoanChargePaidByReadPlatformService loanChargePaidByReadPlatformService) {
-        this.context = context;
-        this.loanReadPlatformService = loanReadPlatformService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.paymentTypeReadPlatformService = paymentTypeReadPlatformService;
-        this.loanChargePaidByReadPlatformService = loanChargePaidByReadPlatformService;
-    }
-
-    private boolean is(final String commandParam, final String commandValue) {
-        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
-    }
 
     @GET
     @Path("template")
@@ -120,7 +101,7 @@ public class LoanTransactionsApiResource {
             + "loans/1/transactions/template?command=recoverypayment" + "\n" + "loans/1/transactions/template?command=prepayLoan" + "\n"
             + "loans/1/transactions/template?command=refundbycash" + "\n" + "loans/1/transactions/template?command=refundbytransfer" + "\n"
             + "loans/1/transactions/template?command=foreclosure" + "\n"
-            + "loans/1/transactions/template?command=creditBalanceRefund (returned 'amount' field will have the overpaid value")
+            + "loans/1/transactions/template?command=creditBalanceRefund (returned 'amount' field will have the overpaid value)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.GetLoansLoanIdTransactionsTemplateResponse.class))) })
     public String retrieveTransactionTemplate(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
@@ -132,39 +113,39 @@ public class LoanTransactionsApiResource {
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         LoanTransactionData transactionData = null;
-        if (is(commandParam, "repayment")) {
+        if (CommandParameterUtil.is(commandParam, "repayment")) {
             transactionData = this.loanReadPlatformService.retrieveLoanTransactionTemplate(loanId);
-        } else if (is(commandParam, "merchantIssuedRefund")) {
+        } else if (CommandParameterUtil.is(commandParam, "merchantIssuedRefund")) {
             LocalDate transactionDate = DateUtils.getBusinessLocalDate();
             transactionData = this.loanReadPlatformService.retrieveLoanPrePaymentTemplate(LoanTransactionType.MERCHANT_ISSUED_REFUND,
                     loanId, transactionDate);
-        } else if (is(commandParam, "payoutRefund")) {
+        } else if (CommandParameterUtil.is(commandParam, "payoutRefund")) {
             LocalDate transactionDate = DateUtils.getBusinessLocalDate();
             transactionData = this.loanReadPlatformService.retrieveLoanPrePaymentTemplate(LoanTransactionType.PAYOUT_REFUND, loanId,
                     transactionDate);
-        } else if (is(commandParam, "goodwillCredit")) {
+        } else if (CommandParameterUtil.is(commandParam, "goodwillCredit")) {
             LocalDate transactionDate = DateUtils.getBusinessLocalDate();
             transactionData = this.loanReadPlatformService.retrieveLoanPrePaymentTemplate(LoanTransactionType.GOODWILL_CREDIT, loanId,
                     transactionDate);
-        } else if (is(commandParam, "waiveinterest")) {
+        } else if (CommandParameterUtil.is(commandParam, "waiveinterest")) {
             transactionData = this.loanReadPlatformService.retrieveWaiveInterestDetails(loanId);
-        } else if (is(commandParam, "writeoff")) {
+        } else if (CommandParameterUtil.is(commandParam, "writeoff")) {
             transactionData = this.loanReadPlatformService.retrieveLoanWriteoffTemplate(loanId);
-        } else if (is(commandParam, "close-rescheduled")) {
+        } else if (CommandParameterUtil.is(commandParam, "close-rescheduled")) {
             transactionData = this.loanReadPlatformService.retrieveNewClosureDetails();
-        } else if (is(commandParam, "close")) {
+        } else if (CommandParameterUtil.is(commandParam, "close")) {
             transactionData = this.loanReadPlatformService.retrieveNewClosureDetails();
-        } else if (is(commandParam, "disburse")) {
+        } else if (CommandParameterUtil.is(commandParam, "disburse")) {
             transactionData = this.loanReadPlatformService.retrieveDisbursalTemplate(loanId, true);
             transactionData.setNumberOfRepayments(this.loanReadPlatformService.retrieveNumberOfRepayments(loanId));
             final List<LoanRepaymentScheduleInstallmentData> loanRepaymentScheduleInstallmentData = this.loanReadPlatformService
                     .getRepaymentDataResponse(loanId);
             transactionData.setLoanRepaymentScheduleInstallments(loanRepaymentScheduleInstallmentData);
-        } else if (is(commandParam, "disburseToSavings")) {
+        } else if (CommandParameterUtil.is(commandParam, "disburseToSavings")) {
             transactionData = this.loanReadPlatformService.retrieveDisbursalTemplate(loanId, false);
-        } else if (is(commandParam, "recoverypayment")) {
+        } else if (CommandParameterUtil.is(commandParam, "recoverypayment")) {
             transactionData = this.loanReadPlatformService.retrieveRecoveryPaymentTemplate(loanId);
-        } else if (is(commandParam, "prepayLoan")) {
+        } else if (CommandParameterUtil.is(commandParam, "prepayLoan")) {
             LocalDate transactionDate = null;
             if (transactionDateParam == null) {
                 transactionDate = DateUtils.getBusinessLocalDate();
@@ -173,11 +154,11 @@ public class LoanTransactionsApiResource {
             }
             transactionData = this.loanReadPlatformService.retrieveLoanPrePaymentTemplate(LoanTransactionType.REPAYMENT, loanId,
                     transactionDate);
-        } else if (is(commandParam, "refundbycash")) {
+        } else if (CommandParameterUtil.is(commandParam, "refundbycash")) {
             transactionData = this.loanReadPlatformService.retrieveRefundByCashTemplate(loanId);
-        } else if (is(commandParam, "refundbytransfer")) {
+        } else if (CommandParameterUtil.is(commandParam, "refundbytransfer")) {
             transactionData = this.loanReadPlatformService.retrieveDisbursalTemplate(loanId, true);
-        } else if (is(commandParam, "foreclosure")) {
+        } else if (CommandParameterUtil.is(commandParam, "foreclosure")) {
             LocalDate transactionDate = null;
             if (transactionDateParam == null) {
                 transactionDate = DateUtils.getBusinessLocalDate();
@@ -185,7 +166,7 @@ public class LoanTransactionsApiResource {
                 transactionDate = transactionDateParam.getDate("transactionDate", dateFormat, locale);
             }
             transactionData = this.loanReadPlatformService.retrieveLoanForeclosureTemplate(loanId, transactionDate);
-        } else if (is(commandParam, "creditBalanceRefund")) {
+        } else if (CommandParameterUtil.is(commandParam, "creditBalanceRefund")) {
             transactionData = this.loanReadPlatformService.retrieveCreditBalanceRefundTemplate(loanId);
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam);
@@ -228,14 +209,14 @@ public class LoanTransactionsApiResource {
             + "Example Requests:\n" + "\n" + "loans/1/transactions?command=repayment" + " | Make a Repayment | \n"
             + "loans/1/transactions?command=merchantIssuedRefund" + " | Merchant Issued Refund | \n"
             + "loans/1/transactions?command=payoutRefund" + " | Payout Refund | \n" + "loans/1/transactions?command=goodwillCredit"
-            + " | Goodwil Credit | \n" + "loans/1/transactions?command=waiveinterest" + " | Waive Interest | \n"
-            + "loans/1/transactions?command=writeoff" + " | Write-off Loan | \n" + "loans/1/transactions?command=close-rescheduled"
-            + " | Close Rescheduled Loan | \n" + "loans/1/transactions?command=close" + " | Close Loan | \n"
-            + "loans/1/transactions?command=undowriteoff" + " | Undo Loan Write-off | \n" + "loans/1/transactions?command=recoverypayment"
-            + " | Make Recovery Payment | \n" + "loans/1/transactions?command=refundByCash"
-            + " | Make a Refund of an Active Loan by Cash | \n" + "loans/1/transactions?command=foreclosure"
-            + " | Foreclosure of an Active Loan | \n" + "loans/1/transactions?command=creditBalanceRefund" + " | Credit Balance Refund"
-            + " |  \n")
+            + " | Goodwil Credit | \n" + "loans/1/transactions?command=chargeRefund" + " | Charge Refund | \n"
+            + "loans/1/transactions?command=waiveinterest" + " | Waive Interest | \n" + "loans/1/transactions?command=writeoff"
+            + " | Write-off Loan | \n" + "loans/1/transactions?command=close-rescheduled" + " | Close Rescheduled Loan | \n"
+            + "loans/1/transactions?command=close" + " | Close Loan | \n" + "loans/1/transactions?command=undowriteoff"
+            + " | Undo Loan Write-off | \n" + "loans/1/transactions?command=recoverypayment" + " | Make Recovery Payment | \n"
+            + "loans/1/transactions?command=refundByCash" + " | Make a Refund of an Active Loan by Cash | \n"
+            + "loans/1/transactions?command=foreclosure" + " | Foreclosure of an Active Loan | \n"
+            + "loans/1/transactions?command=creditBalanceRefund" + " | Credit Balance Refund" + " |  \n")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.PostLoansLoanIdTransactionsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.PostLoansLoanIdTransactionsResponse.class))) })
@@ -245,52 +226,41 @@ public class LoanTransactionsApiResource {
 
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
-        CommandProcessingResult result = null;
-        if (is(commandParam, "repayment")) {
-            final CommandWrapper commandRequest = builder.loanRepaymentTransaction(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "merchantIssuedRefund")) {
-            final CommandWrapper commandRequest = builder.loanMerchantIssuedRefundTransaction(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "payoutRefund")) {
-            final CommandWrapper commandRequest = builder.loanPayoutRefundTransaction(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "goodwillCredit")) {
-            final CommandWrapper commandRequest = builder.loanGoodwillCreditTransaction(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "waiveinterest")) {
-            final CommandWrapper commandRequest = builder.waiveInterestPortionTransaction(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "writeoff")) {
-            final CommandWrapper commandRequest = builder.writeOffLoanTransaction(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "close-rescheduled")) {
-            final CommandWrapper commandRequest = builder.closeLoanAsRescheduledTransaction(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "close")) {
-            final CommandWrapper commandRequest = builder.closeLoanTransaction(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "undowriteoff")) {
-            final CommandWrapper commandRequest = builder.undoWriteOffLoanTransaction(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "recoverypayment")) {
-            final CommandWrapper commandRequest = builder.loanRecoveryPaymentTransaction(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "refundByCash")) {
-            final CommandWrapper commandRequest = builder.refundLoanTransactionByCash(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "foreclosure")) {
-            final CommandWrapper commandRequest = builder.loanForeclosure(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "creditBalanceRefund")) {
-            final CommandWrapper commandRequest = builder.creditBalanceRefund(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        CommandWrapper commandRequest = null;
+        if (CommandParameterUtil.is(commandParam, "repayment")) {
+            commandRequest = builder.loanRepaymentTransaction(loanId).build();
+        } else if (CommandParameterUtil.is(commandParam, "merchantIssuedRefund")) {
+            commandRequest = builder.loanMerchantIssuedRefundTransaction(loanId).build();
+        } else if (CommandParameterUtil.is(commandParam, "payoutRefund")) {
+            commandRequest = builder.loanPayoutRefundTransaction(loanId).build();
+        } else if (CommandParameterUtil.is(commandParam, "goodwillCredit")) {
+            commandRequest = builder.loanGoodwillCreditTransaction(loanId).build();
+        } else if (CommandParameterUtil.is(commandParam, "chargeRefund")) {
+            commandRequest = builder.refundLoanCharge(loanId).build();
+        } else if (CommandParameterUtil.is(commandParam, "waiveinterest")) {
+            commandRequest = builder.waiveInterestPortionTransaction(loanId).build();
+        } else if (CommandParameterUtil.is(commandParam, "writeoff")) {
+            commandRequest = builder.writeOffLoanTransaction(loanId).build();
+        } else if (CommandParameterUtil.is(commandParam, "close-rescheduled")) {
+            commandRequest = builder.closeLoanAsRescheduledTransaction(loanId).build();
+        } else if (CommandParameterUtil.is(commandParam, "close")) {
+            commandRequest = builder.closeLoanTransaction(loanId).build();
+        } else if (CommandParameterUtil.is(commandParam, "undowriteoff")) {
+            commandRequest = builder.undoWriteOffLoanTransaction(loanId).build();
+        } else if (CommandParameterUtil.is(commandParam, "recoverypayment")) {
+            commandRequest = builder.loanRecoveryPaymentTransaction(loanId).build();
+        } else if (CommandParameterUtil.is(commandParam, "refundByCash")) {
+            commandRequest = builder.refundLoanTransactionByCash(loanId).build();
+        } else if (CommandParameterUtil.is(commandParam, "foreclosure")) {
+            commandRequest = builder.loanForeclosure(loanId).build();
+        } else if (CommandParameterUtil.is(commandParam, "creditBalanceRefund")) {
+            commandRequest = builder.creditBalanceRefund(loanId).build();
         }
 
-        if (result == null) {
+        if (commandRequest == null) {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }
-
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         return this.toApiJsonSerializer.serialize(result);
     }
 
@@ -305,10 +275,17 @@ public class LoanTransactionsApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.PostLoansLoanIdTransactionsTransactionIdResponse.class))) })
     public String adjustLoanTransaction(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @PathParam("transactionId") @Parameter(description = "transactionId") final Long transactionId,
-            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+            @Parameter(hidden = true) final String apiRequestBodyAsJson,
+            @QueryParam("command") @Parameter(description = "command") final String commandParam) {
 
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
-        final CommandWrapper commandRequest = builder.adjustTransaction(loanId, transactionId).build();
+
+        CommandWrapper commandRequest = null;
+        if (CommandParameterUtil.is(commandParam, LoanApiConstants.CHARGEBACK_TRANSACTION_COMMAND)) {
+            commandRequest = builder.chargebackTransaction(loanId, transactionId).build();
+        } else { // Default to adjust the Loan Transaction
+            commandRequest = builder.adjustTransaction(loanId, transactionId).build();
+        }
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

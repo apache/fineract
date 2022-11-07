@@ -77,7 +77,7 @@ public class ExtrasSheetPopulator extends AbstractWorkbookPopulator {
             }
 
             writeString(CURRENCY_NAME_COL, row, currencies.getName().trim().replaceAll("[ )(]", "_"));
-            writeString(CURRENCY_CODE_COL, row, currencies.code());
+            writeString(CURRENCY_CODE_COL, row, currencies.getCode());
         }
         extrasSheet.protectSheet("");
 

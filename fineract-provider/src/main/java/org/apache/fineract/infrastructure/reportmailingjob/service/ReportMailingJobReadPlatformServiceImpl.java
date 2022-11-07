@@ -181,8 +181,10 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
             final String updatedByUsername = rs.getString("updatedByUsername");
             final String updatedByFirstname = rs.getString("updatedByFirstname");
             final String updatedByLastname = rs.getString("updatedByLastname");
-            final ReportMailingJobTimelineData timeline = new ReportMailingJobTimelineData(createdOnDate, createdByUsername,
-                    createdByFirstname, createdByLastname, updatedOnDate, updatedByUsername, updatedByFirstname, updatedByLastname);
+            final ReportMailingJobTimelineData timeline = new ReportMailingJobTimelineData().setCreatedOnDate(createdOnDate)
+                    .setCreatedByUsername(createdByUsername).setCreatedByFirstname(createdByFirstname)
+                    .setCreatedByLastname(createdByLastname).setUpdatedOnDate(updatedOnDate).setUpdatedByUsername(updatedByUsername)
+                    .setUpdatedByFirstname(updatedByFirstname).setUpdatedByLastname(updatedByLastname);
             final Long runAsUserId = JdbcSupport.getLong(rs, "runAsUserId");
 
             final Long reportId = JdbcSupport.getLong(rs, "reportId");

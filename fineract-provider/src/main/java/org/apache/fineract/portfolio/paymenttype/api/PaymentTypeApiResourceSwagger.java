@@ -42,6 +42,10 @@ final class PaymentTypeApiResourceSwagger {
         public Boolean isCashPayment;
         @Schema(example = "0")
         public Integer position;
+        @Schema(example = "REPAYMENT_REFUND")
+        public String codeName;
+        @Schema(example = "false")
+        public Boolean isSystemDefined;
     }
 
     @Schema(description = "GetPaymentTypesPaymentTypeIdResponse")
@@ -59,6 +63,10 @@ final class PaymentTypeApiResourceSwagger {
         public Boolean isCashPayment;
         @Schema(example = "1")
         public Integer position;
+        @Schema(example = "REPAYMENT_REFUND")
+        public String codeName;
+        @Schema(example = "false")
+        public Boolean isSystemDefined;
     }
 
     @Schema(description = "PostPaymentTypesRequest")
@@ -74,6 +82,10 @@ final class PaymentTypeApiResourceSwagger {
         public Boolean isCashPayment;
         @Schema(example = "1")
         public Integer position;
+        @Schema(example = "REPAYMENT_REFUND")
+        public String codeName;
+        @Schema(example = "false")
+        public Boolean isSystemDefined;
     }
 
     @Schema(description = "PostPaymentTypesResponse")
@@ -98,6 +110,10 @@ final class PaymentTypeApiResourceSwagger {
         public Boolean isCashPayment;
         @Schema(example = "3")
         public Integer position;
+        @Schema(example = "REPAYMENT_REFUND")
+        public String codeName;
+        @Schema(example = "false")
+        public Boolean isSystemDefined;
     }
 
     @Schema(description = "PutPaymentTypesPaymentTypeIdResponse")

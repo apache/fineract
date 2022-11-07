@@ -20,7 +20,9 @@ package org.apache.fineract.portfolio.floatingrates.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.Getter;
 
+@Getter
 public class InterestRatePeriodData {
 
     private LocalDate fromDate;
@@ -41,48 +43,24 @@ public class InterestRatePeriodData {
         this.blrInterestRate = blrInterestRate;
     }
 
-    public LocalDate getFromDate() {
-        return this.fromDate;
-    }
-
     public void setFromDate(LocalDate fromDate) {
         this.fromDate = fromDate;
-    }
-
-    public BigDecimal getInterestRate() {
-        return this.interestRate;
     }
 
     public boolean isDifferentialToBLR() {
         return this.isDifferentialToBLR;
     }
 
-    public LocalDate getBlrFromDate() {
-        return this.blrFromDate;
-    }
-
-    public BigDecimal getBlrInterestRate() {
-        return this.blrInterestRate;
-    }
-
-    public BigDecimal getLoanDifferentialInterestRate() {
-        return this.loanDifferentialInterestRate;
+    public boolean isIsDifferentialToBLR() {
+        return this.isDifferentialToBLR;
     }
 
     public void setLoanDifferentialInterestRate(BigDecimal loanDifferentialInterestRate) {
         this.loanDifferentialInterestRate = loanDifferentialInterestRate;
     }
 
-    public BigDecimal getLoanProductDifferentialInterestRate() {
-        return this.loanProductDifferentialInterestRate;
-    }
-
     public void setLoanProductDifferentialInterestRate(BigDecimal loanProductDifferentialInterestRate) {
         this.loanProductDifferentialInterestRate = loanProductDifferentialInterestRate;
-    }
-
-    public BigDecimal getEffectiveInterestRate() {
-        return this.effectiveInterestRate;
     }
 
     public void setEffectiveInterestRate(BigDecimal effectiveInterestRate) {

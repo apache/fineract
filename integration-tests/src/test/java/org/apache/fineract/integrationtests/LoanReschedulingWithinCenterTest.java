@@ -146,7 +146,8 @@ public class LoanReschedulingWithinCenterTest {
 
         // Test for loan account approved can be disbursed
         String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanId);
-        this.loanTransactionHelper.disburseLoan(disbursalDate, loanId, JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
+        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(disbursalDate, loanId,
+                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanId);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
@@ -299,7 +300,8 @@ public class LoanReschedulingWithinCenterTest {
 
         // DISBURSE A FIRST TRANCHE
         String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        this.loanTransactionHelper.disburseLoan(disbursementDate, loanID, JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
+        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(disbursementDate, loanID,
+                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
 
         LOG.info("---------------------------------CHANGING GROUP MEETING DATE ------------------------------------------");
@@ -407,7 +409,7 @@ public class LoanReschedulingWithinCenterTest {
                 .withInterestCalculationPeriodTypeAsDays() //
                 .withExpectedDisbursementDate(disbursementDate) //
                 .withSubmittedOnDate(disbursementDate) //
-                .withwithRepaymentStrategy(repaymentStrategy) //
+                .withRepaymentStrategy(repaymentStrategy) //
                 .withCollaterals(collaterals).withCharges(charges)//
                 .build(clientID.toString(), groupId.toString(), loanProductID.toString(), null);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);

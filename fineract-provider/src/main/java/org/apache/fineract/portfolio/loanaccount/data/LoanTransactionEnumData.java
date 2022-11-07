@@ -18,10 +18,12 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
+import lombok.Getter;
+
 /**
  * Immutable data object represent loan status enumerations.
  */
-@SuppressWarnings("unused")
+@Getter
 public class LoanTransactionEnumData {
 
     private final Long id;
@@ -34,6 +36,7 @@ public class LoanTransactionEnumData {
     private final boolean merchantIssuedRefund;
     private final boolean payoutRefund;
     private final boolean goodwillCredit;
+    private final boolean chargeRefund;
     private final boolean contra;
     private final boolean waiveInterest;
     private final boolean waiveCharges;
@@ -49,6 +52,8 @@ public class LoanTransactionEnumData {
     private final boolean refundForActiveLoans;
     private final boolean creditBalanceRefund;
 
+    private final boolean chargeback;
+
     public LoanTransactionEnumData(final Long id, final String code, final String value) {
         this.id = id;
         this.code = code;
@@ -59,6 +64,7 @@ public class LoanTransactionEnumData {
         this.merchantIssuedRefund = Long.valueOf(21).equals(this.id);
         this.payoutRefund = Long.valueOf(22).equals(this.id);
         this.goodwillCredit = Long.valueOf(23).equals(this.id);
+        this.chargeRefund = Long.valueOf(24).equals(this.id);
         this.contra = Long.valueOf(3).equals(this.id);
         this.waiveInterest = Long.valueOf(4).equals(this.id);
         this.waiveCharges = Long.valueOf(9).equals(this.id);
@@ -73,18 +79,7 @@ public class LoanTransactionEnumData {
         this.chargePayment = Long.valueOf(17).equals(this.id);
         this.refundForActiveLoans = Long.valueOf(18).equals(this.id);
         this.creditBalanceRefund = Long.valueOf(20).equals(this.id);
-    }
-
-    public Long id() {
-        return this.id;
-    }
-
-    public String getCode() {
-        return this.code;
-    }
-
-    public String getValue() {
-        return this.value;
+        this.chargeback = Long.valueOf(25).equals(this.id);
     }
 
     /**
@@ -101,86 +96,9 @@ public class LoanTransactionEnumData {
     }
 
     public boolean isRepaymentType() {
-        if (isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit()) {
+        if (isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isChargeRefund()) {
             return true;
         }
         return false;
     }
-
-    public boolean isDisbursement() {
-        return this.disbursement;
-    }
-
-    public boolean isRepaymentAtDisbursement() {
-        return this.repaymentAtDisbursement;
-    }
-
-    public boolean isRepayment() {
-        return this.repayment;
-    }
-
-    public boolean isMerchantIssuedRefund() {
-        return this.merchantIssuedRefund;
-    }
-
-    public boolean isPayoutRefund() {
-        return this.payoutRefund;
-    }
-
-    public boolean isGoodwillCredit() {
-        return this.goodwillCredit;
-    }
-
-    public boolean isWaiveInterest() {
-        return this.waiveInterest;
-    }
-
-    public boolean isWaiveCharges() {
-        return this.waiveCharges;
-    }
-
-    public boolean isWriteOff() {
-        return this.writeOff;
-    }
-
-    public boolean isRecoveryRepayment() {
-        return this.recoveryRepayment;
-    }
-
-    public boolean isAccrual() {
-        return this.accrual;
-    }
-
-    public boolean isInitiateTransfer() {
-        return this.initiateTransfer;
-    }
-
-    public boolean isApproveTransfer() {
-        return this.approveTransfer;
-    }
-
-    public boolean isWithdrawTransfer() {
-        return this.withdrawTransfer;
-    }
-
-    public boolean isRejectTransfer() {
-        return this.rejectTransfer;
-    }
-
-    public boolean isChargePayment() {
-        return this.chargePayment;
-    }
-
-    public boolean isRefund() {
-        return this.refund;
-    }
-
-    public boolean isRefundForActiveLoans() {
-        return this.refundForActiveLoans;
-    }
-
-    public boolean isCreditBalanceRefund() {
-        return this.creditBalanceRefund;
-    }
-
 }

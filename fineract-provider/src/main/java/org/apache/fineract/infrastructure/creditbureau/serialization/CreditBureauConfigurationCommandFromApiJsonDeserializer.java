@@ -39,7 +39,10 @@ import org.springframework.stereotype.Component;
 @Component
 public final class CreditBureauConfigurationCommandFromApiJsonDeserializer {
 
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("configkey", "value", "description"));
+    public static final String CONFIGKEY = "configkey";
+    public static final String VALUE = "value";
+    public static final String DESCRIPTION = "description";
+    private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList(CONFIGKEY, VALUE, DESCRIPTION));
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -53,7 +56,7 @@ public final class CreditBureauConfigurationCommandFromApiJsonDeserializer {
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -63,16 +66,16 @@ public final class CreditBureauConfigurationCommandFromApiJsonDeserializer {
 
         baseDataValidator.reset().value(creditBureauId).notBlank().integerGreaterThanZero();
 
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
-        final String configkey = this.fromApiJsonHelper.extractStringNamed("configkey", element);
-        baseDataValidator.reset().parameter("configkey").value(configkey).notBlank().notExceedingLengthOf(100);
+        final String configkey = this.fromApiJsonHelper.extractStringNamed(CONFIGKEY, element);
+        baseDataValidator.reset().parameter(CONFIGKEY).value(configkey).notBlank().notExceedingLengthOf(100);
 
-        final String value = this.fromApiJsonHelper.extractStringNamed("value", element);
-        baseDataValidator.reset().parameter("value").value(value).notBlank().notExceedingLengthOf(100);
+        final String value = this.fromApiJsonHelper.extractStringNamed(VALUE, element);
+        baseDataValidator.reset().parameter(VALUE).value(value).notBlank().notExceedingLengthOf(100);
 
-        final String description = this.fromApiJsonHelper.extractStringNamed("description", element);
-        baseDataValidator.reset().parameter("description").value(description).notBlank().notExceedingLengthOf(100);
+        final String description = this.fromApiJsonHelper.extractStringNamed(DESCRIPTION, element);
+        baseDataValidator.reset().parameter(DESCRIPTION).value(description).notBlank().notExceedingLengthOf(100);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -83,21 +86,21 @@ public final class CreditBureauConfigurationCommandFromApiJsonDeserializer {
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("config");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        if (this.fromApiJsonHelper.parameterExists("value", element)) {
-            final String value = this.fromApiJsonHelper.extractStringNamed("value", element);
-            baseDataValidator.reset().parameter("value").value(value).notBlank().notExceedingLengthOf(100);
+        if (this.fromApiJsonHelper.parameterExists(VALUE, element)) {
+            final String value = this.fromApiJsonHelper.extractStringNamed(VALUE, element);
+            baseDataValidator.reset().parameter(VALUE).value(value).notBlank().notExceedingLengthOf(100);
         }
 
-        if (this.fromApiJsonHelper.parameterExists("description", element)) {
-            final String description = this.fromApiJsonHelper.extractStringNamed("description", element);
-            baseDataValidator.reset().parameter("description").value(description).notBlank().notExceedingLengthOf(100);
+        if (this.fromApiJsonHelper.parameterExists(DESCRIPTION, element)) {
+            final String description = this.fromApiJsonHelper.extractStringNamed(DESCRIPTION, element);
+            baseDataValidator.reset().parameter(DESCRIPTION).value(description).notBlank().notExceedingLengthOf(100);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

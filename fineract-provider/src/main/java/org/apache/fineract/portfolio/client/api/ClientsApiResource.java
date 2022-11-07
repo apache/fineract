@@ -190,7 +190,7 @@ public class ClientsApiResource {
 
         ClientData clientData = this.clientReadPlatformService.retrieveOne(clientId);
         if (settings.isTemplate()) {
-            final ClientData templateData = this.clientReadPlatformService.retrieveTemplate(clientData.officeId(),
+            final ClientData templateData = this.clientReadPlatformService.retrieveTemplate(clientData.getOfficeId(),
                     staffInSelectedOfficeOnly);
             clientData = ClientData.templateOnTop(clientData, templateData);
             Collection<SavingsAccountData> savingAccountOptions = this.savingsAccountReadPlatformService.retrieveForLookup(clientId, null);

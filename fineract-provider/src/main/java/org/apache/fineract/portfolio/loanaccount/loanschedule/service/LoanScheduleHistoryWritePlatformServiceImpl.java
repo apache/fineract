@@ -21,32 +21,31 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanRepaymentScheduleHistory;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanRepaymentScheduleHistoryRepository;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class LoanScheduleHistoryWritePlatformServiceImpl implements LoanScheduleHistoryWritePlatformService {
 
     private final LoanScheduleHistoryReadPlatformService loanScheduleHistoryReadPlatformService;
     private final LoanRepaymentScheduleHistoryRepository loanRepaymentScheduleHistoryRepository;
 
-    @Autowired
-    public LoanScheduleHistoryWritePlatformServiceImpl(final LoanScheduleHistoryReadPlatformService loanScheduleHistoryReadPlatformService,
-            final LoanRepaymentScheduleHistoryRepository loanRepaymentScheduleHistoryRepository) {
-        this.loanScheduleHistoryReadPlatformService = loanScheduleHistoryReadPlatformService;
-        this.loanRepaymentScheduleHistoryRepository = loanRepaymentScheduleHistoryRepository;
-
-    }
+    private final PlatformSecurityContext platformSecurityContext;
 
     @Override
     public List<LoanRepaymentScheduleHistory> createLoanScheduleArchive(
@@ -73,23 +72,35 @@ public class LoanScheduleHistoryWritePlatformServiceImpl implements LoanSchedule
             final BigDecimal feeChargesCharged = repaymentScheduleInstallment.getFeeChargesCharged(currency).getAmount();
             final BigDecimal penaltyCharges = repaymentScheduleInstallment.getPenaltyChargesCharged(currency).getAmount();
 
-            LocalDateTime createdOnDate = null;
+            Map<String, Object> oldDates = null;
+            OffsetDateTime createdOnDate = DateUtils.getOffsetDateTimeOfTenant();
+            LocalDateTime oldCreatedOnDate = null;
+            LocalDateTime oldLastModifiedOnDate = null;
             if (repaymentScheduleInstallment.getCreatedDate().isPresent()) {
-                createdOnDate = repaymentScheduleInstallment.getCreatedDate().get(); // NOSONAR
+                createdOnDate = repaymentScheduleInstallment.getCreatedDate().get();
+            } else if (repaymentScheduleInstallment.getId() != null) {
+                oldDates = loanScheduleHistoryReadPlatformService.fetchOldAuditDates(repaymentScheduleInstallment.getId());
+                oldCreatedOnDate = (LocalDateTime) oldDates.get("created_date");
+                oldLastModifiedOnDate = (LocalDateTime) oldDates.get("lastmodified_date");
             }
 
-            final Long createdByUser = repaymentScheduleInstallment.getCreatedBy().orElse(null);
-            final Long lastModifiedByUser = repaymentScheduleInstallment.getLastModifiedBy().orElse(null);
+            final Long createdByUser = repaymentScheduleInstallment.getCreatedBy()
+                    .orElse(platformSecurityContext.authenticatedUser().getId());
+            final Long lastModifiedByUser = repaymentScheduleInstallment.getLastModifiedBy()
+                    .orElse(platformSecurityContext.authenticatedUser().getId());
 
-            LocalDateTime lastModifiedOnDate = null;
-
+            OffsetDateTime lastModifiedOnDate = DateUtils.getOffsetDateTimeOfTenant();
             if (repaymentScheduleInstallment.getLastModifiedDate().isPresent()) {
-                lastModifiedOnDate = repaymentScheduleInstallment.getLastModifiedDate().get(); // NOSONAR
+                lastModifiedOnDate = repaymentScheduleInstallment.getLastModifiedDate().get();
+            } else if (repaymentScheduleInstallment.getId() != null && oldDates == null) {
+                oldDates = loanScheduleHistoryReadPlatformService.fetchOldAuditDates(repaymentScheduleInstallment.getId());
+                oldCreatedOnDate = (LocalDateTime) oldDates.get("created_date");
+                oldLastModifiedOnDate = (LocalDateTime) oldDates.get("lastmodified_date");
             }
 
             LoanRepaymentScheduleHistory loanRepaymentScheduleHistory = LoanRepaymentScheduleHistory.instance(loan, loanRescheduleRequest,
-                    installmentNumber, fromDate, dueDate, principal, interestCharged, feeChargesCharged, penaltyCharges, createdOnDate,
-                    createdByUser, lastModifiedByUser, lastModifiedOnDate, version);
+                    installmentNumber, fromDate, dueDate, principal, interestCharged, feeChargesCharged, penaltyCharges, oldCreatedOnDate,
+                    createdByUser, lastModifiedByUser, oldLastModifiedOnDate, version, createdOnDate, lastModifiedOnDate);
 
             loanRepaymentScheduleHistoryList.add(loanRepaymentScheduleHistory);
         }

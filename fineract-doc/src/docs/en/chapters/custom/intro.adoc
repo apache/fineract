@@ -1,0 +1,47 @@
+= Introduction
+
+Creating customizations for Fineract services is easy. The method described here will work both with our future module guidelines (aka "clean room" modules) and with the intermediary solution we will put in place to avoid major refactorings.
+
+The folder structure for modules is based on a convention that ensures that your extensions don't clash with Fineract's internals. This is to make sure that your downstream forks of Fineract are easy to sync. In the past we had all kinds of strategies to add custom code - including editing existing sources in `fineract-provider`. This is not recommended.
+
+IMPORTANT: At the moment the only service(s) we prepared to be overridden/replaced are `org.apache.fineract.portfolio.note.service.NoteReadPlatformService` and `org.apache.fineract.portfolio.note.service.NoteWritePlatformService`. Please reach out on the developer mailing list if you need other services.
+
+The recommended folder structure is very simple. If you follow this recommendation you'll get some additional benefits, e. g. you don't even have to edit `settings.gradle` to include your new custom modules. Your modules will also be automatically included in a custom Fineract Docker image build that you can use for your production deployments.
+
+Let's assume your company/org is called "ACME Inc." and you are trying to (fully/partially) replace an existing Fineract service, let's say those in `org.apache.fineract.portfolio.note`. The recommended folder structure would then look something like this:
+
+[plantuml, format=svg]
+----
+include::{diagramsdir}/custom-folder-structure.puml[]
+----
+
+As soon as we can publish Fineract module JARs to Maven Central you'll have more freedom to setup your projects (including to setup separate Git repos). But for now please follow these instructions:
+
+1. Create a folder under `custom` and name it according to your company/organisation (e. g. `acme` if your company is `ACME Inc.`); this way your custom modules can't clash even with other companies' modules
+2. Under your company folder create a folder for the `category` or `domain` your module is targeting; e. g. "loan", "client", "account" etc.
+3. Finally, setup `library` folders for the actual modules you want to create; usually that will be to replace/extend some existing service, so there could be a `service` folder, maybe even a `core` folder, e. g. if you want to add additional DTOs etc.; we have also an example for COB business steps
+4. Per `category`/`domain` you should have a `starter` library; means: a Spring Boot auto-configuration setup that makes including your module in Fineract easier ("hands-free"); the necessary parts for a auto-configuration library are a Spring Java configuration class (annotated with `@Configuration`) and a text file at `META-INF/spring.factories` in your starter resource folder:
++
+[source,properties]
+----
+include::{rootdir}/custom/acme/note/starter/src/main/resources/META-INF/spring.factories[]
+----
++
+Please make sure that your module libraries have proper `build.gradle` files:
++
+[source,groovy]
+----
+include::{rootdir}/custom/acme/note/service/build.gradle[lines=19..]
+----
++
+NOTE: You don't need to edit `settings.gradle` to add your modules/libraries. If you follow above convention they'll get included automatically.
++
+5. The dependency.gradle file could look something like this:
+[source,groovy]
+----
+include::{rootdir}/custom/acme/note/service/dependencies.gradle[lines=19..]
+----
+
+NOTE: We've included by default some basic and useful dependencies for all custom modules, like Slf4j, Lombok, the usual testing frameworks (JUnit, Cucumber, Mockito etc.)
+
+IMPORTANT: Do not include your custom module in `fineract-provider`'s dependency.gradle file. This creates a circular dependency and will fail your build.

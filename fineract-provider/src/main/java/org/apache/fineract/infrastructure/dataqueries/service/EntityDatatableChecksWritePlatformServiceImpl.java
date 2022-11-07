@@ -107,7 +107,7 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
             final String foreignKeyColumnName = EntityTables.getForeignKeyColumnNameOnDatatable(entity);
             final boolean columnExist = datatableData.hasColumn(foreignKeyColumnName);
 
-            LOG.info("{} has column {} ? {}", datatableData.getRegisteredTableName(), foreignKeyColumnName, columnExist);
+            LOG.debug("{} has column {} ? {}", datatableData.getRegisteredTableName(), foreignKeyColumnName, columnExist);
 
             if (!columnExist) {
                 throw new EntityDatatableCheckNotSupportedException(datatableData.getRegisteredTableName(), entity);
@@ -170,7 +170,7 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
                 final String datatableName = t.getDatatableName();
                 final Long countEntries = readWriteNonCoreDataService.countDatatableEntries(datatableName, entityId, foreignKeyColumn);
 
-                LOG.info("The are {} entries in the table {}", countEntries, datatableName);
+                LOG.debug("The are {} entries in the table {}", countEntries, datatableName);
                 if (countEntries.intValue() == 0) {
                     reqDatatables.add(datatableName);
                 }
@@ -199,7 +199,7 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
                 final String datatableName = t.getDatatableName();
                 final Long countEntries = readWriteNonCoreDataService.countDatatableEntries(datatableName, entityId, foreignKeyColumn);
 
-                LOG.info("The are {} entries in the table {}", countEntries, datatableName);
+                LOG.debug("The are {} entries in the table {}", countEntries, datatableName);
                 if (countEntries.intValue() == 0) {
                     reqDatatables.add(datatableName);
                 }

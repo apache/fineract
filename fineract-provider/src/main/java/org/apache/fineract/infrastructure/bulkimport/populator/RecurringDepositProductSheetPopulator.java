@@ -125,7 +125,7 @@ public class RecurringDepositProductSheetPopulator extends AbstractWorkbookPopul
                 writeString(LOCKIN_PERIOD_FREQUENCY_COL, row, product.getLockinPeriodFrequencyType().getValue());
             }
             CurrencyData currency = product.getCurrency();
-            writeString(CURRENCY_COL, row, currency.code());
+            writeString(CURRENCY_COL, row, currency.getCode());
         }
         productSheet.protectSheet("");
     }

@@ -58,14 +58,6 @@ import org.springframework.stereotype.Service;
 public class FixedDepositImportHandler implements ImportHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(FixedDepositImportHandler.class);
-    private Workbook workbook;
-
-    private List<FixedDepositAccountData> savings;
-    private List<SavingsApproval> approvalDates;
-    private List<SavingsActivation> activationDates;
-    private List<ClosingOfSavingsAccounts> closedOnDate;
-    private List<String> statuses;
-
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
@@ -74,25 +66,28 @@ public class FixedDepositImportHandler implements ImportHandler {
     }
 
     @Override
-    public Count process(Workbook workbook, String locale, String dateFormat) {
-        this.workbook = workbook;
-        savings = new ArrayList<>();
-        approvalDates = new ArrayList<>();
-        activationDates = new ArrayList<>();
-        closedOnDate = new ArrayList<>();
-        statuses = new ArrayList<>();
-        readExcelFile(locale, dateFormat);
-        return importEntity(dateFormat);
+    public Count process(final Workbook workbook, final String locale, final String dateFormat) {
+
+        List<FixedDepositAccountData> savings = new ArrayList<>();
+        List<SavingsApproval> approvalDates = new ArrayList<>();
+        List<SavingsActivation> activationDates = new ArrayList<>();
+        List<ClosingOfSavingsAccounts> closedOnDates = new ArrayList<>();
+        List<String> statuses = new ArrayList<>();
+
+        readExcelFile(workbook, savings, approvalDates, activationDates, closedOnDates, statuses, locale, dateFormat);
+        return importEntity(workbook, savings, approvalDates, activationDates, closedOnDates, statuses, dateFormat);
     }
 
-    public void readExcelFile(final String locale, final String dateFormat) {
+    private void readExcelFile(final Workbook workbook, final List<FixedDepositAccountData> savings,
+            final List<SavingsApproval> approvalDates, final List<SavingsActivation> activationDates,
+            final List<ClosingOfSavingsAccounts> closedOnDate, final List<String> statuses, final String locale, final String dateFormat) {
         Sheet savingsSheet = workbook.getSheet(TemplatePopulateImportConstants.FIXED_DEPOSIT_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(savingsSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = savingsSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, FixedDepositConstants.STATUS_COL)) {
-                savings.add(readSavings(row, locale, dateFormat));
+                savings.add(readSavings(workbook, statuses, row, locale, dateFormat));
                 approvalDates.add(readSavingsApproval(row, locale, dateFormat));
                 activationDates.add(readSavingsActivation(row, locale, dateFormat));
                 closedOnDate.add(readSavingsClosed(row, locale, dateFormat));
@@ -131,7 +126,8 @@ public class FixedDepositImportHandler implements ImportHandler {
         }
     }
 
-    private FixedDepositAccountData readSavings(Row row, String locale, String dateFormat) {
+    private FixedDepositAccountData readSavings(final Workbook workbook, final List<String> statuses, final Row row, final String locale,
+            final String dateFormat) {
 
         String productName = ImportHandlerUtils.readAsString(FixedDepositConstants.PRODUCT_COL, row);
         Long productId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME), productName);
@@ -164,7 +160,7 @@ public class FixedDepositImportHandler implements ImportHandler {
         Long interestPostingPeriodTypeId = null;
 
         EnumOptionData interestPostingPeriodTypeEnum = null;
-        if (interestCompoundingPeriodType != null) {
+        if (interestPostingPeriodType != null) {
             if (interestPostingPeriodType.equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_POSTING_PERIOD_MONTHLY)) {
                 interestPostingPeriodTypeId = 4L;
             } else if (interestPostingPeriodType.equalsIgnoreCase(TemplatePopulateImportConstants.INTEREST_POSTING_PERIOD_QUARTERLY)) {
@@ -238,7 +234,7 @@ public class FixedDepositImportHandler implements ImportHandler {
         String externalId = ImportHandlerUtils.readAsString(FixedDepositConstants.EXTERNAL_ID_COL, row);
         String clientName = ImportHandlerUtils.readAsString(FixedDepositConstants.CLIENT_NAME_COL, row);
 
-        List<SavingsAccountChargeData> charges = new ArrayList<SavingsAccountChargeData>();
+        List<SavingsAccountChargeData> charges = new ArrayList<>();
 
         String charge1 = ImportHandlerUtils.readAsString(FixedDepositConstants.CHARGE_ID_1, row);
         String charge2 = ImportHandlerUtils.readAsString(FixedDepositConstants.CHARGE_ID_2, row);
@@ -273,7 +269,9 @@ public class FixedDepositImportHandler implements ImportHandler {
                 depositPeriodFrequencyId, externalId, charges, row.getRowNum(), locale, dateFormat);
     }
 
-    public Count importEntity(String dateFormat) {
+    private Count importEntity(final Workbook workbook, final List<FixedDepositAccountData> savings,
+            final List<SavingsApproval> approvalDates, final List<SavingsActivation> activationDates,
+            final List<ClosingOfSavingsAccounts> closedOnDates, final List<String> statuses, String dateFormat) {
         Sheet savingsSheet = workbook.getSheet(TemplatePopulateImportConstants.FIXED_DEPOSIT_SHEET_NAME);
         int successCount = 0;
         int errorCount = 0;
@@ -289,7 +287,7 @@ public class FixedDepositImportHandler implements ImportHandler {
                 progressLevel = getProgressLevel(status);
 
                 if (progressLevel == 0) {
-                    CommandProcessingResult result = importSavings(i, dateFormat);
+                    CommandProcessingResult result = importSavings(savings, i, dateFormat);
                     savingsId = result.getSavingsId();
                     progressLevel = 1;
                 } else {
@@ -298,15 +296,15 @@ public class FixedDepositImportHandler implements ImportHandler {
                 }
 
                 if (progressLevel <= 1) {
-                    progressLevel = importSavingsApproval(savingsId, i, dateFormat);
+                    progressLevel = importSavingsApproval(approvalDates, savingsId, i, dateFormat);
                 }
 
                 if (progressLevel <= 2) {
-                    progressLevel = importSavingsActivation(savingsId, i, dateFormat);
+                    progressLevel = importSavingsActivation(activationDates, savingsId, i, dateFormat);
                 }
 
                 if (progressLevel <= 3) {
-                    progressLevel = importSavingsClosing(savingsId, i, dateFormat);
+                    progressLevel = importSavingsClosing(closedOnDates, savingsId, i, dateFormat);
                 }
 
                 successCount++;
@@ -316,7 +314,7 @@ public class FixedDepositImportHandler implements ImportHandler {
                 errorCount++;
                 LOG.error("Problem occurred in importEntity function", ex);
                 errorMessage = ImportHandlerUtils.getErrorMessage(ex);
-                writeFixedDepositErrorMessage(savingsId, errorMessage, progressLevel, statusCell, errorReportCell, row);
+                writeFixedDepositErrorMessage(workbook, savingsId, errorMessage, progressLevel, statusCell, errorReportCell, row);
             }
 
         }
@@ -324,8 +322,8 @@ public class FixedDepositImportHandler implements ImportHandler {
         return Count.instance(successCount, errorCount);
     }
 
-    private void writeFixedDepositErrorMessage(Long savingsId, String errorMessage, int progressLevel, Cell statusCell,
-            Cell errorReportCell, Row row) {
+    private void writeFixedDepositErrorMessage(final Workbook workbook, final Long savingsId, final String errorMessage,
+            final int progressLevel, final Cell statusCell, Cell errorReportCell, Row row) {
         String status = "";
         if (progressLevel == 0) {
             status = TemplatePopulateImportConstants.STATUS_CREATION_FAILED;
@@ -343,21 +341,22 @@ public class FixedDepositImportHandler implements ImportHandler {
         errorReportCell.setCellValue(errorMessage);
     }
 
-    private int importSavingsClosing(Long savingsId, int i, String dateFormat) {
-        if (closedOnDate.get(i) != null) {
+    private int importSavingsClosing(List<ClosingOfSavingsAccounts> closedOnDates, final Long savingsId, final int i,
+            final String dateFormat) {
+        if (closedOnDates.get(i) != null) {
             GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
             gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
-            String payload = gsonBuilder.create().toJson(closedOnDate.get(i));
+            String payload = gsonBuilder.create().toJson(closedOnDates.get(i));
             final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                     .closeFixedDepositAccount(savingsId)//
                     .withJson(payload) //
                     .build(); //
-            final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
         return 4;
     }
 
-    private CommandProcessingResult importSavings(int i, String dateFormat) {
+    private CommandProcessingResult importSavings(List<FixedDepositAccountData> savings, final int i, final String dateFormat) {
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
         gsonBuilder.registerTypeAdapter(EnumOptionData.class, new EnumOptionDataIdSerializer());
@@ -377,11 +376,11 @@ public class FixedDepositImportHandler implements ImportHandler {
                 .createFixedDepositAccount() //
                 .withJson(payload) //
                 .build(); //
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return result;
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
-    private int importSavingsApproval(Long savingsId, int i, String dateFormat) {
+    private int importSavingsApproval(final List<SavingsApproval> approvalDates, final Long savingsId, final int i,
+            final String dateFormat) {
         if (approvalDates.get(i) != null) {
             GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
             gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
@@ -390,12 +389,13 @@ public class FixedDepositImportHandler implements ImportHandler {
                     .approveFixedDepositAccountApplication(savingsId)//
                     .withJson(payload) //
                     .build(); //
-            final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
         return 2;
     }
 
-    private int importSavingsActivation(Long savingsId, int i, String dateFormat) {
+    private int importSavingsActivation(final List<SavingsActivation> activationDates, final Long savingsId, final int i,
+            final String dateFormat) {
         if (activationDates.get(i) != null) {
             GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
             gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
@@ -404,7 +404,7 @@ public class FixedDepositImportHandler implements ImportHandler {
                     .fixedDepositAccountActivation(savingsId)//
                     .withJson(payload) //
                     .build(); //
-            final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
         return 3;
     }

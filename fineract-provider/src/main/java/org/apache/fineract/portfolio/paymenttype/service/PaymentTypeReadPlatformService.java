@@ -25,6 +25,8 @@ public interface PaymentTypeReadPlatformService {
 
     Collection<PaymentTypeData> retrieveAllPaymentTypes();
 
+    Collection<PaymentTypeData> retrieveAllPaymentTypesWithCode();
+
     PaymentTypeData retrieveOne(Long paymentTypeId);
 
 }

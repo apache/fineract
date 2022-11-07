@@ -197,7 +197,7 @@ public class TwoFactorServiceImpl implements TwoFactorService {
             return null;
         }
 
-        return new OTPDeliveryMethod(TwoFactorConstants.SMS_DELIVERY_METHOD_NAME, mobileNo);
+        return new OTPDeliveryMethod().setName(TwoFactorConstants.SMS_DELIVERY_METHOD_NAME).setTarget(mobileNo);
     }
 
     private OTPDeliveryMethod getEmailDeliveryMethodForUser(final AppUser user) {
@@ -205,7 +205,7 @@ public class TwoFactorServiceImpl implements TwoFactorService {
             return null;
         }
 
-        return new OTPDeliveryMethod(TwoFactorConstants.EMAIL_DELIVERY_METHOD_NAME, user.getEmail());
+        return new OTPDeliveryMethod().setName(TwoFactorConstants.EMAIL_DELIVERY_METHOD_NAME).setTarget(user.getEmail());
     }
 
     private OTPRequest generateNewToken(final OTPDeliveryMethod deliveryMethod, final boolean extendedAccessToken) {

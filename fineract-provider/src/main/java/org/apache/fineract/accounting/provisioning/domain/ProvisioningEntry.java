@@ -30,9 +30,17 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.useradministration.domain.AppUser;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 @Entity
 @Table(name = "m_provisioning_history")
 public class ProvisioningEntry extends AbstractPersistableCustom {
@@ -57,19 +65,6 @@ public class ProvisioningEntry extends AbstractPersistableCustom {
     @Column(name = "lastmodified_date")
     private LocalDate lastModifiedDate;
 
-    protected ProvisioningEntry() {
-
-    }
-
-    public ProvisioningEntry(AppUser createdBy, LocalDate createdDate, AppUser lastModifiedBy, LocalDate lastModifiedDate,
-            Set<LoanProductProvisioningEntry> provisioningEntries) {
-        this.provisioningEntries = provisioningEntries;
-        this.createdBy = createdBy;
-        this.createdDate = createdDate;
-        this.lastModifiedBy = lastModifiedBy;
-        this.lastModifiedDate = lastModifiedDate;
-    }
-
     public void setProvisioningEntries(Collection<LoanProductProvisioningEntry> provisioningEntries) {
         if (this.provisioningEntries == null) {
             this.provisioningEntries = new HashSet<>();
@@ -79,14 +74,6 @@ public class ProvisioningEntry extends AbstractPersistableCustom {
 
     public Collection<LoanProductProvisioningEntry> getLoanProductProvisioningEntries() {
         return this.provisioningEntries;
-    }
-
-    public void setJournalEntryCreated(Boolean bool) {
-        this.isJournalEntryCreated = bool;
-    }
-
-    public LocalDate getCreatedDate() {
-        return this.createdDate;
     }
 
 }

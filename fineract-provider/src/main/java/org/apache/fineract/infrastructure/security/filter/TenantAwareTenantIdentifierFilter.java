@@ -88,7 +88,7 @@ public class TenantAwareTenantIdentifierFilter extends GenericFilterBean {
         task.start();
 
         try {
-
+            ThreadLocalContextUtil.reset();
             // allows for Cross-Origin
             // Requests (CORs) to be performed against the platform API.
             response.setHeader("Access-Control-Allow-Origin", "*"); // NOSONAR
@@ -148,9 +148,10 @@ public class TenantAwareTenantIdentifierFilter extends GenericFilterBean {
             response.addHeader("WWW-Authenticate", "Basic realm=\"" + "Fineract Platform API" + "\"");
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         } finally {
+            ThreadLocalContextUtil.reset();
             task.stop();
             final PlatformRequestLog logRequest = PlatformRequestLog.from(task, request);
-            log.info("{}", this.toApiJsonSerializer.serialize(logRequest));
+            log.debug("{}", this.toApiJsonSerializer.serialize(logRequest));
         }
 
     }

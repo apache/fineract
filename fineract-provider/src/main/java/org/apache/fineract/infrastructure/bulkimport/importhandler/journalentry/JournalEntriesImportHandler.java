@@ -35,7 +35,6 @@ import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.CurrencyDateCodeSerializer;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.poi.ss.usermodel.Cell;
@@ -52,12 +51,6 @@ import org.springframework.stereotype.Service;
 public class JournalEntriesImportHandler implements ImportHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(JournalEntriesImportHandler.class);
-    private Workbook workbook;
-    private List<JournalEntryData> gltransaction;
-    private LocalDate transactionDate;
-
-    List<CreditDebit> credits = new ArrayList<>();
-    List<CreditDebit> debits = new ArrayList<>();
 
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
@@ -67,17 +60,18 @@ public class JournalEntriesImportHandler implements ImportHandler {
     }
 
     @Override
-    public Count process(Workbook workbook, String locale, String dateFormat) {
-        this.workbook = workbook;
-        gltransaction = new ArrayList<>();
-        readExcelFile(locale, dateFormat);
-        return importEntity(dateFormat);
+    public Count process(final Workbook workbook, final String locale, final String dateFormat) {
+
+        List<JournalEntryData> glTransactions = readExcelFile(workbook, locale, dateFormat);
+        return importEntity(workbook, glTransactions, dateFormat);
     }
 
-    public void readExcelFile(final String locale, final String dateFormat) {
+    private List<JournalEntryData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
+        List<JournalEntryData> glTransactions = new ArrayList<>();
         String currentTransactionId = null;
         String prevTransactionId = null;
         JournalEntryData journalEntry = null;
+        LocalDate transactionDate = null;
 
         Sheet addJournalEntriesSheet = workbook.getSheet(TemplatePopulateImportConstants.JOURNAL_ENTRY_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(addJournalEntriesSheet, 4);
@@ -120,22 +114,20 @@ public class JournalEntriesImportHandler implements ImportHandler {
                     }
                 }
             } else {
-
                 if (journalEntry != null) {
-                    gltransaction.add(journalEntry);
-                    journalEntry = null;
+                    glTransactions.add(journalEntry);
                 }
-
-                journalEntry = readAddJournalEntries(row, locale, dateFormat);
-
+                journalEntry = readAddJournalEntries(workbook, row, transactionDate, locale, dateFormat);
             }
             prevTransactionId = currentTransactionId;
         }
         // Adding last JE
-        gltransaction.add(journalEntry);
+        glTransactions.add(journalEntry);
+        return glTransactions;
     }
 
-    private JournalEntryData readAddJournalEntries(Row row, String locale, String dateFormat) {
+    private JournalEntryData readAddJournalEntries(final Workbook workbook, final Row row, LocalDate transactionDate, final String locale,
+            final String dateFormat) {
         LocalDate transactionDateCheck = ImportHandlerUtils.readAsDate(JournalEntryConstants.TRANSACION_ON_DATE_COL, row);
         if (transactionDateCheck != null) {
             transactionDate = transactionDateCheck;
@@ -147,8 +139,8 @@ public class JournalEntriesImportHandler implements ImportHandler {
         Long paymentTypeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME),
                 paymentType);
         String currencyName = ImportHandlerUtils.readAsString(JournalEntryConstants.CURRENCY_NAME_COL, row);
-        String currencyCode = ImportHandlerUtils
-                .getCodeByName(workbook.getSheet(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME), currencyName).toString();
+        String currencyCode = ImportHandlerUtils.getCodeByName(workbook.getSheet(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME),
+                currencyName);
         String glAccountNameCredit = ImportHandlerUtils.readAsString(JournalEntryConstants.GL_ACCOUNT_ID_CREDIT_COL, row);
         Long glAccountIdCredit = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.GL_ACCOUNTS_SHEET_NAME),
                 glAccountNameCredit);
@@ -156,8 +148,8 @@ public class JournalEntriesImportHandler implements ImportHandler {
         Long glAccountIdDebit = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.GL_ACCOUNTS_SHEET_NAME),
                 glAccountNameDebit);
 
-        credits = new ArrayList<>();
-        debits = new ArrayList<>();
+        List<CreditDebit> credits = new ArrayList<>();
+        List<CreditDebit> debits = new ArrayList<>();
 
         // String credit =
         // readAsString(JournalEntryConstants.GL_ACCOUNT_ID_CREDIT_COL, row);
@@ -193,7 +185,7 @@ public class JournalEntriesImportHandler implements ImportHandler {
 
     }
 
-    public Count importEntity(String dateFormat) {
+    private Count importEntity(final Workbook workbook, final List<JournalEntryData> glTransactions, String dateFormat) {
         Sheet addJournalEntriesSheet = workbook.getSheet(TemplatePopulateImportConstants.JOURNAL_ENTRY_SHEET_NAME);
         int successCount = 0;
         int errorCount = 0;
@@ -202,14 +194,14 @@ public class JournalEntriesImportHandler implements ImportHandler {
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
         gsonBuilder.registerTypeAdapter(CurrencyData.class, new CurrencyDateCodeSerializer());
 
-        for (JournalEntryData transaction : gltransaction) {
+        for (JournalEntryData transaction : glTransactions) {
             try {
                 String payload = gsonBuilder.create().toJson(transaction);
                 final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                         .createJournalEntry() //
                         .withJson(payload) //
                         .build(); //
-                final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+                commandsSourceWritePlatformService.logCommandSource(commandRequest);
                 successCount++;
                 Cell statusCell = addJournalEntriesSheet.getRow(transaction.getRowIndex()).createCell(JournalEntryConstants.STATUS_COL);
                 statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);

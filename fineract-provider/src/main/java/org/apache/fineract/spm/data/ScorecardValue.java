@@ -18,20 +18,20 @@
  */
 package org.apache.fineract.spm.data;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public class ScorecardValue {
 
     private Long questionId;
     private Long responseId;
     private Integer value;
-    private LocalDateTime createdOn;
+    private OffsetDateTime createdOn;
 
     public ScorecardValue() {
 
     }
 
-    private ScorecardValue(final Long questionId, final Long responseId, final Integer value, final LocalDateTime createdOn) {
+    private ScorecardValue(final Long questionId, final Long responseId, final Integer value, final OffsetDateTime createdOn) {
         this.questionId = questionId;
         this.responseId = responseId;
         this.value = value;
@@ -39,7 +39,7 @@ public class ScorecardValue {
     }
 
     public static ScorecardValue instance(final Long questionId, final Long responseId, final Integer value,
-            final LocalDateTime createdOn) {
+            final OffsetDateTime createdOn) {
         return new ScorecardValue(questionId, responseId, value, createdOn);
     }
 
@@ -67,11 +67,11 @@ public class ScorecardValue {
         this.value = value;
     }
 
-    public LocalDateTime getCreatedOn() {
+    public OffsetDateTime getCreatedOn() {
         return this.createdOn;
     }
 
-    public void setCreatedOn(LocalDateTime createdOn) {
+    public void setCreatedOn(OffsetDateTime createdOn) {
         this.createdOn = createdOn;
     }
 

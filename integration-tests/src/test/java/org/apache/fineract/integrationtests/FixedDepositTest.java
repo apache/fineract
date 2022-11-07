@@ -30,7 +30,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,6 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -61,15 +65,12 @@ import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 @SuppressWarnings({ "unused", "unchecked", "rawtypes", "static-access" })
 public class FixedDepositTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(FixedDepositTest.class);
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private FixedDepositProductHelper fixedDepositProductHelper;
@@ -443,9 +444,8 @@ public class FixedDepositTest {
 
     }
 
-    @Disabled // FINERACT-1099
     @Test
-    public void testFixedDepositAccountClosureTypeWithdrawal_WITH_HOLD_TAX() throws InterruptedException {
+    public void testFixedDepositAccountClosureTypeWithdrawal_WITH_HOLD_TAX() {
         this.fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
@@ -460,41 +460,33 @@ public class FixedDepositTest {
         final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
         final Account liabilityAccountForTax = this.accountHelper.createLiabilityAccount();
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        DateFormat monthDayFormat = new SimpleDateFormat("dd MMM", Locale.US);
-        DateFormat currentDateFormat = new SimpleDateFormat("dd");
+        DateTimeFormatter monthDayFormat = new DateTimeFormatterBuilder().appendPattern("dd MMM").toFormatter();
+        DateTimeFormatter currentDateFormat = new DateTimeFormatterBuilder().appendPattern("dd").toFormatter();
 
-        Calendar todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -20);
-        final String VALID_FROM = dateFormat.format(todaysDate.getTime());
-        todaysDate.add(Calendar.YEAR, 10);
-        final String VALID_TO = dateFormat.format(todaysDate.getTime());
+        LocalDate todaysDate = Utils.getLocalDateOfTenant();
+        todaysDate = todaysDate.minusMonths(20);
+        final String VALID_FROM = Utils.dateFormatter.format(todaysDate);
+        todaysDate = todaysDate.plusYears(10);
+        final String VALID_TO = Utils.dateFormatter.format(todaysDate);
 
-        todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -20);
-        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        monthDayFormat.format(todaysDate.getTime());
+        todaysDate = Utils.getLocalDateOfTenant();
+        todaysDate = todaysDate.minusMonths(20);
+        final String SUBMITTED_ON_DATE = Utils.dateFormatter.format(todaysDate);
+        final String APPROVED_ON_DATE = Utils.dateFormatter.format(todaysDate);
+        final String ACTIVATION_DATE = Utils.dateFormatter.format(todaysDate);
 
-        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
-        Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        Integer numberOfDaysLeft = daysInMonth - currentDate + 1;
-        todaysDate.add(Calendar.DATE, numberOfDaysLeft);
-        Calendar closedOn = Calendar.getInstance();
-        closedOn.add(Calendar.MONTH, -6);
-        final String CLOSED_ON_DATE = dateFormat.format(closedOn.getTime());
+        LocalDate closedOn = todaysDate.plusMonths(14);
+        final String CLOSED_ON_DATE = Utils.dateFormatter.format(closedOn);
 
-        Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientId);
 
         /***
          * Create FD product with CashBased accounting enabled
          */
-        final String accountingRule = CASH_BASED;
         final Integer taxGroupId = createTaxGroup("10", liabilityAccountForTax);
         Integer fixedDepositProductId = createFixedDepositProductWithWithHoldTax(VALID_FROM, VALID_TO, String.valueOf(taxGroupId),
-                accountingRule, assetAccount, liabilityAccount, incomeAccount, expenseAccount);
+                CASH_BASED, assetAccount, liabilityAccount, incomeAccount, expenseAccount);
         Assertions.assertNotNull(fixedDepositProductId);
 
         /***
@@ -528,9 +520,9 @@ public class FixedDepositTest {
          * Verify journal entries posted for initial deposit transaction which happened at activation time
          */
         final JournalEntry[] assetAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.DEBIT) };
-        final JournalEntry[] liablilityAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT) };
+        final JournalEntry[] liabilityAccountInitialEntry = { new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT) };
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, ACTIVATION_DATE, assetAccountInitialEntry);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, ACTIVATION_DATE, liablilityAccountInitialEntry);
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, ACTIVATION_DATE, liabilityAccountInitialEntry);
 
         /***
          * Update interest earned of FD account
@@ -568,7 +560,6 @@ public class FixedDepositTest {
         fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                 this.responseSpec, fixedDepositAccountId.toString());
         FixedDepositAccountStatusChecker.verifyFixedDepositAccountIsMatured(fixedDepositAccountStatusHashMap);
-
     }
 
     @Test
@@ -1268,7 +1259,7 @@ public class FixedDepositTest {
         Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
-        LOG.info("per day = {}", perDay);
+        log.info("per day = {}", perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         todaysDate.getActualMaximum(Calendar.DATE);
@@ -1276,7 +1267,7 @@ public class FixedDepositTest {
         principal = FixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod, interestPerDay,
                 MONTHLY_INTERVAL, MONTHLY_INTERVAL);
 
-        LOG.info("{}", principal.toString());
+        log.info("{}", principal.toString());
         Assertions.assertTrue(Math.abs(principal - maturityAmount) < THRESHOLD, "Verifying Maturity amount for Fixed Deposit Account");
     }
 
@@ -1287,26 +1278,23 @@ public class FixedDepositTest {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.fixedDepositAccountHelper = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        DateFormat monthDayFormat = new SimpleDateFormat("dd MMM", Locale.US);
-        DateFormat currentDateFormat = new SimpleDateFormat("dd");
+        DateTimeFormatter dateFormat = Utils.dateFormatter;
 
-        Calendar todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -3);
-        final String VALID_FROM = dateFormat.format(todaysDate.getTime());
-        todaysDate.add(Calendar.YEAR, 10);
-        final String VALID_TO = dateFormat.format(todaysDate.getTime());
+        LocalDate todaysDate = Utils.getLocalDateOfTenant();
+        todaysDate = todaysDate.minusMonths(3);
+        final String VALID_FROM = dateFormat.format(todaysDate);
+        todaysDate = todaysDate.plusYears(10);
+        final String VALID_TO = dateFormat.format(todaysDate);
 
-        todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -1);
-        todaysDate.add(Calendar.DAY_OF_MONTH, -1);
-        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
-        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
-        monthDayFormat.format(todaysDate.getTime());
-        todaysDate.add(Calendar.MONTH, 1);
-        todaysDate.add(Calendar.DAY_OF_MONTH, 1);
-        final String CLOSED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        todaysDate = Utils.getLocalDateOfTenant();
+        todaysDate = todaysDate.minusMonths(1);
+        todaysDate = todaysDate.minusDays(1);
+        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate);
+        final String APPROVED_ON_DATE = dateFormat.format(todaysDate);
+        final String ACTIVATION_DATE = dateFormat.format(todaysDate);
+
+        todaysDate = Utils.getLocalDateOfTenant();
+        final String CLOSED_ON_DATE = dateFormat.format(todaysDate);
 
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assertions.assertNotNull(clientId);
@@ -1347,22 +1335,17 @@ public class FixedDepositTest {
         interestRate -= preClosurePenalInterestRate;
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
-        LOG.info("per day = {}", perDay);
+        log.info("per day = {}", perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
-        todaysDate.add(Calendar.MONTH, -1);
-        todaysDate.add(Calendar.DAY_OF_MONTH, -1);
-        Integer currentDate = Integer.valueOf(currentDateFormat.format(todaysDate.getTime()));
-        Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        daysInMonth = daysInMonth - currentDate + 1;
-        Float interestPerMonth = (float) (interestPerDay * principal * daysInMonth);
+        todaysDate = todaysDate.minusMonths(1);
+        todaysDate = todaysDate.minusDays(1);
+
+        Float interestPerMonth = (float) (interestPerDay * principal * ChronoUnit.DAYS.between(todaysDate, Utils.getLocalDateOfTenant()));
         principal += interestPerMonth;
-        todaysDate.add(Calendar.DATE, daysInMonth);
-        LOG.info("{}", monthDayFormat.format(todaysDate.getTime()));
-        interestPerMonth = (float) (interestPerDay * principal * currentDate);
-        LOG.info("IPM = {}", interestPerMonth);
-        principal += interestPerMonth;
-        LOG.info("principal = {}", principal);
+        log.info("{}", Utils.dateFormatter.format(todaysDate));
+        log.info("IPM = {}", interestPerMonth);
+        log.info("principal = {}", principal);
 
         Integer transactionIdForPostInterest = this.fixedDepositAccountHelper.postInterestForFixedDeposit(fixedDepositAccountId);
 
@@ -1439,7 +1422,7 @@ public class FixedDepositTest {
         Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
-        LOG.info("per day = {}", perDay);
+        log.info("per day = {}", perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         todaysDate.getActualMaximum(Calendar.DATE);
@@ -1447,7 +1430,7 @@ public class FixedDepositTest {
         principal = FixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod, interestPerDay,
                 MONTHLY_INTERVAL, MONTHLY_INTERVAL);
 
-        LOG.info("{}", principal.toString());
+        log.info("{}", principal.toString());
         Assertions.assertTrue(Math.abs(principal - maturityAmount) < THRESHOLD, "Verifying Maturity amount for Fixed Deposit Account");
     }
 
@@ -1514,7 +1497,7 @@ public class FixedDepositTest {
         interestRate -= preClosurePenalInterestRate;
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
-        LOG.info("per day = {}", perDay);
+        log.info("per day = {}", perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         todaysDate.add(Calendar.MONTH, -1);
@@ -1525,12 +1508,11 @@ public class FixedDepositTest {
         Float interestPerMonth = (float) (interestPerDay * principal * daysInMonth);
         principal += interestPerMonth;
         todaysDate.add(Calendar.DATE, daysInMonth);
-        LOG.info("{}", monthDayFormat.format(todaysDate.getTime()));
-
+        log.info("{}", monthDayFormat.format(todaysDate.getTime()));
         interestPerMonth = (float) (interestPerDay * principal * currentDate);
-        LOG.info("IPM = {}", interestPerMonth);
+        log.info("IPM = {}", interestPerMonth);
         principal += interestPerMonth;
-        LOG.info("principal = {}", principal);
+        log.info("principal = {}", principal);
 
         this.fixedDepositAccountHelper.calculatePrematureAmountForFixedDeposit(fixedDepositAccountId, CLOSED_ON_DATE);
 
@@ -1623,7 +1605,7 @@ public class FixedDepositTest {
         interestRate -= preClosurePenalInterestRate;
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
-        LOG.info("per day = {}", perDay);
+        log.info("per day = {}", perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         todaysDate.add(Calendar.MONTH, -1);
@@ -1634,12 +1616,12 @@ public class FixedDepositTest {
         Float interestPerMonth = (float) (interestPerDay * principal * daysInMonth);
         principal += interestPerMonth;
         todaysDate.add(Calendar.DATE, daysInMonth);
-        LOG.info("{}", monthDayFormat.format(todaysDate.getTime()));
+        log.info("{}", monthDayFormat.format(todaysDate.getTime()));
 
         interestPerMonth = (float) (interestPerDay * principal * currentDate);
-        LOG.info("IPM = {}", interestPerMonth);
+        log.info("IPM = {}", interestPerMonth);
         principal += interestPerMonth;
-        LOG.info("principal = {}", principal);
+        log.info("principal = {}", principal);
 
         this.fixedDepositAccountHelper.calculatePrematureAmountForFixedDeposit(fixedDepositAccountId, CLOSED_ON_DATE);
 
@@ -1737,7 +1719,7 @@ public class FixedDepositTest {
         interestRate -= preClosurePenalInterestRate;
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
-        LOG.info("per day = {}", perDay);
+        log.info("per day = {}", perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         todaysDate.add(Calendar.MONTH, -1);
@@ -1748,12 +1730,12 @@ public class FixedDepositTest {
         Float interestPerMonth = (float) (interestPerDay * principal * daysInMonth);
         principal += interestPerMonth;
         todaysDate.add(Calendar.DATE, daysInMonth);
-        LOG.info("{}", monthDayFormat.format(todaysDate.getTime()));
+        log.info("{}", monthDayFormat.format(todaysDate.getTime()));
 
         interestPerMonth = (float) (interestPerDay * principal * currentDate);
-        LOG.info("IPM = {}", interestPerMonth);
+        log.info("IPM = {}", interestPerMonth);
         principal += interestPerMonth;
-        LOG.info("principal = {}", principal);
+        log.info("principal = {}", principal);
 
         this.fixedDepositAccountHelper.calculatePrematureAmountForFixedDeposit(fixedDepositAccountId, CLOSED_ON_DATE);
 
@@ -1834,7 +1816,7 @@ public class FixedDepositTest {
         Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
-        LOG.info("per day = {}", perDay);
+        log.info("per day = {}", perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         todaysDate.getActualMaximum(Calendar.DATE);
@@ -1842,7 +1824,7 @@ public class FixedDepositTest {
         principal = FixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod, interestPerDay,
                 DAILY_COMPOUNDING_INTERVAL, MONTHLY_INTERVAL);
 
-        LOG.info("{}", principal.toString());
+        log.info("{}", principal.toString());
         Assertions.assertTrue(Math.abs(principal - maturityAmount) < THRESHOLD, "Verifying Maturity amount for Fixed Deposit Account");
 
     }
@@ -1871,7 +1853,7 @@ public class FixedDepositTest {
         dateFormat.format(todaysDate.getTime());
         monthDayFormat.format(todaysDate.getTime());
 
-        LOG.info("Submitted Date: {}", SUBMITTED_ON_DATE);
+        log.info("Submitted Date: {}", SUBMITTED_ON_DATE);
         Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assertions.assertNotNull(clientId);
 
@@ -1907,7 +1889,7 @@ public class FixedDepositTest {
         Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
-        LOG.info("per day = {}", perDay);
+        log.info("per day = {}", perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         todaysDate.getActualMaximum(Calendar.DATE);
@@ -1917,7 +1899,7 @@ public class FixedDepositTest {
 
         principal = new BigDecimal(principal).setScale(0, RoundingMode.FLOOR).floatValue();
         maturityAmount = new BigDecimal(maturityAmount).setScale(0, RoundingMode.FLOOR).floatValue();
-        LOG.info("{}", principal.toString());
+        log.info("{}", principal.toString());
 
         Truth.assertWithMessage("Verifying Maturity amount for Fixed Deposit Account").that(maturityAmount).isAnyOf(principal,
                 principal - 1); // FINERACT-887
@@ -1944,7 +1926,7 @@ public class FixedDepositTest {
         Integer daysLeft = daysInMonth - currentDate;
         todaysDate.add(Calendar.DATE, daysLeft + 1);
         daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        LOG.info("{}", dateFormat.format(todaysDate.getTime()));
+        log.info("{}", dateFormat.format(todaysDate.getTime()));
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
 
         final String VALID_TO = null;
@@ -1990,7 +1972,7 @@ public class FixedDepositTest {
         Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
-        LOG.info("per day = {}", perDay);
+        log.info("per day = {}", perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         principal = FixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod, interestPerDay,
@@ -2027,7 +2009,7 @@ public class FixedDepositTest {
         Integer daysLeft = daysInMonth - currentDate;
         todaysDate.add(Calendar.DATE, daysLeft + 1);
         daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        LOG.info("{}", dateFormat.format(todaysDate.getTime()));
+        log.info("{}", dateFormat.format(todaysDate.getTime()));
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
 
         final String VALID_TO = null;
@@ -2073,7 +2055,7 @@ public class FixedDepositTest {
         Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
-        LOG.info("per day = {}", perDay);
+        log.info("per day = {}", perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         principal = FixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod, interestPerDay,
@@ -2111,7 +2093,7 @@ public class FixedDepositTest {
         Integer daysLeft = daysInMonth - currentDate;
         todaysDate.add(Calendar.DATE, daysLeft + 1);
         daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        LOG.info("{}", dateFormat.format(todaysDate.getTime()));
+        log.info("{}", dateFormat.format(todaysDate.getTime()));
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
 
         final String VALID_TO = null;
@@ -2154,7 +2136,7 @@ public class FixedDepositTest {
         Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
-        LOG.info("per day = {}", perDay);
+        log.info("per day = {}", perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         principal = FixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod, interestPerDay,
@@ -2192,7 +2174,7 @@ public class FixedDepositTest {
         Integer daysLeft = daysInMonth - currentDate;
         todaysDate.add(Calendar.DATE, daysLeft + 1);
         daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        LOG.info("{}", dateFormat.format(todaysDate.getTime()));
+        log.info("{}", dateFormat.format(todaysDate.getTime()));
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
 
         final String VALID_TO = null;
@@ -2235,7 +2217,7 @@ public class FixedDepositTest {
         Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
-        LOG.info("per day = {}", perDay);
+        log.info("per day = {}", perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         principal = FixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod, interestPerDay,
@@ -2273,7 +2255,7 @@ public class FixedDepositTest {
         Integer daysLeft = daysInMonth - currentDate;
         todaysDate.add(Calendar.DATE, daysLeft + 1);
         daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        LOG.info("{}", dateFormat.format(todaysDate.getTime()));
+        log.info("{}", dateFormat.format(todaysDate.getTime()));
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
 
         final String VALID_TO = null;
@@ -2316,7 +2298,7 @@ public class FixedDepositTest {
         Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
-        LOG.info("per day = {}", perDay);
+        log.info("per day = {}", perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         principal = FixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod, interestPerDay,
@@ -2353,7 +2335,7 @@ public class FixedDepositTest {
         Integer daysLeft = daysInMonth - currentDate;
         todaysDate.add(Calendar.DATE, daysLeft + 1);
         daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
-        LOG.info("{}", dateFormat.format(todaysDate.getTime()));
+        log.info("{}", dateFormat.format(todaysDate.getTime()));
         final String VALID_FROM = dateFormat.format(todaysDate.getTime());
 
         final String VALID_TO = null;
@@ -2396,7 +2378,7 @@ public class FixedDepositTest {
         Float interestRate = FixedDepositAccountHelper.getInterestRate(interestRateChartData, depositPeriod);
         double interestRateInFraction = interestRate / 100;
         double perDay = (double) 1 / daysInYear;
-        LOG.info("per day = {}", perDay);
+        log.info("per day = {}", perDay);
         double interestPerDay = interestRateInFraction * perDay;
 
         principal = FixedDepositAccountHelper.getPrincipalAfterCompoundingInterest(todaysDate, principal, depositPeriod, interestPerDay,
@@ -2574,7 +2556,7 @@ public class FixedDepositTest {
 
     private Integer createFixedDepositProduct(final String validFrom, final String validTo, final String accountingRule,
             Account... accounts) {
-        LOG.info("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
+        log.info("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
         FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
         if (accountingRule.equals(CASH_BASED)) {
             fixedDepositProductHelper = fixedDepositProductHelper.withAccountingRuleAsCashBased(accounts);
@@ -2588,7 +2570,7 @@ public class FixedDepositTest {
 
     private Integer createFixedDepositProductWithoutCharts(final String validFrom, final String validTo, final String accountingRule,
             Account... accounts) {
-        LOG.info("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
+        log.info("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
         FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
         if (accountingRule.equals(CASH_BASED)) {
             fixedDepositProductHelper = fixedDepositProductHelper.withAccountingRuleAsCashBased(accounts);
@@ -2602,7 +2584,7 @@ public class FixedDepositTest {
 
     private Integer createFixedDepositProductWithWithHoldTax(final String validFrom, final String validTo, final String taxGroupId,
             final String accountingRule, Account... accounts) {
-        LOG.info("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
+        log.info("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
         FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
         if (accountingRule.equals(CASH_BASED)) {
             fixedDepositProductHelper = fixedDepositProductHelper.withAccountingRuleAsCashBased(accounts);
@@ -2617,7 +2599,7 @@ public class FixedDepositTest {
 
     private Integer createFixedDepositProduct(final String validFrom, final String validTo, final String accountingRule,
             final String chartToBePicked, Account... accounts) {
-        LOG.info("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
+        log.info("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
         FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
         if (accountingRule.equals(CASH_BASED)) {
             fixedDepositProductHelper = fixedDepositProductHelper.withAccountingRuleAsCashBased(accounts);
@@ -2648,7 +2630,7 @@ public class FixedDepositTest {
 
     private Integer applyForFixedDepositApplication(final String clientID, final String productID, final String submittedOnDate,
             final String penalInterestType) {
-        LOG.info("--------------------------------APPLYING FOR FIXED DEPOSIT ACCOUNT --------------------------------");
+        log.info("--------------------------------APPLYING FOR FIXED DEPOSIT ACCOUNT --------------------------------");
         final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec) //
                 .withSubmittedOnDate(submittedOnDate).build(clientID, productID, penalInterestType);
         return FixedDepositAccountHelper.applyFixedDepositApplication(fixedDepositApplicationJSON, this.requestSpec, this.responseSpec);
@@ -2656,7 +2638,7 @@ public class FixedDepositTest {
 
     private Integer applyForFixedDepositApplication(final String clientID, final String productID, final String submittedOnDate,
             final String penalInterestType, final Integer maturityInstructionId) {
-        LOG.info("--------------------------------APPLYING FOR FIXED DEPOSIT ACCOUNT --------------------------------");
+        log.info("--------------------------------APPLYING FOR FIXED DEPOSIT ACCOUNT --------------------------------");
         final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec) //
                 .withSubmittedOnDate(submittedOnDate).withMaturityInstructionId(maturityInstructionId)
                 .build(clientID, productID, penalInterestType);
@@ -2665,7 +2647,7 @@ public class FixedDepositTest {
 
     private Integer applyForFixedDepositApplication(final String clientID, final String productID, final String submittedOnDate,
             final String penalInterestType, final String depositAmount, final String depositPeriod) {
-        LOG.info("--------------------------------APPLYING FOR FIXED DEPOSIT ACCOUNT --------------------------------");
+        log.info("--------------------------------APPLYING FOR FIXED DEPOSIT ACCOUNT --------------------------------");
         final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec)
                 //
                 .withSubmittedOnDate(submittedOnDate).withDepositPeriod(depositPeriod).withDepositAmount(depositAmount)
@@ -2675,7 +2657,7 @@ public class FixedDepositTest {
 
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String minOpenningBalance, final String accountingRule, Account... accounts) {
-        LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
+        log.info("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
 
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
         if (accountingRule.equals(CASH_BASED)) {

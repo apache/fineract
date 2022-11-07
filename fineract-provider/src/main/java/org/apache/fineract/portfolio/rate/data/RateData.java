@@ -21,11 +21,13 @@ package org.apache.fineract.portfolio.rate.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 /**
  * Bowpi GT Created by Jose on 19/07/2017.
  */
+@Getter
 public final class RateData implements Serializable {
 
     private Long id;

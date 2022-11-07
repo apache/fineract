@@ -69,7 +69,7 @@ public interface ConfigurationDomainService {
 
     LocalDate retrieveOrganisationStartDate();
 
-    boolean isPaymnetypeApplicableforDisbursementCharge();
+    boolean isPaymentTypeApplicableForDisbursementCharge();
 
     boolean isInterestChargedFromDateSameAsDisbursementDate();
 
@@ -118,4 +118,10 @@ public interface ConfigurationDomainService {
     boolean isCOBDateAdjustmentEnabled();
 
     boolean isReversalTransactionAllowed();
+
+    Long retrieveExternalEventsPurgeDaysCriteria();
+
+    Long retrieveRepaymentDueDays();
+
+    Long retrieveRepaymentOverdueDays();
 }

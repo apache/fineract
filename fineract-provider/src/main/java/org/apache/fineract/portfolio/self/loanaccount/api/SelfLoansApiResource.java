@@ -204,9 +204,9 @@ public class SelfLoansApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Calculate Loan Repayment Schedule | Submit a new Loan Application", description = "Calculate Loan Repayment Schedule:\n\n"
             + "Calculates Loan Repayment Schedule\n\n"
-            + "Mandatory Fields: productId, principal, loanTermFrequency, loanTermFrequencyType, numberOfRepayments, repaymentEvery, repaymentFrequencyType, interestRatePerPeriod, amortizationType, interestType, interestCalculationPeriodType, expectedDisbursementDate, transactionProcessingStrategyId\n\n"
+            + "Mandatory Fields: productId, principal, loanTermFrequency, loanTermFrequencyType, numberOfRepayments, repaymentEvery, repaymentFrequencyType, interestRatePerPeriod, amortizationType, interestType, interestCalculationPeriodType, expectedDisbursementDate, transactionProcessingStrategyCode\n\n"
             + "Submit a new Loan Application:\n\n"
-            + "Mandatory Fields: clientId, productId, principal, loanTermFrequency, loanTermFrequencyType, loanType, numberOfRepayments, repaymentEvery, repaymentFrequencyType, interestRatePerPeriod, amortizationType, interestType, interestCalculationPeriodType, transactionProcessingStrategyId, expectedDisbursementDate, submittedOnDate, loanType\n\n"
+            + "Mandatory Fields: clientId, productId, principal, loanTermFrequency, loanTermFrequencyType, loanType, numberOfRepayments, repaymentEvery, repaymentFrequencyType, interestRatePerPeriod, amortizationType, interestType, interestCalculationPeriodType, transactionProcessingStrategyCode, expectedDisbursementDate, submittedOnDate, loanType\n\n"
             + "Additional Mandatory Fields if interest recalculation is enabled for product and Rest frequency not same as repayment period: recalculationRestFrequencyDate\n\n"
             + "Additional Mandatory Fields if interest recalculation with interest/fee compounding is enabled for product and compounding frequency not same as repayment period: recalculationCompoundingFrequencyDate\n\n"
             + "Additional Mandatory Field if Entity-Datatable Check is enabled for the entity of type loan: datatables\n\n"
@@ -243,8 +243,8 @@ public class SelfLoansApiResource {
         if (clientId != null) {
             validateAppuserClientsMapping(clientId);
         }
-
-        return this.loansApiResource.modifyLoanApplication(loanId, apiRequestBodyAsJson);
+        final String command = null;
+        return this.loansApiResource.modifyLoanApplication(loanId, command, apiRequestBodyAsJson);
     }
 
     @POST

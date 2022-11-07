@@ -30,6 +30,12 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 
 public interface LoanRepaymentScheduleTransactionProcessor {
 
+    String getCode();
+
+    String getName();
+
+    boolean accept(String s);
+
     void handleTransaction(LoanTransaction loanTransaction, MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
             Set<LoanCharge> charges);
 
@@ -49,6 +55,9 @@ public interface LoanRepaymentScheduleTransactionProcessor {
 
     void handleRefund(LoanTransaction loanTransaction, MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
             Set<LoanCharge> charges);
+
+    void handleChargeback(LoanTransaction loanTransaction, MonetaryCurrency currency, Money overpaidAmount,
+            List<LoanRepaymentScheduleInstallment> installments);
 
     void processTransactionsFromDerivedFields(List<LoanTransaction> transactionsPostDisbursement, MonetaryCurrency currency,
             List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges);

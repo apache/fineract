@@ -20,10 +20,16 @@ package org.apache.fineract.infrastructure.sms.data;
 
 import com.google.gson.Gson;
 import java.util.Collection;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * Immutable data object representing the API request body sent in the POST request to the "/queue" resource
  **/
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class SmsMessageApiQueueResourceData {
 
     private Long internalId;
@@ -35,81 +41,14 @@ public class SmsMessageApiQueueResourceData {
     private Long providerId;
 
     /**
-     * SmsMessageApiQueueResourceData constructor
-     **/
-    private SmsMessageApiQueueResourceData(Long internalId, String mifosTenantIdentifier, String createdOnDate, String sourceAddress,
-            String mobileNumber, String message, Long providerId) {
-        this.internalId = internalId;
-        this.tenantId = mifosTenantIdentifier;
-        this.createdOnDate = createdOnDate;
-        this.sourceAddress = sourceAddress;
-        this.mobileNumber = mobileNumber;
-        this.message = message;
-        this.providerId = providerId;
-    }
-
-    /**
-     * SmsMessageApiQueueResourceData constructor
-     **/
-    protected SmsMessageApiQueueResourceData() {}
-
-    /**
      * @return a new instance of the SmsMessageApiQueueResourceData class
      **/
     public static final SmsMessageApiQueueResourceData instance(Long internalId, String mifosTenantIdentifier, String createdOnDate,
             String sourceAddress, String mobileNumber, String message, Long providerId) {
 
-        return new SmsMessageApiQueueResourceData(internalId, mifosTenantIdentifier, createdOnDate, sourceAddress, mobileNumber, message,
-                providerId);
-    }
-
-    /**
-     * @return the internalId
-     */
-    public Long getInternalId() {
-        return internalId;
-    }
-
-    /**
-     * @return the mifosTenantIdentifier
-     */
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    /**
-     * @return the createdOnDate
-     */
-    public String getCreatedOnDate() {
-        return createdOnDate;
-    }
-
-    /**
-     * @return the sourceAddress
-     */
-    public String getSourceAddress() {
-        return sourceAddress;
-    }
-
-    /**
-     * @return the mobileNumber
-     */
-    public String getMobileNumber() {
-        return mobileNumber;
-    }
-
-    /**
-     * @return the message
-     */
-    public String getMessage() {
-        return message;
-    }
-
-    /**
-     * @return the providerId
-     */
-    public Long getproviderId() {
-        return providerId;
+        return new SmsMessageApiQueueResourceData().setInternalId(internalId).setTenantId(mifosTenantIdentifier)
+                .setCreatedOnDate(createdOnDate).setSourceAddress(sourceAddress).setMobileNumber(mobileNumber).setMessage(message)
+                .setProviderId(providerId);
     }
 
     /**

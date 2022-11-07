@@ -27,6 +27,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -47,64 +50,56 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanCollateralManagementData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidAmountOfCollateralQuantity;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+@Slf4j
+@RequiredArgsConstructor
 @Service
 public class LoanImportHandler implements ImportHandler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LoanImportHandler.class);
-    private Workbook workbook;
-    private List<LoanAccountData> loans;
-    private List<LoanApprovalData> approvalDates;
-    private List<LoanTransactionData> loanRepayments;
-    private List<DisbursementData> disbursalDates;
-    private List<String> statuses;
-
+    public static final String EMPTY_STR = "";
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
-    @Autowired
-    public LoanImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    }
+    private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
 
     @Override
-    public Count process(Workbook workbook, String locale, String dateFormat) {
-        this.workbook = workbook;
-        this.loans = new ArrayList<>();
-        this.approvalDates = new ArrayList<>();
-        this.loanRepayments = new ArrayList<>();
-        this.disbursalDates = new ArrayList<>();
-        this.statuses = new ArrayList<>();
-        readExcelFile(locale, dateFormat);
-        return importEntity(dateFormat);
+    public Count process(final Workbook workbook, final String locale, final String dateFormat) {
+        List<LoanAccountData> loans = new ArrayList<>();
+        List<LoanApprovalData> approvalDates = new ArrayList<>();
+        List<LoanTransactionData> loanRepayments = new ArrayList<>();
+        List<DisbursementData> disbursalDates = new ArrayList<>();
+        List<String> statuses = new ArrayList<>();
+        readExcelFile(workbook, loans, approvalDates, loanRepayments, disbursalDates, statuses, locale, dateFormat);
+        return importEntity(workbook, loans, approvalDates, loanRepayments, disbursalDates, statuses, dateFormat);
     }
 
-    public void readExcelFile(final String locale, final String dateFormat) {
+    private void readExcelFile(final Workbook workbook, final List<LoanAccountData> loans, final List<LoanApprovalData> approvalDates,
+            final List<LoanTransactionData> loanRepayments, final List<DisbursementData> disbursalDates, List<String> statuses,
+            final String locale, final String dateFormat) {
         Sheet loanSheet = workbook.getSheet(TemplatePopulateImportConstants.LOANS_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(loanSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = loanSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, LoanConstants.STATUS_COL)) {
-                loans.add(readLoan(row, locale, dateFormat));
+                loans.add(readLoan(workbook, row, statuses, locale, dateFormat));
                 approvalDates.add(readLoanApproval(row, locale, dateFormat));
                 disbursalDates.add(readDisbursalData(row, locale, dateFormat));
-                loanRepayments.add(readLoanRepayment(row, locale, dateFormat));
+                loanRepayments.add(readLoanRepayment(workbook, row, locale, dateFormat));
             }
         }
 
     }
 
-    private LoanTransactionData readLoanRepayment(Row row, String locale, String dateFormat) {
+    private LoanTransactionData readLoanRepayment(final Workbook workbook, final Row row, final String locale, final String dateFormat) {
         BigDecimal repaymentAmount = null;
         if (ImportHandlerUtils.readAsDouble(LoanConstants.TOTAL_AMOUNT_REPAID_COL, row) != null) {
             repaymentAmount = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(LoanConstants.TOTAL_AMOUNT_REPAID_COL, row));
@@ -121,11 +116,11 @@ public class LoanImportHandler implements ImportHandler {
         return null;
     }
 
-    private DisbursementData readDisbursalData(Row row, String locale, String dateFormat) {
+    private DisbursementData readDisbursalData(final Row row, final String locale, final String dateFormat) {
         LocalDate disbursedDate = ImportHandlerUtils.readAsDate(LoanConstants.DISBURSED_DATE_COL, row);
         String linkAccountId = null;
         if (ImportHandlerUtils.readAsLong(LoanConstants.LINK_ACCOUNT_ID, row) != null) {
-            linkAccountId = ImportHandlerUtils.readAsLong(LoanConstants.LINK_ACCOUNT_ID, row).toString();
+            linkAccountId = Objects.requireNonNull(ImportHandlerUtils.readAsLong(LoanConstants.LINK_ACCOUNT_ID, row)).toString();
         }
 
         if (disbursedDate != null) {
@@ -134,7 +129,7 @@ public class LoanImportHandler implements ImportHandler {
         return null;
     }
 
-    private LoanApprovalData readLoanApproval(Row row, String locale, String dateFormat) {
+    private LoanApprovalData readLoanApproval(final Row row, final String locale, final String dateFormat) {
         LocalDate approvedDate = ImportHandlerUtils.readAsDate(LoanConstants.APPROVED_DATE_COL, row);
         if (approvedDate != null) {
             return LoanApprovalData.importInstance(approvedDate, row.getRowNum(), locale, dateFormat);
@@ -143,7 +138,8 @@ public class LoanImportHandler implements ImportHandler {
         return null;
     }
 
-    private LoanAccountData readLoan(Row row, String locale, String dateFormat) {
+    private LoanAccountData readLoan(final Workbook workbook, final Row row, final List<String> statuses, final String locale,
+            final String dateFormat) {
         String externalId = ImportHandlerUtils.readAsString(LoanConstants.EXTERNAL_ID_COL, row);
         String status = ImportHandlerUtils.readAsString(LoanConstants.STATUS_COL, row);
         String productName = ImportHandlerUtils.readAsString(LoanConstants.PRODUCT_COL, row);
@@ -167,7 +163,7 @@ public class LoanImportHandler implements ImportHandler {
         Integer numberOfRepayments = ImportHandlerUtils.readAsInt(LoanConstants.NO_OF_REPAYMENTS_COL, row);
         Integer repaidEvery = ImportHandlerUtils.readAsInt(LoanConstants.REPAID_EVERY_COL, row);
         String repaidEveryFrequency = ImportHandlerUtils.readAsString(LoanConstants.REPAID_EVERY_FREQUENCY_COL, row);
-        String repaidEveryFrequencyId = "";
+        String repaidEveryFrequencyId = EMPTY_STR;
         EnumOptionData repaidEveryFrequencyEnums = null;
         if (repaidEveryFrequency != null) {
             if (repaidEveryFrequency.equalsIgnoreCase("Days")) {
@@ -185,7 +181,7 @@ public class LoanImportHandler implements ImportHandler {
         String loanTermFrequencyType = ImportHandlerUtils.readAsString(LoanConstants.LOAN_TERM_FREQUENCY_COL, row);
         EnumOptionData loanTermFrequencyEnum = null;
         if (loanTermFrequencyType != null) {
-            String loanTermFrequencyId = "";
+            String loanTermFrequencyId = EMPTY_STR;
             if (loanTermFrequencyType.equalsIgnoreCase("Days")) {
                 loanTermFrequencyId = "0";
             } else if (loanTermFrequencyType.equalsIgnoreCase("Weeks")) {
@@ -200,7 +196,7 @@ public class LoanImportHandler implements ImportHandler {
             nominalInterestRate = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(LoanConstants.NOMINAL_INTEREST_RATE_COL, row));
         }
         String amortization = ImportHandlerUtils.readAsString(LoanConstants.AMORTIZATION_COL, row);
-        String amortizationId = "";
+        String amortizationId = EMPTY_STR;
         EnumOptionData amortizationEnumOption = null;
         if (amortization != null) {
             if (amortization.equalsIgnoreCase("Equal principal payments")) {
@@ -211,7 +207,7 @@ public class LoanImportHandler implements ImportHandler {
             amortizationEnumOption = new EnumOptionData(null, null, amortizationId);
         }
         String interestMethod = ImportHandlerUtils.readAsString(LoanConstants.INTEREST_METHOD_COL, row);
-        String interestMethodId = "";
+        String interestMethodId = EMPTY_STR;
         EnumOptionData interestMethodEnum = null;
         if (interestMethod != null) {
             if (interestMethod.equalsIgnoreCase("Flat")) {
@@ -222,7 +218,7 @@ public class LoanImportHandler implements ImportHandler {
             interestMethodEnum = new EnumOptionData(null, null, interestMethodId);
         }
         String interestCalculationPeriod = ImportHandlerUtils.readAsString(LoanConstants.INTEREST_CALCULATION_PERIOD_COL, row);
-        String interestCalculationPeriodId = "";
+        String interestCalculationPeriodId = EMPTY_STR;
         EnumOptionData interestCalculationPeriodEnum = null;
         if (interestCalculationPeriod != null) {
             if (interestCalculationPeriod.equalsIgnoreCase("Daily")) {
@@ -237,24 +233,17 @@ public class LoanImportHandler implements ImportHandler {
         if (ImportHandlerUtils.readAsDouble(LoanConstants.ARREARS_TOLERANCE_COL, row) != null) {
             arrearsTolerance = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(LoanConstants.ARREARS_TOLERANCE_COL, row));
         }
-        String repaymentStrategy = ImportHandlerUtils.readAsString(LoanConstants.REPAYMENT_STRATEGY_COL, row);
-        Long repaymentStrategyId = null;
-        if (repaymentStrategy != null) {
-            if (repaymentStrategy.equalsIgnoreCase("Penalties, Fees, Interest, Principal order")) {
-                repaymentStrategyId = 1L;
-            } else if (repaymentStrategy.equalsIgnoreCase("HeavensFamily Unique")) {
-                repaymentStrategyId = 2L;
-            } else if (repaymentStrategy.equalsIgnoreCase("Creocore Unique")) {
-                repaymentStrategyId = 3L;
-            } else if (repaymentStrategy.equalsIgnoreCase("Overdue/Due Fee/Int,Principal")) {
-                repaymentStrategyId = 4L;
-            } else if (repaymentStrategy.equalsIgnoreCase("Principal, Interest, Penalties, Fees Order")) {
-                repaymentStrategyId = 5L;
-            } else if (repaymentStrategy.equalsIgnoreCase("Interest, Principal, Penalties, Fees Order")) {
-                repaymentStrategyId = 6L;
-            } else if (repaymentStrategy.equalsIgnoreCase("Early Repayment Strategy")) {
-                repaymentStrategyId = 7L;
-            }
+
+        String loanRepaymentScheduleTransactionProcessorStrategy = ImportHandlerUtils.readAsString(LoanConstants.REPAYMENT_STRATEGY_COL,
+                row);
+
+        LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
+                .determineProcessor(loanRepaymentScheduleTransactionProcessorStrategy);
+
+        String repaymentStrategyCode = "mifos-standard-strategy";
+
+        if (loanRepaymentScheduleTransactionProcessor != null) {
+            repaymentStrategyCode = loanRepaymentScheduleTransactionProcessor.getCode();
         }
         Integer graceOnPrincipalPayment = ImportHandlerUtils.readAsInt(LoanConstants.GRACE_ON_PRINCIPAL_PAYMENT_COL, row);
         Integer graceOnInterestPayment = ImportHandlerUtils.readAsInt(LoanConstants.GRACE_ON_INTEREST_PAYMENT_COL, row);
@@ -358,7 +347,7 @@ public class LoanImportHandler implements ImportHandler {
                 return LoanAccountData.importInstanceIndividual(loanTypeEnumOption, clientId, productId, loanOfficerId, submittedOnDate,
                         fundId, principal, numberOfRepayments, repaidEvery, repaidEveryFrequencyEnums, loanTerm, loanTermFrequencyEnum,
                         nominalInterestRate, submittedOnDate, amortizationEnumOption, interestMethodEnum, interestCalculationPeriodEnum,
-                        arrearsTolerance, repaymentStrategyId, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
+                        arrearsTolerance, repaymentStrategyCode, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
                         interestChargedFromDate, firstRepaymentOnDate, row.getRowNum(), externalId, null, charges, linkAccountId, locale,
                         dateFormat, loanCollateralManagementData);
             } else if (loanType.equals("jlg")) {
@@ -367,7 +356,7 @@ public class LoanImportHandler implements ImportHandler {
                 return LoanAccountData.importInstanceIndividual(loanTypeEnumOption, clientId, productId, loanOfficerId, submittedOnDate,
                         fundId, principal, numberOfRepayments, repaidEvery, repaidEveryFrequencyEnums, loanTerm, loanTermFrequencyEnum,
                         nominalInterestRate, submittedOnDate, amortizationEnumOption, interestMethodEnum, interestCalculationPeriodEnum,
-                        arrearsTolerance, repaymentStrategyId, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
+                        arrearsTolerance, repaymentStrategyCode, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
                         interestChargedFromDate, firstRepaymentOnDate, row.getRowNum(), externalId, groupId, charges, linkAccountId, locale,
                         dateFormat, null);
             } else {
@@ -376,7 +365,7 @@ public class LoanImportHandler implements ImportHandler {
                 return LoanAccountData.importInstanceGroup(loanTypeEnumOption, groupIdforGroupLoan, productId, loanOfficerId,
                         submittedOnDate, fundId, principal, numberOfRepayments, repaidEvery, repaidEveryFrequencyEnums, loanTerm,
                         loanTermFrequencyEnum, nominalInterestRate, amortizationEnumOption, interestMethodEnum,
-                        interestCalculationPeriodEnum, arrearsTolerance, repaymentStrategyId, graceOnPrincipalPayment,
+                        interestCalculationPeriodEnum, arrearsTolerance, repaymentStrategyCode, graceOnPrincipalPayment,
                         graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, firstRepaymentOnDate, row.getRowNum(),
                         externalId, linkAccountId, locale, dateFormat);
             }
@@ -385,25 +374,27 @@ public class LoanImportHandler implements ImportHandler {
         return null;
     }
 
-    public Count importEntity(String dateFormat) {
+    private Count importEntity(final Workbook workbook, final List<LoanAccountData> loans, final List<LoanApprovalData> approvalDates,
+            final List<LoanTransactionData> loanRepayments, final List<DisbursementData> disbursalDates, final List<String> statuses,
+            final String dateFormat) {
         Sheet loanSheet = workbook.getSheet(TemplatePopulateImportConstants.LOANS_SHEET_NAME);
         int successCount = 0;
         int errorCount = 0;
         int progressLevel = 0;
         String loanId;
-        String errorMessage = "";
+        String errorMessage;
         for (int i = 0; i < loans.size(); i++) {
             Row row = loanSheet.getRow(loans.get(i).getRowIndex());
             Cell errorReportCell = row.createCell(LoanConstants.FAILURE_REPORT_COL);
             Cell statusCell = row.createCell(LoanConstants.STATUS_COL);
             CommandProcessingResult result = null;
-            loanId = "";
+            loanId = EMPTY_STR;
             try {
                 String status = statuses.get(i);
                 progressLevel = getProgressLevel(status);
 
                 if (progressLevel == 0 && loans.get(i) != null) {
-                    result = importLoan(i, dateFormat);
+                    result = importLoan(loans, i, dateFormat);
                     loanId = result.getLoanId().toString();
                     progressLevel = 1;
                 } else {
@@ -411,15 +402,15 @@ public class LoanImportHandler implements ImportHandler {
                 }
 
                 if (progressLevel <= 1 && approvalDates.get(i) != null) {
-                    progressLevel = importLoanApproval(result, i, dateFormat);
+                    progressLevel = importLoanApproval(approvalDates, result, i, dateFormat);
                 }
 
                 if (progressLevel <= 2 && disbursalDates.get(i) != null) {
-                    progressLevel = importDisbursalData(result, i, dateFormat);
+                    progressLevel = importDisbursalData(approvalDates, disbursalDates, result, i, dateFormat);
                 }
 
                 if (loanRepayments.get(i) != null) {
-                    progressLevel = importLoanRepayment(result, i, dateFormat);
+                    progressLevel = importLoanRepayment(loanRepayments, result, i, dateFormat);
                 }
 
                 successCount++;
@@ -427,9 +418,9 @@ public class LoanImportHandler implements ImportHandler {
                 statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
             } catch (RuntimeException ex) {
                 errorCount++;
-                LOG.error("Problem occurred in importEntity function", ex);
+                log.error("Problem occurred in importEntity function", ex);
                 errorMessage = ImportHandlerUtils.getErrorMessage(ex);
-                writeLoanErrorMessage(loanId, errorMessage, progressLevel, statusCell, errorReportCell, row);
+                writeLoanErrorMessage(workbook, loanId, errorMessage, progressLevel, statusCell, errorReportCell, row);
             }
 
         }
@@ -437,9 +428,9 @@ public class LoanImportHandler implements ImportHandler {
         return Count.instance(successCount, errorCount);
     }
 
-    private void writeLoanErrorMessage(String loanId, String errorMessage, int progressLevel, Cell statusCell, Cell errorReportCell,
-            Row row) {
-        String status = "";
+    private void writeLoanErrorMessage(final Workbook workbook, final String loanId, final String errorMessage, final int progressLevel,
+            final Cell statusCell, final Cell errorReportCell, final Row row) {
+        String status = EMPTY_STR;
         if (progressLevel == 0) {
             status = TemplatePopulateImportConstants.STATUS_CREATION_FAILED;
         } else if (progressLevel == 1) {
@@ -466,7 +457,8 @@ public class LoanImportHandler implements ImportHandler {
         ImportHandlerUtils.writeString(LoanConstants.FAILURE_REPORT_COL, rowHeader, "Report");
     }
 
-    private Integer importLoanRepayment(CommandProcessingResult result, int rowIndex, String dateFormat) {
+    private Integer importLoanRepayment(final List<LoanTransactionData> loanRepayments, final CommandProcessingResult result,
+            final int rowIndex, final String dateFormat) {
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
         JsonObject loanRepaymentJsonob = gsonBuilder.create().toJsonTree(loanRepayments.get(rowIndex)).getAsJsonObject();
@@ -482,14 +474,15 @@ public class LoanImportHandler implements ImportHandler {
         return 4;
     }
 
-    private Integer importDisbursalData(CommandProcessingResult result, int rowIndex, String dateFormat) {
+    private Integer importDisbursalData(final List<LoanApprovalData> approvalDates, final List<DisbursementData> disbursalDates,
+            final CommandProcessingResult result, final int rowIndex, final String dateFormat) {
         if (approvalDates.get(rowIndex) != null && disbursalDates.get(rowIndex) != null) {
 
             DisbursementData disbusalData = disbursalDates.get(rowIndex);
             String linkAccountId = disbusalData.getLinkAccountId();
             GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
             gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
-            if (linkAccountId != null && !"".equals(linkAccountId)) {
+            if (linkAccountId != null && !EMPTY_STR.equals(linkAccountId)) {
                 String payload = gsonBuilder.create().toJson(disbusalData);
                 final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                         .disburseLoanToSavingsApplication(result.getLoanId()) //
@@ -509,7 +502,8 @@ public class LoanImportHandler implements ImportHandler {
         return 3;
     }
 
-    private Integer importLoanApproval(CommandProcessingResult result, int rowIndex, String dateFormat) {
+    private Integer importLoanApproval(final List<LoanApprovalData> approvalDates, final CommandProcessingResult result, final int rowIndex,
+            final String dateFormat) {
         if (approvalDates.get(rowIndex) != null) {
             GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
             gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
@@ -524,7 +518,7 @@ public class LoanImportHandler implements ImportHandler {
         return 2;
     }
 
-    private CommandProcessingResult importLoan(int rowIndex, String dateFormat) {
+    private CommandProcessingResult importLoan(final List<LoanAccountData> loans, final int rowIndex, final String dateFormat) {
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
         gsonBuilder.registerTypeAdapter(EnumOptionData.class, new EnumOptionDataValueSerializer());
@@ -550,8 +544,7 @@ public class LoanImportHandler implements ImportHandler {
                 .createLoanApplication() //
                 .withJson(payload) //
                 .build(); //
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return result;
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     private int getProgressLevel(String status) {

@@ -156,7 +156,7 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
             }
             writeString(GuarantorConstants.LOOKUP_CLIENT_NAME_COL, row, loan.getClientName() + "(" + loan.getClientId() + ")");
             writeString(GuarantorConstants.LOOKUP_ACCOUNT_NO_COL, row,
-                    Long.parseLong(loan.getAccountNo()) + "-" + loan.getStatusStringValue());
+                    Long.parseLong(loan.getAccountNo()) + "-" + loan.getStatus().getValue());
         }
     }
 

@@ -21,12 +21,14 @@ package org.apache.fineract.infrastructure.core.data;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
 import lombok.ToString;
 
 /**
  * Represents the successful result of an REST API call that results in processing a command.
  */
 @ToString
+@Getter
 public class CommandProcessingResult implements Serializable {
 
     private Long commandId;
@@ -171,44 +173,8 @@ public class CommandProcessingResult implements Serializable {
         this(commandId, officeId, null, clientId, null, null, null, resourceId, null, changesOnly, null, null, null, null, null, null);
     }
 
-    public Long commandId() {
-        return this.commandId;
-    }
-
-    public Long resourceId() {
-        return this.resourceId;
-    }
-
-    public Long getOfficeId() {
-        return this.officeId;
-    }
-
     public void setOfficeId(final Long officeId) {
         this.officeId = officeId;
-    }
-
-    public Long getGroupId() {
-        return this.groupId;
-    }
-
-    public Long getClientId() {
-        return this.clientId;
-    }
-
-    public Long getLoanId() {
-        return this.loanId;
-    }
-
-    public Long getSavingsId() {
-        return this.savingsId;
-    }
-
-    public String getTransactionId() {
-        return this.transactionId;
-    }
-
-    public Map<String, Object> getCreditReport() {
-        return this.creditBureauReportData;
     }
 
     public Map<String, Object> getChanges() {
@@ -224,27 +190,11 @@ public class CommandProcessingResult implements Serializable {
         return !noChanges;
     }
 
-    public Long getProductId() {
-        return this.productId;
-    }
-
-    public Long getGsimId() {
-        return this.gsimId;
-    }
-
-    public Long getGlimId() {
-        return this.glimId;
-    }
-
     public boolean isRollbackTransaction() {
         return this.rollbackTransaction != null && this.rollbackTransaction;
     }
 
     public void setRollbackTransaction(Boolean rollbackTransaction) {
         this.rollbackTransaction = rollbackTransaction;
-    }
-
-    public Long getSubResourceId() {
-        return subResourceId;
     }
 }

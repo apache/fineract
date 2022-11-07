@@ -18,22 +18,18 @@
  */
 package org.apache.fineract.mix.data;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class NamespaceData {
 
     @SuppressWarnings("unused")
-    private final Long id;
+    private Long id;
     @SuppressWarnings("unused")
-    private final String prefix;
-    private final String url;
-
-    public NamespaceData(final Long id, final String prefix, final String url) {
-
-        this.id = id;
-        this.prefix = prefix;
-        this.url = url;
-    }
-
-    public String url() {
-        return this.url;
-    }
+    private String prefix;
+    private String url;
 }

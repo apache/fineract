@@ -25,8 +25,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
+import org.apache.fineract.commands.service.IdempotencyKeyGenerator;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.bulkimport.constants.GroupConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
@@ -56,36 +58,36 @@ import org.springframework.stereotype.Service;
 public class GroupImportHandler implements ImportHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(GroupImportHandler.class);
-    private List<GroupGeneralData> groups;
-    private List<CalendarData> meetings;
-    private Workbook workbook;
-    private List<String> statuses;
 
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final IdempotencyKeyGenerator idempotencyKeyGenerator;
 
     @Autowired
-    public GroupImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+    public GroupImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+            IdempotencyKeyGenerator idempotencyKeyGenerator) {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+        this.idempotencyKeyGenerator = idempotencyKeyGenerator;
     }
 
     @Override
-    public Count process(Workbook workbook, String locale, String dateFormat) {
-        this.workbook = workbook;
-        groups = new ArrayList<>();
-        meetings = new ArrayList<>();
-        statuses = new ArrayList<>();
-        readExcelFile(locale, dateFormat);
-        return importEntity(dateFormat);
+    public Count process(final Workbook workbook, final String locale, final String dateFormat) {
+
+        List<GroupGeneralData> groups = new ArrayList<>();
+        List<CalendarData> meetings = new ArrayList<>();
+        List<String> statuses = new ArrayList<>();
+        readExcelFile(workbook, groups, meetings, statuses, locale, dateFormat);
+        return importEntity(workbook, groups, meetings, statuses, dateFormat);
     }
 
-    public void readExcelFile(String locale, String dateFormat) {
+    private void readExcelFile(final Workbook workbook, final List<GroupGeneralData> groups, final List<CalendarData> meetings,
+            final List<String> statuses, final String locale, final String dateFormat) {
         Sheet groupsSheet = workbook.getSheet(TemplatePopulateImportConstants.GROUP_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(groupsSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = groupsSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, GroupConstants.STATUS_COL)) {
-                groups.add(readGroup(row, locale, dateFormat));
+                groups.add(readGroup(workbook, row, statuses, locale, dateFormat));
                 meetings.add(readMeeting(row, locale, dateFormat));
             }
         }
@@ -112,7 +114,8 @@ public class GroupImportHandler implements ImportHandler {
         }
     }
 
-    private GroupGeneralData readGroup(Row row, String locale, String dateFormat) {
+    private GroupGeneralData readGroup(final Workbook workbook, final Row row, final List<String> statuses, final String locale,
+            final String dateFormat) {
         String status = ImportHandlerUtils.readAsString(GroupConstants.STATUS_COL, row);
         String officeName = ImportHandlerUtils.readAsString(GroupConstants.OFFICE_NAME_COL, row);
         Long officeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME), officeName);
@@ -163,7 +166,8 @@ public class GroupImportHandler implements ImportHandler {
         return false;
     }
 
-    public Count importEntity(String dateFormat) {
+    private Count importEntity(final Workbook workbook, final List<GroupGeneralData> groups, final List<CalendarData> meetings,
+            final List<String> statuses, final String dateFormat) {
         Sheet groupSheet = workbook.getSheet(TemplatePopulateImportConstants.GROUP_SHEET_NAME);
         int successCount = 0;
         int errorCount = 0;
@@ -180,16 +184,17 @@ public class GroupImportHandler implements ImportHandler {
                 progressLevel = getProgressLevel(status);
 
                 if (progressLevel == 0) {
-                    result = importGroup(i, dateFormat);
+                    result = importGroup(groups, i, dateFormat);
                     groupId = result.getGroupId().toString();
                     progressLevel = 1;
                 } else {
-                    groupId = ImportHandlerUtils.readAsInt(GroupConstants.GROUP_ID_COL, groupSheet.getRow(groups.get(i).getRowIndex()))
+                    groupId = Objects.requireNonNull(
+                            ImportHandlerUtils.readAsInt(GroupConstants.GROUP_ID_COL, groupSheet.getRow(groups.get(i).getRowIndex())))
                             .toString();
                 }
 
                 if (meetings.get(i) != null && groups.get(i).getCenterId() == null) {
-                    progressLevel = importGroupMeeting(result, i, dateFormat);
+                    progressLevel = importGroupMeeting(meetings, Objects.requireNonNull(result), i, dateFormat);
                 }
 
                 statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);
@@ -198,15 +203,15 @@ public class GroupImportHandler implements ImportHandler {
                 errorCount++;
                 LOG.error("Problem occurred in importEntity function", ex);
                 errorMessage = ImportHandlerUtils.getErrorMessage(ex);
-                writeGroupErrorMessage(groupId, errorMessage, progressLevel, statusCell, errorReportCell, row);
+                writeGroupErrorMessage(workbook, groupId, errorMessage, progressLevel, statusCell, errorReportCell, row);
             }
         }
         setReportHeaders(groupSheet);
         return Count.instance(successCount, errorCount);
     }
 
-    private void writeGroupErrorMessage(String groupId, String errorMessage, int progressLevel, Cell statusCell, Cell errorReportCell,
-            Row row) {
+    private void writeGroupErrorMessage(final Workbook workbook, final String groupId, final String errorMessage, final int progressLevel,
+            final Cell statusCell, final Cell errorReportCell, final Row row) {
         String status = "";
         if (progressLevel == 0) {
             status = TemplatePopulateImportConstants.STATUS_CREATION_FAILED;
@@ -231,7 +236,7 @@ public class GroupImportHandler implements ImportHandler {
                 TemplatePopulateImportConstants.FAILURE_COL_REPORT_HEADER);
     }
 
-    private Integer importGroupMeeting(CommandProcessingResult result, int rowIndex, String dateFormat) {
+    private Integer importGroupMeeting(final List<CalendarData> meetings, CommandProcessingResult result, int rowIndex, String dateFormat) {
         CalendarData calendarData = meetings.get(rowIndex);
         calendarData.setTitle("group_" + result.getGroupId().toString() + "_CollectionMeeting");
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
@@ -241,27 +246,28 @@ public class GroupImportHandler implements ImportHandler {
         String payload = gsonBuilder.create().toJson(calendarData);
         CommandWrapper commandWrapper = new CommandWrapper(result.getOfficeId(), result.getGroupId(), result.getClientId(),
                 result.getLoanId(), result.getSavingsId(), null, null, null, null, null, payload, result.getTransactionId(),
-                result.getProductId(), null, null, null);
+                result.getProductId(), null, null, null, null, idempotencyKeyGenerator.create());
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createCalendar(commandWrapper, TemplatePopulateImportConstants.CENTER_ENTITY_TYPE, result.getGroupId()) //
                 .withJson(payload) //
                 .build(); //
-        final CommandProcessingResult meetingresult = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        commandsSourceWritePlatformService.logCommandSource(commandRequest);
         return 2;
     }
 
-    private CommandProcessingResult importGroup(int rowIndex, String dateFormat) {
+    private CommandProcessingResult importGroup(final List<GroupGeneralData> groups, final int rowIndex, final String dateFormat) {
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
-        Type clientCollectionType = new TypeToken<Collection<ClientData>>() {}.getType();
+        Type clientCollectionType = new TypeToken<Collection<ClientData>>() {
+
+        }.getType();
         gsonBuilder.registerTypeAdapter(clientCollectionType, new ClientIdSerializer());
         String payload = gsonBuilder.create().toJson(groups.get(rowIndex));
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createGroup() //
                 .withJson(payload) //
                 .build(); //
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return result;
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     private int getProgressLevel(String status) {

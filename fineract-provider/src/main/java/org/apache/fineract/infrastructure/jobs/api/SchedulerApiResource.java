@@ -78,7 +78,7 @@ public class SchedulerApiResource {
         this.context.authenticatedUser().validateHasReadPermission(SchedulerJobApiConstants.SCHEDULER_RESOURCE_NAME);
         final boolean isSchedulerRunning = this.jobRegisterService.isSchedulerRunning();
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        final SchedulerDetailData schedulerDetailData = new SchedulerDetailData(isSchedulerRunning);
+        final SchedulerDetailData schedulerDetailData = new SchedulerDetailData().setActive(isSchedulerRunning);
         return this.toApiJsonSerializer.serialize(settings, schedulerDetailData,
                 SchedulerJobApiConstants.SCHEDULER_DETAIL_RESPONSE_DATA_PARAMETERS);
     }

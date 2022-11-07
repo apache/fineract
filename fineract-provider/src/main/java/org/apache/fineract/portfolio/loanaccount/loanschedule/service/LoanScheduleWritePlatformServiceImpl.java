@@ -23,10 +23,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.event.business.domain.loan.LoanScheduleVariationsAddedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.LoanScheduleVariationsDeletedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -34,41 +37,30 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class LoanScheduleWritePlatformServiceImpl implements LoanScheduleWritePlatformService {
 
     private final LoanAccountDomainService loanAccountDomainService;
     private final LoanAssembler loanAssembler;
     private final LoanScheduleAssembler loanScheduleAssembler;
-    private final PlatformSecurityContext context;
     private final LoanUtilService loanUtilService;
-
-    @Autowired
-    public LoanScheduleWritePlatformServiceImpl(final LoanAccountDomainService loanAccountDomainService,
-            final LoanScheduleAssembler loanScheduleAssembler, final LoanAssembler loanAssembler, final PlatformSecurityContext context,
-            final LoanUtilService loanUtilService) {
-        this.loanAccountDomainService = loanAccountDomainService;
-        this.loanScheduleAssembler = loanScheduleAssembler;
-        this.loanAssembler = loanAssembler;
-        this.context = context;
-        this.loanUtilService = loanUtilService;
-    }
+    private final BusinessEventNotifierService businessEventNotifierService;
 
     @Override
     public CommandProcessingResult addLoanScheduleVariations(final Long loanId, final JsonCommand command) {
-        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        final Loan loan = loanAssembler.assembleFrom(loanId);
         Map<Long, LoanTermVariations> loanTermVariations = new HashMap<>();
         for (LoanTermVariations termVariations : loan.getLoanTermVariations()) {
             loanTermVariations.put(termVariations.getId(), termVariations);
         }
-        this.loanScheduleAssembler.assempleVariableScheduleFrom(loan, command.json());
+        loanScheduleAssembler.assempleVariableScheduleFrom(loan, command.json());
 
-        this.loanAccountDomainService.saveLoanWithDataIntegrityViolationChecks(loan);
+        loanAccountDomainService.saveLoanWithDataIntegrityViolationChecks(loan);
         final Map<String, Object> changes = new HashMap<>();
         List<LoanTermVariationsData> newVariationsData = new ArrayList<>();
         List<LoanTermVariations> modifiedVariations = loan.getLoanTermVariations();
@@ -83,6 +75,7 @@ public class LoanScheduleWritePlatformServiceImpl implements LoanScheduleWritePl
             changes.put("removedVariations", loanTermVariations.keySet());
         }
         changes.put("loanTermVariations", newVariationsData);
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanScheduleVariationsAddedBusinessEvent(loan));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withLoanId(loanId) //
@@ -92,7 +85,7 @@ public class LoanScheduleWritePlatformServiceImpl implements LoanScheduleWritePl
 
     @Override
     public CommandProcessingResult deleteLoanScheduleVariations(final Long loanId) {
-        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        final Loan loan = loanAssembler.assembleFrom(loanId);
         List<LoanTermVariations> variations = loan.getLoanTermVariations();
         List<Long> deletedVariations = new ArrayList<>(variations.size());
         for (LoanTermVariations loanTermVariations : variations) {
@@ -102,9 +95,10 @@ public class LoanScheduleWritePlatformServiceImpl implements LoanScheduleWritePl
         changes.put("removedEntityIds", deletedVariations);
         loan.getLoanTermVariations().clear();
         final LocalDate recalculateFrom = null;
-        ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
+        ScheduleGeneratorDTO scheduleGeneratorDTO = loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
         loan.regenerateRepaymentSchedule(scheduleGeneratorDTO);
-        this.loanAccountDomainService.saveLoanWithDataIntegrityViolationChecks(loan);
+        loanAccountDomainService.saveLoanWithDataIntegrityViolationChecks(loan);
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanScheduleVariationsDeletedBusinessEvent(loan));
         return new CommandProcessingResultBuilder() //
                 .withLoanId(loanId) //
                 .with(changes) //
