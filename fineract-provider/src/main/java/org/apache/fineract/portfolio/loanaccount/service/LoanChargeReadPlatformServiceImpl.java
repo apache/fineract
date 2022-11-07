@@ -64,7 +64,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
                     + "lc.calculation_percentage as percentageOf, lc.calculation_on_amount as amountPercentageAppliedTo, "
                     + "lc.charge_time_enum as chargeTime, " + "lc.is_penalty as penalty, "
                     + "lc.due_for_collection_as_of_date as dueAsOfDate, " + "lc.charge_calculation_enum as chargeCalculation, "
-                    + "lc.charge_payment_mode_enum as chargePaymentMode, " + "lc.is_paid_derived as paid, " + "lc.waived as waied, "
+                    + "lc.charge_payment_mode_enum as chargePaymentMode, " + "lc.is_paid_derived as paid, " + "lc.waived as waived, "
                     + "lc.min_cap as minCap, lc.max_cap as maxCap, " + "lc.charge_amount_or_percentage as amountOrPercentage, "
                     + "c.currency_code as currencyCode, oc.name as currencyName, "
                     + "date(coalesce(dd.disbursedon_date,dd.expected_disburse_date)) as disbursementDate, "
