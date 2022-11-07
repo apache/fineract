@@ -256,6 +256,14 @@ public class SavingsAccountsApiResource {
                     transactions = currentTransactions;
                 }
             }
+            if (associationParameters.contains(SavingsApiConstants.accrualTransactions)) {
+                mandatoryResponseParameters.add(SavingsApiConstants.accrualTransactions);
+                final Collection<SavingsAccountTransactionData> currentTransactions = this.savingsAccountReadPlatformService
+                        .retrieveAccrualTransactions(accountId, DepositAccountType.SAVINGS_DEPOSIT);
+                if (!CollectionUtils.isEmpty(currentTransactions)) {
+                    transactions = currentTransactions;
+                }
+            }
 
             if (associationParameters.contains(SavingsApiConstants.charges)) {
                 mandatoryResponseParameters.add(SavingsApiConstants.charges);
