@@ -1,0 +1,36 @@
+= Custom Business Steps
+
+It very easy to add your own business steps to Fineract's default steps:
+
+1. Create a custom module (e. g. `custom/acme/steps`, follow the instructions on how to create a custom module)
+2. Create a class that implements interace `org.apache.fineract.cob.COBBusinessStep`
+3. Provide the custom database migration to add the necessary information about your business step in table `m_batch_business_steps`
+
+.Business Step Interface
+[source,java]
+----
+include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/cob/COBBusinessStep.java[lines=19..]
+----
+
+== Business Step Implementation
+
+.Custom Business Step Implementation Example
+[source,java]
+----
+include::{rootdir}/custom/acme/loan/cob/src/main/java/com/acme/fineract/loan/cob/AcmeNoopBusinessStep.java[lines=19..]
+----
+
+As you can see this implementation is very simple and doesn't do much. There are some simple conventions though that you should follow implementing your own business steps:
+
+1. Make sure the value returned by method `getEnumStyledName()` is unique; it's a good idea to choose a prefix that reflects the name of your organization (in this example `ACME_`)
+2. You have more freedom for the value returned by `getHumanReadableName()`, but it's a good idea to keep this value as unique as possible
+
+== Business Step Database Migration
+
+.Business Step Database Migration Example
+[source,xml]
+----
+include::{rootdir}/custom/acme/loan/cob/src/main/resources/db/custom-changelog/0001_acme_loan_cob.xml[lines=22..]
+----
+
+NOTE: See also chapter about batch jobs in this documentation.

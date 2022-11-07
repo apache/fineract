@@ -49,9 +49,8 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class EmailConfigurationApiResource {
 
-    private final String resourceNameForPermissions = "EMAIL_CONFIGURATION";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "EMAIL_CONFIGURATION";
     private final PlatformSecurityContext context;
-    private final EmailReadPlatformService readPlatformService;
     private final DefaultToApiJsonSerializer<EmailConfigurationData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
@@ -64,7 +63,6 @@ public class EmailConfigurationApiResource {
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final EmailConfigurationReadPlatformService emailConfigurationReadPlatformService) {
         this.context = context;
-        this.readPlatformService = readPlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
@@ -73,7 +71,7 @@ public class EmailConfigurationApiResource {
 
     @GET
     public String retrieveAll(@Context final UriInfo uriInfo) {
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final Collection<EmailConfigurationData> configuration = this.emailConfigurationReadPlatformService.retrieveAll();
 

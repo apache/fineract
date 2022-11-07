@@ -39,7 +39,7 @@ import org.springframework.stereotype.Component;
 public class DataTableValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
-    private final Set<String> registerParams = new HashSet<>(
+    private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(
             Arrays.asList(DataTableApiConstant.categoryParamName, DataTableApiConstant.localParamName));
 
     @Autowired
@@ -50,7 +50,7 @@ public class DataTableValidator {
     public void validateDataTableRegistration(final String json) {
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, registerParams);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)

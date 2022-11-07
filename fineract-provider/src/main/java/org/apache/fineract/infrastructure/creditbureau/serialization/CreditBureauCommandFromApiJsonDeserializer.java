@@ -39,7 +39,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class CreditBureauCommandFromApiJsonDeserializer {
 
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("alias", "isActive", "creditBureauId"));
+    public static final String ALIAS = "alias";
+    public static final String IS_ACTIVE = "isActive";
+    public static final String CREDIT_BUREAU_ID = "creditBureauId";
+    private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList(ALIAS, IS_ACTIVE, CREDIT_BUREAU_ID));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -54,7 +57,7 @@ public class CreditBureauCommandFromApiJsonDeserializer {
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("CreditBureau");
@@ -63,13 +66,13 @@ public class CreditBureauCommandFromApiJsonDeserializer {
 
         baseDataValidator.reset().value(creditBureauId).notBlank().integerGreaterThanZero();
 
-        final String alias = this.fromApiJsonHelper.extractStringNamed("alias", element);
-        baseDataValidator.reset().parameter("alias").value(alias).notNull().notBlank().notExceedingLengthOf(100);
+        final String alias = this.fromApiJsonHelper.extractStringNamed(ALIAS, element);
+        baseDataValidator.reset().parameter(ALIAS).value(alias).notNull().notBlank().notExceedingLengthOf(100);
 
-        final String is_activeParameter = "isActive";
+        final String is_activeParameter = IS_ACTIVE;
         if (this.fromApiJsonHelper.parameterExists(is_activeParameter, element)) {
-            final boolean isActive = this.fromApiJsonHelper.extractBooleanNamed("isActive", element);
-            baseDataValidator.reset().parameter("isActive").value(isActive).notNull().notBlank().trueOrFalseRequired(isActive);
+            final boolean isActive = this.fromApiJsonHelper.extractBooleanNamed(IS_ACTIVE, element);
+            baseDataValidator.reset().parameter(IS_ACTIVE).value(isActive).notNull().notBlank().trueOrFalseRequired(isActive);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -81,23 +84,23 @@ public class CreditBureauCommandFromApiJsonDeserializer {
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("CreditBureau");
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final String creditBureauIdParameter = "creditBureauId";
+        final String creditBureauIdParameter = CREDIT_BUREAU_ID;
         if (this.fromApiJsonHelper.parameterExists(creditBureauIdParameter, element)) {
-            final Long creditBureauId = this.fromApiJsonHelper.extractLongNamed("creditBureauId", element);
-            baseDataValidator.reset().parameter("creditBureauId").value(creditBureauId).notNull().notBlank().longGreaterThanZero();
+            final Long creditBureauId = this.fromApiJsonHelper.extractLongNamed(CREDIT_BUREAU_ID, element);
+            baseDataValidator.reset().parameter(CREDIT_BUREAU_ID).value(creditBureauId).notNull().notBlank().longGreaterThanZero();
         }
 
-        final String is_activeParameter = "isActive";
+        final String is_activeParameter = IS_ACTIVE;
         if (this.fromApiJsonHelper.parameterExists(is_activeParameter, element)) {
-            final boolean isActive = this.fromApiJsonHelper.extractBooleanNamed("isActive", element);
-            baseDataValidator.reset().parameter("isActive").value(isActive).notNull().notBlank().trueOrFalseRequired(isActive);
+            final boolean isActive = this.fromApiJsonHelper.extractBooleanNamed(IS_ACTIVE, element);
+            baseDataValidator.reset().parameter(IS_ACTIVE).value(isActive).notNull().notBlank().trueOrFalseRequired(isActive);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

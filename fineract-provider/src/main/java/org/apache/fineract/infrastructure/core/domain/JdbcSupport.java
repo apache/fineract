@@ -24,8 +24,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -42,16 +42,7 @@ public final class JdbcSupport {
         ZonedDateTime dateTime = null;
         final Timestamp dateValue = rs.getTimestamp(columnName);
         if (dateValue != null) {
-            dateTime = ZonedDateTime.ofInstant(dateValue.toInstant(), DateUtils.getDateTimeZoneOfTenant());
-        }
-        return dateTime;
-    }
-
-    public static LocalDateTime getLocalDateTime(final ResultSet rs, final String columnName) throws SQLException {
-        LocalDateTime dateTime = null;
-        final Timestamp dateValue = rs.getTimestamp(columnName);
-        if (dateValue != null) {
-            dateTime = dateValue.toLocalDateTime();
+            dateTime = ZonedDateTime.of(dateValue.toLocalDateTime(), DateUtils.getDateTimeZoneOfTenant());
         }
         return dateTime;
     }
@@ -132,5 +123,16 @@ public final class JdbcSupport {
             result = null;
         }
         return result;
+    }
+
+    public static OffsetDateTime getOffsetDateTime(ResultSet rs, String columnName) throws SQLException {
+        final Timestamp timestamp = rs.getTimestamp(columnName);
+        if (timestamp != null) {
+            OffsetDateTime offsetDateTimeAtUTC = OffsetDateTime.of(timestamp.toLocalDateTime(),
+                    DateUtils.getSystemZoneId().getRules().getOffset(timestamp.toLocalDateTime()));
+            return offsetDateTimeAtUTC
+                    .withOffsetSameInstant(DateUtils.getDateTimeZoneOfTenant().getRules().getOffset(offsetDateTimeAtUTC.toInstant()));
+        }
+        return null;
     }
 }

@@ -31,22 +31,22 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 @Embeddable
 public class LoanProductMinMaxConstraints {
 
-    @Column(name = "min_principal_amount", scale = 6, precision = 19, nullable = true)
+    @Column(name = "min_principal_amount", scale = 6, precision = 19)
     private BigDecimal minPrincipal;
 
-    @Column(name = "max_principal_amount", scale = 6, precision = 19, nullable = true)
+    @Column(name = "max_principal_amount", scale = 6, precision = 19)
     private BigDecimal maxPrincipal;
 
-    @Column(name = "min_nominal_interest_rate_per_period", scale = 6, precision = 19, nullable = true)
+    @Column(name = "min_nominal_interest_rate_per_period", scale = 6, precision = 19)
     private BigDecimal minNominalInterestRatePerPeriod;
 
-    @Column(name = "max_nominal_interest_rate_per_period", scale = 6, precision = 19, nullable = true)
+    @Column(name = "max_nominal_interest_rate_per_period", scale = 6, precision = 19)
     private BigDecimal maxNominalInterestRatePerPeriod;
 
-    @Column(name = "min_number_of_repayments", nullable = true)
+    @Column(name = "min_number_of_repayments")
     private Integer minNumberOfRepayments;
 
-    @Column(name = "max_number_of_repayments", nullable = true)
+    @Column(name = "max_number_of_repayments")
     private Integer maxNumberOfRepayments;
 
     public static LoanProductMinMaxConstraints createFrom(final BigDecimal minPrincipal, final BigDecimal maxPrincipal,

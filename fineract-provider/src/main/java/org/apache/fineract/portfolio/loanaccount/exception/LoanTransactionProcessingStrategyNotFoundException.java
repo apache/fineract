@@ -25,8 +25,8 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class LoanTransactionProcessingStrategyNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public LoanTransactionProcessingStrategyNotFoundException(final Long id) {
-        super("error.msg.transactions.processing.strategy.id.invalid",
-                "Loan transaction processing strategy with identifier " + id + " does not exist", id);
+    public LoanTransactionProcessingStrategyNotFoundException(final String code) {
+        super("error.msg.transactions.processing.strategy.code.invalid",
+                "Loan transaction processing strategy with code " + code + " does not exist", code);
     }
 }

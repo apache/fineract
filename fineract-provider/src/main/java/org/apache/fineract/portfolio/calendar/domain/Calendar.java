@@ -39,7 +39,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
-import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
+import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.calendar.CalendarConstants.CalendarSupportedParameters;
@@ -50,7 +50,7 @@ import org.apache.fineract.portfolio.common.domain.NthDayType;
 
 @Entity
 @Table(name = "m_calendar")
-public class Calendar extends AbstractAuditableCustom {
+public class Calendar extends AbstractAuditableWithUTCDateTimeCustom {
 
     @Column(name = "title", length = 50, nullable = false)
     private String title;

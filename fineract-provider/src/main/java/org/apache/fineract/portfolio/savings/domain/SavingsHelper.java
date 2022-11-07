@@ -37,14 +37,14 @@ import org.springframework.stereotype.Service;
 @Service
 public final class SavingsHelper {
 
-    AccountTransfersReadPlatformService accountTransfersReadPlatformService = null;
+    private final AccountTransfersReadPlatformService accountTransfersReadPlatformService;
 
     @Autowired
     public SavingsHelper(AccountTransfersReadPlatformService accountTransfersReadPlatformService) {
         this.accountTransfersReadPlatformService = accountTransfersReadPlatformService;
     }
 
-    private final CompoundInterestHelper compoundInterestHelper = new CompoundInterestHelper();
+    private static final CompoundInterestHelper COMPOUND_INTEREST_HELPER = new CompoundInterestHelper();
 
     public List<LocalDateInterval> determineInterestPostingPeriods(final LocalDate startInterestCalculationLocalDate,
             final LocalDate interestPostingUpToDate, final SavingsPostingInterestPeriodType postingPeriodType,
@@ -169,7 +169,7 @@ public final class SavingsHelper {
 
     public Money calculateInterestForAllPostingPeriods(final MonetaryCurrency currency, final List<PostingPeriod> allPeriods,
             LocalDate accountLockedUntil, Boolean immediateWithdrawalOfInterest) {
-        return this.compoundInterestHelper.calculateInterestForAllPostingPeriods(currency, allPeriods, accountLockedUntil,
+        return COMPOUND_INTEREST_HELPER.calculateInterestForAllPostingPeriods(currency, allPeriods, accountLockedUntil,
                 immediateWithdrawalOfInterest);
     }
 

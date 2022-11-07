@@ -1005,7 +1005,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         // due date changes should be applied only for that dueDate
         if (loanApplicationTerms.getLoanTermVariations().hasDueDateVariation(scheduledDueDate)) {
             LoanTermVariationsData loanTermVariationsData = loanApplicationTerms.getLoanTermVariations().nextDueDateVariation();
-            if (loanTermVariationsData.getTermApplicableFrom().isEqual(modifiedScheduledDueDate)) {
+            if (loanTermVariationsData.getTermVariationApplicableFrom().isEqual(modifiedScheduledDueDate)) {
                 modifiedScheduledDueDate = loanTermVariationsData.getDateValue();
                 if (!loanTermVariationsData.isSpecificToInstallment()) {
                     scheduleParams.setActualRepaymentDate(modifiedScheduledDueDate);
@@ -1018,7 +1018,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         for (LoanTermVariationsData variation : interestRatesForInstallments) {
             if (variation.isApplicable(modifiedScheduledDueDate) && variation.getDecimalValue() != null && !variation.isProcessed()) {
                 loanApplicationTerms.updateAnnualNominalInterestRate(variation.getDecimalValue());
-                if (loanApplicationTerms.getInterestMethod().isDecliningBalnce()) {
+                if (loanApplicationTerms.getInterestMethod().isDecliningBalance()) {
                     if (loanApplicationTerms.getActualFixedEmiAmount() == null) {
                         loanApplicationTerms.setFixedEmiAmount(null);
                     }
@@ -1044,9 +1044,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             switch (loanTermVariationsData.getTermVariationType()) {
                 case INSERT_INSTALLMENT:
                     scheduleParams.setActualRepaymentDate(previousRepaymentDate);
-                    modifiedScheduledDueDate = loanTermVariationsData.getTermApplicableFrom();
+                    modifiedScheduledDueDate = loanTermVariationsData.getTermVariationApplicableFrom();
                     if (loanTermVariationsData.getDecimalValue() != null) {
-                        if (loanApplicationTerms.getInterestMethod().isDecliningBalnce()
+                        if (loanApplicationTerms.getInterestMethod().isDecliningBalance()
                                 && loanApplicationTerms.getAmortizationMethod().isEqualInstallment()) {
                             loanApplicationTerms.setCurrentPeriodFixedEmiAmount(loanTermVariationsData.getDecimalValue());
                         } else {
@@ -1057,7 +1057,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     loanTermVariationsData.setProcessed(true);
                 break;
                 case DELETE_INSTALLMENT:
-                    if (loanTermVariationsData.getTermApplicableFrom().isEqual(modifiedScheduledDueDate)) {
+                    if (loanTermVariationsData.getTermVariationApplicableFrom().isEqual(modifiedScheduledDueDate)) {
                         skipPeriod = true;
                         loanTermVariationsData.setProcessed(true);
                     }
@@ -1144,7 +1144,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         for (LoanTermVariationsData variation : loanApplicationTerms.getLoanTermVariations().getInterestRateFromInstallment()) {
             if (variation.isApplicable(modifiedScheduledDueDate) && variation.getDecimalValue() != null && !variation.isProcessed()) {
                 loanApplicationTerms.updateAnnualNominalInterestRate(variation.getDecimalValue());
-                if (loanApplicationTerms.getInterestMethod().isDecliningBalnce()) {
+                if (loanApplicationTerms.getInterestMethod().isDecliningBalance()) {
                     adjustInstallmentOrPrincipalAmount(loanApplicationTerms, totalCumulativePrincipal, instalmentNumber, mc);
                 } else {
                     loanApplicationTerms.setTotalPrincipalAccountedForInterestCalculation(totalCumulativePrincipal);
@@ -1161,11 +1161,11 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             }
             switch (loanTermVariationsData.getTermVariationType()) {
                 case INSERT_INSTALLMENT:
-                    modifiedScheduledDueDate = loanTermVariationsData.getTermApplicableFrom();
+                    modifiedScheduledDueDate = loanTermVariationsData.getTermVariationApplicableFrom();
                     variationsData.add(loanTermVariationsData);
                 break;
                 case DELETE_INSTALLMENT:
-                    if (loanTermVariationsData.getTermApplicableFrom().isEqual(modifiedScheduledDueDate)) {
+                    if (loanTermVariationsData.getTermVariationApplicableFrom().isEqual(modifiedScheduledDueDate)) {
                         skipPeriod = true;
                         variationsData.add(loanTermVariationsData);
                     }
@@ -1259,8 +1259,14 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
      */
     private Money getPrincipalToBeScheduled(final LoanApplicationTerms loanApplicationTerms) {
         Money principalToBeScheduled;
-        if (loanApplicationTerms.isMultiDisburseLoan() && loanApplicationTerms.getApprovedPrincipal().isGreaterThanZero()) {
-            principalToBeScheduled = loanApplicationTerms.getApprovedPrincipal();
+        if (loanApplicationTerms.isMultiDisburseLoan()) {
+            if (loanApplicationTerms.getTotalDisbursedAmount().isGreaterThanZero()) {
+                principalToBeScheduled = loanApplicationTerms.getTotalMultiDisbursedAmount();
+            } else if (loanApplicationTerms.getApprovedPrincipal().isGreaterThanZero()) {
+                principalToBeScheduled = loanApplicationTerms.getApprovedPrincipal();
+            } else {
+                principalToBeScheduled = loanApplicationTerms.getPrincipal();
+            }
         } else {
             principalToBeScheduled = loanApplicationTerms.getPrincipal();
         }
@@ -1270,7 +1276,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
     private boolean updateFixedInstallmentAmount(final MathContext mc, final LoanApplicationTerms loanApplicationTerms, int periodNumber,
             Money outstandingBalance) {
         boolean isAmountChanged = false;
-        if (loanApplicationTerms.getActualFixedEmiAmount() == null && loanApplicationTerms.getInterestMethod().isDecliningBalnce()
+        if (loanApplicationTerms.getActualFixedEmiAmount() == null && loanApplicationTerms.getInterestMethod().isDecliningBalance()
                 && loanApplicationTerms.getAmortizationMethod().isEqualInstallment()) {
             if (periodNumber < loanApplicationTerms.getPrincipalGrace() + 1) {
                 periodNumber = loanApplicationTerms.getPrincipalGrace() + 1;
@@ -1922,10 +1928,10 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             for (DisbursementData disbursementData : loanApplicationTerms.getDisbursementDatas()) {
                 if (disbursementData.disbursementDate().equals(disbursementDate)) {
                     final LoanScheduleModelDisbursementPeriod disbursementPeriod = LoanScheduleModelDisbursementPeriod.disbursement(
-                            disbursementData.disbursementDate(), Money.of(currency, disbursementData.amount()),
+                            disbursementData.disbursementDate(), Money.of(currency, disbursementData.getPrincipal()),
                             chargesDueAtTimeOfDisbursement);
                     periods.add(disbursementPeriod);
-                    principal = principal.add(disbursementData.amount());
+                    principal = principal.add(disbursementData.getPrincipal());
                 } else if (!excludePastUndisbursed || disbursementData.isDisbursed()
                         || !disbursementData.disbursementDate().isBefore(DateUtils.getLocalDateOfTenant())) {
                     /*
@@ -1937,7 +1943,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     if (prevsum != null) {
                         sumToNow = prevsum.getAmount();
                     }
-                    sumToNow = sumToNow.add(disbursementData.amount());
+                    sumToNow = sumToNow.add(disbursementData.getPrincipal());
                     disurseDetail.put(disbursementData.disbursementDate(), Money.of(currency, sumToNow));
                 }
             }
@@ -2114,7 +2120,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
             // this is required to update total fee amounts in the
             // LoanScheduleModel
-            final BigDecimal chargesDueAtTimeOfDisbursement = deriveTotalChargesDueAtTimeOfDisbursement(loan.charges());
+            final BigDecimal chargesDueAtTimeOfDisbursement = deriveTotalChargesDueAtTimeOfDisbursement(loan.getActiveCharges());
             periods = createNewLoanScheduleListWithDisbursementDetails(loanApplicationTerms.fetchNumberOfRepaymentsAfterExceptions(),
                     loanApplicationTerms, chargesDueAtTimeOfDisbursement);
             MonetaryCurrency currency = outstandingBalance.getCurrency();
@@ -2219,7 +2225,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                                 .adjustRepaymentDate(actualRepaymentDate, loanApplicationTerms, holidayDetailDTO).getChangedScheduleDate();
                         LocalDate modifiedLastInstDate = null;
                         LoanTermVariationsData variation1 = null;
+                        boolean hasDueDateVariation = false;
                         while (loanApplicationTerms.getLoanTermVariations().hasDueDateVariation(lastInstallmentDate)) {
+                            hasDueDateVariation = true;
                             LoanTermVariationsData variation = loanApplicationTerms.getLoanTermVariations().nextDueDateVariation();
                             if (!variation.isSpecificToInstallment()) {
                                 modifiedLastInstDate = variation.getDateValue();
@@ -2227,7 +2235,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                             }
                         }
 
-                        if (!lastInstallmentDate.isEqual(installment.getDueDate())
+                        if (hasDueDateVariation && !lastInstallmentDate.isEqual(installment.getDueDate())
                                 && !installment.getDueDate().equals(modifiedLastInstDate)) {
                             lastInstallmentDate = prevLastInstDate;
                             actualRepaymentDate = lastInstallmentDate;
@@ -2391,7 +2399,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             loanApplicationTerms.setInterestTobeApproppriated(
                     Money.of(loan.getCurrency(), retainedInstallments.get(retainedInstallments.size() - 1).getRescheduleInterestPortion()));
         }
-        LoanScheduleModel loanScheduleModel = generate(mc, loanApplicationTerms, loan.charges(), holidayDetailDTO, loanScheduleParams);
+        LoanScheduleModel loanScheduleModel = generate(mc, loanApplicationTerms, loan.getActiveCharges(), holidayDetailDTO,
+                loanScheduleParams);
 
         for (LoanScheduleModelPeriod loanScheduleModelPeriod : loanScheduleModel.getPeriods()) {
             if (loanScheduleModelPeriod.isRepaymentPeriod()) {
@@ -2662,10 +2671,10 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
         LoanScheduleDTO loanScheduleDTO = rescheduleNextInstallments(mc, loanApplicationTerms, loan, holidayDetailDTO,
                 loanRepaymentScheduleTransactionProcessor, onDate, calculateTill);
-        List<LoanTransaction> loanTransactions = loan.retreiveListOfTransactionsPostDisbursementExcludeAccruals();
+        List<LoanTransaction> loanTransactions = loan.retrieveListOfTransactionsPostDisbursementExcludeAccruals();
 
         loanRepaymentScheduleTransactionProcessor.handleTransaction(loanApplicationTerms.getExpectedDisbursementDate(), loanTransactions,
-                currency, loanScheduleDTO.getInstallments(), loan.charges());
+                currency, loanScheduleDTO.getInstallments(), loan.getActiveCharges());
         Money feeCharges = Money.zero(currency);
         Money penaltyCharges = Money.zero(currency);
         Money totalPrincipal = Money.zero(currency);

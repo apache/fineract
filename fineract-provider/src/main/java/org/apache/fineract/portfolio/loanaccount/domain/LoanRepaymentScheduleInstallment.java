@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
@@ -31,14 +30,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
+import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
 
 @Entity
 @Table(name = "m_loan_repayment_schedule")
-public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom
+public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDateTimeCustom
         implements Comparable<LoanRepaymentScheduleInstallment> {
 
     @ManyToOne(optional = false)
@@ -126,6 +125,12 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     @Column(name = "recalculated_interest_component", nullable = false)
     private boolean recalculatedInterestComponent;
 
+    @Column(name = "is_additional", nullable = false)
+    private boolean additional;
+
+    @Column(name = "credits_amount", scale = 6, precision = 19, nullable = true)
+    private BigDecimal credits;
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "loanRepaymentScheduleInstallment")
     private Set<LoanInterestRecalcualtionAdditionalDetails> loanCompoundingDetails = new HashSet<>();
 
@@ -135,7 +140,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "installment")
     private Set<LoanInstallmentCharge> installmentCharges = new HashSet<>();
 
-    LoanRepaymentScheduleInstallment() {
+    public LoanRepaymentScheduleInstallment() {
         this.installmentNumber = null;
         this.fromDate = null;
         this.dueDate = null;
@@ -221,6 +226,10 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
 
     public LocalDate getDueDate() {
         return this.dueDate;
+    }
+
+    public Money getCredits(final MonetaryCurrency currency) {
+        return Money.of(currency, this.credits);
     }
 
     public Money getPrincipal(final MonetaryCurrency currency) {
@@ -628,7 +637,10 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     private void checkIfRepaymentPeriodObligationsAreMet(final LocalDate transactionDate, final MonetaryCurrency currency) {
         this.obligationsMet = getTotalOutstanding(currency).isZero();
         if (this.obligationsMet) {
-            this.obligationsMetOnDate = transactionDate;
+            this.obligationsMet = getCredits(currency).isZero();
+            if (this.obligationsMet) {
+                this.obligationsMetOnDate = transactionDate;
+            }
         } else {
             this.obligationsMetOnDate = null;
         }
@@ -688,14 +700,22 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         this.principal = principal;
     }
 
-    public static Comparator<LoanRepaymentScheduleInstallment> installmentNumberComparator = new Comparator<LoanRepaymentScheduleInstallment>() {
-
-        @Override
-        public int compare(LoanRepaymentScheduleInstallment arg0, LoanRepaymentScheduleInstallment arg1) {
-
-            return arg0.getInstallmentNumber().compareTo(arg1.getInstallmentNumber());
+    public void addToPrincipal(final LocalDate transactionDate, final Money transactionAmount) {
+        if (this.principal == null) {
+            this.principal = transactionAmount.getAmount();
+        } else {
+            this.principal = this.principal.add(transactionAmount.getAmount());
         }
-    };
+        checkIfRepaymentPeriodObligationsAreMet(transactionDate, transactionAmount.getCurrency());
+    }
+
+    public void addToCredits(final BigDecimal amount) {
+        if (this.credits == null) {
+            this.credits = amount;
+        } else {
+            this.credits = this.credits.add(amount);
+        }
+    }
 
     public BigDecimal getTotalPaidInAdvance() {
         return this.totalPaidInAdvance;
@@ -714,7 +734,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     public Money unpayPenaltyChargesComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
 
         final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
-        Money penaltyPortionOfTransactionDeducted = Money.zero(currency);
+        Money penaltyPortionOfTransactionDeducted;
 
         final Money penaltyChargesCompleted = getPenaltyChargesPaid(currency);
         if (transactionAmountRemaining.isGreaterThanOrEqualTo(penaltyChargesCompleted)) {
@@ -733,7 +753,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     public Money unpayFeeChargesComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
 
         final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
-        Money feePortionOfTransactionDeducted = Money.zero(currency);
+        Money feePortionOfTransactionDeducted;
 
         final Money feeChargesCompleted = getFeeChargesPaid(currency);
         if (transactionAmountRemaining.isGreaterThanOrEqualTo(feeChargesCompleted)) {
@@ -754,7 +774,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     public Money unpayInterestComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
 
         final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
-        Money interestPortionOfTransactionDeducted = Money.zero(currency);
+        Money interestPortionOfTransactionDeducted;
 
         final Money interestCompleted = getInterestPaid(currency);
         if (transactionAmountRemaining.isGreaterThanOrEqualTo(interestCompleted)) {
@@ -775,7 +795,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     public Money unpayPrincipalComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
 
         final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
-        Money principalPortionOfTransactionDeducted = Money.zero(currency);
+        Money principalPortionOfTransactionDeducted;
 
         final Money principalCompleted = getPrincipalCompleted(currency);
         if (transactionAmountRemaining.isGreaterThanOrEqualTo(principalCompleted)) {
@@ -816,6 +836,12 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         }
     }
 
+    public void updateDueChargeback(final LocalDate transactionDate, final Money transactionAmount) {
+        updateDueDate(transactionDate);
+        addToCredits(transactionAmount.getAmount());
+        addToPrincipal(transactionDate, transactionAmount);
+    }
+
     public Money getDue(MonetaryCurrency currency) {
         return getPrincipal(currency).plus(getInterestCharged(currency)).plus(getFeeChargesCharged(currency))
                 .plus(getPenaltyChargesCharged(currency));
@@ -848,7 +874,24 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         this.feeChargesWaived = newFeeChargesCharged;
     }
 
+    public void setPenaltyChargesWaived(final BigDecimal newPenaltyChargesCharged) {
+        this.penaltyChargesWaived = newPenaltyChargesCharged;
+    }
+
     public Set<LoanInstallmentCharge> getInstallmentCharges() {
         return installmentCharges;
     }
+
+    public boolean isAdditional() {
+        return additional;
+    }
+
+    public void markAsAdditional() {
+        this.additional = true;
+    }
+
+    public boolean isFirstPeriod() {
+        return (this.installmentNumber == 1);
+    }
+
 }

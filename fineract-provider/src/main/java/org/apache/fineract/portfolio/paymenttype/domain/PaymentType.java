@@ -23,14 +23,19 @@ import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.paymenttype.api.PaymentTypeApiResourceConstants;
-import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "m_payment_type")
+@AllArgsConstructor
 public class PaymentType extends AbstractPersistableCustom {
 
     @Column(name = "value")
@@ -45,18 +50,13 @@ public class PaymentType extends AbstractPersistableCustom {
     @Column(name = "order_position")
     private Long position;
 
+    @Column(name = "code_name")
+    private String codeName;
+
+    @Column(name = "is_system_defined")
+    private Boolean isSystemDefined;
+
     protected PaymentType() {}
-
-    public PaymentType(final String name, final String description, final Boolean isCashPayment, final Long position) {
-        this.name = name;
-        this.description = description;
-        this.isCashPayment = isCashPayment;
-        this.position = position;
-    }
-
-    public static PaymentType create(String name, String description, Boolean isCashPayment, Long position) {
-        return new PaymentType(name, description, isCashPayment, position);
-    }
 
     public Map<String, Object> update(final JsonCommand command) {
 
@@ -87,18 +87,6 @@ public class PaymentType extends AbstractPersistableCustom {
         }
 
         return actualChanges;
-    }
-
-    public PaymentTypeData toData() {
-        return PaymentTypeData.instance(getId(), this.name, this.description, this.isCashPayment, this.position);
-    }
-
-    public Boolean isCashPayment() {
-        return isCashPayment;
-    }
-
-    public String getPaymentName() {
-        return name;
     }
 
 }

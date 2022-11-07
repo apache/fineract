@@ -18,21 +18,20 @@
  */
 package org.apache.fineract.infrastructure.survey.data;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+
 /**
  * Created by Cieyou on 3/11/14.
  */
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class PovertyLineData {
 
-    final Long resourceId;
-    final Long scoreFrom;
-    final Long scoreTo;
-    final Double povertyLine;
-
-    public PovertyLineData(final Long resourceId, final Long scoreFrom, final Long scoreTo, final Double povertyLine) {
-
-        this.resourceId = resourceId;
-        this.scoreTo = scoreTo;
-        this.scoreFrom = scoreFrom;
-        this.povertyLine = povertyLine;
-    }
+    Long resourceId;
+    Long scoreFrom;
+    Long scoreTo;
+    Double povertyLine;
 }

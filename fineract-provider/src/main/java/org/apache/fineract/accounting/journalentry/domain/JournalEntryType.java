@@ -50,13 +50,12 @@ public enum JournalEntryType {
     }
 
     public static JournalEntryType fromInt(final int i) {
-        final JournalEntryType type = intToEnumMap.get(Integer.valueOf(i));
-        return type;
+        return intToEnumMap.get(i);
     }
 
     @Override
     public String toString() {
-        return name().toString();
+        return name();
     }
 
     public boolean isDebitType() {

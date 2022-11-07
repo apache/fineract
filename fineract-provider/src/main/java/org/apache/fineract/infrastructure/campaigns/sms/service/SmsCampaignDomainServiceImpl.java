@@ -26,6 +26,7 @@ import java.security.InvalidParameterException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -39,25 +40,27 @@ import org.apache.fineract.infrastructure.campaigns.sms.domain.SmsCampaign;
 import org.apache.fineract.infrastructure.campaigns.sms.domain.SmsCampaignRepository;
 import org.apache.fineract.infrastructure.campaigns.sms.exception.SmsRuntimeException;
 import org.apache.fineract.infrastructure.campaigns.sms.serialization.SmsCampaignValidator;
+import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
+import org.apache.fineract.infrastructure.event.business.domain.client.ClientActivateBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.client.ClientRejectBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.LoanApprovedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.LoanRejectedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanTransactionMakeRepaymentPostBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.savings.SavingsActivateBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.savings.SavingsRejectBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.savings.transaction.SavingsDepositBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.savings.transaction.SavingsWithdrawalBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessage;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessageRepository;
 import org.apache.fineract.infrastructure.sms.scheduler.SmsMessageScheduledJobService;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepository;
-import org.apache.fineract.portfolio.businessevent.BusinessEventListener;
-import org.apache.fineract.portfolio.businessevent.domain.client.ClientActivateBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.client.ClientRejectBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.loan.LoanApprovedBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.loan.LoanRejectedBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanTransactionMakeRepaymentPostBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.savings.SavingsActivateBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.savings.SavingsRejectBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.savings.transaction.SavingsDepositBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.savings.transaction.SavingsWithdrawalBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
+import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepository;
+import org.apache.fineract.portfolio.group.exception.GroupNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanTypeException;
@@ -169,13 +172,16 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
                         throw new InvalidLoanTypeException("Loan Type cannot be Invalid for the Triggered Sms Campaign");
                     }
                     if (loan.isGroupLoan()) {
-                        Group group = this.groupRepository.findById(loan.getGroupId()).orElse(null);
+                        Group group = this.groupRepository.findById(loan.getGroupId())
+                                .orElseThrow(() -> new GroupNotFoundException(loan.getGroupId()));
                         groupClients.addAll(group.getClientMembers());
                     } else {
                         groupClients.add(loan.client());
                     }
                     HashMap<String, String> campaignParams = new ObjectMapper().readValue(smsCampaign.getParamValue(),
-                            new TypeReference<HashMap<String, String>>() {});
+                            new TypeReference<>() {
+
+                            });
 
                     if (groupClients.size() > 0) {
                         for (Client client : groupClients) {
@@ -189,7 +195,9 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
                                 }
                                 if (spkeycheck && !(value.equals("-1") || spvalue.equals(value))) {
                                     if (key.equals("officeId")) {
-                                        Office campaignOffice = this.officeRepository.findById(Long.valueOf(value)).orElse(null);
+                                        Long officeId = Long.valueOf(value);
+                                        Office campaignOffice = this.officeRepository.findById(Long.valueOf(value))
+                                                .orElseThrow(() -> new OfficeNotFoundException(officeId));
                                         if (campaignOffice.doesNotHaveAnOfficeInHierarchyWithId(client.getOffice().getId())) {
                                             throw new SmsRuntimeException("error.msg.no.office", "Office not found for the id");
                                         }
@@ -208,10 +216,8 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
                                 }
                                 SmsMessage smsMessage = SmsMessage.pendingSms(null, null, client, null, message, mobileNumber, smsCampaign,
                                         smsCampaign.isNotification());
-                                Collection<SmsMessage> messages = new ArrayList<>();
-                                messages.add(smsMessage);
                                 Map<SmsCampaign, Collection<SmsMessage>> smsDataMap = new HashMap<>();
-                                smsDataMap.put(smsCampaign, messages);
+                                smsDataMap.put(smsCampaign, Collections.singletonList(smsMessage));
                                 this.smsMessageScheduledJobService.sendTriggeredMessages(smsDataMap);
                             }
                         }
@@ -234,7 +240,9 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
                     final SavingsAccount savingsAccount = savingsTransaction.getSavingsAccount();
                     final Client client = savingsAccount.getClient();
                     HashMap<String, String> campaignParams = new ObjectMapper().readValue(smsCampaign.getParamValue(),
-                            new TypeReference<HashMap<String, String>>() {});
+                            new TypeReference<>() {
+
+                            });
                     HashMap<String, Object> smsParams = processSavingsTransactionDataForSms(savingsTransaction, client);
                     for (String key : campaignParams.keySet()) {
                         String value = campaignParams.get(key);
@@ -245,7 +253,9 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
                         }
                         if (spkeycheck && !(value.equals("-1") || spvalue.equals(value))) {
                             if (key.equals("officeId")) {
-                                Office campaignOffice = this.officeRepository.findById(Long.valueOf(value)).orElse(null);
+                                Long officeId = Long.valueOf(value);
+                                Office campaignOffice = this.officeRepository.findById(officeId)
+                                        .orElseThrow(() -> new OfficeNotFoundException(officeId));
                                 if (campaignOffice.doesNotHaveAnOfficeInHierarchyWithId(client.getOffice().getId())) {
                                     throw new SmsRuntimeException("error.msg.no.office", "Office not found for the id");
                                 }
@@ -308,7 +318,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
         smsParams.put("lastname", client.getLastname());
         smsParams.put("FullName", client.getDisplayName());
         smsParams.put("mobileNo", client.mobileNo());
-        smsParams.put("LoanAmount", loan.getPrincpal());
+        smsParams.put("LoanAmount", loan.getPrincipal());
         smsParams.put("LoanOutstanding", loanTransaction.getOutstandingLoanBalance());
         smsParams.put("loanId", loan.getId());
         smsParams.put("LoanAccountId", loan.getAccountNumber());
@@ -340,7 +350,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
         // {{balance}}
 
         // transactionDate
-        HashMap<String, Object> smsParams = new HashMap<String, Object>();
+        HashMap<String, Object> smsParams = new HashMap<>();
         SavingsAccount savingsAccount = savingsAccountTransaction.getSavingsAccount();
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMM:d:yyyy");
         smsParams.put("clientId", client.getId());

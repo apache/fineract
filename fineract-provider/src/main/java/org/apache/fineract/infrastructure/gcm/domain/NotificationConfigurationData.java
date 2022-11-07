@@ -18,34 +18,18 @@
  */
 package org.apache.fineract.infrastructure.gcm.domain;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class NotificationConfigurationData {
 
-    private final Long id;
-    private final String serverKey;
-    private final String gcmEndPoint;
-    private final String fcmEndPoint;
-
-    public NotificationConfigurationData(Long id, String serverKey, final String gcmEndPoint, final String fcmEndPoint) {
-        this.id = id;
-        this.serverKey = serverKey;
-        this.gcmEndPoint = gcmEndPoint;
-        this.fcmEndPoint = fcmEndPoint;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getServerKey() {
-        return serverKey;
-    }
-
-    public String getGcmEndPoint() {
-        return gcmEndPoint;
-    }
-
-    public String getFcmEndPoint() {
-        return fcmEndPoint;
-    }
+    private Long id;
+    private String serverKey;
+    private String gcmEndPoint;
+    private String fcmEndPoint;
 
 }

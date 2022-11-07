@@ -38,7 +38,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -48,7 +47,6 @@ import org.apache.fineract.infrastructure.security.domain.PlatformUser;
 import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
 import org.apache.fineract.infrastructure.security.service.PlatformPasswordEncoder;
 import org.apache.fineract.infrastructure.security.service.RandomPasswordGenerator;
-import org.apache.fineract.infrastructure.security.utils.LogParameterEscapeUtil;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -57,7 +55,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
-@Slf4j
 @Entity
 @Table(name = "m_appuser", uniqueConstraints = @UniqueConstraint(columnNames = { "username" }, name = "username_org"))
 public class AppUser extends AbstractPersistableCustom implements PlatformUser {
@@ -437,6 +434,10 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
         return this.enabled;
     }
 
+    public boolean isBypassUser() {
+        return hasAnyPermission("BYPASS_LOAN_WRITE_PROTECTION");
+    }
+
     public String getFirstname() {
         return this.firstname;
     }
@@ -560,6 +561,10 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
         validateHasPermission("UPDATE", resourceType);
     }
 
+    public void validateHasDeletePermission(final String resourceType) {
+        validateHasPermission("DELETE", resourceType);
+    }
+
     private void validateHasPermission(final String prefix, final String resourceType) {
         final String authorizationMessage = "User has no authority to " + prefix + " " + resourceType.toLowerCase() + "s";
         final String matchPermission = prefix + "_" + resourceType.toUpperCase();
@@ -634,8 +639,6 @@ public class AppUser extends AbstractPersistableCustom implements PlatformUser {
     public void validateHasPermissionTo(final String function) {
         if (hasNotPermissionTo(function)) {
             final String authorizationMessage = "User has no authority to: " + function;
-            log.info("Unauthorized access: userId: {} action: {} allowed: {}", getId(), LogParameterEscapeUtil.escapeLogParameter(function),
-                    getAuthorities());
             throw new NoAuthorizationException(authorizationMessage);
         }
     }

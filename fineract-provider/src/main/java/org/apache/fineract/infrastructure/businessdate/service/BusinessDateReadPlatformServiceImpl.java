@@ -73,6 +73,7 @@ public class BusinessDateReadPlatformServiceImpl implements BusinessDateReadPlat
         ZoneId zone = DateUtils.getDateTimeZoneOfTenant();
         LocalDate tenantDate = LocalDate.now(zone);
         businessDateMap.put(BusinessDateType.BUSINESS_DATE, tenantDate);
+        businessDateMap.put(BusinessDateType.COB_DATE, tenantDate);
         if (configurationDomainService.isBusinessDateEnabled()) {
             final List<BusinessDateData> businessDateDataList = this.findAll();
             for (BusinessDateData businessDateData : businessDateDataList) {

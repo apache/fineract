@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import lombok.Getter;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 /**
@@ -31,7 +32,7 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
  * (both fees and penalties)</li>
  * </ul>
  */
-@SuppressWarnings("unused")
+@Getter
 public class LoanScheduleData {
 
     /**
@@ -52,6 +53,7 @@ public class LoanScheduleData {
     private final BigDecimal totalPaidInAdvance;
     private final BigDecimal totalPaidLate;
     private final BigDecimal totalOutstanding;
+    private final BigDecimal totalCredits;
 
     /**
      * <code>periods</code> is collection of data objects containing specific information to each period of the loan
@@ -66,7 +68,7 @@ public class LoanScheduleData {
             final BigDecimal totalInterestCharged, final BigDecimal totalFeeChargesCharged, final BigDecimal totalPenaltyChargesCharged,
             final BigDecimal totalWaived, final BigDecimal totalWrittenOff, final BigDecimal totalRepaymentExpected,
             final BigDecimal totalRepayment, final BigDecimal totalPaidInAdvance, final BigDecimal totalPaidLate,
-            final BigDecimal totalOutstanding) {
+            final BigDecimal totalOutstanding, final BigDecimal totalCredits) {
         this.currency = currency;
         this.periods = periods;
         this.loanTermInDays = loanTermInDays;
@@ -83,6 +85,7 @@ public class LoanScheduleData {
         this.totalPaidInAdvance = totalPaidInAdvance;
         this.totalPaidLate = totalPaidLate;
         this.totalOutstanding = totalOutstanding;
+        this.totalCredits = totalCredits;
     }
 
     public LoanScheduleData(final CurrencyData currency, final Collection<LoanSchedulePeriodData> periods, final Integer loanTermInDays,
@@ -104,10 +107,7 @@ public class LoanScheduleData {
         this.totalPaidInAdvance = null;
         this.totalPaidLate = null;
         this.totalOutstanding = null;
-    }
-
-    public Collection<LoanSchedulePeriodData> getPeriods() {
-        return this.periods;
+        this.totalCredits = BigDecimal.ZERO;
     }
 
     public void updateFuturePeriods(Collection<LoanSchedulePeriodData> futurePeriods) {

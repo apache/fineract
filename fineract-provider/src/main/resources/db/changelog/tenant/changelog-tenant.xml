@@ -40,5 +40,51 @@
     <include file="parts/0018_pentaho_reports_to_table.xml" relativeToChangelogFile="true"/>
     <include file="parts/0019_refactor_loan_transaction.xml" relativeToChangelogFile="true"/>
     <include file="parts/0020_add_audit_entries.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0021_add_spring_batch_db_structure.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0022_add_batch_business_step_configuration_table.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0023_use_the_proper_date_or_datetime_type.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0024_add_audit_entries.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0025_add_audit_entries_to_journal_entry.xml" relativeToChangelogFile="true"/>
     <include file="parts/0026_reversals_for_reversed_transactions.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0027_add_charge_refund_permission.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0028_add_charge_refund_charge_type_to_loan_transaction.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0029_add_delinquency_buckets.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0030_add_audit_entries_to_business_date.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0031_add_audit_entries_to_client_identifier.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0032_add_some_missing_indexes.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0033_add_audit_entries_to_loan_repayment_schedule_installment.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0034_add_audit_entries_to_note.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0035_add_audit_entries_to_calendar.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0036_add_audit_entries_and_rework_command_source_datetime_fields.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0037_add_loan_cob_job_data.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0038_add_reversal_data_to_loan_transaction.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0039_add_loan_account_locks.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0040_add_delinquency_tags_job.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0041_add_update_business_step_permission.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0042_table_report_query_fix.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0043_add_external_event_table.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0044_table_report_query_fix.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0045_external_event_table_data_binary.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0046_external_event_table_schema_info.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0047_add_loan_delinquency_tags_business_step.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0048_rework_loan_account_locks.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0049_add_send_asynchronous_events_job.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0050_add_reverse_flag_disbursement_details.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0051_external_event_table_category_info.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0052_loan_transaction_chargeback.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0053_add_external_events_purge_job.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0054_additional_fields_loan_repayment_schedule.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0055_add_submitted_on_date_to_loan_charge.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0056_add_external_event_default_configuration.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0057_add_principal_adjustments_to_loan.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0058_add_execute_inline_cob_permission.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0059_add_spring_batch_loan_id_list_table.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0060_add_job_name_to_command_source.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0061_add_idempotency_key_to_command_source.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0062_add_fraud_attribute_to_loan.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0063_add_permissions_for_external_event_configuration.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0064_refactor_loan_transaction_strategy.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0065_add_bypass_loan_write_transaction_permission.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0066_delinquency_classification_chargeback.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0067_add_configurations_for_repayment_due_business_steps.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

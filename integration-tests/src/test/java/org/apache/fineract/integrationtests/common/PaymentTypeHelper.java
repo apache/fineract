@@ -24,7 +24,10 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
+import org.apache.fineract.client.models.GetPaymentTypesResponse;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public final class PaymentTypeHelper {
@@ -33,8 +36,16 @@ public final class PaymentTypeHelper {
 
     }
 
-    private static final String CREATE_PAYMENTTYPE_URL = "/fineract-provider/api/v1/paymenttypes?" + Utils.TENANT_IDENTIFIER;
     private static final String PAYMENTTYPE_URL = "/fineract-provider/api/v1/paymenttypes";
+    private static final String CREATE_PAYMENTTYPE_URL = PAYMENTTYPE_URL + "?" + Utils.TENANT_IDENTIFIER;
+
+    public static ArrayList<GetPaymentTypesResponse> getSystemPaymentType(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec) {
+        String response = Utils.performServerGet(requestSpec, responseSpec,
+                PAYMENTTYPE_URL + "?onlyWithCode=true&" + Utils.TENANT_IDENTIFIER);
+        Type paymentTypeList = new TypeToken<ArrayList<GetPaymentTypesResponse>>() {}.getType();
+        return new Gson().fromJson(response, paymentTypeList);
+    }
 
     public static Integer createPaymentType(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String name, final String description, final Boolean isCashPayment, final Integer position) {

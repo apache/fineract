@@ -44,11 +44,19 @@ public class CommandWrapperBuilder {
     private Long templateId;
     private Long creditBureauId;
     private Long organisationCreditBureauId;
+    private String jobName;
+    private String idempotencyKey;
 
     public CommandWrapper build() {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName, this.entityName,
                 this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId,
-                this.creditBureauId, this.organisationCreditBureauId);
+                this.creditBureauId, this.organisationCreditBureauId, this.jobName, this.idempotencyKey);
+    }
+
+    public CommandWrapper build(String idempotencyKey) {
+        return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName, this.entityName,
+                this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId,
+                this.creditBureauId, this.organisationCreditBureauId, this.jobName, idempotencyKey);
     }
 
     public CommandWrapperBuilder updateCreditBureau() {
@@ -824,6 +832,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder refundLoanCharge(final Long loanId) {
+        this.actionName = "CHARGEREFUND";
+        this.entityName = "LOAN";
+        this.entityId = null;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions/template?command=chargerefund";
+        return this;
+    }
+
     public CommandWrapperBuilder loanRecoveryPaymentTransaction(final Long loanId) {
         this.actionName = "RECOVERYPAYMENT";
         this.entityName = "LOAN";
@@ -896,6 +913,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder chargebackTransaction(final Long loanId, final Long transactionId) {
+        this.actionName = "CHARGEBACK";
+        this.entityName = "LOAN";
+        this.entityId = transactionId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions/" + transactionId;
+        return this;
+    }
+
     public CommandWrapperBuilder loanForeclosure(final Long loanId) {
         this.actionName = "FORECLOSURE";
         this.entityName = "LOAN";
@@ -961,6 +987,15 @@ public class CommandWrapperBuilder {
 
     public CommandWrapperBuilder updateLoanApplication(final Long loanId) {
         this.actionName = "UPDATE";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId;
+        return this;
+    }
+
+    public CommandWrapperBuilder markAsFraud(final Long loanId) {
+        this.actionName = "SETFRAUD";
         this.entityName = "LOAN";
         this.entityId = loanId;
         this.loanId = loanId;
@@ -1143,6 +1178,15 @@ public class CommandWrapperBuilder {
         this.actionName = "BULKREASSIGN";
         this.entityName = "LOAN";
         this.href = "/loans/loanreassignment";
+        return this;
+    }
+
+    public CommandWrapperBuilder assignDelinquency(final Long loanId) {
+        this.actionName = "UPDATEDELINQUENCY";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId;
         return this;
     }
 
@@ -3485,4 +3529,72 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder createDelinquencyRange() {
+        this.actionName = "CREATE";
+        this.entityName = "DELINQUENCY_RANGE";
+        this.href = "/delinquency/range";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateDelinquencyRange(final Long delinquencyRangeId) {
+        this.actionName = "UPDATE";
+        this.entityName = "DELINQUENCY_RANGE";
+        this.entityId = delinquencyRangeId;
+        this.href = "/delinquency/range";
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteDelinquencyRange(final Long delinquencyRangeId) {
+        this.actionName = "DELETE";
+        this.entityName = "DELINQUENCY_RANGE";
+        this.entityId = delinquencyRangeId;
+        this.href = "/delinquency/range";
+        return this;
+    }
+
+    public CommandWrapperBuilder createDelinquencyBucket() {
+        this.actionName = "CREATE";
+        this.entityName = "DELINQUENCY_BUCKET";
+        this.href = "/delinquency/bucket";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateDelinquencyBucket(final Long delinquencyBucketId) {
+        this.actionName = "UPDATE";
+        this.entityName = "DELINQUENCY_BUCKET";
+        this.entityId = delinquencyBucketId;
+        this.href = "/delinquency/bucket";
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteDelinquencyBucket(final Long delinquencyBucketId) {
+        this.actionName = "DELETE";
+        this.entityName = "DELINQUENCY_BUCKET";
+        this.entityId = delinquencyBucketId;
+        this.href = "/delinquency/bucket";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateBusinessStepConfig(String jobName) {
+        this.actionName = "UPDATE";
+        this.entityName = "BATCH_BUSINESS_STEP";
+        this.href = "/jobs/" + jobName + "/steps";
+        this.jobName = jobName;
+        return this;
+    }
+
+    public CommandWrapperBuilder executeInlineJob(String jobName) {
+        this.actionName = "EXECUTE";
+        this.entityName = "INLINE_JOB";
+        this.href = "/jobs/" + jobName + "/inline";
+        this.jobName = jobName;
+        return this;
+    }
+
+    public CommandWrapperBuilder updateExternalEventConfigurations() {
+        this.actionName = "UPDATE";
+        this.entityName = "EXTERNAL_EVENT_CONFIGURATION";
+        this.href = "/externaleventconfiguration";
+        return this;
+    }
 }

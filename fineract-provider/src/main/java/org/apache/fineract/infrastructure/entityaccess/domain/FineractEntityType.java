@@ -18,36 +18,31 @@
  */
 package org.apache.fineract.infrastructure.entityaccess.domain;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class FineractEntityType {
 
     private String type;
     private String description;
     private String tableName;
 
-    public static final FineractEntityType OFFICE = new FineractEntityType("office", "Offices", "m_office");
-    public static final FineractEntityType LOAN_PRODUCT = new FineractEntityType("loan_product", "Loan Products", "m_product_loan");
-    public static final FineractEntityType SAVINGS_PRODUCT = new FineractEntityType("savings_product", "Savings Products",
-            "m_savings_product");
-    public static final FineractEntityType CHARGE = new FineractEntityType("charge", "Fees/Charges", "m_charge");
-    public static final FineractEntityType SHARE_PRODUCT = new FineractEntityType("shares_product", "Shares Products", "m_share_product");
-
-    private FineractEntityType(String type, String description, String tableName) {
-        this.type = type;
-        this.description = description;
-        this.tableName = tableName;
-    }
-
-    public String getType() {
-        return this.type;
-    }
-
-    public String getDescription() {
-        return this.description;
-    }
-
-    public String getTable() {
-        return this.tableName;
-    }
+    public static final FineractEntityType OFFICE = new FineractEntityType().setType("office").setDescription("Offices")
+            .setTableName("m_office");
+    public static final FineractEntityType LOAN_PRODUCT = new FineractEntityType().setType("loan_product").setDescription("Loan Products")
+            .setTableName("m_product_loan");
+    public static final FineractEntityType SAVINGS_PRODUCT = new FineractEntityType().setType("savings_product")
+            .setDescription("Savings Product").setTableName("m_savings_product");
+    public static final FineractEntityType CHARGE = new FineractEntityType().setType("charge").setDescription("Fees/Charges")
+            .setTableName("m_charge");
+    public static final FineractEntityType SHARE_PRODUCT = new FineractEntityType().setType("shares_product")
+            .setDescription("Shares Product").setTableName("m_share_product");
 
     public static FineractEntityType get(String type) {
 

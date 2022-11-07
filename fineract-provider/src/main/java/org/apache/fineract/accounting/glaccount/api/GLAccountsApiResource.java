@@ -195,9 +195,7 @@ public class GLAccountsApiResource {
     @Path("{glAccountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(tags = {
-            "General Ledger Account" }, summary = "Update an Accounting closure", description = "Once an accounting closure is created, only the comments associated with it may be edited\n"
-                    + "\n")
+    @Operation(tags = { "General Ledger Account" }, summary = "Update a GL Account", description = "Updates a GL Account")
     @RequestBody(content = @Content(schema = @Schema(implementation = GLAccountsApiResourceSwagger.PutGLAccountsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GLAccountsApiResourceSwagger.PutGLAccountsResponse.class))) })
@@ -215,8 +213,7 @@ public class GLAccountsApiResource {
     @Path("{glAccountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(tags = {
-            "General Ledger Account" }, summary = "Delete an accounting closure", description = "Note: Only the latest accounting closure associated with a branch may be deleted.")
+    @Operation(tags = { "General Ledger Account" }, summary = "Delete a GL Account", description = "Deletes a GL Account")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GLAccountsApiResourceSwagger.DeleteGLAccountsRequest.class))) })
     public String deleteGLAccount(@PathParam("glAccountId") @Parameter(description = "glAccountId") final Long glAccountId) {
@@ -252,9 +249,18 @@ public class GLAccountsApiResource {
         final Collection<CodeValueData> allowedExpensesTagOptions = this.codeValueReadPlatformService
                 .retrieveCodeValuesByCode(AccountingConstants.EXPENSES_TAG_OPTION_CODE_NAME);
 
-        return new GLAccountData(glAccountData, accountTypeOptions, usageOptions, assetHeaderAccountOptions, liabilityHeaderAccountOptions,
-                equityHeaderAccountOptions, incomeHeaderAccountOptions, expenseHeaderAccountOptions, allowedAssetsTagOptions,
-                allowedLiabilitiesTagOptions, allowedEquityTagOptions, allowedIncomeTagOptions, allowedExpensesTagOptions);
+        return new GLAccountData().setId(glAccountData.getId()).setName(glAccountData.getName()).setParentId(glAccountData.getParentId())
+                .setGlCode(glAccountData.getGlCode()).setDisabled(glAccountData.getDisabled())
+                .setManualEntriesAllowed(glAccountData.getManualEntriesAllowed()).setType(glAccountData.getType())
+                .setUsage(glAccountData.getUsage()).setDescription(glAccountData.getDescription())
+                .setNameDecorated(glAccountData.getNameDecorated()).setTagId(glAccountData.getTagId())
+                .setOrganizationRunningBalance(glAccountData.getOrganizationRunningBalance()).setAccountTypeOptions(accountTypeOptions)
+                .setUsageOptions(usageOptions).setAssetHeaderAccountOptions(assetHeaderAccountOptions)
+                .setLiabilityHeaderAccountOptions(liabilityHeaderAccountOptions).setEquityHeaderAccountOptions(equityHeaderAccountOptions)
+                .setIncomeHeaderAccountOptions(incomeHeaderAccountOptions).setExpenseHeaderAccountOptions(expenseHeaderAccountOptions)
+                .setAllowedAssetsTagOptions(allowedAssetsTagOptions).setAllowedLiabilitiesTagOptions(allowedLiabilitiesTagOptions)
+                .setAllowedEquityTagOptions(allowedEquityTagOptions).setAllowedIncomeTagOptions(allowedIncomeTagOptions)
+                .setAllowedExpensesTagOptions(allowedExpensesTagOptions);
     }
 
     private List<GLAccountData> defaultIfEmpty(final List<GLAccountData> list) {

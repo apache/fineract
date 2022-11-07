@@ -65,7 +65,7 @@ public interface LoanProductConstants {
     String MIN_NUMBER_OF_REPAYMENTS = "minNumberOfRepayments";
     String MAX_NUMBER_OF_REPAYMENTS = "maxNumberOfRepayments";
 
-    String VALUE_CONDITION_END_WITH_ERROR = "condition.type.must.end.with.greterthan";
+    String VALUE_CONDITION_END_WITH_ERROR = "condition.type.must.end.with.greater.than";
     String VALUE_CONDITION_START_WITH_ERROR = "condition.type.must.start.with.equal";
     String SHORT_NAME = "shortName";
 
@@ -115,7 +115,7 @@ public interface LoanProductConstants {
     String allowAttributeOverridesParamName = "allowAttributeOverrides";
     String amortizationTypeParamName = "amortizationType";
     String interestTypeParamName = "interestType";
-    String transactionProcessingStrategyIdParamName = "transactionProcessingStrategyId";
+    String transactionProcessingStrategyCodeParamName = "transactionProcessingStrategyCode";
     String interestCalculationPeriodTypeParamName = "interestCalculationPeriodType";
     String inArrearsToleranceParamName = "inArrearsTolerance";
     String repaymentEveryParamName = "repaymentEvery";
@@ -141,5 +141,6 @@ public interface LoanProductConstants {
     String ALLOW_APPROVED_DISBURSED_AMOUNTS_OVER_APPLIED = "allowApprovedDisbursedAmountsOverApplied";
     String OVER_APPLIED_CALCULATION_TYPE = "overAppliedCalculationType";
     String OVER_APPLIED_NUMBER = "overAppliedNumber";
+    String DELINQUENCY_BUCKET_PARAM_NAME = "delinquencyBucketId";
 
 }

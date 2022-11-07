@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
+import java.util.Set;
 
 /**
  * Created by Chirag Gupta on 12/30/17.
@@ -128,6 +129,23 @@ final class LoanTransactionsApiResourceSwagger {
             public String displayLabel;
         }
 
+        static final class GetLoanTransactionRelation {
+
+            private GetLoanTransactionRelation() {}
+
+            @Schema(example = "1")
+            public Long fromLoanTransaction;
+            @Schema(example = "10")
+            public Long toLoanTransaction;
+            @Schema(example = "CHARGEBACK")
+            private String relationType;
+            @Schema(example = "100.00")
+            private Double amount;
+            @Schema(example = "Repayment Adjustment Chargeback")
+            private String paymentType;
+
+        }
+
         @Schema(example = "3")
         public Integer id;
         public GetLoansType type;
@@ -142,6 +160,27 @@ final class LoanTransactionsApiResourceSwagger {
         public Double amount;
         @Schema(example = "559.88")
         public Double interestPortion;
+        @Schema(example = "20120514")
+        public String reversalExternalId;
+        @Schema(example = "[2012, 5, 18]")
+        public LocalDate reversedOnDate;
+        @Schema(example = "1000.00")
+        public Double netDisbursalAmount;
+        @Schema(example = "240.00")
+        public Double principalPortion;
+        @Schema(example = "23.90")
+        public Double feeChargesPortion;
+        @Schema(example = "12.80")
+        public Double penaltyChargesPortion;
+        @Schema(example = "33.00")
+        public Double overpaymentPortion;
+        @Schema(example = "55.50")
+        public Double unrecognizedIncomePortion;
+        @Schema(example = "100.00")
+        public Double outstandingLoanBalance;
+        @Schema(example = "[2012, 5, 18]")
+        public LocalDate possibleNextRepaymentDate;
+        public Set<GetLoanTransactionRelation> transactionRelations;
     }
 
     @Schema(description = "PostLoansLoanIdTransactionsRequest")
@@ -163,6 +202,19 @@ final class LoanTransactionsApiResourceSwagger {
         public String externalId;
         @Schema(example = "3")
         public Integer paymentTypeId;
+        @Schema(example = "acc123")
+        public String accountNumber;
+        @Schema(example = "che123")
+        public String checkNumber;
+        @Schema(example = "rou123")
+        public String routingCode;
+        @Schema(example = "rec123")
+        public String receiptNumber;
+        @Schema(example = "ban123")
+        public String bankNumber;
+        @Schema(example = "3")
+        public Integer loanChargeId;
+
     }
 
     @Schema(description = "PostLoansLoanIdTransactionsResponse")
@@ -193,6 +245,12 @@ final class LoanTransactionsApiResourceSwagger {
         public Double transactionAmount;
         @Schema(example = "An optional note about why your adjusting or changing the transaction.")
         public String note;
+        @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+        public String reversalExternalId;
+        @Schema(example = "1")
+        public Integer paymentTypeId;
+        @Schema(example = "4ff9b1cb988b7")
+        public String externalId;
     }
 
     @Schema(description = "PostLoansLoanIdTransactionsTransactionIdResponse")

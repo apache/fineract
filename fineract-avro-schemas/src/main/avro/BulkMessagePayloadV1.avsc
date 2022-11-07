@@ -1,0 +1,13 @@
+{
+    "name": "BulkMessagePayloadV1",
+    "namespace": "org.apache.fineract.avro",
+    "type": "record",
+    "fields": [{
+        "name": "datas",
+        "doc": "The individual messages within this bulk message",
+        "type": {
+            "type": "array",
+            "items": "org.apache.fineract.avro.BulkMessageItemV1"
+        }
+    }]
+}

@@ -53,7 +53,7 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
 
     @Override
     public Collection<LoanProductProvisioningEntryData> retrieveLoanProductsProvisioningData(LocalDate date) {
-        String formattedDate = DateUtils.DEFAULT_DATE_FORMATER.format(date);
+        String formattedDate = DateUtils.DEFAULT_DATE_FORMATTER.format(date);
         LoanProductProvisioningEntryMapper mapper = new LoanProductProvisioningEntryMapper(sqlGenerator);
         final String sql = mapper.schema();
         return this.jdbcTemplate.query(sql, mapper, formattedDate, formattedDate, formattedDate);
@@ -95,8 +95,10 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
             Long criteriaId = rs.getLong("criteriaid");
             Long historyId = null;
 
-            return new LoanProductProvisioningEntryData(historyId, officeId, currentcyCode, productId, categoryId, overdueDays, percentage,
-                    outstandingBalance, liabilityAccountCode, expenseAccountCode, criteriaId);
+            return new LoanProductProvisioningEntryData().setHistoryId(historyId).setOfficeId(officeId).setCurrencyCode(currentcyCode)
+                    .setProductId(productId).setCategoryId(categoryId).setOverdueInDays(overdueDays).setPercentage(percentage)
+                    .setBalance(outstandingBalance).setLiablityAccount(liabilityAccountCode).setExpenseAccount(expenseAccountCode)
+                    .setCriteriaId(criteriaId);
         }
 
         public String schema() {
@@ -131,8 +133,9 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
             String modifieUser = rs.getString("modifieduser");
             BigDecimal totalReservedAmount = null;
             LocalDate createdLocalDate = createdDate != null ? createdDate.toLocalDate() : null;
-            return new ProvisioningEntryData(id, journalEntry, createdById, createdUser, createdLocalDate, modifiedById, modifieUser,
-                    totalReservedAmount);
+            return new ProvisioningEntryData().setId(id).setJournalEntry(journalEntry).setCreatedById(createdById)
+                    .setCreatedUser(createdUser).setCreatedDate(createdLocalDate).setModifiedById(modifiedById).setModifiedUser(modifieUser)
+                    .setReservedAmount(totalReservedAmount);
         }
 
         public String getSchema() {
@@ -173,9 +176,13 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
             Long criteriaId = rs.getLong("criteriaid");
             String liabilityAccountName = rs.getString("liabilityname");
             String expenseAccountName = rs.getString("expensename");
-            return new LoanProductProvisioningEntryData(historyId, officeId, officeName, currentcyCode, productId, productName, categoryId,
-                    categoryName, overdueDays, amountreserved, liabilityAccountCode, liabilityAccountglCode, liabilityAccountName,
-                    expenseAccountCode, expenseAccountglCode, expenseAccountName, criteriaId);
+            return new LoanProductProvisioningEntryData().setHistoryId(historyId).setOfficeId(officeId).setOfficeName(officeName)
+                    .setCurrencyCode(currentcyCode).setProductId(productId).setProductName(productName).setCategoryId(categoryId)
+                    .setCategoryName(categoryName).setOverdueInDays(overdueDays).setAmountreserved(amountreserved)
+                    .setLiablityAccount(liabilityAccountCode).setLiabilityAccountCode(liabilityAccountglCode)
+                    .setLiabilityAccountName(liabilityAccountName).setExpenseAccount(expenseAccountCode)
+                    .setExpenseAccountCode(expenseAccountglCode).setExpenseAccountName(expenseAccountName).setCriteriaId(criteriaId);
+
         }
 
         public String getSchema() {
@@ -205,8 +212,9 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
             String modifieUser = rs.getString("modifieduser");
             BigDecimal totalReservedAmount = rs.getBigDecimal("totalreserved");
             LocalDate createdLocalDate = createdDate != null ? createdDate.toLocalDate() : null;
-            return new ProvisioningEntryData(id, journalEntry, createdById, createdUser, createdLocalDate, modifiedById, modifieUser,
-                    totalReservedAmount);
+            return new ProvisioningEntryData().setId(id).setJournalEntry(journalEntry).setCreatedById(createdById)
+                    .setCreatedUser(createdUser).setCreatedDate(createdLocalDate).setModifiedById(modifiedById).setModifiedUser(modifieUser)
+                    .setReservedAmount(totalReservedAmount);
         }
 
         public String getSchema() {
@@ -260,7 +268,7 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
             ProvisioningEntryDataMapper mapper1 = new ProvisioningEntryDataMapper();
             final String sql1 = "select " + mapper1.getSchema() + " where entry.id = ?";
             data = this.jdbcTemplate.queryForObject(sql1, mapper1, entryId); // NOSONAR
-            data.setEntries(entries);
+            data.setProvisioningEntries(entries);
         }
         return data;
     }
@@ -293,8 +301,9 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
             String modifiedName = null;
             BigDecimal totalReservedAmount = null;
             LocalDate createdLocalDate = createdDate != null ? createdDate.toLocalDate() : null;
-            return new ProvisioningEntryData(id, Boolean.TRUE, createdBy, createdName, createdLocalDate, modifiedBy, modifiedName,
-                    totalReservedAmount);
+            return new ProvisioningEntryData().setId(id).setJournalEntry(Boolean.TRUE).setCreatedById(createdBy).setCreatedUser(createdName)
+                    .setCreatedDate(createdLocalDate).setModifiedById(modifiedBy).setModifiedUser(modifiedName)
+                    .setReservedAmount(totalReservedAmount);
         }
 
         public String schema() {

@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.Map;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
@@ -51,6 +50,8 @@ public interface LoanWritePlatformService {
 
     CommandProcessingResult adjustLoanTransaction(Long loanId, Long transactionId, JsonCommand command);
 
+    CommandProcessingResult chargebackLoanTransaction(Long loanId, Long transactionId, JsonCommand command);
+
     CommandProcessingResult waiveInterestOnLoan(Long loanId, JsonCommand command);
 
     CommandProcessingResult writeOff(Long loanId, JsonCommand command);
@@ -69,6 +70,8 @@ public interface LoanWritePlatformService {
 
     CommandProcessingResult undoWaiveLoanCharge(JsonCommand command);
 
+    CommandProcessingResult loanChargeRefund(Long loanId, JsonCommand command);
+
     CommandProcessingResult loanReassignment(Long loanId, JsonCommand command);
 
     CommandProcessingResult bulkLoanReassignment(JsonCommand command);
@@ -77,8 +80,6 @@ public interface LoanWritePlatformService {
 
     void applyMeetingDateChanges(Calendar calendar, Collection<CalendarInstance> loanCalendarInstances,
             Boolean reschedulebasedOnMeetingDates, LocalDate presentMeetingDate, LocalDate newMeetingDate);
-
-    void applyHolidaysToLoans();
 
     LoanTransaction initiateLoanTransfer(Loan loan, LocalDate transferDate);
 
@@ -89,8 +90,6 @@ public interface LoanWritePlatformService {
     LoanTransaction acceptLoanTransfer(Loan loan, LocalDate transferDate, Office acceptedInOffice, Staff loanOfficer);
 
     CommandProcessingResult payLoanCharge(Long loanId, Long loanChargeId, JsonCommand command, boolean isChargeIdIncludedInJson);
-
-    void transferFeeCharges() throws JobExecutionException;
 
     CommandProcessingResult undoWriteOff(Long loanId);
 
@@ -119,5 +118,7 @@ public interface LoanWritePlatformService {
     CommandProcessingResult makeGLIMLoanRepayment(Long loanId, JsonCommand command);
 
     CommandProcessingResult creditBalanceRefund(Long loanId, JsonCommand command);
+
+    CommandProcessingResult markLoanAsFraud(Long loanId, JsonCommand command);
 
 }

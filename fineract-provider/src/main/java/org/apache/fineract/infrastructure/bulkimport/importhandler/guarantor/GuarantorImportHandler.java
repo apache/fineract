@@ -34,7 +34,6 @@ import org.apache.fineract.infrastructure.bulkimport.data.Count;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.portfolio.loanaccount.guarantor.data.GuarantorData;
 import org.apache.poi.ss.usermodel.Cell;
@@ -50,11 +49,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class GuarantorImportHandler implements ImportHandler {
 
+    public static final String SEPARATOR = "-";
     private static final Logger LOG = LoggerFactory.getLogger(GuarantorImportHandler.class);
-    private Workbook workbook;
-    private List<GuarantorData> guarantors;
-    private Long loanAccountId;
-
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
@@ -63,30 +59,31 @@ public class GuarantorImportHandler implements ImportHandler {
     }
 
     @Override
-    public Count process(Workbook workbook, String locale, String dateFormat) {
-        this.workbook = workbook;
-        this.guarantors = new ArrayList<>();
-        readExcelFile(locale, dateFormat);
-        return importEntity(dateFormat);
+    public Count process(final Workbook workbook, final String locale, final String dateFormat) {
+        List<GuarantorData> guarantors = readExcelFile(workbook, locale, dateFormat);
+        return importEntity(workbook, guarantors, dateFormat);
     }
 
-    public void readExcelFile(final String locale, final String dateFormat) {
+    private List<GuarantorData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
+        List<GuarantorData> guarantors = new ArrayList<>();
         Sheet addGuarantorSheet = workbook.getSheet(TemplatePopulateImportConstants.GUARANTOR_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(addGuarantorSheet, GuarantorConstants.LOAN_ACCOUNT_NO_COL);
+        Long loanAccountId = null;
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = addGuarantorSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, GuarantorConstants.STATUS_COL)) {
-                guarantors.add(readGuarantor(row, locale, dateFormat));
+                guarantors.add(readGuarantor(workbook, row, loanAccountId, locale, dateFormat));
             }
-
         }
+        return guarantors;
     }
 
-    private GuarantorData readGuarantor(Row row, String locale, String dateFormat) {
+    private GuarantorData readGuarantor(final Workbook workbook, final Row row, Long loanAccountId, final String locale,
+            final String dateFormat) {
         String loanaccountInfo = ImportHandlerUtils.readAsString(GuarantorConstants.LOAN_ACCOUNT_NO_COL, row);
         if (loanaccountInfo != null) {
-            List<String> loanAccountAr = Splitter.on('-').splitToList(loanaccountInfo);
+            List<String> loanAccountAr = Splitter.on(SEPARATOR).splitToList(loanaccountInfo);
             loanAccountId = Long.parseLong(loanAccountAr.get(0));
         }
         String guarantorType = ImportHandlerUtils.readAsString(GuarantorConstants.GUARANTO_TYPE_COL, row);
@@ -104,7 +101,7 @@ public class GuarantorImportHandler implements ImportHandler {
         String clientRelationshipTypeInfo = ImportHandlerUtils.readAsString(GuarantorConstants.CLIENT_RELATIONSHIP_TYPE_COL, row);
         Integer clientRelationshipTypeId = null;
         if (clientRelationshipTypeInfo != null) {
-            List<String> clientRelationshipTypeAr = Splitter.on('-').splitToList(clientRelationshipTypeInfo);
+            List<String> clientRelationshipTypeAr = Splitter.on(SEPARATOR).splitToList(clientRelationshipTypeInfo);
             clientRelationshipTypeId = Integer.parseInt(clientRelationshipTypeAr.get(1));
         }
         String firstname = ImportHandlerUtils.readAsString(GuarantorConstants.FIRST_NAME_COL, row);
@@ -121,7 +118,7 @@ public class GuarantorImportHandler implements ImportHandler {
                 addressLine2, city, dob, zip, savingsId, amount, row.getRowNum(), loanAccountId, locale, dateFormat);
     }
 
-    public Count importEntity(String dateFormat) {
+    private Count importEntity(final Workbook workbook, final List<GuarantorData> guarantors, final String dateFormat) {
         Sheet addGuarantorSheet = workbook.getSheet(TemplatePopulateImportConstants.GUARANTOR_SHEET_NAME);
         int successCount = 0;
         int errorCount = 0;
@@ -137,7 +134,7 @@ public class GuarantorImportHandler implements ImportHandler {
                         .createGuarantor(guarantor.getAccountId()) //
                         .withJson(payload) //
                         .build(); //
-                final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+                commandsSourceWritePlatformService.logCommandSource(commandRequest);
                 successCount++;
                 Cell statusCell = addGuarantorSheet.getRow(guarantor.getRowIndex()).createCell(GuarantorConstants.STATUS_COL);
                 statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);

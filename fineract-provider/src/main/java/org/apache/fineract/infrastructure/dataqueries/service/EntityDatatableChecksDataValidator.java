@@ -40,12 +40,17 @@ import org.springframework.stereotype.Component;
 @Component
 public final class EntityDatatableChecksDataValidator {
 
+    public static final String ENTITY = "entity";
+    public static final String DATATABLE_NAME = "datatableName";
+    public static final String STATUS = "status";
+    public static final String SYSTEM_DEFINED = "systemDefined";
+    public static final String PRODUCT_ID = "productId";
+    public static final String ENTITY_DATATABLE_CHECKS = "entityDatatableChecks";
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<>(
-            Arrays.asList("entity", "datatableName", "status", "systemDefined", "productId"));
-
+    private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(
+            Arrays.asList(ENTITY, DATATABLE_NAME, STATUS, SYSTEM_DEFINED, PRODUCT_ID));
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -58,33 +63,35 @@ public final class EntityDatatableChecksDataValidator {
             throw new InvalidJsonException();
         }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("entityDatatableChecks");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(ENTITY_DATATABLE_CHECKS);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final String entity = this.fromApiJsonHelper.extractStringNamed("entity", element);
-        baseDataValidator.reset().parameter("entity").value(entity).notBlank().isOneOfTheseStringValues(EntityTables.getEntitiesList());
+        final String entity = this.fromApiJsonHelper.extractStringNamed(ENTITY, element);
+        baseDataValidator.reset().parameter(ENTITY).value(entity).notBlank().isOneOfTheseStringValues(EntityTables.getEntitiesList());
 
-        final Integer status = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("status", element);
+        final Integer status = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(STATUS, element);
         final Object[] entityTablesStatuses = EntityTables.getStatus(entity).toArray();
 
-        baseDataValidator.reset().parameter("status").value(status).isOneOfTheseValues(entityTablesStatuses);
+        baseDataValidator.reset().parameter(STATUS).value(status).isOneOfTheseValues(entityTablesStatuses);
 
-        final String datatableName = this.fromApiJsonHelper.extractStringNamed("datatableName", element);
-        baseDataValidator.reset().parameter("datatableName").value(datatableName).notBlank();
+        final String datatableName = this.fromApiJsonHelper.extractStringNamed(DATATABLE_NAME, element);
+        baseDataValidator.reset().parameter(DATATABLE_NAME).value(datatableName).notBlank();
 
-        if (this.fromApiJsonHelper.parameterExists("systemDefined", element)) {
-            final String systemDefined = this.fromApiJsonHelper.extractStringNamed("systemDefined", element);
-            baseDataValidator.reset().parameter("systemDefined").value(systemDefined).validateForBooleanValue();
+        if (this.fromApiJsonHelper.parameterExists(SYSTEM_DEFINED, element)) {
+            final String systemDefined = this.fromApiJsonHelper.extractStringNamed(SYSTEM_DEFINED, element);
+            baseDataValidator.reset().parameter(SYSTEM_DEFINED).value(systemDefined).validateForBooleanValue();
         }
 
-        if (this.fromApiJsonHelper.parameterExists("productId", element)) {
-            final long productId = this.fromApiJsonHelper.extractLongNamed("productId", element);
-            baseDataValidator.reset().parameter("productId").value(productId).integerZeroOrGreater();
+        if (this.fromApiJsonHelper.parameterExists(PRODUCT_ID, element)) {
+            final long productId = this.fromApiJsonHelper.extractLongNamed(PRODUCT_ID, element);
+            baseDataValidator.reset().parameter(PRODUCT_ID).value(productId).integerZeroOrGreater();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

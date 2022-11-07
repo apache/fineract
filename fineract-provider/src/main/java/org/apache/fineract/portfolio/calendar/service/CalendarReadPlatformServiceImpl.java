@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -56,9 +57,10 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
                     + " c.duration as duration, c.calendar_type_enum as typeId, c.repeating as repeating, "
                     + " c.recurrence as recurrence, c.remind_by_enum as remindById, c.first_reminder as firstReminder, c.second_reminder as secondReminder, "
                     + " c.created_date as createdDate, c.lastmodified_date as updatedDate, creatingUser.id as creatingUserId, creatingUser.username as creatingUserName, "
+                    + " c.created_on_utc as createdDateUtc, c.last_modified_on_utc as updatedDateUtc, "
                     + " updatingUser.id as updatingUserId, updatingUser.username as updatingUserName,c.meeting_time as meetingTime "
                     + " from m_calendar c join m_calendar_instance ci on ci.calendar_id=c.id, m_appuser as creatingUser, m_appuser as updatingUser"
-                    + " where c.createdby_id=creatingUser.id and c.lastmodifiedby_id=updatingUser.id ";
+                    + " where c.created_by=creatingUser.id and c.last_modified_by=updatingUser.id ";
         }
 
         @Override
@@ -96,17 +98,20 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
                 humanReadable = CalendarUtils.getRRuleReadable(startDate, recurrence);
             }
             Integer monthOnDay = CalendarUtils.getMonthOnDay(recurrence);
-            final LocalDate createdDate = JdbcSupport.getLocalDate(rs, "createdDate");
-            final LocalDate lastUpdatedDate = JdbcSupport.getLocalDate(rs, "updatedDate");
+            final OffsetDateTime createdDateLocal = JdbcSupport.getOffsetDateTime(rs, "createdDate");
+            final OffsetDateTime createdDateUtc = JdbcSupport.getOffsetDateTime(rs, "createdDateUtc");
+            final OffsetDateTime lastModifiedDateLocal = JdbcSupport.getOffsetDateTime(rs, "updatedDate");
+            final OffsetDateTime lastModifiedDateUtc = JdbcSupport.getOffsetDateTime(rs, "updatedDateUtc");
             final Long createdByUserId = rs.getLong("creatingUserId");
             final String createdByUserName = rs.getString("creatingUserName");
             final Long lastUpdatedByUserId = rs.getLong("updatingUserId");
             final String lastUpdatedByUserName = rs.getString("updatingUserName");
             final LocalTime meetingTime = JdbcSupport.getLocalTime(rs, "meetingTime");
-
+            final OffsetDateTime createdDate = createdDateUtc != null ? createdDateUtc : createdDateLocal;
+            final OffsetDateTime lastModifiedDate = lastModifiedDateUtc != null ? lastModifiedDateUtc : lastModifiedDateLocal;
             return CalendarData.instance(id, calendarInstanceId, entityId, entityType, title, description, location, startDate, endDate,
                     duration, type, repeating, recurrence, frequency, interval, repeatsOnDay, repeatsOnNthDayOfMonth, remindBy,
-                    firstReminder, secondReminder, humanReadable, createdDate, lastUpdatedDate, createdByUserId, createdByUserName,
+                    firstReminder, secondReminder, humanReadable, createdDate, lastModifiedDate, createdByUserId, createdByUserName,
                     lastUpdatedByUserId, lastUpdatedByUserName, meetingTime, monthOnDay);
         }
     }
@@ -487,8 +492,8 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
                 humanReadable = CalendarUtils.getRRuleReadable(startDate, recurrence);
             }
 
-            final LocalDate createdDate = null;
-            final LocalDate lastUpdatedDate = null;
+            final OffsetDateTime createdDate = null;
+            final OffsetDateTime lastUpdatedDate = null;
             final Long createdByUserId = null;
             final String createdByUserName = null;
             final Long lastUpdatedByUserId = null;

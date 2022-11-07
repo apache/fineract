@@ -267,8 +267,8 @@ public class RecurringDepositAccountsApiResource {
 
         if (settings.isTemplate()) {
             templateData = (RecurringDepositAccountData) this.depositAccountReadPlatformService.retrieveTemplate(
-                    DepositAccountType.RECURRING_DEPOSIT, savingsAccount.clientId(), savingsAccount.groupId(), savingsAccount.productId(),
-                    staffInSelectedOfficeOnly);
+                    DepositAccountType.RECURRING_DEPOSIT, savingsAccount.getClientId(), savingsAccount.getGroupId(),
+                    savingsAccount.getDepositProductId(), staffInSelectedOfficeOnly);
         }
 
         return RecurringDepositAccountData.withTemplateOptions(savingsAccount, templateData, transactions, charges);

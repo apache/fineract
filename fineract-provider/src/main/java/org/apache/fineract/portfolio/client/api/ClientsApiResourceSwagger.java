@@ -161,6 +161,8 @@ final class ClientsApiResourceSwagger {
             public Integer officeId;
             @Schema(example = "Head Office")
             public String officeName;
+            @Schema(example = "test@test.com")
+            public String emailAddress;
         }
 
         @Schema(example = "2")
@@ -248,6 +250,8 @@ final class ClientsApiResourceSwagger {
         public String savingsProductName;
         @Schema(example = "[]")
         public List<GetClientsGroups> groups;
+        @Schema(example = "test@test.com")
+        public String emailAddress;
     }
 
     @Schema(description = "PostClientsRequest")
@@ -320,7 +324,8 @@ final class ClientsApiResourceSwagger {
         public List<PostClientsDatatable> datatables;
         @Schema(description = "Address requests")
         public List<PostClientsAddressRequest> address;
-
+        @Schema(example = "test@test.com")
+        public String emailAddress;
     }
 
     @Schema(description = "PostClientsResponse")

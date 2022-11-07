@@ -32,7 +32,6 @@ import org.apache.fineract.infrastructure.bulkimport.data.Count;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountChargeData;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountData;
@@ -49,11 +48,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class SharedAccountImportHandler implements ImportHandler {
 
+    public static final String ZERO = "0";
+    public static final String SHARE = "share";
+    public static final String EMPTY_STR = "";
     private static final Logger LOG = LoggerFactory.getLogger(SharedAccountImportHandler.class);
-    private Workbook workbook;
-    private List<ShareAccountData> shareAccountDataList;
-    private List<String> statuses;
-
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
@@ -62,27 +60,28 @@ public class SharedAccountImportHandler implements ImportHandler {
     }
 
     @Override
-    public Count process(Workbook workbook, String locale, String dateFormat) {
-        this.workbook = workbook;
-        this.shareAccountDataList = new ArrayList<>();
-        statuses = new ArrayList<String>();
-        readExcelFile(locale, dateFormat);
-        return importEntity(dateFormat);
+    public Count process(final Workbook workbook, final String locale, final String dateFormat) {
+        List<ShareAccountData> shareAccountDataList = new ArrayList<>();
+        List<String> statuses = new ArrayList<>();
+        readExcelFile(workbook, shareAccountDataList, statuses, locale, dateFormat);
+        return importEntity(workbook, shareAccountDataList, dateFormat);
     }
 
-    public void readExcelFile(String locale, String dateFormat) {
+    private void readExcelFile(final Workbook workbook, final List<ShareAccountData> shareAccountDataList, final List<String> statuses,
+            final String locale, String dateFormat) {
         Sheet sharedAccountsSheet = workbook.getSheet(TemplatePopulateImportConstants.SHARED_ACCOUNTS_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(sharedAccountsSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = sharedAccountsSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, SharedAccountsConstants.STATUS_COL)) {
-                shareAccountDataList.add(readSharedAccount(row, locale, dateFormat));
+                shareAccountDataList.add(readSharedAccount(workbook, row, statuses, locale, dateFormat));
             }
         }
     }
 
-    private ShareAccountData readSharedAccount(Row row, String locale, String dateFormat) {
+    private ShareAccountData readSharedAccount(final Workbook workbook, final Row row, final List<String> statuses, final String locale,
+            final String dateFormat) {
         String clientName = ImportHandlerUtils.readAsString(SharedAccountsConstants.CLIENT_NAME_COL, row);
         Long clientId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.CLIENT_SHEET_NAME), clientName);
 
@@ -127,7 +126,7 @@ public class SharedAccountImportHandler implements ImportHandler {
         List<ShareAccountChargeData> charges = new ArrayList<>();
         for (int cellNo = SharedAccountsConstants.CHARGES_NAME_1_COL; cellNo < SharedAccountsConstants.CHARGES_NAME_3_COL; cellNo += 2) {
             String chargeName = ImportHandlerUtils.readAsString(cellNo, row);
-            if (chargeName == null || chargeName.equals("0")) {
+            if (chargeName == null || chargeName.equals(ZERO)) {
                 break;
             }
             Long chargeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.SHARED_PRODUCTS_SHEET_NAME),
@@ -149,11 +148,11 @@ public class SharedAccountImportHandler implements ImportHandler {
                 defaultSavingsAccountId, row.getRowNum(), locale, dateFormat);
     }
 
-    public Count importEntity(String dateFormat) {
+    private Count importEntity(final Workbook workbook, final List<ShareAccountData> shareAccountDataList, final String dateFormat) {
         Sheet sharedAccountsSheet = workbook.getSheet(TemplatePopulateImportConstants.SHARED_ACCOUNTS_SHEET_NAME);
         int successCount = 0;
         int errorCount = 0;
-        String errorMessage = "";
+        String errorMessage;
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
 
@@ -161,10 +160,10 @@ public class SharedAccountImportHandler implements ImportHandler {
             try {
                 String payload = gsonBuilder.create().toJson(shareAccountData);
                 final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                        .createAccount("share")//
+                        .createAccount(SHARE)//
                         .withJson(payload) //
                         .build(); //
-                final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+                commandsSourceWritePlatformService.logCommandSource(commandRequest);
                 successCount++;
                 Cell statusCell = sharedAccountsSheet.getRow(shareAccountData.getRowIndex()).createCell(SharedAccountsConstants.STATUS_COL);
                 statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);

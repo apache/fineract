@@ -19,15 +19,18 @@
 package org.apache.fineract.accounting.producttoaccountmapping.data;
 
 import java.io.Serializable;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 
-@RequiredArgsConstructor
-@Getter
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class PaymentTypeToGLAccountMapper implements Serializable {
 
-    private final PaymentTypeData paymentType;
-    private final GLAccountData fundSourceAccount;
+    private static final long serialVersionUID = 1L;
+    private PaymentTypeData paymentType;
+    private GLAccountData fundSourceAccount;
 }

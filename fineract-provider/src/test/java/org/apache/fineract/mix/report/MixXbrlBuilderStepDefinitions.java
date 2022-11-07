@@ -57,7 +57,7 @@ public class MixXbrlBuilderStepDefinitions implements En {
                 (String start, String end, String currency, String taxonomy, String sample) -> {
                     readNamespaceService = mock(NamespaceReadPlatformServiceImpl.class);
                     lenient().when(this.readNamespaceService.retrieveNamespaceByPrefix(ArgumentMatchers.anyString()))
-                            .thenReturn(new NamespaceData(1L, "mockedprefix", "mockedurl"));
+                            .thenReturn(new NamespaceData().setId(1L).setPrefix("mockedprefix").setUrl("mockedurl"));
 
                     this.start = Date.valueOf(start);
                     this.end = Date.valueOf(end);

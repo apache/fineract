@@ -51,19 +51,19 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Embedded
     private MonetaryCurrency currency;
 
-    @Column(name = "principal_amount", scale = 6, precision = 19, nullable = true)
+    @Column(name = "principal_amount", scale = 6, precision = 19)
     private BigDecimal principal;
 
-    @Column(name = "nominal_interest_rate_per_period", scale = 6, precision = 19, nullable = true)
+    @Column(name = "nominal_interest_rate_per_period", scale = 6, precision = 19)
     private BigDecimal nominalInterestRatePerPeriod;
 
     // FIXME - move away form JPA ordinal use for enums using just integer -
     // requires sql patch for existing users of software.
     @Enumerated(EnumType.ORDINAL)
-    @Column(name = "interest_period_frequency_enum", nullable = true)
+    @Column(name = "interest_period_frequency_enum")
     private PeriodFrequencyType interestPeriodFrequencyType;
 
-    @Column(name = "annual_nominal_interest_rate", scale = 6, precision = 19, nullable = true)
+    @Column(name = "annual_nominal_interest_rate", scale = 6, precision = 19)
     private BigDecimal annualNominalInterestRate;
 
     // FIXME - move away form JPA ordinal use for enums using just integer -
@@ -93,16 +93,16 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Column(name = "number_of_repayments", nullable = false)
     private Integer numberOfRepayments;
 
-    @Column(name = "grace_on_principal_periods", nullable = true)
+    @Column(name = "grace_on_principal_periods")
     private Integer graceOnPrincipalPayment;
 
-    @Column(name = "recurring_moratorium_principal_periods", nullable = true)
+    @Column(name = "recurring_moratorium_principal_periods")
     private Integer recurringMoratoriumOnPrincipalPeriods;
 
-    @Column(name = "grace_on_interest_periods", nullable = true)
+    @Column(name = "grace_on_interest_periods")
     private Integer graceOnInterestPayment;
 
-    @Column(name = "grace_interest_free_periods", nullable = true)
+    @Column(name = "grace_interest_free_periods")
     private Integer graceOnInterestCharged;
 
     // FIXME - move away form JPA ordinal use for enums using just integer -
@@ -111,10 +111,10 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Column(name = "amortization_method_enum", nullable = false)
     private AmortizationMethod amortizationMethod;
 
-    @Column(name = "arrearstolerance_amount", scale = 6, precision = 19, nullable = true)
+    @Column(name = "arrearstolerance_amount", scale = 6, precision = 19)
     private BigDecimal inArrearsTolerance;
 
-    @Column(name = "grace_on_arrears_ageing", nullable = true)
+    @Column(name = "grace_on_arrears_ageing")
     private Integer graceOnArrearsAgeing;
 
     @Column(name = "days_in_month_enum", nullable = false)
@@ -190,7 +190,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 
     private Integer defaultToNullIfZero(final Integer value) {
         Integer defaultTo = value;
-        if (value != null && Integer.valueOf(0).equals(value)) {
+        if (Integer.valueOf(0).equals(value)) {
             defaultTo = null;
         }
         return defaultTo;
@@ -537,11 +537,11 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 
         int graceOnPrincipal = 0;
         if (this.getGraceOnPrincipalPayment() != null) {
-            graceOnPrincipal = this.getGraceOnPrincipalPayment().intValue();
+            graceOnPrincipal = this.getGraceOnPrincipalPayment();
         }
         int recurMoratoriumOnPrincipal = 0;
         if (this.recurringMoratoriumOnPrincipalPeriods() != null) {
-            recurMoratoriumOnPrincipal = this.recurringMoratoriumOnPrincipalPeriods().intValue();
+            recurMoratoriumOnPrincipal = this.recurringMoratoriumOnPrincipalPeriods();
         }
 
         if ((recurMoratoriumOnPrincipal > 0) && ((this.numberOfRepayments - graceOnPrincipal) % (recurMoratoriumOnPrincipal + 1) != 1)) {
@@ -558,7 +558,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     private Integer defaultToZeroIfNull(final Integer value) {
         Integer result = value;
         if (value == null) {
-            result = Integer.valueOf(0);
+            result = 0;
         }
         return result;
     }
@@ -573,7 +573,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         return this.currency.getCode().equalsIgnoreCase(currencyCode);
     }
 
-    public void updatenterestPeriodFrequencyType(final PeriodFrequencyType interestPeriodFrequencyType) {
+    public void updateInterestPeriodFrequencyType(final PeriodFrequencyType interestPeriodFrequencyType) {
         this.interestPeriodFrequencyType = interestPeriodFrequencyType;
     }
 

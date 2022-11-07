@@ -19,7 +19,7 @@
 package org.apache.fineract.portfolio.floatingrates.data;
 
 import java.io.Serializable;
-import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -33,15 +33,15 @@ public class FloatingRateData implements Comparable<FloatingRateData>, Serializa
     private final boolean isBaseLendingRate;
     private final boolean isActive;
     private final String createdBy;
-    private final LocalDate createdOn;
+    private final OffsetDateTime createdOn;
     private final String modifiedBy;
-    private final LocalDate modifiedOn;
+    private final OffsetDateTime modifiedOn;
     private final List<FloatingRatePeriodData> ratePeriods;
     @SuppressWarnings("unused")
     private final List<EnumOptionData> interestRateFrequencyTypeOptions;
 
-    public FloatingRateData(Long id, String name, boolean isBaseLendingRate, boolean isActive, String createdBy, LocalDate createdOn,
-            String modifiedBy, LocalDate modifiedOn, List<FloatingRatePeriodData> ratePeriods,
+    public FloatingRateData(Long id, String name, boolean isBaseLendingRate, boolean isActive, String createdBy, OffsetDateTime createdOn,
+            String modifiedBy, OffsetDateTime modifiedOn, List<FloatingRatePeriodData> ratePeriods,
             List<EnumOptionData> interestRateFrequencyTypeOptions) {
         this.id = id;
         this.name = name;
@@ -75,7 +75,7 @@ public class FloatingRateData implements Comparable<FloatingRateData>, Serializa
         return this.createdBy;
     }
 
-    public LocalDate getCreatedOn() {
+    public OffsetDateTime getCreatedOn() {
         return this.createdOn;
     }
 
@@ -83,7 +83,7 @@ public class FloatingRateData implements Comparable<FloatingRateData>, Serializa
         return this.modifiedBy;
     }
 
-    public LocalDate getModifiedOn() {
+    public OffsetDateTime getModifiedOn() {
         return this.modifiedOn;
     }
 

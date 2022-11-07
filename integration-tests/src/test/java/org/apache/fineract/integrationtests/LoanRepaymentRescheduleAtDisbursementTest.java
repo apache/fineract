@@ -245,7 +245,7 @@ public class LoanRepaymentRescheduleAtDisbursementTest {
                 .withInterestCalculationPeriodTypeAsDays() //
                 .withExpectedDisbursementDate(disbursementDate) //
                 .withSubmittedOnDate(disbursementDate) //
-                .withwithRepaymentStrategy(repaymentStrategy) //
+                .withRepaymentStrategy(repaymentStrategy) //
                 .withCollaterals(collaterals).withCharges(charges)//
                 .build(clientID.toString(), loanProductID.toString(), null);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);

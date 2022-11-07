@@ -138,7 +138,7 @@ public class GroupTest {
 
         this.loanTransactionHelper.approveLoan("20 September 2014", loanId);
         String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanId);
-        this.loanTransactionHelper.disburseLoan("20 September 2014", loanId,
+        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("20 September 2014", loanId,
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
 
         final HashMap assignStaffAndInheritStaffForClientAccounts = (HashMap) GroupHelper.assignStaffInheritStaffForClientAccounts(

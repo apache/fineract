@@ -492,7 +492,7 @@ public class RecurringDepositAccount extends SavingsAccount {
             }
         }
 
-        final List<SavingsAccountTransaction> savingsAccountTransactions = retreiveListOfTransactions();
+        final List<SavingsAccountTransaction> savingsAccountTransactions = retrieveListOfTransactions();
         if (savingsAccountTransactions.size() > 0) {
             final SavingsAccountTransaction accountTransaction = savingsAccountTransactions.get(savingsAccountTransactions.size() - 1);
             if (accountTransaction.isAfter(closedDate)) {
@@ -593,7 +593,7 @@ public class RecurringDepositAccount extends SavingsAccount {
                 throw new PlatformApiDataValidationException(dataValidationErrors);
             }
         }
-        final List<SavingsAccountTransaction> savingsAccountTransactions = retreiveListOfTransactions();
+        final List<SavingsAccountTransaction> savingsAccountTransactions = retrieveListOfTransactions();
         if (savingsAccountTransactions.size() > 0) {
             final SavingsAccountTransaction accountTransaction = savingsAccountTransactions.get(savingsAccountTransactions.size() - 1);
             if (accountTransaction.isAfter(closedDate)) {
@@ -934,7 +934,7 @@ public class RecurringDepositAccount extends SavingsAccount {
     }
 
     private List<SavingsAccountTransaction> retreiveOrderedDepositTransactions() {
-        final List<SavingsAccountTransaction> listOfTransactionsSorted = retreiveListOfTransactions();
+        final List<SavingsAccountTransaction> listOfTransactionsSorted = retrieveListOfTransactions();
 
         final List<SavingsAccountTransaction> orderedDepositTransactions = new ArrayList<>();
 

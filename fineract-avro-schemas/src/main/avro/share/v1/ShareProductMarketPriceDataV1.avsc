@@ -1,0 +1,31 @@
+{
+    "name": "ShareProductMarketPriceDataV1",
+    "namespace": "org.apache.fineract.avro.share.v1",
+    "type": "record",
+    "fields": [
+        {
+            "default": null,
+            "name": "id",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "fromDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "shareValue",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        }
+    ]
+}

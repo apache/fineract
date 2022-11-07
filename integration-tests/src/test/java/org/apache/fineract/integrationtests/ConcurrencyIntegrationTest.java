@@ -77,7 +77,7 @@ public class ConcurrencyIntegrationTest {
         final Integer loanID = applyForLoanApplication(clientID, loanProductID, "12,000.00");
         this.loanTransactionHelper.approveLoan("20 September 2011", loanID);
         String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        this.loanTransactionHelper.disburseLoan("20 September 2011", loanID, "12,000.00",
+        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("20 September 2011", loanID, "12,000.00",
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         ExecutorService executor = Executors.newFixedThreadPool(MYTHREADS);
         Calendar date = Calendar.getInstance();

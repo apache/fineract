@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDate;
 import java.util.Set;
 
 /**
@@ -88,20 +89,22 @@ final class LoanChargesApiResourceSwagger {
         @Schema(example = "0")
         public Double amountPercentageAppliedTo;
         public GetLoanChargeCurrency currency;
-        @Schema(example = "100")
-        public Float amount;
-        @Schema(example = "0")
-        public Float amountPaid;
-        @Schema(example = "0")
-        public Float amountWaived;
-        @Schema(example = "0")
-        public Float amountWrittenOff;
-        @Schema(example = "100")
-        public Float amountOutstanding;
-        @Schema(example = "100")
-        public Float amountOrPercentage;
+        @Schema(example = "100.00")
+        public Double amount;
+        @Schema(example = "0.00")
+        public Double amountPaid;
+        @Schema(example = "0.00")
+        public Double amountWaived;
+        @Schema(example = "0.00")
+        public Double amountWrittenOff;
+        @Schema(example = "100.00")
+        public Double amountOutstanding;
+        @Schema(example = "100.00")
+        public Double amountOrPercentage;
         @Schema(example = "false")
         public Boolean penalty;
+        @Schema(example = "27 March 2013")
+        public LocalDate submittedOnDate;
     }
 
     @Schema(description = "GetLoansLoanIdChargesTemplateResponse")
@@ -146,19 +149,19 @@ final class LoanChargesApiResourceSwagger {
             @Schema(example = "false")
             public Boolean penalty;
             public GetLoansLoanIdChargesChargeIdResponse.GetLoanChargeCurrency currency;
-            @Schema(example = "100")
-            public Float amount;
+            @Schema(example = "100.00")
+            public Double amount;
             public GetLoanChargeTemplateChargeTimeType chargeTimeType;
             public GetLoanChargeTemplateChargeAppliesTo chargeAppliesTo;
             public GetLoansLoanIdChargesChargeIdResponse.GetLoanChargeCalculationType chargeCalculationType;
         }
 
-        @Schema(example = "0")
-        public Float amountPaid;
-        @Schema(example = "0")
-        public Float amountWaived;
-        @Schema(example = "0")
-        public Float amountWrittenOff;
+        @Schema(example = "0.00")
+        public Double amountPaid;
+        @Schema(example = "0.00")
+        public Double amountWaived;
+        @Schema(example = "0.00")
+        public Double amountWrittenOff;
         public Set<GetLoanChargeTemplateChargeOptions> chargeOptions;
         @Schema(example = "false")
         public Boolean penalty;
@@ -173,12 +176,14 @@ final class LoanChargesApiResourceSwagger {
         public Integer chargeId;
         @Schema(example = "en")
         public String locale;
-        @Schema(example = "100")
-        public Float amount;
+        @Schema(example = "100.00")
+        public Double amount;
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
         @Schema(example = "29 April 2013")
         public String dueDate;
+        @Schema(example = "786444UUUYYH7")
+        public String externalId;
     }
 
     @Schema(description = " PostLoansLoanIdChargesResponse")
@@ -205,8 +210,8 @@ final class LoanChargesApiResourceSwagger {
         public String dateFormat;
         @Schema(example = "en")
         public String locale;
-        @Schema(example = "60")
-        public Float amount;
+        @Schema(example = "60.00")
+        public Double amount;
         @Schema(example = "27 March 2013")
         public String dueDate;
     }

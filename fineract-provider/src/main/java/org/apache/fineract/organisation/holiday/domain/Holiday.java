@@ -43,6 +43,10 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -54,6 +58,10 @@ import org.apache.fineract.organisation.office.domain.Office;
 
 @Entity
 @Table(name = "m_holiday", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "holiday_name") })
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public class Holiday extends AbstractPersistableCustom {
 
     @Column(name = "name", unique = true, nullable = false, length = 100)
@@ -101,7 +109,9 @@ public class Holiday extends AbstractPersistableCustom {
                                         // should update this field.
         final String description = command.stringValueOfParameterNamed(HolidayApiConstants.descriptionParamName);
 
-        return new Holiday(name, fromDate, toDate, repaymentsRescheduledTo, status, processed, description, offices, reschedulingType);
+        return new Holiday().setName(StringUtils.trim(name)).setFromDate(fromDate).setToDate(toDate)
+                .setRepaymentsRescheduledTo(repaymentsRescheduledTo).setStatus(status).setProcessed(processed)
+                .setDescription(StringUtils.trim(description)).setOffices(offices).setReschedulingType(reschedulingType);
     }
 
     public Map<String, Object> update(final JsonCommand command) {
@@ -137,7 +147,7 @@ public class Holiday extends AbstractPersistableCustom {
         }
 
         if (currentStatus.isPendingActivation()) {
-            if (command.isChangeInLocalDateParameterNamed(fromDateParamName, getFromDateLocalDate())) {
+            if (command.isChangeInLocalDateParameterNamed(fromDateParamName, getFromDate())) {
                 final String valueAsInput = command.stringValueOfParameterNamed(fromDateParamName);
                 actualChanges.put(fromDateParamName, valueAsInput);
                 actualChanges.put(dateFormatParamName, dateFormatAsInput);
@@ -145,7 +155,7 @@ public class Holiday extends AbstractPersistableCustom {
                 this.fromDate = command.localDateValueOfParameterNamed(fromDateParamName);
             }
 
-            if (command.isChangeInLocalDateParameterNamed(toDateParamName, getToDateLocalDate())) {
+            if (command.isChangeInLocalDateParameterNamed(toDateParamName, getToDate())) {
                 final String valueAsInput = command.stringValueOfParameterNamed(toDateParamName);
                 actualChanges.put(toDateParamName, valueAsInput);
                 actualChanges.put(dateFormatParamName, dateFormatAsInput);
@@ -154,7 +164,7 @@ public class Holiday extends AbstractPersistableCustom {
                 this.toDate = command.localDateValueOfParameterNamed(toDateParamName);
             }
 
-            if (command.isChangeInLocalDateParameterNamed(repaymentsRescheduledToParamName, getRepaymentsRescheduledToLocalDate())) {
+            if (command.isChangeInLocalDateParameterNamed(repaymentsRescheduledToParamName, getRepaymentsRescheduledTo())) {
                 final String valueAsInput = command.stringValueOfParameterNamed(repaymentsRescheduledToParamName);
                 actualChanges.put(repaymentsRescheduledToParamName, valueAsInput);
                 actualChanges.put(dateFormatParamName, dateFormatAsInput);
@@ -170,15 +180,15 @@ public class Holiday extends AbstractPersistableCustom {
                 }
             }
         } else {
-            if (command.isChangeInLocalDateParameterNamed(fromDateParamName, getFromDateLocalDate())) {
+            if (command.isChangeInLocalDateParameterNamed(fromDateParamName, getFromDate())) {
                 baseDataValidator.reset().parameter(fromDateParamName).failWithCode("cannot.edit.holiday.in.active.state");
             }
 
-            if (command.isChangeInLocalDateParameterNamed(toDateParamName, getToDateLocalDate())) {
+            if (command.isChangeInLocalDateParameterNamed(toDateParamName, getToDate())) {
                 baseDataValidator.reset().parameter(toDateParamName).failWithCode("cannot.edit.holiday.in.active.state");
             }
 
-            if (command.isChangeInLocalDateParameterNamed(repaymentsRescheduledToParamName, getRepaymentsRescheduledToLocalDate())) {
+            if (command.isChangeInLocalDateParameterNamed(repaymentsRescheduledToParamName, getRepaymentsRescheduledTo())) {
                 baseDataValidator.reset().parameter(repaymentsRescheduledToParamName).failWithCode("cannot.edit.holiday.in.active.state");
             }
 
@@ -213,66 +223,6 @@ public class Holiday extends AbstractPersistableCustom {
             this.offices = newOffices;
         }
         return updated;
-    }
-
-    private Holiday(final String name, final LocalDate fromDate, final LocalDate toDate, final LocalDate repaymentsRescheduledTo,
-            final Integer status, final boolean processed, final String description, final Set<Office> offices,
-            final int reschedulingType) {
-        if (StringUtils.isNotBlank(name)) {
-            this.name = name.trim();
-        }
-
-        if (fromDate != null) {
-            this.fromDate = fromDate;
-        }
-
-        if (toDate != null) {
-            this.toDate = toDate;
-        }
-
-        if (repaymentsRescheduledTo != null) {
-            this.repaymentsRescheduledTo = repaymentsRescheduledTo;
-        }
-
-        this.status = status;
-        this.processed = processed;
-
-        if (StringUtils.isNotBlank(name)) {
-            this.description = description.trim();
-        } else {
-            this.description = null;
-        }
-
-        if (offices != null) {
-            this.offices = offices;
-        }
-        this.reschedulingType = reschedulingType;
-    }
-
-    protected Holiday() {}
-
-    public LocalDate getRepaymentsRescheduledToLocalDate() {
-        return this.repaymentsRescheduledTo;
-    }
-
-    public boolean isProcessed() {
-        return this.processed;
-    }
-
-    public Set<Office> getOffices() {
-        return this.offices;
-    }
-
-    public LocalDate getFromDateLocalDate() {
-        return this.fromDate;
-    }
-
-    public LocalDate getToDateLocalDate() {
-        return this.toDate;
-    }
-
-    public void processed() {
-        this.processed = true;
     }
 
     public void activate() {

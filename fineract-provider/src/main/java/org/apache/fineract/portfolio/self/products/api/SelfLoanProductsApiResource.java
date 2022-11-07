@@ -72,7 +72,7 @@ import org.springframework.stereotype.Component;
         + "The minimum number of days allowed between a Loan disbursal and its first repayment.\n" + "principalThresholdForLastInstalment\n"
         + "Field represents percentage of current instalment principal amount for comparing against principal outstanding to add another repayment instalment. If the outstanding principal amount is less then calculated amount, remaining outstanding amount will be added to current instalment. Default value for multi disburse loan is 50% and non-multi disburse loan is 0%\n"
         + "canDefineInstallmentAmount\n" + "if provided as true, then fixed instalment amount can be provided from loan account.\n"
-        + "transactionProcessingStrategyId\n"
+        + "transactionProcessingStrategyCode\n"
         + "An enumeration that indicates the type of transaction processing strategy to be used. This relates to functionality that is also known as Payment Application Logic.\n"
         + "A number of out of the box approaches exist, some are custom to specific MFIs, some are more general and indicate the order in which payments are processed.\n"
         + "\n"

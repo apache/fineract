@@ -75,7 +75,7 @@ public class ClientLoanChargeExternalIntegrationTest {
         final Integer loanID = applyForLoanApplication(clientID, loanProductID, null, null, "12,000.00", collaterals);
         HashMap loanStatusHashMap = this.loanTransactionHelper.approveLoan("20 September 2011", loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan("20 September 2011", loanID, "12,000.00");
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("20 September 2011", loanID, "12,000.00");
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         final Integer charge = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
@@ -105,7 +105,7 @@ public class ClientLoanChargeExternalIntegrationTest {
         final Integer loanID = applyForLoanApplication(clientID, loanProductID, null, null, "12,000.00", collaterals);
         HashMap loanStatusHashMap = this.loanTransactionHelper.approveLoan("20 September 2011", loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoan("20 September 2011", loanID, "12,000.00");
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("20 September 2011", loanID, "12,000.00");
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         final Integer charge = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper

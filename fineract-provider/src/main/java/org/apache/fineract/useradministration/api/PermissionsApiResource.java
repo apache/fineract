@@ -61,9 +61,9 @@ import org.springframework.stereotype.Component;
         + "Permissions are not updated, except in the case of enabling or disabling non-read transactions for Maker Checker functionality")
 public class PermissionsApiResource {
 
-    private final Set<String> responseDataParameters = new HashSet<>(
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList("grouping", "code", "entityName", "actionName", "selected", "isMakerChecker"));
-    private final String resourceNameForPermissions = "PERMISSION";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "PERMISSION";
 
     private final PlatformSecurityContext context;
     private final PermissionReadPlatformService permissionReadPlatformService;
@@ -96,18 +96,18 @@ public class PermissionsApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PermissionsApiResourceSwagger.GetPermissionsResponse.class)))) })
     public String retrieveAllPermissions(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        Collection<PermissionData> permissions = null;
+        Collection<PermissionData> permissions;
         if (settings.isMakerCheckerable()) {
             permissions = this.permissionReadPlatformService.retrieveAllMakerCheckerablePermissions();
         } else {
             permissions = this.permissionReadPlatformService.retrieveAllPermissions();
         }
 
-        return this.toApiJsonSerializer.serialize(settings, permissions, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, permissions, RESPONSE_DATA_PARAMETERS);
     }
 
     @PUT

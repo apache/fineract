@@ -35,6 +35,20 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Loa
 public class PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor
         extends AbstractLoanRepaymentScheduleTransactionProcessor {
 
+    private static final String STRATEGY_CODE = "principal-interest-penalties-fees-order-strategy";
+
+    private static final String STRATEGY_NAME = "Principal, Interest, Penalties, Fees Order";
+
+    @Override
+    public String getCode() {
+        return STRATEGY_CODE;
+    }
+
+    @Override
+    public String getName() {
+        return STRATEGY_NAME;
+    }
+
     /**
      * For early/'in advance' repayments, pay off in the same way as on-time payments, interest first, principal,
      * penalties and charges.

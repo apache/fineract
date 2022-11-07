@@ -1,0 +1,39 @@
+{
+    "name": "GroupRoleDataV1",
+    "namespace": "org.apache.fineract.avro.group.v1",
+    "type": "record",
+    "fields": [
+        {
+            "default": null,
+            "name": "id",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "role",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.CodeValueDataV1"
+            ]
+        },
+        {
+            "default": null,
+            "name": "clientId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "clientName",
+            "type": [
+                "null",
+                "string"
+            ]
+        }
+    ]
+}

@@ -25,8 +25,11 @@
     <property name="current_date" value="CURDATE()" context="mysql"/>
     <property name="current_date" value="CURRENT_DATE" context="postgresql"/>
     <property name="current_datetime" value="NOW()"/>
+    <property name="uuid" value="uuid()" context="mysql"/>
+    <property name="uuid" value="uuid_generate_v4()" context="postgresql"/>
     <include file="tenant-store/initial-switch-changelog-tenant-store.xml" relativeToChangelogFile="true" context="tenant_store_db AND initial_switch"/>
     <include file="tenant-store/changelog-tenant-store.xml" relativeToChangelogFile="true" context="tenant_store_db AND !initial_switch"/>
     <include file="tenant/initial-switch-changelog-tenant.xml" relativeToChangelogFile="true" context="tenant_db AND initial_switch"/>
     <include file="tenant/changelog-tenant.xml" relativeToChangelogFile="true" context="tenant_db AND !initial_switch"/>
+    <includeAll path="db/custom-changelog" errorIfMissingOrEmpty="false" context="tenant_db" />
 </databaseChangeLog>

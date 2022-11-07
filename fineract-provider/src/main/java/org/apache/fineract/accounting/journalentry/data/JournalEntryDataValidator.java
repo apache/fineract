@@ -21,7 +21,7 @@ package org.apache.fineract.accounting.journalentry.data;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -41,14 +41,14 @@ public class JournalEntryDataValidator {
     private final FromJsonHelper fromApiJsonHelper;
 
     private static final Set<String> RUNNING_BALANCE_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(JournalEntryJsonInputParams.OFFICE_ID.getValue()));
+            Collections.singletonList(JournalEntryJsonInputParams.OFFICE_ID.getValue()));
 
     @Autowired
     public JournalEntryDataValidator(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
-    public void validateForUpdateRunningbalance(final JsonCommand command) {
+    public void validateForUpdateRunningBalance(final JsonCommand command) {
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, command.json(), RUNNING_BALANCE_UPDATE_REQUEST_DATA_PARAMETERS);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();

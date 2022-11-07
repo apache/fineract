@@ -25,8 +25,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
+import org.apache.fineract.commands.service.IdempotencyKeyGenerator;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.bulkimport.constants.CenterConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
@@ -55,30 +57,29 @@ import org.springframework.stereotype.Service;
 @Service
 public class CenterImportHandler implements ImportHandler {
 
+    public static final String EMPTY_STR = "";
     private static final Logger LOG = LoggerFactory.getLogger(CenterImportHandler.class);
-    private List<CenterData> centers;
-    private List<CalendarData> meetings;
-    private List<String> statuses;
-    private Workbook workbook;
-
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final IdempotencyKeyGenerator idempotencyKeyGenerator;
 
     @Autowired
-    public CenterImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+    public CenterImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+            IdempotencyKeyGenerator idempotencyKeyGenerator) {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+        this.idempotencyKeyGenerator = idempotencyKeyGenerator;
     }
 
     @Override
-    public Count process(Workbook workbook, String locale, String dateFormat) {
-        this.centers = new ArrayList<>();
-        this.meetings = new ArrayList<>();
-        this.statuses = new ArrayList<>();
-        this.workbook = workbook;
-        readExcelFile(locale, dateFormat);
-        return importEntity(dateFormat);
+    public Count process(final Workbook workbook, final String locale, final String dateFormat) {
+        List<CenterData> centers = new ArrayList<>();
+        List<CalendarData> meetings = new ArrayList<>();
+        List<String> statuses = new ArrayList<>();
+        readExcelFile(workbook, centers, meetings, statuses, locale, dateFormat);
+        return importEntity(workbook, centers, meetings, statuses, dateFormat);
     }
 
-    public void readExcelFile(final String locale, final String dateFormat) {
+    private void readExcelFile(final Workbook workbook, final List<CenterData> centers, final List<CalendarData> meetings,
+            final List<String> statuses, final String locale, final String dateFormat) {
 
         Sheet centersSheet = workbook.getSheet(TemplatePopulateImportConstants.CENTER_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(centersSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
@@ -86,13 +87,13 @@ public class CenterImportHandler implements ImportHandler {
             Row row;
             row = centersSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, CenterConstants.STATUS_COL)) {
-                centers.add(readCenter(row, locale, dateFormat));
+                centers.add(readCenter(workbook, statuses, row, locale, dateFormat));
                 meetings.add(readMeeting(row, locale, dateFormat));
             }
         }
     }
 
-    private CalendarData readMeeting(Row row, final String locale, final String dateFormat) {
+    private CalendarData readMeeting(final Row row, final String locale, final String dateFormat) {
         LocalDate meetingStartDate = ImportHandlerUtils.readAsDate(CenterConstants.MEETING_START_DATE_COL, row);
         Boolean isRepeating = ImportHandlerUtils.readAsBoolean(CenterConstants.IS_REPEATING_COL, row);
         String frequency = ImportHandlerUtils.readAsString(CenterConstants.FREQUENCY_COL, row);
@@ -113,7 +114,8 @@ public class CenterImportHandler implements ImportHandler {
         }
     }
 
-    private CenterData readCenter(Row row, final String locale, final String dateFormat) {
+    private CenterData readCenter(final Workbook workbook, final List<String> statuses, final Row row, final String locale,
+            final String dateFormat) {
         String status = ImportHandlerUtils.readAsString(CenterConstants.STATUS_COL, row);
         String officeName = ImportHandlerUtils.readAsString(CenterConstants.OFFICE_NAME_COL, row);
         Long officeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME), officeName);
@@ -123,20 +125,20 @@ public class CenterImportHandler implements ImportHandler {
         String externalId = ImportHandlerUtils.readAsString(CenterConstants.EXTERNAL_ID_COL, row);
         Boolean active = ImportHandlerUtils.readAsBoolean(CenterConstants.ACTIVE_COL, row);
         LocalDate submittedOn = ImportHandlerUtils.readAsDate(CenterConstants.SUBMITTED_ON_DATE_COL, row);
-        LocalDate activationDate = null;
-        if (active) {
+        LocalDate activationDate;
+        if (Boolean.TRUE.equals(active)) {
             activationDate = ImportHandlerUtils.readAsDate(CenterConstants.ACTIVATION_DATE_COL, row);
         } else {
             activationDate = submittedOn;
         }
         String centerName = ImportHandlerUtils.readAsString(CenterConstants.CENTER_NAME_COL, row);
-        if (centerName == null || centerName.equals("")) {
+        if (centerName == null || centerName.equals(EMPTY_STR)) {
             throw new IllegalArgumentException("Name is blank");
         }
-        List<GroupGeneralData> groupMembers = new ArrayList<GroupGeneralData>();
+        List<GroupGeneralData> groupMembers = new ArrayList<>();
         for (int cellNo = CenterConstants.GROUP_NAMES_STARTING_COL; cellNo < CenterConstants.GROUP_NAMES_ENDING_COL; cellNo++) {
             String groupName = ImportHandlerUtils.readAsString(cellNo, row);
-            if (groupName == null || groupName.equals("")) {
+            if (groupName == null || groupName.equals(EMPTY_STR)) {
                 break;
             }
             Long groupId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.GROUP_SHEET_NAME), groupName);
@@ -160,13 +162,14 @@ public class CenterImportHandler implements ImportHandler {
         return false;
     }
 
-    public Count importEntity(String dateFormat) {
+    private Count importEntity(final Workbook workbook, final List<CenterData> centers, final List<CalendarData> meetings,
+            final List<String> statuses, final String dateFormat) {
         Sheet centerSheet = workbook.getSheet(TemplatePopulateImportConstants.CENTER_SHEET_NAME);
         int progressLevel = 0;
-        String centerId = "";
+        String centerId = EMPTY_STR;
         int successCount = 0;
         int errorCount = 0;
-        String errorMessage = "";
+        String errorMessage;
         for (int i = 0; i < centers.size(); i++) {
             Row row = centerSheet.getRow(centers.get(i).getRowIndex());
             Cell errorReportCell = row.createCell(CenterConstants.FAILURE_COL);
@@ -177,16 +180,17 @@ public class CenterImportHandler implements ImportHandler {
                 progressLevel = getProgressLevel(status);
 
                 if (progressLevel == 0) {
-                    result = importCenter(i, dateFormat);
+                    result = importCenter(centers, i, dateFormat);
                     centerId = result.getGroupId().toString();
                     progressLevel = 1;
                 } else {
-                    centerId = ImportHandlerUtils.readAsInt(CenterConstants.CENTER_ID_COL, centerSheet.getRow(centers.get(i).getRowIndex()))
+                    centerId = Objects.requireNonNull(
+                            ImportHandlerUtils.readAsInt(CenterConstants.CENTER_ID_COL, centerSheet.getRow(centers.get(i).getRowIndex())))
                             .toString();
                 }
 
                 if (meetings.get(i) != null) {
-                    progressLevel = importCenterMeeting(result, i, dateFormat);
+                    progressLevel = importCenterMeeting(meetings, Objects.requireNonNull(result), i, dateFormat);
                 }
                 successCount++;
                 statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);
@@ -195,16 +199,16 @@ public class CenterImportHandler implements ImportHandler {
                 errorCount++;
                 LOG.error("Runtime Exception occured in importEntity function", ex);
                 errorMessage = ImportHandlerUtils.getErrorMessage(ex);
-                writeCenterErrorMessage(centerId, errorMessage, progressLevel, statusCell, errorReportCell, row);
+                writeCenterErrorMessage(workbook, centerId, errorMessage, progressLevel, statusCell, errorReportCell, row);
             }
         }
         setReportHeaders(centerSheet);
         return Count.instance(successCount, errorCount);
     }
 
-    private void writeCenterErrorMessage(String centerId, String errorMessage, int progressLevel, Cell statusCell, Cell errorReportCell,
-            Row row) {
-        String status = "";
+    private void writeCenterErrorMessage(final Workbook workbook, final String centerId, final String errorMessage, final int progressLevel,
+            final Cell statusCell, final Cell errorReportCell, final Row row) {
+        String status = EMPTY_STR;
         if (progressLevel == 0) {
             status = TemplatePopulateImportConstants.STATUS_CREATION_FAILED;
         } else if (progressLevel == 1) {
@@ -229,21 +233,22 @@ public class CenterImportHandler implements ImportHandler {
         return 0;
     }
 
-    private CommandProcessingResult importCenter(int rowIndex, String dateFormat) {
+    private CommandProcessingResult importCenter(final List<CenterData> centers, final int rowIndex, final String dateFormat) {
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat));
-        Type groupCollectionType = new TypeToken<Collection<GroupGeneralData>>() {}.getType();
+        Type groupCollectionType = new TypeToken<Collection<GroupGeneralData>>() {
+
+        }.getType();
         gsonBuilder.registerTypeAdapter(groupCollectionType, new GroupIdSerializer());
         String payload = gsonBuilder.create().toJson(centers.get(rowIndex));
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createCenter() //
                 .withJson(payload) //
                 .build(); //
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return result;
+        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
-    private void setReportHeaders(Sheet sheet) {
+    private void setReportHeaders(final Sheet sheet) {
         ImportHandlerUtils.writeString(CenterConstants.STATUS_COL, sheet.getRow(0),
                 TemplatePopulateImportConstants.STATUS_COL_REPORT_HEADER);
         ImportHandlerUtils.writeString(CenterConstants.CENTER_ID_COL, sheet.getRow(0),
@@ -252,7 +257,8 @@ public class CenterImportHandler implements ImportHandler {
                 TemplatePopulateImportConstants.FAILURE_COL_REPORT_HEADER);
     }
 
-    private Integer importCenterMeeting(CommandProcessingResult result, int rowIndex, String dateFormat) {
+    private Integer importCenterMeeting(final List<CalendarData> meetings, final CommandProcessingResult result, final int rowIndex,
+            final String dateFormat) {
         CalendarData calendarData = meetings.get(rowIndex);
         calendarData.setTitle("centers_" + result.getGroupId().toString() + "_CollectionMeeting");
         GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
@@ -262,12 +268,12 @@ public class CenterImportHandler implements ImportHandler {
         String payload = gsonBuilder.create().toJson(calendarData);
         CommandWrapper commandWrapper = new CommandWrapper(result.getOfficeId(), result.getGroupId(), result.getClientId(),
                 result.getLoanId(), result.getSavingsId(), null, null, null, null, null, payload, result.getTransactionId(),
-                result.getProductId(), null, null, null);
+                result.getProductId(), null, null, null, null, idempotencyKeyGenerator.create());
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createCalendar(commandWrapper, TemplatePopulateImportConstants.CENTER_ENTITY_TYPE, result.getGroupId()) //
                 .withJson(payload) //
                 .build(); //
-        final CommandProcessingResult meetingresult = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        commandsSourceWritePlatformService.logCommandSource(commandRequest);
         return 2;
     }
 

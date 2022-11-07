@@ -19,18 +19,21 @@
 package org.apache.fineract.infrastructure.hooks.data;
 
 import java.io.Serializable;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-@Getter
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class Event implements Serializable {
 
-    private final String actionName;
-    private final String entityName;
+    private static final long serialVersionUID = 1L;
+
+    private String actionName;
+    private String entityName;
 
     public static Event instance(final String actionName, final String entityName) {
-        return new Event(actionName, entityName);
+        return new Event().setActionName(actionName).setEntityName(entityName);
     }
 }

@@ -24,34 +24,25 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import lombok.Getter;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
+@Getter
 public final class TaxComponentData implements Serializable {
 
-    @SuppressWarnings("unused")
     private final Long id;
-    @SuppressWarnings("unused")
     private final String name;
-    @SuppressWarnings("unused")
     private final BigDecimal percentage;
-    @SuppressWarnings("unused")
     private final EnumOptionData debitAccountType;
-    @SuppressWarnings("unused")
     private final GLAccountData debitAccount;
-    @SuppressWarnings("unused")
     private final EnumOptionData creditAccountType;
-    @SuppressWarnings("unused")
     private final GLAccountData creditAccount;
-    @SuppressWarnings("unused")
     private final LocalDate startDate;
-    @SuppressWarnings("unused")
     private final Collection<TaxComponentHistoryData> taxComponentHistories;
 
     // template options
-    @SuppressWarnings("unused")
     private final Map<String, List<GLAccountData>> glAccountOptions;
-    @SuppressWarnings("unused")
     private final Collection<EnumOptionData> glAccountTypeOptions;
 
     public static TaxComponentData instance(final Long id, final String name, final BigDecimal percentage,
@@ -144,10 +135,6 @@ public final class TaxComponentData implements Serializable {
         return percentage;
     }
 
-    public BigDecimal getPercentage() {
-        return this.percentage;
-    }
-
     private boolean occursOnDayFrom(final LocalDate target) {
         return target != null && target.isAfter(startDate());
     }
@@ -156,13 +143,7 @@ public final class TaxComponentData implements Serializable {
         LocalDate startDate = null;
         if (this.startDate != null) {
             startDate = this.startDate;
-            // startDate = LocalDate.ofInstant(this.startDate.toInstant(), DateUtils.getDateTimeZoneOfTenant());
         }
         return startDate;
     }
-
-    public GLAccountData getCreditAcount() {
-        return this.creditAccount;
-    }
-
 }

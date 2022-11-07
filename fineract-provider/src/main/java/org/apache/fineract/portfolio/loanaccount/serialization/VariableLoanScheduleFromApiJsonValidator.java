@@ -47,15 +47,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class VariableLoanScheduleFromApiJsonValidator {
 
-    final Set<String> variableSchedulesupportedParameters = new HashSet<>(Arrays.asList(LoanApiConstants.exceptionParamName,
-            LoanApiConstants.localeParameterName, LoanApiConstants.dateFormatParameterName));
-    final Set<String> variableSchedulesupportedArrayParameters = new HashSet<>(Arrays.asList(LoanApiConstants.modifiedinstallmentsParamName,
-            LoanApiConstants.newinstallmentsParamName, LoanApiConstants.deletedinstallmentsParamName));
-    final Set<String> variableScheduleModifiedParameters = new HashSet<>(Arrays.asList(LoanApiConstants.dueDateParamName,
+    private static final Set<String> VARIABLE_SCHEDULESUPPORTED_PARAMETERS = new HashSet<>(Arrays
+            .asList(LoanApiConstants.exceptionParamName, LoanApiConstants.localeParameterName, LoanApiConstants.dateFormatParameterName));
+    private static final Set<String> VARIABLE_SCHEDULESUPPORTED_ARRAY_PARAMETERS = new HashSet<>(
+            Arrays.asList(LoanApiConstants.modifiedinstallmentsParamName, LoanApiConstants.newinstallmentsParamName,
+                    LoanApiConstants.deletedinstallmentsParamName));
+    private static final Set<String> VARIABLE_SCHEDULE_MODIFIED_PARAMETERS = new HashSet<>(Arrays.asList(LoanApiConstants.dueDateParamName,
             LoanApiConstants.modifiedDueDateParamName, LoanApiConstants.principalParamName, LoanApiConstants.installmentAmountParamName));
-    final Set<String> variableScheduleNewInstallmentParameters = new HashSet<>(Arrays.asList(LoanApiConstants.dueDateParamName,
-            LoanApiConstants.principalParamName, LoanApiConstants.installmentAmountParamName));
-    final Set<String> variableScheduleDeleteInstallmentParameters = new HashSet<>(Arrays.asList(LoanApiConstants.dueDateParamName));
+    private static final Set<String> VARIABLE_SCHEDULE_NEW_INSTALLMENT_PARAMETERS = new HashSet<>(Arrays
+            .asList(LoanApiConstants.dueDateParamName, LoanApiConstants.principalParamName, LoanApiConstants.installmentAmountParamName));
+    private static final Set<String> VARIABLE_SCHEDULE_DELETE_INSTALLMENT_PARAMETERS = new HashSet<>(
+            List.of(LoanApiConstants.dueDateParamName));
+    public static final String LOAN = "loan";
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -70,14 +73,14 @@ public class VariableLoanScheduleFromApiJsonValidator {
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.variableSchedulesupportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, VARIABLE_SCHEDULESUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(LOAN);
 
         if (!loan.isSubmittedAndPendingApproval()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("account.is.not.submitted.and.pending.state",
-                    "Loan is not in submited state");
+                    "Loan is not in submitted state");
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
 
@@ -88,25 +91,25 @@ public class VariableLoanScheduleFromApiJsonValidator {
                 final String dateFormat = this.fromApiJsonHelper.extractDateFormatParameter(topLevelJsonElement);
                 final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
                 final JsonObject exceptionObject = topLevelJsonElement.getAsJsonObject(LoanApiConstants.exceptionParamName);
-                this.fromApiJsonHelper.checkForUnsupportedParameters(exceptionObject, this.variableSchedulesupportedArrayParameters);
+                this.fromApiJsonHelper.checkForUnsupportedParameters(exceptionObject, VARIABLE_SCHEDULESUPPORTED_ARRAY_PARAMETERS);
                 if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.modifiedinstallmentsParamName, exceptionObject)
                         && exceptionObject.get(LoanApiConstants.modifiedinstallmentsParamName).isJsonArray()) {
                     final JsonArray modificationsArray = exceptionObject.get(LoanApiConstants.modifiedinstallmentsParamName)
                             .getAsJsonArray();
                     validateLoanTermVariations(loan, baseDataValidator, dateFormat, locale, modificationsArray,
-                            this.variableScheduleModifiedParameters, LoanApiConstants.modifiedinstallmentsParamName);
+                            VARIABLE_SCHEDULE_MODIFIED_PARAMETERS, LoanApiConstants.modifiedinstallmentsParamName);
                 }
                 if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.newinstallmentsParamName, exceptionObject)
                         && exceptionObject.get(LoanApiConstants.newinstallmentsParamName).isJsonArray()) {
                     final JsonArray array = exceptionObject.get(LoanApiConstants.newinstallmentsParamName).getAsJsonArray();
                     validateLoanTermVariations(loan, baseDataValidator, dateFormat, locale, array,
-                            this.variableScheduleNewInstallmentParameters, LoanApiConstants.newinstallmentsParamName);
+                            VARIABLE_SCHEDULE_NEW_INSTALLMENT_PARAMETERS, LoanApiConstants.newinstallmentsParamName);
                 }
                 if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.deletedinstallmentsParamName, exceptionObject)
                         && exceptionObject.get(LoanApiConstants.deletedinstallmentsParamName).isJsonArray()) {
                     final JsonArray array = exceptionObject.get(LoanApiConstants.deletedinstallmentsParamName).getAsJsonArray();
                     validateLoanTermVariations(loan, baseDataValidator, dateFormat, locale, array,
-                            this.variableScheduleDeleteInstallmentParameters, LoanApiConstants.deletedinstallmentsParamName);
+                            VARIABLE_SCHEDULE_DELETE_INSTALLMENT_PARAMETERS, LoanApiConstants.deletedinstallmentsParamName);
                 }
             }
         } else {
@@ -133,12 +136,12 @@ public class VariableLoanScheduleFromApiJsonValidator {
             baseDataValidator.reset().parameter(arrayName).parameterAtIndexArray(LoanApiConstants.principalParamName, i)
                     .value(principalAmount).zeroOrPositiveAmount();
 
-            if (loan.getLoanProductRelatedDetail().getInterestMethod().isDecliningBalnce()
+            if (loan.getLoanProductRelatedDetail().getInterestMethod().isDecliningBalance()
                     && loan.getLoanProductRelatedDetail().getAmortizationMethod().isEqualInstallment() && principalAmount != null) {
                 List<String> unsupportedParams = new ArrayList<>(1);
                 unsupportedParams.add(LoanApiConstants.principalParamName);
                 throw new UnsupportedParameterException(unsupportedParams);
-            } else if ((!loan.getLoanProductRelatedDetail().getInterestMethod().isDecliningBalnce()
+            } else if ((!loan.getLoanProductRelatedDetail().getInterestMethod().isDecliningBalance()
                     || loan.getLoanProductRelatedDetail().getAmortizationMethod().isEqualPrincipal()) && installmentAmount != null) {
                 List<String> unsupportedParams = new ArrayList<>(1);
                 unsupportedParams.add(LoanApiConstants.installmentAmountParamName);

@@ -44,13 +44,6 @@ public class XBRLBuilder {
     private static final String UNITID_PURE = "Unit1";
     private static final String UNITID_CUR = "Unit2";
 
-    private Element root;
-    private HashMap<ContextData, String> contextMap;
-    Date startDate;
-    Date endDate;
-    private Integer instantScenarioCounter = 1;
-    private Integer durationScenarioCounter = 1;
-
     @Autowired
     private NamespaceReadPlatformService readNamespaceService;
 
@@ -59,38 +52,37 @@ public class XBRLBuilder {
     }
 
     public String build(final Map<MixTaxonomyData, BigDecimal> map, final Date startDate, final Date endDate, final String currency) {
-        this.instantScenarioCounter = 1;
-        this.durationScenarioCounter = 1;
-        this.contextMap = new HashMap<>();
+        Integer instantScenarioCounter = 0;
+        Integer durationScenarioCounter = 0;
+        Map<ContextData, String> contextMap = new HashMap<>();
         final Document doc = DocumentHelper.createDocument();
-        this.root = doc.addElement("xbrl");
+        Element root = doc.addElement("xbrl");
 
-        this.root.addElement("schemaRef").addNamespace("link",
+        root.addElement("schemaRef").addNamespace("link",
                 "http://www.themix.org/sites/default/files/Taxonomy2010/dct/dc-all_2010-08-31.xsd");
-
-        this.startDate = startDate;
-        this.endDate = endDate;
 
         for (final Map.Entry<MixTaxonomyData, BigDecimal> entry : map.entrySet()) {
             final MixTaxonomyData taxonomy = entry.getKey();
             final BigDecimal value = entry.getValue();
-            addTaxonomy(this.root, taxonomy, value);
+            addTaxonomy(root, taxonomy, value, startDate, endDate, instantScenarioCounter, durationScenarioCounter, contextMap);
 
         }
 
-        addContexts();
-        addCurrencyUnit(currency);
-        addNumberUnit();
+        addContexts(root, startDate, endDate, contextMap);
+        addCurrencyUnit(root, currency);
+        addNumberUnit(root);
 
         doc.setXMLEncoding("UTF-8");
 
         return doc.asXML();
     }
 
-    Element addTaxonomy(final Element rootElement, final MixTaxonomyData taxonomy, final BigDecimal value) {
+    private Element addTaxonomy(final Element rootElement, final MixTaxonomyData taxonomy, final BigDecimal value, final Date startDate,
+            final Date endDate, Integer instantScenarioCounter, Integer durationScenarioCounter,
+            final Map<ContextData, String> contextMap) {
 
         // throw an error is start / endate is null
-        if (this.startDate == null || this.endDate == null) {
+        if (startDate == null || endDate == null) {
             throw new XBRLMappingInvalidException("start date and end date should not be null");
         }
 
@@ -100,7 +92,7 @@ public class XBRLBuilder {
             final NamespaceData ns = this.readNamespaceService.retrieveNamespaceByPrefix(prefix);
             if (ns != null) {
 
-                this.root.addNamespace(prefix, ns.url());
+                rootElement.addNamespace(prefix, ns.getUrl());
             }
             qname = prefix + ":" + taxonomy.getName();
 
@@ -115,26 +107,31 @@ public class XBRLBuilder {
             final List<String> dims = Splitter.on(':').splitToList(dimension);
 
             if (dims.size() == 2) {
-                context = new ContextData(dims.get(0), dims.get(1), taxonomy.getType());
+                context = new ContextData().setDimensionType(dims.get(0)).setDimension(dims.get(1)).setPeriodType(
+                        taxonomy.getType().equals(MixTaxonomyData.BALANCESHEET) || taxonomy.getType().equals(MixTaxonomyData.PORTFOLIO) ? 0
+                                : 1);
             }
         }
 
         if (context == null) {
-            context = new ContextData(null, null, taxonomy.getType());
+            context = new ContextData().setPeriodType(
+                    taxonomy.getType().equals(MixTaxonomyData.BALANCESHEET) || taxonomy.getType().equals(MixTaxonomyData.PORTFOLIO) ? 0
+                            : 1);
         }
 
-        if (!this.contextMap.containsKey(context)) {
+        if (!contextMap.containsKey(context)) {
 
-            final String startDateStr = timeFormat.format(this.startDate);
-            final String endDateStr = timeFormat.format(this.endDate);
+            final String startDateStr = timeFormat.format(startDate);
+            final String endDateStr = timeFormat.format(endDate);
+            instantScenarioCounter += 1;
+            durationScenarioCounter += 1;
+            final String contextRefID = context.getPeriodType() == 0 ? "As_Of_" + endDateStr + instantScenarioCounter
+                    : "Duration_" + startDateStr + "_To_" + endDateStr + durationScenarioCounter;
 
-            final String contextRefID = context.getPeriodType() == 0 ? "As_Of_" + endDateStr + this.instantScenarioCounter++
-                    : "Duration_" + startDateStr + "_To_" + endDateStr + this.durationScenarioCounter++;
-
-            this.contextMap.put(context, contextRefID);
+            contextMap.put(context, contextRefID);
         }
 
-        xmlElement.addAttribute("contextRef", this.contextMap.get(context));
+        xmlElement.addAttribute("contextRef", contextMap.get(context));
         xmlElement.addAttribute("unitRef", getUnitRef(taxonomy));
         xmlElement.addAttribute("decimals", getNumberOfDecimalPlaces(value).toString());
 
@@ -151,8 +148,8 @@ public class XBRLBuilder {
     /**
      * Adds the generic number unit
      */
-    void addNumberUnit() {
-        final Element numerUnit = this.root.addElement("unit");
+    private void addNumberUnit(final Element root) {
+        final Element numerUnit = root.addElement("unit");
         numerUnit.addAttribute("id", UNITID_PURE);
         final Element measure = numerUnit.addElement("measure");
         measure.addText("xbrli:pure");
@@ -164,29 +161,29 @@ public class XBRLBuilder {
      *
      * @param currencyCode
      */
-    public void addCurrencyUnit(final String currencyCode) {
-        final Element currencyUnitElement = this.root.addElement("unit");
+    private void addCurrencyUnit(final Element root, final String currencyCode) {
+        final Element currencyUnitElement = root.addElement("unit");
         currencyUnitElement.addAttribute("id", UNITID_CUR);
         final Element measure = currencyUnitElement.addElement("measure");
         measure.addText("iso4217:" + currencyCode);
 
     }
 
-    public void addContexts() {
+    private void addContexts(final Element root, final Date startDate, final Date endDate, final Map<ContextData, String> contextMap) {
         final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        for (final Map.Entry<ContextData, String> entry : this.contextMap.entrySet()) {
+        for (final Map.Entry<ContextData, String> entry : contextMap.entrySet()) {
             final ContextData context = entry.getKey();
-            final Element contextElement = this.root.addElement("context");
+            final Element contextElement = root.addElement("context");
             contextElement.addAttribute("id", entry.getValue());
             contextElement.addElement("entity").addElement("identifier").addAttribute("scheme", SCHEME_URL).addText(IDENTIFIER);
 
             final Element periodElement = contextElement.addElement("period");
 
             if (context.getPeriodType() == 0) {
-                periodElement.addElement("instant").addText(format.format(this.endDate));
+                periodElement.addElement("instant").addText(format.format(endDate));
             } else {
-                periodElement.addElement("startDate").addText(format.format(this.startDate));
-                periodElement.addElement("endDate").addText(format.format(this.endDate));
+                periodElement.addElement("startDate").addText(format.format(startDate));
+                periodElement.addElement("endDate").addText(format.format(endDate));
             }
 
             final String dimension = context.getDimension();

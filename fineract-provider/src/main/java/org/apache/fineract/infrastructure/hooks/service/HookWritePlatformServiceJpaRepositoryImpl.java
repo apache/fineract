@@ -130,7 +130,7 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements HookWritePlatf
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
             final Hook hook = retrieveHookBy(hookId);
-            final HookTemplate template = hook.getHookTemplate();
+            final HookTemplate template = hook.getTemplate();
             final Map<String, Object> changes = hook.update(command);
 
             if (!changes.isEmpty()) {
@@ -142,7 +142,7 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements HookWritePlatf
                         changes.remove(templateIdParamName);
                         throw new TemplateNotFoundException(ugdTemplateId);
                     }
-                    hook.updateUgdTemplate(ugdTemplate);
+                    hook.setUgdTemplate(ugdTemplate);
                 }
 
                 if (changes.containsKey(eventsParamName)) {
@@ -211,7 +211,7 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements HookWritePlatf
     private Set<HookConfiguration> assembleConfig(final Map<String, String> hookConfig, final HookTemplate template) {
 
         final Set<HookConfiguration> configuration = new HashSet<>();
-        final Set<Schema> fields = template.getSchema();
+        final Set<Schema> fields = template.getFields();
 
         for (final Map.Entry<String, String> configEntry : hookConfig.entrySet()) {
             for (final Schema field : fields) {
@@ -282,7 +282,7 @@ public class HookWritePlatformServiceJpaRepositoryImpl implements HookWritePlatf
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(errorMessage);
         }
 
-        final Set<Schema> fields = template.getSchema();
+        final Set<Schema> fields = template.getFields();
         for (final Schema field : fields) {
             if (!field.isOptional()) {
                 boolean found = false;

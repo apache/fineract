@@ -25,10 +25,18 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_entity_relation")
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public class FineractEntityRelation extends AbstractPersistableCustom {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "relationId", orphanRemoval = true)
@@ -48,40 +56,12 @@ public class FineractEntityRelation extends AbstractPersistableCustom {
      * this.fromEntityType = fromEntityType; this.toEntityType = toEntityType; this.codeName = codeName; }
      */
 
-    public FineractEntityRelation() {
-        // TODO Auto-generated constructor stub
-    }
-
     public Set<FineractEntityToEntityMapping> getFineractEntityToEntityMapping() {
         return this.fineractEntityToEntityMapping;
     }
 
     public void setFineractEntityToEntityMapping(Set<FineractEntityToEntityMapping> fineractEntityToEntityMapping) {
         this.fineractEntityToEntityMapping = fineractEntityToEntityMapping;
-    }
-
-    public String getFromEntityType() {
-        return this.fromEntityType;
-    }
-
-    public void setFromEntityType(String fromEntityType) {
-        this.fromEntityType = fromEntityType;
-    }
-
-    public String getToEntityType() {
-        return this.toEntityType;
-    }
-
-    public void setToEntityType(String toEntityType) {
-        this.toEntityType = toEntityType;
-    }
-
-    public String getCodeName() {
-        return this.codeName;
-    }
-
-    public void setCodeName(String codeName) {
-        this.codeName = codeName;
     }
 
 }

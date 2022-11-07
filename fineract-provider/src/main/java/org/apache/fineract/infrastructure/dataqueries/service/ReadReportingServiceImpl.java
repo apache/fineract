@@ -104,7 +104,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         final StringBuilder writer = new StringBuilder();
 
         final List<ResultsetColumnHeaderData> columnHeaders = result.getColumnHeaders();
-        log.info("NO. of Columns: {}", columnHeaders.size());
+        log.debug("NO. of Columns: {}", columnHeaders.size());
         final Integer chSize = columnHeaders.size();
         for (int i = 0; i < chSize; i++) {
             writer.append('"' + columnHeaders.get(i).getColumnName() + '"');
@@ -115,21 +115,21 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         writer.append('\n');
 
         final List<ResultsetRowData> data = result.getData();
-        List<String> row;
+        List<Object> row;
         Integer rSize;
         // String currCol;
         String currColType;
         String currVal;
         final String doubleQuote = "\"";
         final String twoDoubleQuotes = doubleQuote + doubleQuote;
-        log.info("NO. of Rows: {}", data.size());
+        log.debug("NO. of Rows: {}", data.size());
         for (ResultsetRowData element : data) {
             row = element.getRow();
             rSize = row.size();
             for (int j = 0; j < rSize; j++) {
                 // currCol = columnHeaders.get(j).getColumnName();
                 currColType = columnHeaders.get(j).getColumnType();
-                currVal = row.get(j);
+                currVal = (String) row.get(j);
                 if (currVal != null) {
                     if (currColType.equals("DECIMAL") || currColType.equals("DOUBLE") || currColType.equals("BIGINT")
                             || currColType.equals("SMALLINT") || currColType.equals("INT")) {
@@ -252,9 +252,9 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
             final List<ResultsetColumnHeaderData> columnHeaders = result.getColumnHeaders();
             final List<ResultsetRowData> data = result.getData();
-            List<String> row;
+            List<Object> row;
 
-            log.info("NO. of Columns: {}", columnHeaders.size());
+            log.debug("NO. of Columns: {}", columnHeaders.size());
             final Integer chSize = columnHeaders.size();
 
             final Document document = new Document(PageSize.B0.rotate());
@@ -276,13 +276,13 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             Integer rSize;
             String currColType;
             String currVal;
-            log.info("NO. of Rows: {}", data.size());
+            log.debug("NO. of Rows: {}", data.size());
             for (ResultsetRowData element : data) {
                 row = element.getRow();
                 rSize = row.size();
                 for (int j = 0; j < rSize; j++) {
                     currColType = columnHeaders.get(j).getColumnType();
-                    currVal = row.get(j);
+                    currVal = (String) row.get(j);
                     if (currVal != null) {
                         if (currColType.equals("DECIMAL") || currColType.equals("DOUBLE") || currColType.equals("BIGINT")
                                 || currColType.equals("SMALLINT") || currColType.equals("INT")) {
@@ -484,14 +484,14 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     @Override
     public GenericResultsetData retrieveGenericResultSetForSmsEmailCampaign(String name, String type, Map<String, String> queryParams) {
         final long startTime = System.currentTimeMillis();
-        log.info("STARTING REPORT: {}   Type: {}", name, type);
+        log.debug("STARTING REPORT: {}   Type: {}", name, type);
 
         final String sql = sqlToRunForSmsEmailCampaign(name, type, queryParams);
 
         final GenericResultsetData result = this.genericDataService.fillGenericResultSet(sql);
 
         final long elapsed = System.currentTimeMillis() - startTime;
-        log.info("FINISHING Report/Request Name: {} - {}     Elapsed Time: {}", name, type, elapsed);
+        log.debug("FINISHING Report/Request Name: {} - {}     Elapsed Time: {}", name, type, elapsed);
         return result;
     }
 

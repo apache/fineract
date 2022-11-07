@@ -21,13 +21,13 @@ package org.apache.fineract.infrastructure.configuration.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.campaigns.sms.data.MessageGatewayConfigurationData;
 import org.apache.fineract.infrastructure.configuration.data.ExternalServicesPropertiesData;
 import org.apache.fineract.infrastructure.configuration.data.S3CredentialsData;
 import org.apache.fineract.infrastructure.configuration.data.SMTPCredentialsData;
 import org.apache.fineract.infrastructure.configuration.exception.ExternalServiceConfigurationNotFoundException;
 import org.apache.fineract.infrastructure.gcm.domain.NotificationConfigurationData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -35,14 +35,10 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class ExternalServicesPropertiesReadPlatformServiceImpl implements ExternalServicesPropertiesReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    public ExternalServicesPropertiesReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     private static final class S3CredentialsDataExtractor implements ResultSetExtractor<S3CredentialsData> {
 
@@ -60,7 +56,7 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
                     secretKey = rs.getString("value");
                 }
             }
-            return new S3CredentialsData(bucketName, accessKey, secretKey);
+            return new S3CredentialsData().setBucketName(bucketName).setAccessKey(accessKey).setSecretKey(secretKey);
         }
     }
 
@@ -96,7 +92,8 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
                     fromName = value;
                 }
             }
-            return new SMTPCredentialsData(username, password, host, port, useTLS, fromEmail, fromName);
+            return new SMTPCredentialsData().setUsername(username).setPassword(password).setHost(host).setPort(port).setUseTLS(useTLS)
+                    .setFromEmail(fromEmail).setFromName(fromName);
         }
     }
 
@@ -111,7 +108,7 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
             if (name != null && "password".equalsIgnoreCase(name)) {
                 value = "XXXX";
             }
-            return new ExternalServicesPropertiesData(name, value);
+            return new ExternalServicesPropertiesData().setName(name).setValue(value);
         }
 
     }
@@ -215,7 +212,7 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
                     fcmEndPoint = rs.getString("value");
                 }
             }
-            return new NotificationConfigurationData(null, serverKey, gcmEndPoint, fcmEndPoint);
+            return new NotificationConfigurationData().setServerKey(serverKey).setGcmEndPoint(gcmEndPoint).setFcmEndPoint(fcmEndPoint);
         }
     }
 

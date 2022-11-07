@@ -39,6 +39,7 @@ import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountSummaryData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
@@ -82,10 +83,12 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
     private CommandStrategyProvider strategyProvider;
     private ResolutionHelper resolutionHelper;
     private SavingsAccountReadPlatformService savingsAccountReadPlatformService;
+    private PlatformSecurityContext platformSecurityContext;
 
     @Override
     @SuppressFBWarnings(value = {
             "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED, rollbackFor = Exception.class)
     public Void call() throws org.apache.fineract.infrastructure.jobs.exception.JobExecutionException {
         ThreadLocalContextUtil.init(this.context);
         Integer maxNumberOfRetries = this.context.getTenantContext().getConnection().getMaxRetriesOnDeadlock();
@@ -93,7 +96,7 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
 
         // List<BatchResponse> responseList = new ArrayList<>();
         long start = System.currentTimeMillis();
-        LOG.info("Thread Execution Started at {}", start);
+        LOG.debug("Thread Execution Started at {}", start);
 
         List<Throwable> errors = new ArrayList<>();
         int i = 0;
@@ -110,11 +113,11 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
                         long endPosting = System.currentTimeMillis();
                         savingsAccountDataList.add(savingsAccountDataRet);
 
-                        LOG.info("Posting Completed Within {}", endPosting - startPosting);
+                        LOG.debug("Posting Completed Within {}", endPosting - startPosting);
 
                         numberOfRetries = maxNumberOfRetries + 1;
                     } catch (CannotAcquireLockException | ObjectOptimisticLockingFailureException exception) {
-                        LOG.info("Interest posting job for savings ID {} has been retried {} time(s)", savingsAccountData.getId(),
+                        LOG.debug("Interest posting job for savings ID {} has been retried {} time(s)", savingsAccountData.getId(),
                                 numberOfRetries);
                         // Fail if the transaction has been retired for
                         // maxNumberOfRetries
@@ -163,15 +166,15 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
         }
 
         long end = System.currentTimeMillis();
-        LOG.info("Time To Finish the batch {} by thread {} for accounts {}", end - start, Thread.currentThread().getId(),
+        LOG.debug("Time To Finish the batch {} by thread {} for accounts {}", end - start, Thread.currentThread().getId(),
                 savingAccounts.size());
         return null;
     }
 
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED, rollbackFor = Exception.class)
     private void batchUpdateJournalEntries(final List<SavingsAccountData> savingsAccountDataList,
             final HashMap<String, SavingsAccountTransactionData> savingsAccountTransactionDataHashMap)
             throws DataAccessException, NullPointerException {
+        Long userId = platformSecurityContext.authenticatedUser().getId();
         String queryForJGLUpdate = batchQueryForJournalEntries();
         List<Object[]> paramsForGLInsertion = new ArrayList<>();
         for (SavingsAccountData savingsAccountData : savingsAccountDataList) {
@@ -182,7 +185,6 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
                 if (savingsAccountTransactionData.getId() == null) {
                     final String key = savingsAccountTransactionData.getRefNo();
                     if (savingsAccountTransactionDataHashMap.containsKey(key)) {
-                        LocalDate currentDate = DateUtils.getLocalDateOfTenant();
                         final SavingsAccountTransactionData dataFromFetch = savingsAccountTransactionDataHashMap.get(key);
                         savingsAccountTransactionData.setId(dataFromFetch.getId());
                         if (savingsAccountData.getGlAccountIdForSavingsControl() != 0
@@ -191,31 +193,23 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
                                     savingsAccountData.getOfficeId(), null, currencyCode,
                                     SAVINGS_TRANSACTION_IDENTIFIER + savingsAccountTransactionData.getId().toString(),
                                     savingsAccountTransactionData.getId(), null, false, null, false,
-                                    Date.from(savingsAccountTransactionData.getTransactionDate()
-                                            .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
-                                    JournalEntryType.CREDIT.getValue().longValue(), savingsAccountTransactionData.getAmount(), null,
-                                    JournalEntryType.CREDIT.getValue().longValue(), savingsAccountData.getId(),
-                                    Date.from(currentDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
-                                    Date.from(currentDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()), false,
-                                    BigDecimal.ZERO, BigDecimal.ZERO, null,
-                                    Date.from(savingsAccountTransactionData.getTransactionDate()
-                                            .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
-                                    null, Integer.valueOf(1), Integer.valueOf(1) });
+                                    savingsAccountTransactionData.getTransactionDate(), JournalEntryType.CREDIT.getValue().longValue(),
+                                    savingsAccountTransactionData.getAmount(), null, JournalEntryType.CREDIT.getValue().longValue(),
+                                    savingsAccountData.getId(), DateUtils.getOffsetDateTimeOfTenant(),
+                                    DateUtils.getOffsetDateTimeOfTenant(), false, BigDecimal.ZERO, BigDecimal.ZERO, null,
+                                    savingsAccountTransactionData.getTransactionDate(), null, userId, userId,
+                                    DateUtils.getBusinessLocalDate() });
 
                             paramsForGLInsertion.add(new Object[] { savingsAccountData.getGlAccountIdForInterestOnSavings(),
                                     savingsAccountData.getOfficeId(), null, currencyCode,
                                     SAVINGS_TRANSACTION_IDENTIFIER + savingsAccountTransactionData.getId().toString(),
                                     savingsAccountTransactionData.getId(), null, false, null, false,
-                                    Date.from(savingsAccountTransactionData.getTransactionDate()
-                                            .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
-                                    JournalEntryType.DEBIT.getValue().longValue(), savingsAccountTransactionData.getAmount(), null,
-                                    JournalEntryType.DEBIT.getValue().longValue(), savingsAccountData.getId(),
-                                    Date.from(currentDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
-                                    Date.from(currentDate.atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()), false,
-                                    BigDecimal.ZERO, BigDecimal.ZERO, null,
-                                    Date.from(savingsAccountTransactionData.getTransactionDate()
-                                            .atStartOfDay(DateUtils.getDateTimeZoneOfTenant()).toInstant()),
-                                    null, Integer.valueOf(1), Integer.valueOf(1) });
+                                    savingsAccountTransactionData.getTransactionDate(), JournalEntryType.DEBIT.getValue().longValue(),
+                                    savingsAccountTransactionData.getAmount(), null, JournalEntryType.DEBIT.getValue().longValue(),
+                                    savingsAccountData.getId(), DateUtils.getOffsetDateTimeOfTenant(),
+                                    DateUtils.getOffsetDateTimeOfTenant(), false, BigDecimal.ZERO, BigDecimal.ZERO, null,
+                                    savingsAccountTransactionData.getTransactionDate(), null, userId, userId,
+                                    DateUtils.getBusinessLocalDate() });
                         }
                     }
                 }
@@ -232,10 +226,10 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
 
         query.append("INSERT INTO acc_gl_journal_entry(account_id,office_id,reversal_id,currency_code,transaction_id,");
         query.append("savings_transaction_id,client_transaction_id,reversed,ref_num,manual_entry,entry_date,type_enum,");
-        query.append("amount,description,entity_type_enum,entity_id,created_date,");
-        query.append("lastmodified_date,is_running_balance_calculated,office_running_balance,organization_running_balance,");
-        query.append("payment_details_id,transaction_date,share_transaction_id, createdby_id, lastmodifiedby_id) ");
-        query.append("VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        query.append("amount,description,entity_type_enum,entity_id,created_on_utc,");
+        query.append("last_modified_on_utc,is_running_balance_calculated,office_running_balance,organization_running_balance,");
+        query.append("payment_details_id,transaction_date,share_transaction_id, created_by, last_modified_by, submitted_on_date) ");
+        query.append("VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
         return query.toString();
     }
@@ -244,7 +238,6 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
         return this.savingsAccountReadPlatformService.retrieveAllTransactionData(refNo);
     }
 
-    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @SuppressWarnings("unused")
     private void batchUpdate(final List<SavingsAccountData> savingsAccountDataList) throws DataAccessException {
         String queryForSavingsUpdate = batchQueryForSavingsSummaryUpdate();
@@ -304,10 +297,10 @@ public class SavingsSchedularInterestPoster implements Callable<Void> {
             this.jdbcTemplate.batchUpdate(queryForSavingsUpdate, paramsForSavingsSummary);
             this.jdbcTemplate.batchUpdate(queryForTransactionInsertion, paramsForTransactionInsertion);
             this.jdbcTemplate.batchUpdate(queryForTransactionUpdate, paramsForTransactionUpdate);
-            LOG.info("`Total No Of Interest Posting:` {}", transRefNo.size());
+            LOG.debug("`Total No Of Interest Posting:` {}", transRefNo.size());
             List<SavingsAccountTransactionData> savingsAccountTransactionDataList = fetchTransactionsFromIds(transRefNo);
             if (savingsAccountDataList != null) {
-                LOG.info("Fetched Transactions from DB: {}", savingsAccountTransactionDataList.size());
+                LOG.debug("Fetched Transactions from DB: {}", savingsAccountTransactionDataList.size());
             }
 
             HashMap<String, SavingsAccountTransactionData> savingsAccountTransactionMap = new HashMap<>();

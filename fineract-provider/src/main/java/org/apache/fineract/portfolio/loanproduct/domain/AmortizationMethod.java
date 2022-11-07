@@ -46,19 +46,11 @@ public enum AmortizationMethod {
             return null;
         }
 
-        AmortizationMethod repaymentMethod = null;
-        switch (selectedMethod) {
-            case 0:
-                repaymentMethod = AmortizationMethod.EQUAL_PRINCIPAL;
-            break;
-            case 1:
-                repaymentMethod = AmortizationMethod.EQUAL_INSTALLMENTS;
-            break;
-            default:
-                repaymentMethod = AmortizationMethod.INVALID;
-            break;
-        }
-        return repaymentMethod;
+        return switch (selectedMethod) {
+            case 0 -> AmortizationMethod.EQUAL_PRINCIPAL;
+            case 1 -> AmortizationMethod.EQUAL_INSTALLMENTS;
+            default -> AmortizationMethod.INVALID;
+        };
     }
 
     public boolean isEqualInstallment() {

@@ -28,7 +28,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
-import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
+import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.client.domain.ClientTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
@@ -37,14 +38,14 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 
 @Entity
 @Table(name = "acc_gl_journal_entry")
-public class JournalEntry extends AbstractAuditableCustom {
+public class JournalEntry extends AbstractAuditableWithUTCDateTimeCustom {
 
     @ManyToOne
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
 
-    @ManyToOne(optional = true)
-    @JoinColumn(name = "payment_details_id", nullable = true)
+    @ManyToOne()
+    @JoinColumn(name = "payment_details_id")
     private PaymentDetail paymentDetail;
 
     @ManyToOne
@@ -73,7 +74,7 @@ public class JournalEntry extends AbstractAuditableCustom {
     @JoinColumn(name = "client_transaction_id", nullable = false)
     private ClientTransaction clientTransaction;
 
-    @Column(name = "share_transaction_id", nullable = true)
+    @Column(name = "share_transaction_id")
     private Long shareTransactionId;
 
     @Column(name = "reversed", nullable = false)
@@ -102,6 +103,9 @@ public class JournalEntry extends AbstractAuditableCustom {
 
     @Column(name = "ref_num")
     private String referenceNumber;
+
+    @Column(name = "submitted_on_date", nullable = false)
+    private LocalDate submittedOnDate;
 
     public static JournalEntry createNew(final Office office, final PaymentDetail paymentDetail, final GLAccount glAccount,
             final String currencyCode, final String transactionId, final boolean manualEntry, final LocalDate transactionDate,
@@ -141,6 +145,7 @@ public class JournalEntry extends AbstractAuditableCustom {
         this.clientTransaction = clientTransaction;
         this.paymentDetail = paymentDetail;
         this.shareTransactionId = shareTransactionId;
+        this.submittedOnDate = DateUtils.getBusinessLocalDate();
     }
 
     public boolean isDebitEntry() {
@@ -225,6 +230,10 @@ public class JournalEntry extends AbstractAuditableCustom {
 
     public String getDescription() {
         return this.description;
+    }
+
+    public LocalDate getSubmittedOnDate() {
+        return this.submittedOnDate;
     }
 
 }

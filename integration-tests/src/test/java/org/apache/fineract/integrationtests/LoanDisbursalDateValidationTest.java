@@ -96,7 +96,7 @@ public class LoanDisbursalDateValidationTest {
         // DISBURSE A LOAN
         String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
         @SuppressWarnings("unchecked")
-        List<HashMap> disbursalError = (List<HashMap>) this.loanTransactionHelper.disburseLoan(disbursalDate, loanID,
+        List<HashMap> disbursalError = (List<HashMap>) this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(disbursalDate, loanID,
                 this.responseForbiddenError, JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
 
         Assertions.assertEquals(disbursalError.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE),

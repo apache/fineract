@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -41,7 +42,7 @@ import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 /**
  * Immutable data object representing client data.
  */
-@SuppressWarnings("unused")
+@Getter
 public final class ClientData implements Comparable<ClientData>, Serializable {
 
     private final Long id;
@@ -270,22 +271,6 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
         this.familyMemberOptions = null;
         this.emailAddress = null;
         this.clientCollateralManagements = null;
-    }
-
-    public Integer getRowIndex() {
-        return rowIndex;
-    }
-
-    public Long getSavingsAccountId() {
-        return savingsAccountId;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getOfficeName() {
-        return officeName;
     }
 
     public static ClientData template(final Long officeId, final LocalDate joinedDate, final Collection<OfficeData> officeOptions,
@@ -611,38 +596,6 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
         this.clientCollateralManagements = clientCollateralManagements;
     }
 
-    public Long id() {
-        return this.id;
-    }
-
-    public String displayName() {
-        return this.displayName;
-    }
-
-    public String accountNo() {
-        return this.accountNo;
-    }
-
-    public Long officeId() {
-        return this.officeId;
-    }
-
-    public String officeName() {
-        return this.officeName;
-    }
-
-    public Long getImageId() {
-        return this.imageId;
-    }
-
-    public Boolean getImagePresent() {
-        return this.imagePresent;
-    }
-
-    public ClientTimelineData getTimeline() {
-        return this.timeline;
-    }
-
     @Override
     public int compareTo(final ClientData obj) {
         if (obj == null) {
@@ -651,8 +604,6 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
         return new CompareToBuilder() //
                 .append(this.id, obj.id) //
                 .append(this.displayName, obj.displayName) //
-                .append(this.mobileNo, obj.mobileNo) //
-                .append(this.emailAddress, obj.emailAddress) //
                 .toComparison();
     }
 
@@ -671,8 +622,6 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
         return new EqualsBuilder() //
                 .append(this.id, rhs.id) //
                 .append(this.displayName, rhs.displayName) //
-                .append(this.mobileNo, rhs.mobileNo) //
-                .append(this.emailAddress, rhs.emailAddress) //
                 .isEquals();
     }
 
@@ -683,25 +632,4 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
                 .append(this.displayName) //
                 .toHashCode();
     }
-
-    public String getExternalId() {
-        return this.externalId;
-    }
-
-    public String getFirstname() {
-        return this.firstname;
-    }
-
-    public String getLastname() {
-        return this.lastname;
-    }
-
-    public LocalDate getActivationDate() {
-        return this.activationDate;
-    }
-
-    public Boolean getIsAddressEnabled() {
-        return this.isAddressEnabled;
-    }
-
 }

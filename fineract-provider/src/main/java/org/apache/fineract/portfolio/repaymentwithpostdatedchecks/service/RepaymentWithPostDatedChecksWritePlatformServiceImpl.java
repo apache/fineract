@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -55,15 +54,22 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class RepaymentWithPostDatedChecksWritePlatformServiceImpl implements RepaymentWithPostDatedChecksWritePlatformService {
 
-    private final PostDatedChecksRepository postDatedChecksRepository;
-    private final FromJsonHelper fromApiJsonHelper;
-    private final LoanRepository loanRepository;
+    public static final String NAME = "name";
+    public static final String AMOUNT = "amount";
+    public static final String ACCOUNT_NO = "accountNo";
+    public static final String LOCALE = "locale";
+    public static final String CHECK_NO = "checkNo";
+    public static final String INSTALLMENT_ID = "installmentId";
+    public static final String REPAYMENT_WITH_POST_DATED_CHECKS = "repayment-with-post-dated-checks";
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParametersForUpdate = new HashSet<>(Arrays.asList("name", "amount", "accountNo", "locale"));
-    private final Set<String> supportedParametersForBounce = new HashSet<>(
-            Arrays.asList("name", "amount", "accountNo", "checkNo", "locale", "installmentId"));
+    private static final Set<String> SUPPORTED_PARAMETERS_FOR_UPDATE = new HashSet<>(Arrays.asList(NAME, AMOUNT, ACCOUNT_NO, LOCALE));
+    private static final Set<String> SUPPORTED_PARAMETERS_FOR_BOUNCE = new HashSet<>(
+            Arrays.asList(NAME, AMOUNT, ACCOUNT_NO, CHECK_NO, LOCALE, INSTALLMENT_ID));
+    private final PostDatedChecksRepository postDatedChecksRepository;
+    private final FromJsonHelper fromApiJsonHelper;
+    private final LoanRepository loanRepository;
 
     @Autowired
     public RepaymentWithPostDatedChecksWritePlatformServiceImpl(final PostDatedChecksRepository postDatedChecksRepository,
@@ -102,19 +108,19 @@ public class RepaymentWithPostDatedChecksWritePlatformServiceImpl implements Rep
         JsonObject jsonObject = jsonElement.getAsJsonObject();
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(jsonObject);
 
-        final String name = this.fromApiJsonHelper.extractStringNamed("name", jsonObject);
+        final String name = this.fromApiJsonHelper.extractStringNamed(NAME, jsonObject);
 
-        final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed("amount", jsonObject, locale);
+        final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed(AMOUNT, jsonObject, locale);
 
-        final Integer installmentId = this.fromApiJsonHelper.extractIntegerNamed("installmentId", jsonObject, locale);
+        final Integer installmentId = this.fromApiJsonHelper.extractIntegerNamed(INSTALLMENT_ID, jsonObject, locale);
 
-        final Long accountNo = this.fromApiJsonHelper.extractLongNamed("accountNo", jsonObject);
-        final Long checkNo = this.fromApiJsonHelper.extractLongNamed("checkNo", jsonObject);
+        final Long accountNo = this.fromApiJsonHelper.extractLongNamed(ACCOUNT_NO, jsonObject);
+        final Long checkNo = this.fromApiJsonHelper.extractLongNamed(CHECK_NO, jsonObject);
 
         final List<LoanRepaymentScheduleInstallment> loanRepaymentScheduleInstallments = loan.getRepaymentScheduleInstallments();
 
         final List<LoanRepaymentScheduleInstallment> installmentList = loanRepaymentScheduleInstallments.stream()
-                .filter(repayment -> repayment.getInstallmentNumber().equals(installmentId)).collect(Collectors.toList());
+                .filter(repayment -> repayment.getInstallmentNumber().equals(installmentId)).toList();
 
         final PostDatedChecks postDatedChecks = PostDatedChecks.instanceOf(accountNo, name, amount, installmentList.get(0), loan, checkNo);
         try {
@@ -124,7 +130,7 @@ public class RepaymentWithPostDatedChecksWritePlatformServiceImpl implements Rep
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("postdatedChecks");
             if (realCause.getMessage().toLowerCase().contains("transaction has been rolled back")) {
-                baseDataValidator.reset().parameter("checkNo").failWithCode("value.must.be.unique");
+                baseDataValidator.reset().parameter(CHECK_NO).failWithCode("value.must.be.unique");
             }
             if (!dataValidationErrors.isEmpty()) {
                 throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
@@ -140,37 +146,39 @@ public class RepaymentWithPostDatedChecksWritePlatformServiceImpl implements Rep
         final JsonElement jsonElement = this.fromApiJsonHelper.parse(command.json());
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, command.json(), this.supportedParametersForBounce);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, command.json(), SUPPORTED_PARAMETERS_FOR_BOUNCE);
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource("repayment-with-post-dated-checks");
+                .resource(REPAYMENT_WITH_POST_DATED_CHECKS);
 
-        if (!command.parameterExists("locale")) {
-            baseDataValidator.reset().parameter("locale").notNull().failWithCode("locale.not.exists");
+        if (!command.parameterExists(LOCALE)) {
+            baseDataValidator.reset().parameter(LOCALE).notNull().failWithCode("locale.not.exists");
         } else {
-            final String locale = this.fromApiJsonHelper.extractStringNamed("locale", jsonElement);
-            baseDataValidator.reset().parameter("locale").value(locale).notNull();
+            final String locale = this.fromApiJsonHelper.extractStringNamed(LOCALE, jsonElement);
+            baseDataValidator.reset().parameter(LOCALE).value(locale).notNull();
         }
 
-        if (command.parameterExists("amount")) {
-            final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("amount", jsonElement);
-            baseDataValidator.reset().parameter("amount").value(amount).notNull().positiveAmount();
+        if (command.parameterExists(AMOUNT)) {
+            final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(AMOUNT, jsonElement);
+            baseDataValidator.reset().parameter(AMOUNT).value(amount).notNull().positiveAmount();
         }
 
-        if (command.parameterExists("accountNo")) {
-            final Long accountNo = this.fromApiJsonHelper.extractLongNamed("accountNo", jsonElement);
-            baseDataValidator.reset().parameter("accountNo").value(accountNo).notNull().positiveAmount();
+        if (command.parameterExists(ACCOUNT_NO)) {
+            final Long accountNo = this.fromApiJsonHelper.extractLongNamed(ACCOUNT_NO, jsonElement);
+            baseDataValidator.reset().parameter(ACCOUNT_NO).value(accountNo).notNull().positiveAmount();
         }
 
-        if (command.parameterExists("name")) {
-            final String name = this.fromApiJsonHelper.extractStringNamed("name", jsonElement);
-            baseDataValidator.reset().parameter("name").value(name).notNull();
+        if (command.parameterExists(NAME)) {
+            final String name = this.fromApiJsonHelper.extractStringNamed(NAME, jsonElement);
+            baseDataValidator.reset().parameter(NAME).value(name).notNull();
         }
 
-        if (command.parameterExists("checkNo")) {
-            final Long checkNo = this.fromApiJsonHelper.extractLongNamed("checkNo", jsonElement);
-            baseDataValidator.reset().parameter("checkNo").value(checkNo).notNull().longGreaterThanZero();
+        if (command.parameterExists(CHECK_NO)) {
+            final Long checkNo = this.fromApiJsonHelper.extractLongNamed(CHECK_NO, jsonElement);
+            baseDataValidator.reset().parameter(CHECK_NO).value(checkNo).notNull().longGreaterThanZero();
         }
 
         if (!dataValidationErrors.isEmpty()) {
@@ -183,32 +191,34 @@ public class RepaymentWithPostDatedChecksWritePlatformServiceImpl implements Rep
         final JsonElement jsonElement = this.fromApiJsonHelper.parse(command.json());
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, command.json(), this.supportedParametersForUpdate);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+
+        }.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, command.json(), SUPPORTED_PARAMETERS_FOR_UPDATE);
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource("repayment-with-post-dated-checks");
+                .resource(REPAYMENT_WITH_POST_DATED_CHECKS);
 
-        if (!command.parameterExists("locale")) {
-            baseDataValidator.reset().parameter("locale").notNull().failWithCode("locale.not.exists");
+        if (!command.parameterExists(LOCALE)) {
+            baseDataValidator.reset().parameter(LOCALE).notNull().failWithCode("locale.not.exists");
         } else {
-            final String locale = this.fromApiJsonHelper.extractStringNamed("locale", jsonElement);
-            baseDataValidator.reset().parameter("locale").value(locale).notNull();
+            final String locale = this.fromApiJsonHelper.extractStringNamed(LOCALE, jsonElement);
+            baseDataValidator.reset().parameter(LOCALE).value(locale).notNull();
         }
 
-        if (command.parameterExists("amount")) {
-            final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("amount", jsonElement);
-            baseDataValidator.reset().parameter("amount").value(amount).notNull().positiveAmount();
+        if (command.parameterExists(AMOUNT)) {
+            final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(AMOUNT, jsonElement);
+            baseDataValidator.reset().parameter(AMOUNT).value(amount).notNull().positiveAmount();
         }
 
-        if (command.parameterExists("accountNo")) {
-            final Long accountNo = this.fromApiJsonHelper.extractLongNamed("accountNo", jsonElement);
-            baseDataValidator.reset().parameter("accountNo").value(accountNo).notNull().positiveAmount();
+        if (command.parameterExists(ACCOUNT_NO)) {
+            final Long accountNo = this.fromApiJsonHelper.extractLongNamed(ACCOUNT_NO, jsonElement);
+            baseDataValidator.reset().parameter(ACCOUNT_NO).value(accountNo).notNull().positiveAmount();
         }
 
-        if (command.parameterExists("name")) {
-            final String name = this.fromApiJsonHelper.extractStringNamed("name", jsonElement);
-            baseDataValidator.reset().parameter("name").value(name).notNull();
+        if (command.parameterExists(NAME)) {
+            final String name = this.fromApiJsonHelper.extractStringNamed(NAME, jsonElement);
+            baseDataValidator.reset().parameter(NAME).value(name).notNull();
         }
 
         if (!dataValidationErrors.isEmpty()) {

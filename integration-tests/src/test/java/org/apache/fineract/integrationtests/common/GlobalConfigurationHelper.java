@@ -99,8 +99,8 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
         // There are currently 37 global configurations.
-        Assertions.assertEquals(41, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(41, actualGlobalConfigurations.size());
+        Assertions.assertEquals(44, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(44, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -463,6 +463,30 @@ public class GlobalConfigurationHelper {
         isReversalTransactionAllowed.put("enabled", false);
         isReversalTransactionAllowed.put("trapDoor", false);
         defaults.add(isReversalTransactionAllowed);
+
+        HashMap<String, Object> purgeExternalEventsOlderThanDaysDefault = new HashMap<>();
+        purgeExternalEventsOlderThanDaysDefault.put("id", 47);
+        purgeExternalEventsOlderThanDaysDefault.put("name", "purge-external-events-older-than-days");
+        purgeExternalEventsOlderThanDaysDefault.put("value", 30);
+        purgeExternalEventsOlderThanDaysDefault.put("enabled", false);
+        purgeExternalEventsOlderThanDaysDefault.put("trapDoor", false);
+        defaults.add(purgeExternalEventsOlderThanDaysDefault);
+
+        HashMap<String, Object> loanRepaymentDueDaysDefault = new HashMap<>();
+        loanRepaymentDueDaysDefault.put("id", 48);
+        loanRepaymentDueDaysDefault.put("name", "days-before-repayment-is-due");
+        loanRepaymentDueDaysDefault.put("value", 1);
+        loanRepaymentDueDaysDefault.put("enabled", false);
+        loanRepaymentDueDaysDefault.put("trapDoor", false);
+        defaults.add(loanRepaymentDueDaysDefault);
+
+        HashMap<String, Object> loanRepaymentOverdueDaysDefault = new HashMap<>();
+        loanRepaymentOverdueDaysDefault.put("id", 49);
+        loanRepaymentOverdueDaysDefault.put("name", "days-after-repayment-is-overdue");
+        loanRepaymentOverdueDaysDefault.put("value", 1);
+        loanRepaymentOverdueDaysDefault.put("enabled", false);
+        loanRepaymentOverdueDaysDefault.put("trapDoor", false);
+        defaults.add(loanRepaymentOverdueDaysDefault);
 
         return defaults;
     }

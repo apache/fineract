@@ -234,15 +234,15 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
             row = loanRepaymentSheet.createRow(rowIndex++);
             writeString(LoanRepaymentConstants.LOOKUP_CLIENT_NAME_COL, row, loan.getClientName() + "(" + loan.getClientId() + ")");
             writeString(LoanRepaymentConstants.LOOKUP_CLIENT_EXTERNAL_ID, row, clientIdToClientExternalId.get(loan.getClientId()));
-            writeString(LoanRepaymentConstants.LOOKUP_ACCOUNT_NO_COL, row, loan.getAccountNo() + "-" + loan.getStatusStringValue());
+            writeString(LoanRepaymentConstants.LOOKUP_ACCOUNT_NO_COL, row, loan.getAccountNo() + "-" + loan.getStatus().getValue());
             writeString(LoanRepaymentConstants.LOOKUP_PRODUCT_COL, row, loan.getLoanProductName());
             writeDouble(LoanRepaymentConstants.LOOKUP_PRINCIPAL_COL, row, loan.getPrincipal().doubleValue());
-            if (loan.getTotalOutstandingAmount() != null) {
-                writeBigDecimal(LoanRepaymentConstants.LOOKUP_TOTAL_OUTSTANDING_AMOUNT_COL, row, loan.getTotalOutstandingAmount());
+            if (loan.getSummary() != null && loan.getSummary().getTotalOutstanding() != null) {
+                writeBigDecimal(LoanRepaymentConstants.LOOKUP_TOTAL_OUTSTANDING_AMOUNT_COL, row, loan.getSummary().getTotalOutstanding());
             }
-            if (loan.getDisbursementDate() != null) {
-                writeDate(LoanRepaymentConstants.LOOKUP_LOAN_DISBURSEMENT_DATE_COL, row, outputFormat.format(loan.getDisbursementDate()),
-                        dateCellStyle, dateFormat);
+            if (loan.getTimeline() != null && loan.getTimeline().getDisbursementDate() != null) {
+                writeDate(LoanRepaymentConstants.LOOKUP_LOAN_DISBURSEMENT_DATE_COL, row,
+                        outputFormat.format(loan.getTimeline().getDisbursementDate()), dateCellStyle, dateFormat);
             }
         }
     }

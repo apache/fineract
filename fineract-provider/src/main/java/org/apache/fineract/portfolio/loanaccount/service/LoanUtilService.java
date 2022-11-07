@@ -321,9 +321,9 @@ public class LoanUtilService {
                     BigDecimal principal = null;
                     BigDecimal netDisbursalAmount = null;
 
-                    if (jsonObject.has(LoanApiConstants.disbursementDateParameterName)) {
-                        expectedDisbursementDate = this.fromApiJsonHelper
-                                .extractLocalDateNamed(LoanApiConstants.disbursementDateParameterName, jsonObject, dateFormat, locale);
+                    if (jsonObject.has(LoanApiConstants.expectedDisbursementDateParameterName)) {
+                        expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed(
+                                LoanApiConstants.expectedDisbursementDateParameterName, jsonObject, dateFormat, locale);
                     }
                     if (jsonObject.has(LoanApiConstants.disbursementPrincipalParameterName)
                             && jsonObject.get(LoanApiConstants.disbursementPrincipalParameterName).isJsonPrimitive()
@@ -337,9 +337,13 @@ public class LoanUtilService {
                         netDisbursalAmount = jsonObject.getAsJsonPrimitive(LoanApiConstants.disbursementNetDisbursalAmountParameterName)
                                 .getAsBigDecimal();
                     }
-
-                    disbursementDatas.add(
-                            new LoanDisbursementDetails(expectedDisbursementDate, actualDisbursementDate, principal, netDisbursalAmount));
+                    boolean isReversed = false;
+                    if (jsonObject.has(LoanApiConstants.disbursementReversedParameterName)) {
+                        isReversed = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.disbursementReversedParameterName,
+                                jsonObject);
+                    }
+                    disbursementDatas.add(new LoanDisbursementDetails(expectedDisbursementDate, actualDisbursementDate, principal,
+                            netDisbursalAmount, isReversed));
                     i++;
                 } while (i < disbursementDataArray.size());
             }

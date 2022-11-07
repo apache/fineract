@@ -18,27 +18,28 @@
  */
 package org.apache.fineract.infrastructure.gcm.domain;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.fineract.portfolio.client.data.ClientData;
 
-public final class DeviceRegistrationData {
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
+public class DeviceRegistrationData {
 
     public Long id;
     public ClientData clientData;
     public String registrationId;
-    public LocalDateTime updatedOnDate;
-
-    private DeviceRegistrationData(final Long id, final ClientData clientData, final String registrationId,
-            final LocalDateTime updatedOnDate) {
-        this.id = id;
-        this.clientData = clientData;
-        this.registrationId = registrationId;
-        this.updatedOnDate = updatedOnDate;
-    }
+    public OffsetDateTime updatedOnDate;
 
     public static DeviceRegistrationData instance(final Long id, final ClientData clientData, final String registrationId,
-            final LocalDateTime updatedOnDate) {
-        return new DeviceRegistrationData(id, clientData, registrationId, updatedOnDate);
+            final OffsetDateTime updatedOnDate) {
+        return new DeviceRegistrationData().setId(id).setClientData(clientData).setRegistrationId(registrationId)
+                .setUpdatedOnDate(updatedOnDate);
     }
 
 }

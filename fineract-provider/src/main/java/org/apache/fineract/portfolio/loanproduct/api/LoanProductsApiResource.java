@@ -65,6 +65,8 @@ import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformSer
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
+import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateData;
 import org.apache.fineract.portfolio.floatingrates.service.FloatingRatesReadPlatformService;
 import org.apache.fineract.portfolio.fund.data.FundData;
@@ -91,13 +93,13 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Loan Products", description = "A Loan product is a template that is used when creating a loan. Much of the template definition can be overridden during loan creation.")
 public class LoanProductsApiResource {
 
-    private final Set<String> loanProductDataParameters = new HashSet<>(Arrays.asList("id", "name", "shortName", "description", "fundId",
-            "fundName", "includeInBorrowerCycle", "currency", "principal", "minPrincipal", "maxPrincipal", "numberOfRepayments",
+    private static final Set<String> LOAN_PRODUCT_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "shortName", "description",
+            "fundId", "fundName", "includeInBorrowerCycle", "currency", "principal", "minPrincipal", "maxPrincipal", "numberOfRepayments",
             "minNumberOfRepayments", "maxNumberOfRepayments", "repaymentEvery", "repaymentFrequencyType", "graceOnPrincipalPayment",
             "recurringMoratoriumOnPrincipalPeriods", "graceOnInterestPayment", "graceOnInterestCharged", "interestRatePerPeriod",
             "minInterestRatePerPeriod", "maxInterestRatePerPeriod", "interestRateFrequencyType", "annualInterestRate", "amortizationType",
             "interestType", "interestCalculationPeriodType", LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME,
-            "inArrearsTolerance", "transactionProcessingStrategyId", "transactionProcessingStrategyName", "charges", "accountingRule",
+            "inArrearsTolerance", "transactionProcessingStrategyCode", "transactionProcessingStrategyName", "charges", "accountingRule",
             "externalId", "accountingMappings", "paymentChannelToFundSourceMappings", "fundOptions", "paymentTypeOptions",
             "currencyOptions", "repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "amortizationTypeOptions",
             "interestTypeOptions", "interestCalculationPeriodTypeOptions", "transactionProcessingStrategyOptions", "chargeOptions",
@@ -107,10 +109,12 @@ public class LoanProductsApiResource {
             LoanProductConstants.CAN_USE_FOR_TOPUP, LoanProductConstants.IS_EQUAL_AMORTIZATION_PARAM, LoanProductConstants.RATES_PARAM_NAME,
             LoanApiConstants.fixedPrincipalPercentagePerInstallmentParamName));
 
-    private final Set<String> productMixDataParameters = new HashSet<>(
+    private static final Set<String> PRODUCT_MIX_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList("productId", "productName", "restrictedProducts", "allowedProducts", "productOptions"));
 
-    private final String resourceNameForPermissions = "LOANPRODUCT";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "LOANPRODUCT";
+    public static final String PRODUCTMIX = "PRODUCTMIX";
+    public static final String PRODUCT_MIXES = "productMixes";
 
     private final PlatformSecurityContext context;
     private final LoanProductReadPlatformService loanProductReadPlatformService;
@@ -130,6 +134,7 @@ public class LoanProductsApiResource {
     private final FloatingRatesReadPlatformService floatingRateReadPlatformService;
     private final RateReadService rateReadService;
     private final ConfigurationDomainService configurationDomainService;
+    private final DelinquencyReadPlatformService delinquencyReadPlatformService;
 
     @Autowired
     public LoanProductsApiResource(final PlatformSecurityContext context, final LoanProductReadPlatformService readPlatformService,
@@ -145,7 +150,8 @@ public class LoanProductsApiResource {
             final DropdownReadPlatformService commonDropdownReadPlatformService,
             PaymentTypeReadPlatformService paymentTypeReadPlatformService,
             final FloatingRatesReadPlatformService floatingRateReadPlatformService, final RateReadService rateReadService,
-            final ConfigurationDomainService configurationDomainService) {
+            final ConfigurationDomainService configurationDomainService,
+            final DelinquencyReadPlatformService delinquencyReadPlatformService) {
         this.context = context;
         this.loanProductReadPlatformService = readPlatformService;
         this.chargeReadPlatformService = chargeReadPlatformService;
@@ -164,6 +170,7 @@ public class LoanProductsApiResource {
         this.floatingRateReadPlatformService = floatingRateReadPlatformService;
         this.rateReadService = rateReadService;
         this.configurationDomainService = configurationDomainService;
+        this.delinquencyReadPlatformService = delinquencyReadPlatformService;
     }
 
     @POST
@@ -171,7 +178,7 @@ public class LoanProductsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create a Loan Product", description = "Depending of the Accounting Rule (accountingRule) selected, additional fields with details of the appropriate Ledger Account identifiers would need to be passed in.\n"
             + "\n" + "Refer MifosX Accounting Specs Draft for more details regarding the significance of the selected accounting rule\n\n"
-            + "Mandatory Fields: name, shortName, currencyCode, digitsAfterDecimal, inMultiplesOf, principal, numberOfRepayments, repaymentEvery, repaymentFrequencyType, interestRatePerPeriod, interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType, transactionProcessingStrategyId, accountingRule, isInterestRecalculationEnabled, daysInYearType, daysInMonthType\n\n"
+            + "Mandatory Fields: name, shortName, currencyCode, digitsAfterDecimal, inMultiplesOf, principal, numberOfRepayments, repaymentEvery, repaymentFrequencyType, interestRatePerPeriod, interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType, transactionProcessingStrategyCode, accountingRule, isInterestRecalculationEnabled, daysInYearType, daysInMonthType\n\n"
             + "Optional Fields: inArrearsTolerance, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, graceOnArrearsAgeing, charges, paymentChannelToFundSourceMappings, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, includeInBorrowerCycle, useBorrowerCycle,principalVariationsForBorrowerCycle, numberOfRepaymentVariationsForBorrowerCycle, interestRateVariationsForBorrowerCycle, multiDisburseLoan,maxTrancheCount, outstandingLoanBalance,overdueDaysForNPA,holdGuaranteeFunds, principalThresholdForLastInstalment, accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineInstallmentAmount, installmentAmountInMultiplesOf, allowAttributeOverrides, allowPartialPeriodInterestCalcualtion\n\n"
             + "Additional Mandatory Fields for Cash(2) based accounting: fundSourceAccountId, loanPortfolioAccountId, interestOnLoanAccountId, incomeFromFeeAccountId, incomeFromPenaltyAccountId, writeOffAccountId, transfersInSuspenseAccountId, overpaymentLiabilityAccountId\n\n"
             + "Additional Mandatory Fields for periodic (3) and upfront (4)accrual accounting: fundSourceAccountId, loanPortfolioAccountId, interestOnLoanAccountId, incomeFromFeeAccountId, incomeFromPenaltyAccountId, writeOffAccountId, receivableInterestAccountId, receivableFeeAccountId, receivablePenaltyAccountId, transfersInSuspenseAccountId, overpaymentLiabilityAccountId\n\n"
@@ -203,21 +210,19 @@ public class LoanProductsApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = LoanProductsApiResourceSwagger.GetLoanProductsResponse.class)))) })
     public String retrieveAllLoanProducts(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        if (!associationParameters.isEmpty()) {
-            if (associationParameters.contains("productMixes")) {
-                this.context.authenticatedUser().validateHasReadPermission("PRODUCTMIX");
-                final Collection<ProductMixData> productMixes = this.productMixReadPlatformService.retrieveAllProductMixes();
-                return this.productMixDataApiJsonSerializer.serialize(settings, productMixes, this.productMixDataParameters);
-            }
+        if (!associationParameters.isEmpty() && associationParameters.contains(PRODUCT_MIXES)) {
+            this.context.authenticatedUser().validateHasReadPermission(PRODUCTMIX);
+            final Collection<ProductMixData> productMixes = this.productMixReadPlatformService.retrieveAllProductMixes();
+            return this.productMixDataApiJsonSerializer.serialize(settings, productMixes, PRODUCT_MIX_DATA_PARAMETERS);
         }
 
         final Collection<LoanProductData> products = this.loanProductReadPlatformService.retrieveAllLoanProducts();
 
-        return this.toApiJsonSerializer.serialize(settings, products, this.loanProductDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, products, LOAN_PRODUCT_DATA_PARAMETERS);
     }
 
     @GET
@@ -231,21 +236,21 @@ public class LoanProductsApiResource {
     public String retrieveTemplate(@Context final UriInfo uriInfo,
             @QueryParam("isProductMixTemplate") @Parameter(description = "isProductMixTemplate") final boolean isProductMixTemplate) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         if (isProductMixTemplate) {
-            this.context.authenticatedUser().validateHasReadPermission("PRODUCTMIX");
+            this.context.authenticatedUser().validateHasReadPermission(PRODUCTMIX);
 
             final Collection<LoanProductData> productOptions = this.loanProductReadPlatformService.retrieveAvailableLoanProductsForMix();
             final ProductMixData productMixData = ProductMixData.template(productOptions);
-            return this.productMixDataApiJsonSerializer.serialize(settings, productMixData, this.productMixDataParameters);
+            return this.productMixDataApiJsonSerializer.serialize(settings, productMixData, PRODUCT_MIX_DATA_PARAMETERS);
         }
 
         LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveNewLoanProductDetails();
         loanProduct = handleTemplate(loanProduct);
 
-        return this.toApiJsonSerializer.serialize(settings, loanProduct, this.loanProductDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, loanProduct, LOAN_PRODUCT_DATA_PARAMETERS);
     }
 
     @GET
@@ -260,19 +265,19 @@ public class LoanProductsApiResource {
     public String retrieveLoanProductDetails(@PathParam("productId") @Parameter(description = "productId") final Long productId,
             @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);
 
-        Map<String, Object> accountingMappings = null;
-        Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings = null;
-        Collection<ChargeToGLAccountMapper> feeToGLAccountMappings = null;
-        Collection<ChargeToGLAccountMapper> penaltyToGLAccountMappings = null;
+        Map<String, Object> accountingMappings;
+        Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings;
+        Collection<ChargeToGLAccountMapper> feeToGLAccountMappings;
+        Collection<ChargeToGLAccountMapper> penaltyToGLAccountMappings;
         if (loanProduct.hasAccountingEnabled()) {
             accountingMappings = this.accountMappingReadPlatformService.fetchAccountMappingDetailsForLoanProduct(productId,
-                    loanProduct.accountingRuleType().getId().intValue());
+                    loanProduct.getAccountingRule().getId().intValue());
             paymentChannelToFundSourceMappings = this.accountMappingReadPlatformService
                     .fetchPaymentTypeToFundSourceMappingsForLoanProduct(productId);
             feeToGLAccountMappings = this.accountMappingReadPlatformService.fetchFeeToGLAccountMappingsForLoanProduct(productId);
@@ -285,7 +290,7 @@ public class LoanProductsApiResource {
         if (settings.isTemplate()) {
             loanProduct = handleTemplate(loanProduct);
         }
-        return this.toApiJsonSerializer.serialize(settings, loanProduct, this.loanProductDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, loanProduct, LOAN_PRODUCT_DATA_PARAMETERS);
     }
 
     @PUT
@@ -339,8 +344,14 @@ public class LoanProductsApiResource {
         if (fundOptions.isEmpty()) {
             fundOptions = null;
         }
+
+        Collection<DelinquencyBucketData> delinquencyBucketOptions = this.delinquencyReadPlatformService.retrieveAllDelinquencyBuckets();
+        if (delinquencyBucketOptions.isEmpty()) {
+            delinquencyBucketOptions = null;
+        }
+
         final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions = this.dropdownReadPlatformService
-                .retreiveTransactionProcessingStrategies();
+                .retrieveTransactionProcessingStrategies();
 
         final Map<String, List<GLAccountData>> accountOptions = this.accountingDropdownReadPlatformService
                 .retrieveAccountMappingOptionsForLoanProducts();
@@ -363,7 +374,7 @@ public class LoanProductsApiResource {
         final List<EnumOptionData> interestRecalculationDayOfWeekTypeOptions = dropdownReadPlatformService
                 .retrieveInterestRecalculationDayOfWeekTypeOptions();
         final List<EnumOptionData> preCloseInterestCalculationStrategyOptions = dropdownReadPlatformService
-                .retrivePreCloseInterestCalculationStrategyOptions();
+                .retrievePreCloseInterestCalculationStrategyOptions();
         final List<FloatingRateData> floatingRateOptions = this.floatingRateReadPlatformService.retrieveLookupActive();
 
         return new LoanProductData(productData, chargeOptions, penaltyOptions, paymentTypeOptions, currencyOptions, amortizationTypeOptions,
@@ -372,7 +383,7 @@ public class LoanProductsApiResource {
                 loanCycleValueConditionTypeOptions, daysInMonthTypeOptions, daysInYearTypeOptions,
                 interestRecalculationCompoundingTypeOptions, rescheduleStrategyTypeOptions, interestRecalculationFrequencyTypeOptions,
                 preCloseInterestCalculationStrategyOptions, floatingRateOptions, interestRecalculationNthDayTypeOptions,
-                interestRecalculationDayOfWeekTypeOptions, isRatesEnabled);
+                interestRecalculationDayOfWeekTypeOptions, isRatesEnabled, delinquencyBucketOptions);
     }
 
 }

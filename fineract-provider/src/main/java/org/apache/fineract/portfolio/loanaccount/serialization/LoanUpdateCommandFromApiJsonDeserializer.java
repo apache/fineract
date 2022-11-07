@@ -37,10 +37,13 @@ import org.springframework.stereotype.Component;
 @Component
 public final class LoanUpdateCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<LoanUpdateCommand> {
 
+    public static final String UNASSIGNED_DATE = "unassignedDate";
+    public static final String LOCALE = "locale";
+    public static final String DATE_FORMAT = "dateFormat";
     /**
      * The parameters supported for this command.
      */
-    final Set<String> supportedParameters = new HashSet<>(Arrays.asList("unassignedDate", "locale", "dateFormat"));
+    private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList(UNASSIGNED_DATE, LOCALE, DATE_FORMAT));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -57,10 +60,10 @@ public final class LoanUpdateCommandFromApiJsonDeserializer extends AbstractFrom
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
-        final LocalDate unassignedDate = this.fromApiJsonHelper.extractLocalDateNamed("unassignedDate", element);
+        final LocalDate unassignedDate = this.fromApiJsonHelper.extractLocalDateNamed(UNASSIGNED_DATE, element);
 
         return new LoanUpdateCommand(unassignedDate);
     }

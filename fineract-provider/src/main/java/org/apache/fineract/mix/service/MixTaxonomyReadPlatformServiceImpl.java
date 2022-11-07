@@ -55,7 +55,8 @@ public class MixTaxonomyReadPlatformServiceImpl implements MixTaxonomyReadPlatfo
             final String dimension = rs.getString("dimension");
             final Integer type = rs.getInt("type");
             final String desc = rs.getString("description");
-            return new MixTaxonomyData(id, name, namespace, dimension, type, desc);
+            return new MixTaxonomyData().setId(id).setName(name).setNamespace(namespace).setDimension(dimension).setType(type)
+                    .setDescription(desc);
         }
 
     }

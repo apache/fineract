@@ -36,7 +36,7 @@ public final class ReportCommandFromApiJsonDeserializer {
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("reportName", "reportType", "reportSubType",
+    private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList("reportName", "reportType", "reportSubType",
             "reportCategory", "description", "reportSql", "useReport", "reportParameters"));
 
     private final FromJsonHelper fromApiJsonHelper;
@@ -53,6 +53,6 @@ public final class ReportCommandFromApiJsonDeserializer {
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
     }
 }

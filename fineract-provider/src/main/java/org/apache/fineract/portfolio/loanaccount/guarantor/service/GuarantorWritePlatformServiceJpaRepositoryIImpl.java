@@ -340,7 +340,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
     }
 
     private void validateLoanStatus(Loan loan) {
-        if (!loan.status().isActiveOrAwaitingApprovalOrDisbursal()) {
+        if (!loan.getStatus().isActiveOrAwaitingApprovalOrDisbursal()) {
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.guarantor");
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("loan.is.closed");

@@ -26,7 +26,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -56,19 +55,17 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class AccountTransfersReadPlatformServiceImpl implements AccountTransfersReadPlatformService {
 
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private final JdbcTemplate jdbcTemplate;
     private final ClientReadPlatformService clientReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
     private final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService;
     private final ColumnValidator columnValidator;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
-
     // mapper
     private final AccountTransfersMapper accountTransfersMapper;
-
     // pagination
     private final PaginationHelper paginationHelper;
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Autowired
     public AccountTransfersReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate,
@@ -136,12 +133,12 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             fromAccount = this.portfolioAccountReadPlatformService.retrieveOne(fromAccountId, accountType);
 
             // override provided fromClient with client of account
-            mostRelevantFromClientId = fromAccount.clientId();
+            mostRelevantFromClientId = fromAccount.getClientId();
         }
 
         if (mostRelevantFromClientId != null) {
             fromClient = this.clientReadPlatformService.retrieveOne(mostRelevantFromClientId);
-            mostRelevantFromOfficeId = fromClient.officeId();
+            mostRelevantFromOfficeId = fromClient.getOfficeId();
             long[] loanStatus = null;
             if (mostRelevantFromAccountType == 1) {
                 loanStatus = new long[] { 300, 700 };
@@ -166,13 +163,13 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
 
         if (toAccountId != null && fromAccount != null) {
             toAccount = this.portfolioAccountReadPlatformService.retrieveOne(toAccountId, mostRelevantToAccountType,
-                    fromAccount.currencyCode());
-            mostRelevantToClientId = toAccount.clientId();
+                    fromAccount.getCurrencyCode());
+            mostRelevantToClientId = toAccount.getClientId();
         }
 
         if (mostRelevantToClientId != null) {
             toClient = this.clientReadPlatformService.retrieveOne(mostRelevantToClientId);
-            mostRelevantToOfficeId = toClient.officeId();
+            mostRelevantToOfficeId = toClient.getOfficeId();
 
             toClientOptions = this.clientReadPlatformService.retrieveAllForLookupByOfficeId(mostRelevantToOfficeId);
 
@@ -199,7 +196,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
     private Collection<PortfolioAccountData> retrieveToAccounts(final PortfolioAccountData excludeThisAccountFromOptions,
             final Integer toAccountType, final Long toClientId) {
 
-        final String currencyCode = excludeThisAccountFromOptions != null ? excludeThisAccountFromOptions.currencyCode() : null;
+        final String currencyCode = excludeThisAccountFromOptions != null ? excludeThisAccountFromOptions.getCurrencyCode() : null;
 
         PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(toAccountType, toClientId, currencyCode, null, null);
         Collection<PortfolioAccountData> accountOptions = this.portfolioAccountReadPlatformService
@@ -260,20 +257,186 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
     public Collection<Long> fetchPostInterestTransactionIds(final Long accountId) {
         final String sql = "select att.from_savings_transaction_id from m_account_transfer_transaction att inner join m_account_transfer_details atd on atd.id = att.account_transfer_details_id where atd.from_savings_account_id=? and att.is_reversed = false and atd.transfer_type = ?";
 
-        final List<Long> transactionId = this.jdbcTemplate.queryForList(sql, Long.class, accountId,
-                AccountTransferType.INTEREST_TRANSFER.getValue());
-
-        return transactionId;
+        return this.jdbcTemplate.queryForList(sql, Long.class, accountId, AccountTransferType.INTEREST_TRANSFER.getValue());
     }
 
     @Override
     public Collection<Long> fetchPostInterestTransactionIdsWithPivotDate(final Long accountId, final LocalDate pivotDate) {
         final String sql = "select att.from_savings_transaction_id from m_account_transfer_transaction att inner join m_account_transfer_details atd on atd.id = att.account_transfer_details_id where atd.from_savings_account_id=? and att.is_reversed = false and atd.transfer_type = ? and att.transaction_date >= ?";
 
-        final List<Long> transactionIds = this.jdbcTemplate.queryForList(sql, Long.class, accountId,
-                AccountTransferType.INTEREST_TRANSFER.getValue(), pivotDate);
+        return this.jdbcTemplate.queryForList(sql, Long.class, accountId, AccountTransferType.INTEREST_TRANSFER.getValue(), pivotDate);
+    }
 
-        return transactionIds;
+    @Override
+    public boolean isAccountTransfer(final Long transactionId, final PortfolioAccountType accountType) {
+        final StringBuilder sql = new StringBuilder("select count(*) from m_account_transfer_transaction at where ");
+        if (accountType.isLoanAccount()) {
+            sql.append("at.from_loan_transaction_id=").append(transactionId).append(" or at.to_loan_transaction_id=").append(transactionId);
+        } else {
+            sql.append("at.from_savings_transaction_id=").append(transactionId).append(" or at.to_savings_transaction_id=")
+                    .append(transactionId);
+        }
+
+        final int count = this.jdbcTemplate.queryForObject(sql.toString(), Integer.class);
+        return count > 0;
+    }
+
+    @Override
+    public Page<AccountTransferData> retrieveByStandingInstruction(final Long id, final SearchParameters searchParameters) {
+
+        final StringBuilder sqlBuilder = new StringBuilder(200);
+        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
+        sqlBuilder.append(this.accountTransfersMapper.schema()).append(
+                " join m_account_transfer_standing_instructions atsi on atsi.account_transfer_details_id = att.account_transfer_details_id ");
+        sqlBuilder.append(" where atsi.id = ?");
+
+        if (searchParameters != null) {
+            if (searchParameters.isOrderByRequested()) {
+                sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
+                this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
+                if (searchParameters.isSortOrderProvided()) {
+                    sqlBuilder.append(' ').append(searchParameters.getSortOrder());
+                    this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
+                }
+            }
+
+            if (searchParameters.isLimited()) {
+                sqlBuilder.append(" ");
+                if (searchParameters.isOffset()) {
+                    sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
+                } else {
+                    sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
+                }
+            }
+        }
+
+        final Object[] finalObjectArray = { id };
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), finalObjectArray, this.accountTransfersMapper);
+    }
+
+    @Override
+    public AccountTransferData retrieveRefundByTransferTemplate(final Long fromOfficeId, final Long fromClientId, final Long fromAccountId,
+            final Integer fromAccountType, final Long toOfficeId, final Long toClientId, final Long toAccountId,
+            final Integer toAccountType) {
+        // TODO Auto-generated method stub
+        final EnumOptionData loanAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.LOAN);
+        final EnumOptionData savingsAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.SAVINGS);
+
+        final Integer mostRelevantFromAccountType = fromAccountType;
+        final Collection<EnumOptionData> fromAccountTypeOptions = Arrays.asList(savingsAccountType, loanAccountType);
+        final Collection<EnumOptionData> toAccountTypeOptions;
+        if (mostRelevantFromAccountType == 1) {
+            // overpaid loan amt transfer to savings account
+            toAccountTypeOptions = Arrays.asList(savingsAccountType);
+        } else {
+            toAccountTypeOptions = Arrays.asList(loanAccountType, savingsAccountType);
+        }
+        final Integer mostRelevantToAccountType = toAccountType;
+
+        final EnumOptionData fromAccountTypeData = AccountTransferEnumerations.accountType(mostRelevantFromAccountType);
+        final EnumOptionData toAccountTypeData = AccountTransferEnumerations.accountType(mostRelevantToAccountType);
+
+        // from settings
+        OfficeData fromOffice = null;
+        ClientData fromClient = null;
+        PortfolioAccountData fromAccount = null;
+
+        OfficeData toOffice = null;
+        ClientData toClient = null;
+        PortfolioAccountData toAccount = null;
+
+        // template
+        Collection<PortfolioAccountData> fromAccountOptions = null;
+        Collection<PortfolioAccountData> toAccountOptions = null;
+
+        Long mostRelevantFromOfficeId = fromOfficeId;
+        Long mostRelevantFromClientId = fromClientId;
+
+        Long mostRelevantToOfficeId = toOfficeId;
+        Long mostRelevantToClientId = toClientId;
+
+        if (fromAccountId != null) {
+            Integer accountType;
+            if (mostRelevantFromAccountType == 1) {
+                accountType = PortfolioAccountType.LOAN.getValue();
+            } else {
+                accountType = PortfolioAccountType.SAVINGS.getValue();
+            }
+            fromAccount = this.portfolioAccountReadPlatformService.retrieveOneByPaidInAdvance(fromAccountId, accountType);
+
+            // override provided fromClient with client of account
+            mostRelevantFromClientId = fromAccount.getClientId();
+        }
+
+        if (mostRelevantFromClientId != null) {
+            fromClient = this.clientReadPlatformService.retrieveOne(mostRelevantFromClientId);
+            mostRelevantFromOfficeId = fromClient.getOfficeId();
+            long[] loanStatus = null;
+            if (mostRelevantFromAccountType == 1) {
+                loanStatus = new long[] { 300, 700 };
+            }
+            PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(mostRelevantFromAccountType, mostRelevantFromClientId,
+                    loanStatus);
+            fromAccountOptions = this.portfolioAccountReadPlatformService.retrieveAllForLookup(portfolioAccountDTO);
+        }
+
+        Collection<OfficeData> fromOfficeOptions = null;
+        Collection<ClientData> fromClientOptions = null;
+        if (mostRelevantFromOfficeId != null) {
+            fromOffice = this.officeReadPlatformService.retrieveOffice(mostRelevantFromOfficeId);
+            fromOfficeOptions = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
+            fromClientOptions = this.clientReadPlatformService.retrieveAllForLookupByOfficeId(mostRelevantFromOfficeId);
+        }
+
+        // defaults
+        final LocalDate transferDate = DateUtils.getBusinessLocalDate();
+        Collection<OfficeData> toOfficeOptions = fromOfficeOptions;
+        Collection<ClientData> toClientOptions = null;
+
+        if (toAccountId != null && fromAccount != null) {
+            toAccount = this.portfolioAccountReadPlatformService.retrieveOne(toAccountId, mostRelevantToAccountType,
+                    fromAccount.getCurrencyCode());
+            mostRelevantToClientId = toAccount.getClientId();
+        }
+
+        if (mostRelevantToClientId != null) {
+            toClient = this.clientReadPlatformService.retrieveOne(mostRelevantToClientId);
+            mostRelevantToOfficeId = toClient.getOfficeId();
+
+            toClientOptions = this.clientReadPlatformService.retrieveAllForLookupByOfficeId(mostRelevantToOfficeId);
+
+            toAccountOptions = retrieveToAccounts(fromAccount, mostRelevantToAccountType, mostRelevantToClientId);
+        }
+
+        if (mostRelevantToOfficeId != null) {
+            toOffice = this.officeReadPlatformService.retrieveOffice(mostRelevantToOfficeId);
+            toOfficeOptions = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
+
+            toClientOptions = this.clientReadPlatformService.retrieveAllForLookupByOfficeId(mostRelevantToOfficeId);
+            if (toClientOptions != null && toClientOptions.size() == 1) {
+                toClient = new ArrayList<>(toClientOptions).get(0);
+
+                toAccountOptions = retrieveToAccounts(fromAccount, mostRelevantToAccountType, mostRelevantToClientId);
+            }
+        }
+
+        return AccountTransferData.template(fromOffice, fromClient, fromAccountTypeData, fromAccount, transferDate, toOffice, toClient,
+                toAccountTypeData, toAccount, fromOfficeOptions, fromClientOptions, fromAccountTypeOptions, fromAccountOptions,
+                toOfficeOptions, toClientOptions, toAccountTypeOptions, toAccountOptions);
+    }
+
+    @Override
+    public BigDecimal getTotalTransactionAmount(Long accountId, Integer accountType, LocalDate transactionDate) {
+        StringBuilder sqlBuilder = new StringBuilder(" select sum(trans.amount) as totalTransactionAmount ");
+        sqlBuilder.append(" from m_account_transfer_details as det ");
+        sqlBuilder.append(" inner join m_account_transfer_transaction as trans ");
+        sqlBuilder.append(" on det.id = trans.account_transfer_details_id ");
+        sqlBuilder.append(" where trans.is_reversed = false ");
+        sqlBuilder.append(" and trans.transaction_date = ? ");
+        sqlBuilder.append(" and IF(1=?, det.from_loan_account_id = ?, det.from_savings_account_id = ?) ");
+
+        return this.jdbcTemplate.queryForObject(sqlBuilder.toString(), BigDecimal.class, DATE_TIME_FORMATTER.format(transactionDate),
+                accountType, accountId, accountId);
     }
 
     private static final class AccountTransfersMapper implements RowMapper<AccountTransferData> {
@@ -391,178 +554,6 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             return AccountTransferData.instance(id, reversed, transferDate, currency, transferAmount, transferDescription, fromOffice,
                     toOffice, fromClient, toClient, fromAccountType, fromAccount, toAccountType, toAccount);
         }
-    }
-
-    @Override
-    public boolean isAccountTransfer(final Long transactionId, final PortfolioAccountType accountType) {
-        final StringBuilder sql = new StringBuilder("select count(*) from m_account_transfer_transaction at where ");
-        if (accountType.isLoanAccount()) {
-            sql.append("at.from_loan_transaction_id=").append(transactionId).append(" or at.to_loan_transaction_id=").append(transactionId);
-        } else {
-            sql.append("at.from_savings_transaction_id=").append(transactionId).append(" or at.to_savings_transaction_id=")
-                    .append(transactionId);
-        }
-
-        final int count = this.jdbcTemplate.queryForObject(sql.toString(), Integer.class);
-        return count > 0;
-    }
-
-    @Override
-    public Page<AccountTransferData> retrieveByStandingInstruction(final Long id, final SearchParameters searchParameters) {
-
-        final StringBuilder sqlBuilder = new StringBuilder(200);
-        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
-        sqlBuilder.append(this.accountTransfersMapper.schema()).append(
-                " join m_account_transfer_standing_instructions atsi on atsi.account_transfer_details_id = att.account_transfer_details_id ");
-        sqlBuilder.append(" where atsi.id = ?");
-
-        if (searchParameters != null) {
-            if (searchParameters.isOrderByRequested()) {
-                sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
-                this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
-                if (searchParameters.isSortOrderProvided()) {
-                    sqlBuilder.append(' ').append(searchParameters.getSortOrder());
-                    this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
-                }
-            }
-
-            if (searchParameters.isLimited()) {
-                sqlBuilder.append(" ");
-                if (searchParameters.isOffset()) {
-                    sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
-                } else {
-                    sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
-                }
-            }
-        }
-
-        final Object[] finalObjectArray = { id };
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), finalObjectArray, this.accountTransfersMapper);
-    }
-
-    @Override
-    public AccountTransferData retrieveRefundByTransferTemplate(final Long fromOfficeId, final Long fromClientId, final Long fromAccountId,
-            final Integer fromAccountType, final Long toOfficeId, final Long toClientId, final Long toAccountId,
-            final Integer toAccountType) {
-        // TODO Auto-generated method stub
-        final EnumOptionData loanAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.LOAN);
-        final EnumOptionData savingsAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.SAVINGS);
-
-        final Integer mostRelevantFromAccountType = fromAccountType;
-        final Collection<EnumOptionData> fromAccountTypeOptions = Arrays.asList(savingsAccountType, loanAccountType);
-        final Collection<EnumOptionData> toAccountTypeOptions;
-        if (mostRelevantFromAccountType == 1) {
-            // overpaid loan amt transfer to savings account
-            toAccountTypeOptions = Arrays.asList(savingsAccountType);
-        } else {
-            toAccountTypeOptions = Arrays.asList(loanAccountType, savingsAccountType);
-        }
-        final Integer mostRelevantToAccountType = toAccountType;
-
-        final EnumOptionData fromAccountTypeData = AccountTransferEnumerations.accountType(mostRelevantFromAccountType);
-        final EnumOptionData toAccountTypeData = AccountTransferEnumerations.accountType(mostRelevantToAccountType);
-
-        // from settings
-        OfficeData fromOffice = null;
-        ClientData fromClient = null;
-        PortfolioAccountData fromAccount = null;
-
-        OfficeData toOffice = null;
-        ClientData toClient = null;
-        PortfolioAccountData toAccount = null;
-
-        // template
-        Collection<PortfolioAccountData> fromAccountOptions = null;
-        Collection<PortfolioAccountData> toAccountOptions = null;
-
-        Long mostRelevantFromOfficeId = fromOfficeId;
-        Long mostRelevantFromClientId = fromClientId;
-
-        Long mostRelevantToOfficeId = toOfficeId;
-        Long mostRelevantToClientId = toClientId;
-
-        if (fromAccountId != null) {
-            Integer accountType;
-            if (mostRelevantFromAccountType == 1) {
-                accountType = PortfolioAccountType.LOAN.getValue();
-            } else {
-                accountType = PortfolioAccountType.SAVINGS.getValue();
-            }
-            fromAccount = this.portfolioAccountReadPlatformService.retrieveOneByPaidInAdvance(fromAccountId, accountType);
-
-            // override provided fromClient with client of account
-            mostRelevantFromClientId = fromAccount.clientId();
-        }
-
-        if (mostRelevantFromClientId != null) {
-            fromClient = this.clientReadPlatformService.retrieveOne(mostRelevantFromClientId);
-            mostRelevantFromOfficeId = fromClient.officeId();
-            long[] loanStatus = null;
-            if (mostRelevantFromAccountType == 1) {
-                loanStatus = new long[] { 300, 700 };
-            }
-            PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(mostRelevantFromAccountType, mostRelevantFromClientId,
-                    loanStatus);
-            fromAccountOptions = this.portfolioAccountReadPlatformService.retrieveAllForLookup(portfolioAccountDTO);
-        }
-
-        Collection<OfficeData> fromOfficeOptions = null;
-        Collection<ClientData> fromClientOptions = null;
-        if (mostRelevantFromOfficeId != null) {
-            fromOffice = this.officeReadPlatformService.retrieveOffice(mostRelevantFromOfficeId);
-            fromOfficeOptions = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
-            fromClientOptions = this.clientReadPlatformService.retrieveAllForLookupByOfficeId(mostRelevantFromOfficeId);
-        }
-
-        // defaults
-        final LocalDate transferDate = DateUtils.getBusinessLocalDate();
-        Collection<OfficeData> toOfficeOptions = fromOfficeOptions;
-        Collection<ClientData> toClientOptions = null;
-
-        if (toAccountId != null && fromAccount != null) {
-            toAccount = this.portfolioAccountReadPlatformService.retrieveOne(toAccountId, mostRelevantToAccountType,
-                    fromAccount.currencyCode());
-            mostRelevantToClientId = toAccount.clientId();
-        }
-
-        if (mostRelevantToClientId != null) {
-            toClient = this.clientReadPlatformService.retrieveOne(mostRelevantToClientId);
-            mostRelevantToOfficeId = toClient.officeId();
-
-            toClientOptions = this.clientReadPlatformService.retrieveAllForLookupByOfficeId(mostRelevantToOfficeId);
-
-            toAccountOptions = retrieveToAccounts(fromAccount, mostRelevantToAccountType, mostRelevantToClientId);
-        }
-
-        if (mostRelevantToOfficeId != null) {
-            toOffice = this.officeReadPlatformService.retrieveOffice(mostRelevantToOfficeId);
-            toOfficeOptions = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
-
-            toClientOptions = this.clientReadPlatformService.retrieveAllForLookupByOfficeId(mostRelevantToOfficeId);
-            if (toClientOptions != null && toClientOptions.size() == 1) {
-                toClient = new ArrayList<>(toClientOptions).get(0);
-
-                toAccountOptions = retrieveToAccounts(fromAccount, mostRelevantToAccountType, mostRelevantToClientId);
-            }
-        }
-
-        return AccountTransferData.template(fromOffice, fromClient, fromAccountTypeData, fromAccount, transferDate, toOffice, toClient,
-                toAccountTypeData, toAccount, fromOfficeOptions, fromClientOptions, fromAccountTypeOptions, fromAccountOptions,
-                toOfficeOptions, toClientOptions, toAccountTypeOptions, toAccountOptions);
-    }
-
-    @Override
-    public BigDecimal getTotalTransactionAmount(Long accountId, Integer accountType, LocalDate transactionDate) {
-        StringBuilder sqlBuilder = new StringBuilder(" select sum(trans.amount) as totalTransactionAmount ");
-        sqlBuilder.append(" from m_account_transfer_details as det ");
-        sqlBuilder.append(" inner join m_account_transfer_transaction as trans ");
-        sqlBuilder.append(" on det.id = trans.account_transfer_details_id ");
-        sqlBuilder.append(" where trans.is_reversed = false ");
-        sqlBuilder.append(" and trans.transaction_date = ? ");
-        sqlBuilder.append(" and IF(1=?, det.from_loan_account_id = ?, det.from_savings_account_id = ?) ");
-
-        return this.jdbcTemplate.queryForObject(sqlBuilder.toString(), BigDecimal.class, this.formatter.format(transactionDate),
-                accountType, accountId, accountId);
     }
 
 }

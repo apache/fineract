@@ -34,7 +34,6 @@ import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.SavingsAccountTransactionEnumValueSerialiser;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
@@ -51,11 +50,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class SavingsTransactionImportHandler implements ImportHandler {
 
+    public static final String TRANSACTION_TYPE = "transactionType";
+    public static final String REVERSED = "reversed";
+    public static final String INTERESTED_POSTED_AS_ON = "interestedPostedAsOn";
+    public static final String WITHDRAWAL = "Withdrawal";
+    public static final String DEPOSIT = "Deposit";
     private static final Logger LOG = LoggerFactory.getLogger(SavingsTransactionImportHandler.class);
-    private Workbook workbook;
-    private List<SavingsAccountTransactionData> savingsTransactions;
-    private String savingsAccountId = "";
-
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
@@ -64,30 +64,30 @@ public class SavingsTransactionImportHandler implements ImportHandler {
     }
 
     @Override
-    public Count process(Workbook workbook, String locale, String dateFormat) {
-        this.workbook = workbook;
-        this.savingsTransactions = new ArrayList<>();
-        readExcelFile(locale, dateFormat);
-        return importEntity(dateFormat);
+    public Count process(final Workbook workbook, final String locale, final String dateFormat) {
+        List<SavingsAccountTransactionData> savingsTransactions = readExcelFile(workbook, locale, dateFormat);
+        return importEntity(workbook, savingsTransactions, dateFormat);
     }
 
-    public void readExcelFile(String locale, String dateFormat) {
+    private List<SavingsAccountTransactionData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
+        List<SavingsAccountTransactionData> savingsTransactions = new ArrayList<>();
         Sheet savingsTransactionSheet = workbook.getSheet(TemplatePopulateImportConstants.SAVINGS_TRANSACTION_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(savingsTransactionSheet, TransactionConstants.AMOUNT_COL);
+        Long savingsAccountId = null;
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = savingsTransactionSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, TransactionConstants.STATUS_COL)) {
-                savingsTransactions.add(readSavingsTransaction(row, locale, dateFormat));
+                savingsTransactions.add(readSavingsTransaction(workbook, row, savingsAccountId, locale, dateFormat));
             }
         }
+        return savingsTransactions;
     }
 
-    private SavingsAccountTransactionData readSavingsTransaction(Row row, String locale, String dateFormat) {
-        String savingsAccountIdCheck = null;
-        if (ImportHandlerUtils.readAsLong(TransactionConstants.SAVINGS_ACCOUNT_NO_COL, row) != null) {
-            savingsAccountIdCheck = ImportHandlerUtils.readAsLong(TransactionConstants.SAVINGS_ACCOUNT_NO_COL, row).toString();
-        }
+    private SavingsAccountTransactionData readSavingsTransaction(final Workbook workbook, final Row row, Long savingsAccountId,
+            final String locale, final String dateFormat) {
+        Long savingsAccountIdCheck = ImportHandlerUtils.readAsLong(TransactionConstants.SAVINGS_ACCOUNT_NO_COL, row);
+
         if (savingsAccountIdCheck != null) {
             savingsAccountId = savingsAccountIdCheck;
         }
@@ -110,12 +110,12 @@ public class SavingsTransactionImportHandler implements ImportHandler {
         String receiptNumber = ImportHandlerUtils.readAsString(TransactionConstants.RECEIPT_NO_COL, row);
         String bankNumber = ImportHandlerUtils.readAsString(TransactionConstants.BANK_NO_COL, row);
         return SavingsAccountTransactionData.importInstance(amount, transactionDate, paymentTypeId, accountNumber, checkNumber, routingCode,
-                receiptNumber, bankNumber, Long.parseLong(savingsAccountId), savingsAccountTransactionEnumData, row.getRowNum(), locale,
-                dateFormat);
+                receiptNumber, bankNumber, savingsAccountId, savingsAccountTransactionEnumData, row.getRowNum(), locale, dateFormat);
 
     }
 
-    public Count importEntity(String dateFormat) {
+    private Count importEntity(final Workbook workbook, final List<SavingsAccountTransactionData> savingsTransactions,
+            final String dateFormat) {
         Sheet savingsTransactionSheet = workbook.getSheet(TemplatePopulateImportConstants.SAVINGS_TRANSACTION_SHEET_NAME);
         int successCount = 0;
         int errorCount = 0;
@@ -127,24 +127,24 @@ public class SavingsTransactionImportHandler implements ImportHandler {
         for (SavingsAccountTransactionData transaction : savingsTransactions) {
             try {
                 JsonObject savingsTransactionJsonob = gsonBuilder.create().toJsonTree(transaction).getAsJsonObject();
-                savingsTransactionJsonob.remove("transactionType");
-                savingsTransactionJsonob.remove("reversed");
-                savingsTransactionJsonob.remove("interestedPostedAsOn");
+                savingsTransactionJsonob.remove(TRANSACTION_TYPE);
+                savingsTransactionJsonob.remove(REVERSED);
+                savingsTransactionJsonob.remove(INTERESTED_POSTED_AS_ON);
                 String payload = savingsTransactionJsonob.toString();
                 CommandWrapper commandRequest = null;
-                if (transaction.getTransactionType().getValue().equals("Withdrawal")) {
+                if (transaction.getTransactionType().getValue().equals(WITHDRAWAL)) {
                     commandRequest = new CommandWrapperBuilder() //
                             .savingsAccountWithdrawal(transaction.getSavingsAccountId()) //
                             .withJson(payload) //
                             .build(); //
 
-                } else if (transaction.getTransactionType().getValue().equals("Deposit")) {
+                } else if (transaction.getTransactionType().getValue().equals(DEPOSIT)) {
                     commandRequest = new CommandWrapperBuilder() //
                             .savingsAccountDeposit(transaction.getSavingsAccountId()) //
                             .withJson(payload) //
                             .build();
                 }
-                final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+                commandsSourceWritePlatformService.logCommandSource(commandRequest);
                 successCount++;
                 Cell statusCell = savingsTransactionSheet.getRow(transaction.getRowIndex()).createCell(TransactionConstants.STATUS_COL);
                 statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);

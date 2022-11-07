@@ -53,7 +53,7 @@ public class SelfUserApiResource {
     private final UsersApiResource usersApiResource;
     private final PlatformSecurityContext context;
     private final FromJsonHelper fromApiJsonHelper;
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("password", "repeatPassword"));
+    private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList("password", "repeatPassword"));
 
     @Autowired
     public SelfUserApiResource(final UsersApiResource usersApiResource, final PlatformSecurityContext context,
@@ -75,7 +75,7 @@ public class SelfUserApiResource {
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, apiRequestBodyAsJson, this.supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, apiRequestBodyAsJson, SUPPORTED_PARAMETERS);
 
         final AppUser appUser = this.context.authenticatedUser();
         return this.usersApiResource.update(appUser.getId(), apiRequestBodyAsJson);

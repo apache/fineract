@@ -23,13 +23,19 @@ public interface LoanApiConstants {
     String emiAmountParameterName = "fixedEmiAmount";
     String maxOutstandingBalanceParameterName = "maxOutstandingLoanBalance";
     String disbursementDataParameterName = "disbursementData";
-    String disbursementDateParameterName = "expectedDisbursementDate";
+    String expectedDisbursementDateParameterName = "expectedDisbursementDate";
     String disbursementPrincipalParameterName = "principal";
+    String principalParameterName = "principal";
+    String disbursementReversedParameterName = "reversed";
     String disbursementNetDisbursalAmountParameterName = "netDisbursalAmount";
     String updatedDisbursementDateParameterName = "updatedExpectedDisbursementDate";
     String updatedDisbursementPrincipalParameterName = "updatedPrincipal";
     String disbursementIdParameterName = "id";
     String loanChargeIdParameterName = "loanChargeId";
+    String chargeIdParameterName = "chargeId";
+    String amountParameterName = "amount";
+    String chargeTimeTypeParameterName = "chargeTimeType";
+    String chargeCalculationTypeParameterName = "chargeCalculationType";
     String principalDisbursedParameterName = "transactionAmount";
     String chargesParameterName = "charges";
     String loanIdTobeApproved = "loanId";
@@ -43,7 +49,7 @@ public interface LoanApiConstants {
     String rejectedOnDateParameterName = "rejectedOnDate";
     String withdrawnOnDateParameterName = "withdrawnOnDate";
 
-    String transactionProcessingStrategyIdParameterName = "transactionProcessingStrategyId";
+    String transactionProcessingStrategyCodeParameterName = "transactionProcessingStrategyCode";
     String loanPurposeIdParameterName = "loanPurposeId";
     String loanOfficerIdParameterName = "loanOfficerId";
     String fundIdParameterName = "fundId";
@@ -63,6 +69,7 @@ public interface LoanApiConstants {
     String interestCalculationPeriodTypeParameterName = "interestCalculationPeriodType";
     String interestTypeParameterName = "interestType";
     String amortizationTypeParameterName = "amortizationType";
+    String amortizationTypeOptionsParameterName = "amortizationTypeOptions";
     String repaymentFrequencyTypeParameterName = "repaymentFrequencyType";
     String loanTermFrequencyTypeParameterName = "loanTermFrequencyType";
     String loanTermFrequencyParameterName = "loanTermFrequency";
@@ -72,8 +79,12 @@ public interface LoanApiConstants {
     String inArrearsToleranceParameterName = "inArrearsTolerance";
     String interestChargedFromDateParameterName = "interestChargedFromDate";
     String submittedOnDateParameterName = "submittedOnDate";
-    String submittedOnNoteParameterName = "interestChargedFromDate";
+    String submittedOnNoteParameterName = "submittedOnNote";
     String collateralParameterName = "collateral";
+    String collateralsParameterName = "collaterals";
+    String clientCollateralIdParameterName = "clientCollateralId";
+
+    String quantityParameterName = "quantity";
     String syncDisbursementWithMeetingParameterName = "syncDisbursementWithMeeting";
     String linkAccountIdParameterName = "linkAccountId";
     String createStandingInstructionAtDisbursementParameterName = "createStandingInstructionAtDisbursement";
@@ -142,4 +153,21 @@ public interface LoanApiConstants {
     String fixedPrincipalPercentagePerInstallmentParamName = "fixedPrincipalPercentagePerInstallment";
 
     String LOAN_ASSOCIATIONS_ALL = "all";
+
+    // Reversal Transation Data
+    String REVERSAL_EXTERNAL_ID_PARAMNAME = "reversalExternalId";
+    String REVERSED_ON_DATE_PARAMNAME = "reversedOnDate";
+
+    String DISALLOW_EXPECTED_DISBURSEMENTS = "disallowExpectedDisbursements";
+
+    String TRANSACTION_AMOUNT_PARAMNAME = "transactionAmount";
+    String PAYMENT_TYPE_PARAMNAME = "paymentTypeId";
+    String FRAUD_ATTRIBUTE_NAME = "fraud";
+
+    // Commands
+    String CHARGEBACK_TRANSACTION_COMMAND = "chargeback";
+    String MARK_AS_FRAUD_COMMAND = "markAsFraud";
+
+    // Data Validator names
+    String LOAN_FRAUD_DATAVALIDATOR_PREFIX = "loans.fraud";
 }

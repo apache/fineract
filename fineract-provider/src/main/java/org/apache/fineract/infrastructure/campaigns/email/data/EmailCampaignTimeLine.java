@@ -19,23 +19,20 @@
 package org.apache.fineract.infrastructure.campaigns.email.data;
 
 import java.time.LocalDate;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class EmailCampaignTimeLine {
 
-    private final LocalDate submittedOnDate;
-    private final String submittedByUsername;
-    private final LocalDate activatedOnDate;
-    private final String activatedByUsername;
-    private final LocalDate closedOnDate;
-    private final String closedByUsername;
+    private LocalDate submittedOnDate;
+    private String submittedByUsername;
+    private LocalDate activatedOnDate;
+    private String activatedByUsername;
+    private LocalDate closedOnDate;
+    private String closedByUsername;
 
-    public EmailCampaignTimeLine(final LocalDate submittedOnDate, final String submittedByUsername, final LocalDate activatedOnDate,
-            final String activatedByUsername, final LocalDate closedOnDate, final String closedByUsername) {
-        this.submittedOnDate = submittedOnDate;
-        this.submittedByUsername = submittedByUsername;
-        this.activatedOnDate = activatedOnDate;
-        this.activatedByUsername = activatedByUsername;
-        this.closedOnDate = closedOnDate;
-        this.closedByUsername = closedByUsername;
-    }
 }

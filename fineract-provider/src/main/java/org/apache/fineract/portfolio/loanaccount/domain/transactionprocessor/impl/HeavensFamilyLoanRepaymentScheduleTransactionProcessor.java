@@ -41,6 +41,20 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Loa
 @SuppressWarnings("unused")
 public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends AbstractLoanRepaymentScheduleTransactionProcessor {
 
+    private static final String STRATEGY_CODE = "heavensfamily-strategy";
+
+    private static final String STRATEGY_NAME = "HeavensFamily Unique";
+
+    @Override
+    public String getCode() {
+        return STRATEGY_CODE;
+    }
+
+    @Override
+    public String getName() {
+        return STRATEGY_NAME;
+    }
+
     /**
      * For late repayments, pay off in the same way as on-time payments, interest first then principal.
      */

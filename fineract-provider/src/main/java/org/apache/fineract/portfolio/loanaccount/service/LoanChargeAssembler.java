@@ -149,7 +149,8 @@ public class LoanChargeAssembler {
                                 if (disbursementArray.size() > 0) {
                                     JsonObject disbursementDataElement = disbursementArray.get(0).getAsJsonObject();
                                     expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed(
-                                            LoanApiConstants.disbursementDateParameterName, disbursementDataElement, dateFormat, locale);
+                                            LoanApiConstants.expectedDisbursementDateParameterName, disbursementDataElement, dateFormat,
+                                            locale);
                                 }
                             }
 

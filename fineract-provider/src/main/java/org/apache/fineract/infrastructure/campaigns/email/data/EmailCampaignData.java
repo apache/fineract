@@ -20,130 +20,59 @@ package org.apache.fineract.infrastructure.campaigns.email.data;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class EmailCampaignData {
 
     @SuppressWarnings("unused")
     private Long id;
     @SuppressWarnings("unused")
-    private final String campaignName;
+    private String campaignName;
     @SuppressWarnings("unused")
-    private final Integer campaignType;
+    private Integer campaignType;
     @SuppressWarnings("unused")
-    private final Long businessRuleId;
+    private Long businessRuleId;
     @SuppressWarnings("unused")
-    private final String paramValue;
+    private String paramValue;
     @SuppressWarnings("unused")
-    private final EnumOptionData campaignStatus;
+    private EnumOptionData campaignStatus;
     @SuppressWarnings("unused")
-    private final String emailSubject;
+    private String emailSubject;
     @SuppressWarnings("unused")
-    private final String emailMessage;
+    private String emailMessage;
     @SuppressWarnings("unused")
-    private final String emailAttachmentFileFormat;
+    private String emailAttachmentFileFormat;
     @SuppressWarnings("unused")
-    private final Long stretchyReportId;
+    private Long stretchyReportId;
     @SuppressWarnings("unused")
-    private final String stretchyReportParamMap;
+    private String stretchyReportParamMap;
     @SuppressWarnings("unused")
-    private final ZonedDateTime nextTriggerDate;
+    private ZonedDateTime nextTriggerDate;
     @SuppressWarnings("unused")
-    private final LocalDate lastTriggerDate;
+    private LocalDate lastTriggerDate;
     @SuppressWarnings("unused")
-    private final EmailCampaignTimeLine emailCampaignTimeLine;
+    private EmailCampaignTimeLine emailCampaignTimeLine;
 
     @SuppressWarnings("unused")
-    private final ZonedDateTime recurrenceStartDate;
+    private ZonedDateTime recurrenceStartDate;
 
-    private final String recurrence;
+    private String recurrence;
 
-    private EmailCampaignData(final Long id, final String campaignName, final Integer campaignType, final Long businessRuleId,
-            final String paramValue, final EnumOptionData campaignStatus, final String emailSubject, final String message,
-            final String emailAttachmentFileFormat, final Long stretchyReportId, final String stretchyReportParamMap,
+    public static EmailCampaignData instance(final Long id, final String campaignName, final Integer campaignType,
+            final Long businessRuleId, final String paramValue, final EnumOptionData campaignStatus, final String emailSubject,
+            final String message, final String emailAttachmentFileFormat, final Long stretchyReportId, final String stretchyReportParamMap,
             final ZonedDateTime nextTriggerDate, final LocalDate lastTriggerDate, final EmailCampaignTimeLine emailCampaignTimeLine,
             final ZonedDateTime recurrenceStartDate, final String recurrence) {
-        this.id = id;
-        this.campaignName = campaignName;
-        this.campaignType = campaignType;
-        this.businessRuleId = businessRuleId;
-        this.paramValue = paramValue;
-        this.campaignStatus = campaignStatus;
-        this.emailSubject = emailSubject;
-        this.emailMessage = message;
-        this.emailAttachmentFileFormat = emailAttachmentFileFormat;
-        this.stretchyReportId = stretchyReportId;
-        this.stretchyReportParamMap = stretchyReportParamMap;
-        if (nextTriggerDate != null) {
-            this.nextTriggerDate = nextTriggerDate;
-        } else {
-            this.nextTriggerDate = null;
-        }
-        if (lastTriggerDate != null) {
-            this.lastTriggerDate = lastTriggerDate;
-        } else {
-            this.lastTriggerDate = null;
-        }
-        this.emailCampaignTimeLine = emailCampaignTimeLine;
-        this.recurrenceStartDate = recurrenceStartDate;
-        this.recurrence = recurrence;
-    }
-
-    public static EmailCampaignData instance(final Long id, final String campaignName, final Integer campaignType, final Long runReportId,
-            final String paramValue, final EnumOptionData campaignStatus, final String emailSubject, final String message,
-            final String emailAttachmentFileFormat, final Long stretchyReportId, final String stretchyReportParamMap,
-            final ZonedDateTime nextTriggerDate, final LocalDate lastTriggerDate, final EmailCampaignTimeLine emailCampaignTimeLine,
-            final ZonedDateTime recurrenceStartDate, final String recurrence) {
-        return new EmailCampaignData(id, campaignName, campaignType, runReportId, paramValue, campaignStatus, emailSubject, message,
-                emailAttachmentFileFormat, stretchyReportId, stretchyReportParamMap, nextTriggerDate, lastTriggerDate,
-                emailCampaignTimeLine, recurrenceStartDate, recurrence);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getCampaignName() {
-        return this.campaignName;
-    }
-
-    public Integer getCampaignType() {
-        return this.campaignType;
-    }
-
-    public Long getRunReportId() {
-        return this.businessRuleId;
-    }
-
-    public String getParamValue() {
-        return this.paramValue;
-    }
-
-    public EnumOptionData getCampaignStatus() {
-        return this.campaignStatus;
-    }
-
-    public String getEmailSubject() {
-        return this.emailSubject;
-    }
-
-    public String getMessage() {
-        return this.emailMessage;
-    }
-
-    public ZonedDateTime getNextTriggerDate() {
-        return this.nextTriggerDate;
-    }
-
-    public LocalDate getLastTriggerDate() {
-        return this.lastTriggerDate;
-    }
-
-    public String getRecurrence() {
-        return this.recurrence;
-    }
-
-    public ZonedDateTime getRecurrenceStartDate() {
-        return this.recurrenceStartDate;
+        return new EmailCampaignData().setId(id).setCampaignName(campaignName).setCampaignType(campaignType)
+                .setBusinessRuleId(businessRuleId).setParamValue(paramValue).setCampaignStatus(campaignStatus).setEmailSubject(emailSubject)
+                .setEmailMessage(message).setEmailAttachmentFileFormat(emailAttachmentFileFormat).setStretchyReportId(stretchyReportId)
+                .setStretchyReportParamMap(stretchyReportParamMap).setNextTriggerDate(nextTriggerDate).setLastTriggerDate(lastTriggerDate)
+                .setEmailCampaignTimeLine(emailCampaignTimeLine).setRecurrenceStartDate(recurrenceStartDate).setRecurrence(recurrence);
     }
 }

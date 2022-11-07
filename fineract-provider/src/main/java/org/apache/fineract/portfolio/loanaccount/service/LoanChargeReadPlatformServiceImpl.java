@@ -31,15 +31,17 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
+import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.service.ChargeDropdownReadPlatformService;
 import org.apache.fineract.portfolio.charge.service.ChargeEnumerations;
 import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidByData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInstallmentChargeData;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -51,22 +53,21 @@ import org.springframework.stereotype.Service;
 public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
-    private final PlatformSecurityContext context;
     private final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService;
     private final DropdownReadPlatformService dropdownReadPlatformService;
 
     private static final class LoanChargeMapper implements RowMapper<LoanChargeData> {
 
         public String schema() {
-            return "lc.id as id, lc.external_id as externalId, c.id as chargeId, c.name as name, " + "lc.amount as amountDue, "
-                    + "lc.amount_paid_derived as amountPaid, " + "lc.amount_waived_derived as amountWaived, "
+            return "lc.id as id, lc.external_id as externalId, c.id as chargeId, c.name as name, lc.submitted_on_date as submittedOnDate, "
+                    + "lc.amount as amountDue, " + "lc.amount_paid_derived as amountPaid, " + "lc.amount_waived_derived as amountWaived, "
                     + "lc.amount_writtenoff_derived as amountWrittenOff, " + "lc.amount_outstanding_derived as amountOutstanding, "
                     + "lc.calculation_percentage as percentageOf, lc.calculation_on_amount as amountPercentageAppliedTo, "
                     + "lc.charge_time_enum as chargeTime, " + "lc.is_penalty as penalty, "
                     + "lc.due_for_collection_as_of_date as dueAsOfDate, " + "lc.charge_calculation_enum as chargeCalculation, "
                     + "lc.charge_payment_mode_enum as chargePaymentMode, " + "lc.is_paid_derived as paid, " + "lc.waived as waied, "
                     + "lc.min_cap as minCap, lc.max_cap as maxCap, " + "lc.charge_amount_or_percentage as amountOrPercentage, "
-                    + "c.currency_code as currencyCode, oc.name as currencyName, "
+                    + "lc.loan_id as loanId, c.currency_code as currencyCode, oc.name as currencyName, "
                     + "date(coalesce(dd.disbursedon_date,dd.expected_disburse_date)) as disbursementDate, "
                     + "oc.decimal_places as currencyDecimalPlaces, oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, "
                     + "oc.internationalized_name_code as currencyNameCode from m_charge c "
@@ -78,6 +79,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
         public LoanChargeData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             final Long id = rs.getLong("id");
             final Long chargeId = rs.getLong("chargeId");
+            final Long loanId = rs.getLong("loanId");
             final String name = rs.getString("name");
             final BigDecimal amount = rs.getBigDecimal("amountDue");
             final BigDecimal amountPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountPaid");
@@ -115,6 +117,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             final BigDecimal maxCap = rs.getBigDecimal("maxCap");
             final BigDecimal amountOrPercentage = rs.getBigDecimal("amountOrPercentage");
             final LocalDate disbursementDate = JdbcSupport.getLocalDate(rs, "disbursementDate");
+            final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedOnDate");
 
             if (disbursementDate != null) {
                 dueAsOfDate = disbursementDate;
@@ -122,8 +125,8 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             final String externalId = rs.getString("externalId");
 
             return new LoanChargeData(id, chargeId, name, currency, amount, amountPaid, amountWaived, amountWrittenOff, amountOutstanding,
-                    chargeTimeType, dueAsOfDate, chargeCalculationType, percentageOf, amountPercentageAppliedTo, penalty, paymentMode, paid,
-                    waived, null, minCap, maxCap, amountOrPercentage, null, externalId);
+                    chargeTimeType, submittedOnDate, dueAsOfDate, chargeCalculationType, percentageOf, amountPercentageAppliedTo, penalty,
+                    paymentMode, paid, waived, loanId, minCap, maxCap, amountOrPercentage, null, externalId);
         }
     }
 
@@ -243,16 +246,18 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
     }
 
     @Override
-    public Collection<Integer> retrieveOverdueInstallmentChargeFrequencyNumber(final Long loanId, final Long chargeId,
+    public Collection<Integer> retrieveOverdueInstallmentChargeFrequencyNumber(final Loan loan, final Charge charge,
             final Integer periodNumber) {
-        String sql = "select oic.frequency_number from m_loan_overdue_installment_charge oic  inner join m_loan_charge lc on lc.id=oic.loan_charge_id inner join m_loan_repayment_schedule rs on rs.id = oic.loan_schedule_id inner join m_loan loan on loan.id=rs.loan_id "
-                + "where lc.is_active = true and loan.id = ? and rs.installment=?";
-        Object[] params = { loanId, periodNumber };
-        if (chargeId != null) {
-            sql += " and lc.charge_id = ? ";
-            params = new Object[] { loanId, periodNumber, chargeId };
+
+        List<Integer> frequencyNumbers = new ArrayList<>();
+        for (LoanCharge loanCharge : loan.getLoanCharges()) {
+            if (loanCharge.isOverdueInstallmentCharge() && charge.equals(loanCharge.getCharge()) && loanCharge.isActive()
+                    && periodNumber.equals(loanCharge.getOverdueInstallmentCharge().getInstallment().getInstallmentNumber())) {
+                frequencyNumbers.add(loanCharge.getOverdueInstallmentCharge().getFrequencyNumber());
+            }
         }
-        return this.jdbcTemplate.queryForList(sql, Integer.class, params);
+
+        return frequencyNumbers;
     }
 
     @Override

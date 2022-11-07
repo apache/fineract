@@ -1,0 +1,25 @@
+@startsalt
+{
+    {T
+    + custom
+    ++ acme
+    +++ note
+    ++++ starter
+    +++++ src
+    ++++++ main
+    +++++++ java
+    ++++++++ com.acme.fineract.note.starter
+    +++++++++ AcmeNoteAutoConfiguration.java
+    +++++ resources
+    ++++++ db
+    +++++++ custom-changelog
+    ++++++++ parts
+    +++++++++ 0001_acme_note_initial.xml
+    ++++++++ changelog-acme-note.xml
+    ++++++ META-INF
+    +++++++ spring.factories
+    +++++ build.gradle
+    +++++ dependencies.gradle
+    }
+}
+@endsalt

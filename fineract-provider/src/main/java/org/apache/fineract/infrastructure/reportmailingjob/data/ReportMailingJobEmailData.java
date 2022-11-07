@@ -19,49 +19,21 @@
 package org.apache.fineract.infrastructure.reportmailingjob.data;
 
 import java.io.File;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * Immutable data object representing report mailing job email data.
  **/
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class ReportMailingJobEmailData {
 
-    private final String to;
-    private final String text;
-    private final String subject;
-    private final File attachment;
+    private String to;
+    private String text;
+    private String subject;
+    private File attachment;
 
-    public ReportMailingJobEmailData(final String to, final String text, final String subject, final File attachment) {
-        this.to = to;
-        this.text = text;
-        this.subject = subject;
-        this.attachment = attachment;
-    }
-
-    /**
-     * @return the to
-     */
-    public String getTo() {
-        return to;
-    }
-
-    /**
-     * @return the text
-     */
-    public String getText() {
-        return text;
-    }
-
-    /**
-     * @return the subject
-     */
-    public String getSubject() {
-        return subject;
-    }
-
-    /**
-     * @return the attachment
-     */
-    public File getAttachment() {
-        return attachment;
-    }
 }

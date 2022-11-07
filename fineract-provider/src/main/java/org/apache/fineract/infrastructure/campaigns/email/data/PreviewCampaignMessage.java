@@ -18,23 +18,18 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.data;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class PreviewCampaignMessage {
 
     @SuppressWarnings("unused")
-    private final String campaignMessage;
+    private String campaignMessage;
 
-    private final Integer totalNumberOfMessages;
+    private Integer totalNumberOfMessages;
 
-    public PreviewCampaignMessage(String campaignMessage, Integer totalNumberOfMessages) {
-        this.campaignMessage = campaignMessage;
-        this.totalNumberOfMessages = totalNumberOfMessages;
-    }
-
-    public String getCampaignMessage() {
-        return campaignMessage;
-    }
-
-    public Integer getTotalNumberOfMessages() {
-        return totalNumberOfMessages;
-    }
 }

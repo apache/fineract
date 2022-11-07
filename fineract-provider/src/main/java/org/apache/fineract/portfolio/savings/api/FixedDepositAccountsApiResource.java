@@ -295,8 +295,8 @@ public class FixedDepositAccountsApiResource {
 
         if (settings.isTemplate()) {
             templateData = (FixedDepositAccountData) this.depositAccountReadPlatformService.retrieveTemplate(
-                    DepositAccountType.FIXED_DEPOSIT, savingsAccount.clientId(), savingsAccount.groupId(), savingsAccount.productId(),
-                    staffInSelectedOfficeOnly);
+                    DepositAccountType.FIXED_DEPOSIT, savingsAccount.getClientId(), savingsAccount.getGroupId(),
+                    savingsAccount.getDepositProductId(), staffInSelectedOfficeOnly);
         }
 
         return FixedDepositAccountData.associationsAndTemplate(savingsAccount, templateData, transactions, charges, linkedAccount,

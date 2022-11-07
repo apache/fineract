@@ -90,12 +90,11 @@ public final class JournalEntryCommandFromApiJsonDeserializer extends AbstractFr
         if (element.isJsonObject()) {
             if (topLevelJsonElement.has(JournalEntryJsonInputParams.CREDITS.getValue())
                     && topLevelJsonElement.get(JournalEntryJsonInputParams.CREDITS.getValue()).isJsonArray()) {
-                credits = populateCreditsOrDebitsArray(topLevelJsonElement, locale, credits,
-                        JournalEntryJsonInputParams.CREDITS.getValue());
+                credits = populateCreditsOrDebitsArray(topLevelJsonElement, locale, JournalEntryJsonInputParams.CREDITS.getValue());
             }
             if (topLevelJsonElement.has(JournalEntryJsonInputParams.DEBITS.getValue())
                     && topLevelJsonElement.get(JournalEntryJsonInputParams.DEBITS.getValue()).isJsonArray()) {
-                debits = populateCreditsOrDebitsArray(topLevelJsonElement, locale, debits, JournalEntryJsonInputParams.DEBITS.getValue());
+                debits = populateCreditsOrDebitsArray(topLevelJsonElement, locale, JournalEntryJsonInputParams.DEBITS.getValue());
             }
         }
         return new JournalEntryCommand(officeId, currencyCode, transactionDate, comments, referenceNumber, accountingRuleId, amount,
@@ -103,14 +102,14 @@ public final class JournalEntryCommandFromApiJsonDeserializer extends AbstractFr
     }
 
     /**
-     * @param comments
      * @param topLevelJsonElement
      * @param locale
+     * @param paramName
      */
     private SingleDebitOrCreditEntryCommand[] populateCreditsOrDebitsArray(final JsonObject topLevelJsonElement, final Locale locale,
-            SingleDebitOrCreditEntryCommand[] debitOrCredits, final String paramName) {
+            final String paramName) {
         final JsonArray array = topLevelJsonElement.get(paramName).getAsJsonArray();
-        debitOrCredits = new SingleDebitOrCreditEntryCommand[array.size()];
+        SingleDebitOrCreditEntryCommand[] debitOrCredits = new SingleDebitOrCreditEntryCommand[array.size()];
         for (int i = 0; i < array.size(); i++) {
 
             final JsonObject creditElement = array.get(i).getAsJsonObject();

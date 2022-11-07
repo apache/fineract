@@ -205,7 +205,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.INVALID_DEBIT_OR_CREDIT_ACCOUNTS, null, null, null);
         }
         for (final SingleDebitOrCreditEntryCommand creditOrDebit : creditOrDebits) {
-            if (!glaccount.getId().equals(creditOrDebit.getGlAccountId())) {
+            if (glaccount == null || creditOrDebit == null || !Objects.equals(glaccount.getId(), creditOrDebit.getGlAccountId())) {
                 throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.INVALID_DEBIT_OR_CREDIT_ACCOUNTS, null, null, null);
             }
         }
@@ -215,23 +215,22 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     private void checkDebitOrCreditAccountsAreValid(final AccountingRule accountingRule, final SingleDebitOrCreditEntryCommand[] credits,
             final SingleDebitOrCreditEntryCommand[] debits) {
         // Validate the debit and credit arrays are appropriate accounts
-        List<GLAccountDataForLookup> allowedCreditGLAccounts = new ArrayList<>();
-        List<GLAccountDataForLookup> allowedDebitGLAccounts = new ArrayList<>();
-        final SingleDebitOrCreditEntryCommand[] validCredits = new SingleDebitOrCreditEntryCommand[credits.length];
-        final SingleDebitOrCreditEntryCommand[] validDebits = new SingleDebitOrCreditEntryCommand[debits.length];
+        List<GLAccountDataForLookup> allowedCreditGLAccounts;
+        List<GLAccountDataForLookup> allowedDebitGLAccounts;
+        int validCreditsNo = 0;
+        int validDebitsNo = 0;
 
         if (credits != null && credits.length > 0) {
             allowedCreditGLAccounts = this.glAccountReadPlatformService.retrieveAccountsByTagId(accountingRule.getId(),
                     JournalEntryType.CREDIT.getValue());
             for (final GLAccountDataForLookup accountDataForLookup : allowedCreditGLAccounts) {
-                for (int i = 0; i < credits.length; i++) {
-                    final SingleDebitOrCreditEntryCommand credit = credits[i];
+                for (final SingleDebitOrCreditEntryCommand credit : credits) {
                     if (credit.getGlAccountId().equals(accountDataForLookup.getId())) {
-                        validCredits[i] = credit;
+                        validCreditsNo++;
                     }
                 }
             }
-            if (credits.length != validCredits.length) {
+            if (credits.length != validCreditsNo) {
                 throw new JournalEntryRuntimeException("error.msg.glJournalEntry.invalid.credits", "Invalid Credits.");
             }
         }
@@ -240,14 +239,13 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             allowedDebitGLAccounts = this.glAccountReadPlatformService.retrieveAccountsByTagId(accountingRule.getId(),
                     JournalEntryType.DEBIT.getValue());
             for (final GLAccountDataForLookup accountDataForLookup : allowedDebitGLAccounts) {
-                for (int i = 0; i < debits.length; i++) {
-                    final SingleDebitOrCreditEntryCommand debit = debits[i];
+                for (final SingleDebitOrCreditEntryCommand debit : debits) {
                     if (debit.getGlAccountId().equals(accountDataForLookup.getId())) {
-                        validDebits[i] = debit;
+                        validDebitsNo++;
                     }
                 }
             }
-            if (debits.length != validDebits.length) {
+            if (debits.length != validDebitsNo) {
                 throw new JournalEntryRuntimeException("error.msg.glJournalEntry.invalid.debits", "Invalid Debits");
             }
         }
@@ -520,7 +518,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     @Override
     public void revertShareAccountJournalEntries(final ArrayList<Long> transactionIds, final LocalDate transactionDate) {
         for (Long shareTransactionId : transactionIds) {
-            String transactionId = AccountingProcessorHelper.SHARE_TRANSACTION_IDENTIFIER + shareTransactionId.longValue();
+            String transactionId = AccountingProcessorHelper.SHARE_TRANSACTION_IDENTIFIER + shareTransactionId;
             List<JournalEntry> journalEntries = this.glJournalEntryRepository.findJournalEntries(transactionId,
                     PortfolioProductType.SHARES.getValue());
             if (journalEntries == null || journalEntries.isEmpty()) {
@@ -559,8 +557,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
     private void validateBusinessRulesForJournalEntries(final JournalEntryCommand command) {
         /** check if date of Journal entry is valid ***/
-        final LocalDate entryLocalDate = command.getTransactionDate();
-        final LocalDate transactionDate = entryLocalDate;
+        final LocalDate transactionDate = command.getTransactionDate();
         // shouldn't be in the future
         final LocalDate todaysDate = DateUtils.getBusinessLocalDate();
         if (transactionDate.isAfter(todaysDate)) {
@@ -581,7 +578,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         final SingleDebitOrCreditEntryCommand[] debits = command.getDebits();
 
         // atleast one debit or credit must be present
-        if (credits == null || credits.length <= 0 || debits == null || debits.length <= 0) {
+        if (credits == null || credits.length == 0 || debits == null || debits.length == 0) {
             throw new JournalEntryInvalidException(GlJournalEntryInvalidReason.NO_DEBITS_OR_CREDITS, null, null, null);
         }
 
@@ -624,13 +621,12 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         final AppUser user = this.context.authenticatedUser();
         final Long time = System.currentTimeMillis();
         final String uniqueVal = String.valueOf(time) + user.getId() + officeId;
-        final String transactionId = Long.toHexString(Long.parseLong(uniqueVal));
-        return transactionId;
+        return Long.toHexString(Long.parseLong(uniqueVal));
     }
 
     private PlatformDataIntegrityException handleJournalEntryDataIntegrityIssues(final Throwable realCause,
             final NonTransientDataAccessException dve) {
-        log.error("Error occured.", dve);
+        log.error("Error occurred.", dve);
         return new PlatformDataIntegrityException("error.msg.glJournalEntry.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource Journal Entry: " + realCause.getMessage());
     }
@@ -663,7 +659,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             /**
              * revert old journal entries
              */
-            final List<String> transactionIdsToBeReversed = this.glJournalEntryRepository.findNonReversedContraTansactionIds(contraId,
+            final List<String> transactionIdsToBeReversed = this.glJournalEntryRepository.findNonReversedContraTransactionIds(contraId,
                     officeId);
             for (String transactionId : transactionIdsToBeReversed) {
                 final List<JournalEntry> journalEntries = this.glJournalEntryRepository
@@ -745,7 +741,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     }
 
     private void validateJournalEntriesArePostedBefore(final Long contraId) {
-        final List<String> transactionIds = this.glJournalEntryRepository.findNonContraTansactionIds(contraId);
+        final List<String> transactionIds = this.glJournalEntryRepository.findNonContraTransactionIds(contraId);
         if (!CollectionUtils.isEmpty(transactionIds)) {
             throw new GeneralPlatformDomainRuleException("error.msg.journalentry.defining.openingbalance.not.allowed",
                     "Defining Opening balances not allowed after journal entries posted", transactionIds);
@@ -760,8 +756,8 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
     private static class OfficeCurrencyKey {
 
-        Office office;
-        String currency;
+        final Office office;
+        final String currency;
 
         OfficeCurrencyKey(Office office, String currency) {
             this.office = office;
@@ -770,10 +766,9 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
         @Override
         public boolean equals(Object obj) {
-            if (!(obj instanceof OfficeCurrencyKey)) {
+            if (!(obj instanceof OfficeCurrencyKey copy)) {
                 return false;
             }
-            OfficeCurrencyKey copy = (OfficeCurrencyKey) obj;
             return Objects.equals(this.office.getId(), copy.office.getId()) && this.currency.equals(copy.currency);
         }
 

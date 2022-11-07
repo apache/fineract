@@ -68,19 +68,25 @@ import org.springframework.stereotype.Component;
 @Tag(name = "Roles", description = "An API capability to support management of application roles for user administration.")
 public class RolesApiResource {
 
+    public static final String ID = "id";
+    public static final String NAME = "name";
+    public static final String DESCRIPTION = "description";
+    public static final String AVAILABLE_PERMISSIONS = "availablePermissions";
+    public static final String SELECTED_PERMISSIONS = "selectedPermissions";
+    public static final String PERMISSION_USAGE_DATA = "permissionUsageData";
+    public static final String DISABLE = "disable";
+    public static final String ENABLE = "enable";
     /**
      * The set of parameters that are supported in response for {@link RoleData}
      */
-    private final Set<String> responseDataParameters = new HashSet<>(
-            Arrays.asList("id", "name", "description", "availablePermissions", "selectedPermissions"));
-
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(ID, NAME, DESCRIPTION, AVAILABLE_PERMISSIONS, SELECTED_PERMISSIONS));
     /**
      * The set of parameters that are supported in response for {@link RoleData}
      */
-    private final Set<String> permissionsResponseParameters = new HashSet<>(
-            Arrays.asList("id", "name", "description", "permissionUsageData"));
-
-    private final String resourceNameForPermissions = "ROLE";
+    private static final Set<String> PERMISSIONS_RESPONSE_PARAMETERS = new HashSet<>(
+            Arrays.asList(ID, NAME, DESCRIPTION, PERMISSION_USAGE_DATA));
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "ROLE";
 
     private final PlatformSecurityContext context;
     private final RoleReadPlatformService roleReadPlatformService;
@@ -114,12 +120,12 @@ public class RolesApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RolesApiResourceSwagger.GetRolesResponse.class)))) })
     public String retrieveAllRoles(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final Collection<RoleData> roles = this.roleReadPlatformService.retrieveAll();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, roles, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, roles, RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
@@ -150,13 +156,13 @@ public class RolesApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = RolesApiResourceSwagger.GetRolesRoleIdResponse.class))) })
     public String retrieveRole(@PathParam("roleId") @Parameter(description = "roleId") final Long roleId, @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         final RoleData role = this.roleReadPlatformService.retrieveOne(roleId);
 
-        return this.toApiJsonSerializer.serialize(settings, role, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, role, RESPONSE_DATA_PARAMETERS);
     }
 
     /**
@@ -185,10 +191,10 @@ public class RolesApiResource {
 
         CommandProcessingResult result = null;
 
-        if (is(commandParam, "disable")) {
+        if (is(commandParam, DISABLE)) {
             final CommandWrapper commandRequest = builder.disableRole(roleId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "enable")) {
+        } else if (is(commandParam, ENABLE)) {
             final CommandWrapper commandRequest = builder.enableRole(roleId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
@@ -226,14 +232,14 @@ public class RolesApiResource {
     public String retrieveRolePermissions(@PathParam("roleId") @Parameter(description = "roleId") final Long roleId,
             @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         final RoleData role = this.roleReadPlatformService.retrieveOne(roleId);
         final Collection<PermissionData> permissionUsageData = this.permissionReadPlatformService.retrieveAllRolePermissions(roleId);
         final RolePermissionsData permissionsData = role.toRolePermissionData(permissionUsageData);
-        return this.permissionsToApiJsonSerializer.serialize(settings, permissionsData, this.permissionsResponseParameters);
+        return this.permissionsToApiJsonSerializer.serialize(settings, permissionsData, PERMISSIONS_RESPONSE_PARAMETERS);
     }
 
     @PUT

@@ -18,29 +18,18 @@
  */
 package org.apache.fineract.mix.data;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class ContextData {
 
-    private final String dimensionType;
-    private final String dimension;
-    private final Integer periodType;
-
-    public ContextData(final String dimensionType, final String dimension, final Integer taxonomyType) {
-        this.dimensionType = dimensionType;
-        this.dimension = dimension;
-        this.periodType = taxonomyType.equals(MixTaxonomyData.BALANCESHEET) || taxonomyType.equals(MixTaxonomyData.PORTFOLIO) ? 0 : 1;
-    }
-
-    public String getDimensionType() {
-        return this.dimensionType;
-    }
-
-    public String getDimension() {
-        return this.dimension;
-    }
-
-    public Integer getPeriodType() {
-        return this.periodType;
-    }
+    private String dimensionType;
+    private String dimension;
+    private Integer periodType;
 
     @Override
     public int hashCode() {

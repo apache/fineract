@@ -19,6 +19,7 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -30,11 +31,19 @@ public class FineractProperties {
 
     private String nodeId;
 
+    private String idempotencyKeyHeaderName;
+
     private FineractTenantProperties tenant;
 
     private FineractModeProperties mode;
 
     private FineractCorrelationProperties correlation;
+
+    private FineractPartitionedJob partitionedJob;
+
+    private FineractRemoteJobMessageHandlerProperties remoteJobMessageHandler;
+
+    private FineractEventsProperties events;
 
     @Getter
     @Setter
@@ -71,5 +80,79 @@ public class FineractProperties {
 
         private boolean enabled;
         private String headerName;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractPartitionedJob {
+
+        // TODO should be used without wrapper class
+        private List<PartitionedJobProperty> partitionedJobProperties;
+    }
+
+    @Getter
+    @Setter
+    public static class PartitionedJobProperty {
+
+        private String jobName;
+        private Integer chunkSize;
+        private Integer partitionSize;
+        private Integer threadCount;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractRemoteJobMessageHandlerProperties {
+
+        private FineractRemoteJobMessageHandlerSpringEventsProperties springEvents;
+        private FineractRemoteJobMessageHandlerJmsProperties jms;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractRemoteJobMessageHandlerSpringEventsProperties {
+
+        private boolean enabled;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractRemoteJobMessageHandlerJmsProperties {
+
+        private boolean enabled;
+        private String requestQueueName;
+        private String brokerUrl;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractEventsProperties {
+
+        private FineractExternalEventsProperties external;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractExternalEventsProperties {
+
+        private boolean enabled;
+        private FineractExternalEventsProducerProperties producer;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractExternalEventsProducerProperties {
+
+        private int readBatchSize;
+        private FineractExternalEventsProducerJmsProperties jms;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractExternalEventsProducerJmsProperties {
+
+        private boolean enabled;
+        private String eventQueueName;
+        private String brokerUrl;
     }
 }

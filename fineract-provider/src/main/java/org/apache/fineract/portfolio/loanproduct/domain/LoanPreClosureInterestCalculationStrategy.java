@@ -55,8 +55,7 @@ public enum LoanPreClosureInterestCalculationStrategy {
     }
 
     public static LoanPreClosureInterestCalculationStrategy fromInt(final Integer ruleTypeValue) {
-        final LoanPreClosureInterestCalculationStrategy type = intToEnumMap.get(ruleTypeValue);
-        return type;
+        return intToEnumMap.get(ruleTypeValue);
     }
 
     LoanPreClosureInterestCalculationStrategy(final Integer value, final String code) {

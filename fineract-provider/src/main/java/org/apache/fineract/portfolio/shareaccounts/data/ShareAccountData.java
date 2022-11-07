@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
+import lombok.Getter;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -31,7 +32,7 @@ import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.products.data.ProductData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 
-@SuppressWarnings("unused")
+@Getter
 public class ShareAccountData implements Serializable, AccountData {
 
     private Long id;
@@ -145,10 +146,6 @@ public class ShareAccountData implements Serializable, AccountData {
         this.clientSavingsAccounts = null;
     }
 
-    public Integer getRowIndex() {
-        return rowIndex;
-    }
-
     // Data for template
     private Collection<ProductData> productOptions;
     private Collection<ChargeData> chargeOptions;
@@ -248,14 +245,6 @@ public class ShareAccountData implements Serializable, AccountData {
         this.currentMarketPrice = currenMarketPrice;
     }
 
-    public Long getProductId() {
-        return this.productId;
-    }
-
-    public Long getClientId() {
-        return this.clientId;
-    }
-
     public static ShareAccountData template(ShareAccountData data, Collection<ProductData> productOptions,
             Collection<ChargeData> chargeOptions, Collection<SavingsAccountData> clientSavingsAccounts,
             Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions,
@@ -296,14 +285,6 @@ public class ShareAccountData implements Serializable, AccountData {
                 productName, status, timeline, currency, summaryData, charges, purchasedSharesData, lockinPeriod, lockPeriodTypeEnum,
                 minimumActivePeriod, minimumActivePeriodTypeEnum, allowDividendCalculationForInactiveClients, productOptions, chargeOptions,
                 clientSavingsAccounts, lockinPeriodFrequencyTypeOptions, minimumActivePeriodFrequencyTypeOption, currenMarketPrice);
-    }
-
-    public Long getId() {
-        return this.id;
-    }
-
-    public Collection<ShareAccountTransactionData> getPurchasedShares() {
-        return this.purchasedShares;
     }
 
     public void setCurrentMarketPrice(final BigDecimal currentMarketPrice) {

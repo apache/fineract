@@ -16,13 +16,12 @@
 # under the License.
 #
 
-# NB: Travis CI (dist: bionic) supports up to v3.7
-# (unless we'd install a more recent version in .travis.yml)
+# You can replace and test a more recent version of docker compose
 version: '3.7'
 services:
   # Backend service
   fineractmysql:
-    image: mariadb:10.8
+    image: mariadb:10.9
     volumes:
       - ./fineract-db/server_collation.cnf:/etc/mysql/conf.d/server_collation.cnf
       - ./fineract-db/docker:/docker-entrypoint-initdb.d:Z,ro

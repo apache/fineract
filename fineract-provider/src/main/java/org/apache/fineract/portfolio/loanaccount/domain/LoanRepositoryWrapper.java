@@ -167,7 +167,7 @@ public class LoanRepositoryWrapper {
         List<Loan> loans = this.repository.findLoanByClientId(clientId);
         if (loans != null && loans.size() > 0) {
             for (Loan loan : loans) {
-                loan.initilizeTransactions();
+                loan.initializeTransactions();
                 loan.initializeLoanOfficerHistory();
             }
         }
@@ -249,7 +249,7 @@ public class LoanRepositoryWrapper {
     public Loan findNonClosedLoanThatBelongsToClient(@Param("loanId") Long loanId, @Param("clientId") Long clientId) {
         Loan loan = this.repository.findNonClosedLoanThatBelongsToClient(loanId, clientId);
         if (loan != null) {
-            loan.initilizeTransactions();
+            loan.initializeTransactions();
         }
         return loan;
     }

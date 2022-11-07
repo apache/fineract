@@ -118,7 +118,7 @@ public class AuthenticationApiResource {
         final Authentication authenticationCheck = this.customAuthenticationProvider.authenticate(authentication);
 
         final Collection<String> permissions = new ArrayList<>();
-        AuthenticatedUserData authenticatedUserData = new AuthenticatedUserData(request.username, permissions);
+        AuthenticatedUserData authenticatedUserData = new AuthenticatedUserData().setUsername(request.username).setPermissions(permissions);
 
         if (authenticationCheck.isAuthenticated()) {
             final Collection<GrantedAuthority> authorities = new ArrayList<>(authenticationCheck.getAuthorities());
@@ -148,14 +148,19 @@ public class AuthenticationApiResource {
                     && !principal.hasSpecificPermissionTo(TwoFactorConstants.BYPASS_TWO_FACTOR_PERMISSION);
             Long userId = principal.getId();
             if (this.springSecurityPlatformSecurityContext.doesPasswordHasToBeRenewed(principal)) {
-                authenticatedUserData = new AuthenticatedUserData(request.username, userId,
-                        new String(base64EncodedAuthenticationKey, StandardCharsets.UTF_8), isTwoFactorRequired);
+                authenticatedUserData = new AuthenticatedUserData().setUsername(request.username).setUserId(userId)
+                        .setBase64EncodedAuthenticationKey(new String(base64EncodedAuthenticationKey, StandardCharsets.UTF_8))
+                        .setAuthenticated(true).setShouldRenewPassword(true).setTwoFactorAuthenticationRequired(isTwoFactorRequired);
             } else {
 
-                authenticatedUserData = new AuthenticatedUserData(request.username, officeId, officeName, staffId, staffDisplayName,
-                        organisationalRole, roles, permissions, principal.getId(),
-                        new String(base64EncodedAuthenticationKey, StandardCharsets.UTF_8), isTwoFactorRequired,
-                        returnClientList ? clientReadPlatformService.retrieveUserClients(userId) : null);
+                authenticatedUserData = new AuthenticatedUserData().setUsername(request.username).setOfficeId(officeId)
+                        .setOfficeName(officeName).setStaffId(staffId).setStaffDisplayName(staffDisplayName)
+                        .setOrganisationalRole(organisationalRole).setRoles(roles).setPermissions(permissions).setUserId(principal.getId())
+                        .setAuthenticated(true)
+                        .setBase64EncodedAuthenticationKey(new String(base64EncodedAuthenticationKey, StandardCharsets.UTF_8))
+                        .setTwoFactorAuthenticationRequired(isTwoFactorRequired)
+                        .setClients(returnClientList ? clientReadPlatformService.retrieveUserClients(userId) : null);
+
             }
 
         }

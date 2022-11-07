@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,7 +50,6 @@ public class XBRLResultServiceImpl implements XBRLResultService {
     private final MixTaxonomyMappingReadPlatformService readTaxonomyMappingService;
     private final MixTaxonomyReadPlatformService readTaxonomyService;
     private final JdbcTemplate jdbcTemplate;
-    private HashMap<String, BigDecimal> accountBalanceMap;
 
     @Autowired
     public XBRLResultServiceImpl(final JdbcTemplate jdbcTemplate, final MixTaxonomyMappingReadPlatformService readTaxonomyMappingService,
@@ -66,7 +66,7 @@ public class XBRLResultServiceImpl implements XBRLResultService {
         if (config == null || config.size() == 0) {
             throw new XBRLMappingInvalidException("Mapping is empty");
         }
-        return new XBRLData(config, startDate, endDate, currency);
+        return new XBRLData().setResultMap(config).setStartDate(startDate).setEndDate(endDate).setCurrency(currency);
     }
 
     @SuppressWarnings("unchecked")
@@ -85,13 +85,11 @@ public class XBRLResultServiceImpl implements XBRLResultService {
             }
             // <taxonomyId, value>
             final HashMap<MixTaxonomyData, BigDecimal> resultMap = new HashMap<>();
-            setupBalanceMap(getAccountSql(startDate, endDate));
+            Map<String, BigDecimal> accountBalanceMap = setupBalanceMap(getAccountSql(startDate, endDate));
             for (final Map.Entry<String, String> entry : configMap.entrySet()) {
-                final BigDecimal value = processMappingString(entry.getValue());
-                if (value != null) {
-                    final MixTaxonomyData taxonomy = this.readTaxonomyService.retrieveOne(Long.parseLong(entry.getKey()));
-                    resultMap.put(taxonomy, value);
-                }
+                final BigDecimal value = processMappingString(accountBalanceMap, entry.getValue());
+                final MixTaxonomyData taxonomy = this.readTaxonomyService.retrieveOne(Long.parseLong(entry.getKey()));
+                resultMap.put(taxonomy, value);
 
             }
             return resultMap;
@@ -100,7 +98,7 @@ public class XBRLResultServiceImpl implements XBRLResultService {
     }
 
     private String getAccountSql(final Date startDate, final Date endDate) {
-        final String sql = "select debits.glcode as 'glcode', debits.name as 'name', coalesce(debits.debitamount,0)-coalesce(credits.creditamount,0)) as 'balance' "
+        return "select debits.glcode as 'glcode', debits.name as 'name', coalesce(debits.debitamount,0)-coalesce(credits.creditamount,0)) as 'balance' "
                 + "from (select acc_gl_account.gl_code as 'glcode',name,sum(amount) as 'debitamount' "
                 + "from acc_gl_journal_entry,acc_gl_account " + "where acc_gl_account.id = acc_gl_journal_entry.account_id "
                 + "and acc_gl_journal_entry.type_enum=2 " + "and acc_gl_journal_entry.entry_date <= " + endDate
@@ -134,30 +132,30 @@ public class XBRLResultServiceImpl implements XBRLResultService {
                 // ${branch}=1) "
                 // +
                 + " group by name, glcode " + "order by glcode) credits " + "on debits.glcode=credits.glcode;";
-        return sql;
     }
 
-    private void setupBalanceMap(final String sql) {
-        if (this.accountBalanceMap == null) {
-            this.accountBalanceMap = new HashMap<>();
-            final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
-            while (rs.next()) {
-                this.accountBalanceMap.put(rs.getString("glcode"), rs.getBigDecimal("balance"));
-            }
+    private Map<String, BigDecimal> setupBalanceMap(final String sql) {
+        Map<String, BigDecimal> accountBalanceMap = new HashMap<>();
+
+        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
+        while (rs.next()) {
+            accountBalanceMap.put(rs.getString("glcode"), rs.getBigDecimal("balance"));
         }
+
+        return accountBalanceMap;
     }
 
     // Calculate Taxonomy value from expression
-    private BigDecimal processMappingString(String mappingString) {
-        final ArrayList<String> glCodes = getGLCodes(mappingString);
+    private BigDecimal processMappingString(Map<String, BigDecimal> accountBalanceMap, String mappingString) {
+        final List<String> glCodes = getGLCodes(mappingString);
         for (final String glcode : glCodes) {
 
-            final BigDecimal balance = this.accountBalanceMap.get(glcode);
+            final BigDecimal balance = accountBalanceMap.get(glcode);
             mappingString = mappingString.replaceAll("\\{" + glcode + "\\}", balance != null ? balance.toString() : "0");
         }
 
         // evaluate the expression
-        Float eval = 0f;
+        float eval = 0f;
         try {
             final Number value = (Number) SCRIPT_ENGINE.eval(mappingString);
             if (value != null) {
@@ -168,10 +166,10 @@ public class XBRLResultServiceImpl implements XBRLResultService {
             throw new IllegalArgumentException(e.getMessage(), e);
         }
 
-        return new BigDecimal(eval);
+        return BigDecimal.valueOf(eval);
     }
 
-    public ArrayList<String> getGLCodes(final String template) {
+    public List<String> getGLCodes(final String template) {
 
         final ArrayList<String> placeholders = new ArrayList<>();
 

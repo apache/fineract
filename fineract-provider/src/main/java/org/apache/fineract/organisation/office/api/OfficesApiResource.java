@@ -28,9 +28,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
@@ -75,10 +75,10 @@ public class OfficesApiResource {
     /**
      * The set of parameters that are supported in response for {@link OfficeData}.
      */
-    private final Set<String> responseDataParameters = new HashSet<>(Arrays.asList("id", "name", "nameDecorated", "externalId",
-            "openingDate", "hierarchy", "parentId", "parentName", "allowedParents"));
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
+            List.of("id", "name", "nameDecorated", "externalId", "openingDate", "hierarchy", "parentId", "parentName", "allowedParents"));
 
-    private final String resourceNameForPermissions = "OFFICE";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "OFFICE";
 
     private final PlatformSecurityContext context;
     private final OfficeReadPlatformService readPlatformService;
@@ -115,14 +115,14 @@ public class OfficesApiResource {
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
             @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final SearchParameters searchParameters = SearchParameters.forOffices(orderBy, sortOrder);
 
         final Collection<OfficeData> offices = this.readPlatformService.retrieveAllOffices(onlyManualEntries, searchParameters);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, offices, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, offices, RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -135,7 +135,7 @@ public class OfficesApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = OfficesApiResourceSwagger.GetOfficesTemplateResponse.class))) })
     public String retrieveOfficeTemplate(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         OfficeData office = this.readPlatformService.retrieveNewOfficeTemplate();
 
@@ -143,7 +143,7 @@ public class OfficesApiResource {
         office = OfficeData.appendedTemplate(office, allowedParents);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, office, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, office, RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
@@ -176,7 +176,7 @@ public class OfficesApiResource {
     public String retreiveOffice(@PathParam("officeId") @Parameter(description = "officeId") final Long officeId,
             @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
@@ -186,7 +186,7 @@ public class OfficesApiResource {
             office = OfficeData.appendedTemplate(office, allowedParents);
         }
 
-        return this.toApiJsonSerializer.serialize(settings, office, this.responseDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, office, RESPONSE_DATA_PARAMETERS);
     }
 
     @PUT

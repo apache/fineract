@@ -420,7 +420,7 @@ public class LoanScheduleAssembler {
             final boolean isSpecificToInstallment = false;
             for (FloatingRatePeriodData periodData : applicableRates) {
                 LoanTermVariationsData loanTermVariation = new LoanTermVariationsData(
-                        LoanEnumerations.loanvariationType(LoanTermVariationType.INTEREST_RATE), periodData.getFromDateAsLocalDate(),
+                        LoanEnumerations.loanVariationType(LoanTermVariationType.INTEREST_RATE), periodData.getFromDateAsLocalDate(),
                         periodData.getInterestRate(), dateValue, isSpecificToInstallment);
                 if (!interestRateStartDate.isBefore(periodData.getFromDateAsLocalDate())) {
                     interestRateStartDate = periodData.getFromDateAsLocalDate();
@@ -526,9 +526,9 @@ public class LoanScheduleAssembler {
                     BigDecimal principal = null;
                     BigDecimal netDisbursalAmount = null;
 
-                    if (jsonObject.has(LoanApiConstants.disbursementDateParameterName)) {
-                        expectedDisbursementDate = this.fromApiJsonHelper
-                                .extractLocalDateNamed(LoanApiConstants.disbursementDateParameterName, jsonObject, dateFormat, locale);
+                    if (jsonObject.has(LoanApiConstants.expectedDisbursementDateParameterName)) {
+                        expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed(
+                                LoanApiConstants.expectedDisbursementDateParameterName, jsonObject, dateFormat, locale);
                     }
                     if (jsonObject.has(LoanApiConstants.disbursementPrincipalParameterName)
                             && jsonObject.get(LoanApiConstants.disbursementPrincipalParameterName).isJsonPrimitive()
@@ -644,7 +644,7 @@ public class LoanScheduleAssembler {
 
         LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getInterestMethod());
         if (loanApplicationTerms.isEqualAmortization()) {
-            if (loanApplicationTerms.getInterestMethod().isDecliningBalnce()) {
+            if (loanApplicationTerms.getInterestMethod().isDecliningBalance()) {
                 final LoanScheduleGenerator decliningLoanScheduleGenerator = this.loanScheduleFactory
                         .create(InterestMethod.DECLINING_BALANCE);
                 LoanScheduleModel loanSchedule = decliningLoanScheduleGenerator.generate(mc, loanApplicationTerms, loanCharges, detailDTO);
@@ -993,7 +993,7 @@ public class LoanScheduleAssembler {
             BigDecimal decimalValue = null;
             LoanTermVariationType decimalValueVariationType = LoanTermVariationType.INVALID;
             if (loan.getLoanProductRelatedDetail().getAmortizationMethod().isEqualInstallment()
-                    && loan.getLoanProductRelatedDetail().getInterestMethod().isDecliningBalnce()) {
+                    && loan.getLoanProductRelatedDetail().getInterestMethod().isDecliningBalance()) {
                 decimalValue = this.fromApiJsonHelper.extractBigDecimalNamed(LoanApiConstants.installmentAmountParamName, arrayElement,
                         locale);
                 decimalValueVariationType = LoanTermVariationType.EMI_AMOUNT;

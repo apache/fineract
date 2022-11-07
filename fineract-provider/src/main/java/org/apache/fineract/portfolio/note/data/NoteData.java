@@ -18,48 +18,35 @@
  */
 package org.apache.fineract.portfolio.note.data;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 /**
  * Immutable data object represent note or case information about a client, loan or loan transaction.
  */
+@Getter
 public class NoteData {
 
-    @SuppressWarnings("unused")
     private final Long id;
-    @SuppressWarnings("unused")
     private final Long clientId;
-    @SuppressWarnings("unused")
     private final Long groupId;
-    @SuppressWarnings("unused")
     private final Long loanId;
-    @SuppressWarnings("unused")
     private final Long loanTransactionId;
-    @SuppressWarnings("unused")
     private final Long depositAccountId;
-    @SuppressWarnings("unused")
     private final Long savingAccountId;
-    @SuppressWarnings("unused")
     private final EnumOptionData noteType;
-    @SuppressWarnings("unused")
     private final String note;
-    @SuppressWarnings("unused")
     private final Long createdById;
-    @SuppressWarnings("unused")
     private final String createdByUsername;
-    @SuppressWarnings("unused")
-    private final ZonedDateTime createdOn;
-    @SuppressWarnings("unused")
+    private final OffsetDateTime createdOn;
     private final Long updatedById;
-    @SuppressWarnings("unused")
     private final String updatedByUsername;
-    @SuppressWarnings("unused")
-    private final ZonedDateTime updatedOn;
+    private final OffsetDateTime updatedOn;
 
     public NoteData(final Long id, final Long clientId, final Long groupId, final Long loanId, final Long transactionId,
             final Long depositAccountId, final Long savingAccountId, final EnumOptionData noteType, final String note,
-            final ZonedDateTime createdDate, final Long createdById, final String createdByUsername, final ZonedDateTime lastModifiedDate,
+            final OffsetDateTime createdDate, final Long createdById, final String createdByUsername, final OffsetDateTime lastModifiedDate,
             final Long lastModifiedById, final String updatedByUsername) {
         this.id = id;
         this.clientId = clientId;

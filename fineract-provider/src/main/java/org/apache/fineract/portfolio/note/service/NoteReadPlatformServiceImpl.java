@@ -20,7 +20,7 @@ package org.apache.fineract.portfolio.note.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -47,9 +47,10 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
 
         public String schema() {
             return " select n.id as id, n.client_id as clientId, n.group_id as groupId, n.loan_id as loanId, n.loan_transaction_id as transactionId, "
-                    + " n.note_type_enum as noteTypeEnum, n.note as note, n.created_date as createdDate, n.createdby_id as createdById, "
-                    + " cb.username as createdBy, n.lastmodified_date as lastModifiedDate, n.lastmodifiedby_id as lastModifiedById, mb.username as modifiedBy "
-                    + " from m_note n left join m_appuser cb on cb.id=n.createdby_id left join m_appuser mb on mb.id=n.lastmodifiedby_id ";
+                    + " n.note_type_enum as noteTypeEnum, n.note as note, n.created_date as createdDate, n.created_by as createdById, "
+                    + "  n.created_on_utc as createdDateUtc, n.last_modified_on_utc as lastModifiedDateUtc, "
+                    + " cb.username as createdBy, n.lastmodified_date as lastModifiedDate, n.last_modified_by as lastModifiedById, mb.username as modifiedBy "
+                    + " from m_note n left join m_appuser cb on cb.id=n.created_by left join m_appuser mb on mb.id=n.last_modified_by ";
         }
 
         @Override
@@ -67,12 +68,16 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
             final Integer noteTypeId = JdbcSupport.getInteger(rs, "noteTypeEnum");
             final EnumOptionData noteType = NoteEnumerations.noteType(noteTypeId);
             final String note = rs.getString("note");
-            final ZonedDateTime createdDate = JdbcSupport.getDateTime(rs, "createdDate");
+            final OffsetDateTime createdDateLocal = JdbcSupport.getOffsetDateTime(rs, "createdDate");
+            final OffsetDateTime createdDateUtc = JdbcSupport.getOffsetDateTime(rs, "createdDateUtc");
             final Long createdById = JdbcSupport.getLong(rs, "createdById");
-            final ZonedDateTime lastModifiedDate = JdbcSupport.getDateTime(rs, "lastModifiedDate");
+            final OffsetDateTime lastModifiedDateLocal = JdbcSupport.getOffsetDateTime(rs, "lastModifiedDate");
+            final OffsetDateTime lastModifiedDateUtc = JdbcSupport.getOffsetDateTime(rs, "lastModifiedDateUtc");
             final Long lastModifiedById = JdbcSupport.getLong(rs, "lastModifiedById");
             final String createdByUsername = rs.getString("createdBy");
             final String updatedByUsername = rs.getString("modifiedBy");
+            final OffsetDateTime createdDate = createdDateUtc != null ? createdDateUtc : createdDateLocal;
+            final OffsetDateTime lastModifiedDate = lastModifiedDateUtc != null ? lastModifiedDateUtc : lastModifiedDateLocal;
             return new NoteData(id, clientId, groupId, loanId, transactionId, null, null, noteType, note, createdDate, createdById,
                     createdByUsername, lastModifiedDate, lastModifiedById, updatedByUsername);
         }

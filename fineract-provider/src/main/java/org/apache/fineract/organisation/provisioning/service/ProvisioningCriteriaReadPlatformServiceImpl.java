@@ -160,8 +160,10 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
             String expenseAccountCode = rs.getString("expensecode");
             String expenseAccountName = rs.getString("expensename");
 
-            return new ProvisioningCriteriaDefinitionData(id, categoryId, categoryName, minAge, maxAge, provisioningPercentage,
-                    liabilityAccount, liabilityAccountCode, liabilityAccountName, expenseAccount, expenseAccountCode, expenseAccountName);
+            return new ProvisioningCriteriaDefinitionData().setId(id).setCategoryId(categoryId).setCategoryName(categoryName)
+                    .setMinAge(minAge).setMaxAge(maxAge).setProvisioningPercentage(provisioningPercentage)
+                    .setLiabilityAccount(liabilityAccount).setLiabilityCode(liabilityAccountCode).setLiabilityName(liabilityAccountName)
+                    .setExpenseAccount(expenseAccount).setExpenseCode(expenseAccountCode).setExpenseName(expenseAccountName);
         }
 
         public String schema() {

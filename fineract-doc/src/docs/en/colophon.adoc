@@ -19,6 +19,7 @@
 | Michael Vorburger | mailto:mike@vorburger.ch[]
 | Aleksandar Vidakovic | mailto:aleks@apache.org[]
 | Arnold Galovics | mailto:arnold@apache.org[]
+| Adam Saghy | mailto:adamsaghy@gmail.com[]
 |===
 
 //ifdef::backend-pdf[]
@@ -34,7 +35,10 @@
 | Arnold Galovics | Database architecture section | 2022-03-11 | 1.7.0
 | Aleksandar Vidakovic | Module section | 2022-03-23 | 1.7.0
 | Aleksandar Vidakovic | Release section, file re-organisation | 2022-04-18 | 1.7.0
+| Arnold Galovics | Spring Batch | 2022-03-11 | 1.7.0
 | Aleksandar Vidakovic | AsciiDoc cheatsheet | 2022-05-09 | 1.7.0
+| Adam Saghy | Business data | 2022-06-13 | 1.7.0
+| Aleksandar Vidakovic | Custom modules and extensions | 2022-10-29 | 1.8.0
 |===
 
 toc::[]

@@ -36,6 +36,8 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;
+import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
+import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductBorrowerCycleVariationData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductGuaranteeData;
@@ -45,6 +47,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProductParamType;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
 import org.apache.fineract.portfolio.rate.data.RateData;
 import org.apache.fineract.portfolio.rate.service.RateReadService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -60,18 +63,20 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     private final RateReadService rateReadService;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final FineractEntityAccessUtil fineractEntityAccessUtil;
+    private final DelinquencyReadPlatformService delinquencyReadPlatformService;
 
     @Autowired
     public LoanProductReadPlatformServiceImpl(final PlatformSecurityContext context,
             final ChargeReadPlatformService chargeReadPlatformService, final JdbcTemplate jdbcTemplate,
             final FineractEntityAccessUtil fineractEntityAccessUtil, final RateReadService rateReadService,
-            DatabaseSpecificSQLGenerator sqlGenerator) {
+            final DelinquencyReadPlatformService delinquencyReadPlatformService, final DatabaseSpecificSQLGenerator sqlGenerator) {
         this.context = context;
         this.chargeReadPlatformService = chargeReadPlatformService;
         this.jdbcTemplate = jdbcTemplate;
         this.fineractEntityAccessUtil = fineractEntityAccessUtil;
         this.rateReadService = rateReadService;
         this.sqlGenerator = sqlGenerator;
+        this.delinquencyReadPlatformService = delinquencyReadPlatformService;
     }
 
     @Override
@@ -82,10 +87,12 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final Collection<RateData> rates = this.rateReadService.retrieveProductLoanRates(loanProductId);
             final Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationDatas = retrieveLoanProductBorrowerCycleVariations(
                     loanProductId);
-            final LoanProductMapper rm = new LoanProductMapper(charges, borrowerCycleVariationDatas, rates);
+            final Collection<DelinquencyBucketData> delinquencyBucketOptions = this.delinquencyReadPlatformService
+                    .retrieveAllDelinquencyBuckets();
+            final LoanProductMapper rm = new LoanProductMapper(charges, borrowerCycleVariationDatas, rates, delinquencyBucketOptions);
             final String sql = "select " + rm.loanProductSchema() + " where lp.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId }); // NOSONAR
+            return this.jdbcTemplate.queryForObject(sql, rm, loanProductId); // NOSONAR
 
         } catch (final EmptyResultDataAccessException e) {
             throw new LoanProductNotFoundException(loanProductId, e);
@@ -96,7 +103,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     public Collection<LoanProductBorrowerCycleVariationData> retrieveLoanProductBorrowerCycleVariations(final Long loanProductId) {
         final LoanProductBorrowerCycleMapper rm = new LoanProductBorrowerCycleMapper();
         final String sql = "select " + rm.schema() + " where bc.loan_product_id=?  order by bc.borrower_cycle_number,bc.value_condition";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { loanProductId }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, loanProductId); // NOSONAR
     }
 
     @Override
@@ -104,7 +111,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         this.context.authenticatedUser();
 
-        final LoanProductMapper rm = new LoanProductMapper(null, null, null);
+        final LoanProductMapper rm = new LoanProductMapper(null, null, null, null);
 
         String sql = "select " + rm.loanProductSchema();
 
@@ -183,15 +190,19 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         private final Collection<RateData> rates;
 
+        private final Collection<DelinquencyBucketData> delinquencyBucketOptions;
+
         LoanProductMapper(final Collection<ChargeData> charges,
-                final Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationDatas, final Collection<RateData> rates) {
+                final Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationDatas, final Collection<RateData> rates,
+                final Collection<DelinquencyBucketData> delinquencyBucketOptions) {
             this.charges = charges;
             this.borrowerCycleVariationDatas = borrowerCycleVariationDatas;
             this.rates = rates;
+            this.delinquencyBucketOptions = delinquencyBucketOptions;
         }
 
         public String loanProductSchema() {
-            return "lp.id as id, lp.fund_id as fundId, f.name as fundName, lp.loan_transaction_strategy_id as transactionStrategyId, ltps.name as transactionStrategyName, "
+            return "lp.id as id, lp.fund_id as fundId, f.name as fundName, lp.loan_transaction_strategy_code as transactionStrategyCode, lp.loan_transaction_strategy_name as transactionStrategyName, "
                     + "lp.name as name, lp.short_name as shortName, lp.description as description, "
                     + "lp.principal_amount as principal, lp.min_principal_amount as minPrincipal, lp.max_principal_amount as maxPrincipal, lp.currency_code as currencyCode, lp.currency_digits as currencyDigits, lp.currency_multiplesof as inMultiplesOf, "
                     + "lp.nominal_interest_rate_per_period as interestRatePerPeriod, lp.min_nominal_interest_rate_per_period as minInterestRatePerPeriod, lp.max_nominal_interest_rate_per_period as maxInterestRatePerPeriod, lp.interest_period_frequency_enum as interestRatePerPeriodFreq, "
@@ -225,7 +236,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lp.account_moves_out_of_npa_only_on_arrears_completion as accountMovesOutOfNPAOnlyOnArrearsCompletion, "
                     + "curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol, lp.external_id as externalId, "
                     + "lca.id as lcaId, lca.amortization_method_enum as amortizationBoolean, lca.interest_method_enum as interestMethodConfigBoolean, "
-                    + "lca.loan_transaction_strategy_id as transactionProcessingStrategyBoolean,lca.interest_calculated_in_period_enum as interestCalcPeriodBoolean, lca.arrearstolerance_amount as arrearsToleranceBoolean, "
+                    + "lca.loan_transaction_strategy_code as transactionProcessingStrategyBoolean,lca.interest_calculated_in_period_enum as interestCalcPeriodBoolean, lca.arrearstolerance_amount as arrearsToleranceBoolean, "
                     + "lca.repay_every as repaymentFrequencyBoolean, lca.moratorium as graceOnPrincipalAndInterestBoolean, lca.grace_on_arrears_ageing as graceOnArrearsAgingBoolean, "
                     + "lp.is_linked_to_floating_interest_rates as isLinkedToFloatingInterestRates, "
                     + "lfr.floating_rates_id as floatingRateId, " + "fr.name as floatingRateName, "
@@ -235,22 +246,22 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lfr.max_differential_lending_rate as maxDifferentialLendingRate, "
                     + "lfr.is_floating_interest_rate_calculation_allowed as isFloatingInterestRateCalculationAllowed, "
                     + "lp.allow_variabe_installments as isVariableIntallmentsAllowed, " + "lvi.minimum_gap as minimumGap, "
-                    + "lvi.maximum_gap as maximumGap, "
+                    + "lvi.maximum_gap as maximumGap, dbuc.id as delinquencyBucketId, dbuc.name as delinquencyBucketName, "
                     + "lp.can_use_for_topup as canUseForTopup, lp.is_equal_amortization as isEqualAmortization "
                     + " from m_product_loan lp " + " left join m_fund f on f.id = lp.fund_id "
                     + " left join m_product_loan_recalculation_details lpr on lpr.product_id=lp.id "
                     + " left join m_product_loan_guarantee_details lpg on lpg.loan_product_id=lp.id "
-                    + " left join ref_loan_transaction_processing_strategy ltps on ltps.id = lp.loan_transaction_strategy_id"
                     + " left join m_product_loan_configurable_attributes lca on lca.loan_product_id = lp.id "
                     + " left join m_product_loan_floating_rates as lfr on lfr.loan_product_id = lp.id "
                     + " left join m_floating_rates as fr on lfr.floating_rates_id = fr.id "
                     + " left join m_product_loan_variable_installment_config as lvi on lvi.loan_product_id = lp.id "
+                    + " left join m_delinquency_bucket as dbuc on dbuc.id = lp.delinquency_bucket_id "
                     + " join m_currency curr on curr.code = lp.currency_code";
 
         }
 
         @Override
-        public LoanProductData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public LoanProductData mapRow(@NotNull final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
             final Long id = JdbcSupport.getLong(rs, "id");
             final String name = rs.getString("name");
@@ -258,7 +269,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final String description = rs.getString("description");
             final Long fundId = JdbcSupport.getLong(rs, "fundId");
             final String fundName = rs.getString("fundName");
-            final Long transactionStrategyId = JdbcSupport.getLong(rs, "transactionStrategyId");
+            final String transactionStrategyCode = rs.getString("transactionStrategyCode");
             final String transactionStrategyName = rs.getString("transactionStrategyName");
 
             final String currencyCode = rs.getString("currencyCode");
@@ -346,7 +357,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final Collection<LoanProductBorrowerCycleVariationData> numberOfRepaymentVariationsForBorrowerCycle = new ArrayList<>();
             if (this.borrowerCycleVariationDatas != null) {
                 for (final LoanProductBorrowerCycleVariationData borrowerCycleVariationData : this.borrowerCycleVariationDatas) {
-                    final LoanProductParamType loanProductParamType = borrowerCycleVariationData.getParamType();
+                    final LoanProductParamType loanProductParamType = borrowerCycleVariationData.getLoanProductParamType();
                     if (loanProductParamType.isParamTypePrincipal()) {
                         principalVariationsForBorrowerCycle.add(borrowerCycleVariationData);
                     } else if (loanProductParamType.isParamTypeInterestTate()) {
@@ -465,11 +476,17 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final Collection<RateData> rateOptions = null;
             final boolean isRatesEnabled = false;
 
+            // Delinquency Buckets
+            final Long delinquencyBucketId = rs.getLong("delinquencyBucketId");
+            final String delinquencyBucketName = rs.getString("delinquencyBucketName");
+            final DelinquencyBucketData delinquencyBucket = new DelinquencyBucketData(delinquencyBucketId, delinquencyBucketName,
+                    new ArrayList<>());
+
             return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                     numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
                     minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType,
                     interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType,
-                    allowPartialPeriodInterestCalcualtion, fundId, fundName, transactionStrategyId, transactionStrategyName,
+                    allowPartialPeriodInterestCalcualtion, fundId, fundName, transactionStrategyCode, transactionStrategyName,
                     graceOnPrincipalPayment, recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged,
                     this.charges, accountingRuleType, includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId,
                     principalVariationsForBorrowerCycle, interestRateVariationsForBorrowerCycle,
@@ -482,7 +499,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
                     maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableIntallmentsAllowed, minimumGap,
                     maximumGap, syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, this.rates,
-                    isRatesEnabled, fixedPrincipalPercentagePerInstallment);
+                    isRatesEnabled, fixedPrincipalPercentagePerInstallment, delinquencyBucketOptions, delinquencyBucket);
         }
     }
 
@@ -547,9 +564,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final BigDecimal maxValue = rs.getBigDecimal("maxVal");
             final BigDecimal minValue = rs.getBigDecimal("minVal");
 
-            final LoanProductBorrowerCycleVariationData borrowerCycleVariationData = new LoanProductBorrowerCycleVariationData(id,
-                    cycleNumber, paramTypeData, conditionTypeData, defaultValue, minValue, maxValue);
-            return borrowerCycleVariationData;
+            return new LoanProductBorrowerCycleVariationData(id, cycleNumber, paramTypeData, conditionTypeData, defaultValue, minValue,
+                    maxValue);
         }
 
     }
@@ -558,7 +574,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     public Collection<LoanProductData> retrieveAllLoanProductsForCurrency(String currencyCode) {
         this.context.authenticatedUser();
 
-        final LoanProductMapper rm = new LoanProductMapper(null, null, null);
+        final LoanProductMapper rm = new LoanProductMapper(null, null, null, null);
 
         String sql = "select " + rm.loanProductSchema() + " where lp.currency_code= ? ";
 
@@ -570,7 +586,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             sql += " and id in (" + inClause + ") ";
         }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { currencyCode }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, currencyCode); // NOSONAR
     }
 
     @Override
@@ -619,7 +635,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             sql += " and lp.id in ( " + inClause2 + " ) ";
         }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { productId, productId }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, productId, productId); // NOSONAR
     }
 
     @Override
@@ -642,7 +658,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         sql += "lp.id not in (" + "Select pm.restricted_product_id from m_product_mix pm where pm.product_id=? " + "UNION "
                 + "Select pm.product_id from m_product_mix pm where pm.restricted_product_id=?)";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { productId, productId }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, productId, productId); // NOSONAR
     }
 
     @Override
@@ -652,7 +668,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final LoanProductFloatingRateMapper rm = new LoanProductFloatingRateMapper();
             final String sql = "select " + rm.schema() + " where lp.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId }); // NOSONAR
+            return this.jdbcTemplate.queryForObject(sql, rm, loanProductId); // NOSONAR
 
         } catch (final EmptyResultDataAccessException e) {
             throw new LoanProductNotFoundException(loanProductId, e);
@@ -676,7 +692,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         }
 
         @Override
-        public LoanProductData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public LoanProductData mapRow(@NotNull final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
             final Long id = JdbcSupport.getLong(rs, "id");
             final String name = rs.getString("name");

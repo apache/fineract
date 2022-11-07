@@ -19,33 +19,23 @@
 package org.apache.fineract.infrastructure.security.domain;
 
 import java.util.Collection;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.springframework.security.core.GrantedAuthority;
 
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public class BasicPasswordEncodablePlatformUser implements PlatformUser {
 
-    private final Long id;
-    private final String username;
-    private final String password;
-
-    public BasicPasswordEncodablePlatformUser(final Long id, final String username, final String password) {
-        this.id = id;
-        this.username = username;
-        this.password = password;
-    }
-
-    public Long getId() {
-        return this.id;
-    }
-
-    @Override
-    public String getPassword() {
-        return this.password;
-    }
-
-    @Override
-    public String getUsername() {
-        return this.username;
-    }
+    @Getter
+    private Long id;
+    @Getter(onMethod = @__(@Override))
+    private String username;
+    @Getter(onMethod = @__(@Override))
+    private String password;
 
     @Override
     public Collection<GrantedAuthority> getAuthorities() {
@@ -71,4 +61,5 @@ public class BasicPasswordEncodablePlatformUser implements PlatformUser {
     public boolean isEnabled() {
         return false;
     }
+
 }

@@ -27,7 +27,7 @@ public class SavingsAccountTransactionDataComparator implements Comparator<Savin
     public int compare(final SavingsAccountTransactionData o1, final SavingsAccountTransactionData o2) {
         int compareResult = 0;
 
-        final int comparsion = o1.getTransactionDate().compareTo(o2.getLastTransactionDate());
+        final int comparsion = o1.getTransactionDate().compareTo(o2.getTransactionDate());
         if (comparsion == 0) {
             compareResult = o1.getSubmittedOnDate().compareTo(o2.getSubmittedOnDate());
             if (compareResult == 0 && o1.getId() != null && o2.getId() != null) {

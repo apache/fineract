@@ -86,7 +86,7 @@ spec:
         tier: fineractmysql
     spec:
       containers:
-        - image: mariadb:10.6
+        - image: mariadb:10.9
           name: mysql
           resources:
             requests:

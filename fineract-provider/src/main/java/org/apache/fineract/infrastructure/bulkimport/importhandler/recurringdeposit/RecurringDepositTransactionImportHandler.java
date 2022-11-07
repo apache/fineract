@@ -34,7 +34,6 @@ import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.SavingsAccountTransactionEnumValueSerialiser;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
@@ -53,9 +52,6 @@ import org.springframework.stereotype.Service;
 public class RecurringDepositTransactionImportHandler implements ImportHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(RecurringDepositTransactionImportHandler.class);
-    private Workbook workbook;
-    private List<SavingsAccountTransactionData> savingsTransactions;
-    private String savingsAccountId = "";
 
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
@@ -65,32 +61,32 @@ public class RecurringDepositTransactionImportHandler implements ImportHandler {
     }
 
     @Override
-    public Count process(Workbook workbook, String locale, String dateFormat) {
-        this.workbook = workbook;
-        this.savingsTransactions = new ArrayList<>();
-        readExcelFile(locale, dateFormat);
-        return importEntity(dateFormat);
+    public Count process(final Workbook workbook, final String locale, final String dateFormat) {
+        List<SavingsAccountTransactionData> savingsTransactions = readExcelFile(workbook, locale, dateFormat);
+        return importEntity(workbook, savingsTransactions, dateFormat);
     }
 
-    public void readExcelFile(String locale, String dateFormat) {
+    public List<SavingsAccountTransactionData> readExcelFile(final Workbook workbook, final String locale, final String dateFormat) {
+        List<SavingsAccountTransactionData> savingsTransactions = new ArrayList<>();
         Sheet savingsTransactionSheet = workbook.getSheet(TemplatePopulateImportConstants.SAVINGS_TRANSACTION_SHEET_NAME);
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(savingsTransactionSheet, TransactionConstants.AMOUNT_COL);
+        Long savingsAccountId = null;
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
             row = savingsTransactionSheet.getRow(rowIndex);
             if (ImportHandlerUtils.isNotImported(row, TransactionConstants.STATUS_COL)) {
-                savingsTransactions.add(readSavingsTransaction(row, locale, dateFormat));
+                savingsTransactions.add(readSavingsTransaction(workbook, row, savingsAccountId, locale, dateFormat));
             }
         }
+        return savingsTransactions;
     }
 
-    private SavingsAccountTransactionData readSavingsTransaction(Row row, String locale, String dateFormat) {
-        String savingsAccountIdCheck = null;
-        if (ImportHandlerUtils.readAsLong(TransactionConstants.SAVINGS_ACCOUNT_NO_COL, row) != null) {
-            savingsAccountIdCheck = ImportHandlerUtils.readAsLong(TransactionConstants.SAVINGS_ACCOUNT_NO_COL, row).toString();
-        }
-        if (savingsAccountIdCheck != null) {
-            savingsAccountId = savingsAccountIdCheck;
+    private SavingsAccountTransactionData readSavingsTransaction(final Workbook workbook, final Row row, Long savingsAccountId,
+            final String locale, final String dateFormat) {
+        Long internalSavingsAccountId = ImportHandlerUtils.readAsLong(TransactionConstants.SAVINGS_ACCOUNT_NO_COL, row);
+
+        if (internalSavingsAccountId != null) {
+            savingsAccountId = internalSavingsAccountId;
         }
         String transactionType = ImportHandlerUtils.readAsString(TransactionConstants.TRANSACTION_TYPE_COL, row);
         SavingsAccountTransactionEnumData savingsAccountTransactionEnumData = new SavingsAccountTransactionEnumData(null, null,
@@ -111,12 +107,12 @@ public class RecurringDepositTransactionImportHandler implements ImportHandler {
         String receiptNumber = ImportHandlerUtils.readAsString(TransactionConstants.RECEIPT_NO_COL, row);
         String bankNumber = ImportHandlerUtils.readAsString(TransactionConstants.BANK_NO_COL, row);
         return SavingsAccountTransactionData.importInstance(amount, transactionDate, paymentTypeId, accountNumber, checkNumber, routingCode,
-                receiptNumber, bankNumber, Long.parseLong(savingsAccountId), savingsAccountTransactionEnumData, row.getRowNum(), locale,
-                dateFormat);
+                receiptNumber, bankNumber, savingsAccountId, savingsAccountTransactionEnumData, row.getRowNum(), locale, dateFormat);
 
     }
 
-    public Count importEntity(String dateFormat) {
+    public Count importEntity(final Workbook workbook, final List<SavingsAccountTransactionData> savingsTransactions,
+            final String dateFormat) {
         Sheet savingsTransactionSheet = workbook.getSheet(TemplatePopulateImportConstants.SAVINGS_TRANSACTION_SHEET_NAME);
         int successCount = 0;
         int errorCount = 0;
@@ -145,7 +141,7 @@ public class RecurringDepositTransactionImportHandler implements ImportHandler {
                             .withJson(payload) //
                             .build();
                 }
-                final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+                commandsSourceWritePlatformService.logCommandSource(commandRequest);
                 successCount++;
                 Cell statusCell = savingsTransactionSheet.getRow(transaction.getRowIndex()).createCell(TransactionConstants.STATUS_COL);
                 statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);

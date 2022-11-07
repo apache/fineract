@@ -18,101 +18,200 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import java.util.Arrays;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.event.business.domain.loan.LoanStatusChangedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 
+// TODO: introduce tests for the state machine
+@RequiredArgsConstructor
 public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachine {
 
     private final List<LoanStatus> allowedLoanStatuses;
+    private final BusinessEventNotifierService businessEventNotifierService;
 
-    public DefaultLoanLifecycleStateMachine(final List<LoanStatus> allowedLoanStatuses) {
-        this.allowedLoanStatuses = allowedLoanStatuses;
+    public DefaultLoanLifecycleStateMachine(LoanStatus[] allowedLoanStatuses, BusinessEventNotifierService businessEventNotifierService) {
+        this(Arrays.asList(allowedLoanStatuses), businessEventNotifierService);
     }
 
     @Override
-    public LoanStatus transition(final LoanEvent loanEvent, final LoanStatus from) {
+    public LoanStatus dryTransition(final LoanEvent loanEvent, final Loan loan) {
+        LoanStatus newStatus = getNextStatus(loanEvent, loan);
+        return newStatus != null ? newStatus : loan.getStatus();
+    }
 
-        LoanStatus newState = from;
+    @Override
+    public void transition(final LoanEvent loanEvent, final Loan loan) {
+        LoanStatus newStatus = getNextStatus(loanEvent, loan);
+        if (newStatus != null) {
+            Integer newPlainStatus = newStatus.getValue();
+            loan.setLoanStatus(newPlainStatus);
+
+            if (isNotLoanCreation(loanEvent)) {
+                // in case of Loan creation, a LoanCreatedBusinessEvent is also raised, no need to send a status change
+                businessEventNotifierService.notifyPostBusinessEvent(new LoanStatusChangedBusinessEvent(loan));
+            }
+        }
+    }
+
+    private boolean isNotLoanCreation(LoanEvent loanEvent) {
+        return !LoanEvent.LOAN_CREATED.equals(loanEvent);
+    }
+
+    private LoanStatus getNextStatus(LoanEvent loanEvent, Loan loan) {
+        Integer plainFrom = loan.getPlainStatus();
+        if (loanEvent.equals(LoanEvent.LOAN_CREATED) && plainFrom == null) {
+            return submittedTransition();
+        }
+
+        LoanStatus from = loan.getStatus();
+        LoanStatus newState = null;
 
         switch (loanEvent) {
-            case LOAN_CREATED:
-                if (from == null) {
-                    newState = stateOf(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL, this.allowedLoanStatuses);
-                }
-            break;
             case LOAN_REJECTED:
                 if (from.hasStateOf(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL)) {
-                    newState = stateOf(LoanStatus.REJECTED, this.allowedLoanStatuses);
+                    newState = rejectedTransition();
                 }
             break;
             case LOAN_APPROVED:
                 if (from.hasStateOf(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL)) {
-                    newState = stateOf(LoanStatus.APPROVED, this.allowedLoanStatuses);
+                    newState = approvedTransition();
                 }
             break;
             case LOAN_WITHDRAWN:
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL)) {
-                    newState = stateOf(LoanStatus.WITHDRAWN_BY_CLIENT, this.allowedLoanStatuses);
+                    newState = withdrawnByClientTransition();
                 }
             break;
             case LOAN_DISBURSED:
-                if (from.hasStateOf(LoanStatus.APPROVED)) {
-                    newState = stateOf(LoanStatus.ACTIVE, this.allowedLoanStatuses);
+                if (anyOfAllowedWhenComingFrom(from, LoanStatus.APPROVED, LoanStatus.CLOSED_OBLIGATIONS_MET, LoanStatus.OVERPAID)) {
+                    newState = activeTransition();
                 }
             break;
             case LOAN_APPROVAL_UNDO:
                 if (from.hasStateOf(LoanStatus.APPROVED)) {
-                    newState = stateOf(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL, this.allowedLoanStatuses);
+                    newState = submittedTransition();
                 }
             break;
             case LOAN_DISBURSAL_UNDO:
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE)) {
-                    newState = stateOf(LoanStatus.APPROVED, this.allowedLoanStatuses);
+                    newState = approvedTransition();
                 }
             break;
             case LOAN_CHARGE_PAYMENT:
             case LOAN_REPAYMENT_OR_WAIVER:
-                if (anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE, LoanStatus.CLOSED_OBLIGATIONS_MET, LoanStatus.OVERPAID)) {
-                    newState = stateOf(LoanStatus.ACTIVE, this.allowedLoanStatuses);
-                } else {
-                    newState = from;
+                if (anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED_OBLIGATIONS_MET, LoanStatus.OVERPAID)) {
+                    newState = activeTransition();
                 }
             break;
             case REPAID_IN_FULL:
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE, LoanStatus.OVERPAID)) {
-                    newState = stateOf(LoanStatus.CLOSED_OBLIGATIONS_MET, this.allowedLoanStatuses);
+                    newState = closeObligationsMetTransition();
                 }
             break;
             case WRITE_OFF_OUTSTANDING:
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE)) {
-                    newState = stateOf(LoanStatus.CLOSED_WRITTEN_OFF, this.allowedLoanStatuses);
+                    newState = closedWrittenOffTransition();
                 }
             break;
             case LOAN_RESCHEDULE:
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.ACTIVE)) {
-                    newState = stateOf(LoanStatus.CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT, this.allowedLoanStatuses);
-                }
-            break;
-            case INTERST_REBATE_OWED:
-                if (anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED_OBLIGATIONS_MET)) {
-                    newState = stateOf(LoanStatus.CLOSED_OBLIGATIONS_MET, this.allowedLoanStatuses);
+                    newState = closedRescheduleOutstandingAmountTransition();
                 }
             break;
             case LOAN_OVERPAYMENT:
                 if (anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED_OBLIGATIONS_MET, LoanStatus.ACTIVE)) {
-                    newState = stateOf(LoanStatus.OVERPAID, this.allowedLoanStatuses);
+                    newState = overpaidTransition();
                 }
             break;
-            case LOAN_CLOSED:
+            case LOAN_ADJUST_TRANSACTION:
+                if (anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED_OBLIGATIONS_MET, LoanStatus.CLOSED_WRITTEN_OFF,
+                        LoanStatus.CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT)) {
+                    newState = activeTransition();
+                }
+            break;
+            case LOAN_INITIATE_TRANSFER:
+                newState = transferInProgress();
+            break;
+            case LOAN_REJECT_TRANSFER:
+                if (anyOfAllowedWhenComingFrom(from, LoanStatus.TRANSFER_IN_PROGRESS)) {
+                    newState = transferOnHold();
+                }
+            break;
+            case LOAN_WITHDRAW_TRANSFER:
+                if (anyOfAllowedWhenComingFrom(from, LoanStatus.TRANSFER_IN_PROGRESS)) {
+                    newState = activeTransition();
+                }
             break;
             case WRITE_OFF_OUTSTANDING_UNDO:
+                if (anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED_WRITTEN_OFF)) {
+                    newState = activeTransition();
+                }
             break;
             case LOAN_CREDIT_BALANCE_REFUND:
+                if (anyOfAllowedWhenComingFrom(from, LoanStatus.OVERPAID)) {
+                    newState = closeObligationsMetTransition();
+                }
+            break;
+            case LOAN_CHARGE_ADDED:
+                if (anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED_OBLIGATIONS_MET)) {
+                    newState = activeTransition();
+                }
+            break;
+            case LOAN_CHARGEBACK:
+                if (anyOfAllowedWhenComingFrom(from, LoanStatus.CLOSED_OBLIGATIONS_MET, LoanStatus.OVERPAID)) {
+                    newState = activeTransition();
+                }
             break;
             default:
             break;
         }
-
         return newState;
+    }
+
+    private LoanStatus transferOnHold() {
+        return stateOf(LoanStatus.TRANSFER_ON_HOLD, this.allowedLoanStatuses);
+    }
+
+    private LoanStatus transferInProgress() {
+        return stateOf(LoanStatus.TRANSFER_IN_PROGRESS, this.allowedLoanStatuses);
+    }
+
+    private LoanStatus overpaidTransition() {
+        return stateOf(LoanStatus.OVERPAID, this.allowedLoanStatuses);
+    }
+
+    private LoanStatus closedRescheduleOutstandingAmountTransition() {
+        return stateOf(LoanStatus.CLOSED_RESCHEDULE_OUTSTANDING_AMOUNT, this.allowedLoanStatuses);
+    }
+
+    private LoanStatus closedWrittenOffTransition() {
+        return stateOf(LoanStatus.CLOSED_WRITTEN_OFF, this.allowedLoanStatuses);
+    }
+
+    private LoanStatus closeObligationsMetTransition() {
+        return stateOf(LoanStatus.CLOSED_OBLIGATIONS_MET, this.allowedLoanStatuses);
+    }
+
+    private LoanStatus activeTransition() {
+        return stateOf(LoanStatus.ACTIVE, this.allowedLoanStatuses);
+    }
+
+    private LoanStatus withdrawnByClientTransition() {
+        return stateOf(LoanStatus.WITHDRAWN_BY_CLIENT, this.allowedLoanStatuses);
+    }
+
+    private LoanStatus approvedTransition() {
+        return stateOf(LoanStatus.APPROVED, this.allowedLoanStatuses);
+    }
+
+    private LoanStatus rejectedTransition() {
+        return stateOf(LoanStatus.REJECTED, this.allowedLoanStatuses);
+    }
+
+    private LoanStatus submittedTransition() {
+        return stateOf(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL, this.allowedLoanStatuses);
     }
 
     private LoanStatus stateOf(final LoanStatus state, final List<LoanStatus> allowedLoanStatuses) {

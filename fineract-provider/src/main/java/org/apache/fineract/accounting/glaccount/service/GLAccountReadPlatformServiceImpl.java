@@ -99,8 +99,9 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
             if (associationParametersData.isRunningBalanceRequired()) {
                 organizationRunningBalance = rs.getLong("organizationRunningBalance");
             }
-            return new GLAccountData(id, name, parentId, glCode, disabled, manualEntriesAllowed, accountType, usage, description,
-                    nameDecorated, tagId, organizationRunningBalance);
+            return new GLAccountData().setId(id).setName(name).setParentId(parentId).setGlCode(glCode).setDisabled(disabled)
+                    .setManualEntriesAllowed(manualEntriesAllowed).setType(accountType).setUsage(usage).setDescription(description)
+                    .setNameDecorated(nameDecorated).setTagId(tagId).setOrganizationRunningBalance(organizationRunningBalance);
         }
     }
 
@@ -275,8 +276,8 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
             final Long id = JdbcSupport.getLong(rs, "id");
             final String name = rs.getString("name");
             final String glCode = rs.getString("glCode");
-            return new GLAccountDataForLookup(id, name, glCode);
-        }
 
+            return new GLAccountDataForLookup().setId(id).setName(name).setGlCode(glCode);
+        }
     }
 }

@@ -20,14 +20,17 @@ package org.apache.fineract.infrastructure.gcm.domain;
 
 import java.io.Serializable;
 import java.util.List;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * Result of a GCM message request that returned HTTP status code 200.
  *
  * <p>
  * If the message is successfully created, the {@link #getMessageId()} returns the message id and
- * {@link #getErrorCodeName()} returns {@literal null}; otherwise, {@link #getMessageId()} returns {@literal null} and
- * {@link #getErrorCodeName()} returns the code of the error.
+ * {@link #getErrorCode()} returns {@literal null}; otherwise, {@link #getMessageId()} returns {@literal null} and
+ * {@link #getErrorCode()} returns the code of the error.
  *
  * <p>
  * There are cases when a request is accept and the message successfully created, but GCM has a canonical registration
@@ -39,22 +42,27 @@ import java.util.List;
  *
  * <pre>
  *   - Call {@link #getMessageId()}:
- *     - {@literal null} means error, call {@link #getErrorCodeName()}
+ *     - {@literal null} means error, call {@link #getErrorCode()}
  *     - non-{@literal null} means the message was created:
  *       - Call {@link #getCanonicalRegistrationId()}
  *         - if it returns {@literal null}, do nothing.
  *         - otherwise, update the server datastore with the new id.
  * </pre>
  */
+
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public final class Result implements Serializable {
 
-    private final String messageId;
-    private final String canonicalRegistrationId;
-    private final String errorCode;
-    private final Integer success;
-    private final Integer failure;
-    private final List<String> failedRegistrationIds;
-    private final int status;
+    private static final long serialVersionUID = 1L;
+    private String messageId;
+    private String canonicalRegistrationId;
+    private String errorCode;
+    private Integer success;
+    private Integer failure;
+    private List<String> failedRegistrationIds;
+    private int status;
 
     public static final class Builder {
 
@@ -117,39 +125,6 @@ public final class Result implements Serializable {
         status = builder.status;
     }
 
-    /**
-     * Gets the message id, if any.
-     */
-    public String getMessageId() {
-        return messageId;
-    }
-
-    /**
-     * Gets the canonical registration id, if any.
-     */
-    public String getCanonicalRegistrationId() {
-        return canonicalRegistrationId;
-    }
-
-    /**
-     * Gets the error code, if any.
-     */
-    public String getErrorCodeName() {
-        return errorCode;
-    }
-
-    public Integer getSuccess() {
-        return success;
-    }
-
-    public Integer getFailure() {
-        return failure;
-    }
-
-    public List<String> getFailedRegistrationIds() {
-        return failedRegistrationIds;
-    }
-
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder("[");
@@ -172,10 +147,6 @@ public final class Result implements Serializable {
             builder.append(" failedRegistrationIds=").append(failedRegistrationIds);
         }
         return builder.append(" ]").toString();
-    }
-
-    public int getStatus() {
-        return this.status;
     }
 
 }

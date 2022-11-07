@@ -22,7 +22,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -39,10 +38,11 @@ import org.springframework.stereotype.Component;
 @Component
 public final class CurrencyCommandFromApiJsonDeserializer {
 
+    public static final String CURRENCIES = "currencies";
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("currencies"));
+    private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(List.of(CURRENCIES));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -58,14 +58,14 @@ public final class CurrencyCommandFromApiJsonDeserializer {
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, SUPPORTED_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("currencies");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(CURRENCIES);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
-        final String[] currencies = this.fromApiJsonHelper.extractArrayNamed("currencies", element);
-        baseDataValidator.reset().parameter("currencies").value(currencies).arrayNotEmpty();
+        final String[] currencies = this.fromApiJsonHelper.extractArrayNamed(CURRENCIES, element);
+        baseDataValidator.reset().parameter(CURRENCIES).value(currencies).arrayNotEmpty();
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

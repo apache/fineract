@@ -40,6 +40,20 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.Loa
  */
 public class CreocoreLoanRepaymentScheduleTransactionProcessor extends AbstractLoanRepaymentScheduleTransactionProcessor {
 
+    private static final String STRATEGY_CODE = "creocore-strategy";
+
+    private static final String STRATEGY_NAME = "Creocore Unique";
+
+    @Override
+    public String getCode() {
+        return STRATEGY_CODE;
+    }
+
+    @Override
+    public String getName() {
+        return STRATEGY_NAME;
+    }
+
     /**
      * For creocore, early is defined as any date before the installment due date
      */

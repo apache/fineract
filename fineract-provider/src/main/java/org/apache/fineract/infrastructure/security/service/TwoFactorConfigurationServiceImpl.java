@@ -28,6 +28,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.security.constants.TwoFactorConfigurationConstants;
 import org.apache.fineract.infrastructure.security.constants.TwoFactorConstants;
@@ -78,10 +80,10 @@ public class TwoFactorConfigurationServiceImpl implements TwoFactorConfiguration
                 continue;
             }
 
-            if (command.isChangeInBooleanParameterNamed(parameterName, configuration.getBooleanValue())) {
+            if (command.isChangeInBooleanParameterNamed(parameterName, BooleanUtils.toBooleanObject(configuration.getValue()))) {
                 final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(parameterName);
                 actualChanges.put(parameterName, newValue);
-                configuration.setBooleanValue(newValue);
+                configuration.setValue(String.valueOf(newValue));
                 configurationRepository.save(configuration);
             }
         }
@@ -92,10 +94,10 @@ public class TwoFactorConfigurationServiceImpl implements TwoFactorConfiguration
                 continue;
             }
 
-            if (command.isChangeInStringParameterNamed(parameterName, configuration.getStringValue())) {
+            if (command.isChangeInStringParameterNamed(parameterName, configuration.getValue())) {
                 final String newValue = command.stringValueOfParameterNamed(parameterName).trim();
                 actualChanges.put(parameterName, newValue);
-                configuration.setStringValue(newValue);
+                configuration.setValue(newValue);
                 configurationRepository.save(configuration);
             }
         }
@@ -106,10 +108,10 @@ public class TwoFactorConfigurationServiceImpl implements TwoFactorConfiguration
                 continue;
             }
 
-            if (command.isChangeInIntegerSansLocaleParameterNamed(parameterName, configuration.getIntegerValue())) {
+            if (command.isChangeInIntegerSansLocaleParameterNamed(parameterName, NumberUtils.createInteger(configuration.getValue()))) {
                 final Long newValue = command.longValueOfParameterNamed(parameterName);
                 actualChanges.put(parameterName, newValue);
-                configuration.setIntegerValue(newValue);
+                configuration.setValue(String.valueOf(newValue));
                 configurationRepository.save(configuration);
             }
         }
@@ -221,7 +223,7 @@ public class TwoFactorConfigurationServiceImpl implements TwoFactorConfiguration
 
     private boolean getBooleanConfig(final String name, final boolean defaultValue) {
         final TwoFactorConfiguration configuration = configurationRepository.findByName(name);
-        Boolean value = configuration.getBooleanValue();
+        Boolean value = BooleanUtils.toBooleanObject(configuration.getValue());
         if (value == null) {
             return defaultValue;
         }
@@ -230,7 +232,7 @@ public class TwoFactorConfigurationServiceImpl implements TwoFactorConfiguration
 
     private String getStringConfig(final String name, final String defaultValue) {
         final TwoFactorConfiguration configuration = configurationRepository.findByName(name);
-        String value = configuration.getStringValue();
+        String value = configuration.getValue();
         if (value == null) {
             return defaultValue;
         }
@@ -239,7 +241,7 @@ public class TwoFactorConfigurationServiceImpl implements TwoFactorConfiguration
 
     private Integer getIntegerConfig(final String name, final Integer defaultValue) {
         final TwoFactorConfiguration configuration = configurationRepository.findByName(name);
-        Integer value = configuration.getIntegerValue();
+        Integer value = NumberUtils.createInteger(configuration.getValue());
         if (value == null) {
             return defaultValue;
         }

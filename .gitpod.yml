@@ -20,7 +20,7 @@
 # https://www.gitpod.io/docs/41_Config_Gitpod_File/
 # https://github.com/gitpod-io/workspace-images/tree/master/mysql
 
-image: gitpod/workspace-mysql
+image: gitpod/workspace-mysql:2022-08-04-13-40-17
 ports:
 - port: 3306
   onOpen: ignore
@@ -35,8 +35,9 @@ ports:
 tasks:
 - command: |
       # NB MySQL on GitPod.io is currently quite slow.
-      # similar to .travis.yml, but using authentication_string= instead of password= due to mysql major version difference
+      # Using authentication_string= instead of password= due to mysql major version difference
       mysql -e "USE mysql;\nUPDATE user SET authentication_string=PASSWORD('mysql') WHERE user='root';\nFLUSH PRIVILEGES;\n"
       ./gradlew createDB -PdbName=fineract_tenants
       ./gradlew createDB -PdbName=fineract_default
       ./gradlew build -x test
+  init: sdk default java 17.0.4.fx-zulu

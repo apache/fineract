@@ -73,6 +73,8 @@ final class DatatablesApiResourceSwagger {
         public String apptableName;
         @Schema(required = true, example = "extra_client_details")
         public String datatableName;
+        @Schema(example = "abc")
+        public String entitySubType;
         @Schema(required = false, description = "Allows to create multiple entries in the Data Table. Optional, defaults to false. If this property is not provided Data Table will allow only one entry.", example = "true")
         public boolean multiRow;
         @Schema(required = true)

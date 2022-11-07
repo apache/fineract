@@ -1,0 +1,114 @@
+= Custom Loan Transaction Processors
+
+Fineract has 7 built-in loan transaction processors:
+
+1. `org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.CreocoreLoanRepaymentScheduleTransactionProcessor`
+2. `org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.EarlyPaymentLoanRepaymentScheduleTransactionProcessor`
+3. `org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.FineractStyleLoanRepaymentScheduleTransactionProcessor`
+4. `org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.HeavensFamilyLoanRepaymentScheduleTransactionProcessor`
+5. `org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor`
+6. `org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor`
+7. `org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.RBILoanRepaymentScheduleTransactionProcessor`
+
+.Default Loan Transaction Processor configuration
+[source,java]
+----
+include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/starter/LoanAccountAutoStarter.java[lines=38..80]
+----
+
+All default processor implementations are enabled by default, but can also be prevented from being loaded into memory by a simple configuration in `application.properties`. Use the environment variables you see below in your Kubernetes and Docker Compose deployments to override the default behavior.
+
+.Default Loan Transaction Processor Application Properties
+[source,properties]
+----
+include::{rootdir}/fineract-provider/src/main/resources/application.properties[lines=64..70]
+----
+
+== Implement Processors
+
+.Loan Transaction Processor Interface
+[source,java]
+----
+include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/transactionprocessor/LoanRepaymentScheduleTransactionProcessor.java[lines=19..]
+----
+
+.Custom Loan Transaction Processor Example
+[source,java]
+----
+include::{rootdir}/custom/acme/loan/processor/src/main/java/com/acme/fineract/loan/processor/AcmeLoanRepaymentScheduleTransactionProcessor.java[lines=19..]
+----
+
+The example implementation doesn't do much. We are just overriding one of the default processor implementations `org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.FineractStyleLoanRepaymentScheduleTransactionProcessor` and give the custom processor it's own lookup code and name (descriptive text for display in UIs, e. g. when configuring a loan product). As usual it is a good idea to follow some simple conventions:
+
+1. Make sure the value returned by `getCode()` is unique. Prefixing it with characters that reflect your organization name (here `acme-`) is a good idea.
+2. You have more freedom for the descriptive test returned by `getName()`, but it is still a good idea to keep the value unique to avoid confusion.
+
+=== Method `getCode()`
+
+Lookup value that is used to pick a loan transaction processor (see processor factory).
+
+=== Method `getName()`
+
+Descriptive text about the loan transaction processor that is mostly used in user interfaces.
+
+=== Method `handleTransaction()`
+
+TBD
+
+=== Method `handleWriteOff()`
+
+TBD
+
+=== Method `handleRepaymentSchedule()`
+
+TBD
+
+=== Method `isInterestFirstRepaymentScheduleTransactionProcessor()`
+
+TBD
+
+=== Method `handleRefund()`
+
+TBD
+
+=== Method `handleChargeback()`
+
+TBD
+
+=== Method `processTransactionsFromDerivedFields()`
+
+TBD
+
+== Override Processor Factory
+
+The processor factory has no reference to any specific implementation of the loan transaction processor interface. All avaible implementations will be injected here (internal default and custom implementations). Processor instances can be looked up via method `determineProcessor()`. You can pass either the code of the processor or the processor's name to look it up. If a matching processor can't be found then the factory function will either return the default instance or fails with an exception depending on the configuration in `application.properties`.
+
+IMPORTANT: It is preferable to use the processor code to lookup processor instances. Lookups via processor names are only done in the import service via Excel sheets (should be fixed).
+
+.Loan Transaction Processor Factory Implementation
+[source,java]
+----
+include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/LoanRepaymentScheduleTransactionProcessorFactory.java[lines=19..]
+----
+
+This is the default factory auto-configuration.
+
+.Loan Transaction Processor Factory Auto-Configuration
+[source,java]
+----
+include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/starter/LoanAccountAutoStarter.java[lines=81..87]
+----
+
+If you need then you can override this, e.g. because you want to set a different default processor then you can do so in your custom module's auto-configuration.
+
+.Custom Loan Transaction Processor Factory Auto-Configuration Example
+[source,java]
+----
+include::{rootdir}/custom/acme/loan/starter/src/main/java/com/acme/fineract/loan/starter/AcmeLoanAutoConfiguration.java[lines=36..41]
+----
+
+.Processor Lookup Failure Configuration Property
+[source,properties]
+----
+include::{rootdir}/fineract-provider/src/main/resources/application.properties[lines=71..71]
+----

@@ -53,12 +53,12 @@ import org.springframework.stereotype.Component;
 @Path("/loanproducts/{productId}/productmix")
 @Component
 @Scope("singleton")
-@Tag(name = "Product Mix", description = "")
+@Tag(name = "Product Mix")
 public class ProductMixApiResource {
 
-    private final String resourceNameForPermissions = "PRODUCTMIX";
+    private static final String RESOURCE_NAME_FOR_PERMISSIONS = "PRODUCTMIX";
 
-    private final Set<String> productMixDataParameters = new HashSet<>(
+    private static final Set<String> PRODUCT_MIX_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList("productId", "productName", "restrictedProducts", "allowedProducts", "productOptions"));
 
     private final PlatformSecurityContext context;
@@ -88,7 +88,7 @@ public class ProductMixApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveTemplate(@PathParam("productId") final Long productId, @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
         ProductMixData productMixData = this.productMixReadPlatformService.retrieveLoanProductMixDetails(productId);
 
@@ -97,7 +97,7 @@ public class ProductMixApiResource {
             final Collection<LoanProductData> productOptions = this.loanProductReadPlatformService.retrieveAvailableLoanProductsForMix();
             productMixData = ProductMixData.withTemplateOptions(productMixData, productOptions);
         }
-        return this.toApiJsonSerializer.serialize(settings, productMixData, this.productMixDataParameters);
+        return this.toApiJsonSerializer.serialize(settings, productMixData, PRODUCT_MIX_DATA_PARAMETERS);
     }
 
     @POST
