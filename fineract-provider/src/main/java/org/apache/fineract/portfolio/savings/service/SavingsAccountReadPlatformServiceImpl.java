@@ -61,6 +61,7 @@ import org.apache.fineract.portfolio.group.service.GroupReadPlatformService;
 import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
+import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYearType;
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
@@ -1299,7 +1300,14 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
         return this.jdbcTemplate.query(sql, this.transactionsMapper, new Object[] { savingsId, depositAccountType.getValue() }); // NOSONAR
     }
+    @Override
+    public Collection<SavingsAccountTransactionData> retrieveAccrualTransactions(final Long savingsId, DepositAccountType depositAccountType) {
 
+        final String sql = "select " + this.transactionsMapper.schema()
+                + " where sa.id = ? and sa.deposit_type_enum = ? AND transaction_type_enum in (?,?)  order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC";
+
+        return this.jdbcTemplate.query(sql, this.transactionsMapper, new Object[] { savingsId, depositAccountType.getValue(),SavingsAccountTransactionType.ACCRUAL_INTEREST_POSTING.getValue(),SavingsAccountTransactionType.OVERDRAFT_ACCRUAL_INTEREST.getValue() });
+    }
     @Override
     public SavingsAccountTransactionData retrieveSavingsTransaction(final Long savingsId, final Long transactionId,
             DepositAccountType depositAccountType) {

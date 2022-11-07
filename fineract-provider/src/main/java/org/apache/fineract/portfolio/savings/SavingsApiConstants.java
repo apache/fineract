@@ -180,6 +180,7 @@ public class SavingsApiConstants {
 
     // Savings account associations
     public static final String transactions = "transactions";
+    public static final String accrualTransactions = "accrualTransactions";
     public static final String charges = "charges";
     public static final String linkedAccount = "linkedAccount";
     public static final String blockNarrations = "blockNarrationOptions";
