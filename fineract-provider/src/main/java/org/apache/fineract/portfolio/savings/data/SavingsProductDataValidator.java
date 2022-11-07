@@ -296,14 +296,6 @@ public class SavingsProductDataValidator {
                     .ignoreIfNull().zeroOrPositiveAmount();
         }
 
-        if (this.fromApiJsonHelper.parameterExists(numberOfCreditTransactionsParamName, element)) {
-            final Long numOfCreditTransaction = this.fromApiJsonHelper.extractLongNamed(numberOfCreditTransactionsParamName, element);
-            baseDataValidator.reset().parameter(numberOfCreditTransactionsParamName).value(numOfCreditTransaction).notNull().longGreaterThanZero();
-        }
-        if (this.fromApiJsonHelper.parameterExists(numberOfDebitTransactionsParamName, element)) {
-            final Long numOfDebitTransaction = this.fromApiJsonHelper.extractLongNamed(numberOfDebitTransactionsParamName, element);
-            baseDataValidator.reset().parameter(numberOfDebitTransactionsParamName).value(numOfDebitTransaction).notNull().longGreaterThanZero();
-        }
 
         validateTaxWithHoldingParams(baseDataValidator, element, true);
         validateLienParams(baseDataValidator, element);
@@ -573,15 +565,6 @@ public class SavingsProductDataValidator {
                         .value(escheatLiabilityAccountId).notNull().integerGreaterThanZero();
             }
         }
-        if (this.fromApiJsonHelper.parameterExists(numberOfCreditTransactionsParamName, element)) {
-            final Long numOfCreditTransaction = this.fromApiJsonHelper.extractLongNamed(numberOfCreditTransactionsParamName, element);
-            baseDataValidator.reset().parameter(numberOfCreditTransactionsParamName).value(numOfCreditTransaction).notNull().longGreaterThanZero();
-        }
-        if (this.fromApiJsonHelper.parameterExists(numberOfDebitTransactionsParamName, element)) {
-            final Long numOfDebitTransaction = this.fromApiJsonHelper.extractLongNamed(numberOfDebitTransactionsParamName, element);
-            baseDataValidator.reset().parameter(numberOfDebitTransactionsParamName).value(numOfDebitTransaction).notNull().longGreaterThanZero();
-        }
-
 
         validatePaymentChannelFundSourceMappings(baseDataValidator, element);
         validateChargeToIncomeAccountMappings(baseDataValidator, element);

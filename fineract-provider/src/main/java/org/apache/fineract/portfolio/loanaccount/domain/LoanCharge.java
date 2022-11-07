@@ -671,7 +671,7 @@ public class LoanCharge extends AbstractPersistableCustom {
         BigDecimal transactionAmountToConsider;
         if(this.maxAmount != null && percentageOf.compareTo(this.maxAmount) > 0){
             transactionAmountToConsider = this.maxAmount;
-        }else if(this.minAmount != null && percentageOf.compareTo(this.minAmount) > 0){
+        }else if(this.minAmount != null && percentageOf.compareTo(this.minAmount) != 0){
             transactionAmountToConsider = this.minAmount;
         } else{
             transactionAmountToConsider = percentageOf;
