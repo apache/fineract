@@ -36,6 +36,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -135,10 +136,16 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     private Long originalTxnId;
 
     @Column(name = "is_lien_transaction")
-    private Boolean lienTransaction;
+    private Boolean lienTransaction = false;
 
     @Column(name = "ref_no", nullable = true)
     private String refNo;
+
+    @Transient
+    private boolean newTransaction;
+
+    @Column(name = "is_account_transfer", nullable = false)
+    private Boolean isAccountTransfer = false;
 
     SavingsAccountTransaction() {
         this.dateOf = null;
@@ -184,7 +191,18 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
         return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.INTEREST_POSTING.getValue(), date,
                 amount, isReversed, null, isManualTransaction, lienTransaction, refNo);
     }
-
+    public static SavingsAccountTransaction interestPosting(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
+                                                            final Money amount, final boolean isManualTransaction, final Boolean isAccountTransfer) {
+        final boolean isReversed = false;
+        return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.INTEREST_POSTING.getValue(), date,
+                amount, isReversed, null, isManualTransaction, isAccountTransfer);
+    }
+    public static SavingsAccountTransaction overdraftInterest(final SavingsAccount savingsAccount, final Office office,
+                                                              final LocalDate date, final Money amount, final boolean isManualTransaction, final Boolean isAccountTransfer) {
+        final boolean isReversed = false;
+        return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.OVERDRAFT_INTEREST.getValue(), date,
+                amount, isReversed, null, isManualTransaction, isAccountTransfer);
+    }
     public static SavingsAccountTransaction overdraftInterest(final SavingsAccount savingsAccount, final Office office,
             final LocalDate date, final Money amount, final boolean isManualTransaction) {
         final boolean isReversed = false;
@@ -289,7 +307,16 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
         updateTaxDetails(taxDetails, accountTransaction);
         return accountTransaction;
     }
-
+    public static SavingsAccountTransaction withHoldTax(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
+                                                        final Money amount, final Map<TaxComponent, BigDecimal> taxDetails, final Boolean isAccountTransfer) {
+        final boolean isReversed = false;
+        final boolean isManualTransaction = false;
+        SavingsAccountTransaction accountTransaction = new SavingsAccountTransaction(savingsAccount, office,
+                SavingsAccountTransactionType.WITHHOLD_TAX.getValue(), date, amount, isReversed, null, isManualTransaction,
+                isAccountTransfer);
+        updateTaxDetails(taxDetails, accountTransaction);
+        return accountTransaction;
+    }
     public static SavingsAccountTransaction escheat(final SavingsAccount savingsAccount, final LocalDate date, final AppUser appUser,
             final boolean accountTransaction) {
         final boolean isReversed = false;
@@ -395,7 +422,9 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
         return sat;
 
     }
-
+    public boolean isNewTransaction() {
+        return newTransaction;
+    }
     public LocalDate transactionLocalDate() {
         return this.dateOf;
     }
@@ -439,7 +468,16 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     public boolean isInterestPostingAndNotReversed() {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isInterestPosting() && isNotReversed();
     }
+    public boolean isAccrualInterestPostingAndNotReversed() {
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isAccrualInterestPosting() && isNotReversed();
+    }
 
+    public boolean isAccrualInterestPosting() {
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isAccrualInterestPosting();
+    }
+    public boolean isOverdraftAccrualInterestAndNotReversed() {
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isOverdraftAccrualPosting() && isNotReversed();
+    }
     public boolean isInterestPosting() {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isInterestPosting()
                 || SavingsAccountTransactionType.fromInt(this.typeOf).isOverDraftInterestPosting();
@@ -927,4 +965,102 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     public boolean isReversalTransaction() {
         return reversalTransaction;
     }
+
+    public static SavingsAccountTransaction overdraftAccrualInterest(final SavingsAccount savingsAccount, final Office office,
+                                                                     final LocalDate date, final Money amount, final boolean isManualTransaction, final Boolean isAccountTransfer) {
+        final boolean isReversed = false;
+        return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.OVERDRAFT_ACCRUAL_INTEREST.getValue(),
+                date, amount, isReversed, null, isManualTransaction, isAccountTransfer);
+    }
+
+    private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Office office, final Integer typeOf,
+                                      final LocalDate transactionLocalDate, final Money amount, final boolean isReversed, final AppUser appUser,
+                                      final boolean isManualTransaction, final Boolean isAccountTransfer) {
+        this(savingsAccount, office, null, typeOf, transactionLocalDate, DateUtils.getLocalDateTimeOfTenant(), amount.getAmount(), isReversed, appUser, isManualTransaction,
+                isAccountTransfer);
+    }
+    private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Office office, final PaymentDetail paymentDetail,
+                                      final Integer typeOf, final LocalDate transactionLocalDate, final LocalDateTime createdDate, final BigDecimal amount,
+                                      final boolean isReversed, final AppUser appUser, final boolean isManualTransaction, final Boolean isAccountTransfer) {
+        this.savingsAccount = savingsAccount;
+        this.office = office;
+        this.typeOf = typeOf;
+        this.dateOf = transactionLocalDate;
+        this.amount = amount;
+        this.reversed = isReversed;
+        this.paymentDetail = paymentDetail;
+        this.createdDate = createdDate;
+        this.appUser = appUser;
+        this.isManualTransaction = isManualTransaction;
+        this.isAccountTransfer = isAccountTransfer;
+    }
+    public static SavingsAccountTransaction AccrualInterestPosting(final SavingsAccount savingsAccount, final Office office,
+                                                                   final LocalDate date, final Money amount, final boolean isManualTransaction, final Boolean isAccountTransfer) {
+        final boolean isReversed = false;
+        return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.ACCRUAL_INTEREST_POSTING.getValue(),
+                date, amount, isReversed, null, isManualTransaction, isAccountTransfer);
+    }
+
+    public void setNewTransaction(boolean newTransaction) {
+        this.newTransaction = newTransaction;
+    }
+
+    public boolean isOverDraftInterestPostingAndNotReversed() {
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isOverDraftInterestPosting() && isNotReversed();
+    }
+
+    public EndOfDayBalance toEndOfDayBalance(final Money openingBalance, final Boolean includePostingAndWithHoldTax) {
+        final MonetaryCurrency currency = openingBalance.getCurrency();
+        Money endOfDayBalance = openingBalance.copy();
+        if (isDeposit() || isDividendPayoutAndNotReversed() || (includePostingAndWithHoldTax && isInterestPostingAndNotReversed())) {
+            endOfDayBalance = openingBalance.plus(getAmount(currency));
+        } else if (isWithdrawal() || isChargeTransactionAndNotReversed()
+                || (includePostingAndWithHoldTax && isOverDraftInterestPostingAndNotReversed())
+                || (includePostingAndWithHoldTax && isWithHoldTaxAndNotReversed())) {
+            endOfDayBalance = openingBalance.minus(getAmount(currency));
+        }
+
+        return EndOfDayBalance.from(getTransactionLocalDate(), openingBalance, endOfDayBalance,
+                this.balanceNumberOfDays == null ? 1 : this.balanceNumberOfDays);
+    }
+
+    public EndOfDayBalance toEndOfDayBalanceBoundedBy(final Money openingBalance, final LocalDateInterval boundedBy, final Boolean includePostingAndWithHoldTax) {
+
+        final MonetaryCurrency currency = openingBalance.getCurrency();
+        Money endOfDayBalance = openingBalance.copy();
+
+        int numberOfDaysOfBalance = 0;
+
+        if(this.balanceNumberOfDays != null) {
+            numberOfDaysOfBalance = this.balanceNumberOfDays;
+        }
+
+        LocalDate balanceStartDate = getTransactionLocalDate();
+        LocalDate balanceEndDate = getEndOfBalanceLocalDate();
+
+        if (boundedBy.startDate().isAfter(balanceStartDate)) {
+            balanceStartDate = boundedBy.startDate();
+            final LocalDateInterval spanOfBalance = LocalDateInterval.create(balanceStartDate, balanceEndDate);
+            numberOfDaysOfBalance = spanOfBalance.daysInPeriodInclusiveOfEndDate();
+        } else {
+            if (isDeposit() || isDividendPayoutAndNotReversed()) {
+                // endOfDayBalance = openingBalance.plus(getAmount(currency));
+                // if (endOfDayBalance.isLessThanZero()) {
+                endOfDayBalance = endOfDayBalance.plus(getAmount(currency));
+                // }
+            } else if (isWithdrawal() || isChargeTransactionAndNotReversed() || (includePostingAndWithHoldTax && isWithHoldTaxAndNotReversed())) {
+                // endOfDayBalance = openingBalance.minus(getAmount(currency));
+                endOfDayBalance = endOfDayBalance.minus(getAmount(currency));
+            }
+        }
+
+        if (balanceEndDate.isAfter(boundedBy.endDate())) {
+            balanceEndDate = boundedBy.endDate();
+            final LocalDateInterval spanOfBalance = LocalDateInterval.create(balanceStartDate, balanceEndDate);
+            numberOfDaysOfBalance = spanOfBalance.daysInPeriodInclusiveOfEndDate();
+        }
+
+        return EndOfDayBalance.from(balanceStartDate, openingBalance, endOfDayBalance, numberOfDaysOfBalance);
+    }
+
 }

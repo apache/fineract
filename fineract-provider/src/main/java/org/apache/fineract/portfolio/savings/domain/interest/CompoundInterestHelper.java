@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.savings.domain.interest;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -54,10 +55,40 @@ public class CompoundInterestHelper {
             final Money moneyToBePostedForPeriod = Money.of(currency, interestEarnedThisPeriod);
 
             interestEarned = interestEarned.plus(moneyToBePostedForPeriod);
-            // these checks are for fixed deposit account for not include
-            // interest for accounts which has post interest to linked savings
-            // account and if already transfered then it includes in interest
-            // calculation.
+
+            if (!(postingPeriod.isInterestTransfered() || !interestTransferEnabled
+                    || (lockUntil != null && !postingPeriod.dateOfPostingTransaction().isAfter(lockUntil)))) {
+                compoundInterestValues.setcompoundedInterest(BigDecimal.ZERO);
+            }
+        }
+
+        return interestEarned;
+    }
+
+    public List<Money> calculateInterestForAllPostingPeriods(final MonetaryCurrency currency, final List<PostingPeriod> allPeriods,
+                                                             LocalDate lockUntil, Boolean interestTransferEnabled, Boolean ignorecompounding) {
+
+        // sum up the 'rounded' values that are posted each posting period
+        List<Money> interestEarned = new ArrayList<Money>();
+
+        // total interest earned in previous periods but not yet recognised
+        BigDecimal compoundedInterest = BigDecimal.ZERO;
+        BigDecimal unCompoundedInterest = BigDecimal.ZERO;
+        CompoundInterestValues compoundInterestValues = new CompoundInterestValues(compoundedInterest,
+                unCompoundedInterest);
+        for (final PostingPeriod postingPeriod : allPeriods) {
+
+            if(ignorecompounding) {
+                compoundInterestValues = new CompoundInterestValues(BigDecimal.ZERO,
+                        BigDecimal.ZERO);
+            }
+
+            final List<BigDecimal> interestEarnedThisPeriod = postingPeriod.calculateInterests(compoundInterestValues);
+
+            for(BigDecimal interest: interestEarnedThisPeriod) {
+                interestEarned.add(Money.of(currency, interest));
+            }
+
             if (!(postingPeriod.isInterestTransfered() || !interestTransferEnabled
                     || (lockUntil != null && !postingPeriod.dateOfPostingTransaction().isAfter(lockUntil)))) {
                 compoundInterestValues.setcompoundedInterest(BigDecimal.ZERO);

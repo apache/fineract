@@ -49,7 +49,7 @@ public class LocalDateInterval {
         return daysBetween() + 1;
     }
 
-    private Integer daysBetween() {
+    public Integer daysBetween() {
         return Math.toIntExact(ChronoUnit.DAYS.between(this.startDate, this.endDate));
     }
 

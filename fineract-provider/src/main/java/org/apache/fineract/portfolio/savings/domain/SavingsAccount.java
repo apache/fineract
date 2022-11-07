@@ -39,12 +39,13 @@ import com.google.gson.JsonArray;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
+import java.time.Year;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.UUID;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -52,7 +53,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
+import java.util.Collections;
+import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
@@ -66,11 +68,12 @@ import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
+import javax.persistence.OrderBy;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
@@ -353,6 +356,17 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     @Column(name = "num_of_debit_transaction")
     private Long numOfDebitTransaction;
+
+    @Transient
+    protected SavingsAccountTransactionRepository savingsAccountTransactionRepository;
+
+
+
+    @Column(name = "start_interest_accrual_calculation_date")
+    protected LocalDate startInterestAccrualCalculationDate;
+
+    @Transient
+    private BigDecimal depositAmountToDeriveBalanceForStampDuty;
 
     protected SavingsAccount() {
         //
@@ -652,6 +666,148 @@ public class SavingsAccount extends AbstractPersistableCustom {
         }
     }
 
+    public void postInterest(final MathContext mc, final LocalDate interestPostingUpToDate, final boolean isInterestTransfer,
+                             final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
+                             final LocalDate postInterestOnDate) {
+        this.recalculateRunningBalances();
+
+        final List<PostingPeriod> postingPeriods = calculateInterestUsing(mc, interestPostingUpToDate, isInterestTransfer,
+                isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestOnDate, true);
+        Money interestPostedToDate = Money.zero(this.currency);
+
+        boolean applyWithHoldTax = isWithHoldTax();
+        final List<SavingsAccountTransaction> withholdTransactions = new ArrayList<>();
+        withholdTransactions.addAll(findWithHoldTransactions());
+
+        for (final PostingPeriod interestPostingPeriod : postingPeriods) {
+            final LocalDate interestPostingTransactionDate = interestPostingPeriod.dateOfPostingTransaction();
+            final List<SavingsAccountTransaction> postingTransactions = findInterestPostingTransactionForLatest(interestPostingTransactionDate);
+            List<Money> interestPostingsInPeriod = interestPostingPeriod.getInterestEarneds();
+            Money positiveInterest = Money.of(currency, BigDecimal.ZERO);
+            Money negativeInterest = Money.of(currency, BigDecimal.ZERO);
+            for (Money interestEarnedToBePostedForPeriod : interestPostingsInPeriod) {
+                if (interestEarnedToBePostedForPeriod.isGreaterThanZero()) {
+                    positiveInterest = positiveInterest.plus(interestEarnedToBePostedForPeriod);
+                } else {
+                    negativeInterest = negativeInterest.plus(interestEarnedToBePostedForPeriod);
+                }
+            }
+            interestPostingsInPeriod.clear();
+            if (!positiveInterest.isEqualTo(Money.zero(getCurrency()))) {
+                interestPostingsInPeriod.add(positiveInterest);
+            }
+            if (!negativeInterest.isEqualTo(Money.zero(getCurrency()))) {
+                interestPostingsInPeriod.add(negativeInterest);
+            }
+            for (Money interestEarnedToBePostedForPeriod : interestPostingsInPeriod) {
+
+                if (!interestPostingTransactionDate.isAfter(interestPostingUpToDate) || (this.isInterestPostingDue(interestPostingUpToDate)
+                        && interestPostingTransactionDate.minusDays(1).equals(interestPostingUpToDate))) {
+                    interestPostedToDate = interestPostedToDate.plus(interestEarnedToBePostedForPeriod);
+
+                    if (postingTransactions.isEmpty()) {
+                        SavingsAccountTransaction newPostingTransaction = null;
+                        if (interestEarnedToBePostedForPeriod.isGreaterThanZero()) {
+                            newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(),
+                                    interestPostingTransactionDate, interestEarnedToBePostedForPeriod,
+                                    interestPostingPeriod.isUserPosting(), false);
+                            Money balance = interestPostingPeriod.closingBalance();
+                            if (balance.isLessThanZero()) {
+                                if (balance.plus(interestEarnedToBePostedForPeriod).isLessThanZero()) {
+                                    newPostingTransaction.updateOverdraftAmount(interestEarnedToBePostedForPeriod.getAmount());
+                                } else if (balance.plus(interestEarnedToBePostedForPeriod).isGreaterThanZero()) {
+                                    newPostingTransaction.updateOverdraftAmount(balance.negated().getAmount());
+                                }
+                            }
+                        } else if (interestEarnedToBePostedForPeriod.isLessThanZero()) {
+                            newPostingTransaction = SavingsAccountTransaction.overdraftInterest(this, office(),
+                                    interestPostingTransactionDate, interestEarnedToBePostedForPeriod.negated(),
+                                    interestPostingPeriod.isUserPosting(), false);
+                            Money balance = interestPostingPeriod.closingBalance();
+                            if (balance.isGreaterThanZero()) {
+                                if (balance.minus(interestEarnedToBePostedForPeriod).isLessThanZero()) {
+                                    newPostingTransaction
+                                            .updateOverdraftAmount(balance.minus(interestEarnedToBePostedForPeriod).negated().getAmount());
+                                }
+                            } else {
+                                newPostingTransaction.updateOverdraftAmount(interestEarnedToBePostedForPeriod.negated().getAmount());
+                            }
+                        }
+                        if (newPostingTransaction != null && newPostingTransaction.getAmount(currency).isGreaterThanZero()) {
+                            newPostingTransaction.updateCumulativeBalanceAndDates(this.currency, interestPostingTransactionDate);
+                            this.addNewTransaction(newPostingTransaction);
+                        }
+                        if (applyWithHoldTax) {
+                            createWithHoldTransaction(interestEarnedToBePostedForPeriod.getAmount(), interestPostingTransactionDate);
+                        }
+                    } else {
+                        boolean correctionRequired = false;
+                        for (SavingsAccountTransaction postingTransaction : postingTransactions) {
+                            if (postingTransaction.isInterestPostingAndNotReversed()) {
+                                correctionRequired = postingTransaction.hasNotAmount(positiveInterest);
+                            } else {
+                                correctionRequired = postingTransaction.hasNotAmount(negativeInterest.negated());
+                            }
+                        }
+                        if (correctionRequired) {
+                            boolean applyWithHoldTaxForOldTransaction = false;
+                            for (SavingsAccountTransaction postingTransaction : postingTransactions) {
+                                postingTransaction.reverse();
+                                this.savingsAccountTransactionRepository.save(postingTransaction);
+                            }
+                            postingTransactions.clear();
+                            final SavingsAccountTransaction withholdTransaction = findTransactionFor(interestPostingTransactionDate,
+                                    withholdTransactions);
+                            if (withholdTransaction != null) {
+                                withholdTransaction.reverse();
+                                applyWithHoldTaxForOldTransaction = true;
+                                this.savingsAccountTransactionRepository.save(withholdTransaction);
+                            }
+                            SavingsAccountTransaction newPostingTransaction = null;
+                            if (interestEarnedToBePostedForPeriod.isGreaterThanZero()) {
+                                newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(),
+                                        interestPostingTransactionDate, interestEarnedToBePostedForPeriod,
+                                        interestPostingPeriod.isUserPosting(), false);
+                                Money balance = interestPostingPeriod.closingBalance();
+                                if (balance.isLessThanZero()) {
+                                    if (balance.plus(interestEarnedToBePostedForPeriod).isLessThanZero()) {
+                                        newPostingTransaction.updateOverdraftAmount(interestEarnedToBePostedForPeriod.getAmount());
+                                    } else if (balance.plus(interestEarnedToBePostedForPeriod).isGreaterThanZero()) {
+                                        newPostingTransaction.updateOverdraftAmount(balance.negated().getAmount());
+                                    }
+                                }
+                            } else if (interestEarnedToBePostedForPeriod.isLessThanZero()) {
+                                newPostingTransaction = SavingsAccountTransaction.overdraftInterest(this, office(),
+                                        interestPostingTransactionDate, interestEarnedToBePostedForPeriod.negated(),
+                                        interestPostingPeriod.isUserPosting(), false);
+                                Money balance = interestPostingPeriod.closingBalance();
+                                if (balance.isGreaterThanZero()) {
+                                    if (balance.minus(interestEarnedToBePostedForPeriod).isLessThanZero()) {
+                                        newPostingTransaction.updateOverdraftAmount(
+                                                balance.minus(interestEarnedToBePostedForPeriod).negated().getAmount());
+                                    }
+                                } else {
+                                    newPostingTransaction.updateOverdraftAmount(interestEarnedToBePostedForPeriod.negated().getAmount());
+                                }
+                            }
+                            if (newPostingTransaction != null) {
+                                this.addNewTransaction(newPostingTransaction);
+                            }
+                            if (applyWithHoldTaxForOldTransaction) {
+                                createWithHoldTransaction(interestEarnedToBePostedForPeriod.getAmount(), interestPostingTransactionDate);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        this.recalculateRunningBalances();
+        this.updateSummary();
+    }
+    protected boolean isInterestPostingDue(LocalDate interestPostingUpToDate) {
+        // This should be true for all SA's
+        return true;
+    }
     protected List<SavingsAccountTransaction> findWithHoldTransactions() {
         final List<SavingsAccountTransaction> withholdTransactions = new ArrayList<>();
         List<SavingsAccountTransaction> trans = getTransactions();
@@ -690,6 +846,17 @@ public class SavingsAccount extends AbstractPersistableCustom {
         }
         return postingTransation;
     }
+    protected List<SavingsAccountTransaction> findInterestPostingTransactionForLatest(final LocalDate postingDate) {
+        List<SavingsAccountTransaction> postingTransaction = new ArrayList<>();
+        List<SavingsAccountTransaction> trans = getTransactions();
+        for (final SavingsAccountTransaction transaction : trans) {
+            if ((transaction.isInterestPostingAndNotReversed() || transaction.isOverdraftInterestAndNotReversed())
+                    && transaction.occursOn(postingDate)) {
+                postingTransaction.add(transaction);
+            }
+        }
+        return postingTransaction;
+    }
 
     protected SavingsAccountTransaction findInterestPostingSavingsTransactionWithPivotConfig(final LocalDate postingDate) {
         SavingsAccountTransaction postingTransation = null;
@@ -715,7 +882,29 @@ public class SavingsAccount extends AbstractPersistableCustom {
         }
         return transaction;
     }
-
+    protected boolean createWithHoldTransaction(final BigDecimal amount, final LocalDate date) {
+        boolean isTaxAdded = false;
+        if (this.taxGroup != null && amount != null && amount.compareTo(BigDecimal.ZERO) > 0) {
+            Map<TaxComponent, BigDecimal> taxSplit = TaxUtils.splitTax(amount, date, this.taxGroup.getTaxGroupMappings(), amount.scale());
+            BigDecimal totalTax = TaxUtils.totalTaxAmount(taxSplit);
+            if (totalTax.compareTo(BigDecimal.ZERO) > 0) {
+                SavingsAccountTransaction withholdTransaction = SavingsAccountTransaction.withHoldTax(this, office(), date,
+                        Money.of(currency, totalTax), taxSplit, false);
+                withholdTransaction.updateCumulativeBalanceAndDates(this.currency, date);
+                Money balance = Money.of(this.currency, getAccountBalance());
+                if (balance.isGreaterThanZero()) {
+                    if (balance.minus(totalTax).isLessThanZero()) {
+                        withholdTransaction.updateOverdraftAmount(balance.minus(totalTax).negated().getAmount());
+                    }
+                } else {
+                    withholdTransaction.updateOverdraftAmount(totalTax);
+                }
+                this.addNewTransaction(withholdTransaction);
+                isTaxAdded = true;
+            }
+        }
+        return isTaxAdded;
+    }
     protected boolean createWithHoldTransaction(final BigDecimal amount, final LocalDate date, final boolean backdatedTxnsAllowedTill) {
         boolean isTaxAdded = false;
         if (this.taxGroup != null && amount.compareTo(BigDecimal.ZERO) > 0) {
@@ -934,7 +1123,128 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
         return allPostingPeriods;
     }
+    public List<PostingPeriod> calculateInterestUsing(final MathContext mc, final LocalDate upToInterestCalculationDate,
+                                                      boolean isInterestTransfer, final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
+                                                      final LocalDate postInterestOnDate, final Boolean includePostingAndWithHoldTax) {
 
+        // update existing transactions so derived balance fields are
+        // correct.
+        resetAccountTransactionsEndOfDayBalances(getTransactions(), upToInterestCalculationDate);
+
+        // 1. default to calculate interest based on entire history OR
+        // 2. determine latest 'posting period' and find interest credited to
+        // that period
+
+        // A generate list of EndOfDayBalances (not including interest postings)
+        final SavingsPostingInterestPeriodType postingPeriodType = SavingsPostingInterestPeriodType.fromInt(this.interestPostingPeriodType);
+
+        final SavingsCompoundingInterestPeriodType compoundingPeriodType = SavingsCompoundingInterestPeriodType
+                .fromInt(this.interestCompoundingPeriodType);
+        SavingsInterestCalculationDaysInYearType daysInYearType = SavingsInterestCalculationDaysInYearType
+                .fromInt(this.interestCalculationDaysInYearType);
+
+        if (daysInYearType.equals(SavingsInterestCalculationDaysInYearType.ACTUAL)) {
+            Year year;
+            if (postInterestOnDate != null) {
+                year = Year.of(postInterestOnDate.getYear());
+            } else {
+                year = Year.of(upToInterestCalculationDate.getYear());
+            }
+            if (daysInYearType.isActual()) {
+                daysInYearType = SavingsInterestCalculationDaysInYearType.fromInt(year.length());
+            }
+        }
+        List<LocalDate> postedAsOnDates = getManualPostingDates();
+        if (postInterestOnDate != null) {
+            postedAsOnDates.add(postInterestOnDate);
+        }
+        final List<LocalDateInterval> postingPeriodIntervals = this.savingsHelper.determineInterestPostingPeriods(
+                getStartInterestCalculationDate(), upToInterestCalculationDate, postingPeriodType, financialYearBeginningMonth,
+                postedAsOnDates, null);
+
+        final List<PostingPeriod> allPostingPeriods = new ArrayList<>();
+        final SavingsAccountTransaction lastTransaction = this.getLastTransaction();
+        final SavingsAccountTransaction lastInterestPosting = this.getLastInterestPostingTransaction();
+        Money periodStartingBalance = null;
+        if (this.startInterestCalculationDate != null) {
+            LocalDate startInterestCalculationDate = this.startInterestCalculationDate;
+            final SavingsAccountTransaction transaction = findLastTransaction(startInterestCalculationDate);
+
+            if (transaction == null) {
+                final String defaultUserMessage = "No transactions were found on the specified date "
+                        + getStartInterestCalculationDate().toString() + " for account number " + this.accountNumber.toString()
+                        + " and resource id " + getId();
+
+                final ApiParameterError error = ApiParameterError.parameterError(
+                        "error.msg.savingsaccount.transaction.incorrect.start.interest.calculation.date", defaultUserMessage,
+                        "transactionDate", getStartInterestCalculationDate().toString());
+
+                final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+                dataValidationErrors.add(error);
+
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
+            periodStartingBalance = transaction.getRunningBalance(this.currency);
+        }
+        final SavingsInterestCalculationType interestCalculationType = SavingsInterestCalculationType.fromInt(this.interestCalculationType);
+        final BigDecimal interestRateAsFraction = getEffectiveInterestRateAsFraction(mc, upToInterestCalculationDate);
+        final BigDecimal overdraftInterestRateAsFraction = getEffectiveOverdraftInterestRateAsFraction(mc);
+        final Collection<Long> interestPostTransactions = this.savingsHelper.fetchPostInterestTransactionIds(getId());
+        final Money minBalanceForInterestCalculation = Money.of(getCurrency(), minBalanceForInterestCalculation());
+        final Money minOverdraftForInterestCalculation = Money.of(getCurrency(), this.minOverdraftForInterestCalculation);
+
+        for (final LocalDateInterval periodInterval : postingPeriodIntervals) {
+
+            boolean isUserPosting = false;
+            if (postedAsOnDates.contains(periodInterval.endDate().plusDays(1))) {
+                isUserPosting = true;
+            }
+
+            // Avoid backdating interest postings
+            if (interestAlreadyPosted(lastTransaction, lastInterestPosting, periodInterval)) {
+                continue;
+            }
+
+            if (periodStartingBalance == null) {
+                periodStartingBalance = this.getRunningBalanceAt(periodInterval.startDate());
+            }
+
+            final PostingPeriod postingPeriod = PostingPeriod.createFrom(periodInterval, periodStartingBalance,
+                    retrieveOrderedTransactionsSince(periodInterval.startDate()), this.currency, compoundingPeriodType,
+                    interestCalculationType, interestRateAsFraction, daysInYearType.getValue(), upToInterestCalculationDate,
+                    interestPostTransactions, isInterestTransfer, minBalanceForInterestCalculation,
+                    isSavingsInterestPostingAtCurrentPeriodEnd, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation,
+                    isUserPosting, financialYearBeginningMonth, includePostingAndWithHoldTax);
+
+            periodStartingBalance = postingPeriod.closingBalance();
+            allPostingPeriods.add(postingPeriod);
+        }
+        this.mergePostingPeriods(allPostingPeriods);
+
+        // Skip calculating this for Savings and Target Accounts
+        if (this instanceof FixedDepositAccount) {
+            this.savingsHelper.calculateInterestForAllPostingPeriods(this.currency, allPostingPeriods, getLockedInUntilLocalDate(),
+                    isTransferInterestToOtherAccount(), false);
+        } else {
+            for (PostingPeriod period : allPostingPeriods) {
+                Money interestAccrued = this.getTotalInterestAccruedBetween(period.getPeriodInterval().startDate(),
+                        period.getPeriodInterval().endDate());
+                Money overdraftInterestAccrued = this.getTotalOverdraftInterestAccruedBetween(period.getPeriodInterval().startDate(),
+                        period.getPeriodInterval().endDate());
+                List<Money> interestEarned = new ArrayList<>();
+                if (interestAccrued.isGreaterThanZero()) {
+                    interestEarned.add(interestAccrued);
+                }
+                if (overdraftInterestAccrued.isGreaterThanZero()) {
+                    overdraftInterestAccrued = Money.zero(this.currency).minus(overdraftInterestAccrued);
+                    interestEarned.add(overdraftInterestAccrued);
+                }
+                period.setInterestEarned(interestEarned);
+            }
+        }
+        this.updateSummaries(allPostingPeriods);
+        return allPostingPeriods;
+    }
     private BigDecimal getEffectiveOverdraftInterestRateAsFraction(MathContext mc) {
         return this.nominalAnnualInterestRateOverdraft.divide(BigDecimal.valueOf(100L), mc);
     }
@@ -3996,4 +4306,464 @@ public class SavingsAccount extends AbstractPersistableCustom {
     public void setMinBalanceForInterestCalculation(BigDecimal minBalanceForInterestCalculation) {
         this.minBalanceForInterestCalculation = minBalanceForInterestCalculation;
     }
+    public void setSavingsAccountTransactionRepository(SavingsAccountTransactionRepository savingsAccountTransactionRepository) {
+        this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
+    }
+    protected List<SavingsAccountTransaction> retrieveListOfTransactions() {
+        return this.transactions;
+    }
+
+    public Map<String, Object> deriveAccountingBridgeData(final CurrencyData currencyData, final Set<Long> existingTransactionIds,
+                                                          final Set<Long> existingReversedTransactionIds) {
+
+        final Map<String, Object> accountingBridgeData = new LinkedHashMap<>();
+        accountingBridgeData.put("savingsId", getId());
+        accountingBridgeData.put("savingsProductId", productId());
+        accountingBridgeData.put("currency", currencyData);
+        accountingBridgeData.put("officeId", officeId());
+        accountingBridgeData.put("cashBasedAccountingEnabled", isCashBasedAccountingEnabledOnSavingsProduct());
+        accountingBridgeData.put("accrualBasedAccountingEnabled", isAccrualBasedAccountingEnabledOnSavingsProduct());
+        accountingBridgeData.put("isAccountTransfer", false);
+
+        final List<Map<String, Object>> newSavingsTransactions = new ArrayList<>();
+        List<SavingsAccountTransaction> trans = getTransactions();
+        for (final SavingsAccountTransaction transaction : trans) {
+            if (transaction.isReversed() && !existingReversedTransactionIds.contains(transaction.getId())) {
+                newSavingsTransactions.add(transaction.toMapData(currencyData));
+            } else if (!existingTransactionIds.contains(transaction.getId())) {
+                newSavingsTransactions.add(transaction.toMapData(currencyData));
+            }
+        }
+
+        accountingBridgeData.put("newSavingsTransactions", newSavingsTransactions);
+        return accountingBridgeData;
+    }
+
+    public void postAccrualInterest(final MathContext mc, final LocalDate interestPostingUpToDate, final boolean isInterestTransfer,
+                                    final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
+                                    final LocalDate postInterestOnDate, LocalDate maturityDate) {
+
+        Boolean includePostingAndWithHoldTax = true;
+        recalculateRunningBalances();
+        resetAccountTransactionsEndOfDayBalances(this.transactions, interestPostingUpToDate);
+
+        // 1. default to calculate interest based on entire history OR
+        // 2. determine latest 'posting period' and find interest credited to
+        // that period
+
+        // A generate list of EndOfDayBalances (not including interest postings)
+        final SavingsPostingInterestPeriodType postingPeriodType = null;
+
+        final SavingsCompoundingInterestPeriodType compoundingPeriodType = SavingsCompoundingInterestPeriodType
+                .fromInt(this.interestCompoundingPeriodType);
+
+        SavingsInterestCalculationDaysInYearType daysInYearType = SavingsInterestCalculationDaysInYearType
+                .fromInt(this.interestCalculationDaysInYearType);
+        if (daysInYearType.equals(SavingsInterestCalculationDaysInYearType.ACTUAL)) {
+            Year year;
+            if (postInterestOnDate != null) {
+                year = Year.of(postInterestOnDate.getYear());
+            } else {
+                year = Year.of(interestPostingUpToDate.getYear());
+            }
+            if (daysInYearType.isActual()) {
+                daysInYearType = SavingsInterestCalculationDaysInYearType.fromInt(year.length());
+            }
+        }
+
+        List<LocalDate> postedAsOnDates = new ArrayList<>();
+        if (postInterestOnDate != null) {
+            postedAsOnDates.add(postInterestOnDate);
+        }
+        final List<LocalDateInterval> postingPeriodIntervals = this.savingsHelper.determineInterestPostingPeriods(
+                getStartInterestAccrualCalculationDate(), interestPostingUpToDate, postingPeriodType, financialYearBeginningMonth, postedAsOnDates,
+                maturityDate);
+
+        final List<PostingPeriod> allPostingPeriods = new ArrayList<>();
+
+        Money periodStartingBalance;
+        LocalDate startInterestAccrualCalculationOn = null;
+        if (this.startInterestAccrualCalculationDate != null) {
+            startInterestAccrualCalculationOn = this.startInterestAccrualCalculationDate;
+            periodStartingBalance = getStartingBalanceBefore(startInterestAccrualCalculationOn);
+        } else {
+            periodStartingBalance = Money.zero(this.currency);
+        }
+        final SavingsInterestCalculationType savingsInterestCalculationType = SavingsInterestCalculationType.fromInt(this.interestCalculationType);
+        final BigDecimal interestRateAsFraction = getEffectiveInterestRateAsFraction(mc, interestPostingUpToDate);
+        final Collection<Long> interestPostTransactions = this.savingsHelper.fetchPostInterestTransactionIds(getId());
+        final BigDecimal overdraftInterestRateAsFraction = getEffectiveOverdraftInterestRateAsFraction(mc);
+        final Money minBalForInterestCalculation = Money.of(getCurrency(), minBalanceForInterestCalculation());
+        final Money minOdForInterestCalculation = Money.of(getCurrency(), this.minOverdraftForInterestCalculation);
+
+        for (final LocalDateInterval periodInterval : postingPeriodIntervals) {
+
+            boolean isUserPosting = false;
+            if (postedAsOnDates.contains(periodInterval.endDate().plusDays(1))) {
+                isUserPosting = true;
+            }
+
+            final PostingPeriod postingPeriod = PostingPeriod.createFrom(periodInterval, periodStartingBalance,
+                    retrieveOrderedTransactionsWithInterestPostings(startInterestAccrualCalculationOn), this.currency,
+                    compoundingPeriodType, savingsInterestCalculationType, interestRateAsFraction, daysInYearType.getValue(),
+                    interestPostingUpToDate, interestPostTransactions, isInterestTransfer, minBalForInterestCalculation,
+                    isSavingsInterestPostingAtCurrentPeriodEnd, overdraftInterestRateAsFraction, minOdForInterestCalculation, isUserPosting,
+                    financialYearBeginningMonth, includePostingAndWithHoldTax);
+
+            periodStartingBalance = postingPeriod.closingBalance();
+            allPostingPeriods.add(postingPeriod);
+        }
+
+        this.savingsHelper.calculateInterestForAllPostingPeriods(this.currency, allPostingPeriods, getLockedInUntilLocalDate(),
+                isTransferInterestToOtherAccount(), true);
+
+        this.updateSummaries(allPostingPeriods);
+
+        Money interestPostedToDate = Money.zero(this.currency);
+
+
+        for (final PostingPeriod interestPostingPeriod : allPostingPeriods) {
+
+            if(interestPostingPeriod.dateOfPostingTransaction().isAfter(interestPostingUpToDate)) {
+                continue;
+            }
+
+            final LocalDate interestPostingTransactionDate = interestPostingPeriod.dateOfPostingTransaction();
+            final List<SavingsAccountTransaction> postingTransactions = findAccrualInterestPostingTransactionFor(
+                    interestPostingTransactionDate);
+            List<Money> interestPostingsInPeriod = interestPostingPeriod.getInterestEarneds();
+            Money positiveInterest = Money.of(currency, BigDecimal.ZERO);
+            Money negativeInterest = Money.of(currency, BigDecimal.ZERO);
+            for (Money interestEarnedToBePostedForPeriod : interestPostingsInPeriod) {
+                if (interestEarnedToBePostedForPeriod.isGreaterThanZero()) {
+                    positiveInterest = positiveInterest.plus(interestEarnedToBePostedForPeriod);
+                } else {
+                    negativeInterest = negativeInterest.plus(interestEarnedToBePostedForPeriod);
+                }
+            }
+            interestPostingsInPeriod.clear();
+            interestPostingsInPeriod.add(positiveInterest);
+            interestPostingsInPeriod.add(negativeInterest);
+            for (Money interestEarnedToBePostedForPeriod : interestPostingsInPeriod) {
+
+                if ((!interestPostingTransactionDate.isAfter(interestPostingUpToDate) || ((this instanceof FixedDepositAccount
+                        && SavingsPostingInterestPeriodType.TENURE.getValue().equals(this.interestPostingPeriodType))
+                        && interestPostingTransactionDate.minusDays(1).equals(interestPostingUpToDate)))
+                        && postingTransactions.isEmpty()) {
+
+                    interestPostedToDate = interestPostedToDate.plus(interestEarnedToBePostedForPeriod);
+
+                    SavingsAccountTransaction newPostingTransaction = null;
+                    if (interestEarnedToBePostedForPeriod.isGreaterThanZero()) {
+
+                        newPostingTransaction = SavingsAccountTransaction.AccrualInterestPosting(this, office(),
+                                interestPostingTransactionDate, interestEarnedToBePostedForPeriod, interestPostingPeriod.isUserPosting(),
+                                false);
+                        newPostingTransaction.updateRunningBalance(interestPostingPeriod.closingBalance());
+                    } else if (interestEarnedToBePostedForPeriod.isLessThanZero()) {
+                        newPostingTransaction = SavingsAccountTransaction.overdraftAccrualInterest(this, office(),
+                                interestPostingTransactionDate, interestEarnedToBePostedForPeriod.negated(),
+                                interestPostingPeriod.isUserPosting(), false);
+                        newPostingTransaction.updateRunningBalance(interestPostingPeriod.closingBalance());
+                    }
+
+                    if (newPostingTransaction != null && newPostingTransaction.getAmount(currency).isGreaterThanZero()) {
+                        this.addNewTransaction(newPostingTransaction);
+                    }
+                } else if (!postingTransactions.isEmpty()) {
+                    boolean correctionRequired = false;
+                    BigDecimal previousTransactionAmount = BigDecimal.ZERO;
+                    Integer previousTransactionType = 0;
+                    for (SavingsAccountTransaction postingTransaction : postingTransactions) {
+                        if (previousTransactionAmount.compareTo(postingTransaction.getAmount()) == 0
+                                && previousTransactionType.equals(postingTransaction.getTypeOf())) {
+                            correctionRequired = true;
+                        }
+                        if(correctionRequired) {
+                            continue;
+                        }
+                        if (postingTransaction.isAccrualInterestPostingAndNotReversed()) {
+                            correctionRequired = postingTransaction.hasNotAmount(positiveInterest);
+                        } else if (postingTransaction.isOverdraftAccrualInterestAndNotReversed()) {
+                            correctionRequired = postingTransaction.hasNotAmount(negativeInterest.negated());
+                        }
+                        postingTransaction.updateRunningBalance(interestPostingPeriod.closingBalance());
+                        previousTransactionAmount = postingTransaction.getAmount();
+                        previousTransactionType = postingTransaction.getTypeOf();
+                    }
+                    if (correctionRequired) {
+                        for (SavingsAccountTransaction postingTransaction : postingTransactions) {
+                            postingTransaction.reverse();
+                            if (this.savingsAccountTransactionRepository != null) {
+                                this.savingsAccountTransactionRepository.save(postingTransaction);
+                            }
+                        }
+                        postingTransactions.clear();
+                        SavingsAccountTransaction newPostingTransaction = null;
+                        if (interestEarnedToBePostedForPeriod.isGreaterThanZero()) {
+                            newPostingTransaction = SavingsAccountTransaction.AccrualInterestPosting(this, office(),
+                                    interestPostingTransactionDate, interestEarnedToBePostedForPeriod,
+                                    interestPostingPeriod.isUserPosting(), false);
+                            newPostingTransaction.updateRunningBalance(interestPostingPeriod.closingBalance());
+                        } else if (interestEarnedToBePostedForPeriod.isLessThanZero()) {
+                            newPostingTransaction = SavingsAccountTransaction.overdraftAccrualInterest(this, office(),
+                                    interestPostingTransactionDate, interestEarnedToBePostedForPeriod.negated(),
+                                    interestPostingPeriod.isUserPosting(), false);
+                            newPostingTransaction.updateRunningBalance(interestPostingPeriod.closingBalance());
+                        }
+                        if (newPostingTransaction != null) {
+                            this.addNewTransaction(newPostingTransaction);
+                        }
+                    }
+                }
+            }
+        }
+        this.startInterestAccrualCalculationDate = interestPostingUpToDate;
+        updateSummary();
+    }
+    private void addNewTransaction(SavingsAccountTransaction transaction) {
+        addTransaction(transaction, true);
+        if (this.savingsAccountTransactionRepository != null) {
+            this.savingsAccountTransactionRepository.saveAndFlush(transaction);
+        }
+        transaction.setNewTransaction(true);
+    }
+    public void addTransaction(final SavingsAccountTransaction transaction, boolean updateBalance) {
+        if (updateBalance) {
+            Money lastTransactionRunningBalance = Money.of(this.currency, this.getAccountBalance());
+            if (this.depositAmountToDeriveBalanceForStampDuty != null) {
+                lastTransactionRunningBalance = lastTransactionRunningBalance.plus(this.depositAmountToDeriveBalanceForStampDuty);
+            }
+            Money runningBalance = lastTransactionRunningBalance;
+            if (transaction.isCredit()) {
+                runningBalance = transaction.getAmount(this.currency).plus(lastTransactionRunningBalance);
+            } else if (transaction.isDebit()) {
+                runningBalance = lastTransactionRunningBalance.minus(transaction.getAmount(this.currency));
+            }
+            if (transaction.isAccrualInterestPosting() || transaction.isOverdraftAccrualInterestAndNotReversed()) {
+                runningBalance = lastTransactionRunningBalance;
+            }
+            if (transaction.isDebit()) {
+                if (runningBalance.isLessThanZero()) {
+                    if (this.isOverdraft() || Money.of(this.currency, this.getAccountBalance()).isLessThanZero() ) {
+                        if (!transaction.isOverdraftInterestAndNotReversed() && runningBalance.abs().isGreaterThan(Money.of(this.currency, this.overdraftLimit))) {
+                            throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), null, transaction.getAmount());
+                        }
+                    } else {
+                        if (runningBalance.minus(minRequiredBalance).isLessThanZero()) {
+                            throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), null, transaction.getAmount());
+                        }
+                    }
+                }
+                if (this.getSavingsHoldAmount().compareTo(BigDecimal.ZERO) > 0) {
+                    if (this.isOverdraft()) {
+                        if (!transaction.isOverdraftInterestAndNotReversed() && runningBalance.isLessThanZero() && runningBalance.abs().plus(this.getSavingsHoldAmount()).isGreaterThan(Money.of(this.currency, this.overdraftLimit))) {
+                            throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), null, transaction.getAmount());
+                        }
+                    } else if (runningBalance.minus(this.getSavingsHoldAmount()).isLessThanZero()) {
+                        throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), null, transaction.getAmount());
+                    }
+                }
+            }
+
+            transaction.updateRunningBalance(runningBalance);
+            this.updateBalance(runningBalance.getAmount());
+        }
+        this.transactions.add(transaction);
+    }
+
+    protected void updateBalance(BigDecimal runningBalance) {
+        this.summary.setAccountBalance(runningBalance);
+    }
+    protected List<SavingsAccountTransaction> findAccrualInterestPostingTransactionFor(final LocalDate postingDate) {
+        List<SavingsAccountTransaction> postingTransaction = new ArrayList<>();
+        List<SavingsAccountTransaction> trans = getTransactions();
+        for (final SavingsAccountTransaction transaction : trans) {
+            if ((transaction.isAccrualInterestPostingAndNotReversed() || transaction.isOverdraftAccrualInterestAndNotReversed())
+                    && transaction.occursOn(postingDate)) {
+                postingTransaction.add(transaction);
+            }
+        }
+        return postingTransaction;
+    }
+    protected void updateSummaries(List<PostingPeriod> allPostingPeriods) {
+        this.summary.updateFromInterestPeriodSummaries(this.currency, allPostingPeriods);
+        updateSummary();
+        //Update total interest earned
+        if (this.summary.getTotalInterestEarned() != null && this.summary.getTotalInterestPosted() != null) {
+            this.summary.setTotalInterestEarned(this.summary.getTotalInterestEarned().add(this.summary.getTotalInterestPosted()));
+        }
+        //Update total overdraft interest earned
+        if (this.summary.getTotalOverdraftInterestEarned() != null && this.summary.getTotalOverdraftInterestDerived() != null) {
+            this.summary.setTotalOverdraftInterestEarned(this.summary.getTotalOverdraftInterestEarned().add(this.summary.getTotalOverdraftInterestDerived()));
+        }
+    }
+
+    public void updateSummary() {
+        this.updateSummary(this.transactions);
+    }
+
+    public void updateSummary(List<SavingsAccountTransaction> transactions) {
+        this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, transactions);
+    }
+
+    protected void recalculateRunningBalances() {
+        Money runningBalance = Money.zero(this.currency);
+        List<SavingsAccountTransaction> accountTransactionsSorted = getTransactions();
+        for (final SavingsAccountTransaction transaction : accountTransactionsSorted) {
+            if (transaction.isNotReversed()) {
+                Money transactionRunningBalance = transaction.getRunningBalance(this.currency);
+                if (transaction.isCredit()) {
+                    runningBalance = transaction.getAmount(this.currency).plus(runningBalance);
+                } else if (transaction.isDebit()) {
+                    runningBalance = runningBalance.minus(transaction.getAmount(this.currency));
+                }
+                if (transactionRunningBalance == null || !runningBalance.isEqualTo(transactionRunningBalance)) {
+                    transaction.updateRunningBalance(runningBalance);
+                    this.savingsAccountTransactionRepository.save(transaction);
+                }
+            }
+        }
+    }
+
+    public LocalDate getStartInterestAccrualCalculationDate() {
+        LocalDate startInterestAccrualCalculationLocalDate = null;
+        if (this.startInterestAccrualCalculationDate != null) {
+            startInterestAccrualCalculationLocalDate = this.startInterestAccrualCalculationDate;
+        } else
+            startInterestAccrualCalculationLocalDate = getActivationLocalDate();
+        return startInterestAccrualCalculationLocalDate;
+    }
+
+    private Money getStartingBalanceBefore(LocalDate date) {
+        Money balance = Money.zero(this.currency);
+        List<SavingsAccountTransaction> accountTransactionsSorted = retrieveListOfTransactions();
+        for (SavingsAccountTransaction tran: accountTransactionsSorted) {
+            if(tran.isNotReversed() && tran.getTransactionLocalDate().isBefore(date)) {
+                if(tran.isDebit() || tran.isOverDraftInterestPostingAndNotReversed()) {
+                    balance = balance.minus(tran.getAmount());
+                }
+                if(tran.isCredit() || tran.isInterestPostingAndNotReversed()) {
+                    balance = balance.plus(tran.getAmount());
+                }
+            }
+        }
+        return balance;
+    }
+
+
+    protected List<SavingsAccountTransaction> retrieveOrderedTransactionsWithInterestPostings(LocalDate transactionDate) {
+        if (transactionDate == null) {
+            return this.retrieveOrderedTransactionsWithInterestPostings();
+        }
+        return retrieveListOfTransactions().stream().filter(transaction -> !transaction.getTransactionLocalDate().isBefore(transactionDate) && !(
+                transaction.isAccrualInterestPostingAndNotReversed() || transaction.isOverdraftAccrualInterestAndNotReversed())
+                && transaction.isNotReversed()).collect(Collectors.toList());
+    }
+
+    protected List<SavingsAccountTransaction> retrieveOrderedTransactionsWithInterestPostings() {
+        return retrieveListOfTransactions().stream().filter(transaction -> !(transaction.isAccrualInterestPostingAndNotReversed() || transaction.isOverdraftAccrualInterestAndNotReversed())
+                && transaction.isNotReversed()).collect(Collectors.toList());
+    }
+    private SavingsAccountTransaction getLastTransaction() {
+        SavingsAccountTransaction lastTransaction = null;
+        List<SavingsAccountTransaction> accountTransactionsSorted = retrieveListOfTransactions();
+        for (int i = accountTransactionsSorted.size() - 1; i >= 0; i--) {
+            SavingsAccountTransaction transaction = accountTransactionsSorted.get(i);
+            if (transaction.isNotReversed() && !transaction.isAccrualInterestPosting()
+                    && !transaction.isOverdraftAccrualInterestAndNotReversed()) {
+                lastTransaction = transaction;
+                break;
+            }
+        }
+        return lastTransaction;
+    }
+    protected SavingsAccountTransaction getLastInterestPostingTransaction() {
+        SavingsAccountTransaction lastTransaction = null;
+        List<SavingsAccountTransaction> accountTransactionsSorted = retrieveListOfTransactions();
+        for (int i = accountTransactionsSorted.size() - 1; i >= 0; i--) {
+            SavingsAccountTransaction transaction = accountTransactionsSorted.get(i);
+            if (transaction.isInterestPostingAndNotReversed() || transaction.isOverDraftInterestPostingAndNotReversed()) {
+                lastTransaction = transaction;
+                break;
+            }
+        }
+        return lastTransaction;
+    }
+    private boolean interestAlreadyPosted(SavingsAccountTransaction lastTransaction, SavingsAccountTransaction lastInterestPosting,
+                                          LocalDateInterval periodInterval) {
+        if (lastTransaction != null && periodInterval.endDate().plusDays(1).isBefore(lastTransaction.getTransactionLocalDate())) {
+            return true;
+        }
+
+        if (lastInterestPosting != null && periodInterval.endDate().plusDays(1).isEqual(lastInterestPosting.getTransactionLocalDate())) {
+            return true;
+        }
+        return false;
+    }
+    protected Money getRunningBalanceAt(LocalDate date) {
+        List<SavingsAccountTransaction> transactionList = this.retrieveOrderedTransactionsSince(date);
+        if (!transactionList.isEmpty()) {
+            SavingsAccountTransaction transaction = transactionList.get(0);
+            return transaction.isCredit() ? transaction.getRunningBalance(this.currency).minus(transaction.getAmount(this.currency))
+                    : transaction.getRunningBalance(this.currency).plus(transaction.getAmount(this.currency));
+        }
+        for (int i = this.transactions.size() - 1; i >= 0; i--) {
+            SavingsAccountTransaction transaction = this.transactions.get(i);
+            if (transaction.isNotReversed() && transaction.transactionLocalDate().isBefore(date)) {
+                return transaction.getRunningBalance(this.currency);
+            }
+        }
+        return Money.of(this.currency, BigDecimal.ZERO);
+    }
+    protected List<SavingsAccountTransaction> retrieveOrderedTransactionsSince(LocalDate date) {
+        if (date == null) {
+            return this.retrieveOrderedTransactionsSince();
+        }
+        List<SavingsAccountTransaction> transactions = retrieveListOfTransactions().stream()
+                .filter(transaction -> !transaction.getTransactionLocalDate().isBefore(date)
+                        && !(transaction.isAccrualInterestPostingAndNotReversed() || transaction.isOverdraftAccrualInterestAndNotReversed())
+                        && transaction.isNotReversed())
+                .collect(Collectors.toList());
+        List<SavingsAccountTransaction> trxnsOnDate = transactions.stream()
+                .filter(transaction -> transaction.transactionLocalDate().isEqual(date)).collect(Collectors.toList());
+        if (trxnsOnDate.size() > 1) {
+            trxnsOnDate.remove(trxnsOnDate.size() - 1);
+            transactions.removeAll(trxnsOnDate);
+        }
+        return transactions;
+    }
+    protected List<SavingsAccountTransaction> retrieveOrderedTransactionsSince() {
+        return retrieveListOfTransactions().stream()
+                .filter(transaction -> !(transaction.isInterestPostingAndNotReversed() || transaction.isOverdraftInterestAndNotReversed()
+                        || transaction.isAccrualInterestPostingAndNotReversed() || transaction.isOverdraftAccrualInterestAndNotReversed())
+                        && transaction.isNotReversed())
+                .collect(Collectors.toList());
+    }
+    protected void mergePostingPeriods(List<PostingPeriod> allPostingPeriods) {
+
+    }
+    private Money getTotalInterestAccruedBetween(LocalDate startDate, LocalDate endDate) {
+        Money total = Money.zero(currency);
+        List<SavingsAccountTransaction> accruals = retrieveListOfTransactions().stream()
+                .filter(t -> t.isAccrualInterestPostingAndNotReversed() && !t.transactionLocalDate().isBefore(startDate)
+                        && !t.transactionLocalDate().isAfter(endDate))
+                .collect(Collectors.toList());
+        for (SavingsAccountTransaction accrual : accruals) {
+            total = total.plus(accrual.getAmount(this.currency));
+        }
+        return total;
+    }
+    private Money getTotalOverdraftInterestAccruedBetween(LocalDate startDate, LocalDate endDate) {
+        Money total = Money.zero(currency);
+        List<SavingsAccountTransaction> accruals = retrieveListOfTransactions().stream()
+                .filter(t -> t.isOverdraftAccrualInterestAndNotReversed() && !t.transactionLocalDate().isBefore(startDate)
+                        && !t.transactionLocalDate().isAfter(endDate))
+                .collect(Collectors.toList());
+        for (SavingsAccountTransaction accrual : accruals) {
+            total = total.plus(accrual.getAmount(this.currency));
+        }
+        return total;
+    }
+
 }

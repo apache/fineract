@@ -394,6 +394,10 @@ public final class SavingsEnumerations {
                 optionData = new EnumOptionData(SavingsPostingInterestPeriodType.ANNUAL.getValue().longValue(),
                         codePrefix + SavingsPostingInterestPeriodType.ANNUAL.getCode(), "Annually");
             break;
+            case TENURE:
+                optionData = new EnumOptionData(SavingsPostingInterestPeriodType.TENURE.getValue().longValue(),
+                        codePrefix + SavingsPostingInterestPeriodType.TENURE.getCode(), "Per Tenure");
+                break;
         }
 
         return optionData;
@@ -492,8 +496,10 @@ public final class SavingsEnumerations {
                 SavingsInterestCalculationDaysInYearType.INVALID.getCode(), "Invalid");
 
         switch (type) {
-            case INVALID:
-            break;
+            case ACTUAL:
+                optionData = new EnumOptionData(SavingsInterestCalculationDaysInYearType.ACTUAL.getValue().longValue(),
+                        SavingsInterestCalculationDaysInYearType.ACTUAL.getCode(), "Actual Days");
+                break;
             case DAYS_360:
                 optionData = new EnumOptionData(SavingsInterestCalculationDaysInYearType.DAYS_360.getValue().longValue(),
                         SavingsInterestCalculationDaysInYearType.DAYS_360.getCode(), "360 Days");
@@ -502,6 +508,8 @@ public final class SavingsEnumerations {
                 optionData = new EnumOptionData(SavingsInterestCalculationDaysInYearType.DAYS_365.getValue().longValue(),
                         SavingsInterestCalculationDaysInYearType.DAYS_365.getCode(), "365 Days");
             break;
+            default:
+                break;
         }
 
         return optionData;

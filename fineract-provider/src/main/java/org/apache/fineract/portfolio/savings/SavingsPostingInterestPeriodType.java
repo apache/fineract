@@ -31,7 +31,9 @@ public enum SavingsPostingInterestPeriodType {
     DAILY(1, "savingsPostingInterestPeriodType.daily"), //
     MONTHLY(4, "savingsPostingInterestPeriodType.monthly"), //
     QUATERLY(5, "savingsPostingInterestPeriodType.quarterly"), //
-    BIANNUAL(6, "savingsPostingInterestPeriodType.biannual"), ANNUAL(7, "savingsPostingInterestPeriodType.annual");
+    BIANNUAL(6, "savingsPostingInterestPeriodType.biannual"),
+    ANNUAL(7, "savingsPostingInterestPeriodType.annual"),
+    TENURE(8, "savingsPostingInterestPeriodType.tenure");
 
     private final Integer value;
     private final String code;
@@ -78,6 +80,9 @@ public enum SavingsPostingInterestPeriodType {
                 break;
                 case 7:
                     repaymentFrequencyType = SavingsPostingInterestPeriodType.ANNUAL;
+                    break;
+                case 8:
+                    repaymentFrequencyType = SavingsPostingInterestPeriodType.TENURE;
                 break;
             }
         }

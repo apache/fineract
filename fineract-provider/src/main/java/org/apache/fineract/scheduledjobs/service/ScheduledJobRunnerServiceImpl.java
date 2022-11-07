@@ -23,6 +23,7 @@ import org.apache.fineract.accounting.glaccount.domain.TrialBalanceRepositoryWra
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.exception.ExceptionHelper;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSourceServiceFactory;
@@ -47,7 +48,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -62,6 +65,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+
 import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountChargeReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.DepositAccountReadPlatformService;
@@ -482,7 +487,47 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         final String errorMessage = "Post Accruals failed for account:";
 
         for (Long savingAccount : savingIds) {
-            System.out.println("Hello, Here is the Savings Account ::: > " +savingAccount);
+            if (savingAccount == 0) {
+                continue;
+            }
+            LOG.info(
+                    "Accruals Saving ID " + savingAccount + " which is " + savingIds.indexOf(savingAccount) + " of " + savingIds.size());
+            Integer numberOfRetries = 0;
+            while (numberOfRetries <= maxNumberOfRetries) {
+                try {
+                    this.savingsAccountWritePlatformService.postAccrualInterest(savingAccount, jobRunDate, false);
+                    numberOfRetries = maxNumberOfRetries + 1;
+                } catch (CannotAcquireLockException | ObjectOptimisticLockingFailureException exception) {
+                    LOG.info("Recalulate interest job has been retried  " + numberOfRetries + " time(s)");
+                    /***
+                     * Fail if the transaction has been retired for
+                     * maxNumberOfRetries
+                     **/
+                    if (numberOfRetries >= maxNumberOfRetries) {
+                        LOG.warn("Recalulate interest job has been retried for the max allowed attempts of " + numberOfRetries
+                                + " and will be rolled back");
+                        sb.append("Recalulate interest job has been retried for the max allowed attempts of " + numberOfRetries
+                                + " and will be rolled back");
+                        break;
+                    }
+                    /***
+                     * Else sleep for a random time (between 1 to 10 seconds)
+                     * and continue
+                     **/
+                    try {
+                        Random random = new Random();
+                        int randomNum = random.nextInt(maxIntervalBetweenRetries + 1);
+                        Thread.sleep(1000 + (randomNum * 1000));
+                        numberOfRetries = numberOfRetries + 1;
+                    } catch (InterruptedException e) {
+                        sb.append("Interest recalculation for loans failed " + exception.getMessage());
+                        break;
+                    }
+                } catch (Exception e) {
+                    ExceptionHelper.handleExceptions(e, sb, errorMessage, savingAccount, LOG);
+                    numberOfRetries = maxNumberOfRetries + 1;
+                }
+            }
         }
     }
 }

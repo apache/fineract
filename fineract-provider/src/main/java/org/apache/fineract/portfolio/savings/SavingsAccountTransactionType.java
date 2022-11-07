@@ -122,6 +122,12 @@ public enum SavingsAccountTransactionType {
             case 21:
                 savingsAccountTransactionType = SavingsAccountTransactionType.AMOUNT_RELEASE;
             break;
+            case 22:
+                savingsAccountTransactionType = SavingsAccountTransactionType.ACCRUAL_INTEREST_POSTING;
+                break;
+            case 25:
+                savingsAccountTransactionType = SavingsAccountTransactionType.OVERDRAFT_ACCRUAL_INTEREST;
+                break;
         }
         return savingsAccountTransactionType;
     }
@@ -213,5 +219,14 @@ public enum SavingsAccountTransactionType {
 
     public boolean isCredit() {
         return isDeposit() || isInterestPosting() || isDividendPayout();
+    }
+
+
+    public boolean isAccrualInterestPosting() {
+        return this.value.equals(SavingsAccountTransactionType.ACCRUAL_INTEREST_POSTING.getValue());
+    }
+
+    public boolean isOverdraftAccrualPosting() {
+        return this.value.equals(SavingsAccountTransactionType.OVERDRAFT_ACCRUAL_INTEREST.getValue());
     }
 }

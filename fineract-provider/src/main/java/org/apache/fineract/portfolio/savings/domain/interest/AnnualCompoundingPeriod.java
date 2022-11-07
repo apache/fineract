@@ -127,27 +127,12 @@ public final class AnnualCompoundingPeriod implements CompoundingPeriod {
                             minOverdraftForInterestCalculation);
                 break;
                 case MONTHLY:
-                    interestOnBalanceUnrounded = balance.calculateInterestOnBalance(interestToCompound, interestRateAsFraction, daysInYear,
-                            minBalanceForInterestCalculation, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation);
-                break;
                 case QUATERLY:
-                    interestOnBalanceUnrounded = balance.calculateInterestOnBalance(interestToCompound, interestRateAsFraction, daysInYear,
-                            minBalanceForInterestCalculation, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation);
-                break;
-                // case WEEKLY:
-                // break;
-                // case BIWEEKLY:
-                // break;
                 case BI_ANNUAL:
-                    interestOnBalanceUnrounded = balance.calculateInterestOnBalance(interestToCompound, interestRateAsFraction, daysInYear,
-                            minBalanceForInterestCalculation, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation);
-                break;
                 case ANNUAL:
                     interestOnBalanceUnrounded = balance.calculateInterestOnBalance(interestToCompound, interestRateAsFraction, daysInYear,
                             minBalanceForInterestCalculation, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation);
                 break;
-                // case NO_COMPOUNDING_SIMPLE_INTEREST:
-                // break;
                 case INVALID:
                 break;
             }
@@ -184,5 +169,106 @@ public final class AnnualCompoundingPeriod implements CompoundingPeriod {
     @Override
     public LocalDateInterval getPeriodInterval() {
         return this.periodInterval;
+    }
+
+    @Override
+    public List<BigDecimal> calculateInterests(final SavingsCompoundingInterestPeriodType compoundingInterestPeriodType,
+                                               final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestToCompound,
+                                               final BigDecimal interestRateAsFraction, final long daysInYear, final BigDecimal minBalanceForInterestCalculation,
+                                               final BigDecimal overdraftInterestRateAsFraction, final BigDecimal minOverdraftForInterestCalculation) {
+
+        List<BigDecimal> interestEarned = new ArrayList<BigDecimal>();
+
+        switch (interestCalculationType) {
+            case DAILY_BALANCE:
+                interestEarned.addAll(calculateUsingDailyBalanceMethods(compoundingInterestPeriodType, interestToCompound,
+                        interestRateAsFraction, daysInYear, minBalanceForInterestCalculation, overdraftInterestRateAsFraction,
+                        minOverdraftForInterestCalculation));
+                break;
+            case AVERAGE_DAILY_BALANCE:
+                interestEarned.addAll(calculateUsingAverageDailyBalanceMethods(interestToCompound, interestRateAsFraction, daysInYear,
+                        minBalanceForInterestCalculation, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation));
+                break;
+            case INVALID:
+                break;
+        }
+
+        return interestEarned;
+    }
+
+    @Override
+    public List<EndOfDayBalance> getEndOfDayBalances() {
+        return endOfDayBalances;
+    }
+    private List<BigDecimal> calculateUsingDailyBalanceMethods(final SavingsCompoundingInterestPeriodType compoundingInterestPeriodType,
+                                                              final BigDecimal interestToCompound, final BigDecimal interestRateAsFraction, final long daysInYear,
+                                                              final BigDecimal minBalanceForInterestCalculation, final BigDecimal overdraftInterestRateAsFraction,
+                                                              final BigDecimal minOverdraftForInterestCalculation) {
+
+        List<BigDecimal> interestEarned = new ArrayList<BigDecimal>();
+        List<BigDecimal> interestOnBalanceUnrounded = new ArrayList<BigDecimal>();
+        for (final EndOfDayBalance balance : this.endOfDayBalances) {
+
+            switch (compoundingInterestPeriodType) {
+                case DAILY:
+                    interestOnBalanceUnrounded
+                            .addAll(balance.calculateInterestOnBalanceAndInterests(interestToCompound, interestRateAsFraction, daysInYear,
+                                    minBalanceForInterestCalculation, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation));
+                    break;
+                case MONTHLY:
+                case QUATERLY:
+                case ANNUAL:
+                case BI_ANNUAL:
+                    interestOnBalanceUnrounded
+                            .addAll(balance.calculateInterestOnBalances(interestToCompound, interestRateAsFraction, daysInYear,
+                                    minBalanceForInterestCalculation, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation));
+                    break;
+                case INVALID:
+                    break;
+            }
+
+            interestEarned.addAll(interestOnBalanceUnrounded);
+        }
+        return interestEarned;
+    }
+
+    private List<BigDecimal> calculateUsingAverageDailyBalanceMethods(final BigDecimal interestToCompound,
+                                                                     final BigDecimal interestRateAsFraction, final long daysInYear, final BigDecimal minBalanceForInterestCalculation,
+                                                                     final BigDecimal overdraftInterestRateAsFraction, final BigDecimal minOverdraftForInterestCalculation) {
+
+        List<BigDecimal> interestEarned = new ArrayList<BigDecimal>();
+
+        for (final EndOfDayBalance balance : this.endOfDayBalances) {
+            final BigDecimal endOfDayCumulativeBalance = balance.cumulativeBalance(interestToCompound);
+            final Integer balanceExistsForNumberOfDays = balance.getNumberOfDays();
+
+            if (endOfDayCumulativeBalance.compareTo(BigDecimal.ZERO) != 0 && balanceExistsForNumberOfDays > 0) {
+                final BigDecimal averageDailyBalance = endOfDayCumulativeBalance
+                        .divide(BigDecimal.valueOf(balanceExistsForNumberOfDays), MathContext.DECIMAL64)
+                        .setScale(9, MoneyHelper.getRoundingMode());
+
+                if (averageDailyBalance.compareTo(BigDecimal.ZERO) >= 0) {
+                    if (averageDailyBalance.compareTo(minBalanceForInterestCalculation) >= 0) {
+                        final BigDecimal multiplicand = BigDecimal.ONE.divide(BigDecimal.valueOf(daysInYear), MathContext.DECIMAL64);
+                        final BigDecimal dailyInterestRate = interestRateAsFraction.multiply(multiplicand, MathContext.DECIMAL64);
+                        final BigDecimal periodicInterestRate = dailyInterestRate.multiply(BigDecimal.valueOf(balanceExistsForNumberOfDays),
+                                MathContext.DECIMAL64);
+                        interestEarned.add(averageDailyBalance.multiply(periodicInterestRate, MathContext.DECIMAL64).setScale(9,
+                                MoneyHelper.getRoundingMode()));
+                    }
+                } else {
+                    if (averageDailyBalance.compareTo(minOverdraftForInterestCalculation.negate()) < 0) {
+                        final BigDecimal multiplicand = BigDecimal.ONE.divide(BigDecimal.valueOf(daysInYear), MathContext.DECIMAL64);
+                        final BigDecimal dailyInterestRate = overdraftInterestRateAsFraction.multiply(multiplicand, MathContext.DECIMAL64);
+                        final BigDecimal periodicInterestRate = dailyInterestRate.multiply(BigDecimal.valueOf(balanceExistsForNumberOfDays),
+                                MathContext.DECIMAL64);
+                        interestEarned.add(averageDailyBalance.multiply(periodicInterestRate, MathContext.DECIMAL64).setScale(9,
+                                MoneyHelper.getRoundingMode()));
+                    }
+                }
+            }
+        }
+
+        return interestEarned;
     }
 }

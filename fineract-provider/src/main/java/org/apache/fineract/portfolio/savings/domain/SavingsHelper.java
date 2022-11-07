@@ -114,7 +114,7 @@ public final class SavingsHelper {
                 .with(TemporalAdjusters.lastDayOfMonth()));
         Collections.sort(biannualDates);
         boolean isEndDateSet = false;
-
+        if (interestPostingPeriodType != null) {
         switch (interestPostingPeriodType) {
             case INVALID:
             break;
@@ -161,7 +161,13 @@ public final class SavingsHelper {
                 }
                 periodEndDate = periodEndDate.with(TemporalAdjusters.lastDayOfMonth());
             break;
+            default:
+                break;
         }
+        }else {
+                periodEndDate = periodStartDate;
+            }
+
         // interest posting always occurs on next day after the period end date.
         periodEndDate = periodEndDate.plusDays(1);
         return periodEndDate;
@@ -180,5 +186,63 @@ public final class SavingsHelper {
     public Collection<Long> fetchPostInterestTransactionIds(Long accountId, LocalDate pivotDate) {
         return this.accountTransfersReadPlatformService.fetchPostInterestTransactionIdsWithPivotDate(accountId, pivotDate);
     }
+    public List<LocalDateInterval> determineInterestPostingPeriods(final LocalDate startInterestCalculationLocalDate,
+                                                                   final LocalDate interestPostingUpToDate, final SavingsPostingInterestPeriodType postingPeriodType,
+                                                                   final Integer financialYearBeginningMonth, List<LocalDate> postInterestAsOn, LocalDate maturityDate) {
 
+        final List<LocalDateInterval> postingPeriods = new ArrayList<>();
+        LocalDate periodStartDate = startInterestCalculationLocalDate;
+        LocalDate periodEndDate = periodStartDate;
+        LocalDate actualPeriodStartDate = periodStartDate;
+
+        while (!periodStartDate.isAfter(interestPostingUpToDate) && !periodEndDate.isAfter(interestPostingUpToDate)) {
+
+            if (postingPeriodType != null && postingPeriodType.getValue().equals(SavingsPostingInterestPeriodType.TENURE.getValue())
+                    && !periodEndDate.isBefore(interestPostingUpToDate)) {
+                break;
+            }
+
+            LocalDate interestPostingLocalDate = determineInterestPostingPeriodEndDateFrom(periodStartDate, postingPeriodType,
+                    interestPostingUpToDate, financialYearBeginningMonth);
+
+            if(maturityDate != null) {
+                if(interestPostingLocalDate.isAfter(maturityDate)) {
+                    interestPostingLocalDate = maturityDate;
+                }
+            }
+
+            periodEndDate = interestPostingLocalDate.minusDays(1);
+
+            if (!postInterestAsOn.isEmpty()) {
+                for (LocalDate transactionDate : postInterestAsOn) {
+                    if (periodStartDate.isBefore(transactionDate)
+                            && (periodEndDate.isAfter(transactionDate) || periodEndDate.isEqual(transactionDate))) {
+                        periodEndDate = transactionDate.minusDays(1);
+                        actualPeriodStartDate = periodEndDate;
+                        break;
+                    }
+                }
+            }
+
+            postingPeriods.add(LocalDateInterval.create(periodStartDate, periodEndDate));
+
+            if (actualPeriodStartDate.isEqual(periodEndDate)) {
+                periodEndDate = actualPeriodStartDate.plusDays(1);
+                periodStartDate = actualPeriodStartDate.plusDays(1);
+            } else {
+                periodEndDate = interestPostingLocalDate;
+                periodStartDate = interestPostingLocalDate;
+            }
+            if (maturityDate != null && interestPostingLocalDate.isEqual(maturityDate)) {
+                break;
+            }
+        }
+
+        return postingPeriods;
+    }
+    public List<Money> calculateInterestForAllPostingPeriods(final MonetaryCurrency currency, final List<PostingPeriod> allPeriods,
+                                                             LocalDate accountLockedUntil, Boolean immediateWithdrawalOfInterest, Boolean ignorecompounding) {
+        return this.compoundInterestHelper.calculateInterestForAllPostingPeriods(currency, allPeriods, accountLockedUntil,
+                immediateWithdrawalOfInterest, ignorecompounding);
+    }
 }

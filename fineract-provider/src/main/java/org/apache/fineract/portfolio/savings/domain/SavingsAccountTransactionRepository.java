@@ -52,4 +52,7 @@ public interface SavingsAccountTransactionRepository
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<SavingsAccountTransaction> findBySavingsAccountId(@Param("savingsAccountId") Long savingsAccountId);
+
+    @Query("SELECT sat FROM SavingsAccountTransaction sat WHERE sat.savingsAccount.id = :savingsId ORDER BY sat.dateOf, sat.createdDate, sat.id")
+    List<SavingsAccountTransaction> getTransactionsByAccountId(@Param("savingsId") Long savingsId);
 }

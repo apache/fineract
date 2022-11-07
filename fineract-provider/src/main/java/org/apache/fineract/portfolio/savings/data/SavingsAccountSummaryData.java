@@ -244,7 +244,6 @@ public class SavingsAccountSummaryData implements Serializable {
     }
 
     public void updateFromInterestPeriodSummaries(final MonetaryCurrency currency, final List<PostingPeriod> allPostingPeriods) {
-
         Money totalEarned = Money.zero(currency);
         LocalDate interestCalculationDate = DateUtils.getBusinessLocalDate();
         for (final PostingPeriod period : allPostingPeriods) {

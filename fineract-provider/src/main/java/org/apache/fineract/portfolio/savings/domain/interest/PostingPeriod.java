@@ -46,6 +46,8 @@ public final class PostingPeriod {
 
     // interest posting details
     private final LocalDate dateOfPostingTransaction;
+    private List<BigDecimal> interestEarnedUnroundeds;
+    private List<Money> interestEarnedRoundeds;
     private BigDecimal interestEarnedUnrounded;
     private Money interestEarnedRounded;
 
@@ -260,6 +262,9 @@ public final class PostingPeriod {
         this.financialYearBeginningMonth = financialYearBeginningMonth;
     }
 
+    public List<Money> interests() {
+        return this.interestEarnedRoundeds;
+    }
     public Money interest() {
         return this.interestEarnedRounded;
     }
@@ -310,10 +315,13 @@ public final class PostingPeriod {
         return interestEarned;
     }
 
+    public List<Money> getInterestEarneds() {
+        return this.interestEarnedRoundeds;
+    }
+
     public Money getInterestEarned() {
         return this.interestEarnedRounded;
     }
-
     private static List<CompoundingPeriod> compoundingPeriodsInPostingPeriod(final LocalDateInterval postingPeriodInterval,
             final SavingsCompoundingInterestPeriodType interestPeriodType, final List<EndOfDayBalance> allEndOfDayBalances,
             final LocalDate upToInterestCalculationDate, int financialYearBeginningMonth) {
@@ -460,14 +468,6 @@ public final class PostingPeriod {
             case DAILY:
                 periodEndDate = periodStartDate;
             break;
-            // case WEEKLY:
-            // periodEndDate = periodStartDate.dayOfWeek().withMaximumValue();
-            // break;
-            // case BIWEEKLY:
-            // final LocalDate closestEndOfWeek =
-            // periodStartDate.dayOfWeek().withMaximumValue();
-            // periodEndDate = closestEndOfWeek.plusWeeks(1);
-            // break;
             case MONTHLY:
                 // produce period end date on last day of current month
                 periodEndDate = periodStartDate.with(TemporalAdjusters.lastDayOfMonth());
@@ -548,4 +548,167 @@ public final class PostingPeriod {
         return this.financialYearBeginningMonth;
     }
 
+
+    // isInterestTransfer boolean is to identify newly created transaction is
+    // interest transfer
+    public static PostingPeriod createFrom(final LocalDateInterval periodInterval, final Money periodStartingBalance,
+                                           final List<SavingsAccountTransaction> orderedListOfTransactions, final MonetaryCurrency currency,
+                                           final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
+                                           final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
+                                           final LocalDate upToInterestCalculationDate, Collection<Long> interestPostTransactions, boolean isInterestTransfer,
+                                           final Money minBalanceForInterestCalculation, final boolean isSavingsInterestPostingAtCurrentPeriodEnd,
+                                           final BigDecimal overdraftInterestRateAsFraction, final Money minOverdraftForInterestCalculation, boolean isUserPosting,
+                                           int financialYearBeginningMonth, final Boolean includePostingAndWithHoldTax) {
+
+        List<EndOfDayBalance> accountEndOfDayBalances = new ArrayList<>();
+        boolean interestTransfered = false;
+        Money openingDayBalance = periodStartingBalance;
+        Money closeOfDayBalance = openingDayBalance;
+        for (final SavingsAccountTransaction transaction : orderedListOfTransactions) {
+
+            if (transaction.fallsWithin(periodInterval)) {
+                // the balance of the transaction falls entirely within this
+                // period so no need to do any cropping/bounding
+                final EndOfDayBalance endOfDayBalance = transaction.toEndOfDayBalance(openingDayBalance, includePostingAndWithHoldTax);
+                accountEndOfDayBalances.add(endOfDayBalance);
+
+                openingDayBalance = endOfDayBalance.closingBalance();
+
+            } else if (transaction.spansAnyPortionOf(periodInterval)) {
+                final EndOfDayBalance endOfDayBalance = transaction.toEndOfDayBalanceBoundedBy(openingDayBalance, periodInterval,
+                        includePostingAndWithHoldTax);
+                accountEndOfDayBalances.add(endOfDayBalance);
+
+                closeOfDayBalance = endOfDayBalance.closingBalance();
+                openingDayBalance = closeOfDayBalance;
+            }
+
+            // this check is to make sure to add interest if withdrawal is
+            // happened for already
+            if (transaction.occursOn(periodInterval.endDate().plusDays(1))) {
+                if (transaction.getId() == null) {
+                    interestTransfered = isInterestTransfer;
+                } else if (interestPostTransactions.contains(transaction.getId())) {
+                    interestTransfered = true;
+                }
+            }
+
+        }
+
+        if (accountEndOfDayBalances.isEmpty()) {
+            LocalDate balanceStartDate = periodInterval.startDate();
+            LocalDate balanceEndDate = periodInterval.endDate();
+            Integer numberOfDaysOfBalance = periodInterval.daysInPeriodInclusiveOfEndDate();
+
+            if (balanceEndDate.isAfter(upToInterestCalculationDate)) {
+                balanceEndDate = upToInterestCalculationDate;
+                final LocalDateInterval spanOfBalance = LocalDateInterval.create(balanceStartDate, balanceEndDate);
+                numberOfDaysOfBalance = spanOfBalance.daysInPeriodInclusiveOfEndDate();
+            }
+
+            final EndOfDayBalance endOfDayBalance = EndOfDayBalance.from(balanceStartDate, openingDayBalance, closeOfDayBalance,
+                    numberOfDaysOfBalance);
+
+            accountEndOfDayBalances.add(endOfDayBalance);
+
+            closeOfDayBalance = endOfDayBalance.closingBalance();
+            openingDayBalance = closeOfDayBalance;
+        } else if (!orderedListOfTransactions.isEmpty()){
+            SavingsAccountTransaction firstTransaction = orderedListOfTransactions.get(0);
+            if (firstTransaction.transactionLocalDate().isAfter(periodInterval.startDate())) {
+                LocalDate balanceStartDate = periodInterval.startDate();
+                LocalDate balanceEndDate = firstTransaction.transactionLocalDate();
+                LocalDateInterval spanOfBalance = LocalDateInterval.create(balanceStartDate, balanceEndDate);
+                Integer numberOfDaysOfBalance = spanOfBalance.daysBetween();
+
+                final EndOfDayBalance endOfDayBalance = EndOfDayBalance.from(balanceStartDate, periodStartingBalance, periodStartingBalance,
+                        numberOfDaysOfBalance);
+
+                accountEndOfDayBalances.add(0, endOfDayBalance);
+            }
+        }
+        accountEndOfDayBalances = flattenEndOfDayBalances(accountEndOfDayBalances, periodInterval);
+
+        final List<CompoundingPeriod> compoundingPeriods = compoundingPeriodsInPostingPeriod(periodInterval, interestCompoundingPeriodType,
+                accountEndOfDayBalances, upToInterestCalculationDate, financialYearBeginningMonth);
+
+        return new PostingPeriod(periodInterval, currency, periodStartingBalance, openingDayBalance, interestCompoundingPeriodType,
+                interestCalculationType, interestRateAsFraction, daysInYear, compoundingPeriods, interestTransfered,
+                minBalanceForInterestCalculation, isSavingsInterestPostingAtCurrentPeriodEnd, overdraftInterestRateAsFraction,
+                minOverdraftForInterestCalculation, isUserPosting, financialYearBeginningMonth);
+    }
+
+    private static List<EndOfDayBalance> flattenEndOfDayBalances(List<EndOfDayBalance> accountEndOfDayBalances, LocalDateInterval periodInterval) {
+        List<EndOfDayBalance> endOfDayBalances = new ArrayList<>();
+        if (!accountEndOfDayBalances.isEmpty()) {
+            EndOfDayBalance endOfDayBalance = accountEndOfDayBalances.get(0);
+            for (int i = 1; i < accountEndOfDayBalances.size(); i++) {
+                EndOfDayBalance balance = accountEndOfDayBalances.get(i);
+                if (endOfDayBalance.date().isEqual(balance.date())) {
+                    endOfDayBalance.setNumberOfDays(endOfDayBalance.getNumberOfDays() + balance.getNumberOfDays());
+                    endOfDayBalance.setEndOfDayBalance(balance.closingBalance());
+                } else {
+                    endOfDayBalances.add(endOfDayBalance);
+                    endOfDayBalance = balance;
+                }
+            }
+            endOfDayBalances.add(endOfDayBalance);
+            for (int i = 0; i < endOfDayBalances.size() - 1; i++) {
+                EndOfDayBalance balance = endOfDayBalances.get(i);
+                EndOfDayBalance balance2 = endOfDayBalances.get(i + 1);
+                LocalDateInterval spanOfBalance = LocalDateInterval.create(balance.date(), balance2.date());
+                balance.setNumberOfDays(spanOfBalance.daysBetween());
+            }
+            EndOfDayBalance lastBalance = endOfDayBalances.get(endOfDayBalances.size() - 1);
+            LocalDateInterval spanOfBalance = LocalDateInterval.create(lastBalance.date(), periodInterval.endDate());
+            lastBalance.setNumberOfDays(spanOfBalance.daysInPeriodInclusiveOfEndDate());
+        }
+
+        return endOfDayBalances;
+    }
+
+    public List<BigDecimal> calculateInterests(final CompoundInterestValues compoundInterestValues) {
+        List<BigDecimal> interestEarned = new ArrayList<>();
+
+        // for each compounding period accumulate the amount of interest
+        // to be applied to the balanced for interest calculation
+        for (final CompoundingPeriod compoundingPeriod : this.compoundingPeriods) {
+            System.out.println(this.interestCompoundingType.getCode());
+            final List<BigDecimal> interestUnrounded = compoundingPeriod.calculateInterests(this.interestCompoundingType,
+                    this.interestCalculationType, compoundInterestValues.getcompoundedInterest(), this.interestRateAsFraction,
+                    this.daysInYear, this.minBalanceForInterestCalculation.getAmount(), this.overdraftInterestRateAsFraction,
+                    this.minOverdraftForInterestCalculation.getAmount());
+            BigDecimal unCompoundedInterest = compoundInterestValues.getuncompoundedInterest();
+            for (BigDecimal interest : interestUnrounded) {
+                unCompoundedInterest = unCompoundedInterest.add(interest);
+            }
+            compoundInterestValues.setuncompoundedInterest(unCompoundedInterest);
+            LocalDate compoundingPeriodEndDate = compoundingPeriod.getPeriodInterval().endDate();
+            if (!SavingsCompoundingInterestPeriodType.DAILY.equals(this.interestCompoundingType)) {
+                compoundingPeriodEndDate = determineInterestPeriodEndDateFrom(compoundingPeriod.getPeriodInterval().startDate(),
+                        this.interestCompoundingType, compoundingPeriod.getPeriodInterval().endDate(),
+                        this.getFinancialYearBeginningMonth());
+            }
+
+            if (compoundingPeriodEndDate.equals(compoundingPeriod.getPeriodInterval().endDate())) {
+                BigDecimal interestCompounded = compoundInterestValues.getcompoundedInterest().add(unCompoundedInterest);
+                compoundInterestValues.setcompoundedInterest(interestCompounded);
+                compoundInterestValues.setZeroForInterestToBeUncompounded();
+            }
+            interestEarned.addAll(interestUnrounded);
+        }
+
+        this.interestEarnedUnroundeds = interestEarned;
+        List<Money> interestRounded = new ArrayList<Money>();
+        for (BigDecimal interest : this.interestEarnedUnroundeds) {
+            interestRounded.add(Money.of(this.currency, interest));
+        }
+        this.interestEarnedRoundeds = interestRounded;
+
+        return interestEarned;
+    }
+
+    public void setInterestEarned(List<Money> interestEarnedRounded) {
+        this.interestEarnedRoundeds = interestEarnedRounded;
+    }
 }

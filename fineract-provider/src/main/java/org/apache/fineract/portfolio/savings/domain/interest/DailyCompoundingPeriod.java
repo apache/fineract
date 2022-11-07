@@ -98,4 +98,29 @@ public final class DailyCompoundingPeriod implements CompoundingPeriod {
     public LocalDateInterval getPeriodInterval() {
         return this.periodInterval;
     }
+
+    @Override
+    public List<BigDecimal> calculateInterests(SavingsCompoundingInterestPeriodType compoundingInterestPeriodType, SavingsInterestCalculationType interestCalculationType, BigDecimal interestFromPreviousPostingPeriod, BigDecimal interestRateAsFraction, long daysInYear, BigDecimal minBalanceForInterestCalculation, BigDecimal overdraftInterestRateAsFraction, BigDecimal minOverdraftForInterestCalculation) {
+        List<BigDecimal> interestEarned = new ArrayList<>();
+
+        // for daily compounding - each interest calculated from previous daily
+        // calculations is 'compounded'
+        BigDecimal interestToCompound = interestFromPreviousPostingPeriod;
+        for (final EndOfDayBalance balance : this.endOfDayBalances) {
+            final List<BigDecimal> interestOnBalanceUnrounded = balance.calculateInterestOnBalanceAndInterests(interestToCompound,
+                    interestRateAsFraction, daysInYear, minBalanceForInterestCalculation, overdraftInterestRateAsFraction,
+                    minOverdraftForInterestCalculation);
+            for (BigDecimal interest : interestOnBalanceUnrounded) {
+                interestToCompound = interestToCompound.add(interest, MathContext.DECIMAL64).setScale(9);
+            }
+            interestEarned.addAll(interestOnBalanceUnrounded);
+        }
+
+        return interestEarned;
+    }
+
+    @Override
+    public List<EndOfDayBalance> getEndOfDayBalances() {
+        return endOfDayBalances;
+    }
 }

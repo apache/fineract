@@ -99,6 +99,7 @@ public class SavingsAccountAssembler {
     private final FromJsonHelper fromApiJsonHelper;
     private final JdbcTemplate jdbcTemplate;
     private final ConfigurationDomainService configurationDomainService;
+    private final SavingsAccountTransactionRepository savingsAccountTransactionRepository;
 
     @Autowired
     public SavingsAccountAssembler(final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
@@ -107,7 +108,7 @@ public class SavingsAccountAssembler {
             final SavingsAccountRepositoryWrapper savingsAccountRepository,
             final SavingsAccountChargeAssembler savingsAccountChargeAssembler, final FromJsonHelper fromApiJsonHelper,
             final AccountTransfersReadPlatformService accountTransfersReadPlatformService, final JdbcTemplate jdbcTemplate,
-            final ConfigurationDomainService configurationDomainService) {
+            final ConfigurationDomainService configurationDomainService,SavingsAccountTransactionRepository savingsAccountTransactionRepository) {
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.clientRepository = clientRepository;
         this.groupRepository = groupRepository;
@@ -119,6 +120,7 @@ public class SavingsAccountAssembler {
         savingsHelper = new SavingsHelper(accountTransfersReadPlatformService);
         this.jdbcTemplate = jdbcTemplate;
         this.configurationDomainService = configurationDomainService;
+        this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
     }
 
     /**
@@ -469,5 +471,23 @@ public class SavingsAccountAssembler {
 
     public void assignSavingAccountHelpers(final SavingsAccountData savingsAccountData) {
         savingsAccountData.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
+    }
+    public SavingsAccount assembleFrom(final Long savingsId) {
+        final SavingsAccount account = this.savingsAccountRepository.findOneWithNotFoundDetection(savingsId);
+        populateTransactions(account, this.savingsAccountTransactionRepository.getTransactionsByAccountId(savingsId));
+        return setAccountHelpers(account);
+    }
+
+    private SavingsAccount setAccountHelpers(SavingsAccount account) {
+        account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
+        return account;
+    }
+
+    private  void populateTransactions(SavingsAccount account, List<SavingsAccountTransaction> transactions) {
+        // We do this in case the passed transaction list is read-only
+        List<SavingsAccountTransaction> trans = account.getTransactions();
+        //Always clear the list first to avoid dups
+        trans.clear();
+        trans.addAll(transactions);
     }
 }

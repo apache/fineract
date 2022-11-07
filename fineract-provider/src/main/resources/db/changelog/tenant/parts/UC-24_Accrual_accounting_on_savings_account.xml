@@ -66,4 +66,32 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="bosco@fiter.io" id="add_total_overdraft_interest_earned_derived_on_m_savings_account">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_savings_account" columnName="total_overdraft_interest_earned_derived"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_savings_account">
+            <column name="total_overdraft_interest_earned_derived" type="decimal(19,6)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_is_account_transfer_on_m_savings_account_transaction">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_savings_account_transaction" columnName="is_account_transfer"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_savings_account_transaction">
+            <column name="is_account_transfer" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

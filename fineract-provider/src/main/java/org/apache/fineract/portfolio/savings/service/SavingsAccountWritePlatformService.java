@@ -89,10 +89,8 @@ public interface SavingsAccountWritePlatformService {
 
     CommandProcessingResult postInterest(JsonCommand command);
 
-    void postInterest(SavingsAccount account, boolean postInterestAs, LocalDate transactionDate, boolean backdatedTxnsAllowedTill);
+    void postInterest(SavingsAccount account, boolean postInterestAs, LocalDate transactionDate);
 
-    // SavingsAccountData postInterest(SavingsAccountData account, boolean postInterestAs, LocalDate transactionDate,
-    // boolean backdatedTxnsAllowedTill);
 
     SavingsAccountData postInterest(SavingsAccountData account, boolean postInterestAs, LocalDate transactionDate,
             boolean backdatedTxnsAllowedTill);
@@ -118,4 +116,7 @@ public interface SavingsAccountWritePlatformService {
     CommandProcessingResult gsimDeposit(Long gsimId, JsonCommand command);
 
     CommandProcessingResult bulkGSIMClose(Long gsimId, JsonCommand command);
+
+    CommandProcessingResult postAccrualInterest(Long savingAccountId, LocalDate postingDate, boolean isUserPosting);
+    void postAccrualInterest(SavingsAccount account, boolean postInterestAs, LocalDate transactionDate, boolean isUserPosting);
 }

@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.fineract.portfolio.businessevent.BusinessEventListener;
 import org.apache.fineract.portfolio.businessevent.domain.BusinessEvent;
+import org.apache.fineract.portfolio.common.domain.BusinessEventNotificationConstants;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -71,6 +72,11 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
             postListeners.put(eventType, businessEventListeners);
         }
         businessEventListeners.add(listener);
+    }
+
+    @Override
+    public void notifyBusinessEventWasExecuted(BusinessEventNotificationConstants.BusinessEvents businessEvent, Map<BusinessEventNotificationConstants.BusinessEntity, Object> businessEventEntity) {
+
     }
 
 }
