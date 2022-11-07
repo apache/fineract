@@ -30,4 +30,6 @@ public interface LoanAccountLockRepository extends JpaRepository<LoanAccountLock
     void deleteByLoanIdInAndLockOwner(List<Long> loanIds, LockOwner lockOwner);
 
     List<LoanAccountLock> findAllByLoanIdIn(List<Long> loanIds);
+
+    boolean existsByLoanIdAndLockOwner(Long loanId, LockOwner lockOwner);
 }

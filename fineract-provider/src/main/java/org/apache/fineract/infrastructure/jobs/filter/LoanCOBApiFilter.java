@@ -21,8 +21,8 @@ package org.apache.fineract.infrastructure.jobs.filter;
 import com.google.common.base.Splitter;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.cob.service.InlineLoanCOBExecutorServiceImpl;
 import org.apache.fineract.cob.service.LoanAccountLockService;
 import org.apache.fineract.infrastructure.core.data.ApiGlobalErrorResponse;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -51,12 +52,14 @@ public class LoanCOBApiFilter extends OncePerRequestFilter {
     private final GLIMAccountInfoRepository glimAccountInfoRepository;
     private final LoanAccountLockService loanAccountLockService;
     private final PlatformSecurityContext context;
+    private final InlineLoanCOBExecutorServiceImpl inlineLoanCOBExecutorService;
 
     private static final List<HttpMethod> HTTP_METHODS = List.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE);
     private static final Function<String, Boolean> URL_FUNCTION = s -> s.matches("/loans/\\d+.*") || s.matches("/loans/glimAccount/\\d+.*");
     private static final Integer LOAN_ID_INDEX_IN_URL = 2;
     private static final Integer GLIM_ID_INDEX_IN_URL = 3;
     private static final Integer GLIM_STRING_INDEX_IN_URL = 2;
+    private static final String JOB_NAME = "INLINE_LOAN_COB";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -67,33 +70,48 @@ public class LoanCOBApiFilter extends OncePerRequestFilter {
             Iterable<String> split = Splitter.on('/').split(request.getPathInfo());
             Supplier<Stream<String>> streamSupplier = () -> StreamSupport.stream(split.spliterator(), false);
             boolean isGlim = isGlim(streamSupplier);
-            Long loanId = getLoanId(isGlim, streamSupplier);
-            if (isLoanLocked(loanId, isGlim)) {
-                reject(loanId, response);
+            Long loanIdFromRequest = getLoanId(isGlim, streamSupplier);
+            List<Long> loanIds = isGlim ? getGlimChildLoanIds(loanIdFromRequest) : Collections.singletonList(loanIdFromRequest);
+            if (isLoanHardLocked(loanIds)) {
+                reject(loanIdFromRequest, response);
+            } else if (isLoanSoftLocked(loanIds)) {
+                executeInlineCob(loanIds);
+                proceed(filterChain, request, response);
             } else {
                 proceed(filterChain, request, response);
             }
         }
     }
 
+    private void executeInlineCob(List<Long> loanIds) {
+        inlineLoanCOBExecutorService.execute(loanIds, JOB_NAME);
+    }
+
+    private List<Long> getGlimChildLoanIds(Long loanIdFromRequest) {
+        GroupLoanIndividualMonitoringAccount glimAccount = glimAccountInfoRepository.findOneByIsAcceptingChildAndApplicationId(true,
+                BigDecimal.valueOf(loanIdFromRequest));
+        if (glimAccount != null) {
+            return glimAccount.getChildLoan().stream().map(Loan::getId).toList();
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    private boolean isLoanSoftLocked(List<Long> loanIds) {
+        return isLoanLocked(loanIds, false);
+    }
+
+    private boolean isLoanHardLocked(List<Long> loanIds) {
+        return isLoanLocked(loanIds, true);
+    }
+
     private boolean isBypassUser() {
         return context.getAuthenticatedUserIfPresent().isBypassUser();
     }
 
-    private boolean isLoanLocked(Long loanId, boolean isGlim) {
-        if (!isGlim) {
-            return loanAccountLockService.isLoanHardLocked(loanId);
-        } else {
-            GroupLoanIndividualMonitoringAccount glimAccount = glimAccountInfoRepository.findOneByIsAcceptingChildAndApplicationId(true,
-                    BigDecimal.valueOf(loanId));
-            if (glimAccount != null) {
-                Set<Loan> loans = glimAccount.getChildLoan();
-                List<Long> loanIds = loans.stream().map(Loan::getId).toList();
-                return loanIds.stream().anyMatch(loanAccountLockService::isLoanHardLocked);
-            } else {
-                return false;
-            }
-        }
+    private boolean isLoanLocked(List<Long> loanIds, boolean isHardLock) {
+        return isHardLock ? loanIds.stream().anyMatch(loanAccountLockService::isLoanHardLocked)
+                : loanIds.stream().anyMatch(loanAccountLockService::isLoanSoftLocked);
     }
 
     private void proceed(FilterChain filterChain, HttpServletRequest request, HttpServletResponse response)

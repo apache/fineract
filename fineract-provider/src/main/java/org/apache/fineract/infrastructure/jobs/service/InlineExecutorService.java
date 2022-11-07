@@ -18,10 +18,18 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
+import java.util.Collections;
+import java.util.List;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
-public interface InlineExecutorService {
+public interface InlineExecutorService<T> {
 
     CommandProcessingResult executeInlineJob(JsonCommand command, String jobName);
+
+    void execute(List<T> elements, String jobName);
+
+    default void execute(T element, String jobName) {
+        execute(Collections.singletonList(element), jobName);
+    }
 }
