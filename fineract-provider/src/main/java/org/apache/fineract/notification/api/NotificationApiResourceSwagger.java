@@ -65,4 +65,14 @@ final class NotificationApiResourceSwagger {
 
         public List<GetNotification> pageItems;
     }
+
+    @Schema(description = "PutNotificationsNotificationIdResponse")
+    public static final class PutNotificationsNotificationIdResponse {
+
+        private PutNotificationsNotificationIdResponse() {}
+
+        @Schema(example = "1")
+        public String name;
+
+    }
 }

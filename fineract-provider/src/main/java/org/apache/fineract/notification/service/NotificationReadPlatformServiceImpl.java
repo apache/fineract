@@ -20,7 +20,6 @@ package org.apache.fineract.notification.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.HashMap;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -32,7 +31,6 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.notification.cache.CacheNotificationResponseHeader;
 import org.apache.fineract.notification.data.NotificationData;
-import org.apache.fineract.notification.domain.NotificationMapper;
 import org.apache.fineract.notification.domain.NotificationMapperRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -96,8 +94,7 @@ public class NotificationReadPlatformServiceImpl implements NotificationReadPlat
 
     private boolean checkForUnreadNotifications(Long appUserId) {
 
-        Collection<NotificationMapper> notificationMappers = this.notificationMapperRepository.getUnreadNotificationsForAUser(appUserId);
-        return notificationMappers.size() > 0;
+        return this.notificationMapperRepository.userHasUnReadNotifications(appUserId);
     }
 
     @Override

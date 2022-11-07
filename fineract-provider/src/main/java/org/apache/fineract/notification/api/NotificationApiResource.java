@@ -88,6 +88,9 @@ public class NotificationApiResource {
     @PUT
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = NotificationApiResourceSwagger.PutNotificationsNotificationIdResponse.class))) })
+    @Operation(summary = "Update a single user notifications", description = "Updates all user notifiacation from is_read = false to is_read = true")
     public void update() {
         final AppUser user = this.context.authenticatedUser();
         this.notificationMapperWritePlatformService.markAllNotificationsForAUserAsRead(user.getId());
@@ -97,6 +100,10 @@ public class NotificationApiResource {
     @Path("{notificationId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = NotificationApiResourceSwagger.PutNotificationsNotificationIdResponse.class))) })
+
+    @Operation(summary = "Update a single user notification", description = "Updates a single user notifiacation from is_read = false to is_read = true")
     public void updateOne(@PathParam("notificationId") @Parameter(description = "notificationId") final Long notificationId) {
         final AppUser user = this.context.authenticatedUser();
         this.notificationMapperWritePlatformService.markASingleNotificationForAUserAsRead(user.getId(), notificationId);

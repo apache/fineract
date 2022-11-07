@@ -39,4 +39,7 @@ public interface NotificationMapperRepository extends JpaRepository<Notification
 
     @Query("SELECT n FROM NotificationMapper n WHERE n.userId.id = :userId AND n.isRead=false")
     Collection<NotificationMapper> getUnreadNotificationsForAUser(@Param("userId") Long userId);
+
+    @Query("SELECT CASE WHEN COUNT(n)> 0 THEN true ELSE false END FROM NotificationMapper n WHERE n.userId.id = :userId AND n.isRead=false")
+    boolean userHasUnReadNotifications(@Param("userId") Long userId);
 }
