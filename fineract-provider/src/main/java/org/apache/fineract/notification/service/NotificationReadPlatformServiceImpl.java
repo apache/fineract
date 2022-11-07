@@ -45,7 +45,6 @@ public class NotificationReadPlatformServiceImpl implements NotificationReadPlat
     private HashMap<Long, HashMap<Long, CacheNotificationResponseHeader>> tenantNotificationResponseHeaderCache = new HashMap<>();
 
     private final NotificationDataRow notificationDataRow = new NotificationDataRow();
-    
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
@@ -96,7 +95,7 @@ public class NotificationReadPlatformServiceImpl implements NotificationReadPlat
     }
 
     private boolean checkForUnreadNotifications(Long appUserId) {
-        
+
         Collection<NotificationMapper> notificationMappers = this.notificationMapperRepository.getUnreadNotificationsForAUser(appUserId);
         return notificationMappers.size() > 0;
     }
@@ -159,8 +158,6 @@ public class NotificationReadPlatformServiceImpl implements NotificationReadPlat
         Object[] params = new Object[] { appUserId };
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), params, this.notificationDataRow);
     }
-
-    
 
     private static final class NotificationDataRow implements RowMapper<NotificationData> {
 
