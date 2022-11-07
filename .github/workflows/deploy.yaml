@@ -3,7 +3,7 @@ name: Deploy BACKEND to ECR
 on:
  
   push:
-    branches: [ unitedcapital-dev ]
+    branches: [ dev ]
 
 jobs:
   
