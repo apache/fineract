@@ -23,7 +23,7 @@ import java.util.Map;
 
 public enum GlobalEntityType {
 
-    INVALID(0, "invalid"), CLIENTS_PERSON(1, "clients.person"), CLIENTS_ENTTTY(2, "clients.entity"), GROUPS(3, "groups"), CENTERS(4,
+    INVALID(0, "invalid"), CLIENTS_PERSON(1, "clients.person"), CLIENTS_ENTITY(2, "clients.entity"), GROUPS(3, "groups"), CENTERS(4,
             "centers"), OFFICES(5, "offices"), STAFF(6, "staff"), USERS(7, "users"), SMS(8, "sms"), DOCUMENTS(9, "documents"), TEMPLATES(10,
                     "templates"), NOTES(11, "templates"), CALENDAR(12, "calendar"), MEETINGS(13, "meetings"), HOLIDAYS(14,
                             "holidays"), LOANS(15, "loans"), LOAN_PRODUCTS(16, "loancharges"), LOAN_TRANSACTIONS(18,

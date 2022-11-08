@@ -17,12 +17,12 @@
 #
 FROM azul/zulu-openjdk:17 AS builder
 
-RUN apt-get update -qq && apt-get install -y wget
+RUN apt-get update -qq && apt-get install -y wget && apt-get install -y dos2unix
 
 COPY . fineract
 WORKDIR /fineract
 
-
+RUN dos2unix ./gradlew
 RUN ./gradlew --no-daemon -q  -x compileTestJava -x test -x spotlessJavaCheck -x spotlessJava bootJar
 RUN mv /fineract/fineract-provider/build/libs/*.jar /fineract/fineract-provider/build/libs/fineract-provider.jar
 
@@ -39,8 +39,8 @@ RUN wget -q https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.23/mys
 FROM azul/zulu-openjdk:17 as fineract
 
 #pentaho copy
-COPY --from=builder /fineract/fineract-provider/pentahoReports/*.properties /root/.mifosx/pentahoReports/
-COPY --from=builder /fineract/fineract-provider/pentahoReports/*.prpt /root/.mifosx/pentahoReports/
+#COPY --from=builder /fineract/fineract-provider/pentahoReports/*.properties /root/.mifosx/pentahoReports/
+#COPY --from=builder /fineract/fineract-provider/pentahoReports/*.prpt /root/.mifosx/pentahoReports/
 
 COPY --from=builder /fineract/fineract-provider/build/libs/ /app
 COPY --from=builder /app/libs /app/libs
