@@ -658,7 +658,7 @@ public class ClientHelper {
     public String importClientEntityTemplate(File file) {
         String locale = "en";
         String dateFormat = "dd MMMM yyyy";
-        String legalFormType = GlobalEntityType.CLIENTS_ENTTTY.toString();
+        String legalFormType = GlobalEntityType.CLIENTS_ENTITY.toString();
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA);
         return Utils.performServerTemplatePost(requestSpec, responseSpec, CLIENT_URL + "/uploadtemplate" + "?" + Utils.TENANT_IDENTIFIER,
                 legalFormType, file, locale, dateFormat);

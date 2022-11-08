@@ -73,7 +73,7 @@ public class BulkImportApiResource {
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
         Collection<ImportData> importData = new ArrayList<>();
         if (entityType.equals(GlobalEntityType.CLIENT.getCode())) {
-            final Collection<ImportData> importForClientEntity = this.bulkImportWorkbookService.getImports(GlobalEntityType.CLIENTS_ENTTTY);
+            final Collection<ImportData> importForClientEntity = this.bulkImportWorkbookService.getImports(GlobalEntityType.CLIENTS_ENTITY);
             final Collection<ImportData> importForClientPerson = this.bulkImportWorkbookService.getImports(GlobalEntityType.CLIENTS_PERSON);
             if (importForClientEntity != null) {
                 importData.addAll(importForClientEntity);
