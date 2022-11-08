@@ -20,6 +20,7 @@ package org.apache.fineract.commands.service;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import io.github.resilience4j.retry.annotation.Retry;
 import java.lang.reflect.Type;
 import java.time.Instant;
 import java.util.HashMap;
@@ -69,8 +70,9 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     private final IdempotencyKeyGenerator idempotencyKeyGenerator;
     private final FineractProperties fineractProperties;
 
-    @Transactional
     @Override
+    @Transactional
+    @Retry(name = "executeCommand", fallbackMethod = "fallbackExecuteCommand")
     public CommandProcessingResult executeCommand(final CommandWrapper wrapper, final JsonCommand command,
             final boolean isApprovedByChecker) {
 
@@ -159,6 +161,15 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
         return new CommandProcessingResultBuilder().withCommandId(commandSourceResult.getId())
                 .withEntityId(commandSourceResult.getResourceId()).build();
+    }
+
+    @SuppressWarnings("unused")
+    private CommandProcessingResult fallbackExecuteCommand(Exception e) throws Exception {
+        if (e instanceof RollbackTransactionAsCommandIsNotApprovedByCheckerException ex) {
+            return logCommand(ex.getCommandSourceResult());
+        }
+
+        throw e;
     }
 
     private NewCommandSourceHandler findCommandHandler(final CommandWrapper wrapper) {

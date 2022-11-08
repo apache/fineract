@@ -31,6 +31,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdraw
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import io.github.resilience4j.retry.annotation.Retry;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
@@ -46,6 +47,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -68,7 +71,6 @@ import org.apache.fineract.infrastructure.event.business.domain.savings.SavingsP
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepositoryWrapper;
-import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.office.domain.Office;
@@ -125,18 +127,16 @@ import org.apache.fineract.portfolio.savings.exception.TransactionUpdateNotAllow
 import org.apache.fineract.portfolio.transfer.api.TransferApiConstants;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+@Slf4j
+@RequiredArgsConstructor
 @Service
 public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements SavingsAccountWritePlatformService {
 
@@ -149,7 +149,6 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final SavingsAccountTransactionDataValidator savingsAccountTransactionDataValidator;
     private final SavingsAccountChargeDataValidator savingsAccountChargeDataValidator;
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
-    private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final SavingsAccountDomainService savingsAccountDomainService;
     private final NoteRepository noteRepository;
@@ -166,62 +165,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final StandingInstructionRepository standingInstructionRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final GSIMRepositoy gsimRepository;
-    private final JdbcTemplate jdbcTemplate;
     private final SavingsAccountInterestPostingService savingsAccountInterestPostingService;
-
-    @Autowired
-    public SavingsAccountWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final SavingsAccountRepositoryWrapper savingAccountRepositoryWrapper,
-            final SavingsAccountTransactionRepository savingsAccountTransactionRepository,
-            final SavingsAccountAssembler savingAccountAssembler,
-            final SavingsAccountTransactionDataValidator savingsAccountTransactionDataValidator,
-            final SavingsAccountChargeDataValidator savingsAccountChargeDataValidator,
-            final PaymentDetailWritePlatformService paymentDetailWritePlatformService,
-            final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper,
-            final JournalEntryWritePlatformService journalEntryWritePlatformService,
-            final SavingsAccountDomainService savingsAccountDomainService, final NoteRepository noteRepository,
-            final AccountTransfersReadPlatformService accountTransfersReadPlatformService, final HolidayRepositoryWrapper holidayRepository,
-            final WorkingDaysRepositoryWrapper workingDaysRepository,
-            final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService,
-            final ChargeRepositoryWrapper chargeRepository, final SavingsAccountChargeRepositoryWrapper savingsAccountChargeRepository,
-            final SavingsAccountDataValidator fromApiJsonDeserializer, final StaffRepositoryWrapper staffRepository,
-            final ConfigurationDomainService configurationDomainService,
-            final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository,
-            final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
-            final AppUserRepositoryWrapper appuserRepository, final StandingInstructionRepository standingInstructionRepository,
-            final BusinessEventNotifierService businessEventNotifierService, final GSIMRepositoy gsimRepository,
-            final JdbcTemplate jdbcTemplate, final SavingsAccountInterestPostingService savingsAccountInterestPostingService) {
-        this.context = context;
-        this.savingAccountRepositoryWrapper = savingAccountRepositoryWrapper;
-        this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
-        this.savingAccountAssembler = savingAccountAssembler;
-        this.savingsAccountTransactionDataValidator = savingsAccountTransactionDataValidator;
-        this.savingsAccountChargeDataValidator = savingsAccountChargeDataValidator;
-        this.paymentDetailWritePlatformService = paymentDetailWritePlatformService;
-        this.applicationCurrencyRepositoryWrapper = applicationCurrencyRepositoryWrapper;
-        this.journalEntryWritePlatformService = journalEntryWritePlatformService;
-        this.savingsAccountDomainService = savingsAccountDomainService;
-        this.noteRepository = noteRepository;
-        this.accountTransfersReadPlatformService = accountTransfersReadPlatformService;
-        this.accountAssociationsReadPlatformService = accountAssociationsReadPlatformService;
-        this.chargeRepository = chargeRepository;
-        this.savingsAccountChargeRepository = savingsAccountChargeRepository;
-        this.holidayRepository = holidayRepository;
-        this.workingDaysRepository = workingDaysRepository;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.staffRepository = staffRepository;
-        this.configurationDomainService = configurationDomainService;
-        this.depositAccountOnHoldTransactionRepository = depositAccountOnHoldTransactionRepository;
-        this.entityDatatableChecksWritePlatformService = entityDatatableChecksWritePlatformService;
-        this.appuserRepository = appuserRepository;
-        this.standingInstructionRepository = standingInstructionRepository;
-        this.businessEventNotifierService = businessEventNotifierService;
-        this.gsimRepository = gsimRepository;
-        this.jdbcTemplate = jdbcTemplate;
-        this.savingsAccountInterestPostingService = savingsAccountInterestPostingService;
-    }
-
-    private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountWritePlatformServiceJpaRepositoryImpl.class);
 
     @Transactional
     @Override
@@ -355,7 +299,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         if (account.getGsim() != null) {
             isGsim = true;
-            LOG.debug("is gsim");
+            log.debug("is gsim");
         }
         checkClientOrGroupActive(account);
 
@@ -376,16 +320,16 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         if (isGsim && (deposit.getId() != null)) {
 
-            LOG.debug("Deposit account has been created: {} ", deposit);
+            log.debug("Deposit account has been created: {} ", deposit);
 
             GroupSavingsIndividualMonitoring gsim = gsimRepository.findById(account.getGsim().getId()).orElseThrow();
-            LOG.debug("parent deposit : {} ", gsim.getParentDeposit());
-            LOG.debug("child account : {} ", savingsId);
+            log.debug("parent deposit : {} ", gsim.getParentDeposit());
+            log.debug("child account : {} ", savingsId);
             BigDecimal currentBalance = gsim.getParentDeposit();
             BigDecimal newBalance = currentBalance.add(transactionAmount);
             gsim.setParentDeposit(newBalance);
             gsimRepository.save(gsim);
-            LOG.debug("balance after making deposit : {} ",
+            log.debug("balance after making deposit : {} ",
                     gsimRepository.findById(account.getGsim().getId()).orElseThrow().getParentDeposit());
 
         }
@@ -641,6 +585,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     @Transactional
     @Override
+    @Retry(name = "postInterest", fallbackMethod = "fallbackPostInterest")
     public SavingsAccountData postInterest(SavingsAccountData savingsAccountData, final boolean postInterestAs,
             final LocalDate transactionDate, final boolean backdatedTxnsAllowedTill) {
 
@@ -662,14 +607,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 postInterestOnDate = transactionDate;
             }
 
-            long startPosting = System.currentTimeMillis();
-            LOG.debug("Interest Posting Start Here at {}", startPosting);
-
             savingsAccountData = this.savingsAccountInterestPostingService.postInterest(mc, today, isInterestTransfer,
                     isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill,
                     savingsAccountData);
-            long endPosting = System.currentTimeMillis();
-            LOG.debug("Interest Posting Ends within {}", endPosting - startPosting);
 
             if (!backdatedTxnsAllowedTill) {
                 List<SavingsAccountTransactionData> transactions = savingsAccountData.getSavingsAccountTransactionData();
@@ -1457,6 +1397,19 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         while (transactionDate.isAfter(savingsAccountCharge.getDueLocalDate()) && savingsAccountCharge.isNotFullyPaid()) {
             payCharge(savingsAccountCharge, transactionDate, savingsAccountCharge.amoutOutstanding(), fmt, user, false);
         }
+    }
+
+    @SuppressWarnings("unused")
+    private SavingsAccountData fallbackPostInterest(SavingsAccountData savingsAccountData, boolean postInterestAs,
+            LocalDate transactionDate, boolean backdatedTxnsAllowedTill, Throwable t) {
+        // NOTE: allow caller to catch the exceptions
+
+        if (t instanceof RuntimeException re) {
+            throw re;
+        }
+
+        // NOTE: wrap throwable only if really necessary
+        throw new RuntimeException(t);
     }
 
     @Transactional
