@@ -85,7 +85,7 @@ class LoanCOBApiFilterTest {
 
         given(request.getPathInfo()).willReturn("/jobs/2/inline");
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
-        given(context.getAuthenticatedUserIfPresent()).willReturn(appUser);
+        given(context.authenticatedUser()).willReturn(appUser);
         given(appUser.isBypassUser()).willReturn(true);
 
         testObj.doFilterInternal(request, response, filterChain);
@@ -103,7 +103,7 @@ class LoanCOBApiFilterTest {
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
         given(loanAccountLockService.isLoanSoftLocked(2L)).willReturn(false);
-        given(context.getAuthenticatedUserIfPresent()).willReturn(appUser);
+        given(context.authenticatedUser()).willReturn(appUser);
 
         testObj.doFilterInternal(request, response, filterChain);
         verify(filterChain, times(1)).doFilter(request, response);
@@ -120,7 +120,7 @@ class LoanCOBApiFilterTest {
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(false);
         given(loanAccountLockService.isLoanSoftLocked(2L)).willReturn(true);
-        given(context.getAuthenticatedUserIfPresent()).willReturn(appUser);
+        given(context.authenticatedUser()).willReturn(appUser);
 
         testObj.doFilterInternal(request, response, filterChain);
         verify(inlineLoanCOBExecutorService, times(1)).execute(Collections.singletonList(2L), "INLINE_LOAN_COB");
@@ -139,7 +139,7 @@ class LoanCOBApiFilterTest {
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
         given(loanAccountLockService.isLoanHardLocked(2L)).willReturn(true);
         given(response.getWriter()).willReturn(writer);
-        given(context.getAuthenticatedUserIfPresent()).willReturn(appUser);
+        given(context.authenticatedUser()).willReturn(appUser);
 
         testObj.doFilterInternal(request, response, filterChain);
         verify(response, times(1)).setStatus(HttpStatus.SC_CONFLICT);
@@ -163,7 +163,7 @@ class LoanCOBApiFilterTest {
         given(loan.getId()).willReturn(loanId);
         given(loanAccountLockService.isLoanHardLocked(loanId)).willReturn(true);
         given(response.getWriter()).willReturn(writer);
-        given(context.getAuthenticatedUserIfPresent()).willReturn(appUser);
+        given(context.authenticatedUser()).willReturn(appUser);
 
         testObj.doFilterInternal(request, response, filterChain);
         verify(response, times(1)).setStatus(HttpStatus.SC_CONFLICT);

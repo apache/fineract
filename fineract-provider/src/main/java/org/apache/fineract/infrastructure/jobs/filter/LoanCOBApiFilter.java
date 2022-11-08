@@ -40,6 +40,7 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringAccount;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.useradministration.exception.UnAuthenticatedUserException;
 import org.apache.http.HttpStatus;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -64,7 +65,7 @@ public class LoanCOBApiFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        if (!isOnApiList(request) || isBypassUser()) {
+        if (!isOnApiList(request) || isBypassUser(response)) {
             proceed(filterChain, request, response);
         } else {
             Iterable<String> split = Splitter.on('/').split(request.getPathInfo());
@@ -73,7 +74,7 @@ public class LoanCOBApiFilter extends OncePerRequestFilter {
             Long loanIdFromRequest = getLoanId(isGlim, streamSupplier);
             List<Long> loanIds = isGlim ? getGlimChildLoanIds(loanIdFromRequest) : Collections.singletonList(loanIdFromRequest);
             if (isLoanHardLocked(loanIds)) {
-                reject(loanIdFromRequest, response);
+                reject(loanIdFromRequest, response, HttpStatus.SC_CONFLICT);
             } else if (isLoanSoftLocked(loanIds)) {
                 executeInlineCob(loanIds);
                 proceed(filterChain, request, response);
@@ -85,6 +86,15 @@ public class LoanCOBApiFilter extends OncePerRequestFilter {
 
     private void executeInlineCob(List<Long> loanIds) {
         inlineLoanCOBExecutorService.execute(loanIds, JOB_NAME);
+    }
+
+    private boolean isBypassUser(HttpServletResponse response) throws IOException {
+        try {
+            return context.authenticatedUser().isBypassUser();
+        } catch (UnAuthenticatedUserException e) {
+            reject(null, response, HttpStatus.SC_UNAUTHORIZED);
+        }
+        return false;
     }
 
     private List<Long> getGlimChildLoanIds(Long loanIdFromRequest) {
@@ -105,10 +115,6 @@ public class LoanCOBApiFilter extends OncePerRequestFilter {
         return isLoanLocked(loanIds, true);
     }
 
-    private boolean isBypassUser() {
-        return context.getAuthenticatedUserIfPresent().isBypassUser();
-    }
-
     private boolean isLoanLocked(List<Long> loanIds, boolean isHardLock) {
         return isHardLock ? loanIds.stream().anyMatch(loanAccountLockService::isLoanHardLocked)
                 : loanIds.stream().anyMatch(loanAccountLockService::isLoanSoftLocked);
@@ -119,8 +125,8 @@ public class LoanCOBApiFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private void reject(Long loanId, HttpServletResponse response) throws IOException {
-        response.setStatus(HttpStatus.SC_CONFLICT);
+    private void reject(Long loanId, HttpServletResponse response, int status) throws IOException {
+        response.setStatus(status);
         ApiGlobalErrorResponse errorResponse = ApiGlobalErrorResponse.loanIsLocked(loanId);
         response.getWriter().write(errorResponse.toJson());
     }
