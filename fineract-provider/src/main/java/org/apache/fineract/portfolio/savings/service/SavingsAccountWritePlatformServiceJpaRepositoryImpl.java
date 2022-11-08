@@ -2128,5 +2128,40 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 existingTransactionIds, existingReversedTransactionIds);
         this.journalEntryWritePlatformService.createJournalEntriesForSavings(accountingBridgeData);
     }
+    @Override
+    public CommandProcessingResult postAccrualInterest(final JsonCommand command) {
+
+        Long savingsId = command.getSavingsId();
+        final boolean postInterestAs = command.booleanPrimitiveValueOfParameterNamed("isPostInterestAsOn");
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
+        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
+        checkClientOrGroupActive(account);
+        if (postInterestAs) {
+
+            if (transactionDate == null) {
+
+                throw new PostInterestAsOnDateException(PostInterestAsOnExceptionType.VALID_DATE);
+            }
+            if (transactionDate.isBefore(account.accountSubmittedOrActivationDate())) {
+                throw new PostInterestAsOnDateException(PostInterestAsOnExceptionType.ACTIVATION_DATE);
+            }
+
+            LocalDate today = DateUtils.getLocalDateOfTenant();
+            if (transactionDate.isAfter(today)) {
+                throw new PostInterestAsOnDateException(PostInterestAsOnExceptionType.FUTURE_DATE);
+            }
+
+        }
+
+        postAccrualInterest(account, postInterestAs, transactionDate, true);
+
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(savingsId) //
+                .withOfficeId(account.officeId()) //
+                .withClientId(account.clientId()) //
+                .withGroupId(account.groupId()) //
+                .withSavingsId(savingsId) //
+                .build();
+    }
 
 }

@@ -119,4 +119,5 @@ public interface SavingsAccountWritePlatformService {
 
     CommandProcessingResult postAccrualInterest(Long savingAccountId, LocalDate postingDate, boolean isUserPosting);
     void postAccrualInterest(SavingsAccount account, boolean postInterestAs, LocalDate transactionDate, boolean isUserPosting);
+    CommandProcessingResult postAccrualInterest(JsonCommand command);
 }

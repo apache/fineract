@@ -3501,5 +3501,13 @@ public class CommandWrapperBuilder {
         this.entityId = businessOwnerId;
         return this;
     }
+    public CommandWrapperBuilder savingsAccountAccrualInterestPosting(final Long accountId) {
+        this.actionName = "POSTACCRUALINTEREST";
+        this.entityName = "SAVINGSACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = accountId;
+        this.href = "/savingsaccounts/" + accountId + "?command=postAccrualInterest";
+        return this;
+    }
 
 }

@@ -510,13 +510,16 @@ public class SavingsAccountsApiResource {
         } else if (is(commandParam, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT)) {
             final CommandWrapper commandRequest = builder.unblockSavingsAccount(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        }else if (is(commandParam, "postAccrualInterestAsOn")) {
+            final CommandWrapper commandRequest = builder.savingsAccountAccrualInterestPosting(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
         if (result == null) {
             //
             throw new UnrecognizedQueryParamException("command", commandParam,
                     new Object[] { "reject", "withdrawnByApplicant", "approve", "undoapproval", "activate", "calculateInterest",
-                            "postInterest", "close", "assignSavingsOfficer", "unassignSavingsOfficer",
+                            "postInterest","postAccrualInterestAsOn", "close", "assignSavingsOfficer", "unassignSavingsOfficer",
                             SavingsApiConstants.COMMAND_BLOCK_DEBIT, SavingsApiConstants.COMMAND_UNBLOCK_DEBIT,
                             SavingsApiConstants.COMMAND_BLOCK_CREDIT, SavingsApiConstants.COMMAND_UNBLOCK_CREDIT,
                             SavingsApiConstants.COMMAND_BLOCK_ACCOUNT, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT });
