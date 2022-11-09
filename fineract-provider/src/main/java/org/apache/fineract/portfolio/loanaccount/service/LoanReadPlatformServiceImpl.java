@@ -110,7 +110,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationRepository;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
@@ -264,11 +263,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String sql = "select " + rm.loanPaymentsSchema() + " where tr.loan_id = ? and tr.transaction_type_enum not in (0, 3) "
                     + " and (tr.is_reversed=false or tr.manually_adjusted_or_reversed = true)  order by tr.transaction_date ASC,id ";
             Collection<LoanTransactionData> loanTransactionData = this.jdbcTemplate.query(sql, rm, loanId); // NOSONAR
+            // TODO: would worth to rework in the future. It is not nice to fetch relations one by one... might worth to
+            // give a try to get rid of native queries
             for (LoanTransactionData loanTransaction : loanTransactionData) {
-                if (loanTransaction.getType().isRepaymentType()) {
-                    loanTransaction
-                            .setLoanTransactionRelations(this.retrieveLoanTransactionRelationsByLoanTransactionId(loanTransaction.getId()));
-                }
+                loanTransaction
+                        .setLoanTransactionRelations(this.retrieveLoanTransactionRelationsByLoanTransactionId(loanTransaction.getId()));
             }
             return loanTransactionData;
         } catch (final EmptyResultDataAccessException e) {
@@ -2399,7 +2398,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     public List<LoanTransactionRelationData> retrieveLoanTransactionRelationsByLoanTransactionId(Long loanTransactionId) {
         final LoanTransaction loanTransaction = this.loanTransactionRepository.getReferenceById(loanTransactionId);
         List<LoanTransactionRelation> loanTransactionRelations = this.loanTransactionRelationRepository
-                .findByFromTransactionAndRelationType(loanTransaction, LoanTransactionRelationTypeEnum.CHARGEBACK);
+                .findByFromTransaction(loanTransaction);
         return loanTransactionRelationMapper.map(loanTransactionRelations);
     }
 

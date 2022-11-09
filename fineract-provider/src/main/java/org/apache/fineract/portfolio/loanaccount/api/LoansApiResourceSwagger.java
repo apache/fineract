@@ -267,7 +267,7 @@ final class LoansApiResourceSwagger {
             public Double totalPaidLate;
             @Schema(example = "0.00")
             public Double totalOutstanding;
-            public Set<GetLoansLoanIdRepaymentPeriod> periods;
+            public List<GetLoansLoanIdRepaymentPeriod> periods;
         }
 
         static final class GetLoansLoanIdRepaymentPeriod {
@@ -635,6 +635,8 @@ final class LoansApiResourceSwagger {
                 public boolean refundForActiveLoans;
                 @Schema(example = "false")
                 public boolean creditBalanceRefund;
+                @Schema(example = "false")
+                public boolean chargeAdjustment;
             }
 
             static final class GetLoansLoanIdPaymentDetailData {
@@ -964,13 +966,13 @@ final class LoansApiResourceSwagger {
         public GetLoansLoanIdSummary summary;
         public GetLoansLoanIdRepaymentSchedule repaymentSchedule;
         @Schema(description = "Set of GetLoansLoanIdTransactions")
-        public Set<GetLoansLoanIdTransactions> transactions;
+        public List<GetLoansLoanIdTransactions> transactions;
         @Schema(description = "Set of GetLoansLoanIdDisbursementDetails")
         public Set<GetLoansLoanIdDisbursementDetails> disbursementDetails;
         @Schema(description = "Delinquent data")
         public GetLoansLoanIdCollectionData delinquent;
         @Schema(description = "Set of charges")
-        public Set<GetLoansLoanIdLoanChargeData> charges;
+        public List<GetLoansLoanIdLoanChargeData> charges;
         public GetDelinquencyRangesResponse delinquencyRange;
         @Schema(example = "false")
         public Boolean fraud;

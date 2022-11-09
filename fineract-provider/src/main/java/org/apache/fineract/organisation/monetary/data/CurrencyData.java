@@ -74,7 +74,10 @@ public class CurrencyData implements Serializable {
 
     private String generateDisplayLabel() {
 
-        final StringBuilder builder = new StringBuilder(this.name).append(' ');
+        final StringBuilder builder = new StringBuilder(20);
+        if (this.name != null) {
+            builder.append(this.name).append(' ');
+        }
 
         if (this.displaySymbol != null && !"".equalsIgnoreCase(this.displaySymbol.trim())) {
             builder.append('(').append(this.displaySymbol).append(')');

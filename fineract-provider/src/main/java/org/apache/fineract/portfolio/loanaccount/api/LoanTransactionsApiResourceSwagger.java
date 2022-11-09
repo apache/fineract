@@ -39,7 +39,7 @@ final class LoanTransactionsApiResourceSwagger {
             private GetLoansTransactionType() {}
 
             @Schema(example = "2")
-            public Integer id;
+            public Long id;
             @Schema(example = "loanTransactionType.repayment")
             public String code;
             @Schema(example = "Repayment")
@@ -88,7 +88,7 @@ final class LoanTransactionsApiResourceSwagger {
             private GetLoansType() {}
 
             @Schema(example = "2")
-            public Integer id;
+            public Long id;
             @Schema(example = "loanTransactionType.repayment")
             public String code;
             @Schema(example = "Repayment")
@@ -137,17 +137,19 @@ final class LoanTransactionsApiResourceSwagger {
             public Long fromLoanTransaction;
             @Schema(example = "10")
             public Long toLoanTransaction;
+            @Schema(example = "10")
+            public Long toLoanCharge;
             @Schema(example = "CHARGEBACK")
-            private String relationType;
+            public String relationType;
             @Schema(example = "100.00")
-            private Double amount;
+            public Double amount;
             @Schema(example = "Repayment Adjustment Chargeback")
-            private String paymentType;
+            public String paymentType;
 
         }
 
         @Schema(example = "3")
-        public Integer id;
+        public Long id;
         public GetLoansType type;
         @Schema(example = "[2012, 5, 14]")
         public LocalDate date;
@@ -162,6 +164,8 @@ final class LoanTransactionsApiResourceSwagger {
         public Double interestPortion;
         @Schema(example = "20120514")
         public String reversalExternalId;
+        @Schema(example = "20120514")
+        public String externalId;
         @Schema(example = "[2012, 5, 18]")
         public LocalDate reversedOnDate;
         @Schema(example = "1000.00")
@@ -201,7 +205,7 @@ final class LoanTransactionsApiResourceSwagger {
         @Schema(example = "3e7791ce-aa10-11ec-b909-0242ac120002")
         public String externalId;
         @Schema(example = "3")
-        public Integer paymentTypeId;
+        public Long paymentTypeId;
         @Schema(example = "acc123")
         public String accountNumber;
         @Schema(example = "che123")
@@ -223,11 +227,11 @@ final class LoanTransactionsApiResourceSwagger {
         private PostLoansLoanIdTransactionsResponse() {}
 
         @Schema(example = "1")
-        public Integer officeId;
+        public Long officeId;
         @Schema(example = "1")
-        public Integer clientId;
+        public Long clientId;
         @Schema(example = "22")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PostLoansLoanIdTransactionsTransactionIdRequest")
@@ -248,7 +252,7 @@ final class LoanTransactionsApiResourceSwagger {
         @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
         public String reversalExternalId;
         @Schema(example = "1")
-        public Integer paymentTypeId;
+        public Long paymentTypeId;
         @Schema(example = "4ff9b1cb988b7")
         public String externalId;
     }
@@ -259,7 +263,7 @@ final class LoanTransactionsApiResourceSwagger {
         private PostLoansLoanIdTransactionsTransactionIdResponse() {}
 
         @Schema(example = "16")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PutChargeTransactionChangesResponse")
@@ -276,9 +280,9 @@ final class LoanTransactionsApiResourceSwagger {
         }
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
         @Schema(example = "48")
-        public Integer loanId;
+        public Long loanId;
         public PutChargeTransactionChangesResponse.Changes changes;
 
     }
@@ -289,8 +293,8 @@ final class LoanTransactionsApiResourceSwagger {
         private PutChargeTransactionChangesRequest() {}
 
         @Schema(example = "1")
-        public Integer id;
+        public Long id;
         @Schema(example = "2")
-        public Integer loanId;
+        public Long loanId;
     }
 }

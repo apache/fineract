@@ -57,7 +57,8 @@ public enum LoanTransactionType {
     PAYOUT_REFUND(22, "loanTransactionType.payoutRefund"), //
     GOODWILL_CREDIT(23, "loanTransactionType.goodwillCredit"), //
     CHARGE_REFUND(24, "loanTransactionType.chargeRefund"), //
-    CHARGEBACK(25, "loanTransactionType.chargeback");
+    CHARGEBACK(25, "loanTransactionType.chargeback"), //
+    CHARGE_ADJUSTMENT(26, "loanTransactionType.chargeAdjustment");
 
     private final Integer value;
     private final String code;
@@ -65,14 +66,6 @@ public enum LoanTransactionType {
     LoanTransactionType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
-    }
-
-    public Integer getValue() {
-        return this.value;
-    }
-
-    public String getCode() {
-        return this.code;
     }
 
     public static LoanTransactionType fromInt(final Integer transactionType) {
@@ -106,36 +99,45 @@ public enum LoanTransactionType {
             case 23 -> LoanTransactionType.GOODWILL_CREDIT;
             case 24 -> LoanTransactionType.CHARGE_REFUND;
             case 25 -> LoanTransactionType.CHARGEBACK;
+            case 26 -> LoanTransactionType.CHARGE_ADJUSTMENT;
             default -> LoanTransactionType.INVALID;
         };
     }
 
+    public Integer getValue() {
+        return this.value;
+    }
+
+    public String getCode() {
+        return this.code;
+    }
+
     public boolean isDisbursement() {
-        return this.value.equals(LoanTransactionType.DISBURSEMENT.getValue());
+        return this.equals(LoanTransactionType.DISBURSEMENT);
     }
 
     public boolean isRepaymentAtDisbursement() {
-        return this.value.equals(LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.getValue());
+        return this.equals(LoanTransactionType.REPAYMENT_AT_DISBURSEMENT);
     }
 
     public boolean isRepayment() {
-        return this.value.equals(LoanTransactionType.REPAYMENT.getValue());
+        return this.equals(LoanTransactionType.REPAYMENT);
     }
 
     public boolean isMerchantIssuedRefund() {
-        return this.value.equals(LoanTransactionType.MERCHANT_ISSUED_REFUND.getValue());
+        return this.equals(LoanTransactionType.MERCHANT_ISSUED_REFUND);
     }
 
     public boolean isPayoutRefund() {
-        return this.value.equals(LoanTransactionType.PAYOUT_REFUND.getValue());
+        return this.equals(LoanTransactionType.PAYOUT_REFUND);
     }
 
     public boolean isGoodwillCredit() {
-        return this.value.equals(LoanTransactionType.GOODWILL_CREDIT.getValue());
+        return this.equals(LoanTransactionType.GOODWILL_CREDIT);
     }
 
     public boolean isChargeRefund() {
-        return this.value.equals(LoanTransactionType.CHARGE_REFUND.getValue());
+        return this.equals(LoanTransactionType.CHARGE_REFUND);
     }
 
     public boolean isRepaymentType() {
@@ -143,39 +145,43 @@ public enum LoanTransactionType {
     }
 
     public boolean isRecoveryRepayment() {
-        return this.value.equals(LoanTransactionType.RECOVERY_REPAYMENT.getValue());
+        return this.equals(LoanTransactionType.RECOVERY_REPAYMENT);
     }
 
     public boolean isWaiveInterest() {
-        return this.value.equals(LoanTransactionType.WAIVE_INTEREST.getValue());
+        return this.equals(LoanTransactionType.WAIVE_INTEREST);
     }
 
     public boolean isWaiveCharges() {
-        return this.value.equals(LoanTransactionType.WAIVE_CHARGES.getValue());
+        return this.equals(LoanTransactionType.WAIVE_CHARGES);
     }
 
     public boolean isAccrual() {
-        return this.value.equals(LoanTransactionType.ACCRUAL.getValue());
+        return this.equals(LoanTransactionType.ACCRUAL);
     }
 
     public boolean isWriteOff() {
-        return this.value.equals(LoanTransactionType.WRITEOFF.getValue());
+        return this.equals(LoanTransactionType.WRITEOFF);
     }
 
     public boolean isChargePayment() {
-        return this.value.equals(LoanTransactionType.CHARGE_PAYMENT.getValue());
+        return this.equals(LoanTransactionType.CHARGE_PAYMENT);
     }
 
     public boolean isRefundForActiveLoan() {
-        return this.value.equals(LoanTransactionType.REFUND_FOR_ACTIVE_LOAN.getValue());
+        return this.equals(LoanTransactionType.REFUND_FOR_ACTIVE_LOAN);
     }
 
     public boolean isIncomePosting() {
-        return this.value.equals(LoanTransactionType.INCOME_POSTING.getValue());
+        return this.equals(LoanTransactionType.INCOME_POSTING);
     }
 
     public boolean isChargeback() {
-        return this.value.equals(LoanTransactionType.CHARGEBACK.getValue());
+        return this.equals(LoanTransactionType.CHARGEBACK);
+    }
+
+    public boolean isChargeAdjustment() {
+        return this.equals(LoanTransactionType.CHARGE_ADJUSTMENT);
     }
 
 }

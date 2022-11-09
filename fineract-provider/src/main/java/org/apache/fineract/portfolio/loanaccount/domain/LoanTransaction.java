@@ -172,6 +172,11 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
                 chargeRefundChargeType);
     }
 
+    public static LoanTransaction chargeAdjustment(final Loan loan, final BigDecimal amount, final LocalDate transactionDate,
+            final String externalId) {
+        return new LoanTransaction(loan, loan.getOffice(), LoanTransactionType.CHARGE_ADJUSTMENT, amount, transactionDate, externalId);
+    }
+
     public void setLoanTransactionToRepaymentScheduleMappings(final Integer installmentId, final BigDecimal chargePerInstallment) {
         for (LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping : this.loanTransactionToRepaymentScheduleMappings) {
             final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loanTransactionToRepaymentScheduleMapping
@@ -296,15 +301,12 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
 
     public static boolean transactionAmountsMatch(final MonetaryCurrency currency, final LoanTransaction loanTransaction,
             final LoanTransaction newLoanTransaction) {
-        if (loanTransaction.getAmount(currency).isEqualTo(newLoanTransaction.getAmount(currency))
+        return loanTransaction.getAmount(currency).isEqualTo(newLoanTransaction.getAmount(currency))
                 && loanTransaction.getPrincipalPortion(currency).isEqualTo(newLoanTransaction.getPrincipalPortion(currency))
                 && loanTransaction.getInterestPortion(currency).isEqualTo(newLoanTransaction.getInterestPortion(currency))
                 && loanTransaction.getFeeChargesPortion(currency).isEqualTo(newLoanTransaction.getFeeChargesPortion(currency))
                 && loanTransaction.getPenaltyChargesPortion(currency).isEqualTo(newLoanTransaction.getPenaltyChargesPortion(currency))
-                && loanTransaction.getOverPaymentPortion(currency).isEqualTo(newLoanTransaction.getOverPaymentPortion(currency))) {
-            return true;
-        }
-        return false;
+                && loanTransaction.getOverPaymentPortion(currency).isEqualTo(newLoanTransaction.getOverPaymentPortion(currency));
     }
 
     private LoanTransaction(final Loan loan, final Office office, final Integer typeOf, final LocalDate dateOf, final BigDecimal amount,
@@ -526,7 +528,8 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public boolean isRepaymentType() {
-        return isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isChargeRefund();
+        return isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isChargeRefund()
+                || isChargeAdjustment();
     }
 
     public boolean isRepayment() {
@@ -547,6 +550,10 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
 
     public boolean isChargeRefund() {
         return LoanTransactionType.CHARGE_REFUND.equals(getTypeOf()) && isNotReversed();
+    }
+
+    public boolean isChargeAdjustment() {
+        return LoanTransactionType.CHARGE_ADJUSTMENT.equals(getTypeOf()) && isNotReversed();
     }
 
     public boolean isNotRepaymentType() {
@@ -717,6 +724,13 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
             thisTransactionData.put("loanChargesPaid", loanChargesPaidData);
         }
 
+        LoanTransactionRelation loanTransactionRelation = loanTransactionRelations.stream()
+                .filter(e -> LoanTransactionRelationTypeEnum.CHARGE_ADJUSTMENT.equals(e.getRelationType())).findAny().orElse(null);
+        if (loanTransactionRelation != null) {
+            LoanCharge loanCharge = loanTransactionRelation.getToCharge();
+            thisTransactionData.put("loanChargeData", loanCharge.toData());
+        }
+
         return thisTransactionData;
     }
 
@@ -874,8 +888,20 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         return (loanTransactionRelations != null && loanTransactionRelations.size() > 0);
     }
 
+    public boolean hasChargebackLoanTransactionRelations() {
+        return (loanTransactionRelations != null
+                && loanTransactionRelations.stream().anyMatch(e -> LoanTransactionRelationTypeEnum.CHARGEBACK.equals(e.getRelationType())));
+    }
+
     public Set<LoanTransactionRelation> getLoanTransactionRelations() {
         return loanTransactionRelations;
+    }
+
+    public void copyLoanTransactionRelations(Set<LoanTransactionRelation> sourceLoanTransactionRelations) {
+        for (LoanTransactionRelation existingLoanTransactionRelation : sourceLoanTransactionRelations) {
+            loanTransactionRelations.add(new LoanTransactionRelation(this, existingLoanTransactionRelation.getToTransaction(),
+                    existingLoanTransactionRelation.getToCharge(), existingLoanTransactionRelation.getRelationType()));
+        }
     }
 
     public BigDecimal getAmount() {

@@ -185,6 +185,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                     } else {
                         loanTransaction.reverse(loanTransaction.getExternalId());
                         loanTransaction.updateExternalId(null);
+                        newLoanTransaction.copyLoanTransactionRelations(loanTransaction.getLoanTransactionRelations());
                         changedTransactionDetail.getNewTransactionMappings().put(loanTransaction.getId(), newLoanTransaction);
                     }
                 }

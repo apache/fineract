@@ -46,9 +46,7 @@ import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
-import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrategyData;
 import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
@@ -315,17 +313,9 @@ public final class LoanProductDataValidator {
 
         final String transactionProcessingStrategyCode = this.fromApiJsonHelper.extractStringNamed(TRANSACTION_PROCESSING_STRATEGY_CODE,
                 element);
-        baseDataValidator.reset().parameter(TRANSACTION_PROCESSING_STRATEGY_CODE).value(transactionProcessingStrategyCode).notNull();
-
-        LoanRepaymentScheduleTransactionProcessor processor = loanRepaymentScheduleTransactionProcessorFactory
-                .determineProcessor(transactionProcessingStrategyCode);
-
-        if (processor == null) {
-            Object[] values = loanRepaymentScheduleTransactionProcessorFactory.getStrategies().stream()
-                    .map(TransactionProcessingStrategyData::getCode).toList().toArray(new String[0]);
-
-            baseDataValidator.reset().parameter(TRANSACTION_PROCESSING_STRATEGY_CODE).isOneOfTheseValues(values);
-        }
+        baseDataValidator.reset().parameter(TRANSACTION_PROCESSING_STRATEGY_CODE).value(transactionProcessingStrategyCode).notBlank();
+        // Validating whether the processor is existing
+        loanRepaymentScheduleTransactionProcessorFactory.determineProcessor(transactionProcessingStrategyCode);
 
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME, element)) {
             final Long delinquencyBucketId = this.fromApiJsonHelper.extractLongNamed(LoanProductConstants.DELINQUENCY_BUCKET_PARAM_NAME,
@@ -1093,8 +1083,9 @@ public final class LoanProductDataValidator {
         if (this.fromApiJsonHelper.parameterExists(TRANSACTION_PROCESSING_STRATEGY_CODE, element)) {
             final String transactionProcessingStrategyCode = this.fromApiJsonHelper.extractStringNamed(TRANSACTION_PROCESSING_STRATEGY_CODE,
                     element);
-            baseDataValidator.reset().parameter(TRANSACTION_PROCESSING_STRATEGY_CODE).value(transactionProcessingStrategyCode).notNull()
-                    .integerGreaterThanZero();
+            baseDataValidator.reset().parameter(TRANSACTION_PROCESSING_STRATEGY_CODE).value(transactionProcessingStrategyCode).notBlank();
+            // Validating whether the processor is existing
+            loanRepaymentScheduleTransactionProcessorFactory.determineProcessor(transactionProcessingStrategyCode);
         }
 
         // grace validation

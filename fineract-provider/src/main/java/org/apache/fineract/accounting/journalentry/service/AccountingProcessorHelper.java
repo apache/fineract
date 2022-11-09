@@ -66,6 +66,7 @@ import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatfor
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.ClientTransaction;
 import org.apache.fineract.portfolio.client.domain.ClientTransactionRepository;
+import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
@@ -125,6 +126,7 @@ public class AccountingProcessorHelper {
             final boolean reversed = (Boolean) map.get("reversed");
             final Long paymentTypeId = (Long) map.get("paymentTypeId");
             final String chargeRefundChargeType = (String) map.get("chargeRefundChargeType");
+            final LoanChargeData loanChargeData = (LoanChargeData) map.get("loanChargeData");
 
             final List<ChargePaymentDTO> feePaymentDetails = new ArrayList<>();
             final List<ChargePaymentDTO> penaltyPaymentDetails = new ArrayList<>();
@@ -152,7 +154,7 @@ public class AccountingProcessorHelper {
             }
             final LoanTransactionDTO transaction = new LoanTransactionDTO(transactionOfficeId, paymentTypeId, transactionId,
                     transactionDate, transactionType, amount, principal, interest, fees, penalties, overPayments, reversed,
-                    penaltyPaymentDetails, feePaymentDetails, isAccountTransfer, chargeRefundChargeType);
+                    penaltyPaymentDetails, feePaymentDetails, isAccountTransfer, chargeRefundChargeType, loanChargeData);
             Boolean isLoanToLoanTransfer = (Boolean) accountingBridgeData.get("isLoanToLoanTransfer");
             transaction.setLoanToLoanTransfer(isLoanToLoanTransfer != null && isLoanToLoanTransfer);
             newLoanTransactions.add(transaction);
@@ -615,6 +617,17 @@ public class AccountingProcessorHelper {
             final Long loanProductId, final Long paymentTypeId, final Long loanId, final String transactionId,
             final LocalDate transactionDate, final BigDecimal amount, final Boolean isReversal) {
         final GLAccount account = getLinkedGLAccountForLoanProduct(loanProductId, accountMappingTypeId, paymentTypeId);
+        if (isReversal) {
+            createCreditJournalEntryForLoan(office, currencyCode, account, loanId, transactionId, transactionDate, amount);
+        } else {
+            createDebitJournalEntryForLoan(office, currencyCode, account, loanId, transactionId, transactionDate, amount);
+        }
+    }
+
+    public void createDebitJournalEntryOrReversalForLoanCharges(final Office office, final String currencyCode,
+            final int accountMappingTypeId, final Long loanProductId, final Long chargeId, final Long loanId, final String transactionId,
+            final LocalDate transactionDate, final BigDecimal amount, final Boolean isReversal) {
+        final GLAccount account = getLinkedGLAccountForLoanCharges(loanProductId, accountMappingTypeId, chargeId);
         if (isReversal) {
             createCreditJournalEntryForLoan(office, currencyCode, account, loanId, transactionId, transactionDate, amount);
         } else {

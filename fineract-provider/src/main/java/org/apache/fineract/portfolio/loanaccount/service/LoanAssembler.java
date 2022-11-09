@@ -34,7 +34,6 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepository;
 import org.apache.fineract.organisation.holiday.domain.HolidayStatusType;
@@ -60,7 +59,6 @@ import org.apache.fineract.portfolio.group.exception.ClientNotInGroupException;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.group.exception.GroupNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
-import org.apache.fineract.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
@@ -68,7 +66,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryWrapper;
 import org.apache.fineract.portfolio.loanaccount.exception.ExceedingTrancheCountException;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidAmountOfCollaterals;
@@ -109,18 +106,18 @@ public class LoanAssembler {
     private final WorkingDaysRepositoryWrapper workingDaysRepository;
     private final LoanUtilService loanUtilService;
     private final RateAssembler rateAssembler;
-    private final BusinessEventNotifierService businessEventNotifierService;
+    private final LoanLifecycleStateMachine defaultLoanLifecycleStateMachine;
 
     public Loan assembleFrom(final Long accountId) {
         final Loan loanAccount = this.loanRepository.findOneWithNotFoundDetection(accountId, true);
-        loanAccount.setHelpers(defaultLoanLifecycleStateMachine(), this.loanSummaryWrapper,
+        loanAccount.setHelpers(defaultLoanLifecycleStateMachine, this.loanSummaryWrapper,
                 this.loanRepaymentScheduleTransactionProcessorFactory);
 
         return loanAccount;
     }
 
     public void setHelpers(final Loan loanAccount) {
-        loanAccount.setHelpers(defaultLoanLifecycleStateMachine(), this.loanSummaryWrapper,
+        loanAccount.setHelpers(defaultLoanLifecycleStateMachine, this.loanSummaryWrapper,
                 this.loanRepaymentScheduleTransactionProcessorFactory);
     }
 
@@ -296,7 +293,7 @@ public class LoanAssembler {
         if (loanApplication == null) {
             throw new IllegalStateException("No loan application exists for either a client or group (or both).");
         }
-        loanApplication.setHelpers(defaultLoanLifecycleStateMachine(), this.loanSummaryWrapper,
+        loanApplication.setHelpers(defaultLoanLifecycleStateMachine, this.loanSummaryWrapper,
                 this.loanRepaymentScheduleTransactionProcessorFactory);
 
         if (loanProduct.isMultiDisburseLoan()) {
@@ -314,14 +311,10 @@ public class LoanAssembler {
         final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
         final LoanScheduleModel loanScheduleModel = this.loanScheduleAssembler.assembleLoanScheduleFrom(loanApplicationTerms,
                 isHolidayEnabled, holidays, workingDays, element, disbursementDetails);
-        loanApplication.loanApplicationSubmittal(loanScheduleModel, loanApplicationTerms, defaultLoanLifecycleStateMachine(),
-                submittedOnDate, externalId, allowTransactionsOnHoliday, holidays, workingDays, allowTransactionsOnNonWorkingDay);
+        loanApplication.loanApplicationSubmittal(loanScheduleModel, loanApplicationTerms, defaultLoanLifecycleStateMachine, submittedOnDate,
+                externalId, allowTransactionsOnHoliday, holidays, workingDays, allowTransactionsOnNonWorkingDay);
 
         return loanApplication;
-    }
-
-    private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
-        return new DefaultLoanLifecycleStateMachine(LoanStatus.values(), businessEventNotifierService);
     }
 
     public CodeValue findCodeValueByIdIfProvided(final Long codeValueId) {

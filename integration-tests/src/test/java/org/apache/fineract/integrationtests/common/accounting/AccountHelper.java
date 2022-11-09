@@ -22,10 +22,13 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
+import org.apache.fineract.client.models.PostGLAccountsRequest;
+import org.apache.fineract.client.models.PostGLAccountsResponse;
+import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.Utils;
 
 @SuppressWarnings("rawtypes")
-public class AccountHelper {
+public class AccountHelper extends IntegrationTest {
 
     private static final String CREATE_GL_ACCOUNT_URL = "/fineract-provider/api/v1/glaccounts?" + Utils.TENANT_IDENTIFIER;
     private static final String GL_ACCOUNT_ID_RESPONSE = "resourceId";
@@ -77,6 +80,10 @@ public class AccountHelper {
         final String GET_RUNNING_BALANCE_URL = "/fineract-provider/api/v1/glaccounts/" + accountId + "?fetchRunningBalance=true";
         final HashMap accountRunningBalance = Utils.performServerGet(this.requestSpec, this.responseSpec, GET_RUNNING_BALANCE_URL, "");
         return accountRunningBalance;
+    }
+
+    public PostGLAccountsResponse createGLAccount(final PostGLAccountsRequest request) {
+        return ok(fineract().glAccounts.createGLAccount1(request));
     }
 
 }

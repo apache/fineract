@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -41,6 +42,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -52,7 +54,9 @@ import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.charge.exception.LoanChargeWithoutMandatoryFieldException;
 import org.apache.fineract.portfolio.loanaccount.command.LoanChargeCommand;
+import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidDetail;
+import org.apache.fineract.portfolio.loanaccount.data.LoanInstallmentChargeData;
 
 @Entity
 @Table(name = "m_loan_charge", uniqueConstraints = { @UniqueConstraint(columnNames = { "external_id" }, name = "external_id") })
@@ -1101,4 +1105,22 @@ public class LoanCharge extends AbstractPersistableCustom {
         return ChargeTimeType.fromInt(this.chargeTime);
     }
 
+    public LoanChargeData toData() {
+        EnumOptionData chargeTimeTypeData = new EnumOptionData((long) getChargeTimeType().ordinal(), getChargeTimeType().getCode(),
+                String.valueOf(getChargeTimeType().getValue()));
+        EnumOptionData chargeCalculationTypeData = new EnumOptionData((long) getChargeCalculation().ordinal(),
+                getChargeCalculation().getCode(), String.valueOf(getChargeCalculation().getValue()));
+        EnumOptionData chargePaymentModeData = new EnumOptionData((long) getChargePaymentMode().ordinal(), getChargePaymentMode().getCode(),
+                String.valueOf(getChargePaymentMode().getValue()));
+        Set<LoanInstallmentChargeData> loanInstallmentChargeDataSet = installmentCharges().stream().map(LoanInstallmentCharge::toData)
+                .collect(Collectors.toSet());
+
+        return LoanChargeData.builder().id(getId()).chargeId(getCharge().getId()).name(getCharge().getName())
+                .currency(getCharge().toData().getCurrency()).amount(amount).amountPaid(amountPaid).amountWaived(amountWaived)
+                .amountWrittenOff(amountWrittenOff).amountOutstanding(amountOutstanding).chargeTimeType(chargeTimeTypeData)
+                .submittedOnDate(submittedOnDate).dueDate(dueDate).chargeCalculationType(chargeCalculationTypeData).percentage(percentage)
+                .amountPercentageAppliedTo(amountPercentageAppliedTo).amountOrPercentage(amountOrPercentage).penalty(penaltyCharge)
+                .chargePaymentMode(chargePaymentModeData).paid(paid).waived(waived).loanId(loan.getId()).minCap(minCap).maxCap(maxCap)
+                .installmentChargeData(loanInstallmentChargeDataSet).externalId(externalId).build();
+    }
 }

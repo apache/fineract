@@ -3379,7 +3379,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     private boolean doPostLoanTransactionChecks(final LocalDate transactionDate,
             final LoanLifecycleStateMachine loanLifecycleStateMachine) {
         boolean statusChanged = false;
-        if (isOverPaid()) {
+        boolean isOverpaid = getTotalOverpaid() != null && getTotalOverpaid().compareTo(BigDecimal.ZERO) > 0;
+        if (isOverpaid) {
             // FIXME - kw - update account balance to negative amount.
             handleLoanOverpayment(loanLifecycleStateMachine);
             statusChanged = true;
@@ -3620,7 +3621,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
         if (transactionForAdjustment.isNotRepaymentType() && transactionForAdjustment.isNotWaiver()
                 && transactionForAdjustment.isNotCreditBalanceRefund()) {
-            final String errorMessage = "Only transactions of type repayment, waiver or credit balance refund can be adjusted.";
+            final String errorMessage = "Only (non-reversed) transactions of type repayment, waiver or credit balance refund can be adjusted.";
             throw new InvalidLoanTransactionTypeException("transaction",
                     "adjustment.is.only.allowed.to.repayment.or.waiver.or.creditbalancerefund.transactions", errorMessage);
         }
@@ -4935,8 +4936,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         switch (event) {
-            case LOAN_CREATED:
-            break;
             case LOAN_APPROVED:
                 if (!isSubmittedAndPendingApproval()) {
                     final String defaultUserMessage = "Loan Account Approval is not allowed. Loan Account is not in submitted and pending approval state.";
@@ -5016,8 +5015,6 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                     dataValidationErrors.add(error);
                 }
             break;
-            case REPAID_IN_FULL:
-            break;
             case LOAN_CHARGE_PAYMENT:
                 if (!isOpen()) {
                     final String defaultUserMessage = "Charge payment is not allowed. Loan Account is not Active.";
@@ -5079,6 +5076,14 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                     final String defaultUserMessage = "Loan Credit Balance Refund is not allowed. Loan Account is not Overpaid.";
                     final ApiParameterError error = ApiParameterError
                             .generalError("error.msg.loan.credit.balance.refund.account.is.not.overpaid", defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
+            break;
+            case LOAN_CHARGE_ADJUSTMENT:
+                if (!(getStatus().isActive() || getStatus().isClosedObligationsMet() || getStatus().isOverpaid())) {
+                    final String defaultUserMessage = "Loan Charge Adjustment is not allowed. Loan Account must be either Active, Fully repaid or Overpaid.";
+                    final ApiParameterError error = ApiParameterError
+                            .generalError("error.msg.loan.charge.adjustment.account.is.not.in.valid.state", defaultUserMessage);
                     dataValidationErrors.add(error);
                 }
             break;

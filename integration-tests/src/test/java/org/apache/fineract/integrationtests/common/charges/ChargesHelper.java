@@ -23,8 +23,10 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
+import org.apache.fineract.client.models.PostChargesRequest;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.util.JSON;
+import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
@@ -32,9 +34,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public final class ChargesHelper {
+public final class ChargesHelper extends IntegrationTest {
 
-    private ChargesHelper() {
+    public ChargesHelper() {
 
     }
 
@@ -521,5 +523,9 @@ public final class ChargesHelper {
         return Utils.performServerPost(requestSpec, responseSpec, CHARGES_URL + "/" + chargeId + "?" + Utils.TENANT_IDENTIFIER, json,
                 "status");
 
+    }
+
+    public PostChargesResponse createCharges(PostChargesRequest request) {
+        return ok(fineract().charges.createCharge(request));
     }
 }
