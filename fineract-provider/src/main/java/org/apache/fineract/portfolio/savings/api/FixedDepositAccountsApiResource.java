@@ -387,6 +387,9 @@ public class FixedDepositAccountsApiResource {
         } else if (is(commandParam, "prematureClose")) {
             final CommandWrapper commandRequest = builder.prematureCloseFixedDepositAccount(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "topUp")) {
+            final CommandWrapper commandRequest = builder.topUpFixedDepositAccount(accountId).withJson(apiRequestBodyAsJson).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "calculatePrematureAmount")) {
             final JsonElement parsedQuery = this.fromJsonHelper.parse(apiRequestBodyAsJson);
             final JsonQuery query = JsonQuery.from(apiRequestBodyAsJson, parsedQuery, this.fromJsonHelper);

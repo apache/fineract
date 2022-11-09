@@ -49,10 +49,54 @@ public class DepositPreClosureDetail {
     @Column(name = "pre_closure_penal_interest_on_enum", nullable = true)
     private Integer preClosurePenalInterestOnType;
 
+    @Column(name = "pre_closure_charge_applicable")
+    private boolean preClosureChargeApplicable;
+
+    public static class DepositPreClosureDetailBuilder {
+
+        private boolean preClosurePenalApplicable;
+        private BigDecimal preClosurePenalInterest;
+        private Integer preClosurePenalInterestOnType;
+        private boolean preClosureChargeApplicable;
+
+        public DepositPreClosureDetailBuilder preClosurePenalApplicable(boolean preClosurePenalApplicable) {
+            this.preClosurePenalApplicable = preClosurePenalApplicable;
+            return this;
+        }
+
+        public DepositPreClosureDetailBuilder preClosurePenalInterest(BigDecimal preClosurePenalInterest) {
+            this.preClosurePenalInterest = preClosurePenalInterest;
+            return this;
+        }
+
+        public DepositPreClosureDetailBuilder preClosurePenalInterestOnType(Integer preClosurePenalInterestOnType) {
+            PreClosurePenalInterestOnType preClosurePenalInterestType = PreClosurePenalInterestOnType
+                    .fromInt(this.preClosurePenalInterestOnType);
+            this.preClosurePenalInterestOnType = preClosurePenalInterestType.isInvalid() ? null : preClosurePenalInterestOnType;
+            return this;
+        }
+
+        public DepositPreClosureDetailBuilder preClosureChargeApplicable(boolean preClosureChargeApplicable) {
+            this.preClosureChargeApplicable = preClosureChargeApplicable;
+            return this;
+        }
+
+        public DepositPreClosureDetail build() {
+            return new DepositPreClosureDetail(this);
+        }
+    }
+
     public static DepositPreClosureDetail createFrom(final boolean preClosurePenalApplicable, final BigDecimal preClosurePenalInterest,
             final PreClosurePenalInterestOnType preClosurePenalInterestType) {
 
         return new DepositPreClosureDetail(preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestType);
+    }
+
+    public DepositPreClosureDetail(DepositPreClosureDetailBuilder builder) {
+        this.preClosurePenalApplicable = builder.preClosurePenalApplicable;
+        this.preClosurePenalInterest = builder.preClosurePenalInterest;
+        this.preClosurePenalInterestOnType = builder.preClosurePenalInterestOnType;
+        this.preClosureChargeApplicable = builder.preClosureChargeApplicable;
     }
 
     protected DepositPreClosureDetail() {
@@ -132,5 +176,17 @@ public class DepositPreClosureDetail {
                 .fromInt(this.preClosurePenalInterestOnType);
 
         return DepositPreClosureDetail.createFrom(preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestType);
+    }
+
+    public BigDecimal getPreClosurePenalInterest() {
+        return preClosurePenalInterest;
+    }
+
+    public Integer getPreClosurePenalInterestOnType() {
+        return this.preClosurePenalInterestOnType;
+    }
+
+    public boolean isPreClosurePenalApplicable() {
+        return this.preClosurePenalApplicable;
     }
 }

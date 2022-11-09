@@ -116,4 +116,8 @@ public final class DateUtils {
         return ThreadLocalContextUtil.getBusinessDate();
     }
 
+    public static DateTimeFormatter getDefaultFormatter() {
+        return DateTimeFormatter.ofPattern(DEFAULT_DATE_FORMAT);
+    }
+
 }

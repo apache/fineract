@@ -1167,6 +1167,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         this.activatedOnDate = now;
     }
 
+    @Override
     public void setClosedOnDate(final LocalDate closedOnDate) {
         this.closedOnDate = closedOnDate;
     }

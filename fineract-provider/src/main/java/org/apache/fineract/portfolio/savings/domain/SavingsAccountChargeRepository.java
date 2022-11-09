@@ -33,4 +33,8 @@ public interface SavingsAccountChargeRepository
 
     @Query("select sac from SavingsAccountCharge sac where sac.dueDate <=:transactionDate and sac.waived = false and sac.paid=false order by sac.dueDate")
     List<SavingsAccountCharge> findPendingCharges(@Param("transactionDate") LocalDate transactionDate);
+
+    @Query("select sac from SavingsAccountCharge sac where sac.savingsAccount.id = :accountId and sac.charge.chargeTimeType = :chargeTimeType and sac.paid = false")
+    List<SavingsAccountCharge> findWithdrawalFeeByAccountId(@Param("accountId") Long accountId,
+                                                            @Param("chargeTimeType") Integer chargeTimeType);
 }

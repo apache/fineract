@@ -1459,6 +1459,50 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     }
 
     @Transactional
+    @Override
+    public void payCharge(final SavingsAccountCharge savingsAccountCharge, final LocalDate transactionDate, final BigDecimal amountPaid,
+                          final DateTimeFormatter formatter, final AppUser user) {
+        Boolean includePostingAndWithHoldTax = false;
+        final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
+                .isSavingsInterestPostingAtCurrentPeriodEnd();
+        final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
+
+        // Get Savings account from savings charge
+        final SavingsAccount account = savingsAccountCharge.savingsAccount();
+        this.savingAccountAssembler.assignSavingAccountHelpers(account);
+        final Set<Long> existingTransactionIds = new HashSet<>();
+        final Set<Long> existingReversedTransactionIds = new HashSet<>();
+        updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
+        account.setSavingsAccountTransactionRepository(this.savingsAccountTransactionRepository);
+        account.payCharge(savingsAccountCharge, amountPaid, transactionDate, formatter, user, false, null);
+        boolean isInterestTransfer = false;
+        LocalDate postInterestOnDate = null;
+        final MathContext mc = MathContext.DECIMAL64;
+
+        if (account.isBeforeLastPostingPeriod(transactionDate, false)) {
+            final LocalDate today = DateUtils.getLocalDateOfTenant();
+            account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
+                    postInterestOnDate);
+        } else {
+            final LocalDate today = DateUtils.getLocalDateOfTenant();
+            account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
+                    financialYearBeginningMonth, postInterestOnDate, includePostingAndWithHoldTax);
+        }
+        List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions = null;
+        if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) > 0) {
+            depositAccountOnHoldTransactions = this.depositAccountOnHoldTransactionRepository
+                    .findBySavingsAccountAndReversedFalseOrderByCreatedDateAsc(account);
+        }
+
+        account.validateAccountBalanceDoesNotBecomeNegative("." + SavingsAccountTransactionType.PAY_CHARGE.getCode(),
+                depositAccountOnHoldTransactions, false);
+
+        this.savingAccountRepositoryWrapper.save(account);
+
+        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
+    }
+
+    @Transactional
     private SavingsAccountTransaction payCharge(final SavingsAccountCharge savingsAccountCharge, final LocalDate transactionDate,
             final BigDecimal amountPaid, final DateTimeFormatter formatter, final AppUser user, final boolean backdatedTxnsAllowedTill) {
 

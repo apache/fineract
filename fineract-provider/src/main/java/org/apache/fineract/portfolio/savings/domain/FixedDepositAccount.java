@@ -81,6 +81,9 @@ public class FixedDepositAccount extends SavingsAccount {
     @Transient
     private ConfigurationDomainService configurationDomainService;
 
+    @Transient
+    private boolean applyPreclosureCharges = true;
+
     protected FixedDepositAccount() {
         //
     }
@@ -579,7 +582,7 @@ public class FixedDepositAccount extends SavingsAccount {
     }
 
     public void postPreMaturityInterest(final LocalDate accountCloseDate, final boolean isPreMatureClosure,
-            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth) {
+            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth, boolean postInterest) {
 
         Money interestPostedToDate = totalInterestPosted();
         // calculate interest before one day of closure date
@@ -587,7 +590,7 @@ public class FixedDepositAccount extends SavingsAccount {
         final Money interestOnMaturity = calculatePreMatureInterest(interestCalculatedToDate,
                 retreiveOrderedNonInterestPostingTransactions(), isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
                 financialYearBeginningMonth);
-        boolean recalucateDailyBalance = false;
+        boolean recalculateDailyBalance = false;
 
         // post remaining interest
         final Money remainigInterestToBePosted = interestOnMaturity.minus(interestPostedToDate);
@@ -597,12 +600,16 @@ public class FixedDepositAccount extends SavingsAccount {
             final SavingsAccountTransaction newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(),
                     accountCloseDate, remainigInterestToBePosted, postInterestAsOn);
             this.transactions.add(newPostingTransaction);
-            recalucateDailyBalance = true;
+            recalculateDailyBalance = true;
         }
 
-        recalucateDailyBalance = applyWithholdTaxForDepositAccounts(accountCloseDate, recalucateDailyBalance, backdatedTxnsAllowedTill);
+        if (postInterest) {
+            recalculateDailyBalance = this.postInterestCarriedForward(accountCloseDate, recalculateDailyBalance);
+        }
+
+        recalculateDailyBalance = applyWithholdTaxForDepositAccounts(accountCloseDate, recalculateDailyBalance, backdatedTxnsAllowedTill);
         boolean postReversals = false;
-        if (recalucateDailyBalance) {
+        if (recalculateDailyBalance) {
             // update existing transactions so derived balance fields are
             // correct.
             recalculateDailyBalances(Money.zero(this.currency), accountCloseDate, backdatedTxnsAllowedTill, postReversals);
@@ -610,6 +617,30 @@ public class FixedDepositAccount extends SavingsAccount {
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
         this.accountTermAndPreClosure.updateMaturityDetails(this.getAccountBalance(), accountCloseDate);
 
+    }
+
+    private boolean postInterestCarriedForward(LocalDate accountCloseDate, boolean recalculateDailyBalance) {
+        if (this.getAccountTermAndPreClosure().getInterestCarriedForwardOnTopUp() != null
+                && this.getAccountTermAndPreClosure().getInterestCarriedForwardOnTopUp().compareTo(BigDecimal.ZERO) > 0) {
+            final SavingsAccountTransaction newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(),
+                    accountCloseDate, Money.of(this.currency, this.getAccountTermAndPreClosure().getInterestCarriedForwardOnTopUp()), false,
+                    false);
+            this.addNewTransaction(newPostingTransaction);
+            recalculateDailyBalance = true;
+        }
+        return recalculateDailyBalance;
+    }
+
+    public DepositAccountTermAndPreClosure getAccountTermAndPreClosure() {
+        return accountTermAndPreClosure;
+    }
+
+    private void addNewTransaction(SavingsAccountTransaction transaction) {
+        this.transactions.add(transaction);
+        if (this.savingsAccountTransactionRepository != null) {
+            this.savingsAccountTransactionRepository.saveAndFlush(transaction);
+        }
+        transaction.setNewTransaction(true);
     }
 
     public BigDecimal calculatePreMatureAmount(final LocalDate preMatureDate, final boolean isPreMatureClosure,
@@ -894,4 +925,19 @@ public class FixedDepositAccount extends SavingsAccount {
         return SavingsAccountStatusType.MATURED.getValue().equals(this.status);
     }
 
+    public boolean shouldApplyPreclosureCharges() {
+        return applyPreclosureCharges;
+    }
+
+    public void setApplyPreclosureCharges(boolean applyPreclosureCharges) {
+        this.applyPreclosureCharges = applyPreclosureCharges;
+    }
+
+    public DepositAccountInterestRateChart getChart() {
+        return chart;
+    }
+
+    public FixedDepositProduct getProduct() {
+        return (FixedDepositProduct) this.product;
+    }
 }

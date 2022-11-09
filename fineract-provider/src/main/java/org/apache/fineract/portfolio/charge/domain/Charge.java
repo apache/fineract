@@ -785,6 +785,10 @@ public class Charge extends AbstractPersistableCustom {
         this.taxGroup = taxGroup;
     }
 
+    public boolean isPartialLiquidationCharge() {
+        return ChargeTimeType.fromInt(this.chargeTimeType).equals(ChargeTimeType.FDA_PARTIAL_LIQUIDATION_FEE);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
