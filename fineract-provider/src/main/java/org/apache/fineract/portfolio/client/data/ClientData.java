@@ -122,7 +122,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
 
     private final Collection<ClientBusinessOwnerData> ownersData;
 
-    private final Boolean isBusinessOwnerEnabled;
+    private Boolean isBusinessOwnerEnabled;
 
     public static ClientData importClientEntityInstance(Long legalFormId, Integer rowIndex, String fullname, Long officeId,
             Long clientTypeId, Long clientClassificationId, Long staffId, Boolean active, LocalDate activationDate,
@@ -276,7 +276,6 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
         this.familyMemberOptions = null;
         this.emailAddress = null;
         this.clientCollateralManagements = null;
-        this.isBusinessOwnerEnabled = false;
         this.ownersData = null;
     }
 
