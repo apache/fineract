@@ -1676,7 +1676,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         BigDecimal topUpAmount = fixedDepositApplicationReq.getDepositAmount()
                 .subtract(account.getAccountTermAndPreClosure().depositAmount());
         BigDecimal interestEarnedOnExisting = this.calculateInterest(account.getAccountTermAndPreClosure().depositAmount(),
-                account.getOriginalInterestRate(), fixedDepositApplicationReq.getDepositPeriod(), daysInYearType.getValue());
+                account.getNominalAnnualInterestRate(), fixedDepositApplicationReq.getDepositPeriod(), daysInYearType.getValue());
         BigDecimal applicableInterestRate = account.getChart().getApplicableInterestRate(fixedDepositApplicationReq.getDepositAmount(),
                 fixedDepositApplicationReq.getSubmittedOnDate(),
                 fixedDepositApplicationReq.getSubmittedOnDate().plusDays(fixedDepositApplicationReq.getDepositPeriod()),

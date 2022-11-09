@@ -167,6 +167,11 @@ public class FixedDepositAccount extends SavingsAccount {
             LocalDate depositCloseDate = calculateMaturityDate();
             if (isPreMatureClosure) {
                 if (this.accountTermAndPreClosure.isPreClosurePenalApplicable()) {
+                    if (this.originalInterestRate == null) {
+                        this.originalInterestRate = this.nominalAnnualInterestRate;
+                    } else {
+                        this.nominalAnnualInterestRate = this.originalInterestRate;
+                    }
                     applyPreMaturePenalty = true;
                     penalInterest = this.accountTermAndPreClosure.depositPreClosureDetail().preClosurePenalInterest();
                     final PreClosurePenalInterestOnType preClosurePenalInterestOnType = this.accountTermAndPreClosure
