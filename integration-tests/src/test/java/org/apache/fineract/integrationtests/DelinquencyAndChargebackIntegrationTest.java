@@ -118,14 +118,14 @@ public class DelinquencyAndChargebackIntegrationTest {
         PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate,
                 transactionAmount, loanId);
         assertNotNull(loanIdTransactionsResponse);
-        final Integer transactionId = loanIdTransactionsResponse.getResourceId();
-        loanTransactionHelper.reviewLoanTransactionRelations(loanId, transactionId, 0);
+        final Long transactionId = loanIdTransactionsResponse.getResourceId();
+        loanTransactionHelper.reviewLoanTransactionRelations(loanId, transactionId.intValue(), 0);
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         validateLoanAccount(getLoansLoanIdResponse, "0.00", "1100.00", 0, doubleZERO);
 
-        final Integer chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId, transactionId, amountVal, 0,
-                responseSpec);
-        loanTransactionHelper.reviewLoanTransactionRelations(loanId, transactionId, 1);
+        final Long chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId, transactionId.intValue(), amountVal,
+                0, responseSpec);
+        loanTransactionHelper.reviewLoanTransactionRelations(loanId, transactionId.intValue(), 1);
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);

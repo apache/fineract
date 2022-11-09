@@ -29,7 +29,7 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.Set;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
 import org.apache.fineract.client.models.GetDelinquencyRangesResponse;
@@ -87,19 +87,19 @@ public class LoanTransactionChargebackTest {
         PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, amount,
                 loanId);
         assertNotNull(loanIdTransactionsResponse);
-        final Integer transactionId = loanIdTransactionsResponse.getResourceId();
+        final Long transactionId = loanIdTransactionsResponse.getResourceId();
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
         loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.closed.obligations.met");
 
-        reviewLoanTransactionRelations(loanId, transactionId, 0, Double.valueOf("0.00"));
+        reviewLoanTransactionRelations(loanId, transactionId.intValue(), 0, Double.valueOf("0.00"));
 
-        final Integer chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId, transactionId, "1000.00", 0,
-                responseSpec);
+        final Long chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId, transactionId.intValue(), "1000.00",
+                0, responseSpec);
 
-        reviewLoanTransactionRelations(loanId, transactionId, 1, Double.valueOf("0.00"));
-        reviewLoanTransactionRelations(loanId, chargebackTransactionId, 0, Double.valueOf("1000.00"));
+        reviewLoanTransactionRelations(loanId, transactionId.intValue(), 1, Double.valueOf("0.00"));
+        reviewLoanTransactionRelations(loanId, chargebackTransactionId.intValue(), 0, Double.valueOf("1000.00"));
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
@@ -109,10 +109,11 @@ public class LoanTransactionChargebackTest {
 
         // Try to reverse a Loan Transaction charge back
         PostLoansLoanIdTransactionsResponse reverseTransactionResponse = loanTransactionHelper.reverseLoanTransaction(loanId,
-                chargebackTransactionId, operationDate, responseSpecError);
+                chargebackTransactionId.intValue(), operationDate, responseSpecError);
 
         // Try to reverse a Loan Transaction repayment with linked transactions
-        reverseTransactionResponse = loanTransactionHelper.reverseLoanTransaction(loanId, transactionId, operationDate, responseSpecError);
+        reverseTransactionResponse = loanTransactionHelper.reverseLoanTransaction(loanId, transactionId.intValue(), operationDate,
+                responseSpecError);
     }
 
     @Test
@@ -135,13 +136,13 @@ public class LoanTransactionChargebackTest {
         PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, amount,
                 loanId);
         assertNotNull(loanIdTransactionsResponse);
-        final Integer transactionId = loanIdTransactionsResponse.getResourceId();
-        reviewLoanTransactionRelations(loanId, transactionId, 0, Double.valueOf("666.67"));
+        final Long transactionId = loanIdTransactionsResponse.getResourceId();
+        reviewLoanTransactionRelations(loanId, transactionId.intValue(), 0, Double.valueOf("666.67"));
 
-        final Integer chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId, transactionId, amount.toString(),
-                0, responseSpec);
-        reviewLoanTransactionRelations(loanId, transactionId, 1, Double.valueOf("666.67"));
-        reviewLoanTransactionRelations(loanId, chargebackTransactionId, 0, Double.valueOf("1000.00"));
+        final Long chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId, transactionId.intValue(),
+                amount.toString(), 0, responseSpec);
+        reviewLoanTransactionRelations(loanId, transactionId.intValue(), 1, Double.valueOf("666.67"));
+        reviewLoanTransactionRelations(loanId, chargebackTransactionId.intValue(), 0, Double.valueOf("1000.00"));
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
@@ -170,7 +171,7 @@ public class LoanTransactionChargebackTest {
         GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
 
-        Set<GetLoansLoanIdTransactions> loanTransactions = getLoansLoanIdResponse.getTransactions();
+        List<GetLoansLoanIdTransactions> loanTransactions = getLoansLoanIdResponse.getTransactions();
         assertNotNull(loanTransactions);
         log.info("Loan Id {} with {} transactions", loanId, loanTransactions.size());
         assertEquals(2, loanTransactions.size());
@@ -203,19 +204,19 @@ public class LoanTransactionChargebackTest {
         PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, amount,
                 loanId);
         assertNotNull(loanIdTransactionsResponse);
-        final Integer transactionId = loanIdTransactionsResponse.getResourceId();
+        final Long transactionId = loanIdTransactionsResponse.getResourceId();
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
         loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.closed.obligations.met");
 
-        reviewLoanTransactionRelations(loanId, transactionId, 0, Double.valueOf("0.00"));
+        reviewLoanTransactionRelations(loanId, transactionId.intValue(), 0, Double.valueOf("0.00"));
 
-        Integer chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId, transactionId, "500.00", 0,
+        Long chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId, transactionId.intValue(), "500.00", 0,
                 responseSpec);
 
-        reviewLoanTransactionRelations(loanId, transactionId, 1, Double.valueOf("0.00"));
-        reviewLoanTransactionRelations(loanId, chargebackTransactionId, 0, Double.valueOf("500.00"));
+        reviewLoanTransactionRelations(loanId, transactionId.intValue(), 1, Double.valueOf("0.00"));
+        reviewLoanTransactionRelations(loanId, chargebackTransactionId.intValue(), 0, Double.valueOf("500.00"));
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
@@ -237,10 +238,11 @@ public class LoanTransactionChargebackTest {
             }
         }
 
-        chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId, transactionId, "300.00", 0, responseSpec);
+        chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId, transactionId.intValue(), "300.00", 0,
+                responseSpec);
 
-        reviewLoanTransactionRelations(loanId, transactionId, 2, Double.valueOf("0.00"));
-        reviewLoanTransactionRelations(loanId, chargebackTransactionId, 0, Double.valueOf("800.00"));
+        reviewLoanTransactionRelations(loanId, transactionId.intValue(), 2, Double.valueOf("0.00"));
+        reviewLoanTransactionRelations(loanId, chargebackTransactionId.intValue(), 0, Double.valueOf("800.00"));
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
@@ -281,19 +283,19 @@ public class LoanTransactionChargebackTest {
         PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, amount,
                 loanId);
         assertNotNull(loanIdTransactionsResponse);
-        final Integer transactionId = loanIdTransactionsResponse.getResourceId();
+        final Long transactionId = loanIdTransactionsResponse.getResourceId();
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
         loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.overpaid");
 
-        reviewLoanTransactionRelations(loanId, transactionId, 0, Double.valueOf("0.00"));
+        reviewLoanTransactionRelations(loanId, transactionId.intValue(), 0, Double.valueOf("0.00"));
 
-        final Integer chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId, transactionId, "200.00", 0,
+        final Long chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId, transactionId.intValue(), "200.00", 0,
                 responseSpec);
 
-        reviewLoanTransactionRelations(loanId, transactionId, 1, Double.valueOf("0.00"));
-        reviewLoanTransactionRelations(loanId, chargebackTransactionId, 0, Double.valueOf("100.00"));
+        reviewLoanTransactionRelations(loanId, transactionId.intValue(), 1, Double.valueOf("0.00"));
+        reviewLoanTransactionRelations(loanId, chargebackTransactionId.intValue(), 0, Double.valueOf("100.00"));
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
@@ -320,19 +322,19 @@ public class LoanTransactionChargebackTest {
         PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, amount,
                 loanId);
         assertNotNull(loanIdTransactionsResponse);
-        final Integer transactionId = loanIdTransactionsResponse.getResourceId();
+        final Long transactionId = loanIdTransactionsResponse.getResourceId();
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
         loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.overpaid");
 
-        reviewLoanTransactionRelations(loanId, transactionId, 0, Double.valueOf("0.00"));
+        reviewLoanTransactionRelations(loanId, transactionId.intValue(), 0, Double.valueOf("0.00"));
 
-        final Integer chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId, transactionId, "100.00", 0,
+        final Long chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId, transactionId.intValue(), "100.00", 0,
                 responseSpec);
 
-        reviewLoanTransactionRelations(loanId, transactionId, 1, Double.valueOf("0.00"));
-        reviewLoanTransactionRelations(loanId, chargebackTransactionId, 0, Double.valueOf("0.00"));
+        reviewLoanTransactionRelations(loanId, transactionId.intValue(), 1, Double.valueOf("0.00"));
+        reviewLoanTransactionRelations(loanId, chargebackTransactionId.intValue(), 0, Double.valueOf("0.00"));
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
@@ -355,21 +357,21 @@ public class LoanTransactionChargebackTest {
         PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, amount,
                 loanId);
         assertNotNull(loanIdTransactionsResponse);
-        final Integer transactionId = loanIdTransactionsResponse.getResourceId();
+        final Long transactionId = loanIdTransactionsResponse.getResourceId();
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
         loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.overpaid");
 
-        reviewLoanTransactionRelations(loanId, transactionId, 0, Double.valueOf("0.00"));
+        reviewLoanTransactionRelations(loanId, transactionId.intValue(), 0, Double.valueOf("0.00"));
 
         GetDelinquencyRangesResponse delinquencyRange = getLoansLoanIdResponse.getDelinquencyRange();
         assertNull(delinquencyRange);
         log.info("Loan Delinquency Range is null {}", (delinquencyRange == null));
-        final Integer chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId, transactionId, "50.00", 0,
+        final Long chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId, transactionId.intValue(), "50.00", 0,
                 responseSpec);
-        reviewLoanTransactionRelations(loanId, transactionId, 1, Double.valueOf("0.00"));
-        reviewLoanTransactionRelations(loanId, chargebackTransactionId, 0, Double.valueOf("0.00"));
+        reviewLoanTransactionRelations(loanId, transactionId.intValue(), 1, Double.valueOf("0.00"));
+        reviewLoanTransactionRelations(loanId, chargebackTransactionId.intValue(), 0, Double.valueOf("0.00"));
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
@@ -396,16 +398,16 @@ public class LoanTransactionChargebackTest {
         PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, amount,
                 loanId);
         assertNotNull(loanIdTransactionsResponse);
-        final Integer transactionId = loanIdTransactionsResponse.getResourceId();
+        final Long transactionId = loanIdTransactionsResponse.getResourceId();
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
         loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.closed.obligations.met");
 
         // First round, empty array
-        reviewLoanTransactionRelations(loanId, transactionId, 0, Double.valueOf("0.00"));
+        reviewLoanTransactionRelations(loanId, transactionId.intValue(), 0, Double.valueOf("0.00"));
 
-        loanTransactionHelper.applyChargebackTransaction(loanId, transactionId, "200.00", 0, responseSpec);
+        loanTransactionHelper.applyChargebackTransaction(loanId, transactionId.intValue(), "200.00", 0, responseSpec);
 
         Double expectedAmount = Double.valueOf("200.00");
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
@@ -416,9 +418,9 @@ public class LoanTransactionChargebackTest {
         DelinquencyBucketsHelper.evaluateLoanCollectionData(getLoansLoanIdResponse, 0, expectedAmount);
 
         // Second round, array size equal to 1
-        reviewLoanTransactionRelations(loanId, transactionId, 1, Double.valueOf("0.00"));
+        reviewLoanTransactionRelations(loanId, transactionId.intValue(), 1, Double.valueOf("0.00"));
 
-        loanTransactionHelper.applyChargebackTransaction(loanId, transactionId, "300.00", 1, responseSpec);
+        loanTransactionHelper.applyChargebackTransaction(loanId, transactionId.intValue(), "300.00", 1, responseSpec);
 
         expectedAmount = Double.valueOf("500.00");
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
@@ -428,9 +430,9 @@ public class LoanTransactionChargebackTest {
         DelinquencyBucketsHelper.evaluateLoanCollectionData(getLoansLoanIdResponse, 0, expectedAmount);
 
         // Third round, array size equal to 2
-        reviewLoanTransactionRelations(loanId, transactionId, 2, Double.valueOf("0.00"));
+        reviewLoanTransactionRelations(loanId, transactionId.intValue(), 2, Double.valueOf("0.00"));
 
-        loanTransactionHelper.applyChargebackTransaction(loanId, transactionId, "500.00", 0, responseSpec);
+        loanTransactionHelper.applyChargebackTransaction(loanId, transactionId.intValue(), "500.00", 0, responseSpec);
 
         expectedAmount = Double.valueOf("1000.00");
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);

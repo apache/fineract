@@ -23,6 +23,7 @@ import org.apache.fineract.portfolio.charge.domain.ChargeAppliesTo;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
+import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 
 public final class ChargeEnumerations {
 
@@ -187,6 +188,28 @@ public final class ChargeEnumerations {
                 optionData = new EnumOptionData(ChargePaymentMode.REGULAR.getValue().longValue(), ChargePaymentMode.REGULAR.getCode(),
                         "Regular");
             break;
+        }
+        return optionData;
+    }
+
+    public static EnumOptionData feeFrequencyType(final int id) {
+        return feeFrequencyType(PeriodFrequencyType.fromInt(id));
+    }
+
+    public static EnumOptionData feeFrequencyType(final PeriodFrequencyType frequencyType) {
+        EnumOptionData optionData;
+        switch (frequencyType) {
+            case DAYS -> optionData = new EnumOptionData(PeriodFrequencyType.DAYS.getValue().longValue(),
+                    PeriodFrequencyType.DAYS.getCode(), "Daily");
+            case WEEKS -> optionData = new EnumOptionData(PeriodFrequencyType.WEEKS.getValue().longValue(),
+                    PeriodFrequencyType.WEEKS.getCode(), "Weekly");
+            case MONTHS -> optionData = new EnumOptionData(PeriodFrequencyType.MONTHS.getValue().longValue(),
+                    PeriodFrequencyType.MONTHS.getCode(), "Monthly");
+            case YEARS -> optionData = new EnumOptionData(PeriodFrequencyType.YEARS.getValue().longValue(),
+                    PeriodFrequencyType.YEARS.getCode(), "Yearly");
+            case WHOLE_TERM -> optionData = new EnumOptionData(PeriodFrequencyType.WHOLE_TERM.getValue().longValue(),
+                    PeriodFrequencyType.WHOLE_TERM.getCode(), "Whole term");
+            default -> throw new UnsupportedOperationException(frequencyType + " is not supported");
         }
         return optionData;
     }

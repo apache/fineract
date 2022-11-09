@@ -32,6 +32,7 @@ public class LoanTransactionRelationData implements Serializable {
 
     private Long fromLoanTransaction;
     private Long toLoanTransaction;
+    private Long toLoanCharge;
     private LoanTransactionRelationTypeEnum relationType;
     private BigDecimal amount;
     private String paymentType;

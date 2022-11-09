@@ -16,15 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.domain;
+package org.apache.fineract.portfolio.loanaccount.exception;
 
-import java.util.List;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-public interface LoanTransactionRelationRepository
-        extends JpaRepository<LoanTransactionRelation, Long>, JpaSpecificationExecutor<LoanTransactionRelation> {
+public class LoanChargeAdjustmentException extends AbstractPlatformDomainRuleException {
 
-    List<LoanTransactionRelation> findByFromTransaction(LoanTransaction fromTransaction);
+    public LoanChargeAdjustmentException(final String errorCode, final String defaultUserMessage, final Object... defaultUserMessageArgs) {
+        super("error.msg." + errorCode, defaultUserMessage, defaultUserMessageArgs);
+    }
 
 }

@@ -91,6 +91,10 @@ public class LoanProductTestBuilder {
     private String maxPrincipal = "10000000.00";
     private Account[] accountList = null;
 
+    private List<Map<String, Long>> feeToIncomeAccountMappings = null;
+    private List<Map<String, Long>> penaltyToIncomeAccountMappings = null;
+    private Account feeAndPenaltyAssetAccount;
+
     private Boolean multiDisburseLoan = false;
     private final String outstandingLoanBalance = "35000";
     private String maxTrancheCount = "3";
@@ -196,7 +200,7 @@ public class LoanProductTestBuilder {
         }
 
         if (this.accountingRule.equals(ACCRUAL_UPFRONT) || this.accountingRule.equals(ACCRUAL_PERIODIC)) {
-            map.putAll(getAccountMappingForAccrualBased());
+            map.putAll(getAccountMappingForAccrualBased(this.feeAndPenaltyAssetAccount));
         } else if (this.accountingRule.equals(CASH_BASED)) {
             map.putAll(getAccountMappingForCashBased());
         }
@@ -248,6 +252,13 @@ public class LoanProductTestBuilder {
         // Delinquency Bucket
         if (delinquencyBucketId != null) {
             map.put("delinquencyBucketId", delinquencyBucketId);
+        }
+
+        if (this.feeToIncomeAccountMappings != null) {
+            map.put("feeToIncomeAccountMappings", this.feeToIncomeAccountMappings);
+        }
+        if (this.penaltyToIncomeAccountMappings != null) {
+            map.put("penaltyToIncomeAccountMappings", this.penaltyToIncomeAccountMappings);
         }
 
         return map;
@@ -436,7 +447,7 @@ public class LoanProductTestBuilder {
         return map;
     }
 
-    private Map<String, String> getAccountMappingForAccrualBased() {
+    private Map<String, String> getAccountMappingForAccrualBased(Account feeAndPenaltyAssetAccount) {
         final Map<String, String> map = new HashMap<>();
         for (int i = 0; i < this.accountList.length; i++) {
             if (this.accountList[i].getAccountType().equals(Account.AccountType.ASSET)) {
@@ -444,9 +455,14 @@ public class LoanProductTestBuilder {
                 map.put("fundSourceAccountId", ID);
                 map.put("loanPortfolioAccountId", ID);
                 map.put("transfersInSuspenseAccountId", ID);
+                if (feeAndPenaltyAssetAccount != null) {
+                    map.put("receivableFeeAccountId", feeAndPenaltyAssetAccount.getAccountID().toString());
+                    map.put("receivablePenaltyAccountId", feeAndPenaltyAssetAccount.getAccountID().toString());
+                } else {
+                    map.put("receivableFeeAccountId", ID);
+                    map.put("receivablePenaltyAccountId", ID);
+                }
                 map.put("receivableInterestAccountId", ID);
-                map.put("receivableFeeAccountId", ID);
-                map.put("receivablePenaltyAccountId", ID);
 
             }
             if (this.accountList[i].getAccountType().equals(Account.AccountType.INCOME)) {
@@ -587,4 +603,30 @@ public class LoanProductTestBuilder {
         return this;
     }
 
+    public LoanProductTestBuilder withFeeToIncomeAccountMapping(final Long chargeId, final Long accountId) {
+        if (this.feeToIncomeAccountMappings == null) {
+            this.feeToIncomeAccountMappings = new ArrayList<>();
+        }
+        Map<String, Long> newMap = new HashMap<>();
+        newMap.put("chargeId", chargeId);
+        newMap.put("incomeAccountId", accountId);
+        this.feeToIncomeAccountMappings.add(newMap);
+        return this;
+    }
+
+    public LoanProductTestBuilder withPenaltyToIncomeAccountMapping(final Long chargeId, final Long accountId) {
+        if (this.penaltyToIncomeAccountMappings == null) {
+            this.penaltyToIncomeAccountMappings = new ArrayList<>();
+        }
+        Map<String, Long> newMap = new HashMap<>();
+        newMap.put("chargeId", chargeId);
+        newMap.put("incomeAccountId", accountId);
+        this.penaltyToIncomeAccountMappings.add(newMap);
+        return this;
+    }
+
+    public LoanProductTestBuilder withFeeAndPenaltyAssetAccount(final Account account) {
+        this.feeAndPenaltyAssetAccount = account;
+        return this;
+    }
 }

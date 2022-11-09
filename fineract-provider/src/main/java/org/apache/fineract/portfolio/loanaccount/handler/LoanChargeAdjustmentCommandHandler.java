@@ -29,15 +29,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@CommandType(entity = "LOANCHARGE", action = "WAIVE")
-public class WaiveLoanChargeCommandHandler implements NewCommandSourceHandler {
+@CommandType(entity = "LOANCHARGE", action = "ADJUSTMENT")
+public class LoanChargeAdjustmentCommandHandler implements NewCommandSourceHandler {
 
     private final LoanChargeWritePlatformService writePlatformService;
 
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-
-        return this.writePlatformService.waiveLoanCharge(command.getLoanId(), command.entityId(), command);
+        return writePlatformService.adjustmentForLoanCharge(command.getLoanId(), command.entityId(), command);
     }
 }

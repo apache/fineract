@@ -16,15 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.domain;
+package org.apache.fineract.infrastructure.event.business.domain.loan.transaction;
 
-import java.util.List;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBusinessEvent;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 
-public interface LoanTransactionRelationRepository
-        extends JpaRepository<LoanTransactionRelation, Long>, JpaSpecificationExecutor<LoanTransactionRelation> {
+public class LoanChargeAdjustmentPreBusinessEvent extends LoanBusinessEvent {
 
-    List<LoanTransactionRelation> findByFromTransaction(LoanTransaction fromTransaction);
+    private static final String TYPE = "LoanChargeAdjustmentPreBusinessEvent";
 
+    public LoanChargeAdjustmentPreBusinessEvent(Loan value) {
+        super(value);
+    }
+
+    @Override
+    public String getType() {
+        return TYPE;
+    }
 }

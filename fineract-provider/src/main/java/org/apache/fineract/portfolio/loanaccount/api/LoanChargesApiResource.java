@@ -43,7 +43,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -52,6 +51,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
@@ -77,6 +77,9 @@ public class LoanChargesApiResource {
                     "amount", "amountPaid", "chargeOptions", "installmentChargeData"));
 
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "LOAN";
+    public static final String COMMAND_PAY = "pay";
+    public static final String COMMAND_WAIVE = "waive";
+    public static final String COMMAND_ADJUSTMENT = "adjustment";
 
     private final PlatformSecurityContext context;
     private final ChargeReadPlatformService chargeReadPlatformService;
@@ -96,10 +99,6 @@ public class LoanChargesApiResource {
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    }
-
-    private boolean is(final String commandParam, final String commandValue) {
-        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
     }
 
     @GET
@@ -176,8 +175,8 @@ public class LoanChargesApiResource {
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
-        CommandProcessingResult result = null;
-        if (is(commandParam, "pay")) {
+        CommandProcessingResult result;
+        if (CommandParameterUtil.is(commandParam, COMMAND_PAY)) {
             final CommandWrapper commandRequest = new CommandWrapperBuilder().payLoanCharge(loanId, null).withJson(apiRequestBodyAsJson)
                     .build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -224,12 +223,15 @@ public class LoanChargesApiResource {
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
-        CommandProcessingResult result = null;
-        if (is(commandParam, "waive")) {
+        CommandProcessingResult result;
+        if (CommandParameterUtil.is(commandParam, COMMAND_WAIVE)) {
             final CommandWrapper commandRequest = builder.waiveLoanCharge(loanId, loanChargeId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "pay")) {
+        } else if (CommandParameterUtil.is(commandParam, COMMAND_PAY)) {
             final CommandWrapper commandRequest = builder.payLoanCharge(loanId, loanChargeId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (CommandParameterUtil.is(commandParam, COMMAND_ADJUSTMENT)) {
+            final CommandWrapper commandRequest = builder.adjustmentForLoanCharge(loanId, loanChargeId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam);

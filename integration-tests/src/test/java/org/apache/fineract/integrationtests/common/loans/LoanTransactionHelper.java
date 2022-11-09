@@ -51,12 +51,17 @@ import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdSummary;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.GetPaymentTypesResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.client.util.JSON;
+import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -65,11 +70,9 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 @Slf4j
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class LoanTransactionHelper {
+public class LoanTransactionHelper extends IntegrationTest {
 
-    private final RequestSpecification requestSpec;
-    private final ResponseSpecification responseSpec;
-
+    public static final String DATE_TIME_FORMAT = "dd MMMM yyyy HH:mm";
     private static final String CREATE_LOAN_PRODUCT_URL = "/fineract-provider/api/v1/loanproducts?" + Utils.TENANT_IDENTIFIER;
     private static final String APPLY_LOAN_URL = "/fineract-provider/api/v1/loans?" + Utils.TENANT_IDENTIFIER;
     private static final String LOAN_ACCOUNT_URL = "/fineract-provider/api/v1/loans";
@@ -90,10 +93,9 @@ public class LoanTransactionHelper {
     private static final String RECOVER_FROM_GUARANTORS_COMMAND = "recoverGuarantees";
     private static final String MAKE_REFUND_BY_CASH_COMMAND = "refundByCash";
     private static final String FORECLOSURE_COMMAND = "foreclosure";
-
-    public static final String DATE_TIME_FORMAT = "dd MMMM yyyy HH:mm";
-
     private static final Gson GSON = new JSON().getGson();
+    private final RequestSpecification requestSpec;
+    private final ResponseSpecification responseSpec;
 
     public LoanTransactionHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
@@ -221,7 +223,9 @@ public class LoanTransactionHelper {
             final ResponseSpecification responseSpec, final Integer loanID) {
         final String URL = "/fineract-provider/api/v1/loans/" + loanID + "/delinquencytags?" + Utils.TENANT_IDENTIFIER;
         final String response = Utils.performServerGet(requestSpec, responseSpec, URL);
-        Type delinquencyTagsListType = new TypeToken<ArrayList<GetDelinquencyTagHistoryResponse>>() {}.getType();
+        Type delinquencyTagsListType = new TypeToken<ArrayList<GetDelinquencyTagHistoryResponse>>() {
+
+        }.getType();
         return GSON.fromJson(response, delinquencyTagsListType);
     }
 
@@ -461,9 +465,18 @@ public class LoanTransactionHelper {
         return postLoanTransaction(createLoanTransactionURL(MAKE_REPAYMENT_COMMAND, loanID), getRepaymentBodyAsJSON(date, amountToBePaid));
     }
 
+    public PostLoansLoanIdTransactionsResponse makeLoanRepayment(final Long loanId, final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "repayment"));
+    }
+
     public PostLoansLoanIdTransactionsResponse reverseLoanTransaction(final Integer loanId, final Integer transactionId, String date,
             ResponseSpecification responseSpec) {
         return postLoanTransaction(createLoanTransactionURL(UNDO, loanId, transactionId), getUndoJsonBody(date), responseSpec);
+    }
+
+    public PostLoansLoanIdTransactionsTransactionIdResponse reverseLoanTransaction(final Long loanId, final Long transactionId,
+            final PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return ok(fineract().loanTransactions.adjustLoanTransaction(loanId, transactionId, request, "undo"));
     }
 
     public HashMap makeRepaymentWithPDC(final String date, final Float amountToBePaid, final Integer loanID, final Integer paymentType) {
@@ -540,6 +553,11 @@ public class LoanTransactionHelper {
         return Utils.performServerPut(requestSpec, responseSpec, TRANSAC_URL, body, "");
     }
 
+    public PostLoansLoanIdChargesChargeIdResponse chargeAdjustment(final Long loanId, final Long chargeId,
+            final PostLoansLoanIdChargesChargeIdRequest request) {
+        return ok(fineract().loanCharges.executeLoanCharge1(loanId, chargeId, request, "adjustment"));
+    }
+
     public Integer undoWaiveChargesForLoanReturnResourceId(final Integer loanId, final Integer transactionId, final String body) {
         log.info("--------------------------------- UNDO WAIVE CHARGES FOR LOAN --------------------------------");
         final String TRANSAC_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/" + transactionId + "?"
@@ -573,6 +591,14 @@ public class LoanTransactionHelper {
         final String GET_LOAN_CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/" + txnId + "?"
                 + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_CHARGES_URL, param);
+    }
+
+    public GetLoansLoanIdTransactionsTransactionIdResponse getLoanTransactionDetails(final Long loanId, final Long transactionId) {
+        return ok(fineract().loanTransactions.retrieveTransaction(loanId, transactionId, null));
+    }
+
+    public GetLoansLoanIdResponse getLoanDetails(final Long loanId) {
+        return ok(fineract().loans.retrieveLoan(loanId, false, "all", null, null));
     }
 
     public GetLoansLoanIdTransactionsTransactionIdResponse getLoanTransaction(final Integer loanId, final Integer txnId) {
@@ -1203,7 +1229,7 @@ public class LoanTransactionHelper {
         }
     }
 
-    public Integer applyChargebackTransaction(final Integer loanId, final Integer transactionId, final String amount,
+    public Long applyChargebackTransaction(final Integer loanId, final Integer transactionId, final String amount,
             final Integer paymentTypeIdx, ResponseSpecification responseSpec) {
         List<GetPaymentTypesResponse> paymentTypeList = PaymentTypeHelper.getSystemPaymentType(this.requestSpec, this.responseSpec);
         assertTrue(!paymentTypeList.isEmpty());

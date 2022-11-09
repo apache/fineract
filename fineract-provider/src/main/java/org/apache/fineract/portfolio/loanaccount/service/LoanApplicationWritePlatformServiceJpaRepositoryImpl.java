@@ -98,7 +98,6 @@ import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
-import org.apache.fineract.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringAccount;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -192,10 +191,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final GLIMAccountInfoRepository glimRepository;
     private final LoanRepository loanRepository;
     private final GSIMReadPlatformService gsimReadPlatformService;
-
-    private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
-        return new DefaultLoanLifecycleStateMachine(LoanStatus.values(), businessEventNotifierService);
-    }
+    private final LoanLifecycleStateMachine defaultLoanLifecycleStateMachine;
 
     @Transactional
     @Override
@@ -1355,7 +1351,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         }
 
         final Map<String, Object> changes = loan.loanApplicationApproval(currentUser, command, disbursementDataArray,
-                defaultLoanLifecycleStateMachine());
+                defaultLoanLifecycleStateMachine);
 
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(loanId, EntityTables.LOAN.getName(),
                 StatusEnum.APPROVE.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
@@ -1462,7 +1458,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         final Loan loan = retrieveLoanBy(loanId);
         checkClientOrGroupActive(loan);
 
-        final Map<String, Object> changes = loan.undoApproval(defaultLoanLifecycleStateMachine());
+        final Map<String, Object> changes = loan.undoApproval(defaultLoanLifecycleStateMachine);
         if (!changes.isEmpty()) {
 
             // If loan approved amount is not same as loan amount demanded, then
@@ -1544,7 +1540,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(loanId, EntityTables.LOAN.getName(),
                 StatusEnum.REJECTED.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
 
-        final Map<String, Object> changes = loan.loanApplicationRejection(currentUser, command, defaultLoanLifecycleStateMachine());
+        final Map<String, Object> changes = loan.loanApplicationRejection(currentUser, command, defaultLoanLifecycleStateMachine);
         if (!changes.isEmpty()) {
             this.loanRepositoryWrapper.saveAndFlush(loan);
 
@@ -1581,7 +1577,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 StatusEnum.WITHDRAWN.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
 
         final Map<String, Object> changes = loan.loanApplicationWithdrawnByApplicant(currentUser, command,
-                defaultLoanLifecycleStateMachine());
+                defaultLoanLifecycleStateMachine);
 
         // Release attached collaterals
         if (AccountType.fromInt(loan.getLoanType()).isIndividualAccount()) {
@@ -1619,7 +1615,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
     private Loan retrieveLoanBy(final Long loanId) {
         final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
-        loan.setHelpers(defaultLoanLifecycleStateMachine(), this.loanSummaryWrapper, this.loanRepaymentScheduleTransactionProcessorFactory);
+        loan.setHelpers(defaultLoanLifecycleStateMachine, this.loanSummaryWrapper, this.loanRepaymentScheduleTransactionProcessorFactory);
         return loan;
     }
 

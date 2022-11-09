@@ -41,15 +41,17 @@ import org.apache.fineract.client.models.GetClientsClientIdResponse;
 import org.apache.fineract.client.models.PostClientClientIdAddressesRequest;
 import org.apache.fineract.client.models.PostClientClientIdAddressesResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
+import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
+import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 
 @Slf4j
 @RequiredArgsConstructor
-public class ClientHelper {
+public class ClientHelper extends IntegrationTest {
 
     private static final String CREATE_CLIENT_URL = "/fineract-provider/api/v1/clients?" + Utils.TENANT_IDENTIFIER;
     private static final String CLIENT_URL = "/fineract-provider/api/v1/clients";
@@ -75,6 +77,10 @@ public class ClientHelper {
         log.info("---------------------------------CREATING A CLIENT---------------------------------------------");
         String requestBody = GSON.toJson(request);
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, requestBody, "clientId");
+    }
+
+    public PostClientsResponse createClient(final PostClientsRequest request) {
+        return ok(fineract().clients.create6(request));
     }
 
     public static Integer createClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {

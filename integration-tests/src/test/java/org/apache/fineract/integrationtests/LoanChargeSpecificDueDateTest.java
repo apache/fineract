@@ -90,7 +90,7 @@ public class LoanChargeSpecificDueDateTest {
         String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, feeAmount, false);
         final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
         assertNotNull(postChargesResponse);
-        final Integer loanChargeId = postChargesResponse.getResourceId();
+        final Long loanChargeId = postChargesResponse.getResourceId();
 
         payloadJSON = LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(loanChargeId.toString(), operationDate, feeAmount);
         PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = loanTransactionHelper.addChargeForLoan(loanId, payloadJSON,

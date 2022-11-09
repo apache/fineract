@@ -32,7 +32,7 @@ import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulk
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface LoanWritePlatformService {
 
@@ -45,6 +45,10 @@ public interface LoanWritePlatformService {
 
     CommandProcessingResult makeLoanRepayment(LoanTransactionType repaymentTransactionType, Long loanId, JsonCommand command,
             boolean isRecoveryRepayment);
+
+    @Transactional
+    CommandProcessingResult makeLoanRepaymentWithChargeRefundChargeType(LoanTransactionType repaymentTransactionType, Long loanId,
+            JsonCommand command, boolean isRecoveryRepayment, String chargeRefundChargeType);
 
     Map<String, Object> makeLoanBulkRepayment(CollectionSheetBulkRepaymentCommand bulkRepaymentCommand);
 
@@ -59,18 +63,6 @@ public interface LoanWritePlatformService {
     CommandProcessingResult closeLoan(Long loanId, JsonCommand command);
 
     CommandProcessingResult closeAsRescheduled(Long loanId, JsonCommand command);
-
-    CommandProcessingResult addLoanCharge(Long loanId, JsonCommand command);
-
-    CommandProcessingResult updateLoanCharge(Long loanId, Long loanChargeId, JsonCommand command);
-
-    CommandProcessingResult deleteLoanCharge(Long loanId, Long loanChargeId, JsonCommand command);
-
-    CommandProcessingResult waiveLoanCharge(Long loanId, Long loanChargeId, JsonCommand command);
-
-    CommandProcessingResult undoWaiveLoanCharge(JsonCommand command);
-
-    CommandProcessingResult loanChargeRefund(Long loanId, JsonCommand command);
 
     CommandProcessingResult loanReassignment(Long loanId, JsonCommand command);
 
@@ -89,8 +81,6 @@ public interface LoanWritePlatformService {
 
     LoanTransaction acceptLoanTransfer(Loan loan, LocalDate transferDate, Office acceptedInOffice, Staff loanOfficer);
 
-    CommandProcessingResult payLoanCharge(Long loanId, Long loanChargeId, JsonCommand command, boolean isChargeIdIncludedInJson);
-
     CommandProcessingResult undoWriteOff(Long loanId);
 
     CommandProcessingResult updateDisbursementDateAndAmountForTranche(Long loanId, Long disbursementId, JsonCommand command);
@@ -103,8 +93,6 @@ public interface LoanWritePlatformService {
 
     CommandProcessingResult addAndDeleteLoanDisburseDetails(Long loanId, JsonCommand command);
 
-    void applyOverdueChargesForLoan(Long loanId, Collection<OverdueLoanScheduleData> overdueLoanScheduleDatas);
-
     void recalculateInterest(long loanId);
 
     CommandProcessingResult undoLastLoanDisbursal(Long loanId, JsonCommand command);
@@ -116,6 +104,8 @@ public interface LoanWritePlatformService {
     CommandProcessingResult undoGLIMLoanDisbursal(Long loanId, JsonCommand command);
 
     CommandProcessingResult makeGLIMLoanRepayment(Long loanId, JsonCommand command);
+
+    void updateOriginalSchedule(Loan loan);
 
     CommandProcessingResult creditBalanceRefund(Long loanId, JsonCommand command);
 

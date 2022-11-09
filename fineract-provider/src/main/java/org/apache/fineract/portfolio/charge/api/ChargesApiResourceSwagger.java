@@ -52,7 +52,7 @@ final class ChargesApiResourceSwagger {
             private GetChargesTimeTypeResponse() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "chargeTimeType.disbursement")
             public String code;
             @Schema(example = "Disbursement")
@@ -64,7 +64,7 @@ final class ChargesApiResourceSwagger {
             private GetChargesAppliesToResponse() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "chargeAppliesTo.loan")
             public String code;
             @Schema(example = "Loan")
@@ -76,7 +76,7 @@ final class ChargesApiResourceSwagger {
             private GetChargesCalculationTypeResponse() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "chargeCalculationType.flat")
             public String code;
             @Schema(example = "Flat")
@@ -88,7 +88,7 @@ final class ChargesApiResourceSwagger {
             private GetChargesPaymentModeResponse() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "chargepaymentmode.accounttransfer")
             public String code;
             @Schema(example = "Account Transfer")
@@ -100,12 +100,12 @@ final class ChargesApiResourceSwagger {
         @Schema(example = "Loan Service fee")
         public String name;
         @Schema(example = "true")
-        public String active;
+        public boolean active;
         @Schema(example = "false")
-        public String penalty;
+        public boolean penalty;
         public GetChargesCurrencyResponse currency;
         @Schema(example = "230.56")
-        public Float amount;
+        public Double amount;
         public GetChargesTimeTypeResponse chargeTimeType;
         public GetChargesAppliesToResponse chargeAppliesTo;
         public GetChargesCalculationTypeResponse chargeCalculationType;
@@ -126,7 +126,7 @@ final class ChargesApiResourceSwagger {
         @Schema(example = "en")
         public String locale;
         @Schema(example = "230.56")
-        public Float amount;
+        public Double amount;
         @Schema(example = "1")
         public Integer chargeTimeType;
         @Schema(example = "1")
@@ -134,11 +134,11 @@ final class ChargesApiResourceSwagger {
         @Schema(example = "1")
         public Integer chargePaymentMode;
         @Schema(example = "true")
-        public String active;
+        public boolean active;
         @Schema(example = "dd MMMM")
         public String monthDayFormat;
         @Schema(example = "false")
-        public String penalty;
+        public boolean penalty;
     }
 
     @Schema(description = "PostChargesResponse")
@@ -147,7 +147,7 @@ final class ChargesApiResourceSwagger {
         private PostChargesResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "PutChargesChargeIdRequest")
@@ -165,7 +165,7 @@ final class ChargesApiResourceSwagger {
         private PutChargesChargeIdResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
         public PutChargesChargeIdRequest changes;
     }
 
@@ -175,7 +175,7 @@ final class ChargesApiResourceSwagger {
         private DeleteChargesChargeIdResponse() {}
 
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
     }
 
     @Schema(description = "GetChargesTemplateResponse")
@@ -188,7 +188,7 @@ final class ChargesApiResourceSwagger {
             private GetChargesTemplateLoanChargeCalculationTypeOptions() {}
 
             @Schema(example = "1")
-            public Integer id;
+            public Long id;
             @Schema(example = "chargeCalculationType.flat")
             public String code;
             @Schema(example = "Flat")
@@ -200,7 +200,7 @@ final class ChargesApiResourceSwagger {
             private GetChargesTemplateLoanChargeTimeTypeOptions() {}
 
             @Schema(example = "2")
-            public Integer id;
+            public Long id;
             @Schema(example = "chargeTimeType.specifiedDueDate")
             public String code;
             @Schema(example = "Specified due date")
@@ -212,7 +212,7 @@ final class ChargesApiResourceSwagger {
             private GetChargesTemplateFeeFrequencyOptions() {}
 
             @Schema(example = "0")
-            public Integer id;
+            public Long id;
             @Schema(example = "loanTermFrequency.periodFrequencyType.days")
             public String code;
             @Schema(example = "Days")
@@ -220,9 +220,9 @@ final class ChargesApiResourceSwagger {
         }
 
         @Schema(example = "false")
-        public String active;
+        public boolean active;
         @Schema(example = "false")
-        public String penalty;
+        public boolean penalty;
         public Set<GetChargesResponse.GetChargesCurrencyResponse> currencyOptions;
         public Set<GetChargesResponse.GetChargesCalculationTypeResponse> chargeCalculationTypeOptions;
         public Set<GetChargesResponse.GetChargesAppliesToResponse> chargeAppliesToOptions;

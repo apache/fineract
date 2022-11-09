@@ -47,13 +47,10 @@ import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollatera
 import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagementRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
-import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidAmountOfCollateralQuantity;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidAmountOfCollaterals;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
-import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrategyData;
 import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
@@ -107,7 +104,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
     private final FromJsonHelper fromApiJsonHelper;
     private final CalculateLoanScheduleQueryFromApiJsonHelper apiJsonHelper;
     private final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper;
-
+    private final LoanChargeApiJsonValidator loanChargeApiJsonValidator;
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
 
     public void validateForCreate(final String json, final boolean isMeetingMandatoryForJLGLoans, final LoanProduct loanProduct) {
@@ -391,15 +388,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                 .extractStringNamed(LoanApiConstants.transactionProcessingStrategyCodeParameterName, element);
         baseDataValidator.reset().parameter(LoanApiConstants.transactionProcessingStrategyCodeParameterName)
                 .value(transactionProcessingStrategy).notNull();
-        LoanRepaymentScheduleTransactionProcessor processor = loanRepaymentScheduleTransactionProcessorFactory
-                .determineProcessor(transactionProcessingStrategy);
-
-        if (processor == null) {
-            Object[] values = loanRepaymentScheduleTransactionProcessorFactory.getStrategies().stream()
-                    .map(TransactionProcessingStrategyData::getCode).toList().toArray(new String[0]);
-
-            baseDataValidator.reset().parameter(LoanApiConstants.transactionProcessingStrategyCodeParameterName).isOneOfTheseValues(values);
-        }
+        // Validating whether the processor is existing
+        loanRepaymentScheduleTransactionProcessorFactory.determineProcessor(transactionProcessingStrategy);
 
         if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.linkAccountIdParameterName, element)) {
             final Long linkAccountId = this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.linkAccountIdParameterName, element);
@@ -640,16 +630,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                     .extractStringNamed(LoanApiConstants.transactionProcessingStrategyCodeParameterName, element);
             baseDataValidator.reset().parameter(LoanApiConstants.transactionProcessingStrategyCodeParameterName)
                     .value(transactionProcessingStrategy).notNull();
-            LoanRepaymentScheduleTransactionProcessor processor = loanRepaymentScheduleTransactionProcessorFactory
-                    .determineProcessor(transactionProcessingStrategy);
-
-            if (processor == null) {
-                Object[] values = loanRepaymentScheduleTransactionProcessorFactory.getStrategies().stream()
-                        .map(TransactionProcessingStrategyData::getCode).toList().toArray(new String[0]);
-
-                baseDataValidator.reset().parameter(LoanApiConstants.transactionProcessingStrategyCodeParameterName)
-                        .isOneOfTheseValues(values);
-            }
+            // Validating whether the processor is existing
+            loanRepaymentScheduleTransactionProcessorFactory.determineProcessor(transactionProcessingStrategy);
         }
 
         BigDecimal principal = null;
@@ -1282,46 +1264,10 @@ public final class LoanApplicationCommandFromApiJsonHelper {
 
     }
 
-    public void validateLoanCharges(final Set<LoanCharge> charges, final List<ApiParameterError> dataValidationErrors) {
-        if (charges == null) {
-            return;
-        }
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
-        for (LoanCharge loanCharge : charges) {
-            String errorcode = null;
-            switch (loanCharge.getChargeCalculation()) {
-                case PERCENT_OF_AMOUNT:
-                    if (loanCharge.isInstalmentFee()) {
-                        errorcode = "installment." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_PRINCIPAL_CALCULATION_TYPE;
-
-                    }
-                break;
-                case PERCENT_OF_AMOUNT_AND_INTEREST:
-                    if (loanCharge.isInstalmentFee()) {
-                        errorcode = "installment." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_PRINCIPAL_CALCULATION_TYPE;
-                    } else if (loanCharge.isSpecifiedDueDate()) {
-                        errorcode = "specific." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_INTEREST_CALCULATION_TYPE;
-                    }
-                break;
-                case PERCENT_OF_INTEREST:
-                    if (loanCharge.isSpecifiedDueDate()) {
-                        errorcode = "specific." + LoanApiConstants.LOAN_CHARGE_CAN_NOT_BE_ADDED_WITH_INTEREST_CALCULATION_TYPE;
-                    }
-                break;
-
-                default:
-                break;
-            }
-            if (errorcode != null) {
-                baseDataValidator.reset().parameter("charges").failWithCode(errorcode);
-            }
-        }
-    }
-
     public void validateLoanForInterestRecalculation(final Loan loan) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
-        validateLoanCharges(loan.getActiveCharges(), dataValidationErrors);
+        loanChargeApiJsonValidator.validateLoanCharges(loan.getActiveCharges(), dataValidationErrors);
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }

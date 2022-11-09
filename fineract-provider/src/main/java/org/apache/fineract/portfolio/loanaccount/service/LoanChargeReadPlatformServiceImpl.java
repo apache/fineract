@@ -65,7 +65,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
                     + "lc.calculation_percentage as percentageOf, lc.calculation_on_amount as amountPercentageAppliedTo, "
                     + "lc.charge_time_enum as chargeTime, " + "lc.is_penalty as penalty, "
                     + "lc.due_for_collection_as_of_date as dueAsOfDate, " + "lc.charge_calculation_enum as chargeCalculation, "
-                    + "lc.charge_payment_mode_enum as chargePaymentMode, " + "lc.is_paid_derived as paid, " + "lc.waived as waied, "
+                    + "lc.charge_payment_mode_enum as chargePaymentMode, " + "lc.is_paid_derived as paid, " + "lc.waived as waived, "
                     + "lc.min_cap as minCap, lc.max_cap as maxCap, " + "lc.charge_amount_or_percentage as amountOrPercentage, "
                     + "lc.loan_id as loanId, c.currency_code as currencyCode, oc.name as currencyName, "
                     + "date(coalesce(dd.disbursedon_date,dd.expected_disburse_date)) as disbursementDate, "
@@ -112,7 +112,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             final int chargePaymentMode = rs.getInt("chargePaymentMode");
             final EnumOptionData paymentMode = ChargeEnumerations.chargePaymentMode(chargePaymentMode);
             final boolean paid = rs.getBoolean("paid");
-            final boolean waived = rs.getBoolean("waied");
+            final boolean waived = rs.getBoolean("waived");
             final BigDecimal minCap = rs.getBigDecimal("minCap");
             final BigDecimal maxCap = rs.getBigDecimal("maxCap");
             final BigDecimal amountOrPercentage = rs.getBigDecimal("amountOrPercentage");
@@ -227,7 +227,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
         public String schema() {
             return " lsi.installment as installmentNumber, lsi.duedate as dueAsOfDate, "
                     + "lic.amount_outstanding_derived as amountOutstanding," + "lic.amount as  amount, " + "lic.is_paid_derived as paid, "
-                    + "lic.amount_waived_derived as amountWaived, " + "lic.waived as waied " + "from  m_loan_installment_charge lic "
+                    + "lic.amount_waived_derived as amountWaived, " + "lic.waived as waived " + "from  m_loan_installment_charge lic "
                     + "join m_loan_repayment_schedule lsi on lsi.id = lic.loan_schedule_id ";
         }
 
@@ -239,9 +239,10 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             final BigDecimal amount = rs.getBigDecimal("amount");
             final BigDecimal amountWaived = rs.getBigDecimal("amountWaived");
             final boolean paid = rs.getBoolean("paid");
-            final boolean waived = rs.getBoolean("waied");
+            final boolean waived = rs.getBoolean("waived");
 
-            return new LoanInstallmentChargeData(installmentNumber, dueAsOfDate, amount, amountOutstanding, amountWaived, paid, waived);
+            return LoanInstallmentChargeData.builder().installmentNumber(installmentNumber).dueDate(dueAsOfDate).amount(amount)
+                    .amountOutstanding(amountOutstanding).amountWaived(amountWaived).paid(paid).waived(waived).build();
         }
     }
 
@@ -419,7 +420,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             sb.append("lic.is_paid_derived as paid, ");
             sb.append("lic.amount_waived_derived as amountWaived, ");
             sb.append(" sum(cp.amount) as amountAccrued, ");
-            sb.append("lic.waived as waied ");
+            sb.append("lic.waived as waived ");
             sb.append("from  m_loan_installment_charge lic ");
             sb.append("join m_loan_repayment_schedule lsi on lsi.id = lic.loan_schedule_id ");
             sb.append("left join (");
@@ -443,11 +444,12 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             final BigDecimal amount = rs.getBigDecimal("amount");
             final BigDecimal amountWaived = rs.getBigDecimal("amountWaived");
             final boolean paid = rs.getBoolean("paid");
-            final boolean waived = rs.getBoolean("waied");
+            final boolean waived = rs.getBoolean("waived");
             final BigDecimal amountAccrued = rs.getBigDecimal("amountAccrued");
 
-            return new LoanInstallmentChargeData(installmentNumber, dueAsOfDate, amount, amountOutstanding, amountWaived, paid, waived,
-                    amountAccrued);
+            return LoanInstallmentChargeData.builder().installmentNumber(installmentNumber).dueDate(dueAsOfDate).amount(amount)
+                    .amountOutstanding(amountOutstanding).amountWaived(amountWaived).paid(paid).waived(waived).amountAccrued(amountAccrued)
+                    .build();
         }
     }
 
@@ -483,12 +485,16 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             final Integer installmentNumber = rs.getInt("installmentNumber");
             final BigDecimal amountUnrecognized = rs.getBigDecimal("amountUnrecognized");
             LoanInstallmentChargeData installmentChargeData = this.installmentChargeDatas.get(installmentNumber);
-            return new LoanInstallmentChargeData(installmentChargeData, amountUnrecognized);
+            return LoanInstallmentChargeData.builder().installmentNumber(installmentChargeData.getInstallmentNumber())
+                    .dueDate(installmentChargeData.getDueDate()).amount(installmentChargeData.getAmount())
+                    .amountOutstanding(installmentChargeData.getAmountOutstanding()).amountWaived(installmentChargeData.getAmountWaived())
+                    .paid(installmentChargeData.isPaid()).waived(installmentChargeData.isWaived())
+                    .amountAccrued(installmentChargeData.getAmountAccrued()).amountUnrecognized(amountUnrecognized).build();
         }
     }
 
     @Override
-    public Collection<LoanChargePaidByData> retriveLoanChargesPaidBy(Long chargeId, final LoanTransactionType transactionType,
+    public Collection<LoanChargePaidByData> retrieveLoanChargesPaidBy(Long chargeId, final LoanTransactionType transactionType,
             final Integer installmentNumber) {
 
         LoanChargesPaidByMapper rm = new LoanChargesPaidByMapper();
