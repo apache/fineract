@@ -66,7 +66,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService, InitializingBean {
+public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<Long>, InitializingBean {
 
     private static final String JOB_EXECUTION_FAILED_MESSAGE = "Job execution failed for job with name: ";
 
@@ -91,9 +91,32 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService, 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public CommandProcessingResult executeInlineJob(JsonCommand command, String jobName) throws LoanAccountLockCannotBeOverruledException {
         List<Long> loanIds = dataParser.parseExecution(command);
-        lockLoanAccounts(loanIds);
         execute(loanIds, jobName);
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).build();
+    }
+
+    @Override
+    public void execute(List<Long> loanIds, String jobName) {
+        lockLoanAccounts(loanIds);
+        Job inlineLoanCOBJob;
+        try {
+            inlineLoanCOBJob = jobLocator.getJob(jobName);
+        } catch (NoSuchJobException e) {
+            throw new JobNotFoundException(jobName, e);
+        }
+        JobParameters jobParameters = new JobParametersBuilder(jobExplorer).getNextJobParameters(inlineLoanCOBJob)
+                .addJobParameters(new JobParameters(getJobParametersMap(loanIds))).toJobParameters();
+        JobExecution jobExecution;
+        try {
+            jobExecution = jobLauncher.run(inlineLoanCOBJob, jobParameters);
+        } catch (Exception e) {
+            log.error("{}{}", JOB_EXECUTION_FAILED_MESSAGE, jobName, e);
+            throw new PlatformInternalServerException("error.msg.sheduler.job.execution.failed", JOB_EXECUTION_FAILED_MESSAGE, jobName, e);
+        }
+        if (!BatchStatus.COMPLETED.equals(jobExecution.getStatus())) {
+            log.error("{}{}", JOB_EXECUTION_FAILED_MESSAGE, jobName);
+            throw new PlatformInternalServerException("error.msg.sheduler.job.execution.failed", JOB_EXECUTION_FAILED_MESSAGE, jobName);
+        }
     }
 
     private List<LoanAccountLock> getLoanAccountLocks(List<Long> loanIds) {
@@ -119,28 +142,6 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService, 
         }
 
         return loanAccountLocks;
-    }
-
-    private void execute(List<Long> loanIds, String jobName) {
-        Job inlineLoanCOBJob;
-        try {
-            inlineLoanCOBJob = jobLocator.getJob(jobName);
-        } catch (NoSuchJobException e) {
-            throw new JobNotFoundException(jobName, e);
-        }
-        JobParameters jobParameters = new JobParametersBuilder(jobExplorer).getNextJobParameters(inlineLoanCOBJob)
-                .addJobParameters(new JobParameters(getJobParametersMap(loanIds))).toJobParameters();
-        JobExecution jobExecution;
-        try {
-            jobExecution = jobLauncher.run(inlineLoanCOBJob, jobParameters);
-        } catch (Exception e) {
-            log.error("{}{}", JOB_EXECUTION_FAILED_MESSAGE, jobName, e);
-            throw new PlatformInternalServerException("error.msg.sheduler.job.execution.failed", JOB_EXECUTION_FAILED_MESSAGE, jobName, e);
-        }
-        if (!BatchStatus.COMPLETED.equals(jobExecution.getStatus())) {
-            log.error("{}{}", JOB_EXECUTION_FAILED_MESSAGE, jobName);
-            throw new PlatformInternalServerException("error.msg.sheduler.job.execution.failed", JOB_EXECUTION_FAILED_MESSAGE, jobName);
-        }
     }
 
     private Map<String, JobParameter> getJobParametersMap(List<Long> loanIds) {
