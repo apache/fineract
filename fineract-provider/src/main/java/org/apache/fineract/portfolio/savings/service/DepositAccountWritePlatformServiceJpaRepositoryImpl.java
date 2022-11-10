@@ -1596,6 +1596,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         if (savingsOfficer != null) {
             fixedDepositApplicationReq.setFieldOfficerId(savingsOfficer.getId());
         }
+        fixedDepositApplicationReq.setClosedFixedDepositAccountNumber(account.getAccountNumber());
         fixedDepositApplicationReq.setCalendarInherited(false);
         fixedDepositApplicationReq.setInterestPeriodTypeValue(account.getInterestCompoundingPeriodType());
         fixedDepositApplicationReq.setInterestPostingPeriodTypeValue(account.getInterestPostingPeriodType());

@@ -54,4 +54,5 @@
     <include file="parts/UC-24_Accrual_accounting_on_savings_account.xml" relativeToChangelogFile="true"/>
     <include file="parts/MON-92_FD_topup.xml" relativeToChangelogFile="true"/>
     <include file="parts/MON-92_FD_topup_permission.xml" relativeToChangelogFile="true"/>
+    <include file="parts/MON-92_FD_topup_old_account_reference.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

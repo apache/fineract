@@ -90,6 +90,7 @@ public class FixedDepositApplicationReq {
     private Boolean transferInterest;
     private Long savingsAccountId;
     private BigDecimal interestCarriedForward;
+    private String closedFixedDepositAccountNumber;
 
     private RecurringAccountDetailReq recurringAccountDetailReq;
     private FixedDepositApplicationTermsReq fixedDepositApplicationTermsReq;
@@ -443,5 +444,13 @@ public class FixedDepositApplicationReq {
 
     public void setInterestCarriedForward(BigDecimal interestCarriedForward) {
         this.interestCarriedForward = interestCarriedForward;
+    }
+
+    public String getClosedFixedDepositAccountNumber() {
+        return closedFixedDepositAccountNumber;
+    }
+
+    public void setClosedFixedDepositAccountNumber(String closedFixedDepositAccountNumber) {
+        this.closedFixedDepositAccountNumber = closedFixedDepositAccountNumber;
     }
 }

@@ -362,6 +362,9 @@ public class SavingsAccount extends AbstractPersistableCustom {
     @Column(name = "original_interest_rate", scale = 6, precision = 19)
     protected BigDecimal originalInterestRate;
 
+    @Column(name = "closed_fixed_deposit_account_no", length = 20, nullable = true)
+    protected String closedFixedDepositAccountNumber;
+
     @Transient
     protected SavingsAccountTransactionRepository savingsAccountTransactionRepository;
 

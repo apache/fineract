@@ -89,15 +89,15 @@ public class FixedDepositAccount extends SavingsAccount {
     }
 
     public static FixedDepositAccount createNewApplicationForSubmittal(final Client client, final Group group, final SavingsProduct product,
-            final Staff fieldOfficer, final String accountNo, final String externalId, final AccountType accountType,
-            final LocalDate submittedOnDate, final AppUser submittedBy, final BigDecimal interestRate,
-            final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
-            final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
-            final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
-            final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
-            final boolean withdrawalFeeApplicableForTransfer, final Set<SavingsAccountCharge> savingsAccountCharges,
-            final DepositAccountTermAndPreClosure accountTermAndPreClosure, final DepositAccountInterestRateChart chart,
-            boolean withHoldTax) {
+                                                                       final Staff fieldOfficer, final String accountNo, final String externalId, final AccountType accountType,
+                                                                       final LocalDate submittedOnDate, final AppUser submittedBy, final BigDecimal interestRate,
+                                                                       final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
+                                                                       final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
+                                                                       final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
+                                                                       final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
+                                                                       final boolean withdrawalFeeApplicableForTransfer, final Set<SavingsAccountCharge> savingsAccountCharges,
+                                                                       final DepositAccountTermAndPreClosure accountTermAndPreClosure, final DepositAccountInterestRateChart chart,
+                                                                       boolean withHoldTax, String closedFixedDepositAccountNumber) {
 
         final SavingsAccountStatusType status = SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL;
         final boolean allowOverdraft = false;
@@ -106,21 +106,21 @@ public class FixedDepositAccount extends SavingsAccount {
                 accountType, submittedOnDate, submittedBy, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
                 interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
                 lockinPeriodFrequencyType, withdrawalFeeApplicableForTransfer, savingsAccountCharges, accountTermAndPreClosure, chart,
-                allowOverdraft, overdraftLimit, withHoldTax);
+                allowOverdraft, overdraftLimit, withHoldTax, closedFixedDepositAccountNumber);
 
         return account;
     }
 
     private FixedDepositAccount(final Client client, final Group group, final SavingsProduct product, final Staff fieldOfficer,
-            final String accountNo, final String externalId, final SavingsAccountStatusType status, final AccountType accountType,
-            final LocalDate submittedOnDate, final AppUser submittedBy, final BigDecimal nominalAnnualInterestRate,
-            final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
-            final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
-            final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
-            final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
-            final boolean withdrawalFeeApplicableForTransfer, final Set<SavingsAccountCharge> savingsAccountCharges,
-            final DepositAccountTermAndPreClosure accountTermAndPreClosure, DepositAccountInterestRateChart chart,
-            final boolean allowOverdraft, final BigDecimal overdraftLimit, boolean withHoldTax) {
+                                final String accountNo, final String externalId, final SavingsAccountStatusType status, final AccountType accountType,
+                                final LocalDate submittedOnDate, final AppUser submittedBy, final BigDecimal nominalAnnualInterestRate,
+                                final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
+                                final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
+                                final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
+                                final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
+                                final boolean withdrawalFeeApplicableForTransfer, final Set<SavingsAccountCharge> savingsAccountCharges,
+                                final DepositAccountTermAndPreClosure accountTermAndPreClosure, DepositAccountInterestRateChart chart,
+                                final boolean allowOverdraft, final BigDecimal overdraftLimit, boolean withHoldTax, String closedFixedDepositAccountNumber) {
 
         super(client, group, product, fieldOfficer, accountNo, externalId, status, accountType, submittedOnDate, submittedBy,
                 nominalAnnualInterestRate, interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType,
@@ -132,6 +132,7 @@ public class FixedDepositAccount extends SavingsAccount {
         if (this.chart != null) {
             this.chart.updateDepositAccountReference(this);
         }
+        this.closedFixedDepositAccountNumber = closedFixedDepositAccountNumber;
     }
 
     @Override
@@ -868,7 +869,7 @@ public class FixedDepositAccount extends SavingsAccount {
                 savingsOfficer, accountNumber, externalId, accountType, getClosedOnDate(), closedBy, interestRate, compoundingPeriodType,
                 postingPeriodType, interestCalculationType, daysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
                 lockinPeriodFrequencyType, withdrawalFeeApplicableForTransfer, savingsAccountCharges, newAccountTermAndPreClosure, newChart,
-                withHoldTax);
+                withHoldTax, null);
 
         newAccountTermAndPreClosure.updateAccountReference(reInvestedAccount);
         newChart.updateDepositAccountReference(reInvestedAccount);
