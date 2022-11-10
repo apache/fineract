@@ -39,7 +39,8 @@ public class LoanItemReader extends AbstractLoanItemReader {
         ExecutionContext executionContext = stepExecution.getExecutionContext();
         ExecutionContext jobExecutionContext = stepExecution.getJobExecution().getExecutionContext();
         List<Long> loanIds = (List<Long>) executionContext.get(LoanCOBConstant.LOAN_IDS);
-        setAlreadyLockedAccounts((List<Long>) jobExecutionContext.get(LoanCOBConstant.ALREADY_LOCKED_LOAN_IDS));
+        setAlreadyLockedOrProcessedAccounts(
+                (List<Long>) jobExecutionContext.get(LoanCOBConstant.ALREADY_LOCKED_BY_INLINE_COB_OR_PROCESSED_LOAN_IDS));
         setRemainingData(new ArrayList<>(loanIds));
     }
 }

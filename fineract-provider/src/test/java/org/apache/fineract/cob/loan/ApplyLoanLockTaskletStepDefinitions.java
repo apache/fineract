@@ -73,14 +73,14 @@ public class ApplyLoanLockTaskletStepDefinitions implements En {
 
         Then("ApplyLoanLockTasklet.execute result should match", () -> {
             assertEquals(RepeatStatus.FINISHED, resultItem);
-            assertEquals(3L,
-                    ((List) stepContribution.getStepExecution().getExecutionContext().get(LoanCOBConstant.ALREADY_LOCKED_LOAN_IDS)).get(0));
-            verify(this.accountLockRepository, Mockito.times(2)).save(valueCaptor.capture());
+            assertEquals(3L, ((List) stepContribution.getStepExecution().getExecutionContext()
+                    .get(LoanCOBConstant.ALREADY_LOCKED_BY_INLINE_COB_OR_PROCESSED_LOAN_IDS)).get(0));
+            assertEquals(4L, ((List) stepContribution.getStepExecution().getExecutionContext()
+                    .get(LoanCOBConstant.ALREADY_LOCKED_BY_INLINE_COB_OR_PROCESSED_LOAN_IDS)).get(1));
+            verify(this.accountLockRepository, Mockito.times(1)).save(valueCaptor.capture());
             List<LoanAccountLock> values = valueCaptor.getAllValues();
             assertEquals(2L, values.get(0).getLoanId());
             assertEquals(LockOwner.LOAN_COB_CHUNK_PROCESSING, values.get(0).getLockOwner());
-            assertEquals(4L, values.get(1).getLoanId());
-            assertEquals(LockOwner.LOAN_COB_CHUNK_PROCESSING, values.get(1).getLockOwner());
         });
 
         Then("throw exception ApplyLoanLockTasklet.execute method", () -> {
