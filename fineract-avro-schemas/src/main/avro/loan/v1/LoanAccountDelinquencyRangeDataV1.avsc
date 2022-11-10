@@ -1,15 +1,11 @@
 {
-    "name": "LoanTransactionRelationDataV1",
+    "name": "LoanAccountDelinquencyRangeDataV1",
     "namespace": "org.apache.fineract.avro.loan.v1",
     "type": "record",
     "fields": [
         {
-            "name": "fromLoanTransaction",
-            "type": "long"
-        },
-        {
             "default": null,
-            "name": "toLoanTransaction",
+            "name": "id",
             "type": [
                 "null",
                 "long"
@@ -17,30 +13,26 @@
         },
         {
             "default": null,
-            "name": "toLoanCharge",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "default": null,
-            "name": "amount",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "name": "relationType",
-            "type": "string"
-        },
-        {
-            "default": null,
-            "name": "paymentType",
+            "name": "accountNo",
             "type": [
                 "null",
                 "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "externalId",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "delinquencyRange",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.loan.v1.DelinquencyRangeDataV1"
             ]
         }
     ]
