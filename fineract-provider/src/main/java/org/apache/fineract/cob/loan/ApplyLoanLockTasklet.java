@@ -45,41 +45,35 @@ public class ApplyLoanLockTasklet implements Tasklet {
     public RepeatStatus execute(@NotNull StepContribution contribution, @NotNull ChunkContext chunkContext) throws Exception {
         ExecutionContext executionContext = contribution.getStepExecution().getExecutionContext();
         List<Long> loanIds = (List<Long>) executionContext.get(LoanCOBConstant.LOAN_IDS);
-        List<Long> remainingLoanIds = new ArrayList<>(loanIds);
 
-        List<LoanAccountLock> accountLocks = accountLockRepository.findAllByLoanIdIn(remainingLoanIds);
-
-        List<Long> alreadyHardLockedAccountIds = accountLocks.stream()
-                .filter(e -> LockOwner.LOAN_COB_CHUNK_PROCESSING.equals(e.getLockOwner())).map(LoanAccountLock::getLoanId).toList();
-
-        List<Long> alreadyUnderProcessingAccountIds = accountLocks.stream()
-                .filter(e -> LockOwner.LOAN_INLINE_COB_PROCESSING.equals(e.getLockOwner())).map(LoanAccountLock::getLoanId).toList();
+        List<LoanAccountLock> accountLocks = accountLockRepository.findAllByLoanIdIn(loanIds);
 
         Map<Long, LoanAccountLock> alreadySoftLockedAccountsMap = accountLocks.stream()
                 .filter(e -> LockOwner.LOAN_COB_PARTITIONING.equals(e.getLockOwner()))
                 .collect(Collectors.toMap(LoanAccountLock::getLoanId, Function.identity()));
 
-        remainingLoanIds.removeAll(alreadyHardLockedAccountIds);
-        remainingLoanIds.removeAll(alreadyUnderProcessingAccountIds);
+        List<Long> alreadyLockedByChunkProcessingAccountIds = accountLocks.stream()
+                .filter(e -> LockOwner.LOAN_COB_CHUNK_PROCESSING.equals(e.getLockOwner())).map(LoanAccountLock::getLoanId).toList();
 
-        for (Long loanId : remainingLoanIds) {
-            LoanAccountLock loanAccountLock = addLock(loanId, alreadySoftLockedAccountsMap);
-            accountLockRepository.save(loanAccountLock);
+        List<Long> toBeProcessedLoanIds = new ArrayList<>(alreadySoftLockedAccountsMap.keySet());
+
+        for (Long loanId : toBeProcessedLoanIds) {
+            upgradeToHardLock(loanId, alreadySoftLockedAccountsMap);
         }
 
-        executionContext.put(LoanCOBConstant.ALREADY_LOCKED_LOAN_IDS, new ArrayList<>(alreadyUnderProcessingAccountIds));
+        toBeProcessedLoanIds.addAll(alreadyLockedByChunkProcessingAccountIds);
+        List<Long> alreadyLockedByInlineCOBOrProcessedLoanIds = new ArrayList<>(loanIds);
+        alreadyLockedByInlineCOBOrProcessedLoanIds.removeAll(toBeProcessedLoanIds);
+
+        executionContext.put(LoanCOBConstant.ALREADY_LOCKED_BY_INLINE_COB_OR_PROCESSED_LOAN_IDS,
+                new ArrayList<>(alreadyLockedByInlineCOBOrProcessedLoanIds));
         return RepeatStatus.FINISHED;
     }
 
-    private LoanAccountLock addLock(Long loanId, Map<Long, LoanAccountLock> alreadySoftLockedAccountsMap) {
-        LoanAccountLock loanAccountLock;
-        if (alreadySoftLockedAccountsMap.containsKey(loanId)) {
-            // Upgrade lock
-            loanAccountLock = alreadySoftLockedAccountsMap.get(loanId);
-            loanAccountLock.setNewLockOwner(LockOwner.LOAN_COB_CHUNK_PROCESSING);
-        } else {
-            loanAccountLock = new LoanAccountLock(loanId, LockOwner.LOAN_COB_CHUNK_PROCESSING);
-        }
-        return loanAccountLock;
+    private void upgradeToHardLock(Long loanId, Map<Long, LoanAccountLock> alreadySoftLockedAccountsMap) {
+        LoanAccountLock loanAccountLock = alreadySoftLockedAccountsMap.get(loanId);
+        // Upgrade lock
+        loanAccountLock.setNewLockOwner(LockOwner.LOAN_COB_CHUNK_PROCESSING);
+        accountLockRepository.save(loanAccountLock);
     }
 }

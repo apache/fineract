@@ -149,7 +149,7 @@ public class LoanCOBWorkerConfiguration {
     @Bean
     public ExecutionContextPromotionListener promotionListener() {
         ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
-        listener.setKeys(new String[] { LoanCOBConstant.ALREADY_LOCKED_LOAN_IDS });
+        listener.setKeys(new String[] { LoanCOBConstant.ALREADY_LOCKED_BY_INLINE_COB_OR_PROCESSED_LOAN_IDS });
         return listener;
     }
 }
