@@ -20,8 +20,13 @@
 
 -->
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <changeSet author="deepika@fiter.io" id="add_codes">
+    <changeSet author="deepika@fiter.io" id="add_codes_1">
 
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_code where code_name = 'CITY';
+            </sqlCheck>
+        </preConditions>
         <insert tableName="m_code">
             <column name="code_name" value="CITY" />
             <column name="is_system_defined" valueBoolean="false" />
