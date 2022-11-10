@@ -150,6 +150,7 @@ public final class SavingsAccountData implements Serializable {
 
     private final Long numOfCreditTransaction;
     private final Long numOfDebitTransaction;
+    private Long transactionSize;
 
     public static SavingsAccountData importInstanceIndividual(Long clientId, Long productId, Long fieldOfficerId, LocalDate submittedOnDate,
             BigDecimal nominalAnnualInterestRate, EnumOptionData interestCompoundingPeriodTypeEnum,
@@ -1153,5 +1154,13 @@ public final class SavingsAccountData implements Serializable {
 
     public Long getNumOfDebitTransaction() {
         return numOfDebitTransaction;
+    }
+
+    public Long getTransactionSize() {
+        return transactionSize;
+    }
+
+    public void setTransactionSize(Long transactionSize) {
+        this.transactionSize = transactionSize;
     }
 }

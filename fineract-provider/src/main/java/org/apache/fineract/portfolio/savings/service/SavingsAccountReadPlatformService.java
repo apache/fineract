@@ -44,8 +44,8 @@ public interface SavingsAccountReadPlatformService {
 
     SavingsAccountTransactionData retrieveDepositTransactionTemplate(Long savingsId, DepositAccountType depositAccountType);
 
-    Collection<SavingsAccountTransactionData> retrieveAllTransactions(Long savingsId, DepositAccountType depositAccountType);
-    Collection<SavingsAccountTransactionData> retrieveAccrualTransactions(Long savingsId, DepositAccountType depositAccountType);
+    Collection<SavingsAccountTransactionData> retrieveAllTransactions(Long savingsId, DepositAccountType depositAccountType,Integer offset, Integer limit);
+    Collection<SavingsAccountTransactionData> retrieveAccrualTransactions(Long savingsId, DepositAccountType depositAccountType,Integer offset, Integer limit);
 
     // Collection<SavingsAccountAnnualFeeData>
     // retrieveAccountsWithAnnualFeeDue();
@@ -64,7 +64,7 @@ public interface SavingsAccountReadPlatformService {
 
     String retrieveAccountNumberByAccountId(Long accountId);
 
-    List<Long> getAccountsIdsByStatusPaged(Integer status, int pageSize, Long maxSavingsIdInList);
+    Long getSavingsAccountTransactionTotalFiltered(Long savingsId, DepositAccountType depositAccountType,Boolean hideAccrualTransactions);
 
     List<SavingsAccountData> retrieveAllSavingsDataForInterestPosting(boolean backdatedTxnsAllowedTill, int pageSize, Integer status,
             Long maxSavingsId);
