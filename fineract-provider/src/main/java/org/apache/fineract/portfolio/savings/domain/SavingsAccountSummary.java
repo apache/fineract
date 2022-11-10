@@ -26,6 +26,8 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Transient;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -262,12 +264,14 @@ public final class SavingsAccountSummary {
         Money overdraftEarned = Money.zero(currency);
         LocalDate interestCalculationDate = DateUtils.getLocalDateOfTenant();
         for (final PostingPeriod period : allPostingPeriods) {
-            for (Money interestEarned : period.interests()) {
-                interestEarned = interestEarned == null ? Money.zero(currency) : interestEarned;
-                if (interestEarned.isGreaterThanZero()) {
-                    totalEarned = totalEarned.plus(interestEarned);
-                } else {
-                    overdraftEarned = overdraftEarned.plus(interestEarned);
+            if (CollectionUtils.isNotEmpty(period.interests())) {
+                for (Money interestEarned : period.interests()) {
+                    interestEarned = interestEarned == null ? Money.zero(currency) : interestEarned;
+                    if (interestEarned.isGreaterThanZero()) {
+                        totalEarned = totalEarned.plus(interestEarned);
+                    } else {
+                        overdraftEarned = overdraftEarned.plus(interestEarned);
+                    }
                 }
             }
         }
