@@ -33,6 +33,8 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.event.business.domain.loan.LoanDelinquencyRangeChangeBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.delinquency.api.DelinquencyApiConstants;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
@@ -73,6 +75,7 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
     private final LoanDelinquencyTagHistoryRepository loanDelinquencyTagRepository;
     private final LoanRepositoryWrapper loanRepository;
     private final LoanProductRepository loanProductRepository;
+    private final BusinessEventNotifierService businessEventNotifierService;
 
     @Override
     public CommandProcessingResult createDelinquencyRange(JsonCommand command) {
@@ -431,6 +434,7 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
         }
         if (loanDelinquencyTagHistory.size() > 0) {
             this.loanDelinquencyTagRepository.saveAllAndFlush(loanDelinquencyTagHistory);
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanDelinquencyRangeChangeBusinessEvent(loan));
         }
         return changes;
     }

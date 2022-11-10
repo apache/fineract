@@ -435,6 +435,11 @@ public class ExternalEventConfigurationHelper {
         loanChargeAdjustmentPreBusinessEvent.put("enabled", false);
         defaults.add(loanChargeAdjustmentPreBusinessEvent);
 
+        Map<String, Object> loanDelinquencyRangeChangeBusinessEvent = new HashMap<>();
+        loanDelinquencyRangeChangeBusinessEvent.put("type", "LoanDelinquencyRangeChangeBusinessEvent");
+        loanDelinquencyRangeChangeBusinessEvent.put("enabled", false);
+        defaults.add(loanDelinquencyRangeChangeBusinessEvent);
+
         return defaults;
 
     }
