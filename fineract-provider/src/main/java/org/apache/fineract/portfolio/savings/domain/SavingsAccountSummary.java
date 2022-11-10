@@ -26,7 +26,6 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Transient;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -348,9 +347,11 @@ public final class SavingsAccountSummary {
     public BigDecimal getTotalInterestEarned() {
         return this.totalInterestEarned;
     }
+
     public void setTotalInterestEarned(BigDecimal totalInterestEarned) {
         this.totalInterestEarned = totalInterestEarned;
     }
+
     public BigDecimal getTotalOverdraftInterestDerived() {
         return this.totalOverdraftInterestDerived;
     }
