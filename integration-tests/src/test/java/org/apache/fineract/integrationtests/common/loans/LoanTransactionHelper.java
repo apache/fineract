@@ -469,9 +469,9 @@ public class LoanTransactionHelper extends IntegrationTest {
         return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "repayment"));
     }
 
-    public PostLoansLoanIdTransactionsResponse reverseLoanTransaction(final Integer loanId, final Integer transactionId, String date,
+    public PostLoansLoanIdTransactionsResponse reverseLoanTransaction(final Integer loanId, final Long transactionId, String date,
             ResponseSpecification responseSpec) {
-        return postLoanTransaction(createLoanTransactionURL(UNDO, loanId, transactionId), getUndoJsonBody(date), responseSpec);
+        return postLoanTransaction(createLoanTransactionURL(UNDO, loanId, transactionId.intValue()), getUndoJsonBody(date), responseSpec);
     }
 
     public PostLoansLoanIdTransactionsTransactionIdResponse reverseLoanTransaction(final Long loanId, final Long transactionId,
@@ -1229,7 +1229,7 @@ public class LoanTransactionHelper extends IntegrationTest {
         }
     }
 
-    public Long applyChargebackTransaction(final Integer loanId, final Integer transactionId, final String amount,
+    public Long applyChargebackTransaction(final Integer loanId, final Long transactionId, final String amount,
             final Integer paymentTypeIdx, ResponseSpecification responseSpec) {
         List<GetPaymentTypesResponse> paymentTypeList = PaymentTypeHelper.getSystemPaymentType(this.requestSpec, this.responseSpec);
         assertTrue(!paymentTypeList.isEmpty());
@@ -1237,15 +1237,15 @@ public class LoanTransactionHelper extends IntegrationTest {
         final String payload = createChargebackPayload(amount, paymentTypeList.get(paymentTypeIdx).getId());
         log.info("Loan Chargeback: {}", payload);
         PostLoansLoanIdTransactionsTransactionIdResponse postLoansTransactionCommandResponse = applyLoanTransactionCommand(loanId,
-                transactionId, "chargeback", payload, responseSpec);
+                transactionId.intValue(), "chargeback", payload, responseSpec);
         assertNotNull(postLoansTransactionCommandResponse);
 
         log.info("Loan Chargeback Id: {}", postLoansTransactionCommandResponse.getResourceId());
         return postLoansTransactionCommandResponse.getResourceId();
     }
 
-    public void reviewLoanTransactionRelations(final Integer loanId, final Integer transactionId, final Integer expectedSize) {
-        GetLoansLoanIdTransactionsTransactionIdResponse getLoansTransactionResponse = getLoanTransaction(loanId, transactionId);
+    public void reviewLoanTransactionRelations(final Integer loanId, final Long transactionId, final Integer expectedSize) {
+        GetLoansLoanIdTransactionsTransactionIdResponse getLoansTransactionResponse = getLoanTransaction(loanId, transactionId.intValue());
         assertNotNull(getLoansTransactionResponse);
         assertNotNull(getLoansTransactionResponse.getTransactionRelations());
         assertEquals(expectedSize, getLoansTransactionResponse.getTransactionRelations().size());
