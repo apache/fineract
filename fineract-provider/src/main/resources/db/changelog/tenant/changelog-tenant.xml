@@ -52,6 +52,7 @@
     <include file="parts/0034_add_fields_in_m_savings_account_table.xml" relativeToChangelogFile="true"/>
     <include file="parts/0035_add_entry_for_job_to_update_interest_config.xml" relativeToChangelogFile="true"/>
     <include file="parts/UC-24_Accrual_accounting_on_savings_account.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0013_create_table_for_business_owner.xml" relativeToChangelogFile="true"/>
     <include file="parts/MON-92_FD_topup.xml" relativeToChangelogFile="true"/>
     <include file="parts/MON-92_FD_topup_permission.xml" relativeToChangelogFile="true"/>
     <include file="parts/MON-92_FD_topup_old_account_reference.xml" relativeToChangelogFile="true"/>
