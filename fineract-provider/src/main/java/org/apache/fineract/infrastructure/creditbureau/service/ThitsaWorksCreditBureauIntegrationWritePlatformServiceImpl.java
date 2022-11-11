@@ -73,11 +73,21 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
     private final CreditBureauConfigurationRepositoryWrapper configDataRepository;
     private final CreditBureauTokenCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
+    private final OkHttpClient client;
+
     @Autowired
     public ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl(final PlatformSecurityContext context,
             final FromJsonHelper fromApiJsonHelper, final TokenRepositoryWrapper tokenRepositoryWrapper,
             final CreditBureauConfigurationRepositoryWrapper configDataRepository,
             final CreditBureauTokenCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
+        this(new OkHttpClient(), context, fromApiJsonHelper, tokenRepositoryWrapper, configDataRepository, fromApiJsonDeserializer);
+    }
+
+    public ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl(final OkHttpClient okHttpClient,
+            final PlatformSecurityContext context, final FromJsonHelper fromApiJsonHelper,
+            final TokenRepositoryWrapper tokenRepositoryWrapper, final CreditBureauConfigurationRepositoryWrapper configDataRepository,
+            final CreditBureauTokenCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
+        this.client = okHttpClient;
         this.context = context;
         this.tokenRepositoryWrapper = tokenRepositoryWrapper;
         this.configDataRepository = configDataRepository;
@@ -93,7 +103,6 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
 
         String reponseMessage = null;
         RequestBody requestBody = null;
-        OkHttpClient client = new OkHttpClient();
 
         if (process.equals("UploadCreditReport")) {
             String fileName = fileData.getFileName();
