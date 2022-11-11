@@ -20,9 +20,9 @@
 
 -->
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <changeSet author="deepika@fiter.io" id="add_field_isActive_in_m_business_owners">
+    <changeSet author="deepika@fiter.io" id="add_field_isActive_in_m_business_owners_1">
 
-        <preConditions>
+        <preConditions onFail="MARK_RAN">
             <not>
                 <columnExists tableName="m_business_owners" columnName="is_active"/>
             </not>
