@@ -597,7 +597,7 @@ public class DelinquencyBucketsIntegrationTest {
 
         // Reverse the Previous Loan Repayment
         PostLoansLoanIdTransactionsResponse loansLoanIdReverseTransactions = loanTransactionHelper.reverseLoanTransaction(loanId,
-                loansLoanIdTransactions.getResourceId().intValue(), operationDate, responseSpec);
+                loansLoanIdTransactions.getResourceId(), operationDate, responseSpec);
         assertNotNull(loansLoanIdReverseTransactions);
         log.info("Loan repayment reverse transaction id {}", loansLoanIdReverseTransactions.getResourceId());
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);

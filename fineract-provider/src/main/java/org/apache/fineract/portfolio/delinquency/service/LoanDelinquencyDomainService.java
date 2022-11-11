@@ -16,33 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.data;
+package org.apache.fineract.portfolio.delinquency.service;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 
-@AllArgsConstructor
-@ToString
-@Getter
-@Setter
-public final class CollectionData {
+public interface LoanDelinquencyDomainService {
 
-    private BigDecimal availableDisbursementAmount;
-    private Long pastDueDays;
-    private LocalDate nextPaymentDueDate;
-    private Long delinquentDays;
-    private LocalDate delinquentDate;
-    private BigDecimal delinquentAmount;
-    private LocalDate lastPaymentDate;
-    private BigDecimal lastPaymentAmount;
-
-    public static CollectionData template() {
-        final BigDecimal zero = BigDecimal.ZERO;
-        return new CollectionData(zero, 0L, null, 0L, null, zero, null, zero);
-    }
+    /**
+     * This method is to calculate the Overdue date and other properties, If the loan is overdue or If there is some
+     * Charge back transaction
+     *
+     * @param loan
+     */
+    CollectionData getOverdueCollectionData(Loan loan);
 
 }
