@@ -37,7 +37,7 @@ public class SavingsAccountNotFoundException extends AbstractPlatformResourceNot
     }
 
     public SavingsAccountNotFoundException(final String globalisationMessageCode, final String defaultUserMessage,
-                                           final Object... defaultUserMessageArgs) {
+            final Object... defaultUserMessageArgs) {
         super(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
     }
 }

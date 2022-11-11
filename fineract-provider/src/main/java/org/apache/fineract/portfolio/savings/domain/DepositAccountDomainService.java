@@ -63,5 +63,5 @@ public interface DepositAccountDomainService {
     AccountAssociations getLinkedSavingsAccount(Long accountId);
 
     Long prematurelyCloseFDAccount(FixedDepositAccount account, PaymentDetail paymentDetail,
-                                   FixedDepositPreClosureReq fixedDepositPreclosureReq, Map<String, Object> changes);
+            FixedDepositPreClosureReq fixedDepositPreclosureReq, Map<String, Object> changes);
 }

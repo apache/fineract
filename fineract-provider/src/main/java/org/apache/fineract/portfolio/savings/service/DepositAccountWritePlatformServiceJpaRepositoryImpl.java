@@ -19,23 +19,23 @@
 package org.apache.fineract.portfolio.savings.service;
 
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.changeTenureParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.depositAmountParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.depositPeriodFrequencyIdParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.depositPeriodParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.amountParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargeIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.submittedOnDateParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.changeTenureParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.depositPeriodParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.depositPeriodFrequencyIdParamName;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.Year;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -98,13 +98,13 @@ import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
+import org.apache.fineract.portfolio.savings.DepositAccountOnClosureType;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
-import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYearType;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
+import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYearType;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
-import org.apache.fineract.portfolio.savings.DepositAccountOnClosureType;
 import org.apache.fineract.portfolio.savings.data.DepositAccountTransactionDataValidator;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountChargeDataValidator;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionDTO;
@@ -122,16 +122,16 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrap
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionRepository;
-import org.apache.fineract.portfolio.savings.request.FixedDepositApprovalReq;
-import org.apache.fineract.portfolio.savings.request.FixedDepositApplicationReq;
-import org.apache.fineract.portfolio.savings.request.FixedDepositActivationReq;
-import org.apache.fineract.portfolio.savings.request.FixedDepositApplicationTermsReq;
-import org.apache.fineract.portfolio.savings.request.FixedDepositApplicationPreClosureReq;
-import org.apache.fineract.portfolio.savings.request.FixedDepositPreClosureReq;
 import org.apache.fineract.portfolio.savings.exception.DepositAccountTransactionNotAllowedException;
 import org.apache.fineract.portfolio.savings.exception.InsufficientAccountBalanceException;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountTransactionNotFoundException;
 import org.apache.fineract.portfolio.savings.exception.TransactionUpdateNotAllowedException;
+import org.apache.fineract.portfolio.savings.request.FixedDepositActivationReq;
+import org.apache.fineract.portfolio.savings.request.FixedDepositApplicationPreClosureReq;
+import org.apache.fineract.portfolio.savings.request.FixedDepositApplicationReq;
+import org.apache.fineract.portfolio.savings.request.FixedDepositApplicationTermsReq;
+import org.apache.fineract.portfolio.savings.request.FixedDepositApprovalReq;
+import org.apache.fineract.portfolio.savings.request.FixedDepositPreClosureReq;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1535,7 +1535,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     }
 
     private FixedDepositAccount autoCreateNewFD(JsonCommand command, FixedDepositAccount account, AccountAssociations accountAssociations,
-                                                FixedDepositApplicationReq fixedDepositApplicationReq) {
+            FixedDepositApplicationReq fixedDepositApplicationReq) {
         FixedDepositAccount newAccount = this.createNewAccount(fixedDepositApplicationReq, account, accountAssociations);
         // Approve
         FixedDepositApprovalReq fixedDepositApprovalReq = this.generateFixedDepositApprovalReq(account, command);
@@ -1571,7 +1571,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     }
 
     private FixedDepositAccount createNewAccount(FixedDepositApplicationReq fixedDepositApplicationReq, FixedDepositAccount account,
-                                                 AccountAssociations accountAssociations) {
+            AccountAssociations accountAssociations) {
         fixedDepositApplicationReq.setSavingsAccountId(accountAssociations.linkedSavingsAccount().getId());
         Set<SavingsAccountCharge> charges = this.generateCharges(account);
         return this.depositApplicationProcessWritePlatformService.createFixedDepositAccount(fixedDepositApplicationReq,
@@ -1616,13 +1616,14 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         fixedDepositApplicationReq.setFixedDepositApplicationTermsReq(new FixedDepositApplicationTermsReq());
         fixedDepositApplicationReq.setFixedDepositApplicationPreClosureReq(this.generateFixedDepositApplicationPreClosureReq(account));
         String newNickName = command.stringValueOfParameterNamed(SavingsApiConstants.nicknameParamName);
-        /*if (newNickName != null && !"".equals(newNickName)) {
-            fixedDepositApplicationReq.setNickname(command.stringValueOfParameterNamed(SavingsApiConstants.nicknameParamName));
-        } else {
-            fixedDepositApplicationReq.setNickname(account.getNickname());
-        }*/
+        /*
+         * if (newNickName != null && !"".equals(newNickName)) {
+         * fixedDepositApplicationReq.setNickname(command.stringValueOfParameterNamed(SavingsApiConstants.
+         * nicknameParamName)); } else { fixedDepositApplicationReq.setNickname(account.getNickname()); }
+         */
         return fixedDepositApplicationReq;
     }
+
     private FixedDepositApplicationPreClosureReq generateFixedDepositApplicationPreClosureReq(FixedDepositAccount account) {
         FixedDepositApplicationPreClosureReq fixedDepositApplicationPreClosureReq = new FixedDepositApplicationPreClosureReq();
         fixedDepositApplicationPreClosureReq
@@ -1700,7 +1701,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     }
 
     private void preCloseAccount(JsonCommand command, Map<String, Object> changes, FixedDepositAccount account,
-                                 AccountAssociations accountAssociations, boolean topUp, final PaymentDetail paymentDetail) {
+            AccountAssociations accountAssociations, boolean topUp, final PaymentDetail paymentDetail) {
         FixedDepositPreClosureReq fixedDepositPreClosureReq = this.generateFixedDepositPreclosureRequest(accountAssociations, command,
                 topUp);
         this.depositAccountDomainService.prematurelyCloseFDAccount(account, paymentDetail, fixedDepositPreClosureReq, changes);
@@ -1716,9 +1717,8 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         }
     }
 
-
     private FixedDepositPreClosureReq generateFixedDepositPreclosureRequest(AccountAssociations accountAssociations, JsonCommand command,
-                                                                            boolean topUp) {
+            boolean topUp) {
         FixedDepositPreClosureReq fixedDepositPreclosureReq = new FixedDepositPreClosureReq();
 
         fixedDepositPreclosureReq.setLocale(command.extractLocale());
@@ -1796,7 +1796,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                         .findBySavingsAccountAndReversedFalseOrderByCreatedDateAsc(account);
             }
             account.validateAccountBalanceDoesNotBecomeNegative(SavingsAccountTransactionType.PAY_CHARGE.name(),
-                    depositAccountOnHoldTransactions,false);
+                    depositAccountOnHoldTransactions, false);
             this.savingAccountRepositoryWrapper.saveAndFlush(account);
         }
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);

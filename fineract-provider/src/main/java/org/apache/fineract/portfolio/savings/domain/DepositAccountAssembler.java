@@ -373,7 +373,7 @@ public class DepositAccountAssembler {
     }
 
     public DepositAccountTermAndPreClosure assembleAccountTermAndPreClosure(FixedDepositApplicationReq fixedDepositApplicationReq,
-                                                                            final DepositProductTermAndPreClosure productTermAndPreclosure) {
+            final DepositProductTermAndPreClosure productTermAndPreclosure) {
         final DepositPreClosureDetail productPreClosure = (productTermAndPreclosure == null) ? null
                 : productTermAndPreclosure.depositPreClosureDetail();
         final DepositTermDetail productTerm = (productTermAndPreclosure == null) ? null : productTermAndPreclosure.depositTermDetail();
@@ -430,7 +430,7 @@ public class DepositAccountAssembler {
     }
 
     public DepositAccountRecurringDetail assembleAccountRecurringDetail(RecurringAccountDetailReq recurringAccountDetailReq,
-                                                                        final DepositRecurringDetail prodRecurringDetail) {
+            final DepositRecurringDetail prodRecurringDetail) {
 
         final BigDecimal recurringDepositAmount = recurringAccountDetailReq.getRecurringDepositAmount();
         boolean isMandatoryDeposit;
@@ -553,12 +553,12 @@ public class DepositAccountAssembler {
      * chosen {@link SavingsProduct}.
      */
     public SavingsAccount assembleFrom(FixedDepositApplicationReq fixedDepositApplicationReq, SavingsProduct product,
-                                       DepositAccountType depositAccountType) {
+            DepositAccountType depositAccountType) {
 
         final AppUser submittedBy = this.context.authenticatedUser();
         final String accountNo = fixedDepositApplicationReq.getAccountNo();
         final String externalId = fixedDepositApplicationReq.getExternalId();
-        //final String nickname = fixedDepositApplicationReq.getNickname();
+        // final String nickname = fixedDepositApplicationReq.getNickname();
         final String closedFixedDepositAccountNumber = fixedDepositApplicationReq.getClosedFixedDepositAccountNumber();
 
         Client client = null;
@@ -701,7 +701,7 @@ public class DepositAccountAssembler {
                     accountNo, externalId, accountType, submittedOnDate, submittedBy, interestRate, interestCompoundingPeriodType,
                     interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                     lockinPeriodFrequency, lockinPeriodFrequencyType, isWithdrawalFeeApplicableForTransfer, null, accountTermAndPreClosure,
-                    accountChart, withHoldTax, closedFixedDepositAccountNumber); //nickname removed
+                    accountChart, withHoldTax, closedFixedDepositAccountNumber); // nickname removed
             accountTermAndPreClosure.updateAccountReference(fdAccount);
             fdAccount.validateDomainRules();
             account = fdAccount;
@@ -719,7 +719,7 @@ public class DepositAccountAssembler {
                     fieldOfficer, accountNo, externalId, accountType, submittedOnDate, submittedBy, interestRate,
                     interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
                     minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, isWithdrawalFeeApplicableForTransfer, null,
-                    accountTermAndPreClosure, accountRecurringDetail, accountChart, withHoldTax); //nickname removed
+                    accountTermAndPreClosure, accountRecurringDetail, accountChart, withHoldTax); // nickname removed
 
             accountTermAndPreClosure.updateAccountReference(rdAccount);
             accountRecurringDetail.updateAccountReference(rdAccount);

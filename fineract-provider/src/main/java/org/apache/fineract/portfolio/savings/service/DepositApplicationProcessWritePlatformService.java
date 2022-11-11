@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.service;
 
+import java.util.Set;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
@@ -25,8 +26,6 @@ import org.apache.fineract.portfolio.savings.domain.FixedDepositAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountCharge;
 import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
 import org.apache.fineract.portfolio.savings.request.FixedDepositApplicationReq;
-
-import java.util.Set;
 
 public interface DepositApplicationProcessWritePlatformService {
 
@@ -49,5 +48,5 @@ public interface DepositApplicationProcessWritePlatformService {
     CommandProcessingResult applicantWithdrawsFromApplication(Long accountId, JsonCommand command, DepositAccountType depositAccountType);
 
     FixedDepositAccount createFixedDepositAccount(FixedDepositApplicationReq fixedDepositApplicationReq, SavingsProduct product,
-                                                  Set<SavingsAccountCharge> charges);
+            Set<SavingsAccountCharge> charges);
 }

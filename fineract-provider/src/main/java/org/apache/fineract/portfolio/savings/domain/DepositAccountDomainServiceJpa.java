@@ -18,17 +18,22 @@
  */
 package org.apache.fineract.portfolio.savings.domain;
 
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.onAccountClosureIdParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.toSavingsAccountIdParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transferDescriptionParamName;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.stream.Collectors;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
@@ -78,13 +83,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.onAccountClosureIdParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.toSavingsAccountIdParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transferDescriptionParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME;
-
-
-
 @Service
 public class DepositAccountDomainServiceJpa implements DepositAccountDomainService {
 
@@ -114,7 +112,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             final ConfigurationDomainService configurationDomainService,
             final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
             final CalendarInstanceRepository calendarInstanceRepository, final AccountAssociationsRepository accountAssociationsRepository,
-            final SavingsAccountTransactionRepository savingsAccountTransactionRepository, final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
+            final SavingsAccountTransactionRepository savingsAccountTransactionRepository,
+            final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
             final SavingsAccountChargeRepository savingsAccountChargeRepository) {
         this.context = context;
         this.savingsAccountRepository = savingsAccountRepository;
@@ -646,7 +645,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
     @Transactional
     @Override
     public Long prematurelyCloseFDAccount(FixedDepositAccount account, PaymentDetail paymentDetail,
-                                          FixedDepositPreClosureReq fixedDepositPreclosureReq, Map<String, Object> changes) {
+            FixedDepositPreClosureReq fixedDepositPreclosureReq, Map<String, Object> changes) {
         final AppUser user = this.context.authenticatedUser();
         account.setSavingsAccountTransactionRepository(this.savingsAccountTransactionRepository);
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
@@ -721,7 +720,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
     }
 
     private void prematurelyCloseFD(FixedDepositAccount account, FixedDepositPreClosureReq fixedDepositPreclosureReq,
-                                    Map<String, Object> changes) {
+            Map<String, Object> changes) {
         final AppUser user = this.context.authenticatedUser();
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();

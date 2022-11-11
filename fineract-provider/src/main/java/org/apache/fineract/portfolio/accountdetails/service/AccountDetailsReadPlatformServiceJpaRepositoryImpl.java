@@ -319,7 +319,8 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
             final StringBuilder accountsSummary = new StringBuilder();
             accountsSummary.append("sa.id as id, sa.account_no as accountNo, sa.external_id as externalId, sa.status_enum as statusEnum, ");
             accountsSummary.append("sa.account_type_enum as accountType, ");
-            accountsSummary.append("sa.account_balance_derived as accountBalance, sa.closed_fixed_deposit_account_no as closedFixedDepositAccountNumber,");
+            accountsSummary.append(
+                    "sa.account_balance_derived as accountBalance, sa.closed_fixed_deposit_account_no as closedFixedDepositAccountNumber,");
 
             accountsSummary.append("sa.submittedon_date as submittedOnDate,");
             accountsSummary.append("sbu.username as submittedByUsername,");
@@ -443,7 +444,8 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
                     activatedByLastname, closedOnDate, closedByUsername, closedByFirstname, closedByLastname);
 
             return new SavingsAccountSummaryData(id, accountNo, externalId, productId, productName, shortProductName, status, currency,
-                    accountBalance, accountTypeData, timeline, depositTypeData, subStatus, lastActiveTransactionDate, closedFixedDepositAccountNumber);
+                    accountBalance, accountTypeData, timeline, depositTypeData, subStatus, lastActiveTransactionDate,
+                    closedFixedDepositAccountNumber);
         }
     }
 

@@ -18,6 +18,21 @@
  */
 package org.apache.fineract.portfolio.savings.data;
 
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.activatedOnDateParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.bankNumberParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.checkNumberParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.closedOnDateParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.depositPeriodFrequencyIdParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.depositPeriodParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.onAccountClosureIdParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.paymentTypeIdParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.receiptNumberParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.routingCodeParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.toSavingsAccountIdParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transactionAccountNumberParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transactionAmountParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transactionDateParamName;
+
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
@@ -43,21 +58,6 @@ import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transactionAmountParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transactionDateParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.paymentTypeIdParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transactionAccountNumberParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.checkNumberParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.routingCodeParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.receiptNumberParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.bankNumberParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.closedOnDateParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.onAccountClosureIdParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.toSavingsAccountIdParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.activatedOnDateParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.depositPeriodParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.depositPeriodFrequencyIdParamName;
 
 @Component
 public class DepositAccountTransactionDataValidator {

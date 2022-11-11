@@ -27,9 +27,9 @@ import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.PersistenceException;
@@ -144,8 +144,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             final AccountAssociationsRepository accountAssociationsRepository, final FromJsonHelper fromJsonHelper,
             final CalendarInstanceRepository calendarInstanceRepository, final ConfigurationDomainService configurationDomainService,
             final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
-            final BusinessEventNotifierService businessEventNotifierService,
-            final NubanAccountService nubanAccountService) {
+            final BusinessEventNotifierService businessEventNotifierService, final NubanAccountService nubanAccountService) {
         this.context = context;
         this.savingAccountRepository = savingAccountRepository;
         this.depositAccountAssembler = depositAccountAssembler;
@@ -792,7 +791,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
     @Override
     public FixedDepositAccount createFixedDepositAccount(FixedDepositApplicationReq fixedDepositApplicationReq, SavingsProduct product,
-                                                         Set<SavingsAccountCharge> charges) {
+            Set<SavingsAccountCharge> charges) {
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
@@ -806,10 +805,12 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         this.fixedDepositAccountRepository.save(account);
         this.generateAccountNumbers(account);
         this.saveLinkedAccountInfo(fixedDepositApplicationReq.getSavingsAccountId(), account);
-        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEventNotificationConstants.BusinessEvents.FIXED_DEPOSIT_ACCOUNT_CREATE,
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(
+                BusinessEventNotificationConstants.BusinessEvents.FIXED_DEPOSIT_ACCOUNT_CREATE,
                 constructEntityMap(BusinessEventNotificationConstants.BusinessEntity.DEPOSIT_ACCOUNT, account));
 
-        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEventNotificationConstants.BusinessEvents.FIXED_DEPOSIT_ACCOUNT_CREATE,
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(
+                BusinessEventNotificationConstants.BusinessEvents.FIXED_DEPOSIT_ACCOUNT_CREATE,
                 constructEntityMap(BusinessEventNotificationConstants.BusinessEntity.DEPOSIT_ACCOUNT, account));
         return account;
     }
@@ -844,8 +845,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         }
     }
 
-    private Map<BusinessEventNotificationConstants.BusinessEntity, Object> constructEntityMap(final BusinessEventNotificationConstants.BusinessEntity entityEvent,
-                                                                                              Object entity) {
+    private Map<BusinessEventNotificationConstants.BusinessEntity, Object> constructEntityMap(
+            final BusinessEventNotificationConstants.BusinessEntity entityEvent, Object entity) {
         Map<BusinessEventNotificationConstants.BusinessEntity, Object> map = new HashMap<>(1);
         map.put(entityEvent, entity);
         return map;

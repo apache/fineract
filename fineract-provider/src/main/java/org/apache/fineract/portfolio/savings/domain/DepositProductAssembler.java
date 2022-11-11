@@ -308,7 +308,7 @@ public class DepositProductAssembler {
     }
 
     public DepositPreClosureDetail assemblePreClosureDetail(final FixedDepositApplicationPreClosureReq fixedDepositApplicationPreClosureReq,
-                                                            DepositPreClosureDetail productPreClosureDetail) {
+            DepositPreClosureDetail productPreClosureDetail) {
         DepositPreClosureDetail.DepositPreClosureDetailBuilder depositPreClosureDetailBuilder = new DepositPreClosureDetail.DepositPreClosureDetailBuilder();
         this.setPreClosurePenalDetails(fixedDepositApplicationPreClosureReq, productPreClosureDetail, depositPreClosureDetailBuilder);
         this.setPreClosureChargeDetails(fixedDepositApplicationPreClosureReq, depositPreClosureDetailBuilder);
@@ -316,8 +316,8 @@ public class DepositProductAssembler {
     }
 
     private void setPreClosurePenalDetails(FixedDepositApplicationPreClosureReq fixedDepositApplicationPreClosureReq,
-                                           DepositPreClosureDetail productPreClosureDetail,
-                                           DepositPreClosureDetail.DepositPreClosureDetailBuilder depositPreClosureDetailBuilder) {
+            DepositPreClosureDetail productPreClosureDetail,
+            DepositPreClosureDetail.DepositPreClosureDetailBuilder depositPreClosureDetailBuilder) {
         boolean preClosurePenalApplicable;
         BigDecimal preClosurePenalInterest = null;
         Integer preClosurePenalInterestOnTypeId = null;
@@ -346,7 +346,7 @@ public class DepositProductAssembler {
     }
 
     private void setPreClosureChargeDetails(FixedDepositApplicationPreClosureReq fixedDepositApplicationPreClosureReq,
-                                            DepositPreClosureDetail.DepositPreClosureDetailBuilder depositPreClosureDetailBuilder) {
+            DepositPreClosureDetail.DepositPreClosureDetailBuilder depositPreClosureDetailBuilder) {
         if (fixedDepositApplicationPreClosureReq.isPreClosureChargeApplicableParamSet()) {
             depositPreClosureDetailBuilder.preClosureChargeApplicable(fixedDepositApplicationPreClosureReq.isPreClosureChargeApplicable());
         }
@@ -409,7 +409,7 @@ public class DepositProductAssembler {
     }
 
     public DepositTermDetail assembleDepositTermDetail(final FixedDepositApplicationTermsReq fixedDepositApplicationTermsReq,
-                                                       final DepositTermDetail prodDepositTermDetail) {
+            final DepositTermDetail prodDepositTermDetail) {
 
         Integer minDepositTerm = null;
         Integer maxDepositTerm = null;

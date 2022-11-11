@@ -771,17 +771,17 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
                                 && Objects.equals(amount, that.amount) && Objects.equals(amountPaid, that.amountPaid)
                                 && Objects.equals(amountWaived, that.amountWaived)
                                 && Objects.equals(amountWrittenOff, that.amountWrittenOff)
-                                && Objects.equals(amountOutstanding, that.amountOutstanding)
-                                && Objects.equals(minAmount, that.minAmount)
-                                && Objects.equals(maxAmount, that.maxAmount)
-                                && inactivationDate.compareTo(that.inactivationDate) == 0 ? Boolean.TRUE : Boolean.FALSE;
+                                && Objects.equals(amountOutstanding, that.amountOutstanding) && Objects.equals(minAmount, that.minAmount)
+                                && Objects.equals(maxAmount, that.maxAmount) && inactivationDate.compareTo(that.inactivationDate) == 0
+                                        ? Boolean.TRUE
+                                        : Boolean.FALSE;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(savingsAccount, charge, chargeTime, dueDate, feeOnMonth, feeOnDay, feeInterval, chargeCalculation, percentage,
                 amountPercentageAppliedTo, amount, amountPaid, amountWaived, amountWrittenOff, amountOutstanding, penaltyCharge, paid,
-                waived, status, inactivationDate,minAmount,maxAmount);
+                waived, status, inactivationDate, minAmount, maxAmount);
     }
 
     public BigDecimal calculateWithdralFeeAmount(@NotNull BigDecimal transactionAmount) {
@@ -792,14 +792,13 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
 
             amountPaybale = transactionAmount.multiply(this.percentage).divide(BigDecimal.valueOf(100L), MoneyHelper.getRoundingMode());
             /*
-            * Apply Computation min and max amount
-            * configuration
-            *
-            * */
+             * Apply Computation min and max amount configuration
+             *
+             */
 
-            if(amountPaybale.compareTo(this.maxAmount) > 0){
+            if (amountPaybale.compareTo(this.maxAmount) > 0) {
                 amountPaybale = this.maxAmount;
-            }else if(amountPaybale.compareTo(this.minAmount) != 0){
+            } else if (amountPaybale.compareTo(this.minAmount) != 0) {
                 amountPaybale = this.minAmount;
             }
         }
