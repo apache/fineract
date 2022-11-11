@@ -149,12 +149,12 @@ public final class SavingsEnumerations {
                 optionData = new SavingsAccountTransactionEnumData(
                         SavingsAccountTransactionType.ACCRUAL_INTEREST_POSTING.getValue().longValue(),
                         SavingsAccountTransactionType.ACCRUAL_INTEREST_POSTING.getCode(), "Accrual Interest posting");
-                break;
+            break;
             case OVERDRAFT_ACCRUAL_INTEREST:
                 optionData = new SavingsAccountTransactionEnumData(
                         SavingsAccountTransactionType.OVERDRAFT_ACCRUAL_INTEREST.getValue().longValue(),
                         SavingsAccountTransactionType.OVERDRAFT_ACCRUAL_INTEREST.getCode(), "Overdraft Accrual posting");
-                break;
+            break;
             case WITHDRAWAL_FEE:
                 optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.WITHDRAWAL_FEE.getValue().longValue(),
                         SavingsAccountTransactionType.WITHDRAWAL_FEE.getCode(), "Withdrawal fee");
@@ -397,7 +397,7 @@ public final class SavingsEnumerations {
             case TENURE:
                 optionData = new EnumOptionData(SavingsPostingInterestPeriodType.TENURE.getValue().longValue(),
                         codePrefix + SavingsPostingInterestPeriodType.TENURE.getCode(), "Per Tenure");
-                break;
+            break;
         }
 
         return optionData;
@@ -499,7 +499,7 @@ public final class SavingsEnumerations {
             case ACTUAL:
                 optionData = new EnumOptionData(SavingsInterestCalculationDaysInYearType.ACTUAL.getValue().longValue(),
                         SavingsInterestCalculationDaysInYearType.ACTUAL.getCode(), "Actual Days");
-                break;
+            break;
             case DAYS_360:
                 optionData = new EnumOptionData(SavingsInterestCalculationDaysInYearType.DAYS_360.getValue().longValue(),
                         SavingsInterestCalculationDaysInYearType.DAYS_360.getCode(), "360 Days");
@@ -509,7 +509,7 @@ public final class SavingsEnumerations {
                         SavingsInterestCalculationDaysInYearType.DAYS_365.getCode(), "365 Days");
             break;
             default:
-                break;
+            break;
         }
 
         return optionData;

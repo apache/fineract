@@ -18,6 +18,41 @@
  */
 package org.apache.fineract.portfolio.savings.data;
 
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.daysToDormancyParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.daysToEscheatParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.daysToInactiveParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.descriptionParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.digitsAfterDecimalParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.feeAmountParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.feeOnMonthDayParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.inMultiplesOfParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestCalculationDaysInYearTypeParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestCalculationTypeParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestCompoundingPeriodTypeParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestPostingPeriodTypeParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.isDormancyTrackingActiveParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.isInterestPostingConfigUpdateParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lienAllowedParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.maxAllowedLienLimitParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minBalanceForInterestCalculationParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minOverdraftForInterestCalculationParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minRequiredOpeningBalanceParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nameParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateOverdraftParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.numberOfCreditTransactionsParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.numberOfDebitTransactionsParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.overdraftLimitParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.shortNameParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -50,41 +85,6 @@ import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.daysToDormancyParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.daysToEscheatParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.daysToInactiveParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.descriptionParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.digitsAfterDecimalParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.feeAmountParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.feeOnMonthDayParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.inMultiplesOfParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestCalculationDaysInYearTypeParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestCalculationTypeParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestCompoundingPeriodTypeParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestPostingPeriodTypeParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.isDormancyTrackingActiveParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lienAllowedParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.maxAllowedLienLimitParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minBalanceForInterestCalculationParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minOverdraftForInterestCalculationParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minRequiredOpeningBalanceParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nameParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateOverdraftParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.overdraftLimitParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.shortNameParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.isInterestPostingConfigUpdateParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.numberOfCreditTransactionsParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.numberOfDebitTransactionsParamName;
-
 @Component
 public class SavingsProductDataValidator {
 
@@ -111,7 +111,8 @@ public class SavingsProductDataValidator {
             SavingsApiConstants.minRequiredBalanceParamName, SavingsApiConstants.enforceMinRequiredBalanceParamName,
             SavingsApiConstants.maxAllowedLienLimitParamName, SavingsApiConstants.lienAllowedParamName,
             minBalanceForInterestCalculationParamName, withHoldTaxParamName, taxGroupIdParamName, isInterestPostingConfigUpdateParamName,
-            numberOfCreditTransactionsParamName, numberOfDebitTransactionsParamName,"receivablePenaltyAccountId","receivableInterestAccountId","receivableFeeAccountId","interestPayableAccountId"));
+            numberOfCreditTransactionsParamName, numberOfDebitTransactionsParamName, "receivablePenaltyAccountId",
+            "receivableInterestAccountId", "receivableFeeAccountId", "interestPayableAccountId"));
 
     @Autowired
     public SavingsProductDataValidator(final FromJsonHelper fromApiJsonHelper) {
@@ -266,13 +267,13 @@ public class SavingsProductDataValidator {
 
             final Long receivablePenaltyAccountId = this.fromApiJsonHelper
                     .extractLongNamed(SavingProductAccountingParams.PENALTIES_RECEIVABLE.getValue(), element);
-            baseDataValidator.reset().parameter(SavingProductAccountingParams.PENALTIES_RECEIVABLE.getValue()).value(receivablePenaltyAccountId)
-                    .notNull().integerGreaterThanZero();
+            baseDataValidator.reset().parameter(SavingProductAccountingParams.PENALTIES_RECEIVABLE.getValue())
+                    .value(receivablePenaltyAccountId).notNull().integerGreaterThanZero();
 
             final Long receivableInterestAccountId = this.fromApiJsonHelper
                     .extractLongNamed(SavingProductAccountingParams.INTEREST_RECEIVABLE.getValue(), element);
-            baseDataValidator.reset().parameter(SavingProductAccountingParams.INTEREST_RECEIVABLE.getValue()).value(receivableInterestAccountId)
-                    .notNull().integerGreaterThanZero();
+            baseDataValidator.reset().parameter(SavingProductAccountingParams.INTEREST_RECEIVABLE.getValue())
+                    .value(receivableInterestAccountId).notNull().integerGreaterThanZero();
 
             final Long receivableFeeAccountId = this.fromApiJsonHelper
                     .extractLongNamed(SavingProductAccountingParams.FEES_RECEIVABLE.getValue(), element);
@@ -296,13 +297,13 @@ public class SavingsProductDataValidator {
                     .ignoreIfNull().zeroOrPositiveAmount();
         }
 
-
         validateTaxWithHoldingParams(baseDataValidator, element, true);
         validateLienParams(baseDataValidator, element);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    private void validateCashBasedAccountingGlsAreMandatory(DataValidatorBuilder baseDataValidator, JsonElement element, Boolean isDormancyActive) {
+    private void validateCashBasedAccountingGlsAreMandatory(DataValidatorBuilder baseDataValidator, JsonElement element,
+            Boolean isDormancyActive) {
         final Long savingsControlAccountId = this.fromApiJsonHelper
                 .extractLongNamed(SavingProductAccountingParams.SAVINGS_CONTROL.getValue(), element);
         baseDataValidator.reset().parameter(SavingProductAccountingParams.SAVINGS_CONTROL.getValue()).value(savingsControlAccountId)
@@ -315,13 +316,13 @@ public class SavingsProductDataValidator {
 
         final Long transfersInSuspenseAccountId = this.fromApiJsonHelper
                 .extractLongNamed(SavingProductAccountingParams.TRANSFERS_SUSPENSE.getValue(), element);
-        baseDataValidator.reset().parameter(SavingProductAccountingParams.TRANSFERS_SUSPENSE.getValue())
-                .value(transfersInSuspenseAccountId).notNull().integerGreaterThanZero();
+        baseDataValidator.reset().parameter(SavingProductAccountingParams.TRANSFERS_SUSPENSE.getValue()).value(transfersInSuspenseAccountId)
+                .notNull().integerGreaterThanZero();
 
         final Long interestOnSavingsAccountId = this.fromApiJsonHelper
                 .extractLongNamed(SavingProductAccountingParams.INTEREST_ON_SAVINGS.getValue(), element);
-        baseDataValidator.reset().parameter(SavingProductAccountingParams.INTEREST_ON_SAVINGS.getValue())
-                .value(interestOnSavingsAccountId).notNull().integerGreaterThanZero();
+        baseDataValidator.reset().parameter(SavingProductAccountingParams.INTEREST_ON_SAVINGS.getValue()).value(interestOnSavingsAccountId)
+                .notNull().integerGreaterThanZero();
 
         final Long incomeFromFeeId = this.fromApiJsonHelper.extractLongNamed(SavingProductAccountingParams.INCOME_FROM_FEES.getValue(),
                 element);
@@ -351,8 +352,8 @@ public class SavingsProductDataValidator {
         if (null != isDormancyActive && isDormancyActive) {
             final Long escheatLiabilityAccountId = this.fromApiJsonHelper
                     .extractLongNamed(SavingProductAccountingParams.ESCHEAT_LIABILITY.getValue(), element);
-            baseDataValidator.reset().parameter(SavingProductAccountingParams.ESCHEAT_LIABILITY.getValue())
-                    .value(escheatLiabilityAccountId).notNull().integerGreaterThanZero();
+            baseDataValidator.reset().parameter(SavingProductAccountingParams.ESCHEAT_LIABILITY.getValue()).value(escheatLiabilityAccountId)
+                    .notNull().integerGreaterThanZero();
         }
 
         validatePaymentChannelFundSourceMappings(baseDataValidator, element);
@@ -591,6 +592,7 @@ public class SavingsProductDataValidator {
     private boolean isCashBasedAccounting(final Integer accountingRuleType) {
         return AccountingRuleType.CASH_BASED.getValue().equals(accountingRuleType);
     }
+
     private boolean isAccrualAccounting(final Integer accountingRuleType) {
         return AccountingRuleType.ACCRUAL_PERIODIC.getValue().equals(accountingRuleType);
     }

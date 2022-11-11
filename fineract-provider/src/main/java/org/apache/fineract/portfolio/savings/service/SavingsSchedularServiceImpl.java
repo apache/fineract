@@ -43,11 +43,11 @@ import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
+import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -282,11 +282,12 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
 
         List<SavingsProduct> products = this.savingsProductRepository.findAll();
         log.info("Reading Savings Account Data!");
-        for (SavingsProduct product :products) {
+        for (SavingsProduct product : products) {
             List<SavingsAccount> savingsAccounts = this.savingsAccountRepository.findByProductIdAndStatus(product.getId(),
-                    ACTIVE.getValue(), product.getNumOfCreditTransaction(), product.getNumOfDebitTransaction(), product.minBalanceForInterestCalculation());
-            if(savingsAccounts.size() > 0){
-                if(product.isInterestPostingUpdate()) {
+                    ACTIVE.getValue(), product.getNumOfCreditTransaction(), product.getNumOfDebitTransaction(),
+                    product.minBalanceForInterestCalculation());
+            if (savingsAccounts.size() > 0) {
+                if (product.isInterestPostingUpdate()) {
                     for (SavingsAccount sav : savingsAccounts) {
                         sav.setNumOfCreditTransaction(product.getNumOfCreditTransaction());
                         sav.setNumOfDebitTransaction(product.getNumOfDebitTransaction());

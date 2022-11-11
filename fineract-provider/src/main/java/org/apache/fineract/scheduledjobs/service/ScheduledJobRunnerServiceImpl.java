@@ -18,6 +18,15 @@
  */
 package org.apache.fineract.scheduledjobs.service;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import org.apache.fineract.accounting.glaccount.domain.TrialBalance;
 import org.apache.fineract.accounting.glaccount.domain.TrialBalanceRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
@@ -42,6 +51,11 @@ import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.DepositAccountUtils;
 import org.apache.fineract.portfolio.savings.data.DepositAccountData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountAnnualFeeData;
+import org.apache.fineract.portfolio.savings.service.DepositAccountReadPlatformService;
+import org.apache.fineract.portfolio.savings.service.DepositAccountWritePlatformService;
+import org.apache.fineract.portfolio.savings.service.SavingsAccountChargeReadPlatformService;
+import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
+import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
 import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountDividendReadPlatformService;
 import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountSchedularService;
 import org.slf4j.Logger;
@@ -56,23 +70,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
-import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
-import org.apache.fineract.portfolio.savings.service.SavingsAccountChargeReadPlatformService;
-import org.apache.fineract.portfolio.savings.service.DepositAccountReadPlatformService;
-import org.apache.fineract.portfolio.savings.service.DepositAccountWritePlatformService;
-import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
-
 
 @Service(value = "scheduledJobRunnerService")
 public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService {
@@ -105,7 +102,8 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             final ShareAccountSchedularService shareAccountSchedularService,
             final TrialBalanceRepositoryWrapper trialBalanceRepositoryWrapper, @Lazy final JobRegisterService jobRegisterService,
             final ScheduledJobDetailRepository scheduledJobDetailsRepository, final FineractProperties fineractProperties,
-            DatabaseSpecificSQLGenerator sqlGenerator, DatabaseTypeResolver databaseTypeResolver,final SavingsAccountReadPlatformService savingsAccountReadPlatformService,final JobExecuter jobExecuter) {
+            DatabaseSpecificSQLGenerator sqlGenerator, DatabaseTypeResolver databaseTypeResolver,
+            final SavingsAccountReadPlatformService savingsAccountReadPlatformService, final JobExecuter jobExecuter) {
         this.dataSourceServiceFactory = dataSourceServiceFactory;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
         this.savingsAccountChargeReadPlatformService = savingsAccountChargeReadPlatformService;
@@ -424,7 +422,6 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
     }
 
-
     private class SavingsAccrualInterestRunnable implements Runnable {
 
         final FineractPlatformTenant tenant;
@@ -457,14 +454,15 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     public void applyAccrualInterestForSavings(LocalDate jobRunDate) {
         final List<Long> activeSavingsAccounts = new ArrayList<>();
 
-            activeSavingsAccounts.addAll(this.savingsAccountReadPlatformService.retrieveActiveSavingsAccrualAccounts(100l));
-            //WIP To Support AccountType 200 and 300
+        activeSavingsAccounts.addAll(this.savingsAccountReadPlatformService.retrieveActiveSavingsAccrualAccounts(100l));
+        // WIP To Support AccountType 200 and 300
 
-            JobRunner<List<Long>> runner = new SavingsAccrualInterestJobRunner(jobRunDate);
-            this.jobExecuter.executeJob(activeSavingsAccounts, runner);
+        JobRunner<List<Long>> runner = new SavingsAccrualInterestJobRunner(jobRunDate);
+        this.jobExecuter.executeJob(activeSavingsAccounts, runner);
     }
 
     private class SavingsAccrualInterestJobRunner implements JobRunner<List<Long>> {
+
         final Integer maxNumberOfRetries;
         final Integer maxIntervalBetweenRetries;
         final LocalDate jobRunDate;
@@ -481,17 +479,17 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         }
 
     }
-    //WIP On Posting Interest here
+
+    // WIP On Posting Interest here
     private void postAccrualInterest(final StringBuilder sb, Integer maxNumberOfRetries, Integer maxIntervalBetweenRetries,
-                                     List<Long> savingIds, LocalDate jobRunDate) {
+            List<Long> savingIds, LocalDate jobRunDate) {
         final String errorMessage = "Post Accruals failed for account:";
 
         for (Long savingAccount : savingIds) {
             if (savingAccount == 0) {
                 continue;
             }
-            LOG.info(
-                    "Accruals Saving ID " + savingAccount + " which is " + savingIds.indexOf(savingAccount) + " of " + savingIds.size());
+            LOG.info("Accruals Saving ID " + savingAccount + " which is " + savingIds.indexOf(savingAccount) + " of " + savingIds.size());
             Integer numberOfRetries = 0;
             while (numberOfRetries <= maxNumberOfRetries) {
                 try {
@@ -500,8 +498,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
                 } catch (CannotAcquireLockException | ObjectOptimisticLockingFailureException exception) {
                     LOG.info("Recalulate interest job has been retried  " + numberOfRetries + " time(s)");
                     /***
-                     * Fail if the transaction has been retired for
-                     * maxNumberOfRetries
+                     * Fail if the transaction has been retired for maxNumberOfRetries
                      **/
                     if (numberOfRetries >= maxNumberOfRetries) {
                         LOG.warn("Recalulate interest job has been retried for the max allowed attempts of " + numberOfRetries
@@ -511,8 +508,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
                         break;
                     }
                     /***
-                     * Else sleep for a random time (between 1 to 10 seconds)
-                     * and continue
+                     * Else sleep for a random time (between 1 to 10 seconds) and continue
                      **/
                     try {
                         Random random = new Random();

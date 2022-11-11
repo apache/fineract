@@ -115,58 +115,58 @@ public final class SavingsHelper {
         Collections.sort(biannualDates);
         boolean isEndDateSet = false;
         if (interestPostingPeriodType != null) {
-        switch (interestPostingPeriodType) {
-            case INVALID:
-            break;
-            case DAILY:
-                // produce period end date on current day
-                periodEndDate = periodStartDate;
-            break;
-            case MONTHLY:
-                // produce period end date on last day of current month
-                periodEndDate = periodStartDate.with(TemporalAdjusters.lastDayOfMonth());
-            break;
-            case QUATERLY:
-                for (LocalDate quarterlyDate : quarterlyDates) {
-                    if (quarterlyDate.isAfter(periodStartDate)) {
-                        periodEndDate = quarterlyDate;
-                        isEndDateSet = true;
-                        break;
-                    }
-                }
-
-                if (!isEndDateSet) {
-                    periodEndDate = quarterlyDates.get(0).plusYears(1).with(TemporalAdjusters.lastDayOfMonth());
-                }
-            break;
-            case BIANNUAL:
-                for (LocalDate biannualDate : biannualDates) {
-                    if (biannualDate.isAfter(periodStartDate)) {
-                        periodEndDate = biannualDate;
-                        isEndDateSet = true;
-                        break;
-                    }
-                }
-
-                if (!isEndDateSet) {
-                    periodEndDate = biannualDates.get(0).plusYears(1).with(TemporalAdjusters.lastDayOfMonth());
-                }
-            break;
-            case ANNUAL:
-                if (financialYearBeginningMonth < monthOfYear) {
-                    periodEndDate = periodStartDate.withMonth(financialYearBeginningMonth);
-                    periodEndDate = periodEndDate.plusYears(1);
-                } else {
-                    periodEndDate = periodStartDate.withMonth(financialYearBeginningMonth);
-                }
-                periodEndDate = periodEndDate.with(TemporalAdjusters.lastDayOfMonth());
-            break;
-            default:
+            switch (interestPostingPeriodType) {
+                case INVALID:
                 break;
-        }
-        }else {
-                periodEndDate = periodStartDate;
+                case DAILY:
+                    // produce period end date on current day
+                    periodEndDate = periodStartDate;
+                break;
+                case MONTHLY:
+                    // produce period end date on last day of current month
+                    periodEndDate = periodStartDate.with(TemporalAdjusters.lastDayOfMonth());
+                break;
+                case QUATERLY:
+                    for (LocalDate quarterlyDate : quarterlyDates) {
+                        if (quarterlyDate.isAfter(periodStartDate)) {
+                            periodEndDate = quarterlyDate;
+                            isEndDateSet = true;
+                            break;
+                        }
+                    }
+
+                    if (!isEndDateSet) {
+                        periodEndDate = quarterlyDates.get(0).plusYears(1).with(TemporalAdjusters.lastDayOfMonth());
+                    }
+                break;
+                case BIANNUAL:
+                    for (LocalDate biannualDate : biannualDates) {
+                        if (biannualDate.isAfter(periodStartDate)) {
+                            periodEndDate = biannualDate;
+                            isEndDateSet = true;
+                            break;
+                        }
+                    }
+
+                    if (!isEndDateSet) {
+                        periodEndDate = biannualDates.get(0).plusYears(1).with(TemporalAdjusters.lastDayOfMonth());
+                    }
+                break;
+                case ANNUAL:
+                    if (financialYearBeginningMonth < monthOfYear) {
+                        periodEndDate = periodStartDate.withMonth(financialYearBeginningMonth);
+                        periodEndDate = periodEndDate.plusYears(1);
+                    } else {
+                        periodEndDate = periodStartDate.withMonth(financialYearBeginningMonth);
+                    }
+                    periodEndDate = periodEndDate.with(TemporalAdjusters.lastDayOfMonth());
+                break;
+                default:
+                break;
             }
+        } else {
+            periodEndDate = periodStartDate;
+        }
 
         // interest posting always occurs on next day after the period end date.
         periodEndDate = periodEndDate.plusDays(1);
@@ -186,9 +186,10 @@ public final class SavingsHelper {
     public Collection<Long> fetchPostInterestTransactionIds(Long accountId, LocalDate pivotDate) {
         return this.accountTransfersReadPlatformService.fetchPostInterestTransactionIdsWithPivotDate(accountId, pivotDate);
     }
+
     public List<LocalDateInterval> determineInterestPostingPeriods(final LocalDate startInterestCalculationLocalDate,
-                                                                   final LocalDate interestPostingUpToDate, final SavingsPostingInterestPeriodType postingPeriodType,
-                                                                   final Integer financialYearBeginningMonth, List<LocalDate> postInterestAsOn, LocalDate maturityDate) {
+            final LocalDate interestPostingUpToDate, final SavingsPostingInterestPeriodType postingPeriodType,
+            final Integer financialYearBeginningMonth, List<LocalDate> postInterestAsOn, LocalDate maturityDate) {
 
         final List<LocalDateInterval> postingPeriods = new ArrayList<>();
         LocalDate periodStartDate = startInterestCalculationLocalDate;
@@ -205,8 +206,8 @@ public final class SavingsHelper {
             LocalDate interestPostingLocalDate = determineInterestPostingPeriodEndDateFrom(periodStartDate, postingPeriodType,
                     interestPostingUpToDate, financialYearBeginningMonth);
 
-            if(maturityDate != null) {
-                if(interestPostingLocalDate.isAfter(maturityDate)) {
+            if (maturityDate != null) {
+                if (interestPostingLocalDate.isAfter(maturityDate)) {
                     interestPostingLocalDate = maturityDate;
                 }
             }
@@ -240,8 +241,9 @@ public final class SavingsHelper {
 
         return postingPeriods;
     }
+
     public List<Money> calculateInterestForAllPostingPeriods(final MonetaryCurrency currency, final List<PostingPeriod> allPeriods,
-                                                             LocalDate accountLockedUntil, Boolean immediateWithdrawalOfInterest, Boolean ignorecompounding) {
+            LocalDate accountLockedUntil, Boolean immediateWithdrawalOfInterest, Boolean ignorecompounding) {
         return this.compoundInterestHelper.calculateInterestForAllPostingPeriods(currency, allPeriods, accountLockedUntil,
                 immediateWithdrawalOfInterest, ignorecompounding);
     }

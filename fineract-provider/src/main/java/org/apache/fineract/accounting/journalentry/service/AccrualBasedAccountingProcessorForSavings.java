@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.accounting.journalentry.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
 import org.apache.fineract.accounting.common.AccountingConstants.ACCRUAL_ACCOUNTS_FOR_SAVINGS;
 import org.apache.fineract.accounting.common.AccountingConstants.FINANCIAL_ACTIVITY;
@@ -27,10 +30,6 @@ import org.apache.fineract.accounting.journalentry.data.SavingsTransactionDTO;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
 
 @Component
 public class AccrualBasedAccountingProcessorForSavings implements AccountingProcessorForSavings {
@@ -166,8 +165,7 @@ public class AccrualBasedAccountingProcessorForSavings implements AccountingProc
                         savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal);
             }
             /**
-             * Handle Interest Applications and reversals of Interest
-             * Applications
+             * Handle Interest Applications and reversals of Interest Applications
              **/
             else if (savingsTransactionDTO.getTransactionType().isInterestPosting() && savingsTransactionDTO.isOverdraftTransaction()) {
                 // Post journal entry if earned interest amount is greater than
@@ -187,8 +185,7 @@ public class AccrualBasedAccountingProcessorForSavings implements AccountingProc
             }
 
             /**
-             * Handle Accrual Interest Applications and reversals of Interest
-             * Applications
+             * Handle Accrual Interest Applications and reversals of Interest Applications
              **/
             else if (savingsTransactionDTO.getTransactionType().isAccrualInterestPosting()) {
                 // Post journal entry if earned interest amount is greater than
@@ -280,13 +277,13 @@ public class AccrualBasedAccountingProcessorForSavings implements AccountingProc
             else if (savingsTransactionDTO.getTransactionType().isOverdraftInterest()) {
                 this.helper.createAccrualBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
                         ACCRUAL_ACCOUNTS_FOR_SAVINGS.OVERDRAFT_PORTFOLIO_CONTROL.getValue(),
-                        ACCRUAL_ACCOUNTS_FOR_SAVINGS.INTEREST_RECEIVABLE.getValue(), savingsProductId, paymentTypeId, savingsId, transactionId,
-                        transactionDate, amount, isReversal);
+                        ACCRUAL_ACCOUNTS_FOR_SAVINGS.INTEREST_RECEIVABLE.getValue(), savingsProductId, paymentTypeId, savingsId,
+                        transactionId, transactionDate, amount, isReversal);
             } else if (savingsTransactionDTO.getTransactionType().isOverdraftAccrualInterest()) {
                 this.helper.createAccrualBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
                         ACCRUAL_ACCOUNTS_FOR_SAVINGS.INTEREST_RECEIVABLE.getValue(),
-                        ACCRUAL_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_INTEREST.getValue(), savingsProductId, paymentTypeId, savingsId, transactionId,
-                        transactionDate, amount, isReversal);
+                        ACCRUAL_ACCOUNTS_FOR_SAVINGS.INCOME_FROM_INTEREST.getValue(), savingsProductId, paymentTypeId, savingsId,
+                        transactionId, transactionDate, amount, isReversal);
             } else if (savingsTransactionDTO.getTransactionType().isWrittenOff()) {
                 this.helper.createAccrualBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
                         ACCRUAL_ACCOUNTS_FOR_SAVINGS.LOSSES_WRITTEN_OFF.getValue(),

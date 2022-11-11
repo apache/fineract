@@ -68,6 +68,7 @@ import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountApplicationTimelineData;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountBlockNarrationHistoryData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountChargeData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountStatusEnumData;
@@ -76,7 +77,6 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountSummaryData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
-import org.apache.fineract.portfolio.savings.data.SavingsAccountBlockNarrationHistoryData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountChargesPaidByData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
@@ -360,8 +360,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sp.days_to_escheat as daysToEscheat, ");
             sqlBuilder.append("sp.num_of_credit_transaction as numOfCreditTransaction,");
             sqlBuilder.append("sp.num_of_debit_transaction as numOfDebitTransaction,");
-            //sqlBuilder.append("sa.block_narration_id as blockNarrationId, ");
-            //sqlBuilder.append("cvn.code_value as blockNarrationValue, ");
+            // sqlBuilder.append("sa.block_narration_id as blockNarrationId, ");
+            // sqlBuilder.append("cvn.code_value as blockNarrationValue, ");
             sqlBuilder.append("sp.accounting_type as accountingType, ");
             sqlBuilder.append("tr.id as transactionId, tr.transaction_type_enum as transactionType, ");
             sqlBuilder.append("tr.transaction_date as transactionDate, tr.amount as transactionAmount,");
@@ -590,8 +590,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     final boolean enforceMinRequiredBalance = rs.getBoolean("enforceMinRequiredBalance");
                     final BigDecimal maxAllowedLienLimit = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "maxAllowedLienLimit");
                     final boolean lienAllowed = rs.getBoolean("lienAllowed");
-                    //final Long blockNarrationId = JdbcSupport.getLong(rs, "blockNarrationId");
-                   // final String blockNarrationValue = rs.getString("blockNarrationValue");
+                    // final Long blockNarrationId = JdbcSupport.getLong(rs, "blockNarrationId");
+                    // final String blockNarrationValue = rs.getString("blockNarrationValue");
 
                     final CodeValueData blockNarration = null;
                     final Long numOfCreditTransaction = JdbcSupport.getLong(rs, "numOfCreditTransaction");
@@ -1084,7 +1084,6 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                 taxGroupData = TaxGroupData.lookup(taxGroupId, taxGroupName);
             }
 
-
             final Long blockNarrationId = JdbcSupport.getLong(rs, "blockNarrationId");
             final String blockNarrationValue = rs.getString("blockNarrationValue");
 
@@ -1100,7 +1099,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     withdrawalFeeForTransfers, summary, allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance,
                     maxAllowedLienLimit, lienAllowed, minBalanceForInterestCalculation, onHoldFunds, nominalAnnualInterestRateOverdraft,
                     minOverdraftForInterestCalculation, withHoldTax, taxGroupData, lastActiveTransactionDate, isDormancyTrackingActive,
-                    daysToInactive, daysToDormancy, daysToEscheat, onHoldAmount, numOfCreditTransaction, numOfDebitTransaction,  blockNarration);
+                    daysToInactive, daysToDormancy, daysToEscheat, onHoldAmount, numOfCreditTransaction, numOfDebitTransaction,
+                    blockNarration);
         }
     }
 
@@ -1300,14 +1300,19 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
         return this.jdbcTemplate.query(sql, this.transactionsMapper, new Object[] { savingsId, depositAccountType.getValue() }); // NOSONAR
     }
+
     @Override
-    public Collection<SavingsAccountTransactionData> retrieveAccrualTransactions(final Long savingsId, DepositAccountType depositAccountType) {
+    public Collection<SavingsAccountTransactionData> retrieveAccrualTransactions(final Long savingsId,
+            DepositAccountType depositAccountType) {
 
         final String sql = "select " + this.transactionsMapper.schema()
                 + " where sa.id = ? and sa.deposit_type_enum = ? AND transaction_type_enum in (?,?)  order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC";
 
-        return this.jdbcTemplate.query(sql, this.transactionsMapper, new Object[] { savingsId, depositAccountType.getValue(),SavingsAccountTransactionType.ACCRUAL_INTEREST_POSTING.getValue(),SavingsAccountTransactionType.OVERDRAFT_ACCRUAL_INTEREST.getValue() });
+        return this.jdbcTemplate.query(sql, this.transactionsMapper,
+                new Object[] { savingsId, depositAccountType.getValue(), SavingsAccountTransactionType.ACCRUAL_INTEREST_POSTING.getValue(),
+                        SavingsAccountTransactionType.OVERDRAFT_ACCRUAL_INTEREST.getValue() });
     }
+
     @Override
     public SavingsAccountTransactionData retrieveSavingsTransaction(final Long savingsId, final Long transactionId,
             DepositAccountType depositAccountType) {
@@ -1695,7 +1700,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     withdrawalFeeForTransfers, summary, allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance,
                     maxAllowedLienLimit, lienAllowed, minBalanceForInterestCalculation, onHoldFunds, nominalAnnualInterestRateOverdraft,
                     minOverdraftForInterestCalculation, withHoldTax, taxGroupData, lastActiveTransactionDate, isDormancyTrackingActive,
-                    daysToInactive, daysToDormancy, daysToEscheat, savingsAmountOnHold, numOfCreditTransaction, numOfDebitTransaction, null);
+                    daysToInactive, daysToDormancy, daysToEscheat, savingsAmountOnHold, numOfCreditTransaction, numOfDebitTransaction,
+                    null);
         }
     }
 

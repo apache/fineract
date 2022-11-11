@@ -67,6 +67,7 @@ import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountBlockNarrationHistoryData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountChargeData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
@@ -78,7 +79,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import org.apache.fineract.portfolio.savings.data.SavingsAccountBlockNarrationHistoryData;
 
 @Path("/savingsaccounts")
 @Component
@@ -245,7 +245,8 @@ public class SavingsAccountsApiResource {
         if (!associationParameters.isEmpty()) {
 
             if (associationParameters.contains("all")) {
-                associationParameters.addAll(Arrays.asList(SavingsApiConstants.transactions, SavingsApiConstants.charges, SavingsApiConstants.blockNarrations));
+                associationParameters.addAll(
+                        Arrays.asList(SavingsApiConstants.transactions, SavingsApiConstants.charges, SavingsApiConstants.blockNarrations));
             }
 
             if (associationParameters.contains(SavingsApiConstants.transactions)) {
@@ -274,7 +275,7 @@ public class SavingsAccountsApiResource {
                 }
             }
 
-            if(associationParameters.contains(SavingsApiConstants.blockNarrations)) {
+            if (associationParameters.contains(SavingsApiConstants.blockNarrations)) {
                 mandatoryResponseParameters.add(SavingsApiConstants.blockNarrations);
                 blockNarrationsOptions = this.codeValueReadPlatformService
                         .retrieveCodeValuesByCode(AccountingConstants.BLOCK_UNBLOCK_OPTION_CODE_NAME);
@@ -290,7 +291,8 @@ public class SavingsAccountsApiResource {
                     savingsAccount.productId(), staffInSelectedOfficeOnly);
         }
 
-        return SavingsAccountData.withTemplateOptions(savingsAccount, templateData, transactions, charges, blockNarrationsOptions, blockNarrationHistoryData);
+        return SavingsAccountData.withTemplateOptions(savingsAccount, templateData, transactions, charges, blockNarrationsOptions,
+                blockNarrationHistoryData);
     }
 
     @PUT
@@ -510,7 +512,7 @@ public class SavingsAccountsApiResource {
         } else if (is(commandParam, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT)) {
             final CommandWrapper commandRequest = builder.unblockSavingsAccount(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        }else if (is(commandParam, "postAccrualInterestAsOn")) {
+        } else if (is(commandParam, "postAccrualInterestAsOn")) {
             final CommandWrapper commandRequest = builder.savingsAccountAccrualInterestPosting(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
@@ -519,7 +521,7 @@ public class SavingsAccountsApiResource {
             //
             throw new UnrecognizedQueryParamException("command", commandParam,
                     new Object[] { "reject", "withdrawnByApplicant", "approve", "undoapproval", "activate", "calculateInterest",
-                            "postInterest","postAccrualInterestAsOn", "close", "assignSavingsOfficer", "unassignSavingsOfficer",
+                            "postInterest", "postAccrualInterestAsOn", "close", "assignSavingsOfficer", "unassignSavingsOfficer",
                             SavingsApiConstants.COMMAND_BLOCK_DEBIT, SavingsApiConstants.COMMAND_UNBLOCK_DEBIT,
                             SavingsApiConstants.COMMAND_BLOCK_CREDIT, SavingsApiConstants.COMMAND_UNBLOCK_CREDIT,
                             SavingsApiConstants.COMMAND_BLOCK_ACCOUNT, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT });

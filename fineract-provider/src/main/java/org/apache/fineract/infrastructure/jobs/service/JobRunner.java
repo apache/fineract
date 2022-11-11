@@ -18,10 +18,8 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
-
-
 public interface JobRunner<T> {
 
     void runJob(final T jobDetails, final StringBuilder sb);
-    
+
 }

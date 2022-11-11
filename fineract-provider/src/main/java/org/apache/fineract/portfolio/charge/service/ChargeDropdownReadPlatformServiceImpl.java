@@ -87,7 +87,7 @@ public class ChargeDropdownReadPlatformServiceImpl implements ChargeDropdownRead
     public List<EnumOptionData> retrieveLoanCollectionTimeTypes() {
         return Arrays.asList(chargeTimeType(ChargeTimeType.DISBURSEMENT), chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE),
                 chargeTimeType(ChargeTimeType.INSTALMENT_FEE), chargeTimeType(ChargeTimeType.OVERDUE_INSTALLMENT),
-                chargeTimeType(ChargeTimeType.TRANCHE_DISBURSEMENT),  chargeTimeType(ChargeTimeType.DISBURSE_TO_SAVINGS));
+                chargeTimeType(ChargeTimeType.TRANCHE_DISBURSEMENT), chargeTimeType(ChargeTimeType.DISBURSE_TO_SAVINGS));
     }
 
     @Override

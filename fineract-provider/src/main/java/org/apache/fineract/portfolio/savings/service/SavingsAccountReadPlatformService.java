@@ -45,6 +45,7 @@ public interface SavingsAccountReadPlatformService {
     SavingsAccountTransactionData retrieveDepositTransactionTemplate(Long savingsId, DepositAccountType depositAccountType);
 
     Collection<SavingsAccountTransactionData> retrieveAllTransactions(Long savingsId, DepositAccountType depositAccountType);
+
     Collection<SavingsAccountTransactionData> retrieveAccrualTransactions(Long savingsId, DepositAccountType depositAccountType);
 
     // Collection<SavingsAccountAnnualFeeData>
@@ -70,7 +71,9 @@ public interface SavingsAccountReadPlatformService {
             Long maxSavingsId);
 
     List<SavingsAccountTransactionData> retrieveAllTransactionData(List<String> refNo);
+
     Collection<SavingsAccountBlockNarrationHistoryData> retrieveSavingsAccountBlockNarrationHistory(Long savingsId);
+
     List<Long> retrieveActiveSavingsAccrualAccounts(Long accountType);
 
 }

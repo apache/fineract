@@ -181,6 +181,7 @@ public class SavingsAccountTransactionEnumData implements Serializable {
     public boolean isWithdrawalFee() {
         return this.value.equals(SavingsAccountTransactionType.WITHDRAWAL_FEE.getValue().toString());
     }
+
     public boolean isAccrualInterestPosting() {
         return this.accrualInterestPosting;
     }
@@ -188,6 +189,7 @@ public class SavingsAccountTransactionEnumData implements Serializable {
     public boolean isOverdraftAccrualInterest() {
         return this.overdraftAccrualInterest;
     }
+
     public boolean isWrittenOff() {
         return this.writtenOff;
     }

@@ -40,7 +40,7 @@ public class AccountingProcessorForSavingsFactory {
         if (savingsDTO.isCashBasedAccountingEnabled()) {
             accountingProcessorForSavings = this.applicationContext.getBean("cashBasedAccountingProcessorForSavings",
                     AccountingProcessorForSavings.class);
-        }else if (savingsDTO.isAccrualBasedAccountingEnabled()) {
+        } else if (savingsDTO.isAccrualBasedAccountingEnabled()) {
             accountingProcessorForSavings = this.applicationContext.getBean("accrualBasedAccountingProcessorForSavings",
                     AccountingProcessorForSavings.class);
         }

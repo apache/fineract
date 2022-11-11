@@ -168,10 +168,9 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
             }
         }
 
-
         ClientFamilyMembers clientFamilyMembers = ClientFamilyMembers.fromJson(client, firstName, middleName, lastName, qualification,
-                mobileNumber, age, isDependent, relationship, maritalStatus, gender, dateOfBirth, profession, 
-                email, addressTypeIdObj, address1, address2, address3, cityIdObj, stateIdObj, countryIdObj, postalCode);
+                mobileNumber, age, isDependent, relationship, maritalStatus, gender, dateOfBirth, profession, email, addressTypeIdObj,
+                address1, address2, address3, cityIdObj, stateIdObj, countryIdObj, postalCode);
 
         this.clientFamilyRepository.saveAndFlush(clientFamilyMembers);
 
@@ -286,8 +285,8 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
 
             CodeValue addressTypeIdCodeValue = null;
             if (member.get("addressTypeId") != null) {
-                 long addressTypeId = member.get("addressTypeId").getAsLong();
-                 addressTypeIdCodeValue = codeValueRepository.getReferenceById(addressTypeId);
+                long addressTypeId = member.get("addressTypeId").getAsLong();
+                addressTypeIdCodeValue = codeValueRepository.getReferenceById(addressTypeId);
             }
             if (member.get("email") != null) {
                 email = member.get("email").getAsString();
@@ -329,8 +328,8 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
             }
 
             familyMember = ClientFamilyMembers.fromJson(client, firstName, middleName, lastName, qualification, mobileNumber, age,
-                    isDependent, relationship, maritalStatus, gender, dateOfBirth, profession, email, addressTypeIdCodeValue, address1, address2, address3,
-                    cityIdCodeValue, stateIdCodeValue, countryIdCodeValue, postalCode);
+                    isDependent, relationship, maritalStatus, gender, dateOfBirth, profession, email, addressTypeIdCodeValue, address1,
+                    address2, address3, cityIdCodeValue, stateIdCodeValue, countryIdCodeValue, postalCode);
 
             this.clientFamilyRepository.saveAndFlush(familyMember);
 

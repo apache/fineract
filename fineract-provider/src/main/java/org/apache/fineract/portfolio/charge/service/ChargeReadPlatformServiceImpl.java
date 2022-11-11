@@ -392,7 +392,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             return ChargeData.instance(id, name, amount, currency, chargeTimeType, chargeAppliesToType, chargeCalculationType,
                     chargePaymentMode, feeOnMonthDay, feeInterval, penalty, active, isFreeWithdrawal, freeWithdrawalChargeFrequency,
                     restartFrequency, restartFrequencyEnum, isPaymentType, paymentTypeData, minCap, maxCap, feeFrequencyType, glAccountData,
-                    taxGroupData,minAmount,maxAmount);
+                    taxGroupData, minAmount, maxAmount);
         }
     }
 

@@ -354,7 +354,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         for (final LoanCharge loanCharge : loan.charges()) {
-            if (loanCharge.isDisburseToSavings()){
+            if (loanCharge.isDisburseToSavings()) {
                 loanCharge.setDueDate(actualDisbursementDate);
             }
         }
@@ -814,7 +814,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
 
         for (final LoanCharge loanCharge : loan.charges()) {
-            if (loanCharge.isDisburseToSavings()){
+            if (loanCharge.isDisburseToSavings()) {
                 loanCharge.setDueDate(loan.getExpectedDisbursedOnLocalDate());
             }
         }

@@ -1969,8 +1969,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
     private Set<LoanCharge> seperateTotalCompoundingPercentageCharges(final Set<LoanCharge> loanCharges) {
         Set<LoanCharge> interestCharges = new HashSet<>();
         for (final LoanCharge loanCharge : loanCharges) {
-            if ((loanCharge.isSpecifiedDueDate() || loanCharge.isDisburseToSavings()) && (loanCharge.getChargeCalculation().isPercentageOfInterest()
-                    || loanCharge.getChargeCalculation().isPercentageOfAmountAndInterest())) {
+            if ((loanCharge.isSpecifiedDueDate() || loanCharge.isDisburseToSavings())
+                    && (loanCharge.getChargeCalculation().isPercentageOfInterest()
+                            || loanCharge.getChargeCalculation().isPercentageOfAmountAndInterest())) {
                 interestCharges.add(loanCharge);
             }
         }
@@ -1990,7 +1991,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     cumulative = calculateInstallmentCharge(principalInterestForThisPeriod, cumulative, loanCharge);
                 } else if (loanCharge.isOverdueInstallmentCharge()
                         && (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd)
-                        || loanCharge.isDueForCollectionForDisburseToSavingsAndIncluding(periodStart))
+                                || loanCharge.isDueForCollectionForDisburseToSavingsAndIncluding(periodStart))
                         && loanCharge.getChargeCalculation().isPercentageBased()) {
                     cumulative = cumulative.plus(loanCharge.chargeAmount());
                 } else if ((loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd)
@@ -2056,7 +2057,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     cumulative = calculateInstallmentCharge(principalInterestForThisPeriod, cumulative, loanCharge);
                 } else if (loanCharge.isOverdueInstallmentCharge()
                         && (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd)
-                        || loanCharge.isDueForCollectionForDisburseToSavingsAndIncluding(periodStart))
+                                || loanCharge.isDueForCollectionForDisburseToSavingsAndIncluding(periodStart))
                         && loanCharge.getChargeCalculation().isPercentageBased()) {
                     cumulative = cumulative.plus(loanCharge.chargeAmount());
                 } else if ((loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd)
