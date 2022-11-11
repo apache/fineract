@@ -100,7 +100,10 @@ public final class DailyCompoundingPeriod implements CompoundingPeriod {
     }
 
     @Override
-    public List<BigDecimal> calculateInterests(SavingsCompoundingInterestPeriodType compoundingInterestPeriodType, SavingsInterestCalculationType interestCalculationType, BigDecimal interestFromPreviousPostingPeriod, BigDecimal interestRateAsFraction, long daysInYear, BigDecimal minBalanceForInterestCalculation, BigDecimal overdraftInterestRateAsFraction, BigDecimal minOverdraftForInterestCalculation) {
+    public List<BigDecimal> calculateInterests(SavingsCompoundingInterestPeriodType compoundingInterestPeriodType,
+            SavingsInterestCalculationType interestCalculationType, BigDecimal interestFromPreviousPostingPeriod,
+            BigDecimal interestRateAsFraction, long daysInYear, BigDecimal minBalanceForInterestCalculation,
+            BigDecimal overdraftInterestRateAsFraction, BigDecimal minOverdraftForInterestCalculation) {
         List<BigDecimal> interestEarned = new ArrayList<>();
 
         // for daily compounding - each interest calculated from previous daily

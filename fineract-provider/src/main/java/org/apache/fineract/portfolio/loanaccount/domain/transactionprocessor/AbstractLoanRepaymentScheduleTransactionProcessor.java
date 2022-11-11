@@ -101,7 +101,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 for (final LoanRepaymentScheduleInstallment installment : installments) {
                     for (final LoanCharge loanCharge : transferCharges) {
                         if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(startDate, installment.getDueDate())
-                                || loanCharge.isDueForCollectionForDisburseToSavingsAndIncluding(startDate)){
+                                || loanCharge.isDueForCollectionForDisburseToSavingsAndIncluding(startDate)) {
                             Money amountForProcess = loanCharge.getAmount(currency);
                             if (amountForProcess.isGreaterThan(loanTransaction.getAmount(currency))) {
                                 amountForProcess = loanTransaction.getAmount(currency);

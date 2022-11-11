@@ -196,7 +196,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
         final List<Map<String, Object>> listOfProductToGLAccountMaps = this.jdbcTemplate.query(sql, rm, // NOSONAR
                 new Object[] { PortfolioProductType.SAVING.getValue(), savingsProductId });
 
-        if (AccountingRuleType.CASH_BASED.getValue().equals(accountingType) ) {
+        if (AccountingRuleType.CASH_BASED.getValue().equals(accountingType)) {
 
             for (final Map<String, Object> productToGLAccountMap : listOfProductToGLAccountMaps) {
 
@@ -210,7 +210,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
 
                 getAccountMappingDetails(accountMappingDetails, glAccountForSavings, gLAccountData);
             }
-        }else if(AccountingRuleType.ACCRUAL_PERIODIC.getValue().equals(accountingType)){
+        } else if (AccountingRuleType.ACCRUAL_PERIODIC.getValue().equals(accountingType)) {
 
             for (final Map<String, Object> productToGLAccountMap : listOfProductToGLAccountMaps) {
 
@@ -224,7 +224,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
 
                 getAccountMappingDetails(accountMappingDetails, glAccountForSavings, gLAccountData);
 
-                 if (glAccountForSavings.equals(CashAccountsForSavings.INTEREST_RECEIVABLE)) {
+                if (glAccountForSavings.equals(CashAccountsForSavings.INTEREST_RECEIVABLE)) {
                     accountMappingDetails.put(SavingProductAccountingDataParams.INTEREST_RECEIVABLE.getValue(), gLAccountData);
                 } else if (glAccountForSavings.equals(CashAccountsForSavings.FEES_RECEIVABLE)) {
                     accountMappingDetails.put(SavingProductAccountingDataParams.FEES_RECEIVABLE.getValue(), gLAccountData);
@@ -238,7 +238,8 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
         return accountMappingDetails;
     }
 
-    private void getAccountMappingDetails(Map<String, Object> accountMappingDetails, CashAccountsForSavings glAccountForSavings, GLAccountData gLAccountData) {
+    private void getAccountMappingDetails(Map<String, Object> accountMappingDetails, CashAccountsForSavings glAccountForSavings,
+            GLAccountData gLAccountData) {
         if (glAccountForSavings.equals(CashAccountsForSavings.SAVINGS_REFERENCE)) {
             accountMappingDetails.put(SavingProductAccountingDataParams.SAVINGS_REFERENCE.getValue(), gLAccountData);
         } else if (glAccountForSavings.equals(CashAccountsForSavings.SAVINGS_CONTROL)) {

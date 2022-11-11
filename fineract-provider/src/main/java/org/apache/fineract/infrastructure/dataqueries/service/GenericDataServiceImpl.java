@@ -225,16 +225,16 @@ public class GenericDataServiceImpl implements GenericDataService {
                     columnValues = retreiveColumnValues(codeName);
                 }
             }
-            if((columnName.equals("created_at") || columnName.equals("updated_at"))) {
-                if(!fieldsSkip){
-                    columnHeaders.add(ResultsetColumnHeaderData.detailed(columnName, columnType, columnLength, columnNullable, columnIsPrimaryKey,
-                            columnValues, codeName));
+            if ((columnName.equals("created_at") || columnName.equals("updated_at"))) {
+                if (!fieldsSkip) {
+                    columnHeaders.add(ResultsetColumnHeaderData.detailed(columnName, columnType, columnLength, columnNullable,
+                            columnIsPrimaryKey, columnValues, codeName));
                 }
-            }else{
-                columnHeaders.add(ResultsetColumnHeaderData.detailed(columnName, columnType, columnLength, columnNullable, columnIsPrimaryKey,
-                        columnValues, codeName));
+            } else {
+                columnHeaders.add(ResultsetColumnHeaderData.detailed(columnName, columnType, columnLength, columnNullable,
+                        columnIsPrimaryKey, columnValues, codeName));
             }
-            
+
         }
 
         return columnHeaders;

@@ -68,6 +68,7 @@ import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountApplicationTimelineData;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountBlockNarrationHistoryData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountChargeData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountStatusEnumData;
@@ -76,7 +77,6 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountSummaryData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
-import org.apache.fineract.portfolio.savings.data.SavingsAccountBlockNarrationHistoryData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountChargesPaidByData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
@@ -360,8 +360,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sp.days_to_escheat as daysToEscheat, ");
             sqlBuilder.append("sp.num_of_credit_transaction as numOfCreditTransaction,");
             sqlBuilder.append("sp.num_of_debit_transaction as numOfDebitTransaction,");
-            //sqlBuilder.append("sa.block_narration_id as blockNarrationId, ");
-            //sqlBuilder.append("cvn.code_value as blockNarrationValue, ");
+            // sqlBuilder.append("sa.block_narration_id as blockNarrationId, ");
+            // sqlBuilder.append("cvn.code_value as blockNarrationValue, ");
             sqlBuilder.append("sp.accounting_type as accountingType, ");
             sqlBuilder.append("tr.id as transactionId, tr.transaction_type_enum as transactionType, ");
             sqlBuilder.append("tr.transaction_date as transactionDate, tr.amount as transactionAmount,");
@@ -590,8 +590,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     final boolean enforceMinRequiredBalance = rs.getBoolean("enforceMinRequiredBalance");
                     final BigDecimal maxAllowedLienLimit = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "maxAllowedLienLimit");
                     final boolean lienAllowed = rs.getBoolean("lienAllowed");
-                    //final Long blockNarrationId = JdbcSupport.getLong(rs, "blockNarrationId");
-                   // final String blockNarrationValue = rs.getString("blockNarrationValue");
+                    // final Long blockNarrationId = JdbcSupport.getLong(rs, "blockNarrationId");
+                    // final String blockNarrationValue = rs.getString("blockNarrationValue");
 
                     final CodeValueData blockNarration = null;
                     final Long numOfCreditTransaction = JdbcSupport.getLong(rs, "numOfCreditTransaction");
@@ -1084,7 +1084,6 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                 taxGroupData = TaxGroupData.lookup(taxGroupId, taxGroupName);
             }
 
-
             final Long blockNarrationId = JdbcSupport.getLong(rs, "blockNarrationId");
             final String blockNarrationValue = rs.getString("blockNarrationValue");
 
@@ -1100,7 +1099,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     withdrawalFeeForTransfers, summary, allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance,
                     maxAllowedLienLimit, lienAllowed, minBalanceForInterestCalculation, onHoldFunds, nominalAnnualInterestRateOverdraft,
                     minOverdraftForInterestCalculation, withHoldTax, taxGroupData, lastActiveTransactionDate, isDormancyTrackingActive,
-                    daysToInactive, daysToDormancy, daysToEscheat, onHoldAmount, numOfCreditTransaction, numOfDebitTransaction,  blockNarration);
+                    daysToInactive, daysToDormancy, daysToEscheat, onHoldAmount, numOfCreditTransaction, numOfDebitTransaction,
+                    blockNarration);
         }
     }
 
@@ -1293,32 +1293,38 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     }
 
     @Override
-    public Collection<SavingsAccountTransactionData> retrieveAllTransactions(final Long savingsId, DepositAccountType depositAccountType,Integer offset, Integer limit) {
-        if(offset == null){
+    public Collection<SavingsAccountTransactionData> retrieveAllTransactions(final Long savingsId, DepositAccountType depositAccountType,
+            Integer offset, Integer limit) {
+        if (offset == null) {
             offset = 1;
         }
-        if(limit == null){
+        if (limit == null) {
             limit = 15;
         }
         final String sql = "select " + this.transactionsMapper.schema()
                 + " where sa.id = ? and sa.deposit_type_enum = ? AND transaction_type_enum not in (22,25)  order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC LIMIT ? OFFSET ?  ";
 
-        return this.jdbcTemplate.query(sql, this.transactionsMapper, new Object[] { savingsId, depositAccountType.getValue(),limit,offset}); // NOSONAR
+        return this.jdbcTemplate.query(sql, this.transactionsMapper,
+                new Object[] { savingsId, depositAccountType.getValue(), limit, offset }); // NOSONAR
     }
+
     @Override
-    public Collection<SavingsAccountTransactionData> retrieveAccrualTransactions(final Long savingsId, DepositAccountType depositAccountType,Integer offset, Integer limit) {
-        if(offset == null){
+    public Collection<SavingsAccountTransactionData> retrieveAccrualTransactions(final Long savingsId,
+            DepositAccountType depositAccountType, Integer offset, Integer limit) {
+        if (offset == null) {
             offset = 1;
         }
-        if(limit == null){
+        if (limit == null) {
             limit = 15;
         }
 
         final String sql = "select " + this.transactionsMapper.schema()
                 + " where sa.id = ? and sa.deposit_type_enum = ? AND transaction_type_enum in (22,25)  order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC LIMIT ? OFFSET ?   ";
 
-        return this.jdbcTemplate.query(sql, this.transactionsMapper, new Object[] { savingsId, depositAccountType.getValue(),limit,offset});
+        return this.jdbcTemplate.query(sql, this.transactionsMapper,
+                new Object[] { savingsId, depositAccountType.getValue(), limit, offset });
     }
+
     @Override
     public SavingsAccountTransactionData retrieveSavingsTransaction(final Long savingsId, final Long transactionId,
             DepositAccountType depositAccountType) {
@@ -1706,7 +1712,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     withdrawalFeeForTransfers, summary, allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance,
                     maxAllowedLienLimit, lienAllowed, minBalanceForInterestCalculation, onHoldFunds, nominalAnnualInterestRateOverdraft,
                     minOverdraftForInterestCalculation, withHoldTax, taxGroupData, lastActiveTransactionDate, isDormancyTrackingActive,
-                    daysToInactive, daysToDormancy, daysToEscheat, savingsAmountOnHold, numOfCreditTransaction, numOfDebitTransaction, null);
+                    daysToInactive, daysToDormancy, daysToEscheat, savingsAmountOnHold, numOfCreditTransaction, numOfDebitTransaction,
+                    null);
         }
     }
 
@@ -1846,18 +1853,23 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     }
 
     @Override
-    public Long getSavingsAccountTransactionTotalFiltered(final Long savingsId, DepositAccountType depositAccountType,Boolean hideAccrualTransactions) {
-        StringBuilder sqlBuilder  = new StringBuilder().append(" SELECT COUNT(tr.id) FROM m_savings_account sa  JOIN m_savings_account_transaction tr ON tr.savings_account_id = sa.id ")
+    public Long getSavingsAccountTransactionTotalFiltered(final Long savingsId, DepositAccountType depositAccountType,
+            Boolean hideAccrualTransactions) {
+        StringBuilder sqlBuilder = new StringBuilder().append(
+                " SELECT COUNT(tr.id) FROM m_savings_account sa  JOIN m_savings_account_transaction tr ON tr.savings_account_id = sa.id ")
                 .append(" where sa.id = ? and sa.deposit_type_enum = ? ");
-        if(hideAccrualTransactions){
+        if (hideAccrualTransactions) {
             sqlBuilder.append(" AND transaction_type_enum not in (?,?) ");
-        }else{
+        } else {
             sqlBuilder.append(" AND transaction_type_enum in (?,?) ");
         }
-            sqlBuilder.append(" order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC ");
+        sqlBuilder.append(" order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC ");
 
         try {
-            return this.jdbcTemplate.queryForObject(sqlBuilder.toString(), Long.class, new Object[] { savingsId, depositAccountType.getValue(),SavingsAccountTransactionType.ACCRUAL_INTEREST_POSTING.getValue(),SavingsAccountTransactionType.OVERDRAFT_ACCRUAL_INTEREST.getValue() });
+            return this.jdbcTemplate.queryForObject(sqlBuilder.toString(), Long.class,
+                    new Object[] { savingsId, depositAccountType.getValue(),
+                            SavingsAccountTransactionType.ACCRUAL_INTEREST_POSTING.getValue(),
+                            SavingsAccountTransactionType.OVERDRAFT_ACCRUAL_INTEREST.getValue() });
         } catch (EmptyResultDataAccessException e) {
             return 0L;
         }
@@ -1925,6 +1937,18 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         sql.append(" AND msa.deposit_type_enum = ? ");
 
         return this.jdbcTemplate.queryForList(sql.toString(), Long.class, accountType);
+    }
+
+    @Override
+    public List<Long> retrieveActiveSavingAccountsWithZeroInterest() {
+        String sql = "select id from m_savings_account where status_enum = 300 and nominal_annual_interest_rate != 0 and deposit_type_enum != 200";
+        return this.jdbcTemplate.queryForList(sql, Long.class);
+    }
+
+    @Override
+    public List<Long> retrieveActiveOverdraftSavingAccounts() {
+        String sql = "select id from m_savings_account where status_enum = 300 and (allow_overdraft = 1 or account_balance_derived <= 0) and deposit_type_enum != 200";
+        return this.jdbcTemplate.queryForList(sql, Long.class);
     }
 
 }

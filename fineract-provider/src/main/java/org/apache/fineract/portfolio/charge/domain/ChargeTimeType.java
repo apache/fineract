@@ -37,8 +37,10 @@ public enum ChargeTimeType {
     SHAREACCOUNT_ACTIVATION(13, "chargeTimeType.activation"), // only for loan
     SHARE_PURCHASE(14, "chargeTimeType.sharespurchase"), SHARE_REDEEM(15, "chargeTimeType.sharesredeem"),
 
-    SAVINGS_NOACTIVITY_FEE(16, "chargeTimeType.savingsNoActivityFee"),
-    DISBURSE_TO_SAVINGS(17, "chargeTimeType.disburseToSavings"); // only for loan charges
+    SAVINGS_NOACTIVITY_FEE(16, "chargeTimeType.savingsNoActivityFee"), DISBURSE_TO_SAVINGS(17, "chargeTimeType.disburseToSavings"); // only
+                                                                                                                                    // for
+                                                                                                                                    // loan
+                                                                                                                                    // charges
 
     private final Integer value;
     private final String code;
@@ -59,12 +61,12 @@ public enum ChargeTimeType {
     public static Object[] validLoanValues() {
         return new Integer[] { ChargeTimeType.DISBURSEMENT.getValue(), ChargeTimeType.SPECIFIED_DUE_DATE.getValue(),
                 ChargeTimeType.INSTALMENT_FEE.getValue(), ChargeTimeType.OVERDUE_INSTALLMENT.getValue(),
-                ChargeTimeType.TRANCHE_DISBURSEMENT.getValue(),  ChargeTimeType.DISBURSE_TO_SAVINGS.getValue() };
+                ChargeTimeType.TRANCHE_DISBURSEMENT.getValue(), ChargeTimeType.DISBURSE_TO_SAVINGS.getValue() };
     }
 
     public static Object[] validLoanChargeValues() {
         return new Integer[] { ChargeTimeType.DISBURSEMENT.getValue(), ChargeTimeType.SPECIFIED_DUE_DATE.getValue(),
-                ChargeTimeType.INSTALMENT_FEE.getValue(),  ChargeTimeType.DISBURSE_TO_SAVINGS.getValue() };
+                ChargeTimeType.INSTALMENT_FEE.getValue(), ChargeTimeType.DISBURSE_TO_SAVINGS.getValue() };
     }
 
     public static Object[] validSavingsValues() {

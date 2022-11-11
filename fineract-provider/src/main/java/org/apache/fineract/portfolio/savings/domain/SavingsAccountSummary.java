@@ -344,9 +344,11 @@ public final class SavingsAccountSummary {
     public BigDecimal getTotalInterestEarned() {
         return this.totalInterestEarned;
     }
+
     public void setTotalInterestEarned(BigDecimal totalInterestEarned) {
         this.totalInterestEarned = totalInterestEarned;
     }
+
     public BigDecimal getTotalOverdraftInterestDerived() {
         return this.totalOverdraftInterestDerived;
     }

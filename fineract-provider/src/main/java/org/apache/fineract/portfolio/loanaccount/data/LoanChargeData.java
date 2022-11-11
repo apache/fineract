@@ -109,7 +109,8 @@ public class LoanChargeData {
             final EnumOptionData chargeCalculationType, final BigDecimal percentage, final BigDecimal amountPercentageAppliedTo,
             final boolean penalty, final EnumOptionData chargePaymentMode, final boolean paid, final boolean waived, final Long loanId,
             final BigDecimal minCap, final BigDecimal maxCap, final BigDecimal amountOrPercentage,
-            Collection<LoanInstallmentChargeData> installmentChargeData, final String externalId,final BigDecimal minAmount,final BigDecimal maxAmount) {
+            Collection<LoanInstallmentChargeData> installmentChargeData, final String externalId, final BigDecimal minAmount,
+            final BigDecimal maxAmount) {
         this.id = id;
         this.chargeId = chargeId;
         this.name = name;

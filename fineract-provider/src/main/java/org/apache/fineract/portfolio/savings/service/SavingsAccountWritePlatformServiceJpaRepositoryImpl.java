@@ -29,9 +29,6 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.transact
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawBalanceParamName;
 
-import org.apache.fineract.infrastructure.codes.domain.CodeValue;
-import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import java.math.BigDecimal;
@@ -51,6 +48,8 @@ import java.util.Set;
 import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -139,7 +138,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-
 @Service
 public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements SavingsAccountWritePlatformService {
 
@@ -196,7 +194,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final AppUserRepositoryWrapper appuserRepository, final StandingInstructionRepository standingInstructionRepository,
             final BusinessEventNotifierService businessEventNotifierService, final GSIMRepositoy gsimRepository,
             final JdbcTemplate jdbcTemplate, final SavingsAccountInterestPostingService savingsAccountInterestPostingService,
-                                                               final CodeValueRepositoryWrapper codeValueRepositoryWrapper) {
+            final CodeValueRepositoryWrapper codeValueRepositoryWrapper) {
         this.context = context;
         this.savingAccountRepositoryWrapper = savingAccountRepositoryWrapper;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
@@ -576,7 +574,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         }
         postInterest(account, postInterestAs, transactionDate);
 
-        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEventNotificationConstants.BusinessEvents.SAVINGS_POST_INTEREST,
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(
+                BusinessEventNotificationConstants.BusinessEvents.SAVINGS_POST_INTEREST,
                 constructEntityMap(BusinessEventNotificationConstants.BusinessEntity.SAVING, account));
         return new CommandProcessingResultBuilder() //
                 .withEntityId(savingsId) //
@@ -587,7 +586,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .build();
     }
 
-    private Map<BusinessEventNotificationConstants.BusinessEntity, Object> constructEntityMap(final BusinessEventNotificationConstants.BusinessEntity entityEvent, Object entity) {
+    private Map<BusinessEventNotificationConstants.BusinessEntity, Object> constructEntityMap(
+            final BusinessEventNotificationConstants.BusinessEntity entityEvent, Object entity) {
         Map<BusinessEventNotificationConstants.BusinessEntity, Object> map = new HashMap<>(1);
         map.put(entityEvent, entity);
         return map;
@@ -602,7 +602,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
         if ((account.getNominalAnnualInterestRate() != null && account.getNominalAnnualInterestRate().compareTo(BigDecimal.ZERO) > 0)
                 || (account.getNominalAnnualInterestRateOverdraft() != null
-                && account.getNominalAnnualInterestRateOverdraft().compareTo(BigDecimal.ZERO) > 0)) {
+                        && account.getNominalAnnualInterestRateOverdraft().compareTo(BigDecimal.ZERO) > 0)) {
             final Set<Long> existingTransactionIds = new HashSet<>();
             final Set<Long> existingReversedTransactionIds = new HashSet<>();
             updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
@@ -632,6 +632,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             this.savingAccountRepositoryWrapper.saveAndFlush(account);
             postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
         }
+
     }
 
     @Transactional
@@ -659,13 +660,15 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
             long startPosting = System.currentTimeMillis();
             LOG.info("Interest Posting Start Here at {}", startPosting);
-            List<SavingsAccountTransaction> accTransactions = this.savingsAccountTransactionRepository.findBySavingsAccountId(savingsAccountData.getId());
-            boolean allowPosting = this.isQualifyForInterest(savingsAccountData.getMinBalanceForInterestCalculation(), savingsAccountData.getNumOfCreditTransaction(),
-                    savingsAccountData.getNumOfDebitTransaction(), accTransactions, savingsAccountData.getSummary().getAccountBalance());
-            if(allowPosting) {
+            List<SavingsAccountTransaction> accTransactions = this.savingsAccountTransactionRepository
+                    .findBySavingsAccountId(savingsAccountData.getId());
+            boolean allowPosting = this.isQualifyForInterest(savingsAccountData.getMinBalanceForInterestCalculation(),
+                    savingsAccountData.getNumOfCreditTransaction(), savingsAccountData.getNumOfDebitTransaction(), accTransactions,
+                    savingsAccountData.getSummary().getAccountBalance());
+            if (allowPosting) {
                 savingsAccountData = this.savingsAccountInterestPostingService.postInterest(mc, today, isInterestTransfer,
-                        isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestOnDate, backdatedTxnsAllowedTill,
-                        savingsAccountData);
+                        isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestOnDate,
+                        backdatedTxnsAllowedTill, savingsAccountData);
                 long endPosting = System.currentTimeMillis();
                 LOG.info("Interest Posting Ends within {}", endPosting - startPosting);
 
@@ -1918,7 +1921,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final String pndComment = command.stringValueOfParameterNamed("pndComment");
         final Long narrationId = command.longValueOfParameterNamed("narrationId");
 
-        final CodeValue codeValue =  narrationId != null ? codeValueRepositoryWrapper.findOneWithNotFoundDetection(narrationId) : null;
+        final CodeValue codeValue = narrationId != null ? codeValueRepositoryWrapper.findOneWithNotFoundDetection(narrationId) : null;
 
         final Map<String, Object> changes = account.blockCredits(account.getSubStatus(), codeValue, pndComment);
         if (!changes.isEmpty()) {
@@ -1939,7 +1942,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         account.updateReason(null);
         final String pndComment = command.stringValueOfParameterNamed("pndComment");
         final Long narrationId = command.longValueOfParameterNamed("narrationId");
-        final CodeValue codeValue =  narrationId != null ? codeValueRepositoryWrapper.findOneWithNotFoundDetection(narrationId) : null;
+        final CodeValue codeValue = narrationId != null ? codeValueRepositoryWrapper.findOneWithNotFoundDetection(narrationId) : null;
         final Map<String, Object> changes = account.unblockCredits(codeValue, pndComment);
         if (!changes.isEmpty()) {
 
@@ -1964,7 +1967,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final Long narrationId = command.longValueOfParameterNamed("narrationId");
         final String pndComment = command.stringValueOfParameterNamed("pndComment");
 
-        final CodeValue codeValue =  narrationId != null ? codeValueRepositoryWrapper.findOneWithNotFoundDetection(narrationId) : null;
+        final CodeValue codeValue = narrationId != null ? codeValueRepositoryWrapper.findOneWithNotFoundDetection(narrationId) : null;
 
         final Map<String, Object> changes = account.blockDebits(account.getSubStatus(), codeValue, pndComment);
         if (!changes.isEmpty()) {
@@ -1986,7 +1989,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final Long narrationId = command.longValueOfParameterNamed("narrationId");
         final String pndComment = command.stringValueOfParameterNamed("pndComment");
 
-        final CodeValue codeValue =  narrationId != null ? codeValueRepositoryWrapper.findOneWithNotFoundDetection(narrationId) : null;
+        final CodeValue codeValue = narrationId != null ? codeValueRepositoryWrapper.findOneWithNotFoundDetection(narrationId) : null;
 
         account.updateReason(null);
 
@@ -2018,32 +2021,30 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         }
     }
 
-    private boolean isQualifyForInterest(BigDecimal minBalance, Long numOfCredit, Long numOfDebit, List<SavingsAccountTransaction> transactions,
-                                         BigDecimal accountBalance){
+    private boolean isQualifyForInterest(BigDecimal minBalance, Long numOfCredit, Long numOfDebit,
+            List<SavingsAccountTransaction> transactions, BigDecimal accountBalance) {
         Integer countOfCredit = 0;
         Integer countOfDebit = 0;
         boolean allowPosting = false;
 
-        if(minBalance != null || numOfCredit != null
-                || numOfDebit !=null){
+        if (minBalance != null || numOfCredit != null || numOfDebit != null) {
             for (SavingsAccountTransaction accountTransaction : transactions) {
                 if (accountTransaction.isCredit()) {
                     countOfCredit++;
-                }else if (accountTransaction.isDebit()){
+                } else if (accountTransaction.isDebit()) {
                     countOfDebit++;
                 }
             }
-            boolean balance = (accountBalance.compareTo(minBalance) > 0 ||
-                    accountBalance.compareTo(minBalance)==0) ? true :false;
+            boolean balance = (accountBalance.compareTo(minBalance) > 0 || accountBalance.compareTo(minBalance) == 0) ? true : false;
             boolean credit = countOfCredit >= numOfCredit ? true : false;
             boolean debit = countOfDebit >= numOfDebit ? true : false;
-            if(balance && credit && debit){
-                allowPosting =true;
+            if (balance && credit && debit) {
+                allowPosting = true;
             }
-        }else{
+        } else {
             allowPosting = true;
         }
-        return  allowPosting;
+        return allowPosting;
     }
 
     @Override
@@ -2069,7 +2070,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         }
 
         LocalDate today = DateUtils.getLocalDateOfTenant();
-        if (transactionDate.isAfter(today)) { throw new PostInterestAsOnDateException(PostInterestAsOnExceptionType.FUTURE_DATE); }
+        if (transactionDate.isAfter(today)) {
+            throw new PostInterestAsOnDateException(PostInterestAsOnExceptionType.FUTURE_DATE);
+        }
 
         postAccrualInterest(account, true, transactionDate, isUserPosting);
 
@@ -2085,11 +2088,13 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     @Override
     public void postAccrualInterest(final SavingsAccount account, final boolean postInterestAs, final LocalDate transactionDate,
-                                    boolean isUserPosting) {
-        final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService.isSavingsInterestPostingAtCurrentPeriodEnd();
+            boolean isUserPosting) {
+        final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
+                .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
         if (account.getNominalAnnualInterestRate().compareTo(BigDecimal.ZERO) > 0
-                || (account.getNominalAnnualInterestRateOverdraft() != null && account.getNominalAnnualInterestRateOverdraft().compareTo(BigDecimal.ZERO) > 0)) {
+                || (account.getNominalAnnualInterestRateOverdraft() != null
+                        && account.getNominalAnnualInterestRateOverdraft().compareTo(BigDecimal.ZERO) > 0)) {
             final Set<Long> existingTransactionIds = new HashSet<>();
             final Set<Long> existingReversedTransactionIds = new HashSet<>();
             updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
@@ -2120,7 +2125,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     }
 
     private void postJournalEntries(final SavingsAccount savingsAccount, final Set<Long> existingTransactionIds,
-                                    final Set<Long> existingReversedTransactionIds) {
+            final Set<Long> existingReversedTransactionIds) {
 
         final MonetaryCurrency currency = savingsAccount.getCurrency();
         final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepositoryWrapper.findOneWithNotFoundDetection(currency);
@@ -2128,6 +2133,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 existingTransactionIds, existingReversedTransactionIds);
         this.journalEntryWritePlatformService.createJournalEntriesForSavings(accountingBridgeData);
     }
+
     @Override
     public CommandProcessingResult postAccrualInterest(final JsonCommand command) {
 

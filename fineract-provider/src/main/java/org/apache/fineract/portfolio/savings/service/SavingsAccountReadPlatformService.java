@@ -44,11 +44,11 @@ public interface SavingsAccountReadPlatformService {
 
     SavingsAccountTransactionData retrieveDepositTransactionTemplate(Long savingsId, DepositAccountType depositAccountType);
 
-    Collection<SavingsAccountTransactionData> retrieveAllTransactions(Long savingsId, DepositAccountType depositAccountType,Integer offset, Integer limit);
-    Collection<SavingsAccountTransactionData> retrieveAccrualTransactions(Long savingsId, DepositAccountType depositAccountType,Integer offset, Integer limit);
+    Collection<SavingsAccountTransactionData> retrieveAllTransactions(Long savingsId, DepositAccountType depositAccountType, Integer offset,
+            Integer limit);
 
-    // Collection<SavingsAccountAnnualFeeData>
-    // retrieveAccountsWithAnnualFeeDue();
+    Collection<SavingsAccountTransactionData> retrieveAccrualTransactions(Long savingsId, DepositAccountType depositAccountType,
+            Integer offset, Integer limit);
 
     SavingsAccountTransactionData retrieveSavingsTransaction(Long savingsId, Long transactionId, DepositAccountType depositAccountType);
 
@@ -64,13 +64,19 @@ public interface SavingsAccountReadPlatformService {
 
     String retrieveAccountNumberByAccountId(Long accountId);
 
-    Long getSavingsAccountTransactionTotalFiltered(Long savingsId, DepositAccountType depositAccountType,Boolean hideAccrualTransactions);
+    Long getSavingsAccountTransactionTotalFiltered(Long savingsId, DepositAccountType depositAccountType, Boolean hideAccrualTransactions);
 
     List<SavingsAccountData> retrieveAllSavingsDataForInterestPosting(boolean backdatedTxnsAllowedTill, int pageSize, Integer status,
             Long maxSavingsId);
 
     List<SavingsAccountTransactionData> retrieveAllTransactionData(List<String> refNo);
+
     Collection<SavingsAccountBlockNarrationHistoryData> retrieveSavingsAccountBlockNarrationHistory(Long savingsId);
+
     List<Long> retrieveActiveSavingsAccrualAccounts(Long accountType);
+
+    List<Long> retrieveActiveSavingAccountsWithZeroInterest();
+
+    List<Long> retrieveActiveOverdraftSavingAccounts();
 
 }

@@ -59,8 +59,8 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
                     + " c1.code_value AS gender, fmb.gender_cv_id AS genderId, fmb.date_of_birth AS dateOfBirth, c2.code_value AS profession, fmb.profession_cv_id AS professionId,"
                     + " fmb.address1 as address1, fmb.address2 as address2, fmb.address3 as address3, fmb.address_type_id as addressTypeId, type_code.code_value as addressType,"
                     + " fmb.state_province_id as state_province_id, cvs.code_value as state_name, fmb.country_id as country_id,cvc.code_value as country_name,"
-                    + " fmb.postal_code as postalCode, fmb.city_id as city_id, cc.code_value as city_name "
-                    + " FROM m_family_members fmb" + " LEFT JOIN m_code_value cv ON fmb.relationship_cv_id=cv.id"
+                    + " fmb.postal_code as postalCode, fmb.city_id as city_id, cc.code_value as city_name " + " FROM m_family_members fmb"
+                    + " LEFT JOIN m_code_value cv ON fmb.relationship_cv_id=cv.id"
                     + " LEFT JOIN m_code_value c ON fmb.marital_status_cv_id=c.id" + " LEFT JOIN m_code_value c1 ON fmb.gender_cv_id=c1.id"
                     + " LEFT JOIN m_code_value c2 ON fmb.profession_cv_id=c2.id"
                     + " left join m_code_value cvs on fmb.state_province_id=cvs.id" + " left join m_code_value cc on fmb.city_id=cc.id"
@@ -103,8 +103,8 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
 
             return ClientFamilyMembersData.instance(id, clientId, firstName, middleName, lastName, qualification, mobileNumber, age,
                     isDependent, relationship, relationshipId, maritalStatus, maritalStatusId, gender, genderId, dateOfBirth, profession,
-                    professionId, email, address1, address2, address3, postalCode, stateProvinceId, countryId, countryName, stateName, cityId, cityName,
-                    addressTypeId, addressType);
+                    professionId, email, address1, address2, address3, postalCode, stateProvinceId, countryId, countryName, stateName,
+                    cityId, cityName, addressTypeId, addressType);
 
         }
     }
@@ -151,10 +151,11 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
 
         final List<CodeValueData> cityOptions = new ArrayList<>(this.codeValueReadPlatformService.retrieveCodeValuesByCode("CITY"));
 
-        final List<CodeValueData> addressTypeOptions = new ArrayList<>(this.codeValueReadPlatformService.retrieveCodeValuesByCode("ADDRESS_TYPE"));
+        final List<CodeValueData> addressTypeOptions = new ArrayList<>(
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode("ADDRESS_TYPE"));
 
-        return ClientFamilyMembersData.templateInstance(relationshipOptions, genderOptions, maritalStatusOptions, professionOptions, countryOptions,
-                stateOptions, cityOptions, addressTypeOptions);
+        return ClientFamilyMembersData.templateInstance(relationshipOptions, genderOptions, maritalStatusOptions, professionOptions,
+                countryOptions, stateOptions, cityOptions, addressTypeOptions);
     }
 
 }

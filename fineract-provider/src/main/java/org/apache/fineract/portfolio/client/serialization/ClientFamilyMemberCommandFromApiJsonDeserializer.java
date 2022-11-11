@@ -43,10 +43,10 @@ import org.springframework.stereotype.Component;
 public final class ClientFamilyMemberCommandFromApiJsonDeserializer {
 
     private final FromJsonHelper fromApiJsonHelper;
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "clientId", "firstName", "middleName", "lastName",
-            "qualification", "mobileNumber", "age", "isDependent", "relationshipId", "maritalStatusId", "genderId", "dateOfBirth",
-            "professionId", "locale", "dateFormat", "familyMembers" , "email", "address1", "address2", "address3", "postalCode", "stateProvinceId",
-             "countryId", "cityId", "addressTypeId"));
+    private final Set<String> supportedParameters = new HashSet<>(
+            Arrays.asList("id", "clientId", "firstName", "middleName", "lastName", "qualification", "mobileNumber", "age", "isDependent",
+                    "relationshipId", "maritalStatusId", "genderId", "dateOfBirth", "professionId", "locale", "dateFormat", "familyMembers",
+                    "email", "address1", "address2", "address3", "postalCode", "stateProvinceId", "countryId", "cityId", "addressTypeId"));
 
     @Autowired
     public ClientFamilyMemberCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {

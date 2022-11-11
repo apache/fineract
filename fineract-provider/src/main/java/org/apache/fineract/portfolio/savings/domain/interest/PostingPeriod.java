@@ -265,6 +265,7 @@ public final class PostingPeriod {
     public List<Money> interests() {
         return this.interestEarnedRoundeds;
     }
+
     public Money interest() {
         return this.interestEarnedRounded;
     }
@@ -322,6 +323,7 @@ public final class PostingPeriod {
     public Money getInterestEarned() {
         return this.interestEarnedRounded;
     }
+
     private static List<CompoundingPeriod> compoundingPeriodsInPostingPeriod(final LocalDateInterval postingPeriodInterval,
             final SavingsCompoundingInterestPeriodType interestPeriodType, final List<EndOfDayBalance> allEndOfDayBalances,
             final LocalDate upToInterestCalculationDate, int financialYearBeginningMonth) {
@@ -548,17 +550,16 @@ public final class PostingPeriod {
         return this.financialYearBeginningMonth;
     }
 
-
     // isInterestTransfer boolean is to identify newly created transaction is
     // interest transfer
     public static PostingPeriod createFrom(final LocalDateInterval periodInterval, final Money periodStartingBalance,
-                                           final List<SavingsAccountTransaction> orderedListOfTransactions, final MonetaryCurrency currency,
-                                           final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
-                                           final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
-                                           final LocalDate upToInterestCalculationDate, Collection<Long> interestPostTransactions, boolean isInterestTransfer,
-                                           final Money minBalanceForInterestCalculation, final boolean isSavingsInterestPostingAtCurrentPeriodEnd,
-                                           final BigDecimal overdraftInterestRateAsFraction, final Money minOverdraftForInterestCalculation, boolean isUserPosting,
-                                           int financialYearBeginningMonth, final Boolean includePostingAndWithHoldTax) {
+            final List<SavingsAccountTransaction> orderedListOfTransactions, final MonetaryCurrency currency,
+            final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
+            final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
+            final LocalDate upToInterestCalculationDate, Collection<Long> interestPostTransactions, boolean isInterestTransfer,
+            final Money minBalanceForInterestCalculation, final boolean isSavingsInterestPostingAtCurrentPeriodEnd,
+            final BigDecimal overdraftInterestRateAsFraction, final Money minOverdraftForInterestCalculation, boolean isUserPosting,
+            int financialYearBeginningMonth, final Boolean includePostingAndWithHoldTax) {
 
         List<EndOfDayBalance> accountEndOfDayBalances = new ArrayList<>();
         boolean interestTransfered = false;
@@ -613,7 +614,7 @@ public final class PostingPeriod {
 
             closeOfDayBalance = endOfDayBalance.closingBalance();
             openingDayBalance = closeOfDayBalance;
-        } else if (!orderedListOfTransactions.isEmpty()){
+        } else if (!orderedListOfTransactions.isEmpty()) {
             SavingsAccountTransaction firstTransaction = orderedListOfTransactions.get(0);
             if (firstTransaction.transactionLocalDate().isAfter(periodInterval.startDate())) {
                 LocalDate balanceStartDate = periodInterval.startDate();
@@ -638,7 +639,8 @@ public final class PostingPeriod {
                 minOverdraftForInterestCalculation, isUserPosting, financialYearBeginningMonth);
     }
 
-    private static List<EndOfDayBalance> flattenEndOfDayBalances(List<EndOfDayBalance> accountEndOfDayBalances, LocalDateInterval periodInterval) {
+    private static List<EndOfDayBalance> flattenEndOfDayBalances(List<EndOfDayBalance> accountEndOfDayBalances,
+            LocalDateInterval periodInterval) {
         List<EndOfDayBalance> endOfDayBalances = new ArrayList<>();
         if (!accountEndOfDayBalances.isEmpty()) {
             EndOfDayBalance endOfDayBalance = accountEndOfDayBalances.get(0);

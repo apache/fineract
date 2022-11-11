@@ -108,7 +108,8 @@ public class SavingsAccountAssembler {
             final SavingsAccountRepositoryWrapper savingsAccountRepository,
             final SavingsAccountChargeAssembler savingsAccountChargeAssembler, final FromJsonHelper fromApiJsonHelper,
             final AccountTransfersReadPlatformService accountTransfersReadPlatformService, final JdbcTemplate jdbcTemplate,
-            final ConfigurationDomainService configurationDomainService,SavingsAccountTransactionRepository savingsAccountTransactionRepository) {
+            final ConfigurationDomainService configurationDomainService,
+            SavingsAccountTransactionRepository savingsAccountTransactionRepository) {
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.clientRepository = clientRepository;
         this.groupRepository = groupRepository;
@@ -472,6 +473,7 @@ public class SavingsAccountAssembler {
     public void assignSavingAccountHelpers(final SavingsAccountData savingsAccountData) {
         savingsAccountData.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
     }
+
     public SavingsAccount assembleFrom(final Long savingsId) {
         final SavingsAccount account = this.savingsAccountRepository.findOneWithNotFoundDetection(savingsId);
         populateTransactions(account, this.savingsAccountTransactionRepository.getTransactionsByAccountId(savingsId));
@@ -483,10 +485,10 @@ public class SavingsAccountAssembler {
         return account;
     }
 
-    private  void populateTransactions(SavingsAccount account, List<SavingsAccountTransaction> transactions) {
+    private void populateTransactions(SavingsAccount account, List<SavingsAccountTransaction> transactions) {
         // We do this in case the passed transaction list is read-only
         List<SavingsAccountTransaction> trans = account.getTransactions();
-        //Always clear the list first to avoid dups
+        // Always clear the list first to avoid dups
         trans.clear();
         trans.addAll(transactions);
     }

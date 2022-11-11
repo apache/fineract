@@ -739,7 +739,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 for (LoanCharge loanCharge : loan.charges()) {
                     if (loanCharge.isActive() && !loanCharge.isPaid()
                             && (loanCharge.isDueForCollectionFromAndUpToAndIncluding(fromDate, foreClosureDate)
-                                    || loanCharge.isInstalmentFee() || loanCharge.isDueForCollectionForDisburseToSavingsAndIncluding(fromDate))) {
+                                    || loanCharge.isInstalmentFee()
+                                    || loanCharge.isDueForCollectionForDisburseToSavingsAndIncluding(fromDate))) {
                         final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(accrualTransaction, loanCharge,
                                 loanCharge.getAmountOutstanding(currency).getAmount(), null);
                         accrualCharges.add(loanChargePaidBy);
