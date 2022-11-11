@@ -22,10 +22,10 @@ import static org.apache.fineract.portfolio.account.AccountDetailConstants.fromA
 import static org.apache.fineract.portfolio.account.AccountDetailConstants.fromAccountTypeParamName;
 import static org.apache.fineract.portfolio.account.AccountDetailConstants.toAccountIdParamName;
 import static org.apache.fineract.portfolio.account.AccountDetailConstants.toAccountTypeParamName;
+import static org.apache.fineract.portfolio.account.api.AccountTransfersApiConstants.DisburseToSavingsCharges;
 import static org.apache.fineract.portfolio.account.api.AccountTransfersApiConstants.transferAmountParamName;
 import static org.apache.fineract.portfolio.account.api.AccountTransfersApiConstants.transferDateParamName;
 import static org.apache.fineract.portfolio.account.api.AccountTransfersApiConstants.transferDescriptionParamName;
-import static org.apache.fineract.portfolio.account.api.AccountTransfersApiConstants.DisburseToSavingsCharges;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -34,7 +34,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -53,9 +52,9 @@ import org.apache.fineract.portfolio.account.exception.DifferentCurrenciesExcept
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidPaidInAdvanceAmountException;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
@@ -197,14 +196,14 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                             chargeAmount = charge.getAmount(toLoanAccount.getCurrency()).getAmount();
 
                             loanRepaymentTransaction = this.loanAccountDomainService.makeRepayment(LoanTransactionType.REPAYMENT,
-                                    toLoanAccount, new CommandProcessingResultBuilder(), transactionDate, chargeAmount , paymentDetail, null, null,
-                                    isRecoveryRepayment, isAccountTransfer, holidayDetailDto, isHolidayValidationDone);
+                                    toLoanAccount, new CommandProcessingResultBuilder(), transactionDate, chargeAmount, paymentDetail, null,
+                                    null, isRecoveryRepayment, isAccountTransfer, holidayDetailDto, isHolidayValidationDone);
                         }
                     }
                 }
             } else {
-                 loanRepaymentTransaction = this.loanAccountDomainService.makeRepayment(LoanTransactionType.REPAYMENT,
-                        toLoanAccount, new CommandProcessingResultBuilder(), transactionDate, transactionAmount, paymentDetail, null, null,
+                loanRepaymentTransaction = this.loanAccountDomainService.makeRepayment(LoanTransactionType.REPAYMENT, toLoanAccount,
+                        new CommandProcessingResultBuilder(), transactionDate, transactionAmount, paymentDetail, null, null,
                         isRecoveryRepayment, isAccountTransfer, holidayDetailDto, isHolidayValidationDone);
             }
 

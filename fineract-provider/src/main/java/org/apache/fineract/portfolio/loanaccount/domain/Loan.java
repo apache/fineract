@@ -601,10 +601,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                     getId(), loanCharge.name());
         }
 
-
-        if(loanCharge.isDisburseToSavings()) {
+        if (loanCharge.isDisburseToSavings()) {
             validateChargeHasValidDisburseToSavingsIfApplicable(loanCharge, getDisbursementDate());
-        }else {
+        } else {
             validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate(false));
         }
         loanCharge.update(this);
@@ -723,7 +722,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments();
         for (final LoanRepaymentScheduleInstallment installment : installments) {
             if (installmentNumber == null && (charge.isDueForCollectionFromAndUpToAndIncluding(startDate, installment.getDueDate())
-                    || charge.isDueForCollectionForDisburseToSavingsAndIncluding(startDate))){
+                    || charge.isDueForCollectionForDisburseToSavingsAndIncluding(startDate))) {
                 chargePaymentInstallments.add(installment);
                 break;
             } else if (installmentNumber != null && installment.getInstallmentNumber().equals(installmentNumber)) {
@@ -1716,9 +1715,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         if (loanCharge.isActive()) {
             clearLoanInstallmentChargesBeforeRegeneration(loanCharge);
             loanCharge.update(chargeAmt, loanCharge.getDueLocalDate(), amount, fetchNumberOfInstallmensAfterExceptions(), totalChargeAmt);
-            if(loanCharge.isDisburseToSavings()) {
+            if (loanCharge.isDisburseToSavings()) {
                 validateChargeHasValidDisburseToSavingsIfApplicable(loanCharge, getDisbursementDate());
-            }else {
+            } else {
                 validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate(false));
             }
         }

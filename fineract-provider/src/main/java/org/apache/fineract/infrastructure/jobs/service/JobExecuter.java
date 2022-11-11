@@ -18,16 +18,16 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import java.util.ArrayList;
-import java.util.TreeMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
 
 @Component
 public class JobExecuter {
@@ -124,7 +124,7 @@ public class JobExecuter {
             this.jobRunner = jobRunner;
             this.jobDetail = jobDetail;
             this.sb = sb;
-            if(SecurityContextHolder.getContext() == null){
+            if (SecurityContextHolder.getContext() == null) {
                 this.auth = null;
             } else {
                 this.auth = SecurityContextHolder.getContext().getAuthentication();

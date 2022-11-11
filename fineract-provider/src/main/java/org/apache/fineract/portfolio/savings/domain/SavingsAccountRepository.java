@@ -71,8 +71,8 @@ public interface SavingsAccountRepository extends JpaRepository<SavingsAccount, 
     @Query("select sa from SavingsAccount sa where sa.accountNumber = :accountNumber")
     SavingsAccount findByAccountNumber(@Param("accountNumber") String accountNumber);
 
-    @Query("select sa from SavingsAccount sa where sa.product.id = :productId and sa.status = :status and (sa.numOfCreditTransaction != :numOfCredit or sa.numOfDebitTransaction != :numOfDebit or" +
-            " sa.minBalanceForInterestCalculation != :minBalance)")
-    List<SavingsAccount> findByProductIdAndStatus(@Param("productId") Long productId, @Param("status") Integer status, @Param("numOfCredit") Long numOfCredit,
-                                                       @Param("numOfDebit") Long numOfDebit, @Param("minBalance") BigDecimal minBalance);
+    @Query("select sa from SavingsAccount sa where sa.product.id = :productId and sa.status = :status and (sa.numOfCreditTransaction != :numOfCredit or sa.numOfDebitTransaction != :numOfDebit or"
+            + " sa.minBalanceForInterestCalculation != :minBalance)")
+    List<SavingsAccount> findByProductIdAndStatus(@Param("productId") Long productId, @Param("status") Integer status,
+            @Param("numOfCredit") Long numOfCredit, @Param("numOfDebit") Long numOfDebit, @Param("minBalance") BigDecimal minBalance);
 }

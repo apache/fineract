@@ -52,14 +52,14 @@ public class SavingsTransactionDTO {
     }
 
     public BigDecimal getAmount() {
-        if(this.amount == null){
+        if (this.amount == null) {
             return BigDecimal.ZERO;
         }
         return amount;
     }
 
     public BigDecimal getOverdraftAmount() {
-        if(this.overdraftAmount == null){
+        if (this.overdraftAmount == null) {
             return BigDecimal.ZERO;
         }
         return overdraftAmount;

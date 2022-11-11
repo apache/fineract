@@ -275,13 +275,13 @@ public class LoanCharge extends AbstractPersistableCustom {
         this.minAmount = chargeDefinition.getMinAmount();
         this.maxAmount = chargeDefinition.getMaxAmount();
 
-        populateDerivedFields(loanPrincipal, chargeAmount, numberOfRepayments, loanCharge,this.minAmount,this.maxAmount);
+        populateDerivedFields(loanPrincipal, chargeAmount, numberOfRepayments, loanCharge, this.minAmount, this.maxAmount);
         this.paid = determineIfFullyPaid();
 
     }
 
     private void populateDerivedFields(final BigDecimal amountPercentageAppliedTo, final BigDecimal chargeAmount,
-            Integer numberOfRepayments, BigDecimal loanCharge,BigDecimal minAmount,BigDecimal maxAmount) {
+            Integer numberOfRepayments, BigDecimal loanCharge, BigDecimal minAmount, BigDecimal maxAmount) {
 
         switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
             case INVALID:
@@ -453,7 +453,7 @@ public class LoanCharge extends AbstractPersistableCustom {
                     // Then we need to get as of this loan charge due date how
                     // much amount disbursed.
                     if ((this.loan.isMultiDisburmentLoan() && this.isSpecifiedDueDate())
-                            || (this.loan.isMultiDisburmentLoan() && isDisburseToSavings())){
+                            || (this.loan.isMultiDisburmentLoan() && isDisburseToSavings())) {
                         for (final LoanDisbursementDetails loanDisbursementDetails : this.loan.getDisbursementDetails()) {
                             if (!loanDisbursementDetails.expectedDisbursementDate().isAfter(this.getDueDate())) {
                                 amountPercentageAppliedTo = amountPercentageAppliedTo.add(loanDisbursementDetails.principal());
@@ -645,7 +645,7 @@ public class LoanCharge extends AbstractPersistableCustom {
     }
 
     public BigDecimal percentageOf(final BigDecimal value) {
-        BigDecimal newValue =  percentageOf(value, this.percentage);
+        BigDecimal newValue = percentageOf(value, this.percentage);
         return extracted(newValue);
     }
 
@@ -662,23 +662,21 @@ public class LoanCharge extends AbstractPersistableCustom {
 
     private BigDecimal extracted(BigDecimal percentageOf) {
         /**
-         * Logic to determine which value to use in the computation
-         * if a transaction amount is greater than min amount then use min amount
-         * and if max if greater that the transaction amount amount then use
-         * max amount else use the transaction amount
+         * Logic to determine which value to use in the computation if a transaction amount is greater than min amount
+         * then use min amount and if max if greater that the transaction amount amount then use max amount else use the
+         * transaction amount
          *
-         * **/
+         **/
         BigDecimal transactionAmountToConsider;
-        if(this.maxAmount != null && percentageOf.compareTo(this.maxAmount) > 0){
+        if (this.maxAmount != null && percentageOf.compareTo(this.maxAmount) > 0) {
             transactionAmountToConsider = this.maxAmount;
-        }else if(this.minAmount != null && percentageOf.compareTo(this.minAmount) != 0){
+        } else if (this.minAmount != null && percentageOf.compareTo(this.minAmount) != 0) {
             transactionAmountToConsider = this.minAmount;
-        } else{
+        } else {
             transactionAmountToConsider = percentageOf;
         }
         return transactionAmountToConsider;
     }
-
 
     /**
      * @param percentageOf
@@ -860,7 +858,6 @@ public class LoanCharge extends AbstractPersistableCustom {
     public Charge getCharge() {
         return this.charge;
     }
-
 
     public ChargePaymentMode getChargePaymentMode() {
         return ChargePaymentMode.fromInt(this.chargePaymentMode);

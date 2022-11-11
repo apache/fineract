@@ -66,7 +66,7 @@ public class CompoundInterestHelper {
     }
 
     public List<Money> calculateInterestForAllPostingPeriods(final MonetaryCurrency currency, final List<PostingPeriod> allPeriods,
-                                                             LocalDate lockUntil, Boolean interestTransferEnabled, Boolean ignorecompounding) {
+            LocalDate lockUntil, Boolean interestTransferEnabled, Boolean ignorecompounding) {
 
         // sum up the 'rounded' values that are posted each posting period
         List<Money> interestEarned = new ArrayList<Money>();
@@ -74,18 +74,16 @@ public class CompoundInterestHelper {
         // total interest earned in previous periods but not yet recognised
         BigDecimal compoundedInterest = BigDecimal.ZERO;
         BigDecimal unCompoundedInterest = BigDecimal.ZERO;
-        CompoundInterestValues compoundInterestValues = new CompoundInterestValues(compoundedInterest,
-                unCompoundedInterest);
+        CompoundInterestValues compoundInterestValues = new CompoundInterestValues(compoundedInterest, unCompoundedInterest);
         for (final PostingPeriod postingPeriod : allPeriods) {
 
-            if(ignorecompounding) {
-                compoundInterestValues = new CompoundInterestValues(BigDecimal.ZERO,
-                        BigDecimal.ZERO);
+            if (ignorecompounding) {
+                compoundInterestValues = new CompoundInterestValues(BigDecimal.ZERO, BigDecimal.ZERO);
             }
 
             final List<BigDecimal> interestEarnedThisPeriod = postingPeriod.calculateInterests(compoundInterestValues);
 
-            for(BigDecimal interest: interestEarnedThisPeriod) {
+            for (BigDecimal interest : interestEarnedThisPeriod) {
                 interestEarned.add(Money.of(currency, interest));
             }
 

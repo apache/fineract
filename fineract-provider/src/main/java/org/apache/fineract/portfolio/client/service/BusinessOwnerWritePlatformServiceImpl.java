@@ -193,8 +193,6 @@ public class BusinessOwnerWritePlatformServiceImpl implements BusinessOwnerWrite
             is_owner_update = true;
         }
 
-
-
         if (command.stringValueOfParameterNamed("email") != null) {
             email = command.stringValueOfParameterNamed("email");
             clientBusinessOwner.setEmail(email);

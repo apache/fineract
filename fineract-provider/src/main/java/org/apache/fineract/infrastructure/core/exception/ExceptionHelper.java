@@ -18,10 +18,9 @@
  */
 package org.apache.fineract.infrastructure.core.exception;
 
+import java.util.List;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.slf4j.Logger;
-
-import java.util.List;
 
 public class ExceptionHelper {
 
@@ -50,8 +49,9 @@ public class ExceptionHelper {
         }
         return rootCause;
     }
-    
-    public static void handleExceptions(Exception exception, StringBuilder sb, String errorMessage, final Long entityId, final Logger logger) {
+
+    public static void handleExceptions(Exception exception, StringBuilder sb, String errorMessage, final Long entityId,
+            final Logger logger) {
         if (exception instanceof PlatformApiDataValidationException) {
             PlatformApiDataValidationException e = (PlatformApiDataValidationException) exception;
             final List<ApiParameterError> errors = e.getErrors();
