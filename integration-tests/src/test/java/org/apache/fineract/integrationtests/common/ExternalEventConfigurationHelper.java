@@ -80,6 +80,11 @@ public class ExternalEventConfigurationHelper {
         loanAcceptTransferBusinessEvent.put("enabled", false);
         defaults.add(loanAcceptTransferBusinessEvent);
 
+        Map<String, Object> loanAccountOverpaidBusinessEvent = new HashMap<>();
+        loanAccountOverpaidBusinessEvent.put("type", "LoanAccountOverpaidBusinessEvent");
+        loanAccountOverpaidBusinessEvent.put("enabled", false);
+        defaults.add(loanAccountOverpaidBusinessEvent);
+
         Map<String, Object> loanAddChargeBusinessEvent = new HashMap<>();
         loanAddChargeBusinessEvent.put("type", "LoanAddChargeBusinessEvent");
         loanAddChargeBusinessEvent.put("enabled", false);

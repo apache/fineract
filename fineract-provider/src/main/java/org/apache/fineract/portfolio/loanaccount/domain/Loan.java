@@ -312,6 +312,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "total_overpaid_derived", scale = 6, precision = 19)
     private BigDecimal totalOverpaid;
 
+    @Column(name = "overpaidon_date")
+    private LocalDate overpaidOnDate;
+
     @Column(name = "loan_counter")
     private Integer loanCounter;
 
@@ -3403,10 +3406,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         }
         if (isAllChargesPaid) {
             loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL, this);
-
             this.closedOnDate = transactionDate;
             this.actualMaturityDate = transactionDate;
         } else if (LoanStatus.fromInt(this.loanStatus).isOverpaid()) {
+            if (this.totalOverpaid == null || BigDecimal.ZERO.compareTo(this.totalOverpaid) == 0) {
+                this.overpaidOnDate = null;
+            }
             loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, this);
         }
         processIncomeAccrualTransactionOnLoanClosure();
@@ -3480,7 +3485,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     private void handleLoanOverpayment(final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
         loanLifecycleStateMachine.transition(LoanEvent.LOAN_OVERPAYMENT, this);
-
+        this.overpaidOnDate = DateUtils.getBusinessLocalDate();
         this.closedOnDate = null;
         this.actualMaturityDate = null;
     }
@@ -5235,6 +5240,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return this.totalOverpaid;
     }
 
+    public LocalDate getOverpaidOnDate() {
+        return this.overpaidOnDate;
+    }
+
     public void updateIsInterestRecalculationEnabled() {
         this.loanRepaymentScheduleDetail.updateIsInterestRecalculationEnabled(isInterestRecalculationEnabledForProduct());
     }
@@ -6030,8 +6039,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         this.loanTransactions.add(newCreditBalanceRefundTransaction);
 
         updateLoanSummaryDerivedFields();
-
         if (this.totalOverpaid == null || BigDecimal.ZERO.compareTo(this.totalOverpaid) == 0) {
+            this.overpaidOnDate = null;
             defaultLoanLifecycleStateMachine.transition(LoanEvent.LOAN_CREDIT_BALANCE_REFUND, this);
         }
 
