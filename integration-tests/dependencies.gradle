@@ -43,4 +43,5 @@ dependencies {
 
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'com.github.tomakehurst:wiremock-jre8:2.35.0'
 }
