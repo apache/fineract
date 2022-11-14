@@ -84,7 +84,7 @@ jib {
             }
         }
         // NOTE: other custom dependencies
-        implementation 'org.mariadb.jdbc:mariadb-java-client:3.0.7'
+        implementation 'org.mariadb.jdbc:mariadb-java-client:3.0.9'
         implementation 'mysql:mysql-connector-java:8.0.31'
         implementation 'org.postgresql:postgresql:42.5.0'
         annotationProcessor('org.springframework.boot:spring-boot-autoconfigure-processor')
