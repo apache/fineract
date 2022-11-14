@@ -204,7 +204,12 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                 }
                 Long transaction = null;
                 if (entityType != null) {
-                    transaction = Long.parseLong(transactionId.substring(1).trim());
+                    if (transactionId.substring(0, 2).equalsIgnoreCase("SH")) {
+                        transaction = Long.parseLong(transactionId.substring(2).trim());
+                    } else {
+                        transaction = Long.parseLong(transactionId.substring(1).trim());
+                    }
+
                 }
 
                 TransactionTypeEnumData transactionTypeEnumData = null;
