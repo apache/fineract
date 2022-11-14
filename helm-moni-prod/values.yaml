@@ -1,0 +1,94 @@
+fineract-rest:
+  replicaCount: 1
+  configFiles:
+    - mountPath: "/app/resources/logback.xml"
+      mountFileName: "logback.xml"
+  repository: "646245671754.dkr.ecr.us-east-1.amazonaws.com/fiter-backend-app"
+  pullPolicy: IfNotPresent
+  tag: "8fc0595"
+  env:
+    TZ: "UTC"
+    FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME: "com.mysql.cj.jdbc.Driver"
+    FINERACT_HIKARI_JDBC_URL: "jdbc:mysql://fiter-moni-africa-prod.cu8xyxecoh5g.us-east-1.rds.amazonaws.com:3306/fineract_tenants"
+    FINERACT_HIKARI_USERNAME: "admin"
+    FINERACT_HIKARI_MINIMUM_IDLE: 1
+    FINERACT_HIKARI_MAXIMUM_POOL_SIZE: 20
+    FINERACT_HIKARI_IDLE_TIMEOUT: 120000
+    FINERACT_HIKARI_CONNECTION_TIMEOUT: 300000
+    FINERACT_HIKARI_TEST_QUERY: "SELECT 1"
+    FINERACT_HIKARI_AUTO_COMMIT: "true"
+    FINERACT_HIKARI_DS_PROPERTIES_CACHE_PREP_STMTS: "true"
+    FINERACT_HIKARI_DS_PROPERTIES_PREP_STMT_CACHE_SIZE: 250
+    FINERACT_HIKARI_DS_PROPERTIES_PREP_STMT_CACHE_SQL_LIMIT: 2048
+    FINERACT_HIKARI_DS_PROPERTIES_USE_SERVER_PREP_STMTS: "true"
+    FINERACT_HIKARI_DS_PROPERTIES_USE_LOCAL_SESSION_STATE: "true"
+    FINERACT_HIKARI_DS_PROPERTIES_REWRITE_BATCHED_STATEMENTS: "true"
+    FINERACT_HIKARI_DS_PROPERTIES_CACHE_RESULT_SET_METADATA: "true"
+    FINERACT_HIKARI_DS_PROPERTIES_CACHE_SERVER_CONFIGURATION: "true"
+    FINERACT_HIKARI_DS_PROPERTIES_ELIDE_SET_AUTO_COMMITS: "true"
+    FINERACT_HIKARI_DS_PROPERTIES_MAINTAIN_TIME_STATS: "false"
+    FINERACT_HIKARI_DS_PROPERTIES_LOG_SLOW_QUERIES: "true"
+    FINERACT_HIKARI_DS_PROPERTIES_DUMP_QUERIES_IN_EXCEPTION: "true"
+    FINERACT_DEFAULT_TENANTDB_HOSTNAME: "fiter-moni-africa-prod.cu8xyxecoh5g.us-east-1.rds.amazonaws.com"
+    FINERACT_DEFAULT_TENANTDB_PORT: 3306
+    FINERACT_DEFAULT_TENANTDB_UID: "admin"
+    FINERACT_DEFAULT_TENANTDB_TIMEZONE: "Africa/Lagos"
+    FINERACT_DEFAULT_TENANTDB_IDENTIFIER: "default"
+    FINERACT_DEFAULT_TENANTDB_NAME: "fineract_default"
+    FINERACT_DEFAULT_TENANTDB_DESCRIPTION: "MoniAfrica Default Tenant"
+    FINERACT_SERVER_SSL_ENABLED: "true"
+    FINERACT_SERVER_PORT: 8443
+
+  
+  
+  awsSecrets:
+    FINERACT_HIKARI_PASSWORD: "arn:aws:secretsmanager:us-east-1:646245671754:secret:HIKARI_PASS-VTGNFz"
+    FINERACT_DEFAULT_TENANTDB_PWD: "arn:aws:secretsmanager:us-east-1:646245671754:secret:rds-pass-6EFOTQ"
+  
+  service:
+    type: ClusterIP
+    servicePorts:
+      - port: 8080
+        containerPort: 8080
+        protocol: TCP
+        name: http
+      - port: 8443
+        containerPort: 8443
+        protocol: TCP
+        name: job-port
+        # service_disabled: true
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+  serviceAccount:
+    name: application-sa
+  ingress:
+    enabled: false
+  resources:
+    requests:
+      cpu: 1024m
+      memory: 2048Mi
+    limits:
+      cpu: 2048m
+      memory: 3096Mi
+  
+  # livenessProbe:
+  #   failureThreshold: 3
+  #   httpGet:
+  #     path: /fineract-provider/actuator/health/ 
+  #     port: 8080
+  #     scheme: HTTP
+  #   initialDelaySeconds: 90
+  #   periodSeconds: 120
+  #   successThreshold: 1
+  #   timeoutSeconds: 10
+  # startupProbe:
+  #   httpGet:
+  #     path: fineract-provider/actuator/health
+  #     port: http
+  #     scheme: HTTP
+  #   failureThreshold: 5
+  #   periodSeconds: 60
