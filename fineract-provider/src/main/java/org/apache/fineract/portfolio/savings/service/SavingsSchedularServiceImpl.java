@@ -51,6 +51,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
 import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.jdbc.core.JdbcTemplate;

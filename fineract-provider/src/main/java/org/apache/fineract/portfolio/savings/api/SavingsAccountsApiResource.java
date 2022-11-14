@@ -297,7 +297,8 @@ public class SavingsAccountsApiResource {
         }
 
         SavingsAccountData savingsAccountData = SavingsAccountData.withTemplateOptions(savingsAccount, templateData, transactions, charges,
-                blockNarrationsOptions, blockNarrationHistoryData);
+                blockNarrationsOptions,
+                blockNarrationHistoryData);
         savingsAccountData.setTransactionSize(transactionSize);
         return savingsAccountData;
     }
