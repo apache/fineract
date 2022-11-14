@@ -221,6 +221,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             rowSet = callFilteredPgSql(sql, valueFilter, filterColumnType);
         } else if (databaseTypeResolver.isMySQL()) {
             rowSet = callFilteredMysql(sql, valueFilter, filterColumnType);
+        } else {
+            throw new IllegalStateException("Database type is not supported");
         }
 
         String[] resultColumnNames = resultColumns.split(",");

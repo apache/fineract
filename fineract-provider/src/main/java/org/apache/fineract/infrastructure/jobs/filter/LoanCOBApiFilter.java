@@ -133,17 +133,9 @@ public class LoanCOBApiFilter extends OncePerRequestFilter {
 
     private Long getLoanId(boolean isGlim, Supplier<Stream<String>> streamSupplier) {
         if (!isGlim) {
-            if (streamSupplier.get().count() >= LOAN_ID_INDEX_IN_URL + 1) {
-                return Long.valueOf(streamSupplier.get().skip(LOAN_ID_INDEX_IN_URL).findFirst().get());
-            } else {
-                return null;
-            }
+            return streamSupplier.get().skip(LOAN_ID_INDEX_IN_URL).findFirst().map(Long::valueOf).orElse(null);
         } else {
-            if (streamSupplier.get().count() >= GLIM_ID_INDEX_IN_URL + 1) {
-                return Long.valueOf(streamSupplier.get().skip(GLIM_ID_INDEX_IN_URL).findFirst().get());
-            } else {
-                return null;
-            }
+            return streamSupplier.get().skip(GLIM_ID_INDEX_IN_URL).findFirst().map(Long::valueOf).orElse(null);
         }
     }
 
@@ -155,9 +147,6 @@ public class LoanCOBApiFilter extends OncePerRequestFilter {
     }
 
     private boolean isGlim(Supplier<Stream<String>> streamSupplier) {
-        if (streamSupplier.get().count() >= GLIM_STRING_INDEX_IN_URL + 1) {
-            return "glimAccount".equals(streamSupplier.get().skip(GLIM_STRING_INDEX_IN_URL).findFirst().get());
-        }
-        return false;
+        return streamSupplier.get().skip(GLIM_STRING_INDEX_IN_URL).findFirst().map(s -> s.equals("glimAccount")).orElse(false);
     }
 }
