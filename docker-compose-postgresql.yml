@@ -21,7 +21,7 @@ version: '3.7'
 services:
   # Backend service
   fineractpostgresql:
-    image: postgres:14.5
+    image: postgres:14.6
     volumes:
       - ./fineract-db/docker/postgresql:/docker-entrypoint-initdb.d/:Z,ro
     restart: always

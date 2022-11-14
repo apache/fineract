@@ -24,11 +24,11 @@ dependencyManagement {
     imports {
         mavenBom 'org.springframework:spring-framework-bom:5.3.23'
         mavenBom 'org.springframework.boot:spring-boot-dependencies:2.7.5'
-        mavenBom 'org.jetbrains.kotlin:kotlin-bom:1.7.20'
+        mavenBom 'org.jetbrains.kotlin:kotlin-bom:1.7.21'
         mavenBom 'org.junit:junit-bom:5.9.1'
         mavenBom 'com.fasterxml.jackson:jackson-bom:2.14.0'
         mavenBom 'io.cucumber:cucumber-bom:7.9.0'
-        mavenBom 'io.netty:netty-bom:4.1.84.Final'
+        mavenBom 'io.netty:netty-bom:4.1.85.Final'
         mavenBom 'org.mockito:mockito-bom:4.8.1'
     }
 
@@ -61,11 +61,11 @@ dependencyManagement {
             exclude 'com.sun.mail:javax.mail'
         }
         dependency 'org.quartz-scheduler:quartz:2.3.2'
-        dependency 'com.amazonaws:aws-java-sdk-s3:1.12.336'
-        dependency 'org.ehcache:ehcache:3.10.2'
+        dependency 'com.amazonaws:aws-java-sdk-s3:1.12.341'
+        dependency 'org.ehcache:ehcache:3.10.4'
         dependency 'com.github.spullara.mustache.java:compiler:0.9.10'
         dependency 'com.jayway.jsonpath:json-path:2.7.0'
-        dependency 'org.apache.tika:tika-core:2.5.0'
+        dependency 'org.apache.tika:tika-core:2.6.0'
         dependency 'org.apache.httpcomponents:httpclient:4.5.13'
         dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
         dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
@@ -122,7 +122,7 @@ dependencyManagement {
         dependency 'org.eclipse.jgit:org.eclipse.jgit:6.3.0.202209071007-r'
         dependency 'org.eclipse.jgit:org.eclipse.jgit.ssh.apache:6.3.0.202209071007-r'
 
-        dependency 'org.tmatesoft.svnkit:svnkit:1.10.8'
+        dependency 'org.tmatesoft.svnkit:svnkit:1.10.9'
         dependency 'com.vdurmont:semver4j:3.1.0'
         dependency 'org.beryx:text-io:3.4.1'
 
