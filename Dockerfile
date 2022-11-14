@@ -23,7 +23,7 @@ COPY . fineract
 WORKDIR /fineract
 
 
-RUN ./gradlew --no-daemon -q  -x compileTestJava -x test -x spotlessJavaCheck -x spotlessJava bootJar
+RUN ./gradlew --no-daemon -q  -x compileTestJava -x test bootJar
 RUN mv /fineract/fineract-provider/build/libs/*.jar /fineract/fineract-provider/build/libs/fineract-provider.jar
 
 

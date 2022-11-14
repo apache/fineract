@@ -4410,7 +4410,6 @@ public class SavingsAccount extends AbstractPersistableCustom {
             if (postedAsOnDates.contains(periodInterval.endDate().plusDays(1))) {
                 isUserPosting = true;
             }
-
             final PostingPeriod postingPeriod = PostingPeriod.createFrom(periodInterval, periodStartingBalance,
                     retrieveOrderedTransactionsWithInterestPostings(startInterestAccrualCalculationOn), this.currency,
                     compoundingPeriodType, savingsInterestCalculationType, interestRateAsFraction, daysInYearType.getValue(),

@@ -1293,24 +1293,36 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     }
 
     @Override
-    public Collection<SavingsAccountTransactionData> retrieveAllTransactions(final Long savingsId, DepositAccountType depositAccountType) {
-
+    public Collection<SavingsAccountTransactionData> retrieveAllTransactions(final Long savingsId, DepositAccountType depositAccountType,
+            Integer offset, Integer limit) {
+        if (offset == null) {
+            offset = 1;
+        }
+        if (limit == null) {
+            limit = 15;
+        }
         final String sql = "select " + this.transactionsMapper.schema()
-                + " where sa.id = ? and sa.deposit_type_enum = ? order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC";
+                + " where sa.id = ? and sa.deposit_type_enum = ? AND transaction_type_enum not in (22,25)  order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC LIMIT ? OFFSET ?  ";
 
-        return this.jdbcTemplate.query(sql, this.transactionsMapper, new Object[] { savingsId, depositAccountType.getValue() }); // NOSONAR
+        return this.jdbcTemplate.query(sql, this.transactionsMapper,
+                new Object[] { savingsId, depositAccountType.getValue(), limit, offset }); // NOSONAR
     }
 
     @Override
     public Collection<SavingsAccountTransactionData> retrieveAccrualTransactions(final Long savingsId,
-            DepositAccountType depositAccountType) {
+            DepositAccountType depositAccountType, Integer offset, Integer limit) {
+        if (offset == null) {
+            offset = 1;
+        }
+        if (limit == null) {
+            limit = 15;
+        }
 
         final String sql = "select " + this.transactionsMapper.schema()
-                + " where sa.id = ? and sa.deposit_type_enum = ? AND transaction_type_enum in (?,?)  order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC";
+                + " where sa.id = ? and sa.deposit_type_enum = ? AND transaction_type_enum in (22,25)  order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC LIMIT ? OFFSET ?   ";
 
         return this.jdbcTemplate.query(sql, this.transactionsMapper,
-                new Object[] { savingsId, depositAccountType.getValue(), SavingsAccountTransactionType.ACCRUAL_INTEREST_POSTING.getValue(),
-                        SavingsAccountTransactionType.OVERDRAFT_ACCRUAL_INTEREST.getValue() });
+                new Object[] { savingsId, depositAccountType.getValue(), limit, offset });
     }
 
     @Override
@@ -1841,14 +1853,25 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     }
 
     @Override
-    public List<Long> getAccountsIdsByStatusPaged(Integer status, int pageSize, Long maxSavingsIdInList) {
-        String sql = new StringBuilder().append(" SELECT sa.id FROM m_savings_account sa ")
-                .append(" where sa.id > ? and sa.status_enum  = ? ").append(" order by sa.id limit ?").toString();
+    public Long getSavingsAccountTransactionTotalFiltered(final Long savingsId, DepositAccountType depositAccountType,
+            Boolean hideAccrualTransactions) {
+        StringBuilder sqlBuilder = new StringBuilder().append(
+                " SELECT COUNT(tr.id) FROM m_savings_account sa  JOIN m_savings_account_transaction tr ON tr.savings_account_id = sa.id ")
+                .append(" where sa.id = ? and sa.deposit_type_enum = ? ");
+        if (hideAccrualTransactions) {
+            sqlBuilder.append(" AND transaction_type_enum not in (?,?) ");
+        } else {
+            sqlBuilder.append(" AND transaction_type_enum in (?,?) ");
+        }
+        sqlBuilder.append(" order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC ");
 
         try {
-            return this.jdbcTemplate.queryForList(sql, Long.class, new Object[] { maxSavingsIdInList, status, pageSize });
+            return this.jdbcTemplate.queryForObject(sqlBuilder.toString(), Long.class,
+                    new Object[] { savingsId, depositAccountType.getValue(),
+                            SavingsAccountTransactionType.ACCRUAL_INTEREST_POSTING.getValue(),
+                            SavingsAccountTransactionType.OVERDRAFT_ACCRUAL_INTEREST.getValue() });
         } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<>();
+            return 0L;
         }
     }
 
@@ -1914,6 +1937,18 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         sql.append(" AND msa.deposit_type_enum = ? ");
 
         return this.jdbcTemplate.queryForList(sql.toString(), Long.class, accountType);
+    }
+
+    @Override
+    public List<Long> retrieveActiveSavingAccountsWithZeroInterest() {
+        String sql = "select id from m_savings_account where status_enum = 300 and nominal_annual_interest_rate != 0 and deposit_type_enum != 200";
+        return this.jdbcTemplate.queryForList(sql, Long.class);
+    }
+
+    @Override
+    public List<Long> retrieveActiveOverdraftSavingAccounts() {
+        String sql = "select id from m_savings_account where status_enum = 300 and (allow_overdraft = 1 or account_balance_derived <= 0) and deposit_type_enum != 200";
+        return this.jdbcTemplate.queryForList(sql, Long.class);
     }
 
 }
