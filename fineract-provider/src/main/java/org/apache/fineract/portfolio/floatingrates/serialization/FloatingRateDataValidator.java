@@ -198,7 +198,7 @@ public class FloatingRateDataValidator {
             baseDataValidator.reset().parameter(IS_BASE_LENDING_RATE).value(isBaseLendingRate).notNull();
             if (isBaseLendingRate == null) {
                 baseDataValidator.reset().parameter(IS_BASE_LENDING_RATE).trueOrFalseRequired(false);
-            } else if (isBaseLendingRate && baseLendingRate != null && !baseLendingRate.getId().equals(floatingRateForUpdate.getId())) {
+            } else if (isBaseLendingRate && baseLendingRate != null && !baseLendingRate.getId().equals(floatingRateForUpdate.getId())) { // NOSONAR
                 baseDataValidator.reset().parameter(IS_BASE_LENDING_RATE).value(isBaseLendingRate).failWithCode("baselendingrate.duplicate",
                         "Base Lending Rate already exists");
             }
@@ -220,7 +220,7 @@ public class FloatingRateDataValidator {
             isActive = floatingRateForUpdate.isActive();
         }
 
-        if (baseLendingRate != null && baseLendingRate.getId().equals(floatingRateForUpdate.getId()) && (!isBaseLendingRate || !isActive)) {
+        if (baseLendingRate != null && baseLendingRate.getId().equals(floatingRateForUpdate.getId()) && (!isBaseLendingRate || !isActive)) { // NOSONAR
             isBLRModifiedAsNonBLR = true;
         }
 

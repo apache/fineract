@@ -294,8 +294,9 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                 break;
             }
         }
-
-        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(newChargeRefundTxn.getLoan()));
+        if (newChargeRefundTxn != null) {
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(newChargeRefundTxn.getLoan()));
+        }
         businessEventNotifierService.notifyPostBusinessEvent(new LoanChargeRefundBusinessEvent(newChargeRefundTxn));
         return result;
     }
@@ -1075,7 +1076,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         BigDecimal chargeAmountPaid;
         BigDecimal chargeAmountRefunded = BigDecimal.ZERO;
         MonetaryCurrency loanCurrency = loanCharge.getLoan().getCurrency();
-        if (loanCharge.isInstalmentFee()) {
+        if (loanCharge.isInstalmentFee() && installmentChargeEntry != null) {
             final Integer installmentNumber = installmentChargeEntry.getRepaymentInstallment().getInstallmentNumber();
             chargeAmountPaid = installmentChargeEntry.getAmountPaid(loanCurrency).getAmount();
             for (LoanChargePaidBy loanChargePaidBy : loanCharge.getLoanChargePaidBySet()) {
