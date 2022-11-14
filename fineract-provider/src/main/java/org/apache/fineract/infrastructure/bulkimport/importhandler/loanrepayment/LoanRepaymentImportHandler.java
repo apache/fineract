@@ -121,6 +121,7 @@ public class LoanRepaymentImportHandler implements ImportHandler {
 
                 JsonObject loanRepaymentJsonob = gsonBuilder.create().toJsonTree(loanRepayment).getAsJsonObject();
                 loanRepaymentJsonob.remove("manuallyReversed");
+                loanRepaymentJsonob.remove("numberOfRepayments");
                 String payload = loanRepaymentJsonob.toString();
                 final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                         .loanRepaymentTransaction(loanRepayment.getAccountId()) //
