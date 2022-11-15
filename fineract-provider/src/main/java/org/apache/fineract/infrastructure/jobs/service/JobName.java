@@ -18,9 +18,6 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
-import java.util.Arrays;
-import java.util.Optional;
-
 public enum JobName {
 
     UPDATE_LOAN_ARREARS_AGEING("Update Loan Arrears Ageing"), //
@@ -66,13 +63,9 @@ public enum JobName {
         this.name = name;
     }
 
-    public static JobName getJobByName(String jobName) {
-        Optional<JobName> optionalJob = Arrays.stream(JobName.values()).filter(jn -> jobName.equals(jn.name)).findAny();
-        return optionalJob.orElseThrow(() -> new IllegalArgumentException("Job not found by name: " + jobName));
-    }
-
     @Override
     public String toString() {
         return this.name;
     }
+
 }

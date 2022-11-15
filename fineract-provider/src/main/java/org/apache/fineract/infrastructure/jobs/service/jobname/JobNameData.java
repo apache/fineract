@@ -16,8 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.fineract.infrastructure.jobs.service.jobname;
 
-dependencies {
-    implementation(project(':fineract-provider'))
-    implementation('org.springframework.boot:spring-boot-starter-data-jpa')
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor
+public class JobNameData {
+
+    private final String enumStyleName;
+    private final String humanReadableName;
 }

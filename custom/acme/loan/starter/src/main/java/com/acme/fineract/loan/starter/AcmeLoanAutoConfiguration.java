@@ -29,7 +29,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScans;
 
 @AutoConfiguration
-@ComponentScans({ @ComponentScan("com.acme.fineract.loan.cob"), @ComponentScan("com.acme.fineract.loan.processor") })
+@ComponentScans({ @ComponentScan("com.acme.fineract.loan.cob"), @ComponentScan("com.acme.fineract.loan.processor"),
+        @ComponentScan("com.acme.fineract.loan.job") })
 @ConditionalOnProperty("acme.loan.enabled")
 public class AcmeLoanAutoConfiguration {
 

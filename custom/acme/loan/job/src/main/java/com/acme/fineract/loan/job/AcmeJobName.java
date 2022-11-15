@@ -16,8 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package com.acme.fineract.loan.job;
 
-dependencies {
-    implementation(project(':fineract-provider'))
-    implementation('org.springframework.boot:spring-boot-starter-data-jpa')
+public enum AcmeJobName {
+
+    ACME_NOOP_JOB("Acme Noop Job");
+
+    private final String name;
+
+    AcmeJobName(final String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return this.name;
+    }
 }
