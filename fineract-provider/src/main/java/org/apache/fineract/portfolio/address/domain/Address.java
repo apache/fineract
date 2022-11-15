@@ -97,10 +97,14 @@ public class Address extends AbstractPersistableCustom {
     @Column(name = "updated_on")
     private LocalDate updatedOn;
 
+    @ManyToOne
+    @JoinColumn(name = "lga_id")
+    private CodeValue lga;
+
     private Address(final String street, final String addressLine1, final String addressLine2, final String addressLine3,
             final String townVillage, final String city, final String countyDistrict, final CodeValue stateProvince,
             final CodeValue country, final String postalCode, final BigDecimal latitude, final BigDecimal longitude, final String createdBy,
-            final LocalDate createdOn, final String updatedBy, final LocalDate updatedOn) {
+            final LocalDate createdOn, final String updatedBy, final LocalDate updatedOn, final CodeValue lga) {
         this.street = street;
         this.addressLine1 = addressLine1;
         this.addressLine2 = addressLine2;
@@ -117,6 +121,7 @@ public class Address extends AbstractPersistableCustom {
         // this.createdOn = createdOn;
         this.updatedBy = updatedBy;
         // this.updatedOn = updatedOn;
+        this.lga = lga;
 
         if (createdOn != null) {
             this.createdOn = createdOn;
@@ -164,10 +169,10 @@ public class Address extends AbstractPersistableCustom {
         final LocalDate updatedOn = command.localDateValueOfParameterNamed("updatedOn");
 
         return new Address(street, addressLine1, addressLine2, addressLine3, townVillage, city, countyDistrict, stateProvince, country,
-                postalCode, latitude, longitude, createdBy, createdOn, updatedBy, updatedOn);
+                postalCode, latitude, longitude, createdBy, createdOn, updatedBy, updatedOn, null);
     }
 
-    public static Address fromJsonObject(final JsonObject jsonObject, final CodeValue state_province, final CodeValue country) {
+    public static Address fromJsonObject(final JsonObject jsonObject, final CodeValue state_province, final CodeValue country, final CodeValue lga) {
         String street = "";
         String addressLine1 = "";
         String addressLine2 = "";
@@ -238,7 +243,7 @@ public class Address extends AbstractPersistableCustom {
         }
 
         return new Address(street, addressLine1, addressLine2, addressLine3, townVillage, city, countyDistrict, state_province, country,
-                postalCode, latitude, longitude, createdBy, createdOnDate, updatedBy, updatedOnDate);
+                postalCode, latitude, longitude, createdBy, createdOnDate, updatedBy, updatedOnDate, lga);
     }
 
     public Set<ClientAddress> getClientaddress() {
@@ -377,4 +382,11 @@ public class Address extends AbstractPersistableCustom {
         this.updatedOn = updatedOn;
     }
 
+    public CodeValue getLga() {
+        return lga;
+    }
+
+    public void setLga(CodeValue lga) {
+        this.lga = lga;
+    }
 }
