@@ -37,12 +37,8 @@ public enum ChargeTimeType {
     SHAREACCOUNT_ACTIVATION(13, "chargeTimeType.activation"), // only for loan
     SHARE_PURCHASE(14, "chargeTimeType.sharespurchase"), SHARE_REDEEM(15, "chargeTimeType.sharesredeem"),
 
-    SAVINGS_NOACTIVITY_FEE(16, "chargeTimeType.savingsNoActivityFee"), DISBURSE_TO_SAVINGS(17,
-            "chargeTimeType.disburseToSavings"), FDA_PRE_CLOSURE_FEE(18,
-                    "chargeTimeType.fdaPreclosureFee"), FDA_PARTIAL_LIQUIDATION_FEE(19, "chargeTimeType.fdaPartialLiquidationFee"); // only
-                                                                                                                                    // for
-                                                                                                                                    // loan
-                                                                                                                                    // charges
+    SAVINGS_NOACTIVITY_FEE(16, "chargeTimeType.savingsNoActivityFee"), DISBURSE_TO_SAVINGS(17,"chargeTimeType.disburseToSavings"),
+    FDA_PRE_CLOSURE_FEE(18,"chargeTimeType.fdaPreclosureFee"), FDA_PARTIAL_LIQUIDATION_FEE(19, "chargeTimeType.fdaPartialLiquidationFee");
 
     private final Integer value;
     private final String code;
@@ -142,6 +138,12 @@ public enum ChargeTimeType {
                 case 17:
                     chargeTimeType = DISBURSE_TO_SAVINGS;
                 break;
+                case 18:
+                    chargeTimeType = FDA_PRE_CLOSURE_FEE;
+                    break;
+                case 19:
+                    chargeTimeType = FDA_PARTIAL_LIQUIDATION_FEE;
+                    break;
                 default:
                     chargeTimeType = INVALID;
                 break;
