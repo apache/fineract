@@ -19,22 +19,20 @@
 package org.apache.fineract.cob.loan;
 
 import java.time.LocalDate;
-import java.util.Collection;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.event.business.domain.loan.LoanRepaymentOverdueBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
-import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 public class CheckLoanRepaymentOverdueBusinessStep implements LoanCOBBusinessStep {
 
-    private final LoanReadPlatformService loanReadPlatformService;
     private final ConfigurationDomainService configurationDomainService;
     private final BusinessEventNotifierService businessEventNotifierService;
 
@@ -42,13 +40,14 @@ public class CheckLoanRepaymentOverdueBusinessStep implements LoanCOBBusinessSte
     public Loan execute(Loan loan) {
         Long numberOfDaysAfterDueDateToRaiseEvent = configurationDomainService.retrieveRepaymentOverdueDays();
         final LocalDate currentDate = DateUtils.getBusinessLocalDate();
-        final Collection<OverdueLoanScheduleData> overdueInstallmentsForLoan = loanReadPlatformService
-                .retrieveAllOverdueInstallmentsForLoan(loan);
-        for (OverdueLoanScheduleData overdueInstallment : overdueInstallmentsForLoan) {
-            LocalDate installmentDueDate = LocalDate.parse(overdueInstallment.getDueDate());
-            if (installmentDueDate.plusDays(numberOfDaysAfterDueDateToRaiseEvent).equals(currentDate)) {
-                businessEventNotifierService.notifyPostBusinessEvent(new LoanRepaymentOverdueBusinessEvent(loan));
-                break;
+        final List<LoanRepaymentScheduleInstallment> loanRepaymentScheduleInstallments = loan.getRepaymentScheduleInstallments();
+        for (LoanRepaymentScheduleInstallment repaymentSchedule : loanRepaymentScheduleInstallments) {
+            if (!repaymentSchedule.isObligationsMet()) {
+                LocalDate installmentDueDate = repaymentSchedule.getDueDate();
+                if (installmentDueDate.plusDays(numberOfDaysAfterDueDateToRaiseEvent).equals(currentDate)) {
+                    businessEventNotifierService.notifyPostBusinessEvent(new LoanRepaymentOverdueBusinessEvent(loan));
+                    break;
+                }
             }
         }
         return loan;
