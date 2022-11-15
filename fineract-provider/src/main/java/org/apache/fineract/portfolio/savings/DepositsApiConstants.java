@@ -227,9 +227,11 @@ public final class DepositsApiConstants {
     private static final Set<String> PRECLOSURE_RESPONSE_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(preClosurePenalApplicableParamName, preClosurePenalInterestParamName, preClosurePenalInterestOnType));
 
-    private static final Set<String> DEPOSIT_TERM_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(minDepositTermParamName,
-            maxDepositTermParamName, minDepositTermTypeIdParamName, maxDepositTermTypeIdParamName, inMultiplesOfDepositTermParamName,
-            inMultiplesOfDepositTermTypeIdParamName, depositAmountParamName, depositMinAmountParamName, depositMaxAmountParamName));
+    private static final Set<String> DEPOSIT_TERM_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(minDepositTermParamName, maxDepositTermParamName, minDepositTermTypeIdParamName, maxDepositTermTypeIdParamName,
+                    inMultiplesOfDepositTermParamName, inMultiplesOfDepositTermTypeIdParamName, depositAmountParamName,
+                    depositMinAmountParamName, depositMaxAmountParamName, SavingProductAccountingParams.PENALTIES_RECEIVABLE.getValue(),
+                    SavingProductAccountingParams.FEES_RECEIVABLE.getValue(), SavingProductAccountingParams.INTEREST_PAYABLE.getValue()));
 
     private static final Set<String> DEPOSIT_TERM_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(minDepositTermParamName,
             maxDepositTermParamName, minDepositTermType, maxDepositTermType, inMultiplesOfDepositTermParamName,
