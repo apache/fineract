@@ -16,8 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.fineract.infrastructure.jobs.service.jobname;
 
-dependencies {
-    implementation(project(':fineract-provider'))
-    implementation('org.springframework.boot:spring-boot-starter-data-jpa')
+import java.util.Collection;
+import java.util.Set;
+
+public class SimpleJobNameProvider implements JobNameProvider {
+
+    private final Set<JobNameData> jobNames;
+
+    public SimpleJobNameProvider(Collection<JobNameData> jobNames) {
+        this.jobNames = Set.copyOf(jobNames);
+    }
+
+    @Override
+    public Set<JobNameData> provide() {
+        return jobNames;
+    }
 }

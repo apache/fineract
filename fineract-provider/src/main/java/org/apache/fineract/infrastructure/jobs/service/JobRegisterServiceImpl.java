@@ -33,6 +33,8 @@ import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.apache.fineract.infrastructure.jobs.domain.SchedulerDetail;
 import org.apache.fineract.infrastructure.jobs.exception.JobNodeIdMismatchingException;
 import org.apache.fineract.infrastructure.jobs.exception.JobNotFoundException;
+import org.apache.fineract.infrastructure.jobs.service.jobname.JobNameData;
+import org.apache.fineract.infrastructure.jobs.service.jobname.JobNameService;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
@@ -78,6 +80,9 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
 
     @Autowired
     private JobStarter jobStarter;
+
+    @Autowired
+    private JobNameService jobNameService;
 
     private static final String JOB_STARTER_METHOD_NAME = "run";
 
@@ -313,8 +318,8 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     private JobDetail createJobDetail(final ScheduledJobDetail scheduledJobDetail) throws Exception {
         final FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
 
-        JobName jobName = JobName.getJobByName(scheduledJobDetail.getJobName());
-        Job job = jobLocator.getJob(jobName.name());
+        JobNameData jobName = jobNameService.getJobByHumanReadableName(scheduledJobDetail.getJobName());
+        Job job = jobLocator.getJob(jobName.getEnumStyleName());
 
         final MethodInvokingJobDetailFactoryBean jobDetailFactoryBean = new MethodInvokingJobDetailFactoryBean();
         jobDetailFactoryBean.setName(scheduledJobDetail.getJobName() + "JobDetail" + tenant.getId());

@@ -16,8 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package com.acme.fineract.loan.job;
 
-dependencies {
-    implementation(project(':fineract-provider'))
-    implementation('org.springframework.boot:spring-boot-starter-data-jpa')
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.StepContribution;
+import org.springframework.batch.core.scope.context.ChunkContext;
+import org.springframework.batch.core.step.tasklet.Tasklet;
+import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.stereotype.Component;
+
+@Slf4j
+@Component
+public class AcmeNoopJobTasklet implements Tasklet {
+
+    @Override
+    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+        log.info("Acme custom job execution");
+        return RepeatStatus.FINISHED;
+    }
 }

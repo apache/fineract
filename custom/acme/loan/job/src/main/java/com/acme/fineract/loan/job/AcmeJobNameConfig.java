@@ -16,8 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package com.acme.fineract.loan.job;
 
-dependencies {
-    implementation(project(':fineract-provider'))
-    implementation('org.springframework.boot:spring-boot-starter-data-jpa')
+import java.util.List;
+import org.apache.fineract.infrastructure.jobs.service.jobname.JobNameData;
+import org.apache.fineract.infrastructure.jobs.service.jobname.JobNameProvider;
+import org.apache.fineract.infrastructure.jobs.service.jobname.SimpleJobNameProvider;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class AcmeJobNameConfig {
+
+    @Bean
+    public JobNameProvider acmeJobNameProvider() {
+        return new SimpleJobNameProvider(List.of(new JobNameData(AcmeJobName.ACME_NOOP_JOB.name(), AcmeJobName.ACME_NOOP_JOB.toString())));
+    }
 }
