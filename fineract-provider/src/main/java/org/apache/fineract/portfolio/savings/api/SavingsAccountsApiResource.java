@@ -67,6 +67,7 @@ import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountBlockNarrationHistoryData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountChargeData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
@@ -78,7 +79,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import org.apache.fineract.portfolio.savings.data.SavingsAccountBlockNarrationHistoryData;
 
 @Path("/savingsaccounts")
 @Component
@@ -211,7 +211,8 @@ public class SavingsAccountsApiResource {
     public String retrieveOne(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @Parameter(description = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
             @DefaultValue("all") @QueryParam("chargeStatus") @Parameter(description = "chargeStatus") final String chargeStatus,
-            @Context final UriInfo uriInfo) {
+            @Context final UriInfo uriInfo, @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
+            @QueryParam("limit") @Parameter(description = "limit") final Integer limit) {
 
         this.context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
 
@@ -223,7 +224,7 @@ public class SavingsAccountsApiResource {
 
         final Set<String> mandatoryResponseParameters = new HashSet<>();
         final SavingsAccountData savingsAccountTemplate = populateTemplateAndAssociations(accountId, savingsAccount,
-                staffInSelectedOfficeOnly, chargeStatus, uriInfo, mandatoryResponseParameters);
+                staffInSelectedOfficeOnly, chargeStatus, uriInfo, mandatoryResponseParameters, offset, limit);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);
@@ -233,25 +234,28 @@ public class SavingsAccountsApiResource {
 
     private SavingsAccountData populateTemplateAndAssociations(final Long accountId, final SavingsAccountData savingsAccount,
             final boolean staffInSelectedOfficeOnly, final String chargeStatus, final UriInfo uriInfo,
-            final Set<String> mandatoryResponseParameters) {
+            final Set<String> mandatoryResponseParameters, final Integer offset, final Integer limit) {
 
         Collection<SavingsAccountTransactionData> transactions = null;
         Collection<SavingsAccountChargeData> charges = null;
-        Integer transactionCount = null;
         Collection<CodeValueData> blockNarrationsOptions = null;
         Collection<SavingsAccountBlockNarrationHistoryData> blockNarrationHistoryData = null;
+        Long transactionSize = null;
 
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         if (!associationParameters.isEmpty()) {
 
             if (associationParameters.contains("all")) {
-                associationParameters.addAll(Arrays.asList(SavingsApiConstants.transactions, SavingsApiConstants.charges, SavingsApiConstants.blockNarrations));
+                associationParameters.addAll(
+                        Arrays.asList(SavingsApiConstants.transactions, SavingsApiConstants.charges, SavingsApiConstants.blockNarrations));
             }
 
             if (associationParameters.contains(SavingsApiConstants.transactions)) {
                 mandatoryResponseParameters.add(SavingsApiConstants.transactions);
                 final Collection<SavingsAccountTransactionData> currentTransactions = this.savingsAccountReadPlatformService
-                        .retrieveAllTransactions(accountId, DepositAccountType.SAVINGS_DEPOSIT);
+                        .retrieveAllTransactions(accountId, DepositAccountType.SAVINGS_DEPOSIT, offset, limit);
+                transactionSize = this.savingsAccountReadPlatformService.getSavingsAccountTransactionTotalFiltered(accountId,
+                        DepositAccountType.SAVINGS_DEPOSIT, true);
                 if (!CollectionUtils.isEmpty(currentTransactions)) {
                     transactions = currentTransactions;
                 }
@@ -259,7 +263,9 @@ public class SavingsAccountsApiResource {
             if (associationParameters.contains(SavingsApiConstants.accrualTransactions)) {
                 mandatoryResponseParameters.add(SavingsApiConstants.accrualTransactions);
                 final Collection<SavingsAccountTransactionData> currentTransactions = this.savingsAccountReadPlatformService
-                        .retrieveAccrualTransactions(accountId, DepositAccountType.SAVINGS_DEPOSIT);
+                        .retrieveAccrualTransactions(accountId, DepositAccountType.SAVINGS_DEPOSIT, offset, limit);
+                transactionSize = this.savingsAccountReadPlatformService.getSavingsAccountTransactionTotalFiltered(accountId,
+                        DepositAccountType.SAVINGS_DEPOSIT, false);
                 if (!CollectionUtils.isEmpty(currentTransactions)) {
                     transactions = currentTransactions;
                 }
@@ -274,7 +280,7 @@ public class SavingsAccountsApiResource {
                 }
             }
 
-            if(associationParameters.contains(SavingsApiConstants.blockNarrations)) {
+            if (associationParameters.contains(SavingsApiConstants.blockNarrations)) {
                 mandatoryResponseParameters.add(SavingsApiConstants.blockNarrations);
                 blockNarrationsOptions = this.codeValueReadPlatformService
                         .retrieveCodeValuesByCode(AccountingConstants.BLOCK_UNBLOCK_OPTION_CODE_NAME);
@@ -290,7 +296,10 @@ public class SavingsAccountsApiResource {
                     savingsAccount.productId(), staffInSelectedOfficeOnly);
         }
 
-        return SavingsAccountData.withTemplateOptions(savingsAccount, templateData, transactions, charges, blockNarrationsOptions, blockNarrationHistoryData);
+        SavingsAccountData savingsAccountData = SavingsAccountData.withTemplateOptions(savingsAccount, templateData, transactions, charges,
+                blockNarrationsOptions, blockNarrationHistoryData);
+        savingsAccountData.setTransactionSize(transactionSize);
+        return savingsAccountData;
     }
 
     @PUT
@@ -510,7 +519,7 @@ public class SavingsAccountsApiResource {
         } else if (is(commandParam, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT)) {
             final CommandWrapper commandRequest = builder.unblockSavingsAccount(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        }else if (is(commandParam, "postAccrualInterestAsOn")) {
+        } else if (is(commandParam, "postAccrualInterestAsOn")) {
             final CommandWrapper commandRequest = builder.savingsAccountAccrualInterestPosting(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
@@ -519,7 +528,7 @@ public class SavingsAccountsApiResource {
             //
             throw new UnrecognizedQueryParamException("command", commandParam,
                     new Object[] { "reject", "withdrawnByApplicant", "approve", "undoapproval", "activate", "calculateInterest",
-                            "postInterest","postAccrualInterestAsOn", "close", "assignSavingsOfficer", "unassignSavingsOfficer",
+                            "postInterest", "postAccrualInterestAsOn", "close", "assignSavingsOfficer", "unassignSavingsOfficer",
                             SavingsApiConstants.COMMAND_BLOCK_DEBIT, SavingsApiConstants.COMMAND_UNBLOCK_DEBIT,
                             SavingsApiConstants.COMMAND_BLOCK_CREDIT, SavingsApiConstants.COMMAND_UNBLOCK_CREDIT,
                             SavingsApiConstants.COMMAND_BLOCK_ACCOUNT, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT });

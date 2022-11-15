@@ -101,7 +101,7 @@ public class SelfSavingsApiResource {
         validateAppuserSavingsAccountMapping(accountId);
 
         final boolean staffInSelectedOfficeOnly = false;
-        return this.savingsAccountsApiResource.retrieveOne(accountId, staffInSelectedOfficeOnly, chargeStatus, uriInfo);
+        return this.savingsAccountsApiResource.retrieveOne(accountId, staffInSelectedOfficeOnly, chargeStatus, uriInfo, null, null);
     }
 
     @GET

@@ -89,7 +89,7 @@ public class LoanRepaymentScheduleProcessingWrapper {
                     }
                 } else if (loanCharge.isOverdueInstallmentCharge()
                         && (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd)
-                        || loanCharge.isDueForCollectionForDisburseToSavingsAndIncluding(periodStart))
+                                || loanCharge.isDueForCollectionForDisburseToSavingsAndIncluding(periodStart))
                         && loanCharge.getChargeCalculation().isPercentageBased()) {
                     cumulative = cumulative.plus(loanCharge.chargeAmount());
                 } else if ((loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd)
@@ -198,7 +198,7 @@ public class LoanRepaymentScheduleProcessingWrapper {
                     }
                 } else if (loanCharge.isOverdueInstallmentCharge()
                         && (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd)
-                        || loanCharge.isDueForCollectionForDisburseToSavingsAndIncluding(periodStart))
+                                || loanCharge.isDueForCollectionForDisburseToSavingsAndIncluding(periodStart))
                         && loanCharge.getChargeCalculation().isPercentageBased()) {
                     cumulative = cumulative.plus(loanCharge.chargeAmount());
                 } else if ((loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd)

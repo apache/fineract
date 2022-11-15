@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
@@ -1305,9 +1304,9 @@ public class AccountingProcessorHelper {
     }
 
     public void createAccrualBasedJournalEntriesAndReversalsForSavings(final Office office, final String currencyCode,
-                                                                       final Integer accountTypeToBeDebited, final Integer accountTypeToBeCredited, final Long savingsProductId,
-                                                                       final Long paymentTypeId, final Long loanId, final String transactionId, final LocalDate transactionDate, final BigDecimal amount,
-                                                                       final Boolean isReversal) {
+            final Integer accountTypeToBeDebited, final Integer accountTypeToBeCredited, final Long savingsProductId,
+            final Long paymentTypeId, final Long loanId, final String transactionId, final LocalDate transactionDate,
+            final BigDecimal amount, final Boolean isReversal) {
         int accountTypeToDebitId = accountTypeToBeDebited;
         int accountTypeToCreditId = accountTypeToBeCredited;
         // reverse debits and credits for reversals
@@ -1320,9 +1319,10 @@ public class AccountingProcessorHelper {
     }
 
     public void createAccrualBasedJournalEntriesAndReversalsForSavingsTax(final Office office, final String currencyCode,
-                                                                          final AccountingConstants.ACCRUAL_ACCOUNTS_FOR_SAVINGS accountTypeToBeDebited, final AccountingConstants.ACCRUAL_ACCOUNTS_FOR_SAVINGS accountTypeToBeCredited,
-                                                                          final Long savingsProductId, final Long paymentTypeId, final Long savingsId, final String transactionId,
-                                                                          final LocalDate transactionDate, final BigDecimal amount, final Boolean isReversal, final List<TaxPaymentDTO> taxDetails) {
+            final AccountingConstants.ACCRUAL_ACCOUNTS_FOR_SAVINGS accountTypeToBeDebited,
+            final AccountingConstants.ACCRUAL_ACCOUNTS_FOR_SAVINGS accountTypeToBeCredited, final Long savingsProductId,
+            final Long paymentTypeId, final Long savingsId, final String transactionId, final LocalDate transactionDate,
+            final BigDecimal amount, final Boolean isReversal, final List<TaxPaymentDTO> taxDetails) {
 
         for (TaxPaymentDTO taxPaymentDTO : taxDetails) {
             if (taxPaymentDTO.getAmount() != null) {
@@ -1341,10 +1341,10 @@ public class AccountingProcessorHelper {
     }
 
     public void createAccrualBasedJournalEntriesAndReversalsForSavingsCharges(final Office office, final String currencyCode,
-                                                                              final AccountingConstants.ACCRUAL_ACCOUNTS_FOR_SAVINGS accountTypeToBeDebited, final AccountingConstants.ACCRUAL_ACCOUNTS_FOR_SAVINGS accountTypeToBeCredited,
-                                                                              final Long savingsProductId, final Long paymentTypeId, final Long loanId, final String transactionId,
-                                                                              final LocalDate transactionDate, final BigDecimal totalAmount, final Boolean isReversal,
-                                                                              final List<ChargePaymentDTO> chargePaymentDTOs) {
+            final AccountingConstants.ACCRUAL_ACCOUNTS_FOR_SAVINGS accountTypeToBeDebited,
+            final AccountingConstants.ACCRUAL_ACCOUNTS_FOR_SAVINGS accountTypeToBeCredited, final Long savingsProductId,
+            final Long paymentTypeId, final Long loanId, final String transactionId, final LocalDate transactionDate,
+            final BigDecimal totalAmount, final Boolean isReversal, final List<ChargePaymentDTO> chargePaymentDTOs) {
 
         if (chargePaymentDTOs.size() != 1) {
             return;

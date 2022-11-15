@@ -58,8 +58,8 @@ import org.springframework.stereotype.Component;
 public class ClientBusinessOwnersApiResources {
 
     private final Set<String> responseDataParameters = new HashSet<>(
-            Arrays.asList("id", "clientId", "firstName", "title", "lastName", "middleName","email", "mobileNumber", "alterMobileNumber", "isActive",
-                    "city", "username", "streetNumberAndName", "dateOfBirth", "lga", "stateProvince", "country", "bvn"));
+            Arrays.asList("id", "clientId", "firstName", "title", "lastName", "middleName", "email", "mobileNumber", "alterMobileNumber",
+                    "isActive", "city", "username", "streetNumberAndName", "dateOfBirth", "lga", "stateProvince", "country", "bvn"));
     private final String resourceNameForPermissions = "BusinessOwners";
     private final PlatformSecurityContext context;
     private final ClientBusinessOwnerReadPlatformService readPlatformService;
@@ -160,7 +160,7 @@ public class ClientBusinessOwnersApiResources {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public Boolean updateOwnerStatus(@Context final UriInfo uriInfo, @PathParam("businessOwnerId") final Long businessOwnerId,
-                                     @QueryParam("status") final Boolean status, @PathParam("clientId") final Long clientId) {
+            @QueryParam("status") final Boolean status, @PathParam("clientId") final Long clientId) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 

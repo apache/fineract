@@ -44,9 +44,10 @@ import org.springframework.stereotype.Component;
 public final class ClientBusinessOwnerCommandFromApiJsonDeserializer {
 
     private final FromJsonHelper fromApiJsonHelper;
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "clientId", "firstName", "titleId",  "middleName", "lastName",
-            "ownership", "email", "mobileNumber", "businessOwnerNumber", "cityId", "streetNumberAndName", "address1", "address2",
-            "address3", "postalCode", "landmark", "typeId", "stateProvinceId", "countryId", "bvn", "nin", "locale", "dateFormat", "isActive"));
+    private final Set<String> supportedParameters = new HashSet<>(
+            Arrays.asList("id", "clientId", "firstName", "titleId", "middleName", "lastName", "ownership", "email", "mobileNumber",
+                    "businessOwnerNumber", "cityId", "streetNumberAndName", "address1", "address2", "address3", "postalCode", "landmark",
+                    "typeId", "stateProvinceId", "countryId", "bvn", "nin", "locale", "dateFormat", "isActive"));
 
     @Autowired
     public ClientBusinessOwnerCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
@@ -94,7 +95,6 @@ public final class ClientBusinessOwnerCommandFromApiJsonDeserializer {
             final String mobileNumber = this.fromApiJsonHelper.extractStringNamed("mobileNumber", element);
             baseDataValidator.reset().parameter("mobileNumber").value(mobileNumber).notNull().notBlank().notExceedingLengthOf(100);
 
-
             if (this.fromApiJsonHelper.extractStringNamed("businessOwnerNumber", element) != null) {
                 final String businessOwnerNumber = this.fromApiJsonHelper.extractStringNamed("businessOwnerNumber", element);
                 baseDataValidator.reset().parameter("businessOwnerNumber").value(businessOwnerNumber).notNull().notBlank()
@@ -131,10 +131,8 @@ public final class ClientBusinessOwnerCommandFromApiJsonDeserializer {
             baseDataValidator.reset().parameter("dateOfBirth").value(dateOfBirth).value(dateOfBirth).notNull()
                     .validateDateBefore(DateUtils.getLocalDateOfTenant());
 
-
             final String street = this.fromApiJsonHelper.extractStringNamed("streetNumberAndName", element);
             baseDataValidator.reset().parameter("streetNumberAndName").value(street).notNull().notBlank().notExceedingLengthOf(100);
-
 
             if (this.fromApiJsonHelper.extractStringNamed("nin", element) != null) {
                 final String bvn = this.fromApiJsonHelper.extractStringNamed("nin", element);
@@ -149,7 +147,6 @@ public final class ClientBusinessOwnerCommandFromApiJsonDeserializer {
             final Long cityId = this.fromApiJsonHelper.extractLongNamed("cityId", element);
             baseDataValidator.reset().parameter("cityId").value(cityId).notNull().integerGreaterThanZero();
 
-
             final String lga = this.fromApiJsonHelper.extractStringNamed("lga", element);
             baseDataValidator.reset().parameter("lga").value(lga).notNull().notBlank().notExceedingLengthOf(100);
 
@@ -157,7 +154,6 @@ public final class ClientBusinessOwnerCommandFromApiJsonDeserializer {
                 final String bvn = this.fromApiJsonHelper.extractStringNamed("bvn", element);
                 baseDataValidator.reset().parameter("bvn").value(bvn).notNull().notBlank().notExceedingLengthOf(100);
             }
-
 
             final Long stateProvinceId = this.fromApiJsonHelper.extractLongNamed("stateProvinceId", element);
             baseDataValidator.reset().parameter("stateProvinceId").value(stateProvinceId).notNull().integerGreaterThanZero();
@@ -222,7 +218,6 @@ public final class ClientBusinessOwnerCommandFromApiJsonDeserializer {
                     .notExceedingLengthOf(100);
         }
 
-
         if (this.fromApiJsonHelper.extractStringNamed("dateOfBirth", element) != null) {
             final LocalDate dateOfBirth = this.fromApiJsonHelper.extractLocalDateNamed("dateOfBirth", element);
             baseDataValidator.reset().parameter("dateOfBirth").value(dateOfBirth).value(dateOfBirth).notNull()
@@ -238,7 +233,6 @@ public final class ClientBusinessOwnerCommandFromApiJsonDeserializer {
             final String street = this.fromApiJsonHelper.extractStringNamed("streetNumberAndName", element);
             baseDataValidator.reset().parameter("streetNumberAndName").value(street).notNull().notBlank().notExceedingLengthOf(100);
         }
-
 
         if (this.fromApiJsonHelper.extractStringNamed("landmark", element) != null) {
             final String landmark = this.fromApiJsonHelper.extractStringNamed("landmark", element);

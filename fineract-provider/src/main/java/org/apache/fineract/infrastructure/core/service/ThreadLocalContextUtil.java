@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.core.service;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
@@ -74,7 +73,7 @@ public final class ThreadLocalContextUtil {
         authTokenContext.set(authToken);
     }
 
-    private static final ThreadLocal<Map<String,Object>> jobParams = new ThreadLocal<>();
+    private static final ThreadLocal<Map<String, Object>> jobParams = new ThreadLocal<>();
 
     // Map is not serializable, but Hashmap is
     public static HashMap<BusinessDateType, LocalDate> getBusinessDates() {
@@ -120,11 +119,12 @@ public final class ThreadLocalContextUtil {
         setBusinessDates(fineractContext.getBusinessDateContext());
         setActionContext(fineractContext.getActionContext());
     }
-    public static void setJobParams(final Map<String,Object> params) {
+
+    public static void setJobParams(final Map<String, Object> params) {
         jobParams.set(params);
     }
 
-    public static Map<String,Object> getJobParams() {
+    public static Map<String, Object> getJobParams() {
         return jobParams.get();
     }
 }

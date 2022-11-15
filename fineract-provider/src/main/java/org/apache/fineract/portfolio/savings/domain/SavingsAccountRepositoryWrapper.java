@@ -175,13 +175,14 @@ public class SavingsAccountRepositoryWrapper {
             account.loadLazyCollections();
         }
     }
+
     public SavingsAccount findByAccountNumber(@Param("accountNumber") String accountNumber) {
-        return this.repository.findByAccountNumber(accountNumber) ;
+        return this.repository.findByAccountNumber(accountNumber);
     }
 
-    public List<SavingsAccount> findByProductIdAndStatus(@Param("productId") Long productId, @Param("status") Integer status, @Param("numOfCredit") Long numOfCredit,
-                                                         @Param("numOfDebit") Long numOfDebit, @Param("numOfDebit") BigDecimal minBalance) {
-        return this.repository.findByProductIdAndStatus(productId, status, numOfCredit, numOfDebit, minBalance) ;
+    public List<SavingsAccount> findByProductIdAndStatus(@Param("productId") Long productId, @Param("status") Integer status,
+            @Param("numOfCredit") Long numOfCredit, @Param("numOfDebit") Long numOfDebit, @Param("numOfDebit") BigDecimal minBalance) {
+        return this.repository.findByProductIdAndStatus(productId, status, numOfCredit, numOfDebit, minBalance);
     }
 
 }

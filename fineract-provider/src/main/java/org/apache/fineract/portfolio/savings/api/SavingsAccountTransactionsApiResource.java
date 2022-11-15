@@ -161,7 +161,7 @@ public class SavingsAccountTransactionsApiResource {
             } else if (is(commandParam, SavingsApiConstants.COMMAND_HOLD_AMOUNT)) {
                 final CommandWrapper commandRequest = builder.holdAmount(savingsId).build();
                 result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            }else if (is(commandParam, "postAccrualInterestAsOn")) {
+            } else if (is(commandParam, "postAccrualInterestAsOn")) {
                 final CommandWrapper commandRequest = builder.savingsAccountAccrualInterestPosting(savingsId).build();
                 result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
             }
@@ -169,7 +169,7 @@ public class SavingsAccountTransactionsApiResource {
             if (result == null) {
                 //
                 throw new UnrecognizedQueryParamException("command", commandParam,
-                        new Object[] { "deposit", "withdrawal","postAccrualInterestAsOn", SavingsApiConstants.COMMAND_HOLD_AMOUNT });
+                        new Object[] { "deposit", "withdrawal", "postAccrualInterestAsOn", SavingsApiConstants.COMMAND_HOLD_AMOUNT });
             }
 
             return this.toApiJsonSerializer.serialize(result);

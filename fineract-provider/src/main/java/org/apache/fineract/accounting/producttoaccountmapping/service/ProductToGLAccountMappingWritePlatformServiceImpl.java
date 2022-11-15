@@ -171,7 +171,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
             break;
             case CASH_BASED:
                 cashBasedSavingsAccountProductGLTracking(savingProductId, command, accountType, element);
-                break;
+            break;
             case ACCRUAL_PERIODIC:
                 // asset
                 this.savingsProductToGLAccountMappingHelper.saveSavingsToAssetAccountMapping(element,
@@ -186,21 +186,21 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                         SavingProductAccountingParams.FEES_RECEIVABLE.getValue(), savingProductId,
                         CashAccountsForSavings.FEES_RECEIVABLE.getValue());
 
-
                 // liability
                 this.savingsProductToGLAccountMappingHelper.saveSavingsToLiabilityAccountMapping(element,
                         SavingProductAccountingParams.INTEREST_PAYABLE.getValue(), savingProductId,
                         CashAccountsForSavings.INTEREST_PAYABLE.getValue());
 
                 cashBasedSavingsAccountProductGLTracking(savingProductId, command, accountType, element);
-                break;
+            break;
             default:
             break;
         }
 
     }
 
-    private void cashBasedSavingsAccountProductGLTracking(Long savingProductId, JsonCommand command, DepositAccountType accountType, JsonElement element) {
+    private void cashBasedSavingsAccountProductGLTracking(Long savingProductId, JsonCommand command, DepositAccountType accountType,
+            JsonElement element) {
         // asset
         this.savingsProductToGLAccountMappingHelper.saveSavingsToAssetAccountMapping(element,
                 SavingProductAccountingParams.SAVINGS_REFERENCE.getValue(), savingProductId,
@@ -246,8 +246,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 SavingProductAccountingParams.TRANSFERS_SUSPENSE.getValue(), savingProductId,
                 CashAccountsForSavings.TRANSFERS_SUSPENSE.getValue());
 
-        final Boolean isDormancyTrackingActive = this.fromApiJsonHelper.extractBooleanNamed(isDormancyTrackingActiveParamName,
-                element);
+        final Boolean isDormancyTrackingActive = this.fromApiJsonHelper.extractBooleanNamed(isDormancyTrackingActiveParamName, element);
         if (null != isDormancyTrackingActive && isDormancyTrackingActive) {
             this.savingsProductToGLAccountMappingHelper.saveSavingsToLiabilityAccountMapping(element,
                     SavingProductAccountingParams.ESCHEAT_LIABILITY.getValue(), savingProductId,

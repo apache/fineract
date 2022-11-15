@@ -75,7 +75,8 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
     }
 
     @Override
-    public void notifyBusinessEventWasExecuted(BusinessEventNotificationConstants.BusinessEvents businessEvent, Map<BusinessEventNotificationConstants.BusinessEntity, Object> businessEventEntity) {
+    public void notifyBusinessEventWasExecuted(BusinessEventNotificationConstants.BusinessEvents businessEvent,
+            Map<BusinessEventNotificationConstants.BusinessEntity, Object> businessEventEntity) {
 
     }
 

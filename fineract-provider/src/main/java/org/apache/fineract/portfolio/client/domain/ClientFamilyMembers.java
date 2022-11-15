@@ -108,9 +108,10 @@ public class ClientFamilyMembers extends AbstractPersistableCustom {
     private String postalCode;
 
     private ClientFamilyMembers(final Client client, final String firstName, final String middleName, final String lastName,
-                                final String qualification, final String mobileNumber, final Long age, final Boolean isDependent, final CodeValue relationship,
-                                final CodeValue maritalStatus, final CodeValue gender, final LocalDate dateOfBirth, final CodeValue profession, String email,
-                                CodeValue addressType, String address1, String address2, String address3, CodeValue city, CodeValue stateProvince, CodeValue country, String postalCode) {
+            final String qualification, final String mobileNumber, final Long age, final Boolean isDependent, final CodeValue relationship,
+            final CodeValue maritalStatus, final CodeValue gender, final LocalDate dateOfBirth, final CodeValue profession, String email,
+            CodeValue addressType, String address1, String address2, String address3, CodeValue city, CodeValue stateProvince,
+            CodeValue country, String postalCode) {
 
         this.client = client;
         this.firstName = firstName;
@@ -142,11 +143,12 @@ public class ClientFamilyMembers extends AbstractPersistableCustom {
 
     public static ClientFamilyMembers fromJson(final Client client, final String firstName, final String middleName, final String lastName,
             final String qualification, final String mobileNumber, final Long age, final Boolean isDependent, final CodeValue relationship,
-            final CodeValue maritalStatus, final CodeValue gender, final LocalDate dateOfBirth, final CodeValue profession,
-            String email, CodeValue addressType, String address1, String address2, String address3, CodeValue city, CodeValue stateProvince,
+            final CodeValue maritalStatus, final CodeValue gender, final LocalDate dateOfBirth, final CodeValue profession, String email,
+            CodeValue addressType, String address1, String address2, String address3, CodeValue city, CodeValue stateProvince,
             CodeValue country, String postalCode) {
         return new ClientFamilyMembers(client, firstName, middleName, lastName, qualification, mobileNumber, age, isDependent, relationship,
-                maritalStatus, gender, dateOfBirth, profession, email, addressType, address1, address2, address3, city, stateProvince, country, postalCode);
+                maritalStatus, gender, dateOfBirth, profession, email, addressType, address1, address2, address3, city, stateProvince,
+                country, postalCode);
     }
 
     public Client getClient() {

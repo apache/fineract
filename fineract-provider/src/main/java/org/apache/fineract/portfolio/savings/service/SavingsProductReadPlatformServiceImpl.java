@@ -218,7 +218,6 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             final Long daysToDormancy = JdbcSupport.getLong(rs, "daysToDormancy");
             final Long daysToEscheat = JdbcSupport.getLong(rs, "daysToEscheat");
 
-
             final Boolean isInterestPostingConfigUpdate = rs.getBoolean("isInterestPostingConfigUpdate");
             final Long numOfCreditTransaction = JdbcSupport.getLong(rs, "numOfCreditTransaction");
             final Long numOfDebitTransaction = JdbcSupport.getLong(rs, "numOfDebitTransaction");
@@ -228,8 +227,8 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
                     minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers,
                     accountingRuleType, allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance, maxAllowedLienLimit,
                     lienAllowed, minBalanceForInterestCalculation, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation,
-                    withHoldTax, taxGroupData, isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat, isInterestPostingConfigUpdate,
-                    numOfCreditTransaction, numOfDebitTransaction);
+                    withHoldTax, taxGroupData, isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat,
+                    isInterestPostingConfigUpdate, numOfCreditTransaction, numOfDebitTransaction);
         }
     }
 

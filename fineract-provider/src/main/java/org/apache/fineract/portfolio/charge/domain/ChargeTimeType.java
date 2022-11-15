@@ -36,10 +36,11 @@ public enum ChargeTimeType {
                                                                     // loan
     SHAREACCOUNT_ACTIVATION(13, "chargeTimeType.activation"), // only for loan
     SHARE_PURCHASE(14, "chargeTimeType.sharespurchase"), SHARE_REDEEM(15, "chargeTimeType.sharesredeem"),
-
+    
     SAVINGS_NOACTIVITY_FEE(16, "chargeTimeType.savingsNoActivityFee"), DISBURSE_TO_SAVINGS(17,
             "chargeTimeType.disburseToSavings"), FDA_PRE_CLOSURE_FEE(18,
                     "chargeTimeType.fdaPreclosureFee"), FDA_PARTIAL_LIQUIDATION_FEE(19, "chargeTimeType.fdaPartialLiquidationFee");
+
 
     private final Integer value;
     private final String code;

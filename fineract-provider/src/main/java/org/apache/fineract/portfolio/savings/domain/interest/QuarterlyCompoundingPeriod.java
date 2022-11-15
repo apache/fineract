@@ -187,9 +187,9 @@ public final class QuarterlyCompoundingPeriod implements CompoundingPeriod {
 
     @Override
     public List<BigDecimal> calculateInterests(final SavingsCompoundingInterestPeriodType compoundingInterestPeriodType,
-                                               final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestToCompound,
-                                               final BigDecimal interestRateAsFraction, final long daysInYear, final BigDecimal minBalanceForInterestCalculation,
-                                               final BigDecimal overdraftInterestRateAsFraction, final BigDecimal minOverdraftForInterestCalculation) {
+            final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestToCompound,
+            final BigDecimal interestRateAsFraction, final long daysInYear, final BigDecimal minBalanceForInterestCalculation,
+            final BigDecimal overdraftInterestRateAsFraction, final BigDecimal minOverdraftForInterestCalculation) {
 
         List<BigDecimal> interestEarned = new ArrayList<BigDecimal>();
 
@@ -198,13 +198,13 @@ public final class QuarterlyCompoundingPeriod implements CompoundingPeriod {
                 interestEarned.addAll(calculateUsingDailyBalanceMethods(compoundingInterestPeriodType, interestToCompound,
                         interestRateAsFraction, daysInYear, minBalanceForInterestCalculation, overdraftInterestRateAsFraction,
                         minOverdraftForInterestCalculation));
-                break;
+            break;
             case AVERAGE_DAILY_BALANCE:
                 interestEarned.addAll(calculateUsingAverageDailyBalanceMethods(interestToCompound, interestRateAsFraction, daysInYear,
                         minBalanceForInterestCalculation, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation));
-                break;
+            break;
             case INVALID:
-                break;
+            break;
         }
 
         return interestEarned;
@@ -216,9 +216,9 @@ public final class QuarterlyCompoundingPeriod implements CompoundingPeriod {
     }
 
     private List<BigDecimal> calculateUsingDailyBalanceMethods(final SavingsCompoundingInterestPeriodType compoundingInterestPeriodType,
-                                                              final BigDecimal interestToCompound, final BigDecimal interestRateAsFraction, final long daysInYear,
-                                                              final BigDecimal minBalanceForInterestCalculation, final BigDecimal overdraftInterestRateAsFraction,
-                                                              final BigDecimal minOverdraftForInterestCalculation) {
+            final BigDecimal interestToCompound, final BigDecimal interestRateAsFraction, final long daysInYear,
+            final BigDecimal minBalanceForInterestCalculation, final BigDecimal overdraftInterestRateAsFraction,
+            final BigDecimal minOverdraftForInterestCalculation) {
 
         List<BigDecimal> interestEarned = new ArrayList<BigDecimal>();
         List<BigDecimal> interestOnBalanceUnrounded = new ArrayList<BigDecimal>();
@@ -228,29 +228,29 @@ public final class QuarterlyCompoundingPeriod implements CompoundingPeriod {
                     interestOnBalanceUnrounded
                             .addAll(balance.calculateInterestOnBalanceAndInterests(interestToCompound, interestRateAsFraction, daysInYear,
                                     minBalanceForInterestCalculation, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation));
-                    break;
+                break;
                 case MONTHLY:
                     interestOnBalanceUnrounded
                             .addAll(balance.calculateInterestOnBalances(interestToCompound, interestRateAsFraction, daysInYear,
                                     minBalanceForInterestCalculation, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation));
-                    break;
+                break;
                 case QUATERLY:
                     interestOnBalanceUnrounded
                             .addAll(balance.calculateInterestOnBalances(interestToCompound, interestRateAsFraction, daysInYear,
                                     minBalanceForInterestCalculation, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation));
-                    break;
+                break;
                 case BI_ANNUAL:
                     interestOnBalanceUnrounded
                             .addAll(balance.calculateInterestOnBalances(interestToCompound, interestRateAsFraction, daysInYear,
                                     minBalanceForInterestCalculation, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation));
-                    break;
+                break;
                 case ANNUAL:
                     interestOnBalanceUnrounded
                             .addAll(balance.calculateInterestOnBalances(interestToCompound, interestRateAsFraction, daysInYear,
                                     minBalanceForInterestCalculation, overdraftInterestRateAsFraction, minOverdraftForInterestCalculation));
-                    break;
+                break;
                 case INVALID:
-                    break;
+                break;
             }
             interestEarned.addAll(interestOnBalanceUnrounded);
         }
@@ -258,8 +258,8 @@ public final class QuarterlyCompoundingPeriod implements CompoundingPeriod {
     }
 
     private List<BigDecimal> calculateUsingAverageDailyBalanceMethods(final BigDecimal interestToCompound,
-                                                                     final BigDecimal interestRateAsFraction, final long daysInYear, final BigDecimal minBalanceForInterestCalculation,
-                                                                     final BigDecimal overdraftInterestRateAsFraction, final BigDecimal minOverdraftForInterestCalculation) {
+            final BigDecimal interestRateAsFraction, final long daysInYear, final BigDecimal minBalanceForInterestCalculation,
+            final BigDecimal overdraftInterestRateAsFraction, final BigDecimal minOverdraftForInterestCalculation) {
 
         List<BigDecimal> interestEarned = new ArrayList<BigDecimal>();
 

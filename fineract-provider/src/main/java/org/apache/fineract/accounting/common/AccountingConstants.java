@@ -178,8 +178,8 @@ public final class AccountingConstants {
     public enum CashAccountsForSavings {
 
         SAVINGS_REFERENCE(1), SAVINGS_CONTROL(2), INTEREST_ON_SAVINGS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), TRANSFERS_SUSPENSE(
-                10), OVERDRAFT_PORTFOLIO_CONTROL(11), INCOME_FROM_INTEREST(12), LOSSES_WRITTEN_OFF(13), ESCHEAT_LIABILITY(14),PENALTIES_RECEIVABLE(50),
-        INTEREST_RECEIVABLE(51),FEES_RECEIVABLE(52),INTEREST_PAYABLE(53);
+                10), OVERDRAFT_PORTFOLIO_CONTROL(11), INCOME_FROM_INTEREST(12), LOSSES_WRITTEN_OFF(13), ESCHEAT_LIABILITY(
+                        14), PENALTIES_RECEIVABLE(50), INTEREST_RECEIVABLE(51), FEES_RECEIVABLE(52), INTEREST_PAYABLE(53);
 
         private final Integer value;
 
@@ -227,9 +227,11 @@ public final class AccountingConstants {
                                                                                 "overdraftPortfolioControlId"), INCOME_FROM_INTEREST(
                                                                                         "incomeFromInterestId"), LOSSES_WRITTEN_OFF(
                                                                                                 "writeOffAccountId"), ESCHEAT_LIABILITY(
-                                                                                                        "escheatLiabilityId"),PENALTIES_RECEIVABLE(
-                                                                                                                "receivablePenaltyAccountId"),INTEREST_RECEIVABLE("receivableInterestAccountId"), FEES_RECEIVABLE("receivableFeeAccountId"),
-                                                                                                                             INTEREST_PAYABLE("interestPayableAccountId");
+                                                                                                        "escheatLiabilityId"), PENALTIES_RECEIVABLE(
+                                                                                                                "receivablePenaltyAccountId"), INTEREST_RECEIVABLE(
+                                                                                                                        "receivableInterestAccountId"), FEES_RECEIVABLE(
+                                                                                                                                "receivableFeeAccountId"), INTEREST_PAYABLE(
+                                                                                                                                        "interestPayableAccountId");
 
         private final String value;
 
@@ -255,10 +257,12 @@ public final class AccountingConstants {
                                 "transfersInSuspenseAccount"), PENALTY_INCOME_ACCOUNT_MAPPING("penaltyToIncomeAccountMappings"), CHARGE_ID(
                                         "charge"), INCOME_ACCOUNT_ID("incomeAccount"), OVERDRAFT_PORTFOLIO_CONTROL(
                                                 "overdraftPortfolioControl"), INCOME_FROM_INTEREST(
-                                                        "incomeFromInterest"), LOSSES_WRITTEN_OFF(
-                                                                "writeOffAccount"), ESCHEAT_LIABILITY("escheatLiabilityAccount"),PENALTIES_RECEIVABLE(
-                                                                            "receivablePenaltyAccountId"),INTEREST_RECEIVABLE("receivableInterestAccountId"), FEES_RECEIVABLE("receivableFeeAccountId"),
-                                                                                        INTEREST_PAYABLE("interestPayableAccountId");
+                                                        "incomeFromInterest"), LOSSES_WRITTEN_OFF("writeOffAccount"), ESCHEAT_LIABILITY(
+                                                                "escheatLiabilityAccount"), PENALTIES_RECEIVABLE(
+                                                                        "receivablePenaltyAccountId"), INTEREST_RECEIVABLE(
+                                                                                "receivableInterestAccountId"), FEES_RECEIVABLE(
+                                                                                        "receivableFeeAccountId"), INTEREST_PAYABLE(
+                                                                                                "interestPayableAccountId");
 
         private final String value;
 
@@ -421,12 +425,13 @@ public final class AccountingConstants {
 
     // Block Unblock Narrations
     public static final String BLOCK_UNBLOCK_OPTION_CODE_NAME = "SavingsAccountBlockUnblockNarration";
+
     /*** Accounting placeholders for accrual based accounting for savings products ***/
     public static enum ACCRUAL_ACCOUNTS_FOR_SAVINGS {
 
         SAVINGS_REFERENCE(1), SAVINGS_CONTROL(2), INTEREST_ON_SAVINGS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), TRANSFERS_SUSPENSE(
                 10), OVERDRAFT_PORTFOLIO_CONTROL(11), INCOME_FROM_INTEREST(12), LOSSES_WRITTEN_OFF(13), ESCHEAT_LIABILITY(
-                14), INTEREST_RECEIVABLE(51), FEES_RECEIVABLE(52), PENALTIES_RECEIVABLE(50), INTEREST_PAYABLE(53);
+                        14), INTEREST_RECEIVABLE(51), FEES_RECEIVABLE(52), PENALTIES_RECEIVABLE(50), INTEREST_PAYABLE(53);
 
         private final Integer value;
 
@@ -456,11 +461,13 @@ public final class AccountingConstants {
         }
     }
 
-    public  enum FINANCIAL_ACTIVITY {
-        ASSET_TRANSFER(100, "assetTransfer", GLAccountType.ASSET), LIABILITY_TRANSFER(200, "liabilityTransfer", GLAccountType.LIABILITY), CASH_AT_MAINVAULT(
-                101, "cashAtMainVault", GLAccountType.ASSET), CASH_AT_TELLER(102, "cashAtTeller", GLAccountType.ASSET), OPENING_BALANCES_TRANSFER_CONTRA(
-                300, "openingBalancesTransferContra", GLAccountType.EQUITY), ASSET_FUND_SOURCE(103, "fundSource", GLAccountType.ASSET), PAYABLE_DIVIDENDS(
-                201, "payableDividends", GLAccountType.LIABILITY);
+    public enum FINANCIAL_ACTIVITY {
+
+        ASSET_TRANSFER(100, "assetTransfer", GLAccountType.ASSET), LIABILITY_TRANSFER(200, "liabilityTransfer",
+                GLAccountType.LIABILITY), CASH_AT_MAINVAULT(101, "cashAtMainVault", GLAccountType.ASSET), CASH_AT_TELLER(102,
+                        "cashAtTeller", GLAccountType.ASSET), OPENING_BALANCES_TRANSFER_CONTRA(300, "openingBalancesTransferContra",
+                                GLAccountType.EQUITY), ASSET_FUND_SOURCE(103, "fundSource",
+                                        GLAccountType.ASSET), PAYABLE_DIVIDENDS(201, "payableDividends", GLAccountType.LIABILITY);
 
         private final Integer value;
         private final String code;
