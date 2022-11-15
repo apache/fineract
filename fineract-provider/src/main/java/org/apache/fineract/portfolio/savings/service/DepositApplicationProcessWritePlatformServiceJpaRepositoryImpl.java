@@ -27,6 +27,7 @@ import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +69,7 @@ import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
+import org.apache.fineract.portfolio.common.domain.BusinessEventNotificationConstants;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepository;
@@ -92,6 +94,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrap
 import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
 import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
+import org.apache.fineract.portfolio.savings.request.FixedDepositApplicationReq;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,6 +128,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final ConfigurationDomainService configurationDomainService;
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final NubanAccountService nubanAccountService;
 
     @Autowired
     public DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -140,7 +144,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             final AccountAssociationsRepository accountAssociationsRepository, final FromJsonHelper fromJsonHelper,
             final CalendarInstanceRepository calendarInstanceRepository, final ConfigurationDomainService configurationDomainService,
             final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
-            final BusinessEventNotifierService businessEventNotifierService) {
+            final BusinessEventNotifierService businessEventNotifierService, final NubanAccountService nubanAccountService) {
         this.context = context;
         this.savingAccountRepository = savingAccountRepository;
         this.depositAccountAssembler = depositAccountAssembler;
@@ -161,6 +165,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         this.configurationDomainService = configurationDomainService;
         this.accountNumberFormatRepository = accountNumberFormatRepository;
         this.businessEventNotifierService = businessEventNotifierService;
+        this.nubanAccountService = nubanAccountService;
     }
 
     /*
@@ -782,5 +787,68 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 throw new GroupNotActiveException(group.getId());
             }
         }
+    }
+
+    @Override
+    public FixedDepositAccount createFixedDepositAccount(FixedDepositApplicationReq fixedDepositApplicationReq, SavingsProduct product,
+            Set<SavingsAccountCharge> charges) {
+        final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
+                .isSavingsInterestPostingAtCurrentPeriodEnd();
+        final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
+
+        final FixedDepositAccount account = (FixedDepositAccount) this.depositAccountAssembler.assembleFrom(fixedDepositApplicationReq,
+                product, DepositAccountType.FIXED_DEPOSIT);
+        account.setCharges(charges);
+
+        account.updateMaturityDateAndAmountBeforeAccountActivation(MathContext.DECIMAL64, false, isSavingsInterestPostingAtCurrentPeriodEnd,
+                financialYearBeginningMonth);
+        this.fixedDepositAccountRepository.save(account);
+        this.generateAccountNumbers(account);
+        this.saveLinkedAccountInfo(fixedDepositApplicationReq.getSavingsAccountId(), account);
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(
+                BusinessEventNotificationConstants.BusinessEvents.FIXED_DEPOSIT_ACCOUNT_CREATE,
+                constructEntityMap(BusinessEventNotificationConstants.BusinessEntity.DEPOSIT_ACCOUNT, account));
+
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(
+                BusinessEventNotificationConstants.BusinessEvents.FIXED_DEPOSIT_ACCOUNT_CREATE,
+                constructEntityMap(BusinessEventNotificationConstants.BusinessEntity.DEPOSIT_ACCOUNT, account));
+        return account;
+    }
+
+    private void generateAccountNumbers(SavingsAccount account) {
+        if (account.isAccountNumberRequiresAutoGeneration()) {
+            AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.CLIENT);
+            account.updateAccountNo(this.accountNumberGenerator.generate(account, accountNumberFormat));
+            String serialNumber = account.getAccountNumber();
+            String nubanAccountNumber = this.nubanAccountService.generateNubanAccountNumber(serialNumber, "1");
+            SavingsAccount existingAccount = this.savingAccountRepository.findByAccountNumber(nubanAccountNumber);
+
+            while (existingAccount != null) {
+                serialNumber = this.nubanAccountService.generateNextSerialNumber(serialNumber);
+                nubanAccountNumber = this.nubanAccountService.generateNubanAccountNumber(serialNumber, "1");
+                existingAccount = this.savingAccountRepository.findByAccountNumber(nubanAccountNumber);
+            }
+            account.updateAccountNo(nubanAccountNumber);
+            this.savingAccountRepository.save(account);
+        }
+    }
+
+    public void saveLinkedAccountInfo(Long linkedSavingsAccountId, FixedDepositAccount account) {
+        if (linkedSavingsAccountId != null) {
+            final SavingsAccount savingsAccount = this.depositAccountAssembler.assembleFrom(linkedSavingsAccountId,
+                    DepositAccountType.SAVINGS_DEPOSIT);
+            this.depositAccountDataValidator.validatelinkedSavingsAccount(savingsAccount, account);
+            boolean isActive = true;
+            final AccountAssociations accountAssociations = AccountAssociations.associateSavingsAccount(account, savingsAccount,
+                    AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue(), isActive);
+            this.accountAssociationsRepository.save(accountAssociations);
+        }
+    }
+
+    private Map<BusinessEventNotificationConstants.BusinessEntity, Object> constructEntityMap(
+            final BusinessEventNotificationConstants.BusinessEntity entityEvent, Object entity) {
+        Map<BusinessEventNotificationConstants.BusinessEntity, Object> map = new HashMap<>(1);
+        map.put(entityEvent, entity);
+        return map;
     }
 }

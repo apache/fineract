@@ -119,6 +119,7 @@ public final class DepositsApiConstants {
     public static final String preClosurePenalInterestOnTypeIdParamName = "preClosurePenalInterestOnTypeId";
     public static final String interestFreePeriodFrequencyType = "interestFreePeriodFrequencyType";
     public static final String preClosurePenalInterestOnType = "preClosurePenalInterestOnType";
+    public static final String preClosureChargeApplicableParamName = "preClosureChargeApplicable";
 
     // term paramters
     public static final String minDepositTermParamName = "minDepositTerm";
@@ -130,12 +131,14 @@ public final class DepositsApiConstants {
     public static final String inMultiplesOfDepositTermParamName = "inMultiplesOfDepositTerm";
     public static final String inMultiplesOfDepositTermTypeIdParamName = "inMultiplesOfDepositTermTypeId";
     public static final String inMultiplesOfDepositTermType = "inMultiplesOfDepositTermType";
+    public static final String autoRolloverParamName = "autoRollover";
 
     public static final String depositAmountParamName = "depositAmount";
     public static final String depositMinAmountParamName = "minDepositAmount";
     public static final String depositMaxAmountParamName = "maxDepositAmount";
     public static final String depositPeriodParamName = "depositPeriod";
     public static final String depositPeriodFrequencyIdParamName = "depositPeriodFrequencyId";
+    public static final String changeTenureParamName = "changeTenure";
 
     // recurring parameters
     public static final String mandatoryRecommendedDepositAmountParamName = "mandatoryRecommendedDepositAmount";

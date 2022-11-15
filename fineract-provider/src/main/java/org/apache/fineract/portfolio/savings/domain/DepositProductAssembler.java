@@ -80,6 +80,8 @@ import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYea
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
+import org.apache.fineract.portfolio.savings.request.FixedDepositApplicationPreClosureReq;
+import org.apache.fineract.portfolio.savings.request.FixedDepositApplicationTermsReq;
 import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -305,6 +307,51 @@ public class DepositProductAssembler {
         return preClosureDetail;
     }
 
+    public DepositPreClosureDetail assemblePreClosureDetail(final FixedDepositApplicationPreClosureReq fixedDepositApplicationPreClosureReq,
+            DepositPreClosureDetail productPreClosureDetail) {
+        DepositPreClosureDetail.DepositPreClosureDetailBuilder depositPreClosureDetailBuilder = new DepositPreClosureDetail.DepositPreClosureDetailBuilder();
+        this.setPreClosurePenalDetails(fixedDepositApplicationPreClosureReq, productPreClosureDetail, depositPreClosureDetailBuilder);
+        this.setPreClosureChargeDetails(fixedDepositApplicationPreClosureReq, depositPreClosureDetailBuilder);
+        return depositPreClosureDetailBuilder.build();
+    }
+
+    private void setPreClosurePenalDetails(FixedDepositApplicationPreClosureReq fixedDepositApplicationPreClosureReq,
+            DepositPreClosureDetail productPreClosureDetail,
+            DepositPreClosureDetail.DepositPreClosureDetailBuilder depositPreClosureDetailBuilder) {
+        boolean preClosurePenalApplicable;
+        BigDecimal preClosurePenalInterest = null;
+        Integer preClosurePenalInterestOnTypeId = null;
+        if (fixedDepositApplicationPreClosureReq.isPreClosurePenalApplicableParamSet()) {
+            preClosurePenalApplicable = fixedDepositApplicationPreClosureReq.isPreClosurePenalApplicable();
+            if (fixedDepositApplicationPreClosureReq.isPreClosurePenalApplicable()) {
+                if (fixedDepositApplicationPreClosureReq.isPreClosurePenalInterestParamSet()) {
+                    preClosurePenalInterest = fixedDepositApplicationPreClosureReq.getPreClosurePenalInterest();
+                } else {
+                    preClosurePenalInterest = productPreClosureDetail.getPreClosurePenalInterest();
+                }
+                if (fixedDepositApplicationPreClosureReq.isPreClosurePenalInterestOnTypeIdPramSet()) {
+                    preClosurePenalInterestOnTypeId = fixedDepositApplicationPreClosureReq.getPreClosurePenalInterestOnTypeId();
+                } else {
+                    preClosurePenalInterestOnTypeId = productPreClosureDetail.getPreClosurePenalInterestOnType();
+                }
+            }
+        } else {
+            preClosurePenalApplicable = productPreClosureDetail.isPreClosurePenalApplicable();
+            preClosurePenalInterest = productPreClosureDetail.getPreClosurePenalInterest();
+            preClosurePenalInterestOnTypeId = productPreClosureDetail.getPreClosurePenalInterestOnType();
+        }
+        depositPreClosureDetailBuilder.preClosurePenalApplicable(preClosurePenalApplicable);
+        depositPreClosureDetailBuilder.preClosurePenalInterest(preClosurePenalInterest);
+        depositPreClosureDetailBuilder.preClosurePenalInterestOnType(preClosurePenalInterestOnTypeId);
+    }
+
+    private void setPreClosureChargeDetails(FixedDepositApplicationPreClosureReq fixedDepositApplicationPreClosureReq,
+            DepositPreClosureDetail.DepositPreClosureDetailBuilder depositPreClosureDetailBuilder) {
+        if (fixedDepositApplicationPreClosureReq.isPreClosureChargeApplicableParamSet()) {
+            depositPreClosureDetailBuilder.preClosureChargeApplicable(fixedDepositApplicationPreClosureReq.isPreClosureChargeApplicable());
+        }
+    }
+
     public DepositPreClosureDetail assemblePreClosureDetail(final JsonCommand command, DepositPreClosureDetail produPreClosureDetail) {
         boolean preClosurePenalApplicable = false;
         BigDecimal preClosurePenalInterest = null;
@@ -359,6 +406,65 @@ public class DepositProductAssembler {
                 maxDepositTermType, inMultiplesOfDepositTerm, inMultiplesOfDepositTermType);
 
         return depositTermDetail;
+    }
+
+    public DepositTermDetail assembleDepositTermDetail(final FixedDepositApplicationTermsReq fixedDepositApplicationTermsReq,
+            final DepositTermDetail prodDepositTermDetail) {
+
+        Integer minDepositTerm = null;
+        Integer maxDepositTerm = null;
+        Integer minDepositTermTypeId = null;
+        Integer maxDepositTermTypeId = null;
+        Integer inMultiplesOfDepositTerm = null;
+        Integer inMultiplesOfDepositTermTypeId = null;
+
+        if (fixedDepositApplicationTermsReq.isMinDepositTermSet()) {
+            minDepositTerm = fixedDepositApplicationTermsReq.getMinDepositTerm();
+        } else if (prodDepositTermDetail != null) {
+            minDepositTerm = prodDepositTermDetail.minDepositTerm();
+        }
+
+        if (fixedDepositApplicationTermsReq.isMaxDepositTermSet()) {
+            maxDepositTerm = fixedDepositApplicationTermsReq.getMaxDepositTerm();
+        } else if (prodDepositTermDetail != null) {
+            maxDepositTerm = prodDepositTermDetail.maxDepositTerm();
+        }
+
+        if (fixedDepositApplicationTermsReq.isMinDepositTermTypeIdSet()) {
+            minDepositTermTypeId = fixedDepositApplicationTermsReq.getMinDepositTermTypeId();
+        } else if (prodDepositTermDetail != null) {
+            minDepositTermTypeId = prodDepositTermDetail.minDepositTermType();
+        }
+
+        if (fixedDepositApplicationTermsReq.isMaxDepositTermTypeIdSet()) {
+            maxDepositTermTypeId = fixedDepositApplicationTermsReq.getMaxDepositTermTypeId();
+        } else if (prodDepositTermDetail != null) {
+            maxDepositTermTypeId = prodDepositTermDetail.maxDepositTermType();
+        }
+
+        final SavingsPeriodFrequencyType minDepositTermType = (minDepositTermTypeId == null) ? null
+                : SavingsPeriodFrequencyType.fromInt(minDepositTermTypeId);
+
+        final SavingsPeriodFrequencyType maxDepositTermType = (maxDepositTermTypeId == null) ? null
+                : SavingsPeriodFrequencyType.fromInt(maxDepositTermTypeId);
+
+        if (fixedDepositApplicationTermsReq.isInMultiplesOfDepositTermSet()) {
+            inMultiplesOfDepositTerm = fixedDepositApplicationTermsReq.getInMultiplesOfDepositTerm();
+        } else if (prodDepositTermDetail != null) {
+            inMultiplesOfDepositTerm = prodDepositTermDetail.inMultiplesOfDepositTerm();
+        }
+
+        if (fixedDepositApplicationTermsReq.isInMultiplesOfDepositTermTypeIdSet()) {
+            inMultiplesOfDepositTermTypeId = fixedDepositApplicationTermsReq.getInMultiplesOfDepositTermTypeId();
+        } else if (prodDepositTermDetail != null) {
+            inMultiplesOfDepositTermTypeId = prodDepositTermDetail.inMultiplesOfDepositTermType();
+        }
+
+        final SavingsPeriodFrequencyType inMultiplesOfDepositTermType = (inMultiplesOfDepositTermTypeId == null) ? null
+                : SavingsPeriodFrequencyType.fromInt(inMultiplesOfDepositTermTypeId);
+
+        return DepositTermDetail.createFrom(minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
+                inMultiplesOfDepositTerm, inMultiplesOfDepositTermType);
     }
 
     public DepositTermDetail assembleDepositTermDetail(final JsonCommand command, final DepositTermDetail prodDepositTermDetail) {

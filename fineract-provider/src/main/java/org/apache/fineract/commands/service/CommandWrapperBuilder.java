@@ -3511,4 +3511,12 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder topUpFixedDepositAccount(final Long accountId) {
+        this.actionName = "TOP_UP";
+        this.entityName = "FIXEDDEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.href = "/fixeddepositaccounts/" + accountId + "?command=topUp";
+        return this;
+    }
+
 }

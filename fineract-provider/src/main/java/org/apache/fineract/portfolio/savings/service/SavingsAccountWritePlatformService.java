@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
@@ -27,7 +28,9 @@ import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountCharge;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
+import org.apache.fineract.useradministration.domain.AppUser;
 
 public interface SavingsAccountWritePlatformService {
 
@@ -121,4 +124,7 @@ public interface SavingsAccountWritePlatformService {
     void postAccrualInterest(SavingsAccount account, boolean postInterestAs, LocalDate transactionDate, boolean isUserPosting);
 
     CommandProcessingResult postAccrualInterest(JsonCommand command);
+
+    void payCharge(SavingsAccountCharge savingsAccountCharge, LocalDate transactionDate, BigDecimal amountPaid, DateTimeFormatter formatter,
+            AppUser user);
 }

@@ -23,7 +23,9 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.portfolio.account.domain.AccountAssociations;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
+import org.apache.fineract.portfolio.savings.request.FixedDepositPreClosureReq;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,4 +59,9 @@ public interface DepositAccountDomainService {
 
     Long handleRDAccountPreMatureClosure(RecurringDepositAccount account, PaymentDetail paymentDetail, AppUser user, JsonCommand command,
             LocalDate tenantsTodayDate, Map<String, Object> changes);
+
+    AccountAssociations getLinkedSavingsAccount(Long accountId);
+
+    Long prematurelyCloseFDAccount(FixedDepositAccount account, PaymentDetail paymentDetail,
+            FixedDepositPreClosureReq fixedDepositPreclosureReq, Map<String, Object> changes);
 }

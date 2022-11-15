@@ -117,6 +117,8 @@ import org.apache.fineract.portfolio.savings.exception.SavingsActivityPriorToCli
 import org.apache.fineract.portfolio.savings.exception.SavingsOfficerAssignmentDateException;
 import org.apache.fineract.portfolio.savings.exception.SavingsOfficerUnassignmentDateException;
 import org.apache.fineract.portfolio.savings.exception.SavingsTransferTransactionsCannotBeUndoneException;
+import org.apache.fineract.portfolio.savings.request.FixedDepositActivationReq;
+import org.apache.fineract.portfolio.savings.request.FixedDepositApprovalReq;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 import org.apache.fineract.portfolio.tax.domain.TaxComponent;
 import org.apache.fineract.portfolio.tax.domain.TaxGroup;
@@ -355,6 +357,12 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     @Column(name = "num_of_debit_transaction")
     private Long numOfDebitTransaction;
+
+    @Column(name = "original_interest_rate", scale = 6, precision = 19)
+    protected BigDecimal originalInterestRate;
+
+    @Column(name = "closed_fixed_deposit_account_no", length = 20, nullable = true)
+    protected String closedFixedDepositAccountNumber;
 
     @Transient
     protected SavingsAccountTransactionRepository savingsAccountTransactionRepository;
@@ -2614,6 +2622,70 @@ public class SavingsAccount extends AbstractPersistableCustom {
         return this.nominalAnnualInterestRateOverdraft;
     }
 
+    public Map<String, Object> approveApplication(final AppUser currentUser, FixedDepositApprovalReq fixedDepositApprovalReq) {
+
+        final Map<String, Object> actualChanges = new LinkedHashMap<>();
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.approvalAction);
+
+        final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        if (!SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.hasStateOf(currentStatus)) {
+            baseDataValidator.reset().parameter(SavingsApiConstants.approvedOnDateParamName)
+                    .failWithCodeNoParameterAddedToErrorCode("not.in.submittedandpendingapproval.state");
+
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
+        }
+
+        this.status = SavingsAccountStatusType.APPROVED.getValue();
+        actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
+
+        // only do below if status has changed in the 'approval' case
+        final LocalDate approvedOn = fixedDepositApprovalReq.getApprovedOnDate();
+        final String approvedOnDateChange = fixedDepositApprovalReq.getApprovedOnDateChange();
+
+        this.approvedOnDate = approvedOn;
+        this.approvedBy = currentUser;
+        actualChanges.put(SavingsApiConstants.localeParamName, fixedDepositApprovalReq.getLocale());
+        actualChanges.put(SavingsApiConstants.dateFormatParamName, fixedDepositApprovalReq.getDateFormat());
+        actualChanges.put(SavingsApiConstants.approvedOnDateParamName, approvedOnDateChange);
+
+        final LocalDate submitDate = getSubmittedOnLocalDate();
+        if (approvedOn.isBefore(submitDate)) {
+
+            final DateTimeFormatter formatter = fixedDepositApprovalReq.getFormatter();
+            final String submitDateAsString = formatter.format(submitDate);
+
+            baseDataValidator.reset().parameter(SavingsApiConstants.approvedOnDateParamName).value(submitDateAsString)
+                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.submittal.date");
+
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
+        }
+
+        if (approvedOn.isAfter(DateUtils.getLocalDateOfTenant())) {
+
+            baseDataValidator.reset().parameter(SavingsApiConstants.approvedOnDateParamName)
+                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.a.future.date");
+
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
+        }
+        validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_APPLICATION_APPROVED, approvedOn);
+
+        if (this.savingsOfficer != null) {
+            final SavingsOfficerAssignmentHistory savingsOfficerAssignmentHistory = SavingsOfficerAssignmentHistory.createNew(this,
+                    this.savingsOfficer, approvedOn);
+            this.savingsOfficerHistory.add(savingsOfficerAssignmentHistory);
+        }
+        return actualChanges;
+    }
+
     public Map<String, Object> approveApplication(final AppUser currentUser, final JsonCommand command, final LocalDate tenantsTodayDate) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
@@ -2978,6 +3050,94 @@ public class SavingsAccount extends AbstractPersistableCustom {
             }
         }
         validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_APPLICATION_WITHDRAWAL_BY_CUSTOMER, withdrawnOn);
+
+        return actualChanges;
+    }
+
+    public Map<String, Object> activate(final AppUser currentUser, FixedDepositActivationReq fixedDepositActivationReq) {
+
+        final Map<String, Object> actualChanges = new LinkedHashMap<>();
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(depositAccountType().resourceName() + SavingsApiConstants.activateAction);
+
+        final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        if (!SavingsAccountStatusType.APPROVED.hasStateOf(currentStatus)) {
+
+            baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName)
+                    .failWithCodeNoParameterAddedToErrorCode("not.in.approved.state");
+
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
+        }
+
+        final Locale locale = fixedDepositActivationReq.getLocale();
+        final DateTimeFormatter fmt = fixedDepositActivationReq.getFormatter();
+        final LocalDate activationDate = fixedDepositActivationReq.getActivationDate();
+
+        this.status = SavingsAccountStatusType.ACTIVE.getValue();
+        actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
+        actualChanges.put(SavingsApiConstants.localeParamName, locale);
+        actualChanges.put(SavingsApiConstants.dateFormatParamName, fixedDepositActivationReq.getDateFormat());
+        actualChanges.put(SavingsApiConstants.activatedOnDateParamName, activationDate.format(fmt));
+
+        this.rejectedOnDate = null;
+        this.rejectedBy = null;
+        this.withdrawnOnDate = null;
+        this.withdrawnBy = null;
+        this.closedOnDate = null;
+        this.closedBy = null;
+        this.activatedOnDate = activationDate;
+        this.activatedBy = currentUser;
+        this.lockedInUntilDate = calculateDateAccountIsLockedUntil(getActivationLocalDate());
+
+        if (this.client != null && this.client.isActivatedAfter(activationDate)) {
+            final DateTimeFormatter formatter = fixedDepositActivationReq.getFormatter();
+            final String dateAsString = formatter.format(this.client.getActivationLocalDate());
+            baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName).value(dateAsString)
+                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.client.activation.date");
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
+        }
+
+        if (this.group != null && this.group.isActivatedAfter(activationDate)) {
+
+            final DateTimeFormatter formatter = fixedDepositActivationReq.getFormatter();
+            final String dateAsString = formatter.format(this.client.getActivationLocalDate());
+            baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName).value(dateAsString)
+                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.group.activation.date");
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
+        }
+
+        final LocalDate approvalDate = getApprovedOnLocalDate();
+        if (activationDate.isBefore(approvalDate)) {
+
+            final DateTimeFormatter formatter = fixedDepositActivationReq.getFormatter();
+            final String dateAsString = formatter.format(approvalDate);
+
+            baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName).value(dateAsString)
+                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.approval.date");
+
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
+        }
+
+        if (activationDate.isAfter(DateUtils.getLocalDateOfTenant())) {
+
+            baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName).value(activationDate)
+                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.a.future.date");
+
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
+            }
+        }
+        validateActivityNotBeforeClientOrGroupTransferDate(SavingsEvent.SAVINGS_ACTIVATE, activationDate);
 
         return actualChanges;
     }
@@ -4794,4 +4954,45 @@ public class SavingsAccount extends AbstractPersistableCustom {
         return total;
     }
 
+    public void setRejectedOnDate(LocalDate rejectedOnDate) {
+        this.rejectedOnDate = rejectedOnDate;
+    }
+
+    public void setRejectedBy(AppUser rejectedBy) {
+        this.rejectedBy = rejectedBy;
+    }
+
+    public void setWithdrawnOnDate(LocalDate withdrawnOnDate) {
+        this.withdrawnOnDate = withdrawnOnDate;
+    }
+
+    public void setWithdrawnBy(AppUser withdrawnBy) {
+        this.withdrawnBy = withdrawnBy;
+    }
+
+    public void setClosedOnDate(LocalDate closedOnDate) {
+        this.closedOnDate = closedOnDate;
+    }
+
+    public void setClosedBy(AppUser closedBy) {
+        this.closedBy = closedBy;
+    }
+
+    public SavingsAccountTransactionSummaryWrapper getSavingsAccountTransactionSummaryWrapper() {
+        return savingsAccountTransactionSummaryWrapper;
+    }
+
+    public BigDecimal getOriginalInterestRate() {
+        return this.originalInterestRate;
+    }
+
+    public Set<SavingsAccountCharge> getCharges() {
+        return charges;
+    }
+
+    public void setCharges(Set<SavingsAccountCharge> charges) {
+        if (!CollectionUtils.isEmpty(charges)) {
+            this.charges = associateChargesWithThisSavingsAccount(charges);
+        }
+    }
 }

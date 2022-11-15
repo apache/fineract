@@ -575,8 +575,19 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
         return this.dateOf;
     }
 
+    /*
+     * public LocalDate getEndOfBalanceLocalDate() { return balanceEndDate; }
+     */
+
     public LocalDate getEndOfBalanceLocalDate() {
-        return balanceEndDate;
+        LocalDate endDate = null;
+        if (this.balanceEndDate != null) {
+            endDate = balanceEndDate;
+        }
+        if (this.balanceEndDate == null) {
+            endDate = this.transactionLocalDate();
+        }
+        return endDate;
     }
 
     public boolean isAcceptableForDailyBalance(final LocalDateInterval interestPeriodInterval) {

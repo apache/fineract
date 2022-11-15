@@ -22,6 +22,8 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.activat
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.bankNumberParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.checkNumberParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.closedOnDateParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.depositPeriodFrequencyIdParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.depositPeriodParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.onAccountClosureIdParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.paymentTypeIdParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.receiptNumberParamName;
@@ -53,6 +55,7 @@ import org.apache.fineract.portfolio.savings.DepositAccountOnClosureType;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
+import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -78,6 +81,12 @@ public class DepositAccountTransactionDataValidator {
 
     private static final Set<String> DEPOSIT_ACCOUNT_PRE_MATURE_CALCULATION_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(DepositsApiConstants.localeParamName, DepositsApiConstants.dateFormatParamName, closedOnDateParamName));
+
+    private static final Set<String> DEPOSIT_ACCOUNT_TOP_UP_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(DepositsApiConstants.localeParamName, DepositsApiConstants.dateFormatParamName,
+                    DepositsApiConstants.submittedOnDateParamName, DepositsApiConstants.depositPeriodParamName,
+                    DepositsApiConstants.depositPeriodFrequencyIdParamName, DepositsApiConstants.depositAmountParamName,
+                    DepositsApiConstants.changeTenureParamName, SavingsApiConstants.nicknameParamName));
 
     @Autowired
     public DepositAccountTransactionDataValidator(final FromJsonHelper fromApiJsonHelper) {
@@ -250,5 +259,49 @@ public class DepositAccountTransactionDataValidator {
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
                     dataValidationErrors);
         }
+    }
+
+    public void validateTopUp(JsonCommand command) {
+        final JsonElement element = command.parsedJson();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(DepositAccountType.FIXED_DEPOSIT.resourceName());
+        this.checkForUnsupportedParameters(command, DEPOSIT_ACCOUNT_TOP_UP_REQUEST_DATA_PARAMETERS);
+        this.validateDepositPeriod(baseDataValidator, element);
+
+        final BigDecimal depositAmount = this.fromApiJsonHelper
+                .extractBigDecimalWithLocaleNamed(DepositsApiConstants.depositAmountParamName, element);
+        baseDataValidator.reset().parameter(DepositsApiConstants.depositAmountParamName).value(depositAmount).notLessThanMin(BigDecimal.ONE)
+                .notNull();
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    private void checkForUnsupportedParameters(JsonCommand command, Set<String> supportedParams) {
+        String json = command.json();
+        validateJson(json);
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParams);
+    }
+
+    private void validateJson(String json) {
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+    }
+
+    private void validateDepositPeriod(DataValidatorBuilder baseDataValidator, JsonElement element) {
+        final LocalDate submitDate = this.fromApiJsonHelper.extractLocalDateNamed(DepositsApiConstants.submittedOnDateParamName, element);
+        baseDataValidator.reset().parameter(DepositsApiConstants.submittedOnDateParamName).value(submitDate).notNull();
+
+        if (this.fromApiJsonHelper.parameterExists(depositPeriodParamName, element)) {
+            final Integer depositPeriod = fromApiJsonHelper.extractIntegerSansLocaleNamed(depositPeriodParamName, element);
+            baseDataValidator.reset().parameter(depositPeriodParamName).value(depositPeriod).notNull().integerGreaterThanZero();
+        }
+
+        final Integer depositPeriodFrequencyId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(depositPeriodFrequencyIdParamName,
+                element);
+        baseDataValidator.reset().parameter(depositPeriodFrequencyIdParamName).value(depositPeriodFrequencyId)
+                .isOneOfTheseValues(SavingsPeriodFrequencyType.integerValues());
     }
 }

@@ -559,7 +559,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
         return this.amount.subtract(totalAccountedFor);
     }
 
-    private BigDecimal percentageOf(final BigDecimal value, final BigDecimal percentage) {
+    public BigDecimal percentageOf(final BigDecimal value, final BigDecimal percentage) {
 
         BigDecimal percentageOf = BigDecimal.ZERO;
 
@@ -939,5 +939,46 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
      */
     public boolean canOverriteSavingAccountRules() {
         return (!this.isSavingsActivation() && !this.isWithdrawalFee());
+    }
+
+    public void setPercentage(BigDecimal percentage) {
+        this.percentage = percentage;
+    }
+
+    public void setAmountPercentageAppliedTo(BigDecimal amountPercentageAppliedTo) {
+        this.amountPercentageAppliedTo = amountPercentageAppliedTo;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    public BigDecimal getPercentage() {
+        return percentage;
+    }
+
+    public void setAmountOutstanding(BigDecimal amountOutstanding) {
+        this.amountOutstanding = amountOutstanding;
+    }
+
+    public void setChargePaid() {
+        this.paid = determineIfFullyPaid();
+    }
+
+    public SavingsAccountCharge copy() {
+        SavingsAccountCharge dup = new SavingsAccountCharge();
+        dup.charge = this.charge;
+        dup.chargeTime = this.chargeTime;
+        dup.penaltyCharge = this.penaltyCharge;
+        dup.chargeCalculation = this.chargeCalculation;
+        dup.amount = this.amount;
+        dup.amountPaid = BigDecimal.ZERO;
+        dup.amountWaived = BigDecimal.ZERO;
+        dup.amountWrittenOff = BigDecimal.ZERO;
+        dup.amountOutstanding = dup.calculateAmountOutstanding(this.savingsAccount.currency);
+        dup.paid = false;
+        dup.waived = false;
+        dup.savingsAccount = null;
+        return dup;
     }
 }

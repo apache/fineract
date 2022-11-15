@@ -90,4 +90,6 @@ public interface DepositAccountWritePlatformService {
     void transferInterestToSavings() throws JobExecutionException;
 
     SavingsAccountTransaction mandatorySavingsAccountDeposit(SavingsAccountTransactionDTO accountTransactionDTO);
+
+    CommandProcessingResult topUpAccount(Long accountId, JsonCommand command);
 }
