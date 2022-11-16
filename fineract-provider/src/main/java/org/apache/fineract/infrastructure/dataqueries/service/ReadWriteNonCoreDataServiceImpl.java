@@ -487,7 +487,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }
     }
 
-    private boolean isRegisteredDataTable(final String name) {
+    public boolean isRegisteredDataTable(final String name) {
         // PERMITTED datatables
         final String sql = "select (CASE WHEN exists (select 1 from x_registered_table where registered_table_name = ?) THEN 'true' ELSE 'false' END)";
         final String isRegisteredDataTable = this.jdbcTemplate.queryForObject(sql, String.class, new Object[] { name });
@@ -1948,6 +1948,16 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         builder.append(" WHERE edc.x_registered_table_name = '" + datatableName + "'");
         final Long count = this.jdbcTemplate.queryForObject(builder.toString(), Long.class);
         return count > 0 ? true : false;
+    }
+
+    @Override
+    public BigDecimal getFxLatestRate(final String datatableName, final Long appTableId) {
+
+        final String sqlString = "SELECT "+ sqlGenerator.escape("Rate") +" FROM " + sqlGenerator.escape(datatableName)
+                + " WHERE " + sqlGenerator.escape("updated_at") + " = (SELECT MAX( " + sqlGenerator.escape("updated_at") + ") FROM "
+                + sqlGenerator.escape(datatableName) + ") and " +sqlGenerator.escape("office_id") + " = " + appTableId;
+        final BigDecimal count = this.jdbcTemplate.queryForObject(sqlString, BigDecimal.class); // NOSONAR
+        return count;
     }
 
 }

@@ -210,4 +210,6 @@ public class SavingsApiConstants {
     public static final String numberOfDebitTransactionsParamName = "numOfDebitTransaction";
 
     public static final String numberOfCreditTransactionsParamName = "numOfCreditTransaction";
+
+    public static final String isUSDProductParamName = "isUSDProduct";
 }

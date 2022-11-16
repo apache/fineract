@@ -59,6 +59,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.shortNam
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.isUSDProductParamName;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -298,6 +299,12 @@ public class DepositProductDataValidator {
                     .ignoreIfNull().zeroOrPositiveAmount();
         }
 
+        //If currency is usd for product
+        if (this.fromApiJsonHelper.parameterExists(isUSDProductParamName, element)) {
+            final String isUSDProduct = this.fromApiJsonHelper.extractStringNamed(isUSDProductParamName, element);
+            baseDataValidator.reset().parameter(isUSDProductParamName).value(isUSDProduct).ignoreIfNull().validateForBooleanValue();
+        }
+
         // accounting related data validation
         final Integer accountingRuleType = fromApiJsonHelper.extractIntegerNamed("accountingRule", element, Locale.getDefault());
         baseDataValidator.reset().parameter("accountingRule").value(accountingRuleType).notNull().inMinMaxRange(1, 3);
@@ -511,6 +518,11 @@ public class DepositProductDataValidator {
                     .extractBigDecimalWithLocaleNamed(minBalanceForInterestCalculationParamName, element);
             baseDataValidator.reset().parameter(minBalanceForInterestCalculationParamName).value(minBalanceForInterestCalculation)
                     .ignoreIfNull().zeroOrPositiveAmount();
+        }
+        //If currency is usd for product
+        if (this.fromApiJsonHelper.parameterExists(isUSDProductParamName, element)) {
+            final String isUSDProduct = this.fromApiJsonHelper.extractStringNamed(isUSDProductParamName, element);
+            baseDataValidator.reset().parameter(isUSDProductParamName).value(isUSDProduct).ignoreIfNull().validateForBooleanValue();
         }
 
         final Long savingsControlAccountId = fromApiJsonHelper.extractLongNamed(SavingProductAccountingParams.SAVINGS_CONTROL.getValue(),

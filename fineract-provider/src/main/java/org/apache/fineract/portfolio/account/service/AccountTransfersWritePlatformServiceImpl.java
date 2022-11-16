@@ -39,6 +39,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
+import org.apache.fineract.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
 import org.apache.fineract.portfolio.account.data.AccountTransfersDataValidator;
@@ -86,15 +87,16 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
     private final LoanReadPlatformService loanReadPlatformService;
     private final GSIMRepositoy gsimRepository;
     private final ConfigurationDomainService configurationDomainService;
+    private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
 
     @Autowired
     public AccountTransfersWritePlatformServiceImpl(final AccountTransfersDataValidator accountTransfersDataValidator,
-            final AccountTransferAssembler accountTransferAssembler, final AccountTransferRepository accountTransferRepository,
-            final SavingsAccountAssembler savingsAccountAssembler, final SavingsAccountDomainService savingsAccountDomainService,
-            final LoanAssembler loanAssembler, final LoanAccountDomainService loanAccountDomainService,
-            final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
-            final AccountTransferDetailRepository accountTransferDetailRepository, final LoanReadPlatformService loanReadPlatformService,
-            final GSIMRepositoy gsimRepository, ConfigurationDomainService configurationDomainService) {
+                                                    final AccountTransferAssembler accountTransferAssembler, final AccountTransferRepository accountTransferRepository,
+                                                    final SavingsAccountAssembler savingsAccountAssembler, final SavingsAccountDomainService savingsAccountDomainService,
+                                                    final LoanAssembler loanAssembler, final LoanAccountDomainService loanAccountDomainService,
+                                                    final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
+                                                    final AccountTransferDetailRepository accountTransferDetailRepository, final LoanReadPlatformService loanReadPlatformService,
+                                                    final GSIMRepositoy gsimRepository, ConfigurationDomainService configurationDomainService, ReadWriteNonCoreDataService readWriteNonCoreDataService) {
         this.accountTransfersDataValidator = accountTransfersDataValidator;
         this.accountTransferAssembler = accountTransferAssembler;
         this.accountTransferRepository = accountTransferRepository;
@@ -107,6 +109,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         this.loanReadPlatformService = loanReadPlatformService;
         this.gsimRepository = gsimRepository;
         this.configurationDomainService = configurationDomainService;
+        this.readWriteNonCoreDataService = readWriteNonCoreDataService;
     }
 
     @Transactional
@@ -413,8 +416,17 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                 transactionDate = transactionDate.plusDays(1);
             }
 
+            BigDecimal withdrawalTransactionAmount = accountTransferDTO.getTransactionAmount();
+            if(accountTransferDTO.isUSDAccount()){
+                BigDecimal rate = this.readWriteNonCoreDataService.getFxLatestRate("Fx_rate", fromSavingsAccount.officeId());
+                if(rate != null){
+                    BigDecimal newAmount = accountTransferDTO.getTransactionAmount().multiply(rate);
+                    withdrawalTransactionAmount = newAmount;
+                }
+            }
+
             final SavingsAccountTransaction withdrawal = this.savingsAccountDomainService.handleWithdrawal(fromSavingsAccount,
-                    accountTransferDTO.getFmt(), transactionDate, accountTransferDTO.getTransactionAmount(),
+                    accountTransferDTO.getFmt(), transactionDate, withdrawalTransactionAmount,
                     accountTransferDTO.getPaymentDetail(), transactionBooleanValues, backdatedTxnsAllowedTill);
 
             final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(toSavingsAccount,
