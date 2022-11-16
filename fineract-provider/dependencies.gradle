@@ -85,6 +85,7 @@ dependencies {
                 include '*.jar' },
             'org.openjdk.nashorn:nashorn-core',
             'org.mapstruct:mapstruct',
+            'org.ff4j:ff4j-config-yaml:1.8.13'
             )
 
     implementation ('org.apache.commons:commons-email') {

@@ -67,6 +67,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import io.fiter.ff4j.validators.SavingsAccountFeatureValidator;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -99,11 +100,18 @@ public class DepositAccountDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final DepositProductDataValidator productDataValidator;
+    /**
+     *
+     * This is a fiter only feature, it should not be committed in the event that it this is merged upstream
+     */
+    private final SavingsAccountFeatureValidator featureValidator;
 
     @Autowired
-    public DepositAccountDataValidator(final FromJsonHelper fromApiJsonHelper, final DepositProductDataValidator productDataValidator) {
+    public DepositAccountDataValidator(final FromJsonHelper fromApiJsonHelper, final DepositProductDataValidator productDataValidator,
+            final SavingsAccountFeatureValidator featureValidator) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.productDataValidator = productDataValidator;
+        this.featureValidator = featureValidator;
     }
 
     public void validateFixedDepositForSubmit(final String json) {
@@ -172,7 +180,7 @@ public class DepositAccountDataValidator {
         validateRecurringDetailForSubmit(element, baseDataValidator);
         validateSavingsCharges(element, baseDataValidator);
         validateWithHoldTax(element, baseDataValidator);
-
+        featureValidator.validateDepositDetailsForUpdate(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -196,7 +204,7 @@ public class DepositAccountDataValidator {
         validateRecurringDetailForUpdate(element, baseDataValidator);
         // validateSavingsCharges(element, baseDataValidator);
         validateWithHoldTax(element, baseDataValidator);
-
+        featureValidator.validateDepositDetailsForUpdate(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
     }
