@@ -172,7 +172,8 @@ public class Address extends AbstractPersistableCustom {
                 postalCode, latitude, longitude, createdBy, createdOn, updatedBy, updatedOn, null);
     }
 
-    public static Address fromJsonObject(final JsonObject jsonObject, final CodeValue state_province, final CodeValue country, final CodeValue lga) {
+    public static Address fromJsonObject(final JsonObject jsonObject, final CodeValue state_province, final CodeValue country,
+            final CodeValue lga) {
         String street = "";
         String addressLine1 = "";
         String addressLine2 = "";
