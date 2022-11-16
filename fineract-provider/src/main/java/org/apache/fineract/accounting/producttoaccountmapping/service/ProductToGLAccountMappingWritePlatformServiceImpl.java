@@ -206,7 +206,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 SavingProductAccountingParams.SAVINGS_REFERENCE.getValue(), savingProductId,
                 CashAccountsForSavings.SAVINGS_REFERENCE.getValue());
 
-        if (!accountType.equals(DepositAccountType.RECURRING_DEPOSIT) && !accountType.equals(DepositAccountType.FIXED_DEPOSIT)) {
+        if (!accountType.equals(DepositAccountType.FIXED_DEPOSIT)) {
             this.savingsProductToGLAccountMappingHelper.saveSavingsToAssetAccountMapping(element,
                     SavingProductAccountingParams.OVERDRAFT_PORTFOLIO_CONTROL.getValue(), savingProductId,
                     CashAccountsForSavings.OVERDRAFT_PORTFOLIO_CONTROL.getValue());
@@ -221,7 +221,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 SavingProductAccountingParams.INCOME_FROM_PENALTIES.getValue(), savingProductId,
                 CashAccountsForSavings.INCOME_FROM_PENALTIES.getValue());
 
-        if (!accountType.equals(DepositAccountType.RECURRING_DEPOSIT) && !accountType.equals(DepositAccountType.FIXED_DEPOSIT)) {
+        if (!accountType.equals(DepositAccountType.FIXED_DEPOSIT)) {
             this.savingsProductToGLAccountMappingHelper.saveSavingsToIncomeAccountMapping(element,
                     SavingProductAccountingParams.INCOME_FROM_INTEREST.getValue(), savingProductId,
                     CashAccountsForSavings.INCOME_FROM_INTEREST.getValue());
@@ -232,7 +232,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 SavingProductAccountingParams.INTEREST_ON_SAVINGS.getValue(), savingProductId,
                 CashAccountsForSavings.INTEREST_ON_SAVINGS.getValue());
 
-        if (!accountType.equals(DepositAccountType.RECURRING_DEPOSIT) && !accountType.equals(DepositAccountType.FIXED_DEPOSIT)) {
+        if (!accountType.equals(DepositAccountType.FIXED_DEPOSIT)) {
             this.savingsProductToGLAccountMappingHelper.saveSavingsToExpenseAccountMapping(element,
                     SavingProductAccountingParams.LOSSES_WRITTEN_OFF.getValue(), savingProductId,
                     CashAccountsForSavings.LOSSES_WRITTEN_OFF.getValue());
