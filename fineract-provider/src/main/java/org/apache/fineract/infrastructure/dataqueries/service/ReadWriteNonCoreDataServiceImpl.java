@@ -1415,14 +1415,14 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             }
         }
 
-        return new CommandProcessingResultBuilder() //
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()) //
+                .withEntityId(datatableId != null ? command.subentityId() : command.entityId()) //
                 .withOfficeId(commandProcessingResult.getOfficeId()) //
                 .withGroupId(commandProcessingResult.getGroupId()) //
                 .withClientId(commandProcessingResult.getClientId()) //
                 .withSavingsId(commandProcessingResult.getSavingsId()) //
                 .withLoanId(commandProcessingResult.getLoanId()) //
-                .with(changes) //
-                .build();
+                .with(changes).build();
     }
 
     @Transactional
@@ -1477,7 +1477,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         SQLInjectionValidator.validateSQLInput(whereClause);
         String sql = "select * from " + sqlGenerator.escape(dataTableName) + " where " + whereClause;
 
-        // id only used for reading a specific entry that belongs to appTableId (in a one to many datatable)
+        // id only used for reading a specific entry that belongs to appTableId (in a
+        // one to many datatable)
         if (multiRow && id != null) {
             sql = sql + " and id = " + id;
         }
@@ -1503,7 +1504,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         SQLInjectionValidator.validateSQLInput(whereClause);
         String sql = "select * from " + sqlGenerator.escape(dataTableName) + " where " + whereClause;
 
-        // id only used for reading a specific entry that belongs to appTableId (in a one to many datatable)
+        // id only used for reading a specific entry that belongs to appTableId (in a
+        // one to many datatable)
         if (multiRow && id != null) {
             sql = sql + " and id = " + id;
         }

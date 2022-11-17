@@ -41,6 +41,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.client.models.PutDataTablesAppTableIdDatatableIdResponse;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -419,10 +420,10 @@ public class DatatableIntegrationTest extends IntegrationTest {
         assertNull(((List) ((Map) ((List) items.get("data")).get(1)).get("row")).get(8));
         assertNull(((List) ((Map) ((List) items.get("data")).get(1)).get("row")).get(9));
 
-        HashMap<String, Object> updatedDatatableEntryResponse = this.datatableHelper.updateDatatableEntry(datatableName, loanID, 1, false,
-                datatableEntryRequestJsonString);
-
-        assertEquals(null, updatedDatatableEntryResponse.get("changes"));
+        PutDataTablesAppTableIdDatatableIdResponse updatedDatatableEntryResponse = this.datatableHelper.updateDatatableEntry(datatableName,
+                loanID, 1, datatableEntryRequestJsonString);
+        assertNotNull(updatedDatatableEntryResponse);
+        assertEquals(0, updatedDatatableEntryResponse.getChanges().size());
     }
 
     @Test
@@ -591,20 +592,25 @@ public class DatatableIntegrationTest extends IntegrationTest {
         datatabelEntryRequestJsonString = new GsonBuilder().serializeNulls().create().toJson(datatableEntryMap);
         LOG.info("map : {}", datatabelEntryRequestJsonString);
 
-        HashMap<String, Object> updatedDatatableEntryResponse = this.datatableHelper.updateDatatableEntry(datatableName, loanID, 1, false,
+        PutDataTablesAppTableIdDatatableIdResponse updatedDatatableEntryResponse = this.datatableHelper.updateDatatableEntry(datatableName,
+                loanID, 1, datatabelEntryRequestJsonString);
+        assertNotNull(updatedDatatableEntryResponse);
+        assertEquals(1L, updatedDatatableEntryResponse.getResourceId());
+        updatedDatatableEntryResponse = this.datatableHelper.updateDatatableEntry(datatableName, loanID, 2,
                 datatabelEntryRequestJsonString);
-        this.datatableHelper.updateDatatableEntry(datatableName, loanID, 2, false, datatabelEntryRequestJsonString);
+        assertNotNull(updatedDatatableEntryResponse);
+        assertEquals(2L, updatedDatatableEntryResponse.getResourceId());
 
-        assertEquals(loanID, updatedDatatableEntryResponse.get("loanId"));
+        assertEquals(Long.valueOf(loanID), updatedDatatableEntryResponse.getLoanId());
 
-        assertEquals(null, ((Map) updatedDatatableEntryResponse.get("changes")).get("itsABoolean"));
-        assertEquals(null, ((Map) updatedDatatableEntryResponse.get("changes")).get("itsADate"));
-        assertEquals(null, ((Map) updatedDatatableEntryResponse.get("changes")).get("itsADecimal"));
-        assertEquals(null, ((Map) updatedDatatableEntryResponse.get("changes")).get("itsADatetime"));
-        assertEquals(null, ((Map) updatedDatatableEntryResponse.get("changes")).get(tst_tst_tst + "_cd_itsADropdown"));
-        assertEquals(null, ((Map) updatedDatatableEntryResponse.get("changes")).get("itsANumber"));
-        assertEquals(null, ((Map) updatedDatatableEntryResponse.get("changes")).get("itsAString"));
-        assertEquals(null, ((Map) updatedDatatableEntryResponse.get("changes")).get("itsAText"));
+        assertEquals(null, updatedDatatableEntryResponse.getChanges().get("itsABoolean"));
+        assertEquals(null, updatedDatatableEntryResponse.getChanges().get("itsADate"));
+        assertEquals(null, updatedDatatableEntryResponse.getChanges().get("itsADecimal"));
+        assertEquals(null, updatedDatatableEntryResponse.getChanges().get("itsADatetime"));
+        assertEquals(null, updatedDatatableEntryResponse.getChanges().get(tst_tst_tst + "_cd_itsADropdown"));
+        assertEquals(null, updatedDatatableEntryResponse.getChanges().get("itsANumber"));
+        assertEquals(null, updatedDatatableEntryResponse.getChanges().get("itsAString"));
+        assertEquals(null, updatedDatatableEntryResponse.getChanges().get("itsAText"));
 
         items = this.datatableHelper.readDatatableEntry(datatableName, loanID, genericResultSet, null, "");
         assertNotNull(items);

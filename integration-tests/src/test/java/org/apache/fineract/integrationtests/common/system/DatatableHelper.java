@@ -30,11 +30,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import org.apache.fineract.client.models.PutDataTablesAppTableIdDatatableIdResponse;
+import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DatatableHelper {
+
+    private static final Gson GSON = new JSON().getGson();
 
     private static final Logger LOG = LoggerFactory.getLogger(DatatableHelper.class);
     private final RequestSpecification requestSpec;
@@ -73,6 +77,13 @@ public class DatatableHelper {
             final boolean genericResultSet, final String json) {
         return Utils.performServerPut(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + apptableId + "/"
                 + entryId + "?genericResultSet=" + genericResultSet + "&" + Utils.TENANT_IDENTIFIER, json, "");
+    }
+
+    public PutDataTablesAppTableIdDatatableIdResponse updateDatatableEntry(final String datatableName, final Integer apptableId,
+            final Integer entryId, final String json) {
+        final String response = Utils.performServerPut(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/"
+                + apptableId + "/" + entryId + "?genericResultSet=false&" + Utils.TENANT_IDENTIFIER, json, null);
+        return GSON.fromJson(response, PutDataTablesAppTableIdDatatableIdResponse.class);
     }
 
     public Integer createDatatableEntry(final String apptableName, final String datatableName, final Integer apptableId,
