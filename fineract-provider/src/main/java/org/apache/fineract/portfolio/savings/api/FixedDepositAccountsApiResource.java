@@ -381,6 +381,9 @@ public class FixedDepositAccountsApiResource {
         } else if (is(commandParam, "postInterest")) {
             final CommandWrapper commandRequest = builder.fixedDepositAccountInterestPosting(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "postAccrualInterestAsOn")) {
+            final CommandWrapper commandRequest = builder.fixedDepositAccountAccrualInterestPosting(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "close")) {
             final CommandWrapper commandRequest = builder.closeFixedDepositAccount(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);

@@ -92,4 +92,7 @@ public interface DepositAccountWritePlatformService {
     SavingsAccountTransaction mandatorySavingsAccountDeposit(SavingsAccountTransactionDTO accountTransactionDTO);
 
     CommandProcessingResult topUpAccount(Long accountId, JsonCommand command);
+
+    CommandProcessingResult postAccrualInterest(JsonCommand command, DepositAccountType depositAccountType);
+
 }
