@@ -53,7 +53,6 @@
 
     <changeSet author="fineract" id="add_field_configuration_for_client_address_lga">
         <insert tableName="m_field_configuration">
-            <column name="id" valueNumeric="19"/>
             <column name="entity" value="ADDRESS"/>
             <column name="subentity" value="CLIENT"/>
             <column name="field" value="lgaId"/>
