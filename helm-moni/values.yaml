@@ -40,6 +40,8 @@ fineract-rest:
     FINERACT_SERVER_PORT: 8443
     FINERACT_HIKARI_PASSWORD: "pM69CnRS!E9u"
     FINERACT_DEFAULT_TENANTDB_PWD: "pM69CnRS!E9u"
+    FF4J_FILE_NAME: "ff4j-feature-moniafrica.yml"
+
   
   
   # awsSecrets:
