@@ -53,7 +53,8 @@ import org.junit.jupiter.api.Test;
 public class LoanTransactionChargebackTest {
 
     private ResponseSpecification responseSpec;
-    private ResponseSpecification responseSpecError;
+    private ResponseSpecification responseSpecErr400;
+    private ResponseSpecification responseSpecErr503;
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;
     private final String amountVal = "1000";
@@ -66,7 +67,8 @@ public class LoanTransactionChargebackTest {
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.responseSpecError = new ResponseSpecBuilder().expectStatusCode(503).build();
+        this.responseSpecErr400 = new ResponseSpecBuilder().expectStatusCode(400).build();
+        this.responseSpecErr503 = new ResponseSpecBuilder().expectStatusCode(503).build();
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
 
         this.todaysDate = Utils.getLocalDateOfTenant();
@@ -109,11 +111,35 @@ public class LoanTransactionChargebackTest {
 
         // Try to reverse a Loan Transaction charge back
         PostLoansLoanIdTransactionsResponse reverseTransactionResponse = loanTransactionHelper.reverseLoanTransaction(loanId,
-                chargebackTransactionId.intValue(), operationDate, responseSpecError);
+                chargebackTransactionId.intValue(), operationDate, responseSpecErr503);
 
         // Try to reverse a Loan Transaction repayment with linked transactions
         reverseTransactionResponse = loanTransactionHelper.reverseLoanTransaction(loanId, transactionId.intValue(), operationDate,
-                responseSpecError);
+                responseSpecErr503);
+    }
+
+    @Test
+    public void applyLoanTransactionChargebackWithAmountZero() {
+        // Client and Loan account creation
+        final Integer loanId = createAccounts(15, 1);
+
+        GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+
+        loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
+
+        Float amount = Float.valueOf(amountVal);
+        PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, amount,
+                loanId);
+        assertNotNull(loanIdTransactionsResponse);
+        final Long transactionId = loanIdTransactionsResponse.getResourceId();
+
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+        loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.closed.obligations.met");
+
+        loanTransactionHelper.applyChargebackTransaction(loanId, transactionId.intValue(), "0.00", 0, responseSpecErr400);
+
     }
 
     @Test
@@ -179,7 +205,7 @@ public class LoanTransactionChargebackTest {
         log.info("Try to apply the Charge back over transaction Id {} with type {}", loanTransaction.getId(),
                 loanTransaction.getType().getCode());
 
-        loanTransactionHelper.applyChargebackTransaction(loanId, loanTransaction.getId().intValue(), amountVal, 0, responseSpecError);
+        loanTransactionHelper.applyChargebackTransaction(loanId, loanTransaction.getId().intValue(), amountVal, 0, responseSpecErr503);
     }
 
     @Test

@@ -237,7 +237,7 @@ public final class LoanEventApiJsonValidator {
         final BigDecimal transactionAmount = this.fromApiJsonHelper
                 .extractBigDecimalWithLocaleNamed(LoanApiConstants.TRANSACTION_AMOUNT_PARAMNAME, element);
         baseDataValidator.reset().parameter(LoanApiConstants.TRANSACTION_AMOUNT_PARAMNAME).value(transactionAmount).notNull()
-                .zeroOrPositiveAmount();
+                .positiveAmount();
 
         final String note = this.fromApiJsonHelper.extractStringNamed(LoanApiConstants.noteParameterName, element);
         baseDataValidator.reset().parameter(LoanApiConstants.noteParameterName).value(note).notExceedingLengthOf(1000);
