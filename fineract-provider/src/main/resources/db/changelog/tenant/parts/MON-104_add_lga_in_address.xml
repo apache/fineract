@@ -52,6 +52,11 @@
     </changeSet>
 
     <changeSet author="fineract" id="add_field_configuration_for_client_address_lga_1">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_field_configuration where field = 'lgaId' and entity = 'ADDRESS' and subentity='CLIENT';
+            </sqlCheck>
+        </preConditions>
         <insert tableName="m_field_configuration">
             <column name="entity" value="ADDRESS"/>
             <column name="subentity" value="CLIENT"/>
