@@ -18,10 +18,13 @@
  */
 package org.apache.fineract.infrastructure.creditbureau.service;
 
+import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
+import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
+import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.File;
@@ -30,6 +33,12 @@ import java.net.HttpURLConnection;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import javax.annotation.Nullable;
+import javax.validation.constraints.NotNull;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -37,6 +46,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -67,6 +77,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implements ThitsaWorksCreditBureauIntegrationWritePlatformService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl.class);
+    public static final String UPLOAD_CREDIT_REPORT = "UploadCreditReport";
+    public static final String RESPONSE_MESSAGE = "ResponseMessage";
+    public static final String IS_NOT_AVAILABLE_SUFFIX = ".is.not.available";
     private final PlatformSecurityContext context;
     private final FromJsonHelper fromApiJsonHelper;
     private final TokenRepositoryWrapper tokenRepositoryWrapper;
@@ -97,87 +110,112 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
 
     @Transactional
     @Override
-    @SuppressWarnings("deprecation")
     public String okHttpConnectionMethod(String userName, String password, String subscriptionKey, String subscriptionId, String url,
-            String token, File file, FormDataContentDisposition fileData, Long uniqueId, String nrcId, String process) {
+            String token, File file, FormDataContentDisposition fileData, Long uniqueId, String nrcId, @NotNull String process) {
 
-        String reponseMessage = null;
-        RequestBody requestBody = null;
-
-        if (process.equals("UploadCreditReport")) {
-            String fileName = fileData.getFileName();
-            requestBody = RequestBody.create(file, MediaType.parse("multipart/form-data"));
-
-            requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM).addFormDataPart("file", fileName, requestBody)
-                    .addFormDataPart("BODY", "formdata").addFormDataPart("userName", userName).build();
-
-        } else if (process.equals("token")) {
-
-            final MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
-            String jsonBody = "" + "BODY=x-www-form-urlencoded&\r" + "grant_type=password&\r" + "userName=" + userName + "&\r" + "password="
-                    + password + "&\r";
-            requestBody = RequestBody.create(jsonBody, mediaType);
-
-        } else if (process.equals("NRC")) {
-
-            final MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
-            String jsonBody = "BODY=x-www-form-urlencoded&nrc=" + nrcId + "&";
-            requestBody = RequestBody.create(jsonBody, mediaType);
-
+        String responseMessage = null;
+        if (StringUtils.isBlank(url)) {
+            throw new PlatformDataIntegrityException("error.msg.url.is.null.or.empty", "URL is null or empty");
         }
-
-        HttpUrl.Builder urlBuilder = HttpUrl.parse(url).newBuilder();
-        String urlokhttp = urlBuilder.build().toString();
+        HttpUrl urlBuilder = HttpUrl.parse(url);
+        if (urlBuilder == null) {
+            throw new PlatformDataIntegrityException("error.url.not.parsed", "URL not parsed");
+        }
+        String okHttpUrl = urlBuilder.toString();
         Request request = null;
-        if (token == null) {
-
-            request = new Request.Builder().header("mcix-subscription-key", subscriptionKey).header("mcix-subscription-id", subscriptionId)
-                    .header("Content-Type", "application/x-www-form-urlencoded").url(urlokhttp).post(requestBody).build();
-        }
-
-        if (token != null) {
-
-            if (process.equals("CreditReport")) { // GET method for fetching credit report
-                request = new Request.Builder().header("mcix-subscription-key", subscriptionKey)
-                        .header("mcix-subscription-id", subscriptionId).header("Content-Type", "application/x-www-form-urlencoded")
-                        .header("Authorization", "Bearer " + token).url(urlokhttp).get().build();
-            } else if (process.equals("UploadCreditReport")) { // POST for uploading Credit-Report(multipart/form-data)
-                // To ThitsaWork
-                request = new Request.Builder().header("mcix-subscription-key", subscriptionKey)
-                        .header("mcix-subscription-id", subscriptionId).header("Content-Type", "multipart/form-data")
-                        .header("Authorization", "Bearer " + token).url(urlokhttp).post(requestBody).build();
-
-            } else { // POST method for application/x-www-form-urlencoded
-
-                request = new Request.Builder().header("mcix-subscription-key", subscriptionKey)
-                        .header("mcix-subscription-id", subscriptionId).header("Content-Type", "application/x-www-form-urlencoded")
-                        .header("Authorization", "Bearer " + token).url(urlokhttp).post(requestBody).build();
-            }
+        Request.Builder baseRequestBuilder = createRequestBuilder(subscriptionKey, subscriptionId, token, okHttpUrl);
+        switch (process) {
+            case UPLOAD_CREDIT_REPORT -> request = createRequest(baseRequestBuilder, () -> new MultipartBody.Builder()
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart("file", fileData.getFileName(), RequestBody.create(file, MediaType.parse("multipart/form-data")))
+                    .addFormDataPart("BODY", "formdata").addFormDataPart("userName", userName).build(),
+                    (requestBody, builder) -> builder.header(CONTENT_TYPE, MULTIPART_FORM_DATA).post(requestBody).build());
+            case "CreditReport" -> request = createRequest(baseRequestBuilder,
+                    builder -> builder.header(CONTENT_TYPE, APPLICATION_FORM_URLENCODED).get().build());
+            case "token" -> request = createRequest(baseRequestBuilder,
+                    () -> RequestBody.create("" + "BODY=x-www-form-urlencoded&\r" + "grant_type=password&\r" + "userName=" + userName
+                            + "&\r" + "password=" + password + "&\r", MediaType.parse("application/x-www-form-urlencoded")),
+                    (requestBody, builder) -> builder.header(CONTENT_TYPE, APPLICATION_FORM_URLENCODED).post(requestBody).build());
+            case "NRC" -> request = createRequest(baseRequestBuilder,
+                    () -> RequestBody.create("BODY=x-www-form-urlencoded&nrc=" + nrcId + "&",
+                            MediaType.parse("application/x-www-form-urlencoded")),
+                    (requestBody, builder) -> builder.header(CONTENT_TYPE, APPLICATION_FORM_URLENCODED).post(requestBody).build());
+            default -> handleAPIIntegrityIssues("Invalid Process");
         }
 
         Response response;
-        Integer responseCode = 0;
+        int responseCode = 0;
         try {
             response = client.newCall(request).execute();
             responseCode = response.code();
-            reponseMessage = response.body().string();
+            responseMessage = response.body().string();
         } catch (IOException e) {
 
             LOG.error("error occured in HTTP request-response method.", e);
         }
 
         if (responseCode != HttpURLConnection.HTTP_OK) {
-            this.httpResponse(responseCode, reponseMessage);
+            this.httpResponse(responseCode, responseMessage);
         }
 
-        if (process.equals("UploadCreditReport")) { // to show the Response on frontEnd
-            JsonObject reportObject = JsonParser.parseString(reponseMessage).getAsJsonObject();
-            String responseMessageJson = reportObject.get("ResponseMessage").getAsString();
+        if (process.equals(UPLOAD_CREDIT_REPORT)) { // to show the Response on frontEnd
+            JsonObject reportObject = JsonParser.parseString(responseMessage).getAsJsonObject();
+            String responseMessageJson = reportObject.get(RESPONSE_MESSAGE).getAsString();
             this.handleAPIIntegrityIssues(responseMessageJson);
         }
+        return responseMessage;
 
-        return reponseMessage;
+    }
 
+    /**
+     * Create a request object with the given request builder without request body support (ex: GET)
+     *
+     * @param builder
+     *            the request builder object
+     * @param requestBuilder
+     *            create a request from the builder object with customization
+     * @return return the generated request object
+     */
+    private Request createRequest(Request.Builder builder, Function<Request.Builder, Request> requestBuilder) {
+        return requestBuilder.apply(builder);
+    }
+
+    /**
+     * Create a reuqest obejct with a request body support
+     *
+     * @param builder
+     *            the base Builder object
+     * @param requestBodySupplier
+     *            request body supplier method
+     * @param requestBuilder
+     *            generate request from the builder object with customization
+     * @return return the generated request object
+     */
+    private Request createRequest(Request.Builder builder, Supplier<RequestBody> requestBodySupplier,
+            BiFunction<RequestBody, Request.Builder, Request> requestBuilder) {
+        return requestBuilder.apply(requestBodySupplier.get(), builder);
+    }
+
+    /**
+     * Create a request builder for the given url if no token not adds authorization header
+     *
+     * @param subscriptionKey
+     *            subscription key parameter
+     * @param subscriptionId
+     *            subscription id parameter
+     * @param token
+     *            token can be null
+     * @param url
+     *            the url to connect
+     * @return a request builder base object
+     */
+    private Request.Builder createRequestBuilder(String subscriptionKey, String subscriptionId, @Nullable String token, String url) {
+        Request.Builder base = new Request.Builder().header("mcix-subscription-key", subscriptionKey)
+                .header("mcix-subscription-id", subscriptionId).url(url);
+        if (token != null) {
+            return base.header("Authorization", "Bearer " + token);
+        }
+        return base;
     }
 
     private void httpResponse(Integer responseCode, String responseMessage) {
@@ -208,17 +246,15 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
         String bureauID = command.stringValueOfParameterNamed("creditBureauID");
         Integer creditBureauId = Integer.parseInt(bureauID);
 
-        String token = null;
-
         String userName = getCreditBureauConfiguration(creditBureauId, CreditBureauConfigurations.USERNAME.toString());
         String password = getCreditBureauConfiguration(creditBureauId, CreditBureauConfigurations.PASSWORD.toString());
         String subscriptionId = getCreditBureauConfiguration(creditBureauId, CreditBureauConfigurations.SUBSCRIPTIONID.toString());
         String subscriptionKey = getCreditBureauConfiguration(creditBureauId, CreditBureauConfigurations.SUBSCRIPTIONKEY.toString());
 
         CreditBureauToken creditbureautoken = createToken(creditBureauId.longValue());
-        token = creditbureautoken.getAccessToken();
+        String token = creditbureautoken.getAccessToken();
 
-        // will use only "NRC" part of code from common http method to get data based on nrc
+        // will use only "NRC" part of code from common http method to get data based on the nrc
         String process = "NRC";
         String url = getCreditBureauConfiguration(creditBureauId, CreditBureauConfigurations.SEARCHURL.toString());
 
@@ -227,18 +263,15 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
         String searchResult = this.okHttpConnectionMethod(userName, password, subscriptionKey, subscriptionId, nrcUrl, token, null, null,
                 0L, nrcId, process);
 
-        if (process.equals("NRC")) {
-            Long uniqueID = this.extractUniqueId(searchResult);
+        Long uniqueID = this.extractUniqueId(searchResult);
 
-            process = "CreditReport";
-            url = getCreditBureauConfiguration(creditBureauId, CreditBureauConfigurations.CREDITREPORTURL.toString());
+        process = "CreditReport";
+        url = getCreditBureauConfiguration(creditBureauId, CreditBureauConfigurations.CREDITREPORTURL.toString());
 
-            String creditReportUrl = url + uniqueID;
+        String creditReportUrl = url + uniqueID;
 
-            searchResult = this.okHttpConnectionMethod(userName, password, subscriptionKey, subscriptionId, creditReportUrl, token, null,
-                    null, uniqueID, null, process);
-
-        }
+        searchResult = this.okHttpConnectionMethod(userName, password, subscriptionKey, subscriptionId, creditReportUrl, token, null, null,
+                uniqueID, null, process);
 
         // after getting the result(creditreport) from httpconnection-response it will assign creditreport to generic
         // creditreportdata object
@@ -246,48 +279,35 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
         JsonObject reportObject = JsonParser.parseString(searchResult).getAsJsonObject();
 
         // Credit Reports Stored into Generic CreditReportData
-        JsonObject jsonData = null;
-        JsonElement element = reportObject.get("Data");
 
-        if (!(element instanceof JsonNull)) { // NOTE : "element instanceof JsonNull" is for handling empty values (and
-            // assigning null) while fetching data from results
-            jsonData = (JsonObject) element;
+        // Extract Data from Credit Report
+        Optional<JsonObject> jsonData = Optional.ofNullable(reportObject.get("Data")).filter(JsonElement::isJsonObject)
+                .map(JsonElement::getAsJsonObject);
 
-        }
+        // Extract Borrower from Credit Report data section.
+        Optional<JsonElement> element = jsonData.map(data -> data.get("BorrowerInfo"));
 
-        JsonObject borrowerInfos = null;
-        String borrowerInfo = null;
+        // Fill borrower data if present, and it's a json object.
+        Optional<JsonObject> borrowerInfos = element.filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject);
 
-        element = jsonData.get("BorrowerInfo");
+        // Create json object for borrower data.
+        String borrowerInfo = borrowerInfos.map(data -> new Gson().toJson(data)).orElse(null);
 
-        if (!(element instanceof JsonNull)) {
-            borrowerInfos = (JsonObject) element;
-            Gson gson = new Gson();
-            borrowerInfo = gson.toJson(borrowerInfos);
-        }
-
-        String name = borrowerInfos.get("Name").toString();
-        String gender = borrowerInfos.get("Gender").toString();
-        String address = borrowerInfos.get("Address").toString();
+        String name = borrowerInfos.map(data -> data.get("Name")).map(JsonElement::toString).orElse(null);
+        String gender = borrowerInfos.map(data -> data.get("Gender")).map(JsonElement::toString).orElse(null);
+        String address = borrowerInfos.map(data -> data.get("Address")).map(JsonElement::toString).orElse(null);
 
         String creditScore = "CreditScore";
-        creditScore = getJsonObjectToString(creditScore, element, jsonData);
+        creditScore = getJsonObjectToString(creditScore, jsonData);
 
         String activeLoans = "ActiveLoans";
-        JsonArray activeLoansArray = getJsonObjectToArray(activeLoans, element, jsonData);
 
-        String[] activeLoanStringArray = null;
-        if (activeLoansArray != null) {
-            activeLoanStringArray = convertArrayintoStringArray(activeLoansArray);
-        }
+        String[] activeLoanStringArray = Optional.ofNullable(getJsonObjectToArray(activeLoans, jsonData))
+                .map(this::convertArrayintoStringArray).orElse(null);
 
         String writeOffLoans = "WriteOffLoans";
-        JsonArray writeOffLoansArray = getJsonObjectToArray(writeOffLoans, element, jsonData);
-
-        String[] writeoffLoanStringArray = null;
-        if (writeOffLoansArray != null) {
-            writeoffLoanStringArray = convertArrayintoStringArray(writeOffLoansArray);
-        }
+        String[] writeoffLoanStringArray = Optional.ofNullable(getJsonObjectToArray(writeOffLoans, jsonData))
+                .map(this::convertArrayintoStringArray).orElse(null);
 
         return CreditBureauReportData.instance(name, gender, address, creditScore, borrowerInfo, activeLoanStringArray,
                 writeoffLoanStringArray);
@@ -310,17 +330,15 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
         CreditBureauConfiguration addReportURL = this.configDataRepository.getCreditBureauConfigData(creditBureauId, "addCreditReporturl");
         String url = addReportURL.getValue();
 
-        String process = "UploadCreditReport";
-
         return this.okHttpConnectionMethod(userName, password, subscriptionKey, subscriptionId, url, token, creditReport, fileDetail, 0L,
-                null, process);
+                null, UPLOAD_CREDIT_REPORT);
     }
 
     private String[] convertArrayintoStringArray(JsonArray jsonResult) {
 
         String[] loanAccounts = new String[jsonResult.size()];
 
-        Integer i = 0;
+        int i = 0;
         for (JsonElement ele : jsonResult) {
             loanAccounts[i++] = ele.toString();
         }
@@ -337,14 +355,14 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
         JsonElement element = reportObject.get("Data");
 
         if (element.isJsonNull()) {
-            String responseMessage = reportObject.get("ResponseMessage").getAsString();
+            String responseMessage = reportObject.get(RESPONSE_MESSAGE).getAsString();
             handleAPIIntegrityIssues(responseMessage);
         }
 
         // to fetch the Unique ID from Result
         JsonObject jsonObject = JsonParser.parseString(jsonResult).getAsJsonObject();
 
-        Long uniqueID = 0L;
+        long uniqueID = 0L;
         try {
             JsonArray dataArray = jsonObject.getAsJsonArray("Data");
 
@@ -358,7 +376,7 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
                 uniqueID = Long.parseLong(trimUniqueId);
 
             } else if (dataArray.size() == 0) {
-                String responseMessage = reportObject.get("ResponseMessage").getAsString();
+                String responseMessage = reportObject.get(RESPONSE_MESSAGE).getAsString();
                 handleAPIIntegrityIssues(responseMessage);
             } else {
                 String nrc;
@@ -376,32 +394,19 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
             }
 
         } catch (IndexOutOfBoundsException e) {
-            String responseMessage = jsonObject.get("ResponseMessage").getAsString();
+            String responseMessage = jsonObject.get(RESPONSE_MESSAGE).getAsString();
             handleAPIIntegrityIssues(responseMessage);
         }
         return uniqueID;
     }
 
-    private String getJsonObjectToString(String fetchData, JsonElement element, JsonObject jsonData) {
-
-        String jsonString = null;
-        element = jsonData.get(fetchData);
-        if (!(element instanceof JsonNull)) {
-            JsonObject fetchJson = (JsonObject) element;
-            Gson gson = new Gson();
-            jsonString = gson.toJson(fetchJson);
-        }
-        return jsonString;
+    private String getJsonObjectToString(String fetchData, Optional<JsonObject> jsonData) {
+        return jsonData.map(data -> data.get(fetchData)).filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject)
+                .map(data -> new Gson().toJson(data)).orElse(null);
     }
 
-    private JsonArray getJsonObjectToArray(String fetchData, JsonElement element, JsonObject jsonData) {
-
-        JsonArray fetchJson = null;
-        element = jsonData.get(fetchData);
-        if (!(element instanceof JsonNull)) {
-            fetchJson = (JsonArray) element;
-        }
-        return fetchJson;
+    private JsonArray getJsonObjectToArray(String fetchData, Optional<JsonObject> jsonData) {
+        return jsonData.map(data -> data.get(fetchData)).filter(JsonElement::isJsonArray).map(JsonElement::getAsJsonArray).orElse(null);
     }
 
     @Transactional
@@ -435,21 +440,19 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
             String url = getCreditBureauConfiguration(bureauID.intValue(), CreditBureauConfigurations.TOKENURL.toString());
 
             String process = "token";
-            String nrcId = null;
             Long uniqueID = 0L;
             String result = this.okHttpConnectionMethod(userName, password, subscriptionKey, subscriptionId, url, null, null, null,
-                    uniqueID, nrcId, process);
+                    uniqueID, null, process);
             // created token will be storing it into database
             final CommandWrapper wrapper = new CommandWrapperBuilder().withJson(result).build();
             final String json = wrapper.getJson();
 
-            JsonCommand apicommand = null;
             final JsonElement parsedCommand = this.fromApiJsonHelper.parse(json);
 
-            apicommand = JsonCommand.from(json, parsedCommand, this.fromApiJsonHelper, wrapper.getEntityName(), wrapper.getEntityId(),
-                    wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getSavingsId(),
-                    wrapper.getTransactionId(), wrapper.getHref(), wrapper.getProductId(), wrapper.getCreditBureauId(),
-                    wrapper.getOrganisationCreditBureauId(), wrapper.getJobName());
+            JsonCommand apicommand = JsonCommand.from(json, parsedCommand, this.fromApiJsonHelper, wrapper.getEntityName(),
+                    wrapper.getEntityId(), wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(),
+                    wrapper.getSavingsId(), wrapper.getTransactionId(), wrapper.getHref(), wrapper.getProductId(),
+                    wrapper.getCreditBureauId(), wrapper.getOrganisationCreditBureauId(), wrapper.getJobName());
 
             this.fromApiJsonDeserializer.validateForCreate(apicommand.json());
 
@@ -473,8 +476,8 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
         List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource("ThitsaWorksCreditBureauIntegration");
-        String creditBureauConfigurationValue = null;
 
+        String creditBureauConfigurationValue;
         try {
 
             CreditBureauConfiguration configurationParameterValue = this.configDataRepository.getCreditBureauConfigData(creditBureauId,
@@ -483,10 +486,12 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImpl implemen
             creditBureauConfigurationValue = configurationParameterValue.getValue();
             if (creditBureauConfigurationValue.isEmpty()) {
 
-                baseDataValidator.reset().failWithCode("creditBureau.configuration." + configurationParameterName + ".is.not.available");
+                baseDataValidator.reset()
+                        .failWithCode("creditBureau.configuration." + configurationParameterName + IS_NOT_AVAILABLE_SUFFIX);
 
-                throw new PlatformDataIntegrityException("creditBureau.Configuration." + configurationParameterName + ".is.not.available",
-                        "creditBureau.Configuration." + configurationParameterName + ".is.not.available");
+                throw new PlatformDataIntegrityException(
+                        "creditBureau.Configuration." + configurationParameterName + IS_NOT_AVAILABLE_SUFFIX,
+                        "creditBureau.Configuration." + configurationParameterName + IS_NOT_AVAILABLE_SUFFIX);
 
             }
         } catch (NullPointerException ex) {

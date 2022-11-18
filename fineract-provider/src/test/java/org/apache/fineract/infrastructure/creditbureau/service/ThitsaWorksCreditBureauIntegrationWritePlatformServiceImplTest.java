@@ -170,6 +170,32 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImplTest {
     }
 
     @Test
+    public void okHttpNullUrlTest() throws IOException {
+
+        mockOkHttpCall(request -> createOkhttpResponse(request, 500, "Internal Server Error"));
+
+        PlatformDataIntegrityException raisedException = assertThrows(PlatformDataIntegrityException.class, () -> {
+            underTest.okHttpConnectionMethod("testUser", "testPassword", "subscriptionKey", "subscriptionId", null, "AccessToken", null,
+                    null, 0L, "nrcId", "NRC");
+
+        });
+        assertEquals("error.msg.url.is.null.or.empty", raisedException.getGlobalisationMessageCode());
+    }
+
+    @Test
+    public void okHttpInvalidProcessTestTest() throws IOException {
+
+        mockOkHttpCall(request -> createOkhttpResponse(request, 500, "Internal Server Error"));
+
+        PlatformDataIntegrityException raisedException = assertThrows(PlatformDataIntegrityException.class, () -> {
+            underTest.okHttpConnectionMethod("testUser", "testPassword", "subscriptionKey", "subscriptionId", "https://nrc.test.url.com",
+                    "AccessToken", null, null, 0L, "nrcId", "notValidProcess");
+
+        });
+        assertEquals("Invalid Process", raisedException.getGlobalisationMessageCode());
+    }
+
+    @Test
     public void okHttpIOExceptionTest() throws IOException {
         mockOkHttpCall(request -> {
             throw new IOException("IO Exception");
@@ -468,8 +494,7 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImplTest {
         assertEquals("ADD_CREDIT_RESPONSE", result.getDefaultUserMessage());
     }
 
-    // TODO: if no borrower is throw NPE
-    // @Test
+    @Test
     public void getCreditReportFromThitsaWorksEmptyBorrowerTest() throws IOException {
         mockTokenGeneration();
         mockOkHttpCall(request -> {
@@ -499,8 +524,7 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImplTest {
         assertNotNull(result.getCreditScore());
     }
 
-    // TODO: empty gender not handler correctly (NPE)
-    // @Test
+    @Test
     public void getCreditReportFromThitsaWorksNoGenderTest() throws IOException {
         mockTokenGeneration();
         mockOkHttpCall(request -> {
@@ -534,8 +558,7 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImplTest {
         assertNotNull(result.getCreditScore());
     }
 
-    // TODO: null credit script invalid result
-    // @Test
+    @Test
     public void getCreditReportFromThitsaWorksNoLoansTest() throws IOException {
         mockTokenGeneration();
         mockOkHttpCall(request -> {
