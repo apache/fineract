@@ -49,6 +49,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 import javax.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -84,8 +85,6 @@ import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -96,18 +95,15 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@Slf4j
 @RequiredArgsConstructor
 public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataService {
 
     private static final String DATATABLE_NAME_REGEX_PATTERN = "^[a-zA-Z][a-zA-Z0-9\\-_\\s]{0,48}[a-zA-Z0-9]$";
 
     private static final String CODE_VALUES_TABLE = "m_code_value";
-
-    private static final Logger LOG = LoggerFactory.getLogger(ReadWriteNonCoreDataServiceImpl.class);
 
     // TODO: Extract these types out of here
     private static final ImmutableMap<String, String> apiTypeToMySQL = ImmutableMap.<String, String>builder().put("string", "VARCHAR")
@@ -367,7 +363,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
-        LOG.error("Error occurred.", dve);
+        log.error("Error occurred.", dve);
     }
 
     @Transactional
@@ -847,7 +843,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             if (databaseTypeResolver.isMySQL()) {
                 sqlBuilder.append(" ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;");
             }
-            LOG.debug("SQL:: {}", sqlBuilder.toString());
+            log.debug("SQL:: {}", sqlBuilder.toString());
 
             this.jdbcTemplate.execute(sqlBuilder.toString());
 
@@ -989,7 +985,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         try {
             codeId = this.jdbcTemplate.queryForObject(checkColumnCodeMapping.toString(), Integer.class);
         } catch (final EmptyResultDataAccessException e) {
-            LOG.warn("Error occurred.", e);
+            log.warn("Error occurred.", e);
         }
         return ObjectUtils.defaultIfNull(codeId, 0);
     }
@@ -1411,11 +1407,11 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 pkValue = datatableId;
             }
             final String sql = getUpdateSql(grs.getColumnHeaders(), dataTableName, pkName, pkValue, changes);
-            LOG.debug("Update sql: {}", sql);
+            log.debug("Update sql: {}", sql);
             if (StringUtils.isNotBlank(sql)) {
                 this.jdbcTemplate.update(sql);
             } else {
-                LOG.debug("No Changes");
+                log.debug("No Changes");
             }
         }
 
@@ -1520,7 +1516,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private CommandProcessingResult checkMainResourceExistsWithinScope(final String appTable, final Long appTableId) {
 
         final String sql = dataScopedSQL(appTable, appTableId);
-        LOG.debug("data scoped sql: {}", sql);
+        log.debug("data scoped sql: {}", sql);
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
 
         if (!rs.next()) {
@@ -1757,7 +1753,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         addSql = "insert into " + sqlGenerator.escape(datatable) + " (" + sqlGenerator.escape(fkName) + " " + insertColumns + ")"
                 + " select " + appTableId + " as id" + selectColumns;
 
-        LOG.debug("{}", addSql);
+        log.debug("{}", addSql);
 
         return addSql;
     }
@@ -1807,7 +1803,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 + ", score )" + " select " + appTableId + " as id" + selectColumns
                 + " , ( SELECT SUM( code_score ) FROM m_code_value WHERE m_code_value.id IN (" + scoresId + " ) ) as score";
 
-        LOG.debug("{}", vaddSql);
+        log.debug("{}", vaddSql);
 
         return vaddSql;
     }
