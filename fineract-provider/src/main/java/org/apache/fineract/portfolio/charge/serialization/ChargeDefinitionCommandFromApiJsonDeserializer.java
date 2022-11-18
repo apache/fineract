@@ -277,6 +277,7 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
 
         final BigDecimal maxAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maxAmount", element.getAsJsonObject());
 
+        if(maxAmount != null && minAmount != null){
         if (appliesTo.isSavingsCharge() || appliesTo.isLoanCharge()) {
 
             final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeTimeType", element);
@@ -301,6 +302,7 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
         } else {
             String message = "Minimum and Maximum Amount is only supported on Loans and Savings Deposits  charges";
             minandmaxConfigurationAreNotSupported(minAmount, maxAmount, message);
+        }
         }
     }
 
