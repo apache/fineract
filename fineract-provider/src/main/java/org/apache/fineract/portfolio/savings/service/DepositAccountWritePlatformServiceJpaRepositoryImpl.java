@@ -57,6 +57,7 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
@@ -123,12 +124,12 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionRepository;
 import org.apache.fineract.portfolio.savings.exception.DepositAccountTransactionNotAllowedException;
+import org.apache.fineract.portfolio.savings.exception.Fx_RateTableShouldBeExistException;
 import org.apache.fineract.portfolio.savings.exception.InsufficientAccountBalanceException;
 import org.apache.fineract.portfolio.savings.exception.PostInterestAsOnDateException;
 import org.apache.fineract.portfolio.savings.exception.PostInterestAsOnDateException.PostInterestAsOnExceptionType;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountTransactionNotFoundException;
 import org.apache.fineract.portfolio.savings.exception.TransactionUpdateNotAllowedException;
-import org.apache.fineract.portfolio.savings.exception.Fx_RateTableShouldBeExistException;
 import org.apache.fineract.portfolio.savings.request.FixedDepositActivationReq;
 import org.apache.fineract.portfolio.savings.request.FixedDepositApplicationPreClosureReq;
 import org.apache.fineract.portfolio.savings.request.FixedDepositApplicationReq;
@@ -141,7 +142,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.apache.fineract.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
 
 @Service
 @Transactional
@@ -271,10 +271,10 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                             portfolioAccountData.accountId(), account.getId(), "Account Transfer", locale, fmt, null, null, null, null,
                             null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, account, fromSavingsAccount,
                             isRegularTransaction, isExceptionForBalanceCheck);
-                    if(account.getProduct().isUSDProduct()) {
-                        if(this.readWriteNonCoreDataService.retrieveDatatable("Fx_rate") != null){
+                    if (account.getProduct().isUSDProduct()) {
+                        if (this.readWriteNonCoreDataService.retrieveDatatable("Fx_rate") != null) {
                             accountTransferDTO.setUSDAccount(true);
-                        }else{
+                        } else {
                             throw new Fx_RateTableShouldBeExistException();
                         }
 
@@ -1874,7 +1874,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final MathContext mc = new MathContext(10, MoneyHelper.getRoundingMode());
         boolean isInterestTransfer = false;
         account.setSavingsAccountTransactionRepository(this.savingsAccountTransactionRepository);
-        account.postAccrualInterests(mc, transactionDate, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
+        account.postAccrualInterest(mc, transactionDate, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
                 financialYearBeginningMonth, transactionDate, null);
         this.savingAccountRepositoryWrapper.saveAndFlush(account);
 

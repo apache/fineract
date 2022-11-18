@@ -91,12 +91,13 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
 
     @Autowired
     public AccountTransfersWritePlatformServiceImpl(final AccountTransfersDataValidator accountTransfersDataValidator,
-                                                    final AccountTransferAssembler accountTransferAssembler, final AccountTransferRepository accountTransferRepository,
-                                                    final SavingsAccountAssembler savingsAccountAssembler, final SavingsAccountDomainService savingsAccountDomainService,
-                                                    final LoanAssembler loanAssembler, final LoanAccountDomainService loanAccountDomainService,
-                                                    final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
-                                                    final AccountTransferDetailRepository accountTransferDetailRepository, final LoanReadPlatformService loanReadPlatformService,
-                                                    final GSIMRepositoy gsimRepository, ConfigurationDomainService configurationDomainService, ReadWriteNonCoreDataService readWriteNonCoreDataService) {
+            final AccountTransferAssembler accountTransferAssembler, final AccountTransferRepository accountTransferRepository,
+            final SavingsAccountAssembler savingsAccountAssembler, final SavingsAccountDomainService savingsAccountDomainService,
+            final LoanAssembler loanAssembler, final LoanAccountDomainService loanAccountDomainService,
+            final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
+            final AccountTransferDetailRepository accountTransferDetailRepository, final LoanReadPlatformService loanReadPlatformService,
+            final GSIMRepositoy gsimRepository, ConfigurationDomainService configurationDomainService,
+            ReadWriteNonCoreDataService readWriteNonCoreDataService) {
         this.accountTransfersDataValidator = accountTransfersDataValidator;
         this.accountTransferAssembler = accountTransferAssembler;
         this.accountTransferRepository = accountTransferRepository;
@@ -417,17 +418,17 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             }
 
             BigDecimal withdrawalTransactionAmount = accountTransferDTO.getTransactionAmount();
-            if(accountTransferDTO.isUSDAccount()){
+            if (accountTransferDTO.isUSDAccount()) {
                 BigDecimal rate = this.readWriteNonCoreDataService.getFxLatestRate("Fx_rate", fromSavingsAccount.officeId());
-                if(rate != null){
+                if (rate != null) {
                     BigDecimal newAmount = accountTransferDTO.getTransactionAmount().multiply(rate);
                     withdrawalTransactionAmount = newAmount;
                 }
             }
 
             final SavingsAccountTransaction withdrawal = this.savingsAccountDomainService.handleWithdrawal(fromSavingsAccount,
-                    accountTransferDTO.getFmt(), transactionDate, withdrawalTransactionAmount,
-                    accountTransferDTO.getPaymentDetail(), transactionBooleanValues, backdatedTxnsAllowedTill);
+                    accountTransferDTO.getFmt(), transactionDate, withdrawalTransactionAmount, accountTransferDTO.getPaymentDetail(),
+                    transactionBooleanValues, backdatedTxnsAllowedTill);
 
             final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(toSavingsAccount,
                     accountTransferDTO.getFmt(), transactionDate, accountTransferDTO.getTransactionAmount(),

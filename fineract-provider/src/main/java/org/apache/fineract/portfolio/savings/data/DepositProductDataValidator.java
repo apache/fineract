@@ -49,6 +49,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interest
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestCalculationTypeParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestCompoundingPeriodTypeParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.interestPostingPeriodTypeParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.isUSDProductParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minBalanceForInterestCalculationParamName;
@@ -59,7 +60,6 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.shortNam
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.isUSDProductParamName;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -299,7 +299,7 @@ public class DepositProductDataValidator {
                     .ignoreIfNull().zeroOrPositiveAmount();
         }
 
-        //If currency is usd for product
+        // If currency is usd for product
         if (this.fromApiJsonHelper.parameterExists(isUSDProductParamName, element)) {
             final String isUSDProduct = this.fromApiJsonHelper.extractStringNamed(isUSDProductParamName, element);
             baseDataValidator.reset().parameter(isUSDProductParamName).value(isUSDProduct).ignoreIfNull().validateForBooleanValue();
@@ -519,7 +519,7 @@ public class DepositProductDataValidator {
             baseDataValidator.reset().parameter(minBalanceForInterestCalculationParamName).value(minBalanceForInterestCalculation)
                     .ignoreIfNull().zeroOrPositiveAmount();
         }
-        //If currency is usd for product
+        // If currency is usd for product
         if (this.fromApiJsonHelper.parameterExists(isUSDProductParamName, element)) {
             final String isUSDProduct = this.fromApiJsonHelper.extractStringNamed(isUSDProductParamName, element);
             baseDataValidator.reset().parameter(isUSDProductParamName).value(isUSDProduct).ignoreIfNull().validateForBooleanValue();
