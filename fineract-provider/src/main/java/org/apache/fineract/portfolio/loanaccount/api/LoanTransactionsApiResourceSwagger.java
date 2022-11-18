@@ -185,6 +185,38 @@ final class LoanTransactionsApiResourceSwagger {
         @Schema(example = "[2012, 5, 18]")
         public LocalDate possibleNextRepaymentDate;
         public Set<GetLoanTransactionRelation> transactionRelations;
+        public PaymentDetailData paymentDetailData;
+
+        static final class PaymentDetailData {
+
+            private PaymentDetailData() {}
+
+            @Schema(example = "62")
+            public Long id;
+            public PaymentType paymentType;
+            @Schema(example = "acc123")
+            public String accountNumber;
+            @Schema(example = "che123")
+            public String checkNumber;
+            @Schema(example = "rou123")
+            public String routingCode;
+            @Schema(example = "rec123")
+            public String receiptNumber;
+            @Schema(example = "ban123")
+            public String bankNumber;
+        }
+
+        static final class PaymentType {
+
+            private PaymentType() {}
+
+            @Schema(example = "11")
+            public Long id;
+            @Schema(example = "DOWN_PAYMENT")
+            public String name;
+            @Schema(example = "true")
+            public Boolean isSystemDefined;
+        }
     }
 
     @Schema(description = "PostLoansLoanIdTransactionsRequest")
