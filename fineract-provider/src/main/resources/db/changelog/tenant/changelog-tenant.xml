@@ -57,4 +57,6 @@
     <include file="parts/MON-92_FD_topup_permission.xml" relativeToChangelogFile="true"/>
     <include file="parts/MON-92_FD_topup_old_account_reference.xml" relativeToChangelogFile="true"/>
     <include file="parts/MON-104_add_lga_in_address.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0036_add_isUSDProduct_in_savings_product_table.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0037_create_table_for_Fx_rate.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

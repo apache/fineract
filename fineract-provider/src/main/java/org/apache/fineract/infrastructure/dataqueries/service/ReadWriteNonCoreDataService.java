@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -70,4 +71,6 @@ public interface ReadWriteNonCoreDataService {
     String getDataTableName(String Url);
 
     Long countDatatableEntries(String datatableName, Long appTableId, String foreignKeyColumn);
+
+    BigDecimal getFxLatestRate(final String datatableName, final Long appTableId);
 }
