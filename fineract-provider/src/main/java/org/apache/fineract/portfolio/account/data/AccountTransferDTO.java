@@ -56,6 +56,8 @@ public class AccountTransferDTO {
     private final Boolean isRegularTransaction;
     private final Boolean isExceptionForBalanceCheck;
 
+    private boolean isUSDAccount = false;
+
     public AccountTransferDTO(final LocalDate transactionDate, final BigDecimal transactionAmount,
             final PortfolioAccountType fromAccountType, final PortfolioAccountType toAccountType, final Long fromAccountId,
             final Long toAccountId, final String description, final Locale locale, final DateTimeFormatter fmt,
@@ -222,4 +224,11 @@ public class AccountTransferDTO {
         return this.isExceptionForBalanceCheck;
     }
 
+    public boolean isUSDAccount() {
+        return isUSDAccount;
+    }
+
+    public void setUSDAccount(boolean USDAccount) {
+        isUSDAccount = USDAccount;
+    }
 }

@@ -148,7 +148,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             sqlBuilder.append("sp.lockin_period_frequency_enum as lockinPeriodFrequencyType, ");
             sqlBuilder.append("sp.accounting_type as accountingType, ");
             sqlBuilder.append("sp.min_balance_for_interest_calculation as minBalanceForInterestCalculation, ");
-            sqlBuilder.append("sp.withhold_tax as withHoldTax,");
+            sqlBuilder.append("sp.withhold_tax as withHoldTax, sp.is_usd_product as isUSDProduct,");
             sqlBuilder.append("tg.id as taxGroupId, tg.name as taxGroupName ");
             this.schemaSql = sqlBuilder.toString();
         }
@@ -209,11 +209,12 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             if (taxGroupId != null) {
                 taxGroupData = TaxGroupData.lookup(taxGroupId, taxGroupName);
             }
+            final boolean isUSDProduct = rs.getBoolean("isUSDProduct");
 
             return DepositProductData.instance(id, name, shortName, description, currency, nominalAnnualInterestRate,
                     compoundingInterestPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
                     lockinPeriodFrequency, lockinPeriodFrequencyType, accountingRuleType, minBalanceForInterestCalculation, withHoldTax,
-                    taxGroupData);
+                    taxGroupData, isUSDProduct);
         }
     }
 

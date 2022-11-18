@@ -128,6 +128,7 @@ import org.apache.fineract.portfolio.savings.exception.PostInterestAsOnDateExcep
 import org.apache.fineract.portfolio.savings.exception.PostInterestAsOnDateException.PostInterestAsOnExceptionType;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountTransactionNotFoundException;
 import org.apache.fineract.portfolio.savings.exception.TransactionUpdateNotAllowedException;
+import org.apache.fineract.portfolio.savings.exception.Fx_RateTableShouldBeExistException;
 import org.apache.fineract.portfolio.savings.request.FixedDepositActivationReq;
 import org.apache.fineract.portfolio.savings.request.FixedDepositApplicationPreClosureReq;
 import org.apache.fineract.portfolio.savings.request.FixedDepositApplicationReq;
@@ -140,6 +141,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.apache.fineract.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
 
 @Service
 @Transactional
@@ -173,6 +175,8 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     private final SavingsAccountActionService savingsAccountActionService;
     private final AccountAssociationsRepository accountAssociationsRepository;
 
+    private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
+
     @Autowired
     public DepositAccountWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final SavingsAccountRepositoryWrapper savingAccountRepositoryWrapper,
@@ -194,7 +198,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository,
             final DepositApplicationProcessWritePlatformService depositApplicationProcessWritePlatformService,
             final SavingsAccountActionService savingsAccountActionService,
-            final AccountAssociationsRepository accountAssociationsRepository) {
+            final AccountAssociationsRepository accountAssociationsRepository, ReadWriteNonCoreDataService readWriteNonCoreDataService) {
 
         this.context = context;
         this.savingAccountRepositoryWrapper = savingAccountRepositoryWrapper;
@@ -221,6 +225,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         this.depositApplicationProcessWritePlatformService = depositApplicationProcessWritePlatformService;
         this.savingsAccountActionService = savingsAccountActionService;
         this.accountAssociationsRepository = accountAssociationsRepository;
+        this.readWriteNonCoreDataService = readWriteNonCoreDataService;
     }
 
     @Transactional
@@ -266,6 +271,14 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                             portfolioAccountData.accountId(), account.getId(), "Account Transfer", locale, fmt, null, null, null, null,
                             null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, account, fromSavingsAccount,
                             isRegularTransaction, isExceptionForBalanceCheck);
+                    if(account.getProduct().isUSDProduct()) {
+                        if(this.readWriteNonCoreDataService.retrieveDatatable("Fx_rate") != null){
+                            accountTransferDTO.setUSDAccount(true);
+                        }else{
+                            throw new Fx_RateTableShouldBeExistException();
+                        }
+
+                    }
                     this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
                 }
                 final boolean isInterestTransfer = false;
