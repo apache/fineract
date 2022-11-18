@@ -569,7 +569,7 @@ final class LoansApiResourceSwagger {
             private GetLoansLoanIdPaymentType() {}
 
             @Schema(example = "11")
-            public Integer id;
+            public Long id;
             @Schema(example = "Cash")
             public String name;
             @Schema(example = "Cash Payment")
@@ -644,7 +644,7 @@ final class LoansApiResourceSwagger {
                 private GetLoansLoanIdPaymentDetailData() {}
 
                 @Schema(example = "62")
-                public Integer id;
+                public Long id;
                 public GetLoansLoanIdPaymentType paymentType;
                 @Schema(example = "acc123")
                 public String accountNumber;

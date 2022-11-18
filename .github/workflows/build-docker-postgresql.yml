@@ -22,7 +22,7 @@ jobs:
       - name: Start the stack
         run: docker-compose -f docker-compose-postgresql.yml up -d
       - name: Wait for stack to come up
-        run: sleep 60
+        run: sleep 120
       - name: Check health
         run: curl -f -k --retry 5 --retry-connrefused --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/health
       - name: Check info
