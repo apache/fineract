@@ -796,9 +796,9 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
              *
              */
 
-            if (amountPaybale.compareTo(this.maxAmount) > 0) {
+            if (this.maxAmount != null && amountPaybale.compareTo(this.maxAmount) > 0) {
                 amountPaybale = this.maxAmount;
-            } else if (amountPaybale.compareTo(this.minAmount) != 0) {
+            } else if (this.minAmount != null && amountPaybale.compareTo(this.minAmount) != 0) {
                 amountPaybale = this.minAmount;
             }
         }
