@@ -1953,9 +1953,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     @Override
     public BigDecimal getFxLatestRate(final String datatableName, final Long appTableId) {
 
-        final String sqlString = "SELECT "+ sqlGenerator.escape("Rate") +" FROM " + sqlGenerator.escape(datatableName)
-                + " WHERE " + sqlGenerator.escape("updated_at") + " = (SELECT MAX( " + sqlGenerator.escape("updated_at") + ") FROM "
-                + sqlGenerator.escape(datatableName) + ") and " +sqlGenerator.escape("office_id") + " = " + appTableId;
+        final String sqlString = "SELECT " + sqlGenerator.escape("Rate") + " FROM " + sqlGenerator.escape(datatableName) + " WHERE "
+                + sqlGenerator.escape("updated_at") + " = (SELECT MAX( " + sqlGenerator.escape("updated_at") + ") FROM "
+                + sqlGenerator.escape(datatableName) + ") and " + sqlGenerator.escape("office_id") + " = " + appTableId;
         final BigDecimal count = this.jdbcTemplate.queryForObject(sqlString, BigDecimal.class); // NOSONAR
         return count;
     }

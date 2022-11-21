@@ -2375,6 +2375,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder fixedDepositAccountAccrualInterestPosting(final Long accountId) {
+        this.actionName = "POSTACCRUALINTEREST";
+        this.entityName = "FIXEDDEPOSITACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = accountId;
+        this.href = "/fixeddepositaccounts/" + accountId + "?command=postAccrualInterest";
+        return this;
+    }
+
     public CommandWrapperBuilder fixedDepositAccountDeposit(final Long accountId) {
         this.actionName = "DEPOSIT";
         this.entityName = "FIXEDDEPOSITACCOUNT";
