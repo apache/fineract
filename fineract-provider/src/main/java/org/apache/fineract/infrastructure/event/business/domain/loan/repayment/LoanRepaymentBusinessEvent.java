@@ -16,20 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.business.domain.loan;
+package org.apache.fineract.infrastructure.event.business.domain.loan.repayment;
 
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.infrastructure.event.business.domain.AbstractBusinessEvent;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 
-public class LoanRepaymentDueBusinessEvent extends LoanBusinessEvent {
+public abstract class LoanRepaymentBusinessEvent extends AbstractBusinessEvent<LoanRepaymentScheduleInstallment> {
 
-    private static final String TYPE = "LoanRepaymentDueBusinessEvent";
+    private static final String CATEGORY = "Loan";
 
-    public LoanRepaymentDueBusinessEvent(Loan value) {
+    public LoanRepaymentBusinessEvent(LoanRepaymentScheduleInstallment value) {
         super(value);
     }
 
     @Override
-    public String getType() {
-        return TYPE;
+    public String getCategory() {
+        return CATEGORY;
     }
 }

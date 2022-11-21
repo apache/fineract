@@ -16,15 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.business.domain.loan;
+package org.apache.fineract.infrastructure.event.business.domain.loan.repayment;
 
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 
-public class LoanRepaymentOverdueBusinessEvent extends LoanBusinessEvent {
+public class LoanRepaymentOverdueBusinessEvent extends LoanRepaymentBusinessEvent {
 
     private static final String TYPE = "LoanRepaymentOverdueBusinessEvent";
 
-    public LoanRepaymentOverdueBusinessEvent(Loan value) {
+    public LoanRepaymentOverdueBusinessEvent(LoanRepaymentScheduleInstallment value) {
         super(value);
     }
 

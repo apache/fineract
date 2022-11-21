@@ -37,7 +37,7 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.infrastructure.event.business.domain.loan.LoanRepaymentOverdueBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.loan.repayment.LoanRepaymentOverdueBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -74,19 +74,19 @@ public class CheckLoanRepaymentOverdueBusinessStepTest {
         when(configurationDomainService.retrieveRepaymentOverdueDays()).thenReturn(1L);
         LocalDate loanInstallmentRepaymentDueDate = DateUtils.getBusinessLocalDate().minusDays(1);
         Loan loanForProcessing = Mockito.mock(Loan.class);
-        List<LoanRepaymentScheduleInstallment> loanRepaymentScheduleInstallments = Arrays
-                .asList(new LoanRepaymentScheduleInstallment(loanForProcessing, 1, LocalDate.now(ZoneId.systemDefault()),
-                        loanInstallmentRepaymentDueDate, BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0),
-                        BigDecimal.valueOf(0.0), false, new HashSet<>(), BigDecimal.valueOf(0.0)));
+        LoanRepaymentScheduleInstallment repaymentInstallment = new LoanRepaymentScheduleInstallment(loanForProcessing, 1,
+                LocalDate.now(ZoneId.systemDefault()), loanInstallmentRepaymentDueDate, BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0),
+                BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), false, new HashSet<>(), BigDecimal.valueOf(0.0));
+        List<LoanRepaymentScheduleInstallment> loanRepaymentScheduleInstallments = Arrays.asList(repaymentInstallment);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(loanRepaymentScheduleInstallments);
 
         // when
         Loan processedLoan = underTest.execute(loanForProcessing);
         // then
         verify(businessEventNotifierService, times(1)).notifyPostBusinessEvent(loanRepaymentOverdueBusinessEventArgumentCaptor.capture());
-        Loan loanPayloadForEvent = loanRepaymentOverdueBusinessEventArgumentCaptor.getValue().get();
-        assertEquals(loanForProcessing, loanPayloadForEvent);
-        assertEquals(processedLoan, loanPayloadForEvent);
+        LoanRepaymentScheduleInstallment loanPayloadForEvent = loanRepaymentOverdueBusinessEventArgumentCaptor.getValue().get();
+        assertEquals(repaymentInstallment, loanPayloadForEvent);
+        assertEquals(processedLoan, loanForProcessing);
     }
 
     @Test
