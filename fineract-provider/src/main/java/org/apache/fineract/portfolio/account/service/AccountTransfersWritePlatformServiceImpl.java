@@ -71,6 +71,8 @@ import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatform
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
+
 
 @Service
 public class AccountTransfersWritePlatformServiceImpl implements AccountTransfersWritePlatformService {
@@ -89,6 +91,8 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
     private final ConfigurationDomainService configurationDomainService;
     private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
 
+    private final SavingsProductRepository savingsProductRepository;
+
     @Autowired
     public AccountTransfersWritePlatformServiceImpl(final AccountTransfersDataValidator accountTransfersDataValidator,
             final AccountTransferAssembler accountTransferAssembler, final AccountTransferRepository accountTransferRepository,
@@ -97,7 +101,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
             final AccountTransferDetailRepository accountTransferDetailRepository, final LoanReadPlatformService loanReadPlatformService,
             final GSIMRepositoy gsimRepository, ConfigurationDomainService configurationDomainService,
-            ReadWriteNonCoreDataService readWriteNonCoreDataService) {
+            ReadWriteNonCoreDataService readWriteNonCoreDataService, SavingsProductRepository savingsProductRepository) {
         this.accountTransfersDataValidator = accountTransfersDataValidator;
         this.accountTransferAssembler = accountTransferAssembler;
         this.accountTransferRepository = accountTransferRepository;
@@ -111,6 +115,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         this.gsimRepository = gsimRepository;
         this.configurationDomainService = configurationDomainService;
         this.readWriteNonCoreDataService = readWriteNonCoreDataService;
+        this.savingsProductRepository = savingsProductRepository;
     }
 
     @Transactional
@@ -418,12 +423,17 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             }
 
             BigDecimal withdrawalTransactionAmount = accountTransferDTO.getTransactionAmount();
-            if (accountTransferDTO.isUSDAccount()) {
-                BigDecimal rate = this.readWriteNonCoreDataService.getFxLatestRate("Fx_rate", fromSavingsAccount.officeId());
-                if (rate != null) {
+            BigDecimal depositTransactionAmount = accountTransferDTO.getTransactionAmount();
+            BigDecimal rate = this.readWriteNonCoreDataService.getFxLatestRate("Fx_rate", fromSavingsAccount.officeId());
+            if(rate != null){
+                if(accountTransferDTO.isSavingsToFD()){
                     BigDecimal newAmount = accountTransferDTO.getTransactionAmount().multiply(rate);
                     withdrawalTransactionAmount = newAmount;
+                }else if(accountTransferDTO.isFdToSavings()){
+                    BigDecimal newAmount = accountTransferDTO.getTransactionAmount().multiply(rate);
+                    depositTransactionAmount = newAmount;
                 }
+
             }
 
             final SavingsAccountTransaction withdrawal = this.savingsAccountDomainService.handleWithdrawal(fromSavingsAccount,
@@ -431,7 +441,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                     transactionBooleanValues, backdatedTxnsAllowedTill);
 
             final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(toSavingsAccount,
-                    accountTransferDTO.getFmt(), transactionDate, accountTransferDTO.getTransactionAmount(),
+                    accountTransferDTO.getFmt(), transactionDate, depositTransactionAmount,
                     accountTransferDTO.getPaymentDetail(), isAccountTransfer, isRegularTransaction, backdatedTxnsAllowedTill);
 
             accountTransferDetails = this.accountTransferAssembler.assembleSavingsToSavingsTransfer(accountTransferDTO, fromSavingsAccount,
