@@ -26,6 +26,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -36,7 +38,6 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
@@ -54,20 +55,16 @@ import org.apache.fineract.portfolio.client.domain.ClientTransaction;
 import org.apache.fineract.portfolio.client.domain.ClientTransactionRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements ClientChargeWritePlatformService {
+@RequiredArgsConstructor
+@Slf4j
+public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePlatformService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ClientChargeWritePlatformServiceJpaRepositoryImpl.class);
-
-    private final PlatformSecurityContext context;
     private final ChargeRepositoryWrapper chargeRepository;
     private final ClientRepositoryWrapper clientRepository;
     private final ClientChargeDataValidator clientChargeDataValidator;
@@ -78,27 +75,6 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
     private final ClientTransactionRepository clientTransactionRepository;
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
-
-    @Autowired
-    public ClientChargeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final ChargeRepositoryWrapper chargeRepository, final ClientChargeDataValidator clientChargeDataValidator,
-            final ClientRepositoryWrapper clientRepository, final HolidayRepositoryWrapper holidayRepositoryWrapper,
-            final ConfigurationDomainService configurationDomainService, final ClientChargeRepositoryWrapper clientChargeRepository,
-            final WorkingDaysRepositoryWrapper workingDaysRepository, final ClientTransactionRepository clientTransactionRepository,
-            final PaymentDetailWritePlatformService paymentDetailWritePlatformService,
-            final JournalEntryWritePlatformService journalEntryWritePlatformService) {
-        this.context = context;
-        this.chargeRepository = chargeRepository;
-        this.clientChargeDataValidator = clientChargeDataValidator;
-        this.clientRepository = clientRepository;
-        this.holidayRepository = holidayRepositoryWrapper;
-        this.configurationDomainService = configurationDomainService;
-        this.clientChargeRepository = clientChargeRepository;
-        this.workingDaysRepository = workingDaysRepository;
-        this.clientTransactionRepository = clientTransactionRepository;
-        this.paymentDetailWritePlatformService = paymentDetailWritePlatformService;
-        this.journalEntryWritePlatformService = journalEntryWritePlatformService;
-    }
 
     @Override
     public CommandProcessingResult addCharge(Long clientId, JsonCommand command) {
@@ -447,7 +423,7 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
                     "clientChargeId", clientChargeId);
         }
 
-        LOG.error("Error occured.", dve);
+        log.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.client.charges.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
