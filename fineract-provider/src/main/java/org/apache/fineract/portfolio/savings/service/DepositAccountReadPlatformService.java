@@ -41,7 +41,7 @@ public interface DepositAccountReadPlatformService {
 
     DepositAccountData retrieveOneWithChartSlabs(DepositAccountType depositAccountType, Long productId);
 
-    Collection<SavingsAccountTransactionData> retrieveAllTransactions(DepositAccountType depositAccountType, Long accountId);
+    Collection<SavingsAccountTransactionData> retrieveAllTransactions(DepositAccountType depositAccountType, Long accountId, Integer offset,Integer limit);
 
     DepositAccountData retrieveTemplate(DepositAccountType depositAccountType, Long clientId, Long groupId, Long productId,
             boolean staffInSelectedOfficeOnly);
@@ -53,4 +53,6 @@ public interface DepositAccountReadPlatformService {
     Collection<AccountTransferDTO> retrieveDataForInterestTransfer();
 
     Collection<Map<String, Object>> retriveDataForRDScheduleCreation();
+    Long getSavingsAccountTransactionTotalFiltered(Long savingsId, DepositAccountType depositAccountType, Boolean hideAccrualTransactions);
+
 }

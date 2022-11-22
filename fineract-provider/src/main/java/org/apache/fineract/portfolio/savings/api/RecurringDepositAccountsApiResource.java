@@ -246,7 +246,7 @@ public class RecurringDepositAccountsApiResource {
             if (associationParameters.contains(SavingsApiConstants.transactions)) {
                 mandatoryResponseParameters.add(SavingsApiConstants.transactions);
                 final Collection<SavingsAccountTransactionData> currentTransactions = this.depositAccountReadPlatformService
-                        .retrieveAllTransactions(DepositAccountType.RECURRING_DEPOSIT, accountId);
+                        .retrieveAllTransactions(DepositAccountType.RECURRING_DEPOSIT, accountId,0,50000);
                 if (!CollectionUtils.isEmpty(currentTransactions)) {
                     transactions = currentTransactions;
                 }
