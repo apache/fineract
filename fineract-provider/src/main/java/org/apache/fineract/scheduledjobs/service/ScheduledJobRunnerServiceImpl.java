@@ -456,7 +456,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
         activeSavingsAccounts.addAll(this.savingsAccountReadPlatformService.retrieveActiveSavingsAccrualAccounts(100l));
         activeSavingsAccounts.addAll(this.savingsAccountReadPlatformService.retrieveActiveSavingsAccrualAccounts(200l));
-        // WIP To Support AccountType 300
+        activeSavingsAccounts.addAll(this.savingsAccountReadPlatformService.retrieveActiveSavingsAccrualAccounts(300l));
 
         JobRunner<List<Long>> runner = new SavingsAccrualInterestJobRunner(jobRunDate);
         this.jobExecuter.executeJob(activeSavingsAccounts, runner);
