@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -156,6 +157,15 @@ public class ClientHelper extends IntegrationTest {
                 "clientId");
     }
 
+    public static PostClientsResponse createClientAsPersonWithDatatable(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String activationDate, final String officeId,
+            final HashMap<String, Object> datatables) {
+        log.info("---------------------------------CREATING A CLIENT PERSON WITH DATATABLE---------------------------------------------");
+        final String response = Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL,
+                getTestPersonClientAsJSON(activationDate, officeId, datatables), null);
+        return GSON.fromJson(response, PostClientsResponse.class);
+    }
+
     public static Integer createClientAsEntity(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         return createClientAsEntity(requestSpec, responseSpec, "04 March 2011");
     }
@@ -276,6 +286,25 @@ public class ClientHelper extends IntegrationTest {
         map.put("active", "true");
         map.put("activationDate", dateOfJoining);
         map.put("legalFormId", 1);
+
+        log.info("map :  {}", map);
+        return GSON.toJson(map);
+    }
+
+    public static String getTestPersonClientAsJSON(final String dateOfJoining, final String officeId,
+            final HashMap<String, Object> datatables) {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("officeId", officeId);
+        map.put("fullname", Utils.randomNameGenerator("Client_FullName_", 5));
+        map.put("externalId", randomIDGenerator("ID_", 7));
+        map.put("dateFormat", Utils.DATE_FORMAT);
+        map.put("locale", "en");
+        map.put("active", "true");
+        map.put("activationDate", dateOfJoining);
+        map.put("legalFormId", 1);
+        if (datatables != null) {
+            map.put("datatables", Arrays.asList(datatables));
+        }
 
         log.info("map :  {}", map);
         return GSON.toJson(map);
@@ -665,7 +694,7 @@ public class ClientHelper extends IntegrationTest {
     public String importClientEntityTemplate(File file) {
         String locale = "en";
         String dateFormat = "dd MMMM yyyy";
-        String legalFormType = GlobalEntityType.CLIENTS_ENTTTY.toString();
+        String legalFormType = GlobalEntityType.CLIENTS_ENTITY.toString();
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA);
         return Utils.performServerTemplatePost(requestSpec, responseSpec, CLIENT_URL + "/uploadtemplate" + "?" + Utils.TENANT_IDENTIFIER,
                 legalFormType, file, locale, dateFormat);

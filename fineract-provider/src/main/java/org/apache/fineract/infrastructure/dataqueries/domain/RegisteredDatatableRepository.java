@@ -16,22 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.dataqueries.service;
+package org.apache.fineract.infrastructure.dataqueries.domain;
 
-import com.google.gson.JsonArray;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface EntityDatatableChecksWritePlatformService {
-
-    CommandProcessingResult createCheck(JsonCommand command);
-
-    CommandProcessingResult deleteCheck(Long entityDatatableCheckId);
-
-    void runTheCheck(Long entityId, String entityName, Integer statusCode, String foreignKeyColumn, String entitySubtype);
-
-    void runTheCheckForProduct(Long entityId, String entityName, Long statusCode, String foreignKeyColumn, long productLoanId);
-
-    boolean saveDatatables(Long status, String entity, Long entityId, Long productId, JsonArray data);
+public interface RegisteredDatatableRepository
+        extends JpaRepository<RegisteredDatatable, Long>, JpaSpecificationExecutor<RegisteredDatatable> {
 
 }
