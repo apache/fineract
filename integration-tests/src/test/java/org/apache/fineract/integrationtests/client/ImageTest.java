@@ -18,10 +18,16 @@
  */
 package org.apache.fineract.integrationtests.client;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.File;
 import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
+import org.apache.commons.io.IOUtils;
 import org.apache.fineract.client.services.ImagesApi;
 import org.apache.fineract.client.util.Parts;
 import org.junit.jupiter.api.Order;
@@ -36,6 +42,7 @@ import retrofit2.http.Headers;
  *
  * @author Michael Vorburger.ch
  */
+@Slf4j
 public class ImageTest extends IntegrationTest {
 
     final File testImage = new File(getClass().getResource("/michael.vorburger-crepes.jpg").getFile());
@@ -135,6 +142,116 @@ public class ImageTest extends IntegrationTest {
     void delete() {
         ok(fineract().images.delete("staff", staffId));
         ok(fineract().images.delete("clients", clientId));
+    }
+
+    @Test
+    @Order(100)
+    void pathTraversalJsp() {
+        final MultipartBody.Part part = createPart("image-text-wrong-content.jsp",
+                "../../../../../../../../../../tmp/image-text-wrong-content.jsp", "image/gif");
+
+        assertThat(part).isNotNull();
+
+        Exception exception = assertThrows(Exception.class, () -> {
+            ok(fineract().images.create("clients", clientId, part));
+        });
+
+        assertThat(exception).isNotNull();
+
+        log.warn("Should not be able to upload a file that doesn't match the indicated content type: {}", exception.getMessage());
+    }
+
+    @Test
+    @Order(101)
+    void gifWithPngExtension() {
+        final MultipartBody.Part part = createPart("image-gif-wrong-extension.png", "image-gif-wrong-extension.png", "image/png");
+
+        assertThat(part).isNotNull();
+
+        Exception exception = assertThrows(Exception.class, () -> {
+            ok(fineract().images.create("clients", clientId, part));
+        });
+
+        assertThat(exception).isNotNull();
+
+        log.warn("Should not be able to upload a gif by just renaming the file extension: {}", exception.getMessage());
+    }
+
+    @Test
+    @Order(102)
+    void gifImage() {
+        final MultipartBody.Part part = createPart("image-gif-correct-extension.gif", "image-gif-correct-extension.gif", "image/png");
+
+        assertThat(part).isNotNull();
+
+        Exception exception = assertThrows(Exception.class, () -> {
+            ok(fineract().images.create("clients", clientId, part));
+        });
+
+        assertThat(exception).isNotNull();
+
+        log.warn("Should not be able to upload a gif it is not whitelisted: {}", exception.getMessage());
+    }
+
+    @Test
+    @Order(103)
+    void pathTraversalJpg() {
+        final MultipartBody.Part part = createPart("michael.vorburger-crepes.jpg",
+                "../../../../../../../../../../tmp/michael.vorburger-crepes.jpg", "image/jpeg");
+
+        assertThat(part).isNotNull();
+
+        Exception exception = assertThrows(Exception.class, () -> {
+            ok(fineract().images.create("clients", clientId, part));
+        });
+
+        assertThat(exception).isNotNull();
+
+        log.warn("Should not be able to upload a file with a forbidden name pattern: {}", exception.getMessage());
+    }
+
+    @Test
+    @Order(104)
+    void pathTraversalWithAbsolutePathJpg() {
+        final MultipartBody.Part part = createPart("michael.vorburger-crepes.jpg", "../17/michael.vorburger-crepes.jpg", "image/jpeg");
+
+        assertThat(part).isNotNull();
+
+        Exception exception = assertThrows(Exception.class, () -> {
+            ok(fineract().images.create("clients", clientId, part));
+        });
+
+        assertThat(exception).isNotNull();
+
+        log.warn("Should not be able to upload a file with a forbidden name pattern: {}", exception.getMessage());
+    }
+
+    @Test
+    @Order(105)
+    void pathTraversalWithAbsolutePathJpg2() {
+        final MultipartBody.Part part = createPart("michael.vorburger-crepes.jpg", "..//17//michael.vorburger-crepes.jpg", "image/jpeg");
+
+        assertThat(part).isNotNull();
+
+        Exception exception = assertThrows(Exception.class, () -> {
+            ok(fineract().images.create("clients", clientId, part));
+        });
+
+        assertThat(exception).isNotNull();
+
+        log.warn("Should not be able to upload a file with a forbidden name pattern: {}", exception.getMessage());
+    }
+
+    private MultipartBody.Part createPart(String fileResource, String fileName, String mediaType) {
+        try {
+            byte[] data = IOUtils.toByteArray(ImageTest.class.getClassLoader().getResourceAsStream(fileResource));
+            RequestBody rb = RequestBody.create(data, MediaType.get(mediaType));
+            return MultipartBody.Part.createFormData("file", fileName, rb);
+        } catch (Exception e) {
+            log.error("Error creating file part.", e);
+        }
+
+        return null;
     }
 
     interface ImagesApiWithHeadersForTest extends ImagesApi {

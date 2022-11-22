@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.service;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -92,7 +93,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                 IOUtils.copy(inputStream, baos);
                 final byte[] bytes = baos.toByteArray();
                 InputStream clonedInputStream = new ByteArrayInputStream(bytes);
-                InputStream clonedInputStreamWorkbook = new ByteArrayInputStream(bytes);
+                final BufferedInputStream bis = new BufferedInputStream(new ByteArrayInputStream(bytes));
                 final Tika tika = new Tika();
                 final TikaInputStream tikaInputStream = TikaInputStream.get(clonedInputStream);
                 final String fileType = tika.detect(tikaInputStream);
@@ -104,7 +105,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                             "Uploaded file extension is not recognized.");
 
                 }
-                Workbook workbook = new HSSFWorkbook(clonedInputStreamWorkbook);
+                Workbook workbook = new HSSFWorkbook(clonedInputStream);
                 GlobalEntityType entityType = null;
                 int primaryColumn = 0;
                 if (entity.trim().equalsIgnoreCase(GlobalEntityType.CLIENTS_PERSON.toString())) {
@@ -169,7 +170,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                     throw new GeneralPlatformDomainRuleException("error.msg.unable.to.find.resource", "Unable to find requested resource");
 
                 }
-                return publishEvent(primaryColumn, fileDetail, clonedInputStreamWorkbook, entityType, workbook, locale, dateFormat);
+                return publishEvent(primaryColumn, fileDetail, bis, entityType, workbook, locale, dateFormat);
             }
             throw new GeneralPlatformDomainRuleException("error.msg.null", "One or more of the given parameters not found");
         } catch (IOException e) {
