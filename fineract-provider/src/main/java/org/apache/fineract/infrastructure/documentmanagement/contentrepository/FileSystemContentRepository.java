@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.documentmanagement.contentrepository;
 
 import com.google.common.io.Files;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -41,6 +42,12 @@ public class FileSystemContentRepository implements ContentRepository {
     private static final Logger LOG = LoggerFactory.getLogger(FileSystemContentRepository.class);
 
     public static final String FINERACT_BASE_DIR = System.getProperty("user.home") + File.separator + ".fineract";
+
+    private final FileSystemContentPathSanitizer pathSanitizer;
+
+    public FileSystemContentRepository(final FileSystemContentPathSanitizer pathSanitizer) {
+        this.pathSanitizer = pathSanitizer;
+    }
 
     @Override
     public String saveFile(final InputStream uploadedInputStream, final DocumentCommand documentCommand) {
@@ -88,23 +95,29 @@ public class FileSystemContentRepository implements ContentRepository {
     }
 
     private void deleteFileInternal(final String documentPath) {
-        final File fileToBeDeleted = new File(documentPath);
+        String path = pathSanitizer.sanitize(documentPath);
+
+        final File fileToBeDeleted = new File(path);
         final boolean fileDeleted = fileToBeDeleted.delete();
         if (!fileDeleted) {
             // no need to throw an Error, what's a caller going to do about it, so simply log a warning
-            LOG.warn("Unable to delete file {}", documentPath);
+            LOG.warn("Unable to delete file {}", path);
         }
     }
 
     @Override
     public FileData fetchFile(final DocumentData documentData) {
-        final File file = new File(documentData.fileLocation());
-        return new FileData(Files.asByteSource(file), documentData.fileName(), documentData.contentType());
+        String path = pathSanitizer.sanitize(documentData.fileLocation());
+
+        final File file = new File(path);
+        return new FileData(Files.asByteSource(file), file.getName(), documentData.contentType());
     }
 
     @Override
     public FileData fetchImage(final ImageData imageData) {
-        final File file = new File(imageData.location());
+        String path = pathSanitizer.sanitize(imageData.location());
+
+        final File file = new File(path);
         return new FileData(Files.asByteSource(file), imageData.getEntityDisplayName(), imageData.contentType().getValue());
     }
 
@@ -139,9 +152,10 @@ public class FileSystemContentRepository implements ContentRepository {
     }
 
     private void writeFileToFileSystem(final String fileName, final InputStream uploadedInputStream, final String fileLocation) {
-        try {
-            makeDirectories(fileLocation);
-            FileUtils.copyInputStreamToFile(uploadedInputStream, new File(fileLocation)); // NOSONAR
+        try (BufferedInputStream bis = new BufferedInputStream(uploadedInputStream)) {
+            String sanitizedPath = pathSanitizer.sanitize(fileLocation, bis);
+            makeDirectories(sanitizedPath);
+            FileUtils.copyInputStreamToFile(bis, new File(sanitizedPath)); // NOSONAR
         } catch (final IOException ioException) {
             LOG.warn("writeFileToFileSystem() IOException (logged because cause is not propagated in ContentManagementException)",
                     ioException);
