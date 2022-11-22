@@ -114,5 +114,15 @@
             INSERT IGNORE INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('transaction_savings', 'POSTACCRUALINTEREST_FIXEDDEPOSITACCOUNT', 'FIXEDDEPOSITACCOUNT', 'POSTACCRUALINTEREST', '0');
         </sql>
     </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permissions_POSTACCRUALINTEREST_RECURRINGDEPOSITACCOUNT">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM `m_permission` WHERE `code` = 'POSTACCRUALINTEREST_RECURRINGDEPOSITACCOUNT'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            INSERT IGNORE INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('transacti on_savings', 'POSTACCRUALINTEREST_RECURRINGDEPOSITACCOUNT', 'RECURRINGDEPOSITACCOUNT', 'POSTACCRUALINTEREST', '0');
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>
