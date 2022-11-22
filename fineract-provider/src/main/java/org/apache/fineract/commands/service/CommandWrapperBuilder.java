@@ -3528,4 +3528,12 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder recurringDepositAccountAccrualInterestPosting(final Long accountId) {
+        this.actionName = "POSTACCRUALINTEREST";
+        this.entityName = "RECURRINGDEPOSITACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = accountId;
+        this.href = "/recurringdepositaccounts/" + accountId + "?command=postAccrualInterest";
+        return this;
+    }
 }

@@ -64,6 +64,7 @@ public final class DepositsApiConstants {
     public static final String COMMAND_WAIVE_CHARGE = "waive";
     public static final String COMMAND_PAY_CHARGE = "paycharge";
     public static final String UPDATE_DEPOSIT_AMOUNT = "updateDepositAmount";
+    public static final String COMMAND_POST_ACCRUAL_INTEREST_AS_ON = "postAccrualInterestAsOn";
 
     // general
     public static final String localeParamName = "locale";

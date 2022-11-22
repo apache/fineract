@@ -375,12 +375,15 @@ public class RecurringDepositAccountsApiResource {
             final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
             return this.toApiJsonSerializer.serialize(settings, account,
                     DepositsApiConstants.RECURRING_DEPOSIT_ACCOUNT_RESPONSE_DATA_PARAMETERS);
+        } else if (is(commandParam, DepositsApiConstants.COMMAND_POST_ACCRUAL_INTEREST_AS_ON)) {
+            final CommandWrapper commandRequest = builder.recurringDepositAccountAccrualInterestPosting(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
         if (result == null) {
             throw new UnrecognizedQueryParamException("command", commandParam,
                     new Object[] { "reject", "withdrawnByApplicant", "approve", "undoapproval", "activate", "calculateInterest",
-                            "postInterest", "close", "prematureClose", "calculatePrematureAmount" });
+                            "postInterest", "close", "prematureClose", "calculatePrematureAmount", "postAccrualInterestAsOn" });
         }
 
         return this.toApiJsonSerializer.serialize(result);
