@@ -18,29 +18,26 @@
  */
 package org.apache.fineract.portfolio.client.domain;
 
+import lombok.Getter;
+
 /**
  * Type used to differentiate the type of client
  */
+@Getter
 public enum LegalForm {
 
-    PERSON(1, "legalFormType.person"),
+    PERSON(1, "legalFormType.person", "Person"),
 
-    ENTITY(2, "legalFormType.entity");
+    ENTITY(2, "legalFormType.entity", "Entity");
 
     private final Integer value;
     private final String code;
+    private final String label;
 
-    LegalForm(final Integer value, final String code) {
+    LegalForm(final Integer value, final String code, final String label) {
         this.value = value;
         this.code = code;
-    }
-
-    public Integer getValue() {
-        return this.value;
-    }
-
-    public String getCode() {
-        return this.code;
+        this.label = label;
     }
 
     public static LegalForm fromInt(final Integer type) {
@@ -63,5 +60,10 @@ public enum LegalForm {
 
     public boolean isEntity() {
         return this.value.equals(LegalForm.ENTITY.getValue());
+    }
+
+    @Override
+    public String toString() {
+        return this.label;
     }
 }

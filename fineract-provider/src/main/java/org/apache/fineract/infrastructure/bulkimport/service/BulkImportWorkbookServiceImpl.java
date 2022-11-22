@@ -110,8 +110,8 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                 if (entity.trim().equalsIgnoreCase(GlobalEntityType.CLIENTS_PERSON.toString())) {
                     entityType = GlobalEntityType.CLIENTS_PERSON;
                     primaryColumn = 0;
-                } else if (entity.trim().equalsIgnoreCase(GlobalEntityType.CLIENTS_ENTTTY.toString())) {
-                    entityType = GlobalEntityType.CLIENTS_ENTTTY;
+                } else if (entity.trim().equalsIgnoreCase(GlobalEntityType.CLIENTS_ENTITY.toString())) {
+                    entityType = GlobalEntityType.CLIENTS_ENTITY;
                     primaryColumn = 0;
                 } else if (entity.trim().equalsIgnoreCase(GlobalEntityType.CENTERS.toString())) {
                     entityType = GlobalEntityType.CENTERS;

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import javax.persistence.PersistenceException;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -86,12 +87,12 @@ import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.apache.fineract.portfolio.savings.service.SavingsApplicationProcessWritePlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@AllArgsConstructor
 @Service
 @Slf4j
 public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWritePlatformService {
@@ -119,47 +120,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
-
-    @Autowired
-    public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final ClientRepositoryWrapper clientRepository, final ClientNonPersonRepositoryWrapper clientNonPersonRepository,
-            final OfficeRepositoryWrapper officeRepositoryWrapper, final NoteRepository noteRepository,
-            final ClientDataValidator fromApiJsonDeserializer, final AccountNumberGenerator accountNumberGenerator,
-            final GroupRepository groupRepository, final StaffRepositoryWrapper staffRepository,
-            final CodeValueRepositoryWrapper codeValueRepository, final LoanRepositoryWrapper loanRepositoryWrapper,
-            final SavingsAccountRepositoryWrapper savingsRepositoryWrapper, final SavingsProductRepository savingsProductRepository,
-            final SavingsApplicationProcessWritePlatformService savingsApplicationProcessWritePlatformService,
-            final CommandProcessingService commandProcessingService, final ConfigurationDomainService configurationDomainService,
-            final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, final FromJsonHelper fromApiJsonHelper,
-            final ConfigurationReadPlatformService configurationReadPlatformService,
-            final AddressWritePlatformService addressWritePlatformService,
-            final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService,
-            final BusinessEventNotifierService businessEventNotifierService,
-            final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService) {
-        this.context = context;
-        this.clientRepository = clientRepository;
-        this.clientNonPersonRepository = clientNonPersonRepository;
-        this.officeRepositoryWrapper = officeRepositoryWrapper;
-        this.noteRepository = noteRepository;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.accountNumberGenerator = accountNumberGenerator;
-        this.groupRepository = groupRepository;
-        this.staffRepository = staffRepository;
-        this.codeValueRepository = codeValueRepository;
-        this.loanRepositoryWrapper = loanRepositoryWrapper;
-        this.savingsRepositoryWrapper = savingsRepositoryWrapper;
-        this.savingsProductRepository = savingsProductRepository;
-        this.savingsApplicationProcessWritePlatformService = savingsApplicationProcessWritePlatformService;
-        this.commandProcessingService = commandProcessingService;
-        this.configurationDomainService = configurationDomainService;
-        this.accountNumberFormatRepository = accountNumberFormatRepository;
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.configurationReadPlatformService = configurationReadPlatformService;
-        this.addressWritePlatformService = addressWritePlatformService;
-        this.clientFamilyMembersWritePlatformService = clientFamilyMembersWritePlatformService;
-        this.businessEventNotifierService = businessEventNotifierService;
-        this.entityDatatableChecksWritePlatformService = entityDatatableChecksWritePlatformService;
-    }
 
     @Transactional
     @Override
@@ -232,8 +192,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             final Boolean isAddressEnabled = configuration.isEnabled();
 
-            final Boolean isStaff = command.booleanObjectValueOfParameterNamed(ClientApiConstants.isStaffParamName);
-
             final Long officeId = command.longValueOfParameterNamed(ClientApiConstants.officeIdParamName);
 
             final Office clientOffice = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
@@ -280,8 +238,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final Integer legalFormParamValue = command.integerValueOfParameterNamed(ClientApiConstants.legalFormIdParamName);
             boolean isEntity = false;
             Integer legalFormValue = null;
+            LegalForm legalForm = LegalForm.PERSON;
             if (legalFormParamValue != null) {
-                LegalForm legalForm = LegalForm.fromInt(legalFormParamValue);
+                legalForm = LegalForm.fromInt(legalFormParamValue);
                 if (legalForm != null) {
                     legalFormValue = legalForm.getValue();
                     isEntity = legalForm.isEntity();
@@ -294,7 +253,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             boolean rollbackTransaction = false;
             if (newClient.isActive()) {
                 validateParentGroupRulesBeforeClientActivation(newClient);
-                runEntityDatatableCheck(newClient.getId());
+                runEntityDatatableCheck(newClient.getId(), newClient.getLegalForm());
                 final CommandWrapper commandWrapper = new CommandWrapperBuilder().activateClient(null).build();
                 rollbackTransaction = this.commandProcessingService.validateCommand(commandWrapper, currentUser);
             }
@@ -332,8 +291,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                         command.arrayOfParameterNamed(ClientApiConstants.datatables));
             }
 
+            legalForm = LegalForm.fromInt(newClient.getLegalForm());
             entityDatatableChecksWritePlatformService.runTheCheck(newClient.getId(), EntityTables.CLIENT.getName(),
-                    StatusEnum.CREATE.getCode().longValue(), EntityTables.CLIENT.getForeignKeyColumnNameOnDatatable());
+                    StatusEnum.CREATE.getCode(), EntityTables.CLIENT.getForeignKeyColumnNameOnDatatable(), legalForm.getLabel());
             businessEventNotifierService.notifyPostBusinessEvent(new ClientCreateBusinessEvent(newClient));
             if (newClient.isActive()) {
                 businessEventNotifierService.notifyPostBusinessEvent(new ClientActivateBusinessEvent(newClient));
@@ -582,7 +542,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
             final LocalDate activationDate = command.localDateValueOfParameterNamed("activationDate");
 
-            runEntityDatatableCheck(clientId);
+            runEntityDatatableCheck(clientId, client.getLegalForm());
 
             final AppUser currentUser = this.context.authenticatedUser();
             client.activate(currentUser, fmt, activationDate);
@@ -718,8 +678,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 throw new InvalidClientStateTransitionException("close", "date.cannot.before.client.actvation.date", errorMessage,
                         closureDate, client.getActivationLocalDate());
             }
-            entityDatatableChecksWritePlatformService.runTheCheck(clientId, EntityTables.CLIENT.getName(),
-                    StatusEnum.CLOSE.getCode().longValue(), EntityTables.CLIENT.getForeignKeyColumnNameOnDatatable());
+            final LegalForm legalForm = LegalForm.fromInt(client.getLegalForm());
+            entityDatatableChecksWritePlatformService.runTheCheck(clientId, EntityTables.CLIENT.getName(), StatusEnum.CLOSE.getCode(),
+                    EntityTables.CLIENT.getForeignKeyColumnNameOnDatatable(), legalForm.getLabel());
 
             final List<Loan> clientLoans = this.loanRepositoryWrapper.findLoanByClientId(clientId);
             for (final Loan loan : clientLoans) {
@@ -813,9 +774,10 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         }
     }
 
-    private void runEntityDatatableCheck(final Long clientId) {
-        entityDatatableChecksWritePlatformService.runTheCheck(clientId, EntityTables.CLIENT.getName(),
-                StatusEnum.ACTIVATE.getCode().longValue(), EntityTables.CLIENT.getForeignKeyColumnNameOnDatatable());
+    private void runEntityDatatableCheck(final Long clientId, final Integer legalFormId) {
+        final LegalForm legalForm = LegalForm.fromInt(legalFormId);
+        entityDatatableChecksWritePlatformService.runTheCheck(clientId, EntityTables.CLIENT.getName(), StatusEnum.ACTIVATE.getCode(),
+                EntityTables.CLIENT.getForeignKeyColumnNameOnDatatable(), legalForm.getLabel());
     }
 
     @Override
