@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.campaigns.jobs.executeemail;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailCampaignRepository;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessageRepository;
 import org.apache.fineract.infrastructure.campaigns.email.service.EmailMessageJobEmailService;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadReportingService;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.reportmailingjob.validation.ReportMailingJobValidator;
@@ -57,6 +58,9 @@ public class ExecuteEmailConfig {
     @Autowired
     private ReportMailingJobValidator reportMailingJobValidator;
 
+    @Autowired
+    private FineractProperties fineractProperties;
+
     @Bean
     protected Step executeEmailStep() {
         return steps.get(JobName.EXECUTE_EMAIL.name()).tasklet(executeEmailTasklet()).build();
@@ -70,6 +74,6 @@ public class ExecuteEmailConfig {
     @Bean
     public ExecuteEmailTasklet executeEmailTasklet() {
         return new ExecuteEmailTasklet(emailMessageRepository, emailCampaignRepository, loanRepository, savingsAccountRepository,
-                emailMessageJobEmailService, readReportingService, reportMailingJobValidator);
+                emailMessageJobEmailService, readReportingService, reportMailingJobValidator, fineractProperties);
     }
 }
