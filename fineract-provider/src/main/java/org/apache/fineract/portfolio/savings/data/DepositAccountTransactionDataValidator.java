@@ -56,6 +56,7 @@ import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
+import org.apache.fineract.portfolio.savings.domain.FixedDepositAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -87,6 +88,11 @@ public class DepositAccountTransactionDataValidator {
                     DepositsApiConstants.submittedOnDateParamName, DepositsApiConstants.depositPeriodParamName,
                     DepositsApiConstants.depositPeriodFrequencyIdParamName, DepositsApiConstants.depositAmountParamName,
                     DepositsApiConstants.changeTenureParamName, SavingsApiConstants.nicknameParamName));
+
+    private static final Set<String> DEPOSIT_ACCOUNT_PARTIAL_LIQUIDATION_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+            DepositsApiConstants.localeParamName, DepositsApiConstants.dateFormatParamName, DepositsApiConstants.submittedOnDateParamName,
+            DepositsApiConstants.noteParamName, DepositsApiConstants.depositPeriodParamName,
+            DepositsApiConstants.depositPeriodFrequencyIdParamName, DepositsApiConstants.liquidationAmountParamName));
 
     @Autowired
     public DepositAccountTransactionDataValidator(final FromJsonHelper fromApiJsonHelper) {
@@ -303,5 +309,26 @@ public class DepositAccountTransactionDataValidator {
                 element);
         baseDataValidator.reset().parameter(depositPeriodFrequencyIdParamName).value(depositPeriodFrequencyId)
                 .isOneOfTheseValues(SavingsPeriodFrequencyType.integerValues());
+    }
+
+    public void validatePartialLiquidation(FixedDepositAccount account, JsonCommand command) {
+        final JsonElement element = command.parsedJson();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(DepositAccountType.FIXED_DEPOSIT.resourceName());
+        this.checkForUnsupportedParameters(command, DEPOSIT_ACCOUNT_PARTIAL_LIQUIDATION_REQUEST_DATA_PARAMETERS);
+        this.validateDepositPeriod(baseDataValidator, element);
+
+        final BigDecimal liquidationAmount = this.fromApiJsonHelper
+                .extractBigDecimalWithLocaleNamed(DepositsApiConstants.liquidationAmountParamName, element);
+        baseDataValidator.reset().parameter(DepositsApiConstants.liquidationAmountParamName).value(liquidationAmount)
+                .notLessThanMin(BigDecimal.ONE).notNull();
+
+        if (liquidationAmount.compareTo(account.getAccountTermAndPreClosure().maturityAmount()) >= 0) {
+            baseDataValidator.reset().parameter(DepositsApiConstants.liquidationAmountParamName)
+                    .failWithCode("liquidation.amount.must.be.less.than.maturity.amount");
+        }
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 }

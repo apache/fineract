@@ -28,6 +28,7 @@ import javax.persistence.Table;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.portfolio.charge.domain.Charge;
 
 @Entity
 @Table(name = "m_deposit_product_term_and_preclosure")
@@ -42,6 +43,10 @@ public class DepositProductTermAndPreClosure extends AbstractPersistableCustom {
     @OneToOne
     @JoinColumn(name = "savings_product_id", nullable = false)
     private FixedDepositProduct product;
+
+    @OneToOne
+    @JoinColumn(name = "pre_closure_charge_id")
+    private Charge preClosureCharge;
 
     @Embedded
     private DepositProductAmountDetails depositProductAmountDetails;
@@ -94,5 +99,13 @@ public class DepositProductTermAndPreClosure extends AbstractPersistableCustom {
 
     public void updateProductReference(final SavingsProduct product) {
         this.product = (FixedDepositProduct) product;
+    }
+
+    public Charge getPreClosureCharge() {
+        return preClosureCharge;
+    }
+
+    public void setPreClosureCharge(Charge preClosureCharge) {
+        this.preClosureCharge = preClosureCharge;
     }
 }

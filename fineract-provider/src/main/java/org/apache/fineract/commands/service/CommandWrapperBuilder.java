@@ -3528,6 +3528,14 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder partiallyLiquidateFD(final Long accountId) {
+        this.actionName = "PARTIALLY_LIQUIDATE";
+        this.entityName = "FIXEDDEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.href = "/fixeddepositaccounts/partiallyliquidate";
+        return this;
+    }
+
     public CommandWrapperBuilder recurringDepositAccountAccrualInterestPosting(final Long accountId) {
         this.actionName = "POSTACCRUALINTEREST";
         this.entityName = "RECURRINGDEPOSITACCOUNT";
@@ -3536,4 +3544,5 @@ public class CommandWrapperBuilder {
         this.href = "/recurringdepositaccounts/" + accountId + "?command=postAccrualInterest";
         return this;
     }
+
 }
