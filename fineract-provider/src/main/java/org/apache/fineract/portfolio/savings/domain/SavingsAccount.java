@@ -816,7 +816,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
         return true;
     }
 
-    protected List<SavingsAccountTransaction> findWithHoldTransactions() {
+    public List<SavingsAccountTransaction> findWithHoldTransactions() {
         final List<SavingsAccountTransaction> withholdTransactions = new ArrayList<>();
         List<SavingsAccountTransaction> trans = getTransactions();
         for (final SavingsAccountTransaction transaction : trans) {
@@ -4993,6 +4993,19 @@ public class SavingsAccount extends AbstractPersistableCustom {
     public void setCharges(Set<SavingsAccountCharge> charges) {
         if (!CollectionUtils.isEmpty(charges)) {
             this.charges = associateChargesWithThisSavingsAccount(charges);
+        }
+    }
+
+    public void validationAccountStatus() {
+        if (!isTransactionsAllowed()) {
+            final String defaultUserMessage = "Account is not active.";
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.account.is.not.active",
+                    defaultUserMessage, defaultUserMessage, getId());
+
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+            dataValidationErrors.add(error);
+
+            throw new PlatformApiDataValidationException(dataValidationErrors);
         }
     }
 }

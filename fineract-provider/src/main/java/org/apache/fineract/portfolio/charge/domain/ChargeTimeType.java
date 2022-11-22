@@ -72,7 +72,7 @@ public enum ChargeTimeType {
         return new Integer[] { ChargeTimeType.SPECIFIED_DUE_DATE.getValue(), ChargeTimeType.SAVINGS_ACTIVATION.getValue(),
                 ChargeTimeType.SAVINGS_CLOSURE.getValue(), ChargeTimeType.WITHDRAWAL_FEE.getValue(), ChargeTimeType.ANNUAL_FEE.getValue(),
                 ChargeTimeType.MONTHLY_FEE.getValue(), ChargeTimeType.OVERDRAFT_FEE.getValue(), ChargeTimeType.WEEKLY_FEE.getValue(),
-                ChargeTimeType.SAVINGS_NOACTIVITY_FEE.getValue() };
+                ChargeTimeType.SAVINGS_NOACTIVITY_FEE.getValue(), ChargeTimeType.FDA_PARTIAL_LIQUIDATION_FEE.getValue() };
     }
 
     public static Object[] validClientValues() {
@@ -208,7 +208,7 @@ public enum ChargeTimeType {
 
     public boolean isAllowedSavingsChargeTime() {
         return isOnSpecifiedDueDate() || isSavingsActivation() || isSavingsClosure() || isWithdrawalFee() || isAnnualFee() || isMonthlyFee()
-                || isWeeklyFee() || isOverdraftFee() || isSavingsNoActivityFee();
+                || isWeeklyFee() || isOverdraftFee() || isSavingsNoActivityFee() || isFdaPartialLiquidationFee();
     }
 
     public boolean isOverdraftFee() {
@@ -233,5 +233,13 @@ public enum ChargeTimeType {
 
     public boolean isTimeOfDisburseToSavings() {
         return ChargeTimeType.DISBURSE_TO_SAVINGS.getValue().equals(this.value);
+    }
+
+    public boolean isFdaPreclosureFee() {
+        return this.value.equals(ChargeTimeType.FDA_PRE_CLOSURE_FEE.getValue());
+    }
+
+    public boolean isFdaPartialLiquidationFee() {
+        return this.value.equals(ChargeTimeType.FDA_PARTIAL_LIQUIDATION_FEE.getValue());
     }
 }

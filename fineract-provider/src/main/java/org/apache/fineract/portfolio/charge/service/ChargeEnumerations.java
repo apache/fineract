@@ -104,7 +104,11 @@ public final class ChargeEnumerations {
             break;
             case DISBURSE_TO_SAVINGS:
                 optionData = new EnumOptionData(ChargeTimeType.DISBURSE_TO_SAVINGS.getValue().longValue(),
-                        ChargeTimeType.DISBURSE_TO_SAVINGS.getCode(), " Disburse To Savings");
+                        ChargeTimeType.DISBURSE_TO_SAVINGS.getCode(), "Disburse To Savings");
+            break;
+            case FDA_PARTIAL_LIQUIDATION_FEE:
+                optionData = new EnumOptionData(ChargeTimeType.FDA_PARTIAL_LIQUIDATION_FEE.getValue().longValue(),
+                        ChargeTimeType.FDA_PARTIAL_LIQUIDATION_FEE.getCode(), "Partial Liquidation Fee");
             break;
             default:
                 optionData = new EnumOptionData(ChargeTimeType.INVALID.getValue().longValue(), ChargeTimeType.INVALID.getCode(), "Invalid");

@@ -135,6 +135,7 @@ public final class DepositsApiConstants {
     public static final String autoRolloverParamName = "autoRollover";
 
     public static final String depositAmountParamName = "depositAmount";
+    public static final String liquidationAmountParamName = "liquidationAmount";
     public static final String depositMinAmountParamName = "minDepositAmount";
     public static final String depositMaxAmountParamName = "maxDepositAmount";
     public static final String depositPeriodParamName = "depositPeriod";
@@ -208,6 +209,14 @@ public final class DepositsApiConstants {
 
     // template
     public static final String chartTemplate = "chartTemplate";
+
+    // charge summary
+    public static final String preCloseParamName = "preclose";
+    public static final String liquidateParamName = "liquidate";
+    public static final String closureActionParamName = "action";
+    public static final String closureOnParamName = "closureOn";
+    public static final String transferParamName = "transfer";
+    public static final String withdrawParamName = "withdraw";
 
     /**
      * Deposit Product Parameters
@@ -364,7 +373,7 @@ public final class DepositsApiConstants {
     private static final Set<String> SAVINGS_ACCOUNT_ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(localeParamName, dateFormatParamName, activatedOnDateParamName));
 
-    private static final Set<String> SAVINGS_ACCOUNT_CHARGES_RESPONSE_DATA_PARAMETERS = new HashSet<>(
+    public static final Set<String> SAVINGS_ACCOUNT_CHARGES_RESPONSE_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(chargeIdParamName, savingsAccountChargeIdParamName, chargeNameParamName, penaltyParamName,
                     chargeTimeTypeParamName, dueAsOfDateParamName, chargeCalculationTypeParamName, percentageParamName,
                     amountPercentageAppliedToParamName, currencyParamName, amountWaivedParamName, amountWrittenOffParamName,

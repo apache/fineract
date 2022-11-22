@@ -49,6 +49,7 @@ import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.charge.exception.SavingsAccountChargeWithoutMandatoryFieldException;
+import org.apache.fineract.portfolio.savings.request.SavingsAccountChargeReq;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -136,6 +137,27 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
 
     @Column(name = "inactivated_on_date")
     private LocalDate inactivationDate;
+
+    public static SavingsAccountCharge createNew(SavingsAccount savingsAccount, Charge chargeDefinition,
+            SavingsAccountChargeReq savingsAccountChargeReq) {
+
+        BigDecimal amount = savingsAccountChargeReq.getAmount();
+        final LocalDate dueDate = savingsAccountChargeReq.getDueDate();
+        MonthDay feeOnMonthDay = savingsAccountChargeReq.getFeeOnMonthDay();
+        Integer feeInterval = savingsAccountChargeReq.getFeeInterval();
+        final ChargeTimeType chargeTime = null;
+        final ChargeCalculationType chargeCalculation = null;
+        final boolean status = true;
+
+        // If these values is not sent as parameter, then derive from Charge
+        // definition
+        amount = (amount == null) ? chargeDefinition.getAmount() : amount;
+        feeOnMonthDay = (feeOnMonthDay == null) ? chargeDefinition.getFeeOnMonthDay() : feeOnMonthDay;
+        feeInterval = (feeInterval == null) ? chargeDefinition.getFeeInterval() : feeInterval;
+
+        return new SavingsAccountCharge(savingsAccount, chargeDefinition, amount, chargeTime, chargeCalculation, dueDate, status,
+                feeOnMonthDay, feeInterval);
+    }
 
     public static SavingsAccountCharge createNewFromJson(final SavingsAccount savingsAccount, final Charge chargeDefinition,
             final JsonCommand command) {
@@ -980,5 +1002,13 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
         dup.waived = false;
         dup.savingsAccount = null;
         return dup;
+    }
+
+    public boolean isFdaPartialLiquidationFee() {
+        return ChargeTimeType.fromInt(this.chargeTime).isFdaPartialLiquidationFee();
+    }
+
+    public boolean isFdaPreclosureFee() {
+        return ChargeTimeType.fromInt(this.chargeTime).isFdaPreclosureFee();
     }
 }
