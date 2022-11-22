@@ -189,4 +189,8 @@ public class DepositPreClosureDetail {
     public boolean isPreClosurePenalApplicable() {
         return this.preClosurePenalApplicable;
     }
+
+    public boolean isPreClosureChargeApplicable() {
+        return preClosureChargeApplicable;
+    }
 }

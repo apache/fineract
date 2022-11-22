@@ -277,32 +277,32 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
 
         final BigDecimal maxAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maxAmount", element.getAsJsonObject());
 
-        if(maxAmount != null && minAmount != null){
-        if (appliesTo.isSavingsCharge() || appliesTo.isLoanCharge()) {
+        if (maxAmount != null && minAmount != null) {
+            if (appliesTo.isSavingsCharge() || appliesTo.isLoanCharge()) {
 
-            final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeTimeType", element);
-            baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType).notNull();
+                final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeTimeType", element);
+                baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType).notNull();
 
-            final ChargeTimeType ctt = ChargeTimeType.fromInt(chargeTimeType);
+                final ChargeTimeType ctt = ChargeTimeType.fromInt(chargeTimeType);
 
-            final ChargeCalculationType chargeCalculationTypeValue = ChargeCalculationType.fromInt(chargeCalculationType);
+                final ChargeCalculationType chargeCalculationTypeValue = ChargeCalculationType.fromInt(chargeCalculationType);
 
-            if ((appliesTo.isSavingsCharge()
-                    && chargeCalculationTypeValue.getValue().equals(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue())
-                    && ctt.isWithdrawalFee())
-                    || (appliesTo.isLoanCharge() && !ctt.isOnSpecifiedDueDate()
-                            && !chargeCalculationTypeValue.getValue().equals(ChargeCalculationType.FLAT.getValue()))) {
-                validateMinMaxPolicyOnCharge(minAmount, maxAmount);
+                if ((appliesTo.isSavingsCharge()
+                        && chargeCalculationTypeValue.getValue().equals(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue())
+                        && ctt.isWithdrawalFee())
+                        || (appliesTo.isLoanCharge() && !ctt.isOnSpecifiedDueDate()
+                                && !chargeCalculationTypeValue.getValue().equals(ChargeCalculationType.FLAT.getValue()))) {
+                    validateMinMaxPolicyOnCharge(minAmount, maxAmount);
+                } else {
+                    String message = "Minimum and Maximum Amount is not supported with given settings of [Applies To: " + appliesTo.name()
+                            + ", charge time type :" + ctt.name() + ", and Charge Calculation Type: " + chargeCalculationTypeValue.name()
+                            + " ]";
+                    minandmaxConfigurationAreNotSupported(minAmount, maxAmount, message);
+                }
             } else {
-                String message = "Minimum and Maximum Amount is not supported with given settings of [Applies To: " + appliesTo.name()
-                        + ", charge time type :" + ctt.name() + ", and Charge Calculation Type: " + chargeCalculationTypeValue.name()
-                        + " ]";
+                String message = "Minimum and Maximum Amount is only supported on Loans and Savings Deposits  charges";
                 minandmaxConfigurationAreNotSupported(minAmount, maxAmount, message);
             }
-        } else {
-            String message = "Minimum and Maximum Amount is only supported on Loans and Savings Deposits  charges";
-            minandmaxConfigurationAreNotSupported(minAmount, maxAmount, message);
-        }
         }
     }
 

@@ -100,6 +100,7 @@ import org.apache.fineract.portfolio.savings.exception.RecurringDepositProductNo
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.apache.fineract.portfolio.savings.request.FixedDepositApplicationReq;
 import org.apache.fineract.portfolio.savings.request.RecurringAccountDetailReq;
+import org.apache.fineract.portfolio.savings.service.SavingsAccountActionService;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -120,6 +121,7 @@ public class DepositAccountAssembler {
     private final FromJsonHelper fromApiJsonHelper;
     private final DepositProductAssembler depositProductAssembler;
     private final PaymentDetailAssembler paymentDetailAssembler;
+    private final SavingsAccountTransactionRepository savingsAccountTransactionRepository;
 
     @Autowired
     public DepositAccountAssembler(final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
@@ -130,7 +132,7 @@ public class DepositAccountAssembler {
             final DepositProductAssembler depositProductAssembler,
             final RecurringDepositProductRepository recurringDepositProductRepository,
             final AccountTransfersReadPlatformService accountTransfersReadPlatformService, final PlatformSecurityContext context,
-            final PaymentDetailAssembler paymentDetailAssembler) {
+            final PaymentDetailAssembler paymentDetailAssembler, SavingsAccountTransactionRepository savingsAccountTransactionRepository) {
 
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.clientRepository = clientRepository;
@@ -145,6 +147,7 @@ public class DepositAccountAssembler {
         this.savingsHelper = new SavingsHelper(accountTransfersReadPlatformService);
         this.context = context;
         this.paymentDetailAssembler = paymentDetailAssembler;
+        this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
     }
 
     /**
@@ -365,6 +368,8 @@ public class DepositAccountAssembler {
     public SavingsAccount assembleFrom(final Long savingsId, DepositAccountType depositAccountType) {
         final SavingsAccount account = this.savingsAccountRepository.findOneWithNotFoundDetection(savingsId, depositAccountType);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
+        SavingsAccountActionService.populateTransactions(account,
+                this.savingsAccountTransactionRepository.getTransactionsByAccountId(savingsId));
         return account;
     }
 

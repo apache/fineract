@@ -70,4 +70,8 @@ public class SavingsAccountChargeRepositoryWrapper {
     public void delete(final SavingsAccountCharge savingsAccountCharge) {
         this.repository.delete(savingsAccountCharge);
     }
+
+    public List<SavingsAccountCharge> findFdaPreclosureCharges(Long accountId, List<Integer> chargeTimeTypes) {
+        return this.repository.findFdaPreclosureCharges(accountId, chargeTimeTypes);
+    }
 }
