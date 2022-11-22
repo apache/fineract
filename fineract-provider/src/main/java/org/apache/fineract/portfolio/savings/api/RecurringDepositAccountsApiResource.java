@@ -208,7 +208,8 @@ public class RecurringDepositAccountsApiResource {
     public String retrieveOne(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @Parameter(description = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
             @DefaultValue("all") @QueryParam("chargeStatus") @Parameter(description = "chargeStatus") final String chargeStatus,
-            @Context final UriInfo uriInfo) {
+            @Context final UriInfo uriInfo, @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
+            @QueryParam("limit") @Parameter(description = "limit") final Integer limit) {
 
         this.context.authenticatedUser().validateHasReadPermission(DepositsApiConstants.RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME);
 
@@ -221,7 +222,7 @@ public class RecurringDepositAccountsApiResource {
 
         final Set<String> mandatoryResponseParameters = new HashSet<>();
         final RecurringDepositAccountData accountTemplate = populateTemplateAndAssociations(accountId, account, staffInSelectedOfficeOnly,
-                chargeStatus, uriInfo, mandatoryResponseParameters);
+                chargeStatus, uriInfo, mandatoryResponseParameters, offset, limit);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);
@@ -231,10 +232,11 @@ public class RecurringDepositAccountsApiResource {
 
     private RecurringDepositAccountData populateTemplateAndAssociations(final Long accountId,
             final RecurringDepositAccountData savingsAccount, final boolean staffInSelectedOfficeOnly, final String chargeStatus,
-            final UriInfo uriInfo, final Set<String> mandatoryResponseParameters) {
+            final UriInfo uriInfo, final Set<String> mandatoryResponseParameters, final Integer offset, final Integer limit) {
 
         Collection<SavingsAccountTransactionData> transactions = null;
         Collection<SavingsAccountChargeData> charges = null;
+        Long transactionSize = null;
 
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         if (!associationParameters.isEmpty()) {
@@ -246,7 +248,9 @@ public class RecurringDepositAccountsApiResource {
             if (associationParameters.contains(SavingsApiConstants.transactions)) {
                 mandatoryResponseParameters.add(SavingsApiConstants.transactions);
                 final Collection<SavingsAccountTransactionData> currentTransactions = this.depositAccountReadPlatformService
-                        .retrieveAllTransactions(DepositAccountType.RECURRING_DEPOSIT, accountId,0,50000);
+                        .retrieveAllTransactions(DepositAccountType.RECURRING_DEPOSIT, accountId, offset, limit);
+                transactionSize = this.depositAccountReadPlatformService.getSavingsAccountTransactionTotalFiltered(accountId,
+                        DepositAccountType.RECURRING_DEPOSIT, true);
                 if (!CollectionUtils.isEmpty(currentTransactions)) {
                     transactions = currentTransactions;
                 }
@@ -271,7 +275,10 @@ public class RecurringDepositAccountsApiResource {
                     staffInSelectedOfficeOnly);
         }
 
-        return RecurringDepositAccountData.withTemplateOptions(savingsAccount, templateData, transactions, charges);
+        RecurringDepositAccountData result = RecurringDepositAccountData.withTemplateOptions(savingsAccount, templateData, transactions,
+                charges);
+        result.setTransactionSize(transactionSize);
+        return result;
     }
 
     @PUT

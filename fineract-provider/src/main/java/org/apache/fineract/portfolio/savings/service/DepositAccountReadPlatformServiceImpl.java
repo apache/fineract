@@ -312,7 +312,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
     @Override
     public Collection<SavingsAccountTransactionData> retrieveAllTransactions(final DepositAccountType depositAccountType,
-            final Long accountId,Integer offset, Integer limit) {
+            final Long accountId, Integer offset, Integer limit) {
         if (offset == null) {
             offset = 1;
         }
@@ -322,7 +322,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         final String sql = "select " + this.transactionsMapper.schema()
                 + " where sa.id = ? and sa.deposit_type_enum = ? AND transaction_type_enum not in (22,25)   order by tr.transaction_date DESC, tr.id DESC  LIMIT ? OFFSET ? ";
 
-        return this.jdbcTemplate.query(sql, this.transactionsMapper, new Object[] { accountId, depositAccountType.getValue(),limit, offset }); // NOSONAR
+        return this.jdbcTemplate.query(sql, this.transactionsMapper,
+                new Object[] { accountId, depositAccountType.getValue(), limit, offset }); // NOSONAR
     }
 
     @Override
@@ -1513,11 +1514,12 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         }
 
     }
+
     @Override
     public Long getSavingsAccountTransactionTotalFiltered(final Long savingsId, DepositAccountType depositAccountType,
-                                                          Boolean hideAccrualTransactions) {
+            Boolean hideAccrualTransactions) {
         StringBuilder sqlBuilder = new StringBuilder().append(
-                        " SELECT COUNT(tr.id) FROM m_savings_account sa  JOIN m_savings_account_transaction tr ON tr.savings_account_id = sa.id ")
+                " SELECT COUNT(tr.id) FROM m_savings_account sa  JOIN m_savings_account_transaction tr ON tr.savings_account_id = sa.id ")
                 .append(" where sa.id = ? and sa.deposit_type_enum = ? ");
         if (hideAccrualTransactions) {
             sqlBuilder.append(" AND transaction_type_enum not in (?,?) ");

@@ -80,6 +80,7 @@ public final class RecurringDepositAccountData extends DepositAccountData {
     private String locale;
     private LocalDate submittedOnDate;
     private Long depositPeriodFrequencyId;
+    private Long transactionSize;
 
     public static RecurringDepositAccountData importInstance(Long clientId, Long productId, Long fieldOfficerId, LocalDate submittedOnDate,
             EnumOptionData interestCompoundingPeriodTypeEnum, EnumOptionData interestPostingPeriodTypeEnum,
@@ -595,6 +596,10 @@ public final class RecurringDepositAccountData extends DepositAccountData {
         }
         final RecurringDepositAccountData rhs = (RecurringDepositAccountData) obj;
         return new EqualsBuilder().append(this.id, rhs.id).append(this.accountNo, rhs.accountNo).isEquals();
+    }
+
+    public void setTransactionSize(Long transactionSize) {
+        this.transactionSize = transactionSize;
     }
 
     @Override

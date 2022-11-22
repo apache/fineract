@@ -77,6 +77,7 @@ public final class FixedDepositAccountData extends DepositAccountData {
     private String locale;
     private LocalDate submittedOnDate;
     private Long depositPeriodFrequencyId;
+    private Long transactionSize;
 
     public static FixedDepositAccountData importInstance(Long clientId, Long productId, Long fieldOfficerId, LocalDate submittedOnDate,
             EnumOptionData interestCompoundingPeriodTypeEnum, EnumOptionData interestPostingPeriodTypeEnum,
@@ -550,5 +551,9 @@ public final class FixedDepositAccountData extends DepositAccountData {
 
     public Long getTransferToSavingsId() {
         return transferToSavingsId;
+    }
+
+    public void setTransactionSize(Long transactionSize) {
+        this.transactionSize = transactionSize;
     }
 }
