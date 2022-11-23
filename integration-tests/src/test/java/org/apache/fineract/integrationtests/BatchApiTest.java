@@ -1392,6 +1392,77 @@ public class BatchApiTest {
     }
 
     /**
+     * Test for the successful repayment chargeback transaction. A '200' status code is expected on successful
+     * responses.
+     *
+     * @see AdjustTransactionCommandStrategy
+     */
+    @Test
+    public void shouldReturnOkStatusForBatchRepaymentChargeback() {
+
+        final String loanProductJSON = new LoanProductTestBuilder() //
+                .withPrincipal("10000000.00") //
+                .withNumberOfRepayments("24") //
+                .withRepaymentAfterEvery("1") //
+                .withRepaymentTypeAsMonth() //
+                .withinterestRatePerPeriod("2") //
+                .withInterestRateFrequencyTypeAsMonths() //
+                .withAmortizationTypeAsEqualPrincipalPayment() //
+                .withInterestTypeAsDecliningBalance() //
+                .currencyDetails("0", "100").build(null);
+
+        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+
+        final Long applyLoanRequestId = 5730L;
+        final Long approveLoanRequestId = 5731L;
+        final Long disburseLoanRequestId = 5732L;
+        final Long repayLoanRequestId = 5733L;
+        final Long repayReversalRequestId = 5734L;
+        final Long getLoanRequestId = 5735L;
+
+        // Create client
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+
+        // Create an apply loan request
+        final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
+
+        // Create an approve loan request
+        final BatchRequest approveLoanRequest = BatchHelper.approveLoanRequest(approveLoanRequestId, applyLoanRequestId);
+
+        // Create a disburse loan request
+        final BatchRequest disburseLoanRequest = BatchHelper.disburseLoanRequest(disburseLoanRequestId, approveLoanRequestId);
+
+        // Create a repayment request
+        final BatchRequest repaymentRequest = BatchHelper.repayLoanRequest(repayLoanRequestId, disburseLoanRequestId, "500");
+
+        // Create a repayment chargeback request
+        final BatchRequest repaymentChargebackRequest = BatchHelper.createChargebackTransactionRequest(repayReversalRequestId,
+                repayLoanRequestId, "500");
+
+        // Get loan transactions request
+        final BatchRequest getLoanTransactionsRequest = BatchHelper.getLoanByIdRequest(getLoanRequestId, applyLoanRequestId,
+                "associations=transactions");
+
+        final List<BatchRequest> batchRequests = Arrays.asList(applyLoanRequest, approveLoanRequest, disburseLoanRequest, repaymentRequest,
+                repaymentChargebackRequest, getLoanTransactionsRequest);
+
+        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+                BatchHelper.toJsonString(batchRequests));
+
+        final FromJsonHelper jsonHelper = new FromJsonHelper();
+        final JsonObject repayment = jsonHelper.parse(responses.get(5).getBody()).getAsJsonObject().get("transactions").getAsJsonArray()
+                .get(2).getAsJsonObject();
+
+        Assertions.assertEquals(HttpStatus.SC_OK, (long) responses.get(4).getStatusCode(),
+                "Verify Status Code 200 for repayment chargeback");
+        Assertions.assertEquals("Repayment", repayment.get("type").getAsJsonObject().get("value").getAsString());
+        final JsonArray transactionRelations = repayment.get("transactionRelations").getAsJsonArray();
+        Assertions.assertEquals(1, transactionRelations.size());
+        Assertions.assertEquals("CHARGEBACK", transactionRelations.get(0).getAsJsonObject().get("relationType").getAsString());
+    }
+
+    /**
      * Tests successful run of batch goodwill credit reversal for loans. A '200' status code is expected on successful
      * responses.
      *

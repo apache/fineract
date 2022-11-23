@@ -883,6 +883,19 @@ public final class BatchHelper {
         return br;
     }
 
+    /**
+     * Creates and returns a batch request to create an adjust transaction request.
+     *
+     * @param requestId
+     *            the request ID
+     * @param reference
+     *            the reference
+     * @param amount
+     *            the amount
+     * @param date
+     *            the date
+     * @return the {@link BatchRequest}
+     */
     public static BatchRequest createAdjustTransactionRequest(final Long requestId, final Long reference, final String amount,
             final LocalDate date) {
         final BatchRequest br = new BatchRequest();
@@ -895,6 +908,30 @@ public final class BatchHelper {
         br.setBody(String.format(
                 "{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", " + "\"transactionDate\": \"%s\",  \"transactionAmount\": %s}",
                 dateString, amount));
+
+        return br;
+    }
+
+    /**
+     * Creates and returns a batch request to create a chargeback transaction request.
+     *
+     * @param requestId
+     *            the request ID
+     * @param reference
+     *            the reference
+     * @param amount
+     *            the amount
+     * @return the {@link BatchRequest}
+     */
+    public static BatchRequest createChargebackTransactionRequest(final Long requestId, final Long reference, final String amount) {
+
+        final BatchRequest br = new BatchRequest();
+
+        br.setRequestId(requestId);
+        br.setReference(reference);
+        br.setRelativeUrl("loans/$.loanId/transactions/$.resourceId?command=chargeback");
+        br.setMethod("POST");
+        br.setBody(String.format("{\"locale\": \"en\", \"transactionAmount\": %s, \"paymentTypeId\": 2}", amount));
 
         return br;
 

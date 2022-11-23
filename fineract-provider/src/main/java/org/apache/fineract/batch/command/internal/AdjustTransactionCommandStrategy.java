@@ -59,7 +59,15 @@ public class AdjustTransactionCommandStrategy implements CommandStrategy {
         // Get the loan and transaction ids for use in loanTransactionsApiResource
         final List<String> pathParameters = Splitter.on('/').splitToList(relativeUrl);
         Long loanId = Long.parseLong(pathParameters.get(1));
-        Long transactionId = Long.parseLong(pathParameters.get(3));
+
+        final String transactionIdPathParameter = pathParameters.get(3);
+        Long transactionId;
+        if (transactionIdPathParameter.contains("?")) {
+            transactionId = Long.parseLong(pathParameters.get(3).substring(0, pathParameters.get(3).indexOf("?")));
+        } else {
+            transactionId = Long.parseLong(pathParameters.get(3));
+        }
+
         Map<String, String> queryParameters = CommandStrategyUtils.getQueryParameters(relativeUrl);
         String command = queryParameters.get("command");
 
