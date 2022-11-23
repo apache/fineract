@@ -57,4 +57,7 @@ public interface DepositAccountReadPlatformService {
 
     Long getSavingsAccountTransactionTotalFiltered(Long savingsId, DepositAccountType depositAccountType, Boolean hideAccrualTransactions);
 
+    Collection<SavingsAccountTransactionData> retrieveAccrualTransactions(Long savingsId, DepositAccountType depositAccountType,
+            Integer offset, Integer limit);
+
 }

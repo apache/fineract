@@ -1536,4 +1536,21 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             return 0L;
         }
     }
+
+    @Override
+    public Collection<SavingsAccountTransactionData> retrieveAccrualTransactions(final Long savingsId,
+            DepositAccountType depositAccountType, Integer offset, Integer limit) {
+        if (offset == null) {
+            offset = 1;
+        }
+        if (limit == null) {
+            limit = 15;
+        }
+
+        final String sql = "select " + this.transactionsMapper.schema()
+                + " where sa.id = ? and sa.deposit_type_enum = ? AND transaction_type_enum in (22,25)  order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC LIMIT ? OFFSET ?   ";
+
+        return this.jdbcTemplate.query(sql, this.transactionsMapper,
+                new Object[] { savingsId, depositAccountType.getValue(), limit, offset });
+    }
 }
