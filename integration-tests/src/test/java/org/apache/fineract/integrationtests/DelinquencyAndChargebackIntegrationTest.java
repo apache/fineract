@@ -34,6 +34,7 @@ import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
@@ -93,7 +94,7 @@ public class DelinquencyAndChargebackIntegrationTest {
 
         // Create Loan Account
         final Integer loanId = createLoanAccount(loanTransactionHelper, clientId.toString(),
-                getLoanProductsProductResponse.getId().toString(), operationDate);
+                getLoanProductsProductResponse.getId().toString(), operationDate, "12");
 
         // Move the Business date 1 month to apply the first repayment
         businessDate = businessDate.plusMonths(1);
@@ -182,6 +183,107 @@ public class DelinquencyAndChargebackIntegrationTest {
         GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
     }
 
+    @Test
+    public void testLoanClassificationStepAsPartOfCOBRepeated() {
+        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+
+        LocalDate businessDate = LocalDate.parse("2022-01-01", DateUtils.DEFAULT_DATE_FORMATTER);
+        log.info("Current Business date {}", businessDate);
+        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
+
+        final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
+        // Delinquency Bucket
+        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
+        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+                delinquencyBucketId);
+
+        // Client and Loan account creation
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
+                delinquencyBucket.getId());
+        assertNotNull(getLoanProductsProductResponse);
+
+        // Older date to have more than one overdue installment
+        String operationDate = Utils.dateFormatter.format(businessDate);
+        log.info("Operation date  {}", businessDate);
+
+        // Create Loan Account
+        final Integer loanId = createLoanAccount(loanTransactionHelper, clientId.toString(),
+                getLoanProductsProductResponse.getId().toString(), operationDate, "3");
+
+        // Move the Business date 1 month to apply the first repayment
+        businessDate = businessDate.plusMonths(1);
+        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
+        log.info("Current Business date {}", businessDate);
+
+        String amountVal = "400.00";
+        Float transactionAmount = Float.valueOf(amountVal);
+        operationDate = Utils.dateFormatter.format(businessDate);
+        PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate,
+                transactionAmount, loanId);
+        assertNotNull(loanIdTransactionsResponse);
+        Long transactionId = loanIdTransactionsResponse.getResourceId();
+        loanTransactionHelper.reviewLoanTransactionRelations(loanId, transactionId, 0);
+
+        // Move the Business date 1 month more to apply the second repayment
+        businessDate = businessDate.plusMonths(1);
+        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
+        log.info("Current Business date {}", businessDate);
+
+        operationDate = Utils.dateFormatter.format(businessDate);
+        loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, transactionAmount, loanId);
+        assertNotNull(loanIdTransactionsResponse);
+        transactionId = loanIdTransactionsResponse.getResourceId();
+        loanTransactionHelper.reviewLoanTransactionRelations(loanId, transactionId, 0);
+
+        // Get loan details expecting to have not a delinquency classification and 1,000 as Outstanding
+        GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        validateLoanAccount(getLoansLoanIdResponse, "0.00", "400.00", 0, doubleZERO);
+
+        // Move the Business date n days to apply the chargeback for the previous repayment
+        businessDate = businessDate.plusDays(15);
+        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
+        log.info("Current Business date {}", businessDate);
+
+        // Apply the Chargeback transaction
+        final Long chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId, transactionId, amountVal, 0,
+                responseSpec);
+        loanTransactionHelper.reviewLoanTransactionRelations(loanId, transactionId, 1);
+
+        // Validate the account expecting to have an adjustment for 100.00 and Outstanding 1,100
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+        // Past Due Days in Zero because the Charge back transaction exists and It was done with the current date
+        validateLoanAccount(getLoansLoanIdResponse, amountVal, "800.00", 0, Double.valueOf("0.00"));
+
+        // Move the Business date n days to run the COB
+        businessDate = businessDate.plusDays(23);
+        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
+        log.info("Current Business date {}", businessDate);
+
+        // Run the Loan COB Job
+        final String jobName = "Loan COB";
+        schedulerJobHelper.executeAndAwaitJob(jobName);
+
+        // Get loan details expecting to have a delinquency classification
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        validateLoanAccount(getLoansLoanIdResponse, amountVal, "800.00", 23, Double.valueOf("800.00"));
+
+        // Move the Business date few days to apply the repayment for Chargeback
+        businessDate = LocalDate.parse("2022-03-20", DateUtils.DEFAULT_DATE_FORMATTER);
+        operationDate = Utils.dateFormatter.format(businessDate);
+        loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, transactionAmount, loanId);
+        assertNotNull(loanIdTransactionsResponse);
+        transactionId = loanIdTransactionsResponse.getResourceId();
+        loanTransactionHelper.reviewLoanTransactionRelations(loanId, transactionId, 0);
+
+        // Get loan details expecting to have a delinquency classification
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        validateLoanAccount(getLoansLoanIdResponse, amountVal, "400.00", 7, Double.valueOf("400.00"));
+
+        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+    }
+
     private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,
             final Integer delinquencyBucketId) {
         final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().build(null, delinquencyBucketId);
@@ -190,9 +292,9 @@ public class DelinquencyAndChargebackIntegrationTest {
     }
 
     private Integer createLoanAccount(final LoanTransactionHelper loanTransactionHelper, final String clientId, final String loanProductId,
-            final String operationDate) {
-        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(principalAmount).withLoanTermFrequency("12")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("12").withRepaymentEveryAfter("1")
+            final String operationDate, final String periods) {
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(principalAmount).withLoanTermFrequency(periods)
+                .withLoanTermFrequencyAsMonths().withNumberOfRepayments(periods).withRepaymentEveryAfter("1")
                 .withRepaymentFrequencyTypeAsMonths() //
                 .withInterestRatePerPeriod("0") //
                 .withExpectedDisbursementDate(operationDate) //
