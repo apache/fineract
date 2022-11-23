@@ -94,7 +94,7 @@ public class CommandStrategyProvider {
                 "getChargeByIdCommandStrategy");
         commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\?(\\w+(\\=[\\w]+))").method("POST").build(),
                 "createTransactionLoanCommandStrategy");
-        commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\/\\d+").method("POST").build(),
+        commandStrategies.put(CommandContext.resource("loans\\/\\d+\\/transactions\\/\\d+(\\?command=[\\w]+)?").method("POST").build(),
                 "adjustTransactionCommandStrategy");
         commandStrategies.put(CommandContext.resource("clients\\/\\d+\\?command=activate").method("POST").build(),
                 "activateClientCommandStrategy");

@@ -976,6 +976,8 @@ final class LoansApiResourceSwagger {
         public GetDelinquencyRangesResponse delinquencyRange;
         @Schema(example = "false")
         public Boolean fraud;
+        @Schema(example = "250.000000")
+        public Double totalOverpaid;
     }
 
     @Schema(description = "GetLoansResponse")
@@ -1049,6 +1051,8 @@ final class LoansApiResourceSwagger {
         public List<PostLoansDisbursementData> disbursementData;
         @Schema(description = "Maximum allowed outstanding balance")
         public BigDecimal maxOutstandingLoanBalance;
+        @Schema(example = "[2011, 10, 20]")
+        public LocalDate repaymentsStartingFromDate;
     }
 
     @Schema(description = "PostLoansResponse")

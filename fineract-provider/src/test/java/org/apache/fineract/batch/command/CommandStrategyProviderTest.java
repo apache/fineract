@@ -88,6 +88,8 @@ public class CommandStrategyProviderTest {
                         mock(CreateTransactionLoanCommandStrategy.class)),
                 Arguments.of("loans/123/transactions/123", HttpMethod.POST, "adjustTransactionCommandStrategy",
                         mock(AdjustTransactionCommandStrategy.class)),
+                Arguments.of("loans/123/transactions/123?command=chargeback", HttpMethod.POST, "adjustTransactionCommandStrategy",
+                        mock(AdjustTransactionCommandStrategy.class)),
                 Arguments.of("clients/456?command=activate", HttpMethod.POST, "activateClientCommandStrategy",
                         mock(ActivateClientCommandStrategy.class)),
                 Arguments.of("loans/123?command=approve", HttpMethod.POST, "approveLoanCommandStrategy",
