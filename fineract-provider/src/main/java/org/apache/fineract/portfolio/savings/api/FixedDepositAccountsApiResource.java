@@ -219,7 +219,8 @@ public class FixedDepositAccountsApiResource {
     public String retrieveOne(@PathParam("accountId") @Parameter(description = "accountId") final Long accountId,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @Parameter(description = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
             @DefaultValue("all") @QueryParam("chargeStatus") @Parameter(description = "chargeStatus") final String chargeStatus,
-            @Context final UriInfo uriInfo) {
+            @Context final UriInfo uriInfo, @QueryParam("offset") @Parameter(description = "offset") final Integer offset,
+            @QueryParam("limit") @Parameter(description = "limit") final Integer limit) {
 
         this.context.authenticatedUser().validateHasReadPermission(DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME);
 
@@ -232,7 +233,7 @@ public class FixedDepositAccountsApiResource {
 
         final Set<String> mandatoryResponseParameters = new HashSet<>();
         final FixedDepositAccountData accountTemplate = populateTemplateAndAssociations(accountId, account, staffInSelectedOfficeOnly,
-                chargeStatus, uriInfo, mandatoryResponseParameters);
+                chargeStatus, uriInfo, mandatoryResponseParameters, offset, limit);
         accountTemplate.setActivationCharge(getActivationCharge(accountId));
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);
@@ -254,12 +255,13 @@ public class FixedDepositAccountsApiResource {
 
     private FixedDepositAccountData populateTemplateAndAssociations(final Long accountId, final FixedDepositAccountData savingsAccount,
             final boolean staffInSelectedOfficeOnly, final String chargeStatus, final UriInfo uriInfo,
-            final Set<String> mandatoryResponseParameters) {
+            final Set<String> mandatoryResponseParameters, final Integer offset, final Integer limit) {
 
         Collection<SavingsAccountTransactionData> transactions = null;
         Collection<SavingsAccountChargeData> charges = null;
         PortfolioAccountData linkedAccount = null;
         PortfolioAccountData transferToSavingsAccount = null;
+        Long transactionSize = null;
 
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         if (!associationParameters.isEmpty()) {
@@ -272,7 +274,9 @@ public class FixedDepositAccountsApiResource {
             if (associationParameters.contains(SavingsApiConstants.transactions)) {
                 mandatoryResponseParameters.add(SavingsApiConstants.transactions);
                 final Collection<SavingsAccountTransactionData> currentTransactions = this.depositAccountReadPlatformService
-                        .retrieveAllTransactions(DepositAccountType.FIXED_DEPOSIT, accountId);
+                        .retrieveAllTransactions(DepositAccountType.FIXED_DEPOSIT, accountId, offset, limit);
+                transactionSize = this.depositAccountReadPlatformService.getSavingsAccountTransactionTotalFiltered(accountId,
+                        DepositAccountType.FIXED_DEPOSIT, true);
                 if (!CollectionUtils.isEmpty(currentTransactions)) {
                     transactions = currentTransactions;
                 }
@@ -307,8 +311,10 @@ public class FixedDepositAccountsApiResource {
                     staffInSelectedOfficeOnly);
         }
 
-        return FixedDepositAccountData.associationsAndTemplate(savingsAccount, templateData, transactions, charges, linkedAccount,
-                transferToSavingsAccount);
+        FixedDepositAccountData result = FixedDepositAccountData.associationsAndTemplate(savingsAccount, templateData, transactions,
+                charges, linkedAccount, transferToSavingsAccount);
+        result.setTransactionSize(transactionSize);
+        return result;
     }
 
     @PUT
