@@ -4054,7 +4054,7 @@ CREATE TABLE IF NOT EXISTS `m_portfolio_command_source` (
   `made_on_date` datetime NOT NULL,
   `checker_id` BIGINT DEFAULT NULL,
   `checked_on_date` datetime DEFAULT NULL,
-  `processing_result_enum` SMALLINT NOT NULL,
+  `status` SMALLINT NOT NULL,
   `product_id` BIGINT DEFAULT NULL,
   `transaction_id` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -4064,7 +4064,7 @@ CREATE TABLE IF NOT EXISTS `m_portfolio_command_source` (
   KEY `entity_name` (`entity_name`,`resource_id`),
   KEY `made_on_date` (`made_on_date`),
   KEY `checked_on_date` (`checked_on_date`),
-  KEY `processing_result_enum` (`processing_result_enum`),
+  KEY `status` (`status`),
   KEY `office_id` (`office_id`),
   KEY `group_id` (`office_id`),
   KEY `client_id` (`office_id`),
@@ -4075,7 +4075,7 @@ CREATE TABLE IF NOT EXISTS `m_portfolio_command_source` (
 
 -- Dumping data for table mifostenant-reference.m_portfolio_command_source: ~72 rows (approximately)
 /*!40000 ALTER TABLE `m_portfolio_command_source` DISABLE KEYS */;
-INSERT INTO `m_portfolio_command_source` (`id`, `action_name`, `entity_name`, `office_id`, `group_id`, `client_id`, `loan_id`, `savings_account_id`, `api_get_url`, `resource_id`, `subresource_id`, `command_as_json`, `maker_id`, `made_on_date`, `checker_id`, `checked_on_date`, `processing_result_enum`, `product_id`, `transaction_id`) VALUES
+INSERT INTO `m_portfolio_command_source` (`id`, `action_name`, `entity_name`, `office_id`, `group_id`, `client_id`, `loan_id`, `savings_account_id`, `api_get_url`, `resource_id`, `subresource_id`, `command_as_json`, `maker_id`, `made_on_date`, `checker_id`, `checked_on_date`, `status`, `product_id`, `transaction_id`) VALUES
     (1, 'CREATE', 'STAFF', 1, NULL, NULL, NULL, NULL, '/staff/template', 1, NULL, '{"isLoanOfficer":true,"officeId":1,"firstname":"Aliya","lastname":"A"}', 1, '2014-03-07 19:10:05', NULL, NULL, 1, NULL, NULL),
     (2, 'CREATE', 'USER', 1, NULL, NULL, NULL, NULL, '/users/template', 2, NULL, '{"sendPasswordToEmail":true,"officeId":1,"username":"adama","firstname":"Adam","lastname":"A","email":"adama@123.com","roles":["1"]}', 1, '2014-03-07 19:19:31', NULL, NULL, 1, NULL, NULL),
     (3, 'CREATE', 'CLIENT', 1, NULL, 1, NULL, NULL, '/clients/template', 1, NULL, '{"officeId":1,"staffId":1,"firstname":"Smith","lastname":"R","active":true,"locale":"en","dateFormat":"dd MMMM yyyy","activationDate":"07 March 2014","submittedOnDate":"01 January 2010","savingsProductId":null}', 1, '2014-03-07 19:23:36', NULL, NULL, 1, NULL, NULL),
@@ -5889,10 +5889,10 @@ INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `en
     ('portfolio_account_type_enum', 2, 'SAVING', 'EXPENSE', 0),
     ('portfolio_account_type_enum', 3, 'PROVISIONING', 'PROVISIONING', 0),
     ('portfolio_account_type_enum', 4, 'SHARES', 'SHARES', 0),
-    ('processing_result_enum', 0, 'invalid', 'Invalid', 0),
-    ('processing_result_enum', 1, 'processed', 'Processed', 0),
-    ('processing_result_enum', 2, 'awaiting.approval', 'Awaiting Approval', 0),
-    ('processing_result_enum', 3, 'rejected', 'Rejected', 0),
+    ('status', 0, 'invalid', 'Invalid', 0),
+    ('status', 1, 'processed', 'Processed', 0),
+    ('status', 2, 'awaiting.approval', 'Awaiting Approval', 0),
+    ('status', 3, 'rejected', 'Rejected', 0),
     ('repayment_period_frequency_enum', 0, 'Days', 'Days', 0),
     ('repayment_period_frequency_enum', 1, 'Weeks', 'Weeks', 0),
     ('repayment_period_frequency_enum', 2, 'Months', 'Months', 0),

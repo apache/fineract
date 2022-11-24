@@ -55,7 +55,6 @@ import org.springframework.batch.core.configuration.JobLocator;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.NoSuchJobException;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
@@ -66,7 +65,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<Long>, InitializingBean {
+public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<Long> {
 
     private static final String JOB_EXECUTION_FAILED_MESSAGE = "Job execution failed for job with name: ";
 
@@ -80,12 +79,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
     private final CustomJobParameterRepository customJobParameterRepository;
     private final PlatformSecurityContext context;
 
-    private Gson gson;
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        this.gson = gsonFactory.createSimpleGson();
-    }
+    private final Gson gson = GoogleGsonSerializerHelper.createSimpleGson();
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)

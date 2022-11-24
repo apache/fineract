@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.delinquency.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import javax.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -30,13 +29,14 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleIns
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionToRepaymentScheduleMapping;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
 public class LoanDelinquencyDomainServiceImpl implements LoanDelinquencyDomainService {
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public CollectionData getOverdueCollectionData(final Loan loan) {
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
 

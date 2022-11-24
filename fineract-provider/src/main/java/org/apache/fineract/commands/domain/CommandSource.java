@@ -24,7 +24,6 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -91,8 +90,8 @@ public class CommandSource extends AbstractPersistableCustom {
     @JoinColumn(name = "checker_id", nullable = true)
     private AppUser checker;
 
-    @Column(name = "processing_result_enum", nullable = false)
-    private Integer processingResult;
+    @Column(name = "status", nullable = false)
+    private Integer status;
 
     @Column(name = "product_id")
     private Long productId;
@@ -118,10 +117,16 @@ public class CommandSource extends AbstractPersistableCustom {
     @Column(name = "subresource_external_id")
     private ExternalId subResourceExternalId;
 
+    @Column(name = "result")
+    private String result;
+
+    @Column(name = "result_status_code")
+    private Integer resultStatusCode;
+
     public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker,
-            String idempotencyKey) {
+            String idempotencyKey, Integer status) {
         return new CommandSource(wrapper.actionName(), wrapper.entityName(), wrapper.getHref(), command.entityId(), command.subentityId(),
-                command.json(), maker, idempotencyKey);
+                command.json(), maker, idempotencyKey, status);
     }
 
     protected CommandSource() {
@@ -129,7 +134,8 @@ public class CommandSource extends AbstractPersistableCustom {
     }
 
     private CommandSource(final String actionName, final String entityName, final String href, final Long resourceId,
-            final Long subResourceId, final String commandSerializedAsJson, final AppUser maker, final String idempotencyKey) {
+            final Long subResourceId, final String commandSerializedAsJson, final AppUser maker, final String idempotencyKey,
+            final Integer status) {
         this.actionName = actionName;
         this.entityName = entityName;
         this.resourceGetUrl = href;
@@ -138,7 +144,7 @@ public class CommandSource extends AbstractPersistableCustom {
         this.commandAsJson = commandSerializedAsJson;
         this.maker = maker;
         this.madeOnDate = DateUtils.getOffsetDateTimeOfTenant();
-        this.processingResult = CommandProcessingResultType.PROCESSED.getValue();
+        this.status = status;
         this.idempotencyKey = idempotencyKey;
     }
 
@@ -165,13 +171,13 @@ public class CommandSource extends AbstractPersistableCustom {
     public void markAsChecked(final AppUser checker) {
         this.checker = checker;
         this.checkedOnDate = DateUtils.getOffsetDateTimeOfTenant();
-        this.processingResult = CommandProcessingResultType.PROCESSED.getValue();
+        this.status = CommandProcessingResultType.PROCESSED.getValue();
     }
 
     public void markAsRejected(final AppUser checker) {
         this.checker = checker;
         this.checkedOnDate = DateUtils.getOffsetDateTimeOfTenant();
-        this.processingResult = CommandProcessingResultType.REJECTED.getValue();
+        this.status = CommandProcessingResultType.REJECTED.getValue();
     }
 
     public void updateResourceId(final Long resourceId) {
@@ -182,7 +188,11 @@ public class CommandSource extends AbstractPersistableCustom {
         this.subResourceId = subResourceId;
     }
 
-    public void updateJsonTo(final String json) {
+    public String getCommandJson() {
+        return this.commandAsJson;
+    }
+
+    public void setCommandJson(final String json) {
         this.commandAsJson = json;
     }
 
@@ -192,14 +202,6 @@ public class CommandSource extends AbstractPersistableCustom {
 
     public Long subResourceId() {
         return this.subResourceId;
-    }
-
-    public boolean hasJson() {
-        return StringUtils.isNotBlank(this.commandAsJson);
-    }
-
-    public String json() {
-        return this.commandAsJson;
     }
 
     public String getActionName() {
@@ -223,15 +225,11 @@ public class CommandSource extends AbstractPersistableCustom {
     }
 
     public void markAsAwaitingApproval() {
-        this.processingResult = CommandProcessingResultType.AWAITING_APPROVAL.getValue();
+        this.status = CommandProcessingResultType.AWAITING_APPROVAL.getValue();
     }
 
     public boolean isMarkedAsAwaitingApproval() {
-        if (this.processingResult.equals(CommandProcessingResultType.AWAITING_APPROVAL.getValue())) {
-            return true;
-        }
-
-        return false;
+        return this.status.equals(CommandProcessingResultType.AWAITING_APPROVAL.getValue());
     }
 
     public void updateForAudit(final CommandProcessingResult result) {
@@ -308,5 +306,29 @@ public class CommandSource extends AbstractPersistableCustom {
 
     public void setIdempotencyKey(String idempotencyKey) {
         this.idempotencyKey = idempotencyKey;
+    }
+
+    public String getResult() {
+        return result;
+    }
+
+    public void setResult(String result) {
+        this.result = result;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public Integer getResultStatusCode() {
+        return resultStatusCode;
+    }
+
+    public void setResultStatusCode(Integer resultStatusCode) {
+        this.resultStatusCode = resultStatusCode;
     }
 }
