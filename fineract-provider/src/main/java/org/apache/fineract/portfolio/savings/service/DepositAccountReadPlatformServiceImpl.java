@@ -314,13 +314,13 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
     public Collection<SavingsAccountTransactionData> retrieveAllTransactions(final DepositAccountType depositAccountType,
             final Long accountId, Integer offset, Integer limit) {
         if (offset == null) {
-            offset = 1;
+            offset = 0;
         }
         if (limit == null) {
             limit = 15;
         }
         final String sql = "select " + this.transactionsMapper.schema()
-                + " where sa.id = ? and sa.deposit_type_enum = ? AND transaction_type_enum not in (22,25)   order by tr.transaction_date DESC, tr.id DESC  LIMIT ? OFFSET ? ";
+                + " where sa.id = ? and sa.deposit_type_enum = ? AND tr.transaction_type_enum not in (22,25)   order by tr.transaction_date DESC, tr.id DESC  LIMIT ? OFFSET ? ";
 
         return this.jdbcTemplate.query(sql, this.transactionsMapper,
                 new Object[] { accountId, depositAccountType.getValue(), limit, offset }); // NOSONAR
@@ -1541,7 +1541,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
     public Collection<SavingsAccountTransactionData> retrieveAccrualTransactions(final Long savingsId,
             DepositAccountType depositAccountType, Integer offset, Integer limit) {
         if (offset == null) {
-            offset = 1;
+            offset = 0;
         }
         if (limit == null) {
             limit = 15;
