@@ -432,6 +432,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "fixed_principal_percentage_per_installment", scale = 2, precision = 5, nullable = true)
     private BigDecimal fixedPrincipalPercentagePerInstallment;
 
+    @Column(name = "last_closed_business_date")
+    private LocalDate lastClosedBusinessDate;
+
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
             final String transactionProcessingStrategyCode, final LoanProductRelatedDetail loanRepaymentScheduleDetail,
@@ -6920,4 +6923,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return ageOfOverdueDays;
     }
 
+    public LocalDate getLastClosedBusinessDate() {
+        return this.lastClosedBusinessDate;
+    }
+
+    public void setLastClosedBusinessDate(LocalDate lastClosedBusinessDate) {
+        this.lastClosedBusinessDate = lastClosedBusinessDate;
+    }
 }

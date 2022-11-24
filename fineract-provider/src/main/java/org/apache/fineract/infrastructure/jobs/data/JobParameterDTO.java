@@ -16,21 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.infrastructure.jobs.data;
 
-import org.apache.fineract.cob.COBBusinessStepService;
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.annotation.BeforeStep;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-public class LoanItemProcessor extends AbstractLoanItemProcessor {
+@Data
+@AllArgsConstructor
+@EqualsAndHashCode
+public class JobParameterDTO {
 
-    public LoanItemProcessor(COBBusinessStepService cobBusinessStepService) {
-        super(cobBusinessStepService);
-    }
-
-    @BeforeStep
-    public void beforeStep(StepExecution stepExecution) {
-        setExecutionContext(stepExecution.getExecutionContext());
-        setBusinessDate(stepExecution);
-    }
+    private String parameterName;
+    private String parameterValue;
 }

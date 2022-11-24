@@ -31,5 +31,6 @@ public class InlineCOBLoanItemProcessor extends AbstractLoanItemProcessor {
     @BeforeStep
     public void beforeStep(StepExecution stepExecution) {
         setExecutionContext(stepExecution.getJobExecution().getExecutionContext());
+        setBusinessDate(stepExecution);
     }
 }

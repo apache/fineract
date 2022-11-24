@@ -978,6 +978,7 @@ final class LoansApiResourceSwagger {
         public Boolean fraud;
         @Schema(example = "250.000000")
         public Double totalOverpaid;
+        public LocalDate lastClosedBusinessDate;
     }
 
     @Schema(description = "GetLoansResponse")

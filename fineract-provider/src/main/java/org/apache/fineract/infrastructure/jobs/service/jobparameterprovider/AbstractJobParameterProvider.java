@@ -16,21 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.infrastructure.jobs.service.jobparameterprovider;
 
-import org.apache.fineract.cob.COBBusinessStepService;
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.annotation.BeforeStep;
+public abstract class AbstractJobParameterProvider implements JobParameterProvider {
 
-public class LoanItemProcessor extends AbstractLoanItemProcessor {
-
-    public LoanItemProcessor(COBBusinessStepService cobBusinessStepService) {
-        super(cobBusinessStepService);
+    @Override
+    public boolean canProvideParametersForJob(String jobName) {
+        return jobName.equals(getJobName());
     }
 
-    @BeforeStep
-    public void beforeStep(StepExecution stepExecution) {
-        setExecutionContext(stepExecution.getExecutionContext());
-        setBusinessDate(stepExecution);
-    }
+    protected abstract String getJobName();
 }

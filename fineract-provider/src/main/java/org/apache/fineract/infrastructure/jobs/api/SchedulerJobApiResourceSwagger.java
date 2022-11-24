@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Date;
 import java.util.List;
 import org.apache.fineract.infrastructure.jobs.data.JobDetailHistoryData;
+import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
 
 /**
  * Created by sanyam on 12/8/17.
@@ -98,6 +99,18 @@ final class SchedulerJobApiResourceSwagger {
         @Schema(example = "8")
         public int totalFilteredRecords;
         public List<JobDetailHistoryDataSwagger> pageItems;
+
+    }
+
+    @Schema(description = "ExecuteJobRequest")
+    public static final class ExecuteJobRequest {
+
+        private ExecuteJobRequest() {
+
+        }
+
+        @Schema(example = "Update loan Summary")
+        public List<JobParameterDTO> jobParameters;
 
     }
 }

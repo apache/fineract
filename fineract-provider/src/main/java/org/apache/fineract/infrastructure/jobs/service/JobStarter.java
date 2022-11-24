@@ -18,14 +18,20 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
 import org.apache.fineract.infrastructure.jobs.domain.JobParameterRepository;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
+import org.apache.fineract.infrastructure.jobs.service.jobname.JobNameService;
+import org.apache.fineract.infrastructure.jobs.service.jobparameterprovider.JobParameterProvider;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
@@ -45,14 +51,19 @@ public class JobStarter {
     private final JobExplorer jobExplorer;
     private final JobLauncher jobLauncher;
     private final JobParameterRepository jobParameterRepository;
+    private final List<JobParameterProvider> jobParameterProviders;
+    private final JobNameService jobNameService;
 
-    public void run(Job job, ScheduledJobDetail scheduledJobDetail, FineractContext fineractContext)
-            throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException,
-            JobRestartException {
+    public void run(Job job, ScheduledJobDetail scheduledJobDetail, FineractContext fineractContext,
+            Set<JobParameterDTO> jobParameterDTOSet) throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException,
+            JobParametersInvalidException, JobRestartException {
         ThreadLocalContextUtil.init(fineractContext);
         Map<String, JobParameter> jobParameterMap = getJobParameter(scheduledJobDetail);
         JobParameters jobParameters = new JobParametersBuilder(jobExplorer).getNextJobParameters(job)
-                .addJobParameters(new JobParameters(jobParameterMap)).toJobParameters();
+                .addJobParameters(new JobParameters(jobParameterMap))
+                .addJobParameters(new JobParameters(provideCustomJobParameters(
+                        jobNameService.getJobByHumanReadableName(scheduledJobDetail.getJobName()).getEnumStyleName(), jobParameterDTOSet)))
+                .toJobParameters();
         jobLauncher.run(job, jobParameters);
     }
 
@@ -64,5 +75,11 @@ public class JobStarter {
             jobParameterMap.put(jobParameter.getParameterName(), new JobParameter(jobParameter.getParameterValue()));
         }
         return jobParameterMap;
+    }
+
+    private Map<String, JobParameter> provideCustomJobParameters(String jobName, Set<JobParameterDTO> jobParameterDTOSet) {
+        Optional<JobParameterProvider> jobParameterProvider = jobParameterProviders.stream()
+                .filter(provider -> provider.canProvideParametersForJob(jobName)).findFirst();
+        return jobParameterProvider.map(parameterProvider -> parameterProvider.provide(jobParameterDTOSet)).orElse(Collections.emptyMap());
     }
 }
