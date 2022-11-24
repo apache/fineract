@@ -26,7 +26,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.useradministration.domain.AppUser;
 
@@ -62,7 +64,7 @@ public class CommandSource extends AbstractPersistableCustom {
     private Long resourceId;
 
     @Column(name = "subresource_id")
-    private Long subresourceId;
+    private Long subResourceId;
 
     @Column(name = "command_as_json", length = 1000)
     private String commandAsJson;
@@ -110,6 +112,12 @@ public class CommandSource extends AbstractPersistableCustom {
     @Column(name = "idempotency_key", length = 50)
     private String idempotencyKey;
 
+    @Column(name = "resource_external_id")
+    private ExternalId resourceExternalId;
+
+    @Column(name = "subresource_external_id")
+    private ExternalId subResourceExternalId;
+
     public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker,
             String idempotencyKey) {
         return new CommandSource(wrapper.actionName(), wrapper.entityName(), wrapper.getHref(), command.entityId(), command.subentityId(),
@@ -121,12 +129,12 @@ public class CommandSource extends AbstractPersistableCustom {
     }
 
     private CommandSource(final String actionName, final String entityName, final String href, final Long resourceId,
-            final Long subresourceId, final String commandSerializedAsJson, final AppUser maker, final String idempotencyKey) {
+            final Long subResourceId, final String commandSerializedAsJson, final AppUser maker, final String idempotencyKey) {
         this.actionName = actionName;
         this.entityName = entityName;
         this.resourceGetUrl = href;
         this.resourceId = resourceId;
-        this.subresourceId = subresourceId;
+        this.subResourceId = subResourceId;
         this.commandAsJson = commandSerializedAsJson;
         this.maker = maker;
         this.madeOnDate = DateUtils.getOffsetDateTimeOfTenant();
@@ -170,8 +178,8 @@ public class CommandSource extends AbstractPersistableCustom {
         this.resourceId = resourceId;
     }
 
-    public void updateSubresourceId(final Long subresourceId) {
-        this.subresourceId = subresourceId;
+    public void updateSubResourceId(final Long subResourceId) {
+        this.subResourceId = subResourceId;
     }
 
     public void updateJsonTo(final String json) {
@@ -182,8 +190,8 @@ public class CommandSource extends AbstractPersistableCustom {
         return this.resourceId;
     }
 
-    public Long subresourceId() {
-        return this.subresourceId;
+    public Long subResourceId() {
+        return this.subResourceId;
     }
 
     public boolean hasJson() {
@@ -210,8 +218,8 @@ public class CommandSource extends AbstractPersistableCustom {
         return this.resourceId;
     }
 
-    public Long getSubresourceId() {
-        return this.subresourceId;
+    public Long getSubResourceId() {
+        return this.subResourceId;
     }
 
     public void markAsAwaitingApproval() {
@@ -226,15 +234,18 @@ public class CommandSource extends AbstractPersistableCustom {
         return false;
     }
 
-    public void updateForAudit(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final Long savingsId,
-            final Long productId, final String transactionId) {
-        this.officeId = officeId;
-        this.groupId = groupId;
-        this.clientId = clientId;
-        this.loanId = loanId;
-        this.savingsId = savingsId;
-        this.productId = productId;
-        this.transactionId = transactionId;
+    public void updateForAudit(final CommandProcessingResult result) {
+        this.officeId = result.getOfficeId();
+        this.groupId = result.getGroupId();
+        this.clientId = result.getClientId();
+        this.loanId = result.getLoanId();
+        this.savingsId = result.getSavingsId();
+        this.productId = result.getProductId();
+        this.transactionId = result.getTransactionId();
+        this.resourceId = result.getResourceId();
+        this.resourceExternalId = result.getResourceExternalId();
+        this.subResourceId = result.getSubResourceId();
+        this.subResourceExternalId = result.getSubResourceExternalId();
     }
 
     public String getResourceGetUrl() {

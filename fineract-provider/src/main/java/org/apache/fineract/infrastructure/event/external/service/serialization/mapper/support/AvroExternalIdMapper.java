@@ -16,25 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.collectionsheet.command;
+package org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
-import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
+import org.springframework.stereotype.Component;
 
-/**
- * Immutable command for Single loan repayment.
- */
-@Getter
-@AllArgsConstructor
-public class SingleRepaymentCommand {
+@Component
+public class AvroExternalIdMapper {
 
-    private final Long loanId;
-    private final ExternalId externalId;
-    private final BigDecimal transactionAmount;
-    private final LocalDate transactionDate;
-    private final PaymentDetail paymentDetail;
+    public String mapExternalId(ExternalId source) {
+        if (source == null) {
+            return null;
+        }
+        return source.getValue();
+    }
 }

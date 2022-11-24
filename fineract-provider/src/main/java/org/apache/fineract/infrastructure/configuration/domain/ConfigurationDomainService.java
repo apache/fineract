@@ -124,4 +124,6 @@ public interface ConfigurationDomainService {
     Long retrieveRepaymentDueDays();
 
     Long retrieveRepaymentOverdueDays();
+
+    boolean isExternalIdAutoGenerationEnabled();
 }

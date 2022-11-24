@@ -41,6 +41,7 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -1372,7 +1373,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final BigDecimal overPaymentPortion = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "overpayment");
             final BigDecimal unrecognizedIncomePortion = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "unrecognizedIncome");
             final BigDecimal outstandingLoanBalance = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "outstandingLoanBalance");
-            final String externalId = rs.getString("externalId");
+            final String externalIdStr = rs.getString("externalId");
+            final ExternalId externalId = StringUtils.isBlank(externalIdStr) ? ExternalId.empty() : new ExternalId(externalIdStr);
             final String reversalExternalId = rs.getString("reversalExternalId");
             final LocalDate reversedOnDate = JdbcSupport.getLocalDate(rs, "reversedOnDate");
 
@@ -2186,7 +2188,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(loanTransactionType);
         return new LoanTransactionData(null, null, null, transactionType, null, currencyData, currentDate, transactionAmount, null,
-                netDisbursal, null, null, null, null, null, paymentOptions, null, null, null, null, false, loanId, externalLoanId);
+                netDisbursal, null, null, null, null, null, paymentOptions, ExternalId.empty(), null, null, null, false, loanId,
+                externalLoanId);
     }
 
     @Override
@@ -2308,6 +2311,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         }
 
         public String schema() {
+            // TODO: investigate whether it can be refactored to be more efficient
             StringBuilder sqlBuilder = new StringBuilder();
             sqlBuilder.append("(CASE ");
             sqlBuilder.append(
@@ -2358,11 +2362,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String officeName = null;
             boolean manuallyReversed = false;
             final PaymentDetailData paymentDetailData = null;
-            final String externalId = null;
             final AccountTransferData transfer = null;
             final BigDecimal fixedEmiAmount = null;
             return new LoanTransactionData(id, officeId, officeName, transactionType, paymentDetailData, currencyData, date, totalDue,
-                    netDisbursalAmount, principalPortion, interestDue, feeDue, penaltyDue, overPaymentPortion, externalId, transfer,
+                    netDisbursalAmount, principalPortion, interestDue, feeDue, penaltyDue, overPaymentPortion, ExternalId.empty(), transfer,
                     fixedEmiAmount, outstandingLoanBalance, unrecognizedIncomePortion, manuallyReversed, loanId, externalLoanId);
         }
 
@@ -2400,6 +2403,16 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         List<LoanTransactionRelation> loanTransactionRelations = this.loanTransactionRelationRepository
                 .findByFromTransaction(loanTransaction);
         return loanTransactionRelationMapper.map(loanTransactionRelations);
+    }
+
+    @Override
+    public Long retrieveLoanTransactionIdByExternalId(ExternalId externalId) {
+        return loanTransactionRepository.findIdByExternalId(externalId);
+    }
+
+    @Override
+    public Long retrieveLoanIdByExternalId(String externalId) {
+        return loanRepositoryWrapper.findIdByExternalId(externalId);
     }
 
 }

@@ -58,7 +58,6 @@ import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
-import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
@@ -116,8 +115,17 @@ public class LoanTransactionHelper extends IntegrationTest {
         return this.getLoanId(loanApplicationJSON, this.requestSpec, this.responseSpec);
     }
 
+    public HashMap getLoanId(final String loanApplicationJSON, final String responseAttribute) {
+        return (HashMap) this.getLoanId(loanApplicationJSON, responseAttribute, this.requestSpec, this.responseSpec);
+    }
+
+    public Object getLoanId(final String loanApplicationJSON, final String responseAttribute, RequestSpecification requestSpec,
+            ResponseSpecification responseSpec) {
+        return Utils.performServerPost(requestSpec, responseSpec, APPLY_LOAN_URL, loanApplicationJSON, responseAttribute);
+    }
+
     public Integer getLoanId(final String loanApplicationJSON, RequestSpecification requestSpec, ResponseSpecification responseSpec) {
-        return Utils.performServerPost(requestSpec, responseSpec, APPLY_LOAN_URL, loanApplicationJSON, "loanId");
+        return (Integer) getLoanId(loanApplicationJSON, "loanId", requestSpec, responseSpec);
     }
 
     public HashMap<String, Integer> getGlimId(final String loanApplicationJSON) {
@@ -258,12 +266,12 @@ public class LoanTransactionHelper extends IntegrationTest {
         return Utils.performServerGet(requestSpec, responseSpec, GET_REPAYMENTS_URL, "loanRepaymentScheduleInstallments");
     }
 
-    public PostLoansLoanIdTransactionsTransactionIdResponse applyLoanTransactionCommand(final Integer loanId, final Integer transactionId,
+    public PostLoansLoanIdTransactionsResponse applyLoanTransactionCommand(final Integer loanId, final Integer transactionId,
             final String command, final String payload, final ResponseSpecification responseSpec) {
         final String LOAN_TRANSACTION_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/" + transactionId + "?command="
                 + command + "&" + Utils.TENANT_IDENTIFIER;
         final String response = Utils.performServerPost(requestSpec, responseSpec, LOAN_TRANSACTION_URL, payload, null);
-        return GSON.fromJson(response, PostLoansLoanIdTransactionsTransactionIdResponse.class);
+        return GSON.fromJson(response, PostLoansLoanIdTransactionsResponse.class);
     }
 
     public HashMap approveLoan(final String approvalDate, final Integer loanID) {
@@ -303,6 +311,11 @@ public class LoanTransactionHelper extends IntegrationTest {
     public HashMap disburseLoanWithNetDisbursalAmount(final String date, final Integer loanID, final String netDisbursalAmount) {
         return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID),
                 getDisburseLoanAsJSON(date, null, netDisbursalAmount));
+    }
+
+    public HashMap disburseLoan(final String date, final Integer loanID, final String netDisbursalAmount, final String externalId) {
+        return (HashMap) performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID),
+                getDisburseLoanAsJSON(date, null, netDisbursalAmount, externalId), "");
     }
 
     public HashMap disburseLoanWithTransactionAmount(final String date, final Integer loanID, final String transactionAmount) {
@@ -469,12 +482,179 @@ public class LoanTransactionHelper extends IntegrationTest {
         return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "repayment"));
     }
 
+    public HashMap undoWaiveLoanCharge(final Long loanId, final String transactionExternalId) {
+        log.info("--------------------------------- UNDO WAIVE CHARGES FOR LOAN --------------------------------");
+        final String TRANSAC_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/external-id/" + transactionExternalId + "?"
+                + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerPut(requestSpec, responseSpec, TRANSAC_URL, "", "");
+    }
+
+    public HashMap undoWaiveLoanCharge(final String loanExternalId, final Long transactionId) {
+        log.info("--------------------------------- UNDO WAIVE CHARGES FOR LOAN --------------------------------");
+        final String TRANSAC_URL = "/fineract-provider/api/v1/loans/external-id/" + loanExternalId + "/transactions/" + transactionId + "?"
+                + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerPut(requestSpec, responseSpec, TRANSAC_URL, "", "");
+    }
+
+    public HashMap undoWaiveLoanCharge(final String loanExternalId, final String transactionExternalId) {
+        log.info("--------------------------------- UNDO WAIVE CHARGES FOR LOAN --------------------------------");
+        final String TRANSAC_URL = "/fineract-provider/api/v1/loans/external-id/" + loanExternalId + "/transactions/external-id/"
+                + transactionExternalId + "?" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerPut(requestSpec, responseSpec, TRANSAC_URL, "", "");
+    }
+
+    public PostLoansLoanIdChargesChargeIdResponse waiveLoanCharge(final Long loanId, final Long chargeId,
+            final PostLoansLoanIdChargesChargeIdRequest request) {
+        return ok(fineract().loanCharges.executeLoanCharge1(loanId, chargeId, request, "waive"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeLoanRepayment(final String loanExternalId,
+            final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction1(loanExternalId, request, "repayment"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeMerchantIssuedRefund(final Long loanId,
+            final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "merchantIssuedRefund"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeMerchantIssuedRefund(final String loanExternalId,
+            final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction1(loanExternalId, request, "merchantIssuedRefund"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makePayoutRefund(final Long loanId, final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "payoutRefund"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makePayoutRefund(final String loanExternalId,
+            final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction1(loanExternalId, request, "payoutRefund"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeChargeRefund(final Long loanId, final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "chargeRefund"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeChargeRefund(final String loanExternalId,
+            final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction1(loanExternalId, request, "chargeRefund"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeGoodwillCredit(final Long loanId, final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "goodwillCredit"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeGoodwillCredit(final String loanExternalId,
+            final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction1(loanExternalId, request, "goodwillCredit"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeWaiveInterest(final Long loanId, final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "waiveinterest"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeWaiveInterest(final String loanExternalId,
+            final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction1(loanExternalId, request, "waiveinterest"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeWriteoff(final Long loanId, final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "writeoff"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeWriteoff(final String loanExternalId, final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction1(loanExternalId, request, "writeoff"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeUndoWriteoff(final Long loanId, final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "undowriteoff"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeUndoWriteoff(final String loanExternalId,
+            final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction1(loanExternalId, request, "undowriteoff"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeRecoveryPayment(final Long loanId, final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "recoverypayment"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeRecoveryPayment(final String loanExternalId,
+            final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction1(loanExternalId, request, "recoverypayment"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeRefundByCash(final Long loanId, final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "refundByCash"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeRefundByCash(final String loanExternalId,
+            final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction1(loanExternalId, request, "refundByCash"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeCreditBalanceRefund(final Long loanId,
+            final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "creditBalanceRefund"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeCreditBalanceRefund(final String loanExternalId,
+            final PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction1(loanExternalId, request, "creditBalanceRefund"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse reverseLoanTransaction(final String loanExternalId, final Long transactionId,
+            final PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return ok(fineract().loanTransactions.adjustLoanTransaction2(loanExternalId, transactionId, request, "undo"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse reverseLoanTransaction(final String loanExternalId, final String transactionExternalId,
+            final PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return ok(fineract().loanTransactions.adjustLoanTransaction3(loanExternalId, transactionExternalId, request, "undo"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse reverseLoanTransaction(final Long loanId, final String transactionExternalId,
+            final PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return ok(fineract().loanTransactions.adjustLoanTransaction1(loanId, transactionExternalId, request, "undo"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse chargebackLoanTransaction(final String loanExternalId, final Long transactionId,
+            final PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return ok(fineract().loanTransactions.adjustLoanTransaction2(loanExternalId, transactionId, request, "chargeback"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse chargebackLoanTransaction(final String loanExternalId, final String transactionExternalId,
+            final PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return ok(fineract().loanTransactions.adjustLoanTransaction3(loanExternalId, transactionExternalId, request, "chargeback"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse chargebackLoanTransaction(final Long loanId, final String transactionExternalId,
+            final PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return ok(fineract().loanTransactions.adjustLoanTransaction1(loanId, transactionExternalId, request, "chargeback"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse adjustLoanTransaction(final String loanExternalId, final Long transactionId,
+            final PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return ok(fineract().loanTransactions.adjustLoanTransaction2(loanExternalId, transactionId, request, "adjust"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse adjustLoanTransaction(final String loanExternalId, final String transactionExternalId,
+            final PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return ok(fineract().loanTransactions.adjustLoanTransaction3(loanExternalId, transactionExternalId, request, "adjust"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse adjustLoanTransaction(final Long loanId, final String transactionExternalId,
+            final PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return ok(fineract().loanTransactions.adjustLoanTransaction1(loanId, transactionExternalId, request, "adjust"));
+    }
+
     public PostLoansLoanIdTransactionsResponse reverseLoanTransaction(final Integer loanId, final Long transactionId, String date,
             ResponseSpecification responseSpec) {
         return postLoanTransaction(createLoanTransactionURL(UNDO, loanId, transactionId.intValue()), getUndoJsonBody(date), responseSpec);
     }
 
-    public PostLoansLoanIdTransactionsTransactionIdResponse reverseLoanTransaction(final Long loanId, final Long transactionId,
+    public PostLoansLoanIdTransactionsResponse reverseLoanTransaction(final Long loanId, final Long transactionId,
             final PostLoansLoanIdTransactionsTransactionIdRequest request) {
         return ok(fineract().loanTransactions.adjustLoanTransaction(loanId, transactionId, request, "undo"));
     }
@@ -574,6 +754,13 @@ public class LoanTransactionHelper extends IntegrationTest {
         return (Integer) response.get("resourceId");
     }
 
+    public HashMap payChargesForLoan(final Integer loanId, final Integer loanchargeId, final String json, final String responseAttribute) {
+        log.info("--------------------------------- WAIVE CHARGES FOR LOAN --------------------------------");
+        final String CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/charges/" + loanchargeId + "?command=pay&"
+                + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerPost(requestSpec, responseSpec, CHARGES_URL, json, responseAttribute);
+    }
+
     public ArrayList<HashMap> getLoanTransactionDetails(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer loanID) {
         final String URL = "/fineract-provider/api/v1/loans/" + loanID + "?associations=all&exclude=guarantors,futureSchedule&"
@@ -616,6 +803,11 @@ public class LoanTransactionHelper extends IntegrationTest {
 
     private String getDisburseLoanAsJSON(final String actualDisbursementDate, final String transactionAmount,
             final String netDisbursalAmount) {
+        return getDisburseLoanAsJSON(actualDisbursementDate, transactionAmount, netDisbursalAmount, null);
+    }
+
+    private String getDisburseLoanAsJSON(final String actualDisbursementDate, final String transactionAmount,
+            final String netDisbursalAmount, final String externalId) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");
@@ -626,6 +818,9 @@ public class LoanTransactionHelper extends IntegrationTest {
         map.put("note", "DISBURSE NOTE");
         if (transactionAmount != null) {
             map.put("transactionAmount", transactionAmount);
+        }
+        if (externalId != null) {
+            map.put("externalId", externalId);
         }
         log.info("Loan Application disburse request : {} ", map);
         return new Gson().toJson(map);
@@ -842,12 +1037,19 @@ public class LoanTransactionHelper extends IntegrationTest {
     }
 
     public static String getPayChargeJSON(final String date, final String installmentNumber) {
+        return getPayChargeJSON(date, installmentNumber, null);
+    }
+
+    public static String getPayChargeJSON(final String date, final String installmentNumber, final String externalId) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en_GB");
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("transactionDate", date);
         if (installmentNumber != null) {
             map.put("installmentNumber", installmentNumber);
+        }
+        if (externalId != null) {
+            map.put("externalId", externalId);
         }
         String json = new Gson().toJson(map);
         log.info("{}", json);
@@ -1236,7 +1438,7 @@ public class LoanTransactionHelper extends IntegrationTest {
 
         final String payload = createChargebackPayload(amount, paymentTypeList.get(paymentTypeIdx).getId());
         log.info("Loan Chargeback: {}", payload);
-        PostLoansLoanIdTransactionsTransactionIdResponse postLoansTransactionCommandResponse = applyLoanTransactionCommand(loanId,
+        PostLoansLoanIdTransactionsResponse postLoansTransactionCommandResponse = applyLoanTransactionCommand(loanId,
                 transactionId.intValue(), "chargeback", payload, responseSpec);
         assertNotNull(postLoansTransactionCommandResponse);
 

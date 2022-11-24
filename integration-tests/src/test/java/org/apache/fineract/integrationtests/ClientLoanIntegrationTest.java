@@ -5913,6 +5913,7 @@ public class ClientLoanIntegrationTest {
         this.loanTransactionHelper.makeRepayment(loanPrepaymentDate, Float.parseFloat(prepayAmount), loanID);
         loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
+        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "42", false);
     }
 
     @Test
@@ -5984,6 +5985,7 @@ public class ClientLoanIntegrationTest {
         HashMap savingsAccountErrorData = validationErrorHelper.makeRepayment(retrieveDueDate, amount, loanID);
         ArrayList<HashMap> error = (ArrayList<HashMap>) savingsAccountErrorData.get("errors");
         assertEquals("error.msg.loan.transaction.cannot.be.a.future.date", error.get(0).get("userMessageGlobalisationCode"));
+        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "42", false);
     }
 
     @Test
@@ -6016,7 +6018,8 @@ public class ClientLoanIntegrationTest {
         ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(404).build();
         LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, responseSpec);
         HashMap response = loanTransactionHelper.undoWaiveChargesForLoan(-1, -2, "");
-        assertEquals("error.msg.loan.id.invalid", ((Map) ((List) response.get("errors")).get(0)).get("userMessageGlobalisationCode"));
+        assertEquals("error.msg.loan.transaction.id.invalid",
+                ((Map) ((List) response.get("errors")).get(0)).get("userMessageGlobalisationCode"));
         assertEquals("Transaction with identifier -2 does not exist for loan with identifier -1.",
                 ((Map) ((List) response.get("errors")).get(0)).get("defaultUserMessage"));
     }
@@ -6176,13 +6179,13 @@ public class ClientLoanIntegrationTest {
         assertEquals(1000.0f, loanSummary.get("totalOutstanding"));
 
         GetLoansLoanIdTransactionsTransactionIdResponse chargeAdjustmentTransaction = this.loanTransactionHelper
-                .getLoanTransactionDetails((long) loanID, chargeAdjustmentResponse.getResourceId());
+                .getLoanTransactionDetails((long) loanID, chargeAdjustmentResponse.getSubResourceId());
         assertEquals(10.0, chargeAdjustmentTransaction.getAmount());
         assertEquals(10.0, chargeAdjustmentTransaction.getPenaltyChargesPortion());
         assertEquals("loanTransactionType.chargeAdjustment", chargeAdjustmentTransaction.getType().getCode());
         assertEquals(externalId, chargeAdjustmentTransaction.getExternalId());
         GetLoanTransactionRelation transactionRelation = chargeAdjustmentTransaction.getTransactionRelations().iterator().next();
-        assertEquals(chargeAdjustmentResponse.getResourceId(), transactionRelation.getFromLoanTransaction());
+        assertEquals(chargeAdjustmentResponse.getSubResourceId(), transactionRelation.getFromLoanTransaction());
         assertEquals((long) penalty1LoanChargeId, transactionRelation.getToLoanCharge());
         assertEquals("CHARGE_ADJUSTMENT", transactionRelation.getRelationType());
 
