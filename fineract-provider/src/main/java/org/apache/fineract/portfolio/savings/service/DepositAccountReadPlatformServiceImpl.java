@@ -314,13 +314,13 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
     public Collection<SavingsAccountTransactionData> retrieveAllTransactions(final DepositAccountType depositAccountType,
             final Long accountId, Integer offset, Integer limit) {
         if (offset == null) {
-            offset = 1;
+            offset = 0;
         }
         if (limit == null) {
             limit = 15;
         }
         final String sql = "select " + this.transactionsMapper.schema()
-                + " where sa.id = ? and sa.deposit_type_enum = ? AND transaction_type_enum not in (22,25)   order by tr.transaction_date DESC, tr.id DESC  LIMIT ? OFFSET ? ";
+                + " where sa.id = ? and sa.deposit_type_enum = ? AND tr.transaction_type_enum not in (22,25)   order by tr.transaction_date DESC, tr.id DESC  LIMIT ? OFFSET ? ";
 
         return this.jdbcTemplate.query(sql, this.transactionsMapper,
                 new Object[] { accountId, depositAccountType.getValue(), limit, offset }); // NOSONAR
@@ -1522,9 +1522,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                 " SELECT COUNT(tr.id) FROM m_savings_account sa  JOIN m_savings_account_transaction tr ON tr.savings_account_id = sa.id ")
                 .append(" where sa.id = ? and sa.deposit_type_enum = ? ");
         if (hideAccrualTransactions) {
-            sqlBuilder.append(" AND transaction_type_enum not in (?,?) ");
+            sqlBuilder.append(" AND tr.transaction_type_enum not in (?,?) ");
         } else {
-            sqlBuilder.append(" AND transaction_type_enum in (?,?) ");
+            sqlBuilder.append(" AND tr.transaction_type_enum in (?,?) ");
         }
         sqlBuilder.append(" order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC ");
         try {
@@ -1535,5 +1535,22 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         } catch (EmptyResultDataAccessException e) {
             return 0L;
         }
+    }
+
+    @Override
+    public Collection<SavingsAccountTransactionData> retrieveAccrualTransactions(final Long savingsId,
+            DepositAccountType depositAccountType, Integer offset, Integer limit) {
+        if (offset == null) {
+            offset = 0;
+        }
+        if (limit == null) {
+            limit = 15;
+        }
+
+        final String sql = "select " + this.transactionsMapper.schema()
+                + " where sa.id = ? and sa.deposit_type_enum = ? AND tr.transaction_type_enum in (22,25)  order by tr.transaction_date DESC, tr.created_date DESC, tr.id DESC LIMIT ? OFFSET ?   ";
+
+        return this.jdbcTemplate.query(sql, this.transactionsMapper,
+                new Object[] { savingsId, depositAccountType.getValue(), limit, offset });
     }
 }

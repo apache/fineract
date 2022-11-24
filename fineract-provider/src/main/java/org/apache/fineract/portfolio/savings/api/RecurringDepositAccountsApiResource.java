@@ -255,6 +255,16 @@ public class RecurringDepositAccountsApiResource {
                     transactions = currentTransactions;
                 }
             }
+            if (associationParameters.contains(SavingsApiConstants.accrualTransactions)) {
+                mandatoryResponseParameters.add(SavingsApiConstants.accrualTransactions);
+                final Collection<SavingsAccountTransactionData> currentTransactions = this.depositAccountReadPlatformService
+                        .retrieveAccrualTransactions(accountId, DepositAccountType.RECURRING_DEPOSIT, offset, limit);
+                transactionSize = this.depositAccountReadPlatformService.getSavingsAccountTransactionTotalFiltered(accountId,
+                        DepositAccountType.RECURRING_DEPOSIT, false);
+                if (!CollectionUtils.isEmpty(currentTransactions)) {
+                    transactions = currentTransactions;
+                }
+            }
 
             if (associationParameters.contains(SavingsApiConstants.charges)) {
                 mandatoryResponseParameters.add(SavingsApiConstants.charges);
