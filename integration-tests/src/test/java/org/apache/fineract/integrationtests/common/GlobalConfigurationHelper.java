@@ -98,9 +98,9 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> expectedGlobalConfigurations = getAllDefaultGlobalConfigurations();
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
-        // There are currently 37 global configurations.
-        Assertions.assertEquals(44, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(44, actualGlobalConfigurations.size());
+        // There are currently 45 global configurations.
+        Assertions.assertEquals(45, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(45, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -487,6 +487,14 @@ public class GlobalConfigurationHelper {
         loanRepaymentOverdueDaysDefault.put("enabled", false);
         loanRepaymentOverdueDaysDefault.put("trapDoor", false);
         defaults.add(loanRepaymentOverdueDaysDefault);
+
+        HashMap<String, Object> isAutomaticExternalIdGenerationEnabled = new HashMap<>();
+        isAutomaticExternalIdGenerationEnabled.put("id", 50);
+        isAutomaticExternalIdGenerationEnabled.put("name", "enable-auto-generated-external-id");
+        isAutomaticExternalIdGenerationEnabled.put("value", 0);
+        isAutomaticExternalIdGenerationEnabled.put("enabled", false);
+        isAutomaticExternalIdGenerationEnabled.put("trapDoor", false);
+        defaults.add(isAutomaticExternalIdGenerationEnabled);
 
         return defaults;
     }

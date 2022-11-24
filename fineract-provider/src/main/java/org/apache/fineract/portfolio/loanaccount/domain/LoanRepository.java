@@ -75,6 +75,8 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
 
     String FIND_BY_ACCOUNT_NUMBER = "select loan from Loan loan where loan.accountNumber = :accountNumber";
 
+    String FIND_ID_BY_EXTERNAL_ID = "SELECT loan.id FROM Loan loan WHERE loan.externalId = :externalId";
+
     @Query(FIND_GROUP_LOANS_DISBURSED_AFTER)
     List<Loan> getGroupLoansDisbursedAfter(@Param("disbursementDate") LocalDate disbursementDate, @Param("groupId") Long groupId,
             @Param("loanType") Integer loanType);
@@ -168,4 +170,6 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     @Query(FIND_ALL_NON_CLOSED)
     List<Long> findAllNonClosedLoanIds();
 
+    @Query(FIND_ID_BY_EXTERNAL_ID)
+    Long findIdByExternalId(@Param("externalId") String externalId);
 }

@@ -89,6 +89,12 @@ final class LoanTransactionsApiResourceSwagger {
 
             @Schema(example = "2")
             public Long id;
+            @Schema(example = "3e7791ce-aa10-11ec-b909-0242ac120002")
+            public String externalId;
+            @Schema(example = "2")
+            public Long loanId;
+            @Schema(example = "3e7791ce-aa10-11ec-b909-0242ac120002")
+            public String externalLoanId;
             @Schema(example = "loanTransactionType.repayment")
             public String code;
             @Schema(example = "Repayment")
@@ -250,6 +256,8 @@ final class LoanTransactionsApiResourceSwagger {
         public String bankNumber;
         @Schema(example = "3")
         public Integer loanChargeId;
+        @Schema(example = "28 June 2022")
+        public String dueDate;
 
     }
 
@@ -262,8 +270,37 @@ final class LoanTransactionsApiResourceSwagger {
         public Long officeId;
         @Schema(example = "1")
         public Long clientId;
+        @Schema(example = "1")
+        public Long loanId;
         @Schema(example = "22")
         public Long resourceId;
+        @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+        public String resourceExternalId;
+        @Schema(example = "22")
+        public Long subResourceId;
+        @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+        public String subResourceExternalId;
+        public PostLoansLoanIdTransactionsResponse.Changes changes;
+
+        static final class Changes {
+
+            @Schema(example = "en_GB")
+            public String locale;
+            @Schema(example = "dd MMMM yyyy")
+            public String dateFormat;
+            @Schema(example = "28 June 2022")
+            public String transactionDate;
+            @Schema(example = "50,000.00")
+            public Double transactionAmount;
+            @Schema(example = "An optional note about why your adjusting or changing the transaction.")
+            public String note;
+            @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+            public String reversalExternalId;
+            @Schema(example = "1")
+            public Long paymentTypeId;
+            @Schema(example = "4ff9b1cb988b7")
+            public String externalId;
+        }
     }
 
     @Schema(description = "PostLoansLoanIdTransactionsTransactionIdRequest")
@@ -289,15 +326,6 @@ final class LoanTransactionsApiResourceSwagger {
         public String externalId;
     }
 
-    @Schema(description = "PostLoansLoanIdTransactionsTransactionIdResponse")
-    public static final class PostLoansLoanIdTransactionsTransactionIdResponse {
-
-        private PostLoansLoanIdTransactionsTransactionIdResponse() {}
-
-        @Schema(example = "16")
-        public Long resourceId;
-    }
-
     @Schema(description = "PutChargeTransactionChangesResponse")
     public static final class PutChargeTransactionChangesResponse {
 
@@ -305,16 +333,41 @@ final class LoanTransactionsApiResourceSwagger {
 
         static final class Changes {
 
-            private Changes() {}
+            @Schema(example = "10.0")
+            public Double amount;
+            @Schema(example = "10.0")
+            public Double principalPortion;
+            @Schema(example = "10.0")
+            public Double interestPortion;
+            @Schema(example = "10.0")
+            public Double feeChargesPortion;
+            @Schema(example = "10.0")
+            public Double penaltyChargesPortion;
+            @Schema(example = "10.0")
+            public Double outstandingLoanBalance;
+            @Schema(example = "1")
+            public Long id;
+            @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+            public String externalId;
+            @Schema(example = "28 June 2022")
+            public String date;
 
-            @Schema(example = "amount")
-            public String amount;
         }
 
         @Schema(example = "1")
-        public Long resourceId;
-        @Schema(example = "48")
+        public Long officeId;
+        @Schema(example = "1")
+        public Long clientId;
+        @Schema(example = "1")
         public Long loanId;
+        @Schema(example = "22")
+        public Long resourceId;
+        @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+        public String resourceExternalId;
+        @Schema(example = "22")
+        public Long subResourceId;
+        @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+        public String subResourceExternalId;
         public PutChargeTransactionChangesResponse.Changes changes;
 
     }

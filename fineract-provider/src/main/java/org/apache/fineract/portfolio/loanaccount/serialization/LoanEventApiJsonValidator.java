@@ -320,7 +320,7 @@ public final class LoanEventApiJsonValidator {
         }
 
         final Set<String> disbursementParameters = new HashSet<>(
-                Arrays.asList("transactionDate", "note", "locale", "dateFormat", "writeoffReasonId"));
+                Arrays.asList("transactionDate", "note", "locale", "dateFormat", "writeoffReasonId", "externalId"));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
@@ -334,6 +334,9 @@ public final class LoanEventApiJsonValidator {
 
         final String note = this.fromApiJsonHelper.extractStringNamed("note", element);
         baseDataValidator.reset().parameter("note").value(note).notExceedingLengthOf(1000);
+
+        final String externalId = this.fromApiJsonHelper.extractStringNamed("externalId", element);
+        baseDataValidator.reset().parameter("externalId").value(externalId).ignoreIfNull().notExceedingLengthOf(100);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -482,7 +485,7 @@ public final class LoanEventApiJsonValidator {
         baseDataValidator.reset().parameter("note").value(note).notExceedingLengthOf(1000);
 
         final String externalId = this.fromApiJsonHelper.extractStringNamed("externalId", element);
-        baseDataValidator.reset().parameter("externalId").value(externalId).notExceedingLengthOf(100);
+        baseDataValidator.reset().parameter("externalId").value(externalId).ignoreIfNull().notExceedingLengthOf(100);
 
         validatePaymentDetails(baseDataValidator, element);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -494,7 +497,8 @@ public final class LoanEventApiJsonValidator {
             throw new InvalidJsonException();
         }
 
-        final Set<String> foreclosureParameters = new HashSet<>(Arrays.asList("transactionDate", "note", "locale", "dateFormat"));
+        final Set<String> foreclosureParameters = new HashSet<>(
+                Arrays.asList("transactionDate", "note", "locale", "dateFormat", "externalId"));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, foreclosureParameters);
@@ -508,6 +512,9 @@ public final class LoanEventApiJsonValidator {
 
         final String note = this.fromApiJsonHelper.extractStringNamed("note", element);
         baseDataValidator.reset().parameter("note").value(note).notExceedingLengthOf(1000);
+
+        final String externalId = this.fromApiJsonHelper.extractStringNamed("externalId", element);
+        baseDataValidator.reset().parameter("externalId").value(externalId).ignoreIfNull().notExceedingLengthOf(100);
 
         validatePaymentDetails(baseDataValidator, element);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

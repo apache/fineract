@@ -49,11 +49,13 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
@@ -244,6 +246,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanLifecycleStateMachine defaultLoanLifecycleStateMachine;
     private final LoanAccountLockService loanAccountLockService;
 
+    private final ExternalIdFactory externalIdFactory;
+
     @Transactional
     @Override
     public CommandProcessingResult disburseGLIMLoan(final Long loanId, final JsonCommand command) {
@@ -382,7 +386,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             Money disburseAmount = loan.adjustDisburseAmount(command, actualDisbursementDate);
             Money amountToDisburse = disburseAmount.copy();
             boolean recalculateSchedule = amountBeforeAdjust.isNotEqualTo(loan.getPrincipal());
-            final String txnExternalId = command.stringValueOfParameterNamedAllowingNull("externalId");
+            final ExternalId txnExternalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
 
             if (loan.isTopup() && loan.getClientId() != null) {
                 final Long loanIdToClose = loan.getTopupLoanDetails().getLoanIdToClose();
@@ -486,8 +490,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(actualDisbursementDate, entrySet.getValue(),
                     PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN, savingAccountData.getId(), loanId, "Loan Charge Payment",
                     locale, fmt, null, null, LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.getValue(), entrySet.getKey(), null,
-                    AccountTransferType.CHARGE_PAYMENT.getValue(), null, null, null, null, null, fromSavingsAccount, isRegularTransaction,
-                    isExceptionForBalanceCheck);
+                    AccountTransferType.CHARGE_PAYMENT.getValue(), null, null, ExternalId.empty(), null, null, fromSavingsAccount,
+                    isRegularTransaction, isExceptionForBalanceCheck);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
         }
 
@@ -505,17 +509,20 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         businessEventNotifierService.notifyPostBusinessEvent(new LoanDisbursalBusinessEvent(loan));
 
         Long entityId = loan.getId();
+        ExternalId externalId = ExternalId.empty();
 
         // During a disbursement, the entityId should be the disbursement transaction id
         if (!isAccountTransfer) {
             LoanTransaction disbursalTransaction = loan.getLoanTransactions().get(loan.getLoanTransactions().size() - 1);
             entityId = disbursalTransaction.getId();
+            externalId = disbursalTransaction.getExternalId();
             businessEventNotifierService.notifyPostBusinessEvent(new LoanDisbursalTransactionBusinessEvent(disbursalTransaction));
         }
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(entityId) //
+                .withEntityExternalId(externalId) //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
                 .withGroupId(loan.getGroupId()) //
@@ -608,7 +615,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
             if (realCause.getMessage().toLowerCase().contains("external_id_unique")) {
-                baseDataValidator.reset().parameter("externalId").failWithCode("value.must.be.unique");
+                baseDataValidator.reset().parameter(LoanApiConstants.externalIdParameterName).failWithCode("value.must.be.unique");
             }
             if (!dataValidationErrors.isEmpty()) {
                 throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
@@ -626,7 +633,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
             if (realCause.getMessage().toLowerCase().contains("external_id_unique")) {
-                baseDataValidator.reset().parameter("externalId").failWithCode("value.must.be.unique");
+                baseDataValidator.reset().parameter(LoanApiConstants.externalIdParameterName).failWithCode("value.must.be.unique");
             }
             if (!dataValidationErrors.isEmpty()) {
                 throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
@@ -687,7 +694,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 Money amountBeforeAdjust = loan.getPrincipal();
                 Money disburseAmount = loan.adjustDisburseAmount(command, actualDisbursementDate);
                 boolean recalculateSchedule = amountBeforeAdjust.isNotEqualTo(loan.getPrincipal());
-                final String txnExternalId = command.stringValueOfParameterNamedAllowingNull("externalId");
+                final ExternalId txnExternalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
                 if (isAccountTransfer) {
                     disburseLoanToSavings(loan, command, disburseAmount, paymentDetail);
                     existingTransactionIds.addAll(loan.findExistingTransactionIds());
@@ -753,7 +760,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(actualDisbursementDate, entrySet.getValue(),
                         PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN, savingAccountData.getId(), loan.getId(),
                         "Loan Charge Payment", locale, fmt, null, null, LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.getValue(),
-                        entrySet.getKey(), null, AccountTransferType.CHARGE_PAYMENT.getValue(), null, null, null, null, null,
+                        entrySet.getKey(), null, AccountTransferType.CHARGE_PAYMENT.getValue(), null, null, ExternalId.empty(), null, null,
                         fromSavingsAccount, isRegularTransaction, isExceptionForBalanceCheck);
                 this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             }
@@ -907,7 +914,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
-        final String txnExternalId = command.stringValueOfParameterNamedAllowingNull("externalId");
+        final ExternalId txnExternalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
 
         final Map<String, Object> changes = new LinkedHashMap<>();
         changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
@@ -920,15 +927,18 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (StringUtils.isNotBlank(noteText)) {
             changes.put("note", noteText);
         }
+        if (!txnExternalId.isEmpty()) {
+            changes.put(LoanApiConstants.externalIdParameterName, txnExternalId);
+        }
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
         final Boolean isHolidayValidationDone = false;
         final HolidayDetailDTO holidayDetailDto = null;
         boolean isAccountTransfer = false;
-        final CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder();
-        LoanTransaction loanTransaction = this.loanAccountDomainService.makeRepayment(repaymentTransactionType, loan,
-                commandProcessingResultBuilder, transactionDate, transactionAmount, paymentDetail, noteText, txnExternalId,
-                isRecoveryRepayment, chargeRefundChargeType, isAccountTransfer, holidayDetailDto, isHolidayValidationDone);
+
+        LoanTransaction loanTransaction = this.loanAccountDomainService.makeRepayment(repaymentTransactionType, loan, transactionDate,
+                transactionAmount, paymentDetail, noteText, txnExternalId, isRecoveryRepayment, chargeRefundChargeType, isAccountTransfer,
+                holidayDetailDto, isHolidayValidationDone);
 
         // Update loan transaction on repayment.
         if (AccountType.fromInt(loan.getLoanType()).isIndividualAccount()) {
@@ -947,8 +957,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             this.loanAccountDomainService.updateLoanCollateralTransaction(loanCollateralManagements);
         }
 
-        return commandProcessingResultBuilder.withCommandId(command.commandId()) //
-                .withLoanId(loanId) //
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()) //
+                .withLoanId(loan.getId()) //
+                .withEntityId(loanTransaction.getId()) //
+                .withEntityExternalId(loanTransaction.getExternalId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
                 .with(changes) //
                 .build();
     }
@@ -993,15 +1008,18 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             if (singleLoanRepaymentCommand != null) {
                 final Loan loan = this.loanAssembler.assembleFrom(singleLoanRepaymentCommand.getLoanId());
                 final PaymentDetail paymentDetail = singleLoanRepaymentCommand.getPaymentDetail();
+                ExternalId externalId = singleLoanRepaymentCommand.getExternalId();
+                if (externalId.isEmpty() && configurationDomainService.isExternalIdAutoGenerationEnabled()) {
+                    externalId = ExternalId.generate();
+                }
                 if (paymentDetail != null && paymentDetail.getId() == null) {
                     this.paymentDetailWritePlatformService.persistPaymentDetail(paymentDetail);
                 }
-                final CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder();
                 final String chargeRefundChargeType = null;
                 LoanTransaction loanTransaction = this.loanAccountDomainService.makeRepayment(LoanTransactionType.REPAYMENT, loan,
-                        commandProcessingResultBuilder, bulkRepaymentCommand.getTransactionDate(),
-                        singleLoanRepaymentCommand.getTransactionAmount(), paymentDetail, bulkRepaymentCommand.getNote(), null,
-                        isRecoveryRepayment, chargeRefundChargeType, isAccountTransfer, holidayDetailDTO, isHolidayValidationDone);
+                        bulkRepaymentCommand.getTransactionDate(), singleLoanRepaymentCommand.getTransactionAmount(), paymentDetail,
+                        bulkRepaymentCommand.getNote(), externalId, isRecoveryRepayment, chargeRefundChargeType, isAccountTransfer,
+                        holidayDetailDTO, isHolidayValidationDone);
                 transactionIds.add(loanTransaction.getId());
             }
         }
@@ -1014,6 +1032,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public CommandProcessingResult adjustLoanTransaction(final Long loanId, final Long transactionId, final JsonCommand command) {
 
         this.loanEventApiJsonValidator.validateTransaction(command.json());
+        LoanTransaction transactionToAdjust = this.loanTransactionRepository.findByIdAndLoanId(command.entityId(), command.getLoanId())
+                .orElseThrow(() -> new LoanTransactionNotFoundException(command.entityId(), command.getLoanId()));
 
         Loan loan = this.loanAssembler.assembleFrom(loanId);
         if (loan.getStatus().isClosed() && loan.getLoanSubStatus() != null
@@ -1022,8 +1042,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             throw new LoanForeclosureException("loan.cannot.be.reopened.as.it.is.foreclosured", defaultUserMessage, loanId);
         }
         checkClientOrGroupActive(loan);
-        final LoanTransaction transactionToAdjust = this.loanTransactionRepository.findById(transactionId)
-                .orElseThrow(() -> new LoanTransactionNotFoundException(transactionId));
+
         businessEventNotifierService.notifyPreBusinessEvent(
                 new LoanAdjustTransactionBusinessEvent(new LoanAdjustTransactionBusinessEvent.Data(transactionToAdjust)));
         if (this.accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.LOAN)) {
@@ -1049,8 +1068,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
-        final String txnExternalId = command.stringValueOfParameterNamedAllowingNull("externalId");
-        final String reversalExternalId = command.stringValueOfParameterNamedAllowingNull(LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME);
+        final ExternalId txnExternalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
+        // TODO: can it be refactored to use the 'externalId' for reversal?
+        final ExternalId reversalTxnExternalId = externalIdFactory.createFromCommand(command,
+                LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME);
 
         final Map<String, Object> changes = new LinkedHashMap<>();
         changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
@@ -1077,7 +1098,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 }
             }
             newTransactionDetail = LoanTransaction.waiver(loan.getOffice(), loan, transactionAmountAsMoney, transactionDate,
-                    interestComponent, unrecognizedIncome);
+                    interestComponent, unrecognizedIncome, txnExternalId);
         }
 
         LocalDate recalculateFrom = null;
@@ -1091,9 +1112,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final ChangedTransactionDetail changedTransactionDetail = loan.adjustExistingTransaction(newTransactionDetail,
                 defaultLoanLifecycleStateMachine, transactionToAdjust, existingTransactionIds, existingReversedTransactionIds,
-                scheduleGeneratorDTO, reversalExternalId);
+                scheduleGeneratorDTO, reversalTxnExternalId);
 
-        if (newTransactionDetail.isGreaterThanZero(loan.getPrincipal().getCurrency())) {
+        boolean thereIsNewTransaction = newTransactionDetail.isGreaterThanZero(loan.getPrincipal().getCurrency());
+        if (thereIsNewTransaction) {
             if (paymentDetail != null) {
                 this.paymentDetailWritePlatformService.persistPaymentDetail(paymentDetail);
             }
@@ -1122,7 +1144,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             /**
              * If a new transaction is not created, associate note with the transaction to be adjusted
              **/
-            if (newTransactionDetail.isGreaterThanZero(loan.getPrincipal().getCurrency())) {
+            if (thereIsNewTransaction) {
                 note = Note.loanTransactionNote(loan, newTransactionDetail, noteText);
             } else {
                 note = Note.loanTransactionNote(loan, transactionToAdjust, noteText);
@@ -1151,14 +1173,27 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
 
         LoanAdjustTransactionBusinessEvent.Data eventData = new LoanAdjustTransactionBusinessEvent.Data(transactionToAdjust);
-        if (newTransactionDetail.isRepaymentType() && newTransactionDetail.isGreaterThanZero(loan.getPrincipal().getCurrency())) {
+        if (newTransactionDetail.isRepaymentType() && thereIsNewTransaction) {
             eventData.setNewTransactionDetail(newTransactionDetail);
+        }
+        Long entityId = transactionToAdjust.getId();
+        ExternalId entityExternalId = transactionToAdjust.getExternalId();
+
+        if (thereIsNewTransaction) {
+            entityId = newTransactionDetail.getId();
+            entityExternalId = newTransactionDetail.getExternalId();
         }
         businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
         businessEventNotifierService.notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(eventData));
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(transactionId)
-                .withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId()).withGroupId(loan.getGroupId()).withLoanId(loanId)
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(entityId) //
+                .withEntityExternalId(entityExternalId) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
                 .with(changes).build();
     }
 
@@ -1166,6 +1201,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Override
     public CommandProcessingResult chargebackLoanTransaction(final Long loanId, final Long transactionId, final JsonCommand command) {
         this.loanEventApiJsonValidator.validateChargebackTransaction(command.json());
+
+        LoanTransaction loanTransaction = this.loanTransactionRepository.findByIdAndLoanId(command.entityId(), command.getLoanId())
+                .orElseThrow(() -> new LoanTransactionNotFoundException(command.entityId(), command.getLoanId()));
 
         Loan loan = this.loanAssembler.assembleFrom(loanId);
         if (this.accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.LOAN)) {
@@ -1187,9 +1225,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         checkClientOrGroupActive(loan);
 
-        LoanTransaction loanTransaction = this.loanTransactionRepository.findById(transactionId)
-                .orElseThrow(() -> new LoanTransactionNotFoundException(transactionId));
-
         if (loanTransaction.isReversed()) {
             throw new PlatformServiceUnavailableException("error.msg.loan.chargeback.operation.not.allowed",
                     "Loan transaction:" + transactionId + " chargeback not allowed as loan transaction repayment is reversed",
@@ -1207,7 +1242,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final LocalDate transactionDate = DateUtils.getBusinessLocalDate();
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.TRANSACTION_AMOUNT_PARAMNAME);
-        final String txnExternalId = command.stringValueOfParameterNamedAllowingNull(LoanApiConstants.externalIdParameterName);
+        final ExternalId txnExternalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
 
         final Map<String, Object> changes = new LinkedHashMap<>();
         changes.put("transactionAmount", command.stringValueOfParameterNamed(LoanApiConstants.TRANSACTION_AMOUNT_PARAMNAME));
@@ -1247,8 +1282,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanChargebackTransactionBusinessEvent(loanTransaction));
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(newTransaction.getId())
-                .withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId()).withGroupId(loan.getGroupId()).withLoanId(loanId)
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(newTransaction.getId()) //
+                .withEntityExternalId(newTransaction.getExternalId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
                 .with(changes).build();
     }
 
@@ -1280,6 +1321,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("dateFormat", command.dateFormat());
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
+        final ExternalId externalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
 
         Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
@@ -1298,7 +1340,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             }
         }
         final LoanTransaction waiveInterestTransaction = LoanTransaction.waiver(loan.getOffice(), loan, transactionAmountAsMoney,
-                transactionDate, interestComponent, unrecognizedIncome);
+                transactionDate, interestComponent, unrecognizedIncome, externalId);
         businessEventNotifierService.notifyPreBusinessEvent(new LoanWaiveInterestBusinessEvent(waiveInterestTransaction));
         LocalDate recalculateFrom = null;
         if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
@@ -1339,8 +1381,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
         businessEventNotifierService.notifyPostBusinessEvent(new LoanWaiveInterestBusinessEvent(waiveInterestTransaction));
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(waiveInterestTransaction.getId())
-                .withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId()).withGroupId(loan.getGroupId()).withLoanId(loanId)
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(waiveInterestTransaction.getId()) //
+                .withEntityExternalId(waiveInterestTransaction.getExternalId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
                 .with(changes).build();
     }
 
@@ -1404,8 +1452,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
         businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
         businessEventNotifierService.notifyPostBusinessEvent(new LoanWrittenOffPostBusinessEvent(writeOff));
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(writeOff.getId())
-                .withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId()).withGroupId(loan.getGroupId()).withLoanId(loanId)
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(writeOff.getId()) //
+                .withEntityExternalId(writeOff.getExternalId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
                 .with(changes).build();
     }
 
@@ -1485,12 +1539,23 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         CommandProcessingResult result;
         if (possibleClosingTransaction != null) {
 
-            result = new CommandProcessingResultBuilder().withCommandId(command.commandId())
-                    .withEntityId(possibleClosingTransaction.getId()).withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId())
-                    .withGroupId(loan.getGroupId()).withLoanId(loanId).with(changes).build();
+            result = new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(possibleClosingTransaction.getId()) //
+                    .withEntityExternalId(possibleClosingTransaction.getExternalId()) //
+                    .withOfficeId(loan.getOfficeId()) //
+                    .withClientId(loan.getClientId()) //
+                    .withGroupId(loan.getGroupId()) //
+                    .withLoanId(loanId) //
+                    .with(changes).build();
         } else {
-            result = new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(loanId)
-                    .withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId()).withGroupId(loan.getGroupId()).withLoanId(loanId)
+            result = new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(loanId) //
+                    .withOfficeId(loan.getOfficeId()) //
+                    .withClientId(loan.getClientId()) //
+                    .withGroupId(loan.getGroupId()) //
+                    .withLoanId(loanId) //
                     .with(changes).build();
         }
 
@@ -1558,7 +1623,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private void disburseLoanToLoan(final Loan loan, final JsonCommand command, final BigDecimal amount) {
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
-        final String txnExternalId = command.stringValueOfParameterNamedAllowingNull("externalId");
+        final ExternalId txnExternalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
 
         final Locale locale = command.extractLocale();
         final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
@@ -1573,7 +1638,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private void disburseLoanToSavings(final Loan loan, final JsonCommand command, final Money amount, final PaymentDetail paymentDetail) {
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
-        final String txnExternalId = command.stringValueOfParameterNamedAllowingNull("externalId");
+        final ExternalId txnExternalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
 
         final Locale locale = command.extractLocale();
         final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
@@ -1606,8 +1671,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final List<Long> existingTransactionIds = new ArrayList<>(loan.findExistingTransactionIds());
         final List<Long> existingReversedTransactionIds = new ArrayList<>(loan.findExistingReversedTransactionIds());
-
-        final LoanTransaction newTransferTransaction = LoanTransaction.initiateTransfer(loan.getOffice(), loan, transferDate);
+        ExternalId externalId = externalIdFactory.create();
+        final LoanTransaction newTransferTransaction = LoanTransaction.initiateTransfer(loan.getOffice(), loan, transferDate, externalId);
         loan.addLoanTransaction(newTransferTransaction);
         LoanLifecycleStateMachine loanLifecycleStateMachine = defaultLoanLifecycleStateMachine;
         loanLifecycleStateMachine.transition(LoanEvent.LOAN_INITIATE_TRANSFER, loan);
@@ -1628,8 +1693,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         businessEventNotifierService.notifyPreBusinessEvent(new LoanAcceptTransferBusinessEvent(loan));
         final List<Long> existingTransactionIds = new ArrayList<>(loan.findExistingTransactionIds());
         final List<Long> existingReversedTransactionIds = new ArrayList<>(loan.findExistingReversedTransactionIds());
-
-        final LoanTransaction newTransferAcceptanceTransaction = LoanTransaction.approveTransfer(acceptedInOffice, loan, transferDate);
+        ExternalId externalId = externalIdFactory.create();
+        final LoanTransaction newTransferAcceptanceTransaction = LoanTransaction.approveTransfer(acceptedInOffice, loan, transferDate,
+                externalId);
         loan.addLoanTransaction(newTransferAcceptanceTransaction);
         LoanLifecycleStateMachine loanLifecycleStateMachine = defaultLoanLifecycleStateMachine;
         if (loan.getTotalOverpaid() != null) {
@@ -1659,7 +1725,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final List<Long> existingTransactionIds = new ArrayList<>(loan.findExistingTransactionIds());
         final List<Long> existingReversedTransactionIds = new ArrayList<>(loan.findExistingReversedTransactionIds());
 
-        final LoanTransaction newTransferAcceptanceTransaction = LoanTransaction.withdrawTransfer(loan.getOffice(), loan, transferDate);
+        ExternalId externalId = externalIdFactory.create();
+
+        final LoanTransaction newTransferAcceptanceTransaction = LoanTransaction.withdrawTransfer(loan.getOffice(), loan, transferDate,
+                externalId);
         loan.addLoanTransaction(newTransferAcceptanceTransaction);
         LoanLifecycleStateMachine loanLifecycleStateMachine = defaultLoanLifecycleStateMachine;
         loanLifecycleStateMachine.transition(LoanEvent.LOAN_WITHDRAW_TRANSFER, loan);
@@ -2076,6 +2145,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .withClientId(loan.getClientId()) //
                 .withGroupId(loan.getGroupId()) //
                 .withLoanId(loanId) //
+                .withEntityId(writeOffTransaction.getId()) //
+                .withEntityExternalId(writeOffTransaction.getExternalId()) //
                 .build();
     }
 
@@ -2266,7 +2337,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Override
     public CommandProcessingResult recoverFromGuarantor(final Long loanId) {
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
-        this.guarantorDomainService.transaferFundsFromGuarantor(loan);
+        this.guarantorDomainService.transferFundsFromGuarantor(loan);
         return new CommandProcessingResultBuilder().withLoanId(loanId).build();
     }
 
@@ -2333,10 +2404,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public CommandProcessingResult creditBalanceRefund(Long loanId, JsonCommand command) {
         this.loanEventApiJsonValidator.validateNewRefundTransaction(command.json());
 
+        Loan loan = this.loanAssembler.assembleFrom(loanId);
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
         final String noteText = command.stringValueOfParameterNamedAllowingNull("note");
-        final String externalId = command.stringValueOfParameterNamedAllowingNull("externalId");
+        final ExternalId externalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
 
         final Map<String, Object> changes = new LinkedHashMap<>();
         changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
@@ -2347,15 +2419,21 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (StringUtils.isNotBlank(noteText)) {
             changes.put("note", noteText);
         }
-        if (StringUtils.isNotBlank(externalId)) {
-            changes.put("externalId", externalId);
+        if (!externalId.isEmpty()) {
+            changes.put(LoanApiConstants.externalIdParameterName, externalId);
         }
 
-        final CommandProcessingResultBuilder commandProcessingResultBuilder = this.loanAccountDomainService.creditBalanceRefund(loanId,
-                transactionDate, transactionAmount, noteText, externalId);
+        final LoanTransaction loanTransaction = this.loanAccountDomainService.creditBalanceRefund(loan, transactionDate, transactionAmount,
+                noteText, externalId);
 
-        return commandProcessingResultBuilder //
-                .withCommandId(command.commandId()).with(changes) //
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(loanTransaction.getId()) //
+                .withEntityExternalId(loanTransaction.getExternalId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withCommandId(command.commandId()) //
+                .with(changes) //
                 .build();
 
     }
@@ -2398,6 +2476,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanEventApiJsonValidator.validateNewRefundTransaction(command.json());
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
+        ExternalId externalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
 
         // checkRefundDateIsAfterAtLeastOneRepayment(loanId, transactionDate);
 
@@ -2409,6 +2488,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("transactionAmount", command.stringValueOfParameterNamed("transactionAmount"));
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
+        changes.put(LoanApiConstants.externalIdParameterName, externalId);
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
@@ -2419,11 +2499,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder();
 
-        this.loanAccountDomainService.makeRefundForActiveLoan(loanId, commandProcessingResultBuilder, transactionDate, transactionAmount,
-                paymentDetail, noteText, null);
+        LoanTransaction loanTransaction = this.loanAccountDomainService.makeRefundForActiveLoan(loanId, commandProcessingResultBuilder,
+                transactionDate, transactionAmount, paymentDetail, noteText, externalId);
 
-        return commandProcessingResultBuilder.withCommandId(command.commandId()) //
+        return commandProcessingResultBuilder //
+                .withCommandId(command.commandId()) //
                 .withLoanId(loanId) //
+                .withEntityId(loanTransaction.getId()) //
+                .withEntityExternalId(loanTransaction.getExternalId()) //
                 .with(changes) //
                 .build();
 
@@ -2502,9 +2585,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final JsonElement element = fromApiJsonHelper.parse(json);
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.transactionDateParamName, element);
+        final ExternalId externalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
         this.loanEventApiJsonValidator.validateLoanForeclosure(command.json());
         final Map<String, Object> changes = new LinkedHashMap<>();
         changes.put("transactionDate", transactionDate);
+        changes.put("externalId", externalId);
 
         String noteText = this.fromApiJsonHelper.extractStringNamed(LoanApiConstants.noteParamName, element);
         LoanRescheduleRequest loanRescheduleRequest = null;
@@ -2519,11 +2604,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanScheduleHistoryWritePlatformService.createAndSaveLoanScheduleArchive(loan.getRepaymentScheduleInstallments(), loan,
                 loanRescheduleRequest);
 
-        final Map<String, Object> modifications = this.loanAccountDomainService.foreCloseLoan(loan, transactionDate, noteText);
+        final Map<String, Object> modifications = this.loanAccountDomainService.foreCloseLoan(loan, transactionDate, noteText, externalId);
         changes.putAll(modifications);
 
         final CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder();
-        return commandProcessingResultBuilder.withLoanId(loanId) //
+        return commandProcessingResultBuilder //
+                .withLoanId(loanId) //
                 .with(changes) //
                 .build();
     }
@@ -2566,5 +2652,4 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
     }
-
 }

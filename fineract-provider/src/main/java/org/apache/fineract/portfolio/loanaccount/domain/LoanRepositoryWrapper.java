@@ -62,8 +62,7 @@ public class LoanRepositoryWrapper {
     public Collection<Loan> findActiveLoansByLoanIdAndGroupId(Long clientId, Long groupId) {
         final Collection<Integer> loanStatuses = new ArrayList<>(Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),
                 LoanStatus.APPROVED.getValue(), LoanStatus.ACTIVE.getValue(), LoanStatus.OVERPAID.getValue()));
-        final Collection<Loan> loans = this.repository.findByClientIdAndGroupIdAndLoanStatus(clientId, groupId, loanStatuses);
-        return loans;
+        return this.repository.findByClientIdAndGroupIdAndLoanStatus(clientId, groupId, loanStatuses);
     }
 
     public Loan saveAndFlush(final Loan loan) {
@@ -114,8 +113,7 @@ public class LoanRepositoryWrapper {
 
     public List<LoanRepaymentScheduleInstallment> getLoanRepaymentScheduleInstallments(final Long loanId) {
         final Loan loan = this.repository.findById(loanId).orElseThrow(() -> new LoanNotFoundException(loanId));
-        final List<LoanRepaymentScheduleInstallment> loanRepaymentScheduleInstallments = loan.getRepaymentScheduleInstallments();
-        return loanRepaymentScheduleInstallments;
+        return loan.getRepaymentScheduleInstallments();
     }
 
     public Integer getNumberOfRepayments(final Long loanId) {
@@ -252,5 +250,9 @@ public class LoanRepositoryWrapper {
             loan.initializeTransactions();
         }
         return loan;
+    }
+
+    public Long findIdByExternalId(String externalId) {
+        return this.repository.findIdByExternalId(externalId);
     }
 }

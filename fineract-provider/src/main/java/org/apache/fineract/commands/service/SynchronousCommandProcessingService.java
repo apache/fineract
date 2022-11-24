@@ -110,9 +110,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                             ? (requestIdempotencyKey == null ? idempotencyKeyGenerator.create() : requestIdempotencyKey)
                             : wrapper.getIdempotencyKey());
         }
-        commandSourceResult.updateResourceId(result.getResourceId());
-        commandSourceResult.updateForAudit(result.getOfficeId(), result.getGroupId(), result.getClientId(), result.getLoanId(),
-                result.getSavingsId(), result.getProductId(), result.getTransactionId());
+
+        commandSourceResult.updateForAudit(result);
 
         String changesOnlyJson;
         boolean rollBack = (rollbackTransaction || result.isRollbackTransaction()) && !isApprovedByChecker;

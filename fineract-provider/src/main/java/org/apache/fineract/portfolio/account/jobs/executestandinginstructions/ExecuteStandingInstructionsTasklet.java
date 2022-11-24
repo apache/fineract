@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -107,8 +108,8 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
                 AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, transactionAmount, data.fromAccountType(),
                         data.toAccountType(), data.fromAccount().getId(), data.toAccount().getId(),
                         data.name() + " Standing instruction trasfer ", null, null, null, null, data.toTransferType(), null, null,
-                        data.transferType().getValue(), null, null, null, null, null, fromSavingsAccount, isRegularTransaction,
-                        isExceptionForBalanceCheck);
+                        data.transferType().getValue(), null, null, ExternalId.empty(), null, null, fromSavingsAccount,
+                        isRegularTransaction, isExceptionForBalanceCheck);
                 final boolean transferCompleted = transferAmount(errors, accountTransferDTO, data.getId());
 
                 if (transferCompleted) {

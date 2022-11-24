@@ -16,25 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.collectionsheet.command;
+package org.apache.fineract.infrastructure.core.domain;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import org.apache.fineract.infrastructure.core.domain.ExternalId;
-import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
+import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
+import org.apache.commons.lang3.StringUtils;
 
-/**
- * Immutable command for Single loan repayment.
- */
-@Getter
-@AllArgsConstructor
-public class SingleRepaymentCommand {
+@Converter(autoApply = true)
+public class ExternalIdConverter implements AttributeConverter<ExternalId, String> {
 
-    private final Long loanId;
-    private final ExternalId externalId;
-    private final BigDecimal transactionAmount;
-    private final LocalDate transactionDate;
-    private final PaymentDetail paymentDetail;
+    @Override
+    public String convertToDatabaseColumn(ExternalId externalId) {
+        return externalId != null ? externalId.getValue() : null;
+    }
+
+    @Override
+    public ExternalId convertToEntityAttribute(String externalId) {
+        return StringUtils.isBlank(externalId) ? ExternalId.empty() : new ExternalId(externalId);
+    }
+
 }

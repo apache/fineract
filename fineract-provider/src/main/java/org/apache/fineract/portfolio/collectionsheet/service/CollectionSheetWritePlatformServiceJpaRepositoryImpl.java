@@ -91,7 +91,7 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
         }
 
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
-        changes.putAll(updateBulkReapayments(command, paymentDetail));
+        changes.putAll(updateBulkRepayments(command, paymentDetail));
 
         changes.putAll(updateBulkDisbursals(command));
 
@@ -122,7 +122,7 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
 
         final PaymentDetail paymentDetail = null;
 
-        changes.putAll(updateBulkReapayments(command, paymentDetail));
+        changes.putAll(updateBulkRepayments(command, paymentDetail));
 
         changes.putAll(updateBulkDisbursals(command));
 
@@ -135,7 +135,7 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
                 .with(changes).with(changes).build();
     }
 
-    private Map<String, Object> updateBulkReapayments(final JsonCommand command, final PaymentDetail paymentDetail) {
+    private Map<String, Object> updateBulkRepayments(final JsonCommand command, final PaymentDetail paymentDetail) {
         final Map<String, Object> changes = new HashMap<>();
         final CollectionSheetBulkRepaymentCommand bulkRepaymentCommand = this.bulkRepaymentCommandFromApiJsonDeserializer
                 .commandFromApiJson(command.json(), paymentDetail);

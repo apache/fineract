@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.exception;
 
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
-import org.springframework.dao.EmptyResultDataAccessException;
 
 /**
  * A {@link RuntimeException} thrown when loan resources are not found.
@@ -30,11 +30,19 @@ public class LoanNotFoundException extends AbstractPlatformResourceNotFoundExcep
         super("error.msg.loan.id.invalid", "Loan with identifier " + id + " does not exist", id);
     }
 
-    public LoanNotFoundException(Long id, EmptyResultDataAccessException e) {
+    public LoanNotFoundException(Long id, Exception e) {
         super("error.msg.loan.id.invalid", "Loan with identifier " + id + " does not exist", id, e);
     }
 
     public LoanNotFoundException(String accountId) {
         super("error.msg.loan.account.id.invalid", "Loan with account ID " + accountId + " does not exist", accountId);
+    }
+
+    public LoanNotFoundException(ExternalId externalId) {
+        super("error.msg.loan.external.id.invalid", "Loan with external identifier " + externalId + " does not exist", externalId);
+    }
+
+    public LoanNotFoundException(ExternalId externalId, Exception e) {
+        super("error.msg.loan.external.id.invalid", "Loan with external identifier " + externalId + " does not exist", externalId, e);
     }
 }

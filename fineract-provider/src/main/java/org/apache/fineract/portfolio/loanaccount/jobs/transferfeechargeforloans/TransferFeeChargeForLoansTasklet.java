@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
@@ -74,7 +75,7 @@ public class TransferFeeChargeForLoansTasklet implements Tasklet {
                                     portfolioAccountData.getId(), chargeData.getLoanId(), "Loan Charge Payment", null, null, null, null,
                                     LoanTransactionType.CHARGE_PAYMENT.getValue(), chargeData.getId(),
                                     installmentChargeData.getInstallmentNumber(), AccountTransferType.CHARGE_PAYMENT.getValue(), null, null,
-                                    null, null, null, null, isRegularTransaction, isExceptionForBalanceCheck);
+                                    ExternalId.empty(), null, null, null, isRegularTransaction, isExceptionForBalanceCheck);
                             transferFeeCharge(accountTransferDTO, errors);
                         }
                     }
@@ -86,8 +87,8 @@ public class TransferFeeChargeForLoansTasklet implements Tasklet {
                             chargeData.getAmountOutstanding(), PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN,
                             portfolioAccountData.getId(), chargeData.getLoanId(), "Loan Charge Payment", null, null, null, null,
                             LoanTransactionType.CHARGE_PAYMENT.getValue(), chargeData.getId(), null,
-                            AccountTransferType.CHARGE_PAYMENT.getValue(), null, null, null, null, null, null, isRegularTransaction,
-                            isExceptionForBalanceCheck);
+                            AccountTransferType.CHARGE_PAYMENT.getValue(), null, null, ExternalId.empty(), null, null, null,
+                            isRegularTransaction, isExceptionForBalanceCheck);
                     transferFeeCharge(accountTransferDTO, errors);
                 }
             }

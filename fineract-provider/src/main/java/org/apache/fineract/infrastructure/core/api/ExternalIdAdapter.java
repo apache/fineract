@@ -16,25 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.collectionsheet.command;
+package org.apache.fineract.infrastructure.core.api;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+import java.lang.reflect.Type;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
-import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 
 /**
- * Immutable command for Single loan repayment.
+ * GSON Serializer for ExternalId
+ *
  */
-@Getter
-@AllArgsConstructor
-public class SingleRepaymentCommand {
+public class ExternalIdAdapter implements JsonSerializer<ExternalId> {
 
-    private final Long loanId;
-    private final ExternalId externalId;
-    private final BigDecimal transactionAmount;
-    private final LocalDate transactionDate;
-    private final PaymentDetail paymentDetail;
+    @Override
+    @SuppressWarnings("unused")
+    public JsonElement serialize(ExternalId src, Type typeOfSrc, JsonSerializationContext context) {
+        if (src == null || src.isEmpty()) {
+            return null;
+        }
+        return new JsonPrimitive(src.getValue());
+    }
 }

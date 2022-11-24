@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.fineract.infrastructure.core.api.DateAdapter;
+import org.apache.fineract.infrastructure.core.api.ExternalIdAdapter;
 import org.apache.fineract.infrastructure.core.api.JodaDateTimeAdapter;
 import org.apache.fineract.infrastructure.core.api.JodaMonthDayAdapter;
 import org.apache.fineract.infrastructure.core.api.LocalDateAdapter;
@@ -39,6 +40,7 @@ import org.apache.fineract.infrastructure.core.api.LocalTimeAdapter;
 import org.apache.fineract.infrastructure.core.api.OffsetDateTimeAdapter;
 import org.apache.fineract.infrastructure.core.api.ParameterListExclusionStrategy;
 import org.apache.fineract.infrastructure.core.api.ParameterListInclusionStrategy;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.springframework.stereotype.Service;
 
@@ -122,5 +124,6 @@ public final class GoogleGsonSerializerHelper {
         builder.registerTypeAdapter(MonthDay.class, new JodaMonthDayAdapter());
         builder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter());
         builder.registerTypeAdapter(OffsetDateTime.class, new OffsetDateTimeAdapter());
+        builder.registerTypeAdapter(ExternalId.class, new ExternalIdAdapter());
     }
 }

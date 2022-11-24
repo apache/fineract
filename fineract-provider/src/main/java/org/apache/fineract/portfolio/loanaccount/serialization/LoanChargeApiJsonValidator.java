@@ -119,9 +119,10 @@ public final class LoanChargeApiJsonValidator {
         Set<String> transactionParameters = null;
         if (isChargeIdIncluded) {
             transactionParameters = new HashSet<>(
-                    Arrays.asList("transactionDate", "locale", "dateFormat", "chargeId", "dueDate", "installmentNumber"));
+                    Arrays.asList("transactionDate", "locale", "dateFormat", "chargeId", "dueDate", "installmentNumber", "externalId"));
         } else {
-            transactionParameters = new HashSet<>(Arrays.asList("transactionDate", "locale", "dateFormat", "dueDate", "installmentNumber"));
+            transactionParameters = new HashSet<>(
+                    Arrays.asList("transactionDate", "locale", "dateFormat", "dueDate", "installmentNumber", "externalId"));
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {
@@ -215,7 +216,8 @@ public final class LoanChargeApiJsonValidator {
         if (StringUtils.isBlank(json)) {
             return;
         }
-        Set<String> transactionParameters = new HashSet<>(Arrays.asList("dueDate", "locale", "dateFormat", "installmentNumber"));
+        Set<String> transactionParameters = new HashSet<>(
+                Arrays.asList("dueDate", "locale", "dateFormat", "installmentNumber", "externalId"));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {
 
