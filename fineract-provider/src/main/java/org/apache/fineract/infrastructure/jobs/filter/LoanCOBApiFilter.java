@@ -23,8 +23,9 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.servlet.FilterChain;
@@ -56,7 +57,12 @@ public class LoanCOBApiFilter extends OncePerRequestFilter {
     private final InlineLoanCOBExecutorServiceImpl inlineLoanCOBExecutorService;
 
     private static final List<HttpMethod> HTTP_METHODS = List.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE);
-    private static final Function<String, Boolean> URL_FUNCTION = s -> s.matches("/loans/\\d+.*") || s.matches("/loans/glimAccount/\\d+.*");
+
+    private static final Pattern LOAN_PATH_PATTERN = Pattern.compile("/loans/\\d+");
+
+    private static final Pattern LOAN_GLIMACCOUNT_PATH_PATTERN = Pattern.compile("/loans/glimAccount/\\d+");
+    private static final Predicate<String> URL_FUNCTION = s -> LOAN_PATH_PATTERN.matcher(s).find()
+            || LOAN_GLIMACCOUNT_PATH_PATTERN.matcher(s).find();
     private static final Integer LOAN_ID_INDEX_IN_URL = 2;
     private static final Integer GLIM_ID_INDEX_IN_URL = 3;
     private static final Integer GLIM_STRING_INDEX_IN_URL = 2;
@@ -143,7 +149,7 @@ public class LoanCOBApiFilter extends OncePerRequestFilter {
         if (StringUtils.isBlank(request.getPathInfo())) {
             return false;
         }
-        return HTTP_METHODS.contains(HttpMethod.valueOf(request.getMethod())) && URL_FUNCTION.apply(request.getPathInfo());
+        return HTTP_METHODS.contains(HttpMethod.valueOf(request.getMethod())) && URL_FUNCTION.test(request.getPathInfo());
     }
 
     private boolean isGlim(Supplier<Stream<String>> streamSupplier) {
