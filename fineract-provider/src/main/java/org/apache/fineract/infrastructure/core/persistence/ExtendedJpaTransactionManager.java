@@ -29,6 +29,10 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 public class ExtendedJpaTransactionManager extends JpaTransactionManager {
 
+    public ExtendedJpaTransactionManager() {
+        setValidateExistingTransaction(true);
+    }
+
     @Override
     protected void doBegin(Object transaction, TransactionDefinition definition) {
         super.doBegin(transaction, definition);

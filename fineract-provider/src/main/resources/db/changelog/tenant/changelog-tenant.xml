@@ -91,4 +91,7 @@
     <include file="parts/0069_add_unique_constraint_for_reversal_external_id_of_loan_transactions.xml" relativeToChangelogFile="true"/>
     <include file="parts/0070_add_event_configuration_for_delinquency_range_change_event.xml" relativeToChangelogFile="true"/>
     <include file="parts/0071_add_external_id_support_for_loan_transaction.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0072_add_result_and status_to_command_source.xml" relativeToChangelogFile="true" />
+    <include file="parts/0073_add_result_status_code_to_command_source.xml" relativeToChangelogFile="true" />
+
 </databaseChangeLog>

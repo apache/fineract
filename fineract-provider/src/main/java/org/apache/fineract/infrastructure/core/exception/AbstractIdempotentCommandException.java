@@ -16,23 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.commands.data;
+package org.apache.fineract.infrastructure.core.exception;
 
-import java.util.Collection;
-import java.util.List;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.apache.fineract.useradministration.data.AppUserData;
 
-/**
- * Immutable data object representing audit search results.
- */
-@RequiredArgsConstructor
-@Getter
-public final class AuditSearchData {
+public abstract class AbstractIdempotentCommandException extends AbstractPlatformException {
 
-    private final Collection<AppUserData> appUsers;
-    private final List<String> actionNames;
-    private final List<String> entityNames;
-    private final Collection<ProcessingResultLookup> statuses;
+    public static final String IDEMPOTENT_CACHE_HEADER = "x-served-from-cache";
+    @Getter
+    private final String action;
+
+    @Getter
+    private final String entity;
+    @Getter
+    private final String idempotencyKey;
+    @Getter
+    private final String response;
+
+    protected AbstractIdempotentCommandException(String action, String entity, String idempotencyKey, String response) {
+        super(null, null);
+        this.action = action;
+        this.entity = entity;
+        this.idempotencyKey = idempotencyKey;
+        this.response = response;
+    }
 }

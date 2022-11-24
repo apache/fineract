@@ -16,23 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.commands.data;
+package org.apache.fineract.infrastructure.core.exception;
 
-import java.util.Collection;
-import java.util.List;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.apache.fineract.useradministration.data.AppUserData;
+import org.apache.fineract.commands.domain.CommandWrapper;
 
 /**
- * Immutable data object representing audit search results.
+ * Exception thrown when command is sent with same action, entity and idempotency key
  */
-@RequiredArgsConstructor
-@Getter
-public final class AuditSearchData {
+public class IdempotentCommandProcessSucceedException extends AbstractIdempotentCommandException {
 
-    private final Collection<AppUserData> appUsers;
-    private final List<String> actionNames;
-    private final List<String> entityNames;
-    private final Collection<ProcessingResultLookup> statuses;
+    public IdempotentCommandProcessSucceedException(CommandWrapper wrapper, String response) {
+        super(wrapper.actionName(), wrapper.entityName(), wrapper.getIdempotencyKey(), response);
+    }
 }

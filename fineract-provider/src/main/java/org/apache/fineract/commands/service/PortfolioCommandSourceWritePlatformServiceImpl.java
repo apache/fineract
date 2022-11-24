@@ -87,16 +87,15 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
                 commandSourceInput.getGroupId(), commandSourceInput.getClientId(), commandSourceInput.getLoanId(),
                 commandSourceInput.getSavingsId(), commandSourceInput.getTransactionId(), commandSourceInput.getCreditBureauId(),
                 commandSourceInput.getOrganisationCreditBureauId(), commandSourceInput.getIdempotencyKey());
-        final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSourceInput.json());
-        final JsonCommand command = JsonCommand.fromExistingCommand(makerCheckerId, commandSourceInput.json(), parsedCommand,
+        final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSourceInput.getCommandJson());
+        final JsonCommand command = JsonCommand.fromExistingCommand(makerCheckerId, commandSourceInput.getCommandJson(), parsedCommand,
                 this.fromApiJsonHelper, commandSourceInput.getEntityName(), commandSourceInput.resourceId(),
                 commandSourceInput.subResourceId(), commandSourceInput.getGroupId(), commandSourceInput.getClientId(),
                 commandSourceInput.getLoanId(), commandSourceInput.getSavingsId(), commandSourceInput.getTransactionId(),
                 commandSourceInput.getResourceGetUrl(), commandSourceInput.getProductId(), commandSourceInput.getCreditBureauId(),
                 commandSourceInput.getOrganisationCreditBureauId(), commandSourceInput.getJobName());
 
-        final boolean makerCheckerApproval = true;
-        return this.processAndLogCommandService.executeCommand(wrapper, command, makerCheckerApproval);
+        return this.processAndLogCommandService.executeCommand(wrapper, command, true);
     }
 
     @Transactional
