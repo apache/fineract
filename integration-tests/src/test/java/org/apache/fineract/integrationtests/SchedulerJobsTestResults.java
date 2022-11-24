@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -649,6 +650,58 @@ public class SchedulerJobsTestResults {
     }
 
     @Test
+    public void testLoanCOBRunsOnlyOnLoansOneDayBehind() {
+        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        Assertions.assertNotNull(clientID);
+
+        Integer overdueFeeChargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
+                ChargesHelper.getLoanOverdueFeeJSONWithCalculationTypePercentage("1"));
+        Assertions.assertNotNull(overdueFeeChargeId);
+
+        final Integer loanProductID = createLoanProduct(overdueFeeChargeId.toString());
+        Assertions.assertNotNull(loanProductID);
+        HashMap loanStatusHashMap;
+
+        final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null, "10 January 2020");
+
+        Assertions.assertNotNull(loanID);
+
+        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
+        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+        loanStatusHashMap = loanTransactionHelper.approveLoan("01 March 2020", loanID);
+        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+
+        String loanDetails = loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
+        loanStatusHashMap = loanTransactionHelper.disburseLoanWithNetDisbursalAmount("02 March 2020", loanID,
+                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
+        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.COB_DATE, LocalDate.of(2020, 3, 2));
+        String jobName = "Loan COB";
+
+        schedulerJobHelper.executeAndAwaitJob(jobName);
+        GetLoansLoanIdResponse loan = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);
+        Assertions.assertEquals(LocalDate.of(2020, 3, 2), loan.getLastClosedBusinessDate());
+
+        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.COB_DATE, LocalDate.of(2020, 3, 3));
+        schedulerJobHelper.executeAndAwaitJob(jobName);
+
+        loan = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);
+        Assertions.assertEquals(LocalDate.of(2020, 3, 3), loan.getLastClosedBusinessDate());
+
+        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.COB_DATE, LocalDate.of(2020, 3, 5));
+        schedulerJobHelper.executeAndAwaitJob(jobName);
+
+        loan = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);
+        Assertions.assertEquals(LocalDate.of(2020, 3, 3), loan.getLastClosedBusinessDate());
+
+        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+    }
+
+    @Test
     public void testLoanCOBApplyPenaltyOnDue() {
         GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
         // set penalty wait period to 0
@@ -688,15 +741,17 @@ public class SchedulerJobsTestResults {
         Assertions.assertEquals(0, (Integer) repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"),
                 "Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job");
 
-        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.COB_DATE, LocalDate.of(2020, 4, 2));
+        LocalDate lastBusinessDateBeforeFastForward = LocalDate.of(2020, 4, 2);
+        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.COB_DATE, lastBusinessDateBeforeFastForward);
         this.schedulerJobHelper.executeAndAwaitJob(jobName);
         repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
         Assertions.assertEquals(39.39f, (Float) repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"),
                 "Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job");
 
         GlobalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec, "10", "1");
-
-        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.COB_DATE, LocalDate.of(2020, 5, 2));
+        LocalDate dateToFastForward = LocalDate.of(2020, 5, 2);
+        schedulerJobHelper.fastForwardTime(lastBusinessDateBeforeFastForward, dateToFastForward, jobName, responseSpec);
+        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.COB_DATE, dateToFastForward);
         this.schedulerJobHelper.executeAndAwaitJob(jobName);
         repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
         Assertions.assertEquals(0, (Integer) repaymentScheduleDataAfter.get(2).get("penaltyChargesDue"),

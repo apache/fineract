@@ -16,37 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.jobs.service.executealldirtyjobs;
+package org.apache.fineract.cob.loan;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.config.FineractProperties;
-import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
-import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetailRepository;
-import org.apache.fineract.infrastructure.jobs.service.JobRegisterService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.stereotype.Component;
 
+@Slf4j
 @RequiredArgsConstructor
-@Component
-public class ExecuteAllDirtyJobsTasklet implements Tasklet {
+public class ResolveLoanCOBCustomJobParametersTasklet implements Tasklet {
 
-    private final JobRegisterService jobRegisterService;
-    private final ScheduledJobDetailRepository scheduledJobDetailsRepository;
-    private final FineractProperties fineractProperties;
+    private final CustomJobParameterResolver customJobParameterResolver;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        List<ScheduledJobDetail> jobDetails = scheduledJobDetailsRepository.findAllMismatchedJobs(true);
-
-        for (ScheduledJobDetail scheduledJobDetail : jobDetails) {
-            if (scheduledJobDetail.getNodeId().toString().equals(fineractProperties.getNodeId())) {
-                jobRegisterService.executeJobWithParameters(scheduledJobDetail.getId(), null);
-            }
-        }
+        customJobParameterResolver.resolve(contribution, chunkContext, LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME,
+                LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME);
         return RepeatStatus.FINISHED;
     }
 }

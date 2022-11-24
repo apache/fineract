@@ -250,6 +250,7 @@ public class LoanAccountData {
 
     private CollectionData delinquent;
     private DelinquencyRangeData delinquencyRange;
+    private LocalDate lastClosedBusinessDate;
 
     public static LoanAccountData importInstanceIndividual(EnumOptionData loanTypeEnumOption, Long clientId, Long productId,
             Long loanOfficerId, LocalDate submittedOnDate, Long fundId, BigDecimal principal, Integer numberOfRepayments,
@@ -648,7 +649,8 @@ public class LoanAccountData {
             final Boolean isVariableInstallmentsAllowed, Integer minimumGap, Integer maximumGap, final EnumOptionData subStatus,
             final boolean canUseForTopup, final boolean isTopup, final Long closureLoanId, final String closureLoanAccountNo,
             final BigDecimal topupAmount, final boolean isEqualAmortization, final BigDecimal fixedPrincipalPercentagePerInstallment,
-            final DelinquencyRangeData delinquencyRange, final boolean disallowExpectedDisbursements, final boolean fraud) {
+            final DelinquencyRangeData delinquencyRange, final boolean disallowExpectedDisbursements, final boolean fraud,
+            LocalDate lastClosedBusinessDate) {
 
         final CollectionData delinquent = CollectionData.template();
 
@@ -687,7 +689,8 @@ public class LoanAccountData {
                 .setSubStatus(subStatus).setCanUseForTopup(canUseForTopup).setTopup(isTopup).setClosureLoanId(closureLoanId)
                 .setClosureLoanAccountNo(closureLoanAccountNo).setTopupAmount(topupAmount).setIsEqualAmortization(isEqualAmortization)
                 .setFixedPrincipalPercentagePerInstallment(fixedPrincipalPercentagePerInstallment).setDelinquent(delinquent)
-                .setDelinquencyRange(delinquencyRange).setDisallowExpectedDisbursements(disallowExpectedDisbursements).setFraud(fraud);
+                .setDelinquencyRange(delinquencyRange).setDisallowExpectedDisbursements(disallowExpectedDisbursements).setFraud(fraud)
+                .setLastClosedBusinessDate(lastClosedBusinessDate);
     }
 
     /*
@@ -771,7 +774,7 @@ public class LoanAccountData {
                 .setIsEqualAmortization(acc.isEqualAmortization)
                 .setFixedPrincipalPercentagePerInstallment(acc.fixedPrincipalPercentagePerInstallment)
                 .setDelinquencyRange(acc.delinquencyRange).setDisallowExpectedDisbursements(acc.disallowExpectedDisbursements)
-                .setFraud(acc.fraud);
+                .setFraud(acc.fraud).setLastClosedBusinessDate(acc.getLastClosedBusinessDate());
     }
 
     public static LoanAccountData associationsAndTemplate(final LoanAccountData acc, final Collection<LoanProductData> productOptions,

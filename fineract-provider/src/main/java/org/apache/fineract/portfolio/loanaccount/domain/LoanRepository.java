@@ -71,6 +71,8 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
 
     String FIND_ALL_NON_CLOSED = "select loan.id from Loan loan where loan.loanStatus in (100,200,300,303,304)";
 
+    String FIND_ALL_NON_CLOSED_ONE_DAY_BEHIND = "select loan.id from Loan loan where loan.loanStatus in (100,200,300,303,304) and (:last_closed_business_date = loan.lastClosedBusinessDate or loan.lastClosedBusinessDate is NULL)";
+
     String FIND_NON_CLOSED_LOAN_THAT_BELONGS_TO_CLIENT = "select loan from Loan loan where loan.id = :loanId and loan.loanStatus = 300 and loan.client.id = :clientId";
 
     String FIND_BY_ACCOUNT_NUMBER = "select loan from Loan loan where loan.accountNumber = :accountNumber";
@@ -172,4 +174,8 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
 
     @Query(FIND_ID_BY_EXTERNAL_ID)
     Long findIdByExternalId(@Param("externalId") String externalId);
+
+    @Query(FIND_ALL_NON_CLOSED_ONE_DAY_BEHIND)
+    List<Long> findAllNonClosedLoanIdsOneDayBehind(@Param("last_closed_business_date") LocalDate businessDate);
+
 }

@@ -24,9 +24,12 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
 import io.cucumber.java8.En;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.TreeMap;
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.item.ExecutionContext;
 
@@ -47,8 +50,10 @@ public class LoanItemProcessorStepDefinitions implements En {
 
     public LoanItemProcessorStepDefinitions() {
         Given("/^The LoanItemProcessor.process method with item (.*)$/", (String loanItem) -> {
-
-            StepExecution stepExecution = new StepExecution("test", null);
+            JobExecution jobExecution = new JobExecution(1L);
+            jobExecution.getExecutionContext().put(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME,
+                    LocalDate.now(ZoneId.systemDefault()).toString());
+            StepExecution stepExecution = new StepExecution("test", jobExecution);
             ExecutionContext stepExecutionContext = new ExecutionContext();
             stepExecutionContext.put(LoanCOBConstant.BUSINESS_STEP_MAP, treeMap);
             stepExecution.setExecutionContext(stepExecutionContext);

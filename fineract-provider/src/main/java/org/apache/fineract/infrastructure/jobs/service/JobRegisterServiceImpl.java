@@ -20,15 +20,18 @@ package org.apache.fineract.infrastructure.jobs.service;
 
 import com.google.common.base.Splitter;
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TimeZone;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.PlatformInternalServerException;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.apache.fineract.infrastructure.jobs.domain.SchedulerDetail;
 import org.apache.fineract.infrastructure.jobs.exception.JobNodeIdMismatchingException;
@@ -61,6 +64,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class JobRegisterServiceImpl implements JobRegisterService, ApplicationListener<ContextClosedEvent> {
 
+    private static final String JOB_EXECUTION_FAILED_MESSAGE = "Job execution failed for job with name: ";
+
     @Autowired
     private SchedularWritePlatformService schedularWritePlatformService;
 
@@ -82,11 +87,14 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     private JobStarter jobStarter;
 
     @Autowired
+    private JobParameterDataParser dataParser;
+
+    @Autowired
     private JobNameService jobNameService;
 
     private static final String JOB_STARTER_METHOD_NAME = "run";
 
-    public void executeJob(final ScheduledJobDetail scheduledJobDetail, String triggerType) {
+    public void executeJob(final ScheduledJobDetail scheduledJobDetail, String triggerType, Set<JobParameterDTO> jobParameterDTOSet) {
         try {
             final JobDataMap jobDataMap = new JobDataMap();
             if (triggerType == null) {
@@ -96,7 +104,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
             jobDataMap.put(SchedulerServiceConstants.TENANT_IDENTIFIER, ThreadLocalContextUtil.getTenant().getTenantIdentifier());
             final String schedulerName = getSchedulerName(scheduledJobDetail);
             final Scheduler scheduler = SCHEDULERS.get(schedulerName);
-            final JobDetail jobDetail = createJobDetail(scheduledJobDetail);
+            final JobDetail jobDetail = createJobDetail(scheduledJobDetail, jobParameterDTOSet);
             JobKey jobKey = jobDetail.getKey();
             if (scheduler == null || !scheduler.checkExists(jobKey)) {
                 SchedulerStopListener schedulerStopListener = new SchedulerStopListener(this);
@@ -157,7 +165,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
                 for (final ScheduledJobDetail jobDetail : scheduledJobDetails) {
                     if (jobDetail.isTriggerMisfired() || jobDetail.isMismatchedJob()) {
                         if (jobDetail.isActiveSchedular()) {
-                            executeJob(jobDetail, SchedulerServiceConstants.TRIGGER_TYPE_CRON);
+                            executeJob(jobDetail, SchedulerServiceConstants.TRIGGER_TYPE_CRON, Collections.emptySet());
                             jobDetail.setMismatchedJob(false);
                         }
                         final String schedulerName = getSchedulerName(jobDetail);
@@ -198,7 +206,8 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     }
 
     @Override
-    public void executeJob(final Long jobId) {
+    public void executeJobWithParameters(final Long jobId, String jobParametersJson) {
+        Set<JobParameterDTO> jobParameterDTOSet = dataParser.parseExecution(jobParametersJson);
         final ScheduledJobDetail scheduledJobDetail = this.schedularWritePlatformService.findByJobId(jobId);
         if (scheduledJobDetail == null) {
             throw new JobNotFoundException(String.valueOf(jobId));
@@ -206,7 +215,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         final String nodeIdStored = scheduledJobDetail.getNodeId().toString();
 
         if (nodeIdStored.equals(fineractProperties.getNodeId()) || nodeIdStored.equals("0")) {
-            executeJob(scheduledJobDetail, null);
+            executeJob(scheduledJobDetail, null, jobParameterDTOSet);
             scheduledJobDetail.setMismatchedJob(false);
             this.schedularWritePlatformService.saveOrUpdate(scheduledJobDetail);
         } else {
@@ -234,7 +243,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     @Override
     public void scheduleJob(final ScheduledJobDetail scheduledJobDetails) {
         try {
-            final JobDetail jobDetail = createJobDetail(scheduledJobDetails);
+            final JobDetail jobDetail = createJobDetail(scheduledJobDetails, Collections.emptySet());
             scheduledJobDetails.setJobKey(getJobKeyAsString(jobDetail.getKey()));
             if (!scheduledJobDetails.isActiveSchedular()) {
                 scheduledJobDetails.setNextRunTime(null);
@@ -315,7 +324,8 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         return schedulerFactoryBean.getScheduler();
     }
 
-    private JobDetail createJobDetail(final ScheduledJobDetail scheduledJobDetail) throws Exception {
+    private JobDetail createJobDetail(final ScheduledJobDetail scheduledJobDetail, Set<JobParameterDTO> jobParameterDTOSet)
+            throws Exception {
         final FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
 
         JobNameData jobName = jobNameService.getJobByHumanReadableName(scheduledJobDetail.getJobName());
@@ -328,7 +338,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         jobDetailFactoryBean.setGroup(scheduledJobDetail.getGroupName());
         jobDetailFactoryBean.setConcurrent(false);
 
-        jobDetailFactoryBean.setArguments(job, scheduledJobDetail, ThreadLocalContextUtil.getContext());
+        jobDetailFactoryBean.setArguments(job, scheduledJobDetail, ThreadLocalContextUtil.getContext(), jobParameterDTOSet);
         jobDetailFactoryBean.afterPropertiesSet();
         return jobDetailFactoryBean.getObject();
     }
