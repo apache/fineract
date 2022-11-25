@@ -38,6 +38,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalcualtio
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionToRepaymentScheduleMapping;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.CreocoreLoanRepaymentScheduleTransactionProcessor;
@@ -186,6 +188,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                         loanTransaction.reverse(loanTransaction.getExternalId());
                         loanTransaction.updateExternalId(null);
                         newLoanTransaction.copyLoanTransactionRelations(loanTransaction.getLoanTransactionRelations());
+                        // Adding Replayed relation from newly created transaction to reversed transaction
+                        newLoanTransaction.getLoanTransactionRelations().add(LoanTransactionRelation.linkToTransaction(newLoanTransaction,
+                                loanTransaction, LoanTransactionRelationTypeEnum.REPLAYED));
                         changedTransactionDetail.getNewTransactionMappings().put(loanTransaction.getId(), newLoanTransaction);
                     }
                 }
