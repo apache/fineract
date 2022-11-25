@@ -373,6 +373,12 @@ public class SavingsAccount extends AbstractPersistableCustom {
     @Transient
     private BigDecimal depositAmountToDeriveBalanceForStampDuty;
 
+    @Column(name = "vault_target_amount", scale = 6, precision = 19)
+    private BigDecimal vaultTargetAmount;
+
+    @Column(name = "vault_target_date")
+    private LocalDate vaultTargetDate;
+
     protected SavingsAccount() {
         //
     }
