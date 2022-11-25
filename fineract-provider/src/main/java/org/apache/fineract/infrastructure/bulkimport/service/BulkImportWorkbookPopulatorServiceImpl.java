@@ -281,7 +281,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
 
     @SuppressWarnings("unchecked")
     private List<ChargeData> fetchCharges() {
-        return (List) this.chargeReadPlatformService.retrieveAllCharges();
+        return (List) this.chargeReadPlatformService.retrieveLoanApplicableFees();
     }
 
     @SuppressWarnings("unchecked")
