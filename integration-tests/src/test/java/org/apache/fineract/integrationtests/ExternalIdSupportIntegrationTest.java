@@ -31,6 +31,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.HashMap;
 import java.util.UUID;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdResponse;
@@ -135,9 +136,25 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
                 (long) penalty1LoanChargeId, new PostLoansLoanIdChargesChargeIdRequest().externalId(waiveChargeExternalIdStr));
         assertEquals(waiveChargeExternalIdStr, waiveLoanChargeResult.getSubResourceExternalId());
 
+        GetLoansLoanIdTransactionsTransactionIdResponse response = loanTransactionHelper.getLoanTransactionDetails((long) loanId,
+                waiveChargeExternalIdStr);
+        assertEquals(waiveChargeExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, waiveLoanChargeResult.getSubResourceExternalId());
+        assertEquals(waiveChargeExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, waiveChargeExternalIdStr);
+        assertEquals(waiveChargeExternalIdStr, response.getExternalId());
+
         // Check whether an external id was generated
         HashMap undoWaiveLoanChargeResult = loanTransactionHelper.undoWaiveLoanCharge((long) loanId, waiveChargeExternalIdStr);
         assertEquals(waiveChargeExternalIdStr, undoWaiveLoanChargeResult.get("subResourceExternalId"));
+
+        response = loanTransactionHelper.getLoanTransactionDetails((long) loanId, waiveChargeExternalIdStr);
+        assertEquals(waiveChargeExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr,
+                Long.valueOf(undoWaiveLoanChargeResult.get("subResourceId").toString()));
+        assertEquals(waiveChargeExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, waiveChargeExternalIdStr);
+        assertEquals(waiveChargeExternalIdStr, response.getExternalId());
 
         // Check whether an external id was generated
         waiveLoanChargeResult = loanTransactionHelper.waiveLoanCharge((long) loanId, (long) penalty1LoanChargeId,
@@ -165,6 +182,14 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
                         .transactionAmount(5.0));
         assertNotNull(repaymentResult.getResourceExternalId());
 
+        String repaymentExternalId = repaymentResult.getResourceExternalId();
+        response = loanTransactionHelper.getLoanTransactionDetails((long) loanId, repaymentExternalId);
+        assertEquals(repaymentExternalId, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, repaymentResult.getResourceId());
+        assertEquals(repaymentExternalId, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, repaymentExternalId);
+        assertEquals(repaymentExternalId, response.getExternalId());
+
         // Check whether the provided external id was retrieved
         String transactionExternalIdStr = UUID.randomUUID().toString();
         final PostLoansLoanIdTransactionsResponse repaymentResultWithExternalId = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
@@ -185,6 +210,14 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
                         .transactionDate("06 September 2022").locale("en").transactionAmount(5.0).externalId(transactionExternalIdStr));
         assertEquals(transactionExternalIdStr, merchantIssuedRefundResultWithExternalId.getResourceExternalId());
 
+        response = loanTransactionHelper.getLoanTransactionDetails((long) loanId, transactionExternalIdStr);
+        assertEquals(transactionExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr,
+                merchantIssuedRefundResultWithExternalId.getResourceId());
+        assertEquals(transactionExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, transactionExternalIdStr);
+        assertEquals(transactionExternalIdStr, response.getExternalId());
+
         // Check whether an external id was generated
         final PostLoansLoanIdTransactionsResponse payoutRefundResult = loanTransactionHelper.makePayoutRefund(loanExternalIdStr,
                 new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("06 September 2022").locale("en")
@@ -197,6 +230,13 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
                 .makePayoutRefund(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
                         .transactionDate("06 September 2022").locale("en").transactionAmount(5.0).externalId(transactionExternalIdStr));
         assertEquals(transactionExternalIdStr, payoutRefundResultWithExternalId.getResourceExternalId());
+
+        response = loanTransactionHelper.getLoanTransactionDetails((long) loanId, transactionExternalIdStr);
+        assertEquals(transactionExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, payoutRefundResultWithExternalId.getResourceId());
+        assertEquals(transactionExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, transactionExternalIdStr);
+        assertEquals(transactionExternalIdStr, response.getExternalId());
 
         // Check whether an external id was generated
         final PostLoansLoanIdTransactionsResponse goodWillCreditResult = loanTransactionHelper.makeGoodwillCredit(loanExternalIdStr,
@@ -211,10 +251,25 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
                         .transactionDate("06 September 2022").locale("en").transactionAmount(5.0).externalId(transactionExternalIdStr));
         assertEquals(transactionExternalIdStr, goodWillCreditResultWithExternalId.getResourceExternalId());
 
+        response = loanTransactionHelper.getLoanTransactionDetails((long) loanId, transactionExternalIdStr);
+        assertEquals(transactionExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, goodWillCreditResultWithExternalId.getResourceId());
+        assertEquals(transactionExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, transactionExternalIdStr);
+        assertEquals(transactionExternalIdStr, response.getExternalId());
+
         // Check whether an external id was generated
         final PostLoansLoanIdTransactionsResponse writeoffResult = loanTransactionHelper.makeWriteoff(loanExternalIdStr,
                 new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("06 September 2022").locale("en"));
         assertNotNull(writeoffResult.getResourceExternalId());
+
+        transactionExternalIdStr = writeoffResult.getResourceExternalId();
+        response = loanTransactionHelper.getLoanTransactionDetails((long) loanId, transactionExternalIdStr);
+        assertEquals(transactionExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, writeoffResult.getResourceId());
+        assertEquals(transactionExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, transactionExternalIdStr);
+        assertEquals(transactionExternalIdStr, response.getExternalId());
 
         // Check whether an external id was generated
         final PostLoansLoanIdTransactionsResponse makeRecoveryPaymentResult = loanTransactionHelper.makeRecoveryPayment(loanExternalIdStr,
@@ -229,10 +284,17 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
                         .transactionDate("06 September 2022").locale("en").transactionAmount(5.0).externalId(transactionExternalIdStr));
         assertEquals(transactionExternalIdStr, makeRecoveryPaymentResultWithExternalId.getResourceExternalId());
 
+        response = loanTransactionHelper.getLoanTransactionDetails((long) loanId, transactionExternalIdStr);
+        assertEquals(transactionExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr,
+                makeRecoveryPaymentResultWithExternalId.getResourceId());
+        assertEquals(transactionExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, transactionExternalIdStr);
+        assertEquals(transactionExternalIdStr, response.getExternalId());
+
         // Check whether an external id was generated
         final PostLoansLoanIdTransactionsResponse undoWriteoffResult = loanTransactionHelper.makeUndoWriteoff(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("06 September 2022").locale("en")
-                        .transactionAmount(5.0));
+                new PostLoansLoanIdTransactionsRequest());
         assertNotNull(undoWriteoffResult.getResourceExternalId());
 
         // Check whether the provided external id was retrieved
@@ -246,6 +308,13 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
         final PostLoansLoanIdTransactionsResponse undoWriteoffResultWithExternalId = loanTransactionHelper
                 .makeUndoWriteoff(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest());
         assertEquals(transactionExternalIdStr, undoWriteoffResultWithExternalId.getResourceExternalId());
+
+        response = loanTransactionHelper.getLoanTransactionDetails((long) loanId, transactionExternalIdStr);
+        assertEquals(transactionExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, undoWriteoffResultWithExternalId.getResourceId());
+        assertEquals(transactionExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, transactionExternalIdStr);
+        assertEquals(transactionExternalIdStr, response.getExternalId());
 
         // Overpay the account
         transactionExternalIdStr = UUID.randomUUID().toString();
@@ -267,6 +336,14 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
                         .transactionDate("06 September 2022").locale("en").transactionAmount(5.0).externalId(transactionExternalIdStr));
         assertEquals(transactionExternalIdStr, makeCreditBalanceRefundResultWithExternalId.getResourceExternalId());
 
+        response = loanTransactionHelper.getLoanTransactionDetails((long) loanId, transactionExternalIdStr);
+        assertEquals(transactionExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr,
+                makeCreditBalanceRefundResultWithExternalId.getResourceId());
+        assertEquals(transactionExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, transactionExternalIdStr);
+        assertEquals(transactionExternalIdStr, response.getExternalId());
+
         // Check whether an external id was generated
         final PostLoansLoanIdTransactionsResponse chargeRefundResult = loanTransactionHelper.makeChargeRefund(loanExternalIdStr,
                 new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").locale("en").loanChargeId(penalty1LoanChargeId)
@@ -279,6 +356,13 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
                 .makeChargeRefund(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").locale("en")
                         .loanChargeId(penalty1LoanChargeId).transactionAmount(1.0).externalId(transactionExternalIdStr));
         assertEquals(transactionExternalIdStr, chargeRefundResultWithExternalId.getResourceExternalId());
+
+        response = loanTransactionHelper.getLoanTransactionDetails((long) loanId, transactionExternalIdStr);
+        assertEquals(transactionExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, chargeRefundResultWithExternalId.getResourceId());
+        assertEquals(transactionExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, transactionExternalIdStr);
+        assertEquals(transactionExternalIdStr, response.getExternalId());
 
         // Create a loan with interest and test the rest of the transactions
 
@@ -335,6 +419,13 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
                         .transactionDate(formattedDate).locale("en").transactionAmount(1.0).externalId(waiveInterestTxnExternalIdStr));
         assertEquals(waiveInterestTxnExternalIdStr, waiveInterestResultWithExternalId.getResourceExternalId());
 
+        response = loanTransactionHelper.getLoanTransactionDetails((long) loanWithInterestId, waiveInterestTxnExternalIdStr);
+        assertEquals(waiveInterestTxnExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, waiveInterestResultWithExternalId.getResourceId());
+        assertEquals(waiveInterestTxnExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, waiveInterestTxnExternalIdStr);
+        assertEquals(waiveInterestTxnExternalIdStr, response.getExternalId());
+
         String inAdvanceRepaymentTxnExternalIdStr = UUID.randomUUID().toString();
         final PostLoansLoanIdTransactionsResponse inAdvanceRepaymentResult = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
                 new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate(formattedDate).locale("en")
@@ -358,10 +449,24 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
                         .transactionDate(formattedDate).locale("en").transactionAmount(5.0).externalId(makeRefundTxnExternalIdStr));
         assertEquals(makeRefundTxnExternalIdStr, makeRefundByCashResultWithExternalId.getResourceExternalId());
 
+        response = loanTransactionHelper.getLoanTransactionDetails((long) loanWithInterestId, makeRefundTxnExternalIdStr);
+        assertEquals(makeRefundTxnExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, makeRefundByCashResultWithExternalId.getResourceId());
+        assertEquals(makeRefundTxnExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, makeRefundTxnExternalIdStr);
+        assertEquals(makeRefundTxnExternalIdStr, response.getExternalId());
+
         PostLoansLoanIdTransactionsResponse adjustmentResult = loanTransactionHelper.reverseLoanTransaction((long) loanWithInterestId,
                 inAdvanceRepayment2TxnExternalIdStr, new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate(formattedDate)
                         .locale("en").dateFormat("dd MMMM yyyy").transactionAmount(0.0));
         assertEquals(inAdvanceRepayment2TxnExternalIdStr, adjustmentResult.getResourceExternalId());
+
+        response = loanTransactionHelper.getLoanTransactionDetails((long) loanWithInterestId, inAdvanceRepayment2TxnExternalIdStr);
+        assertEquals(inAdvanceRepayment2TxnExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, adjustmentResult.getResourceId());
+        assertEquals(inAdvanceRepayment2TxnExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, inAdvanceRepayment2TxnExternalIdStr);
+        assertEquals(inAdvanceRepayment2TxnExternalIdStr, response.getExternalId());
 
         adjustmentResult = loanTransactionHelper.reverseLoanTransaction(loanExternalIdStr, inAdvanceRepaymentResult.getResourceId(),
                 new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate(formattedDate).locale("en").dateFormat("dd MMMM yyyy")
@@ -373,6 +478,13 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
                 new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate(formattedDate).locale("en").dateFormat("dd MMMM yyyy")
                         .transactionAmount(2.0).externalId(adjustTransactionExternalId));
         assertEquals(adjustTransactionExternalId, adjustmentResult.getResourceExternalId());
+
+        response = loanTransactionHelper.getLoanTransactionDetails((long) loanWithInterestId, adjustTransactionExternalId);
+        assertEquals(adjustTransactionExternalId, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, adjustmentResult.getResourceId());
+        assertEquals(adjustTransactionExternalId, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, adjustTransactionExternalId);
+        assertEquals(adjustTransactionExternalId, response.getExternalId());
 
         adjustmentResult = loanTransactionHelper.adjustLoanTransaction(loanExternalIdStr, adjustmentResult.getResourceExternalId(),
                 new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate(formattedDate).locale("en").dateFormat("dd MMMM yyyy")
@@ -390,6 +502,13 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
                         .transactionAmount(2.0).externalId(chargebackTransactionExternalId).paymentTypeId(1L));
         assertEquals(chargebackTransactionExternalId, chargebackResult.getResourceExternalId());
 
+        response = loanTransactionHelper.getLoanTransactionDetails((long) loanWithInterestId, chargebackTransactionExternalId);
+        assertEquals(chargebackTransactionExternalId, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, chargebackResult.getResourceId());
+        assertEquals(chargebackTransactionExternalId, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, chargebackTransactionExternalId);
+        assertEquals(chargebackTransactionExternalId, response.getExternalId());
+
         chargebackResult = loanTransactionHelper.chargebackLoanTransaction(loanExternalIdStr,
                 repaymentForChargebackResult.getResourceExternalId(),
                 new PostLoansLoanIdTransactionsTransactionIdRequest().locale("en").transactionAmount(2.0).paymentTypeId(2L));
@@ -401,6 +520,13 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
                 (long) penalty3LoanChargeId,
                 new PostLoansLoanIdChargesChargeIdRequest().externalId(chargeAdjustmentExternalIdStr).amount(1.0).locale("en"));
         assertEquals(chargeAdjustmentExternalIdStr, chargeAdjustmentResult.getSubResourceExternalId());
+
+        response = loanTransactionHelper.getLoanTransactionDetails((long) loanWithInterestId, chargeAdjustmentExternalIdStr);
+        assertEquals(chargeAdjustmentExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, chargeAdjustmentResult.getSubResourceExternalId());
+        assertEquals(chargeAdjustmentExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, chargeAdjustmentExternalIdStr);
+        assertEquals(chargeAdjustmentExternalIdStr, response.getExternalId());
 
         // Check whether an external id was generated
         chargeAdjustmentResult = loanTransactionHelper.chargeAdjustment((long) loanWithInterestId, (long) penalty3LoanChargeId,
@@ -415,6 +541,14 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
         payChargeResult = this.loanTransactionHelper.payChargesForLoan(loanWithInterestId, penalty5LoanChargeId,
                 LoanTransactionHelper.getPayChargeJSON(formattedDate, null, payChargeExternalIdStr), "");
         assertEquals(payChargeExternalIdStr, payChargeResult.get("subResourceExternalId"));
+
+        response = loanTransactionHelper.getLoanTransactionDetails((long) loanWithInterestId, payChargeExternalIdStr);
+        assertEquals(payChargeExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr,
+                Long.valueOf(payChargeResult.get("subResourceId").toString()));
+        assertEquals(payChargeExternalIdStr, response.getExternalId());
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, payChargeExternalIdStr);
+        assertEquals(payChargeExternalIdStr, response.getExternalId());
 
         GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, 50, false);
     }
