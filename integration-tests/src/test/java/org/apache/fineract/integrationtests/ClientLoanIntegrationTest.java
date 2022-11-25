@@ -47,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.client.models.BusinessDateRequest;
@@ -6221,10 +6222,14 @@ public class ClientLoanIntegrationTest {
         assertEquals(5.0, chargeAdjustmentTransaction.getPrincipalPortion());
         assertEquals("loanTransactionType.chargeAdjustment", chargeAdjustmentTransaction.getType().getCode());
         assertEquals(externalId, chargeAdjustmentTransaction.getExternalId());
-        transactionRelation = chargeAdjustmentTransaction.getTransactionRelations().iterator().next();
-        assertEquals(chargeAdjustmentTxnId, transactionRelation.getFromLoanTransaction());
-        assertEquals((long) penalty1LoanChargeId, transactionRelation.getToLoanCharge());
-        assertEquals("CHARGE_ADJUSTMENT", transactionRelation.getRelationType());
+
+        Set<GetLoanTransactionRelation> transactionRelations = chargeAdjustmentTransaction.getTransactionRelations();
+        for (GetLoanTransactionRelation loanTransactionRelation : transactionRelations) {
+            if (loanTransactionRelation.getRelationType().equals("CHARGE_ADJUSTMENT")) {
+                assertEquals(chargeAdjustmentTxnId, loanTransactionRelation.getFromLoanTransaction());
+                assertEquals((long) penalty1LoanChargeId, loanTransactionRelation.getToLoanCharge());
+            }
+        }
 
         String uuid = UUID.randomUUID().toString();
         this.loanTransactionHelper.reverseLoanTransaction((long) loanID, chargeAdjustmentTxnId,
