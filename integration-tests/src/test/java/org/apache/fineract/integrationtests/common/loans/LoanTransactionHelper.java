@@ -784,6 +784,22 @@ public class LoanTransactionHelper extends IntegrationTest {
         return ok(fineract().loanTransactions.retrieveTransaction(loanId, transactionId, null));
     }
 
+    public GetLoansLoanIdTransactionsTransactionIdResponse getLoanTransactionDetails(final String loanExternalId,
+            final Long transactionId) {
+        return ok(fineract().loanTransactions.retrieveTransactionByLoanExternalIdAndTransactionId(loanExternalId, transactionId, null));
+    }
+
+    public GetLoansLoanIdTransactionsTransactionIdResponse getLoanTransactionDetails(final Long loanId,
+            final String transactionExternalId) {
+        return ok(fineract().loanTransactions.retrieveTransactionByTransactionExternalId(loanId, transactionExternalId, null));
+    }
+
+    public GetLoansLoanIdTransactionsTransactionIdResponse getLoanTransactionDetails(final String loanExternalId,
+            final String transactionExternalId) {
+        return ok(fineract().loanTransactions.retrieveTransactionByLoanExternalIdAndTransactionExternalId(loanExternalId,
+                transactionExternalId, null));
+    }
+
     public GetLoansLoanIdResponse getLoanDetails(final Long loanId) {
         return ok(fineract().loans.retrieveLoan(loanId, false, "all", null, null));
     }
