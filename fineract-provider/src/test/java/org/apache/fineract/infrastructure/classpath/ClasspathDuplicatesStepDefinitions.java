@@ -22,10 +22,14 @@ import io.cucumber.java8.En;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ResourceList;
 import io.github.classgraph.ScanResult;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.MapUtils;
 import org.opentest4j.AssertionFailedError;
 
 public class ClasspathDuplicatesStepDefinitions implements En {
@@ -69,7 +73,11 @@ public class ClasspathDuplicatesStepDefinitions implements En {
         // tag::then[]
         Then("There should be no duplicates", () -> {
             if (!duplicates.isEmpty()) {
-                throw new AssertionFailedError(duplicates.size() + " Classpath duplicates detected:\n" + duplicates);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                PrintStream ps = new PrintStream(baos, false, StandardCharsets.UTF_8);
+                MapUtils.debugPrint(ps, "duplicates", duplicates);
+                String prettyPrintedMap = baos.toString(StandardCharsets.UTF_8);
+                throw new AssertionFailedError(duplicates.size() + " Classpath duplicates detected:\n" + prettyPrintedMap);
             }
         });
         // end::then[]
@@ -89,10 +97,11 @@ public class ClasspathDuplicatesStepDefinitions implements En {
                 // list formerly in ClasspathHellDuplicatesCheckRule (moved here
                 // in INFRAUTILS-52)
                 || resourcePath.endsWith(".txt") || resourcePath.endsWith("LICENSE") || resourcePath.endsWith("license.html")
-                || resourcePath.endsWith("about.html") || resourcePath.endsWith("readme.html")
-                || resourcePath.startsWith("META-INF/services") || resourcePath.equals("META-INF/DEPENDENCIES")
-                || resourcePath.equals("META-INF/git.properties") || resourcePath.equals("META-INF/io.netty.versions.properties")
-                || resourcePath.equals("META-INF/jersey-module-version") || resourcePath.startsWith("OSGI-INF/blueprint/")
+                || resourcePath.endsWith("AL2.0") || resourcePath.endsWith("LGPL2.1") || resourcePath.endsWith("about.html")
+                || resourcePath.endsWith("readme.html") || resourcePath.startsWith("META-INF/services")
+                || resourcePath.equals("META-INF/DEPENDENCIES") || resourcePath.equals("META-INF/git.properties")
+                || resourcePath.equals("META-INF/io.netty.versions.properties") || resourcePath.equals("META-INF/jersey-module-version")
+                || resourcePath.startsWith("OSGI-INF/blueprint/")
                 // in Akka's JARs
                 || resourcePath.startsWith("org/opendaylight/blueprint/") || resourcePath.endsWith("reference.conf")
                 // json-schema-core and json-schema-validator depend on each
