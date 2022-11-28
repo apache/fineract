@@ -620,8 +620,8 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             sqlBuilder.append(" left join m_savings_account sav on sav_txn.savings_account_id = sav.id ");
             sqlBuilder.append(" left join m_client cl on sav.client_id = cl.id ");
             sqlBuilder.append(" left join m_office o on cl.office_id = o.id ");
-            sqlBuilder.append(" left join m_appuser user on sav_txn.appuser_id = user.id ");
-            sqlBuilder.append(" left join m_staff staff on user.staff_id = staff.id ");
+            sqlBuilder.append(" left join m_appuser appuser on sav_txn.appuser_id = appuser.id ");
+            sqlBuilder.append(" left join m_staff staff on appuser.staff_id = staff.id ");
             sqlBuilder.append(" left join m_cashiers c on c.staff_id = staff.id ");
             sqlBuilder.append(" left join m_payment_detail payDetails on payDetails.id = sav_txn.payment_detail_id ");
             sqlBuilder.append(" left join m_payment_type payType on payType.id = payDetails.payment_type_id ");
@@ -658,8 +658,8 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             sqlBuilder.append(" left join m_loan loan on loan_txn.loan_id = loan.id ");
             sqlBuilder.append(" left join m_client cl on loan.client_id = cl.id ");
             sqlBuilder.append(" left join m_office o on cl.office_id = o.id ");
-            sqlBuilder.append(" left join m_appuser user on loan_txn.created_by = user.id ");
-            sqlBuilder.append(" left join m_staff staff on user.staff_id = staff.id ");
+            sqlBuilder.append(" left join m_appuser appuser on loan_txn.created_by = appuser.id ");
+            sqlBuilder.append(" left join m_staff staff on appuser.staff_id = staff.id ");
             sqlBuilder.append(" left join m_cashiers c on c.staff_id = staff.id ");
             sqlBuilder.append(" left join m_payment_detail payDetails on payDetails.id = loan_txn.payment_detail_id ");
             sqlBuilder.append(" left join m_payment_type payType on payType.id = payDetails.payment_type_id ");
@@ -694,8 +694,8 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
                     " left join r_enum_value renum on cli_txn.transaction_type_enum = renum.enum_id AND renum.enum_name = 'client_transaction_type_enum' ");
             sqlBuilder.append(" left join m_client cl on cli_txn.client_id = cl.id ");
             sqlBuilder.append(" left join m_office o on cl.office_id = o.id ");
-            sqlBuilder.append(" left join m_appuser user on cli_txn.created_by = user.id ");
-            sqlBuilder.append(" left join m_staff staff on user.staff_id = staff.id ");
+            sqlBuilder.append(" left join m_appuser appuser on cli_txn.created_by = appuser.id ");
+            sqlBuilder.append(" left join m_staff staff on appuser.staff_id = staff.id ");
             sqlBuilder.append(" left join m_cashiers c on c.staff_id = staff.id ");
             sqlBuilder.append(" left join m_payment_detail payDetails on payDetails.id = cli_txn.payment_detail_id ");
             sqlBuilder.append(" left join m_payment_type payType on payType.id = payDetails.payment_type_id ");
@@ -783,8 +783,8 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             sqlBuilder.append("    left join m_savings_account sav on sav_txn.savings_account_id = sav.id ");
             sqlBuilder.append("    left join m_client cl on sav.client_id = cl.id ");
             sqlBuilder.append("    left join m_office o on cl.office_id = o.id ");
-            sqlBuilder.append("    left join m_appuser user on sav_txn.appuser_id = user.id ");
-            sqlBuilder.append("    left join m_staff staff on user.staff_id = staff.id ");
+            sqlBuilder.append("    left join m_appuser appuser on sav_txn.appuser_id = appuser.id ");
+            sqlBuilder.append("    left join m_staff staff on appuser.staff_id = staff.id ");
             sqlBuilder.append("    left join m_cashiers c on c.staff_id = staff.id ");
             sqlBuilder.append(" left join m_payment_detail payDetails on payDetails.id = sav_txn.payment_detail_id ");
             sqlBuilder.append(" left join m_payment_type payType on payType.id = payDetails.payment_type_id ");
@@ -822,8 +822,8 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             sqlBuilder.append("    left join m_loan loan on loan_txn.loan_id = loan.id ");
             sqlBuilder.append("    left join m_client cl on loan.client_id = cl.id ");
             sqlBuilder.append("    left join m_office o on cl.office_id = o.id ");
-            sqlBuilder.append("    left join m_appuser user on loan_txn.created_by = user.id ");
-            sqlBuilder.append("    left join m_staff staff on user.staff_id = staff.id ");
+            sqlBuilder.append("    left join m_appuser appuser on loan_txn.created_by = appuser.id ");
+            sqlBuilder.append("    left join m_staff staff on appuser.staff_id = staff.id ");
             sqlBuilder.append("    left join m_cashiers c on c.staff_id = staff.id ");
             sqlBuilder.append(" left join m_payment_detail payDetails on payDetails.id = loan_txn.payment_detail_id ");
             sqlBuilder.append(" left join m_payment_type payType on payType.id = payDetails.payment_type_id ");
@@ -859,8 +859,8 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
                     "    left join r_enum_value renum ON cli_txn.transaction_type_enum = renum.enum_id AND renum.enum_name = 'client_transaction_type_enum' ");
             sqlBuilder.append("    left join m_client cl ON cli_txn.client_id = cl.id ");
             sqlBuilder.append("    left join m_office o ON cl.office_id = o.id ");
-            sqlBuilder.append("    left join m_appuser user ON cli_txn.created_by = user.id ");
-            sqlBuilder.append("    left join m_staff staff ON user.staff_id = staff.id ");
+            sqlBuilder.append("    left join m_appuser appuser ON cli_txn.created_by = appuser.id ");
+            sqlBuilder.append("    left join m_staff staff ON appuser.staff_id = staff.id ");
             sqlBuilder.append("    left join m_cashiers c ON c.staff_id = staff.id ");
             sqlBuilder.append(" left join m_payment_detail payDetails on payDetails.id = cli_txn.payment_detail_id ");
             sqlBuilder.append(" left join m_payment_type payType on payType.id = payDetails.payment_type_id ");
