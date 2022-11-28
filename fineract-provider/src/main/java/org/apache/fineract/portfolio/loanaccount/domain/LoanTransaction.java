@@ -479,6 +479,18 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom {
         return this.principalPortion;
     }
 
+    public BigDecimal getInterestPortion() {
+        return this.interestPortion;
+    }
+
+    public BigDecimal getPenaltyChargesPortion() {
+        return this.penaltyChargesPortion;
+    }
+
+    public BigDecimal getFeeChargesPortion() {
+        return this.feeChargesPortion;
+    }
+
     public Money getInterestPortion(final MonetaryCurrency currency) {
         return Money.of(currency, this.interestPortion);
     }

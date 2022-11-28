@@ -364,11 +364,10 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanWaiveChargeUndoBusinessEvent(loanCharge));
 
-        // TODO: this needs to be fixed in the future! Principal portion is bigdecimal, interest portion is money, ...
         changes.put("principalPortion", loanTransaction.getPrincipalPortion());
-        changes.put("interestPortion", loanTransaction.getInterestPortion(loan.getCurrency()));
-        changes.put("feeChargesPortion", loanTransaction.getFeeChargesPortion(loan.getCurrency()));
-        changes.put("penaltyChargesPortion", loanTransaction.getPenaltyChargesPortion(loan.getCurrency()));
+        changes.put("interestPortion", loanTransaction.getInterestPortion());
+        changes.put("feeChargesPortion", loanTransaction.getFeeChargesPortion());
+        changes.put("penaltyChargesPortion", loanTransaction.getPenaltyChargesPortion());
         changes.put("outstandingLoanBalance", loanTransaction.getOutstandingLoanBalance());
         changes.put("id", loanTransaction.getId());
         changes.put("externalId", loanTransaction.getExternalId());

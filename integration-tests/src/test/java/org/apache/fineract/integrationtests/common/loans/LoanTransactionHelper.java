@@ -62,6 +62,8 @@ import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
+import org.apache.fineract.client.models.PutChargeTransactionChangesRequest;
+import org.apache.fineract.client.models.PutChargeTransactionChangesResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
@@ -504,25 +506,28 @@ public class LoanTransactionHelper extends IntegrationTest {
         return ok(fineract().loanTransactions.executeLoanTransaction(loanId, request, "repayment"));
     }
 
-    public HashMap undoWaiveLoanCharge(final Long loanId, final String transactionExternalId) {
+    public PutChargeTransactionChangesResponse undoWaiveLoanCharge(final Long loanId, final Long transactionId,
+            final PutChargeTransactionChangesRequest request) {
         log.info("--------------------------------- UNDO WAIVE CHARGES FOR LOAN --------------------------------");
-        final String TRANSAC_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/external-id/" + transactionExternalId + "?"
-                + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPut(requestSpec, responseSpec, TRANSAC_URL, "", "");
+        return ok(fineract().loanTransactions.undoWaiveCharge(loanId, transactionId, request));
     }
 
-    public HashMap undoWaiveLoanCharge(final String loanExternalId, final Long transactionId) {
+    public PutChargeTransactionChangesResponse undoWaiveLoanCharge(final Long loanId, final String transactionExternalId,
+            final PutChargeTransactionChangesRequest request) {
         log.info("--------------------------------- UNDO WAIVE CHARGES FOR LOAN --------------------------------");
-        final String TRANSAC_URL = "/fineract-provider/api/v1/loans/external-id/" + loanExternalId + "/transactions/" + transactionId + "?"
-                + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPut(requestSpec, responseSpec, TRANSAC_URL, "", "");
+        return ok(fineract().loanTransactions.undoWaiveCharge1(loanId, transactionExternalId, request));
     }
 
-    public HashMap undoWaiveLoanCharge(final String loanExternalId, final String transactionExternalId) {
+    public PutChargeTransactionChangesResponse undoWaiveLoanCharge(final String loanExternalId, final Long transactionId,
+            final PutChargeTransactionChangesRequest request) {
         log.info("--------------------------------- UNDO WAIVE CHARGES FOR LOAN --------------------------------");
-        final String TRANSAC_URL = "/fineract-provider/api/v1/loans/external-id/" + loanExternalId + "/transactions/external-id/"
-                + transactionExternalId + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPut(requestSpec, responseSpec, TRANSAC_URL, "", "");
+        return ok(fineract().loanTransactions.undoWaiveCharge2(loanExternalId, transactionId, request));
+    }
+
+    public PutChargeTransactionChangesResponse undoWaiveLoanCharge(final String loanExternalId, final String transactionExternalId,
+            final PutChargeTransactionChangesRequest request) {
+        log.info("--------------------------------- UNDO WAIVE CHARGES FOR LOAN --------------------------------");
+        return ok(fineract().loanTransactions.undoWaiveCharge3(loanExternalId, transactionExternalId, request));
     }
 
     public PostLoansLoanIdChargesChargeIdResponse waiveLoanCharge(final Long loanId, final Long loanChargeId,
