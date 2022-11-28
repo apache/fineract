@@ -41,6 +41,8 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     public static final String ENABLE_BUSINESS_DATE = "enable_business_date";
     public static final String ENABLE_AUTOMATIC_COB_DATE_ADJUSTMENT = "enable_automatic_cob_date_adjustment";
     public static final String EXTERNAL_EVENTS_PURGE_DAYS = "purge-external-events-older-than-days";
+
+    public static final String PROCESSED_COMMANDS_PURGE_DAYS = "purge-processed-commands-older-than-days";
     private static final String DAYS_BEFORE_REPAYMENT_IS_DUE = "days-before-repayment-is-due";
     private static final String DAYS_AFTER_REPAYMENT_IS_OVERDUE = "days-after-repayment-is-overdue";
     private static final String ENABLE_EXTERNAL_ID_AUTO_GENERATION = "enable-auto-generated-external-id";
@@ -459,6 +461,13 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     @Override
     public Long retrieveExternalEventsPurgeDaysCriteria() {
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(EXTERNAL_EVENTS_PURGE_DAYS);
+        return property.getValue();
+
+    }
+
+    @Override
+    public Long retrieveProcessedCommandsPurgeDaysCriteria() {
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(PROCESSED_COMMANDS_PURGE_DAYS);
         return property.getValue();
 
     }

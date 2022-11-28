@@ -121,6 +121,8 @@ public interface ConfigurationDomainService {
 
     Long retrieveExternalEventsPurgeDaysCriteria();
 
+    Long retrieveProcessedCommandsPurgeDaysCriteria();
+
     Long retrieveRepaymentDueDays();
 
     Long retrieveRepaymentOverdueDays();
