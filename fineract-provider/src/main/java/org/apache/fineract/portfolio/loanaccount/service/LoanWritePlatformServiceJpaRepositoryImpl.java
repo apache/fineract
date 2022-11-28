@@ -2119,6 +2119,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
         LocalDate recalculateFrom = null;
         LoanTransaction writeOffTransaction = loan.findWriteOffTransaction();
+        if (writeOffTransaction == null) {
+            throw new PlatformServiceUnavailableException("error.msg.loan.write.off.transaction.not.found",
+                    "Loan :" + loanId + " write off transaction not found", loanId);
+        }
         businessEventNotifierService.notifyPreBusinessEvent(new LoanUndoWrittenOffBusinessEvent(writeOffTransaction));
 
         ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
