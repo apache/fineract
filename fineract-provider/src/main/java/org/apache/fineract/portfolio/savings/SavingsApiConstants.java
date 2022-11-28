@@ -212,4 +212,6 @@ public class SavingsApiConstants {
     public static final String numberOfCreditTransactionsParamName = "numOfCreditTransaction";
 
     public static final String isUSDProductParamName = "isUSDProduct";
+    public static final String VAULT_TARGET_AMOUNT = "vaultTargetAmount";
+    public static final String VAULT_TARGET_DATE = "vaultTargetDate";
 }

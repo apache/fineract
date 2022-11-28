@@ -2093,6 +2093,21 @@ public class SavingsAccount extends AbstractPersistableCustom {
             this.withdrawalFeeApplicableForTransfer = newValue;
         }
 
+        if (command.isChangeInLocalDateParameterNamed(SavingsApiConstants.VAULT_TARGET_DATE, getVaultTargetDate())) {
+            final String newValueAsString = command.stringValueOfParameterNamed(SavingsApiConstants.VAULT_TARGET_DATE);
+            actualChanges.put(SavingsApiConstants.VAULT_TARGET_DATE, newValueAsString);
+            actualChanges.put(SavingsApiConstants.localeParamName, localeAsInput);
+            actualChanges.put(SavingsApiConstants.dateFormatParamName, dateFormat);
+            this.vaultTargetDate = command.localDateValueOfParameterNamed(SavingsApiConstants.VAULT_TARGET_DATE);
+        }
+        if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(SavingsApiConstants.VAULT_TARGET_AMOUNT,
+                getVaultTargetAmount())) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(SavingsApiConstants.VAULT_TARGET_AMOUNT);
+            actualChanges.put(SavingsApiConstants.VAULT_TARGET_AMOUNT, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.vaultTargetAmount = Money.of(this.currency, newValue).getAmount();
+        }
+
         // charges
         final String chargesParamName = "charges";
         if (command.hasParameter(chargesParamName)) {
@@ -5013,5 +5028,20 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
+    }
+
+    public void setVaultTribeDetails(BigDecimal vaultTargetAmount, LocalDate vaultTargetDate) {
+        if (vaultTargetAmount != null && vaultTargetDate != null) {
+            this.vaultTargetAmount = vaultTargetAmount;
+            this.vaultTargetDate = vaultTargetDate;
+        }
+    }
+
+    public BigDecimal getVaultTargetAmount() {
+        return vaultTargetAmount;
+    }
+
+    public LocalDate getVaultTargetDate() {
+        return vaultTargetDate;
     }
 }
