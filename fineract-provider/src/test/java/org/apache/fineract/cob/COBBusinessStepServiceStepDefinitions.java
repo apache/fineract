@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import com.google.common.base.Splitter;
 import io.cucumber.java8.En;
@@ -39,6 +40,7 @@ import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.mix.data.MixTaxonomyData;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -144,6 +146,14 @@ public class COBBusinessStepServiceStepDefinitions implements En {
             assertThrows(BusinessStepException.class, () -> {
                 resultItem = this.businessStepService.run(this.executionMap, this.item);
             });
+            ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
+        });
+
+        Then("throw exception COBBusinessStepService.run method with verification", () -> {
+            assertThrows(BusinessStepException.class, () -> {
+                resultItem = this.businessStepService.run(this.executionMap, this.item);
+            });
+            verify(businessEventNotifierService, Mockito.times(1)).resetEventRecording();
             ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         });
 
