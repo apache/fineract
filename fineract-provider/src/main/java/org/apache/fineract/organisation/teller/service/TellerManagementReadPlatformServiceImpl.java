@@ -500,8 +500,9 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         String sql = "select * from (select " + ctm.cashierTxnSchema()
                 + " where txn.cashier_id = ? and txn.currency_code = ? and o.hierarchy like ? "
                 + "AND ((case when c.full_day then Date(txn.created_date) between c.start_date AND c.end_date else ( Date(txn.created_date) between c.start_date AND c.end_date"
-                + " ) and ( " + sqlGenerator.subTime("created_date") + " between " + sqlGenerator.subTime("c.start_time") + " AND " + sqlGenerator.subTime("c.end_time") + ") end) or txn.txn_type = 101))  cashier_txns "
-                + " union (select " + ctm.savingsTxnSchema()
+                + " ) and ( " + sqlGenerator.subTime("created_date") + " between " + sqlGenerator.subTime("c.start_time") + " AND "
+                + sqlGenerator.subTime("c.end_time") + ") end) or txn.txn_type = 101))  cashier_txns " + " union (select "
+                + ctm.savingsTxnSchema()
                 + " where sav_txn.is_reversed = false and c.id = ? and sav.currency_code = ? and o.hierarchy like ? and "
                 + " sav_txn.transaction_date between c.start_date and " + sqlGenerator.addDate("c.end_date", "1", "day") + " "
                 + " and renum.enum_value in ('deposit','withdrawal fee', 'Pay Charge', 'withdrawal', 'Annual Fee', 'Waive Charge', 'Interest Posting', 'Overdraft Interest') "
@@ -758,7 +759,9 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             sqlBuilder.append("    left join m_staff s on s.id = c.staff_id ");
             sqlBuilder.append("    where txn.cashier_id = ? ");
             sqlBuilder.append(" AND (( case when c.full_day then Date(txn.created_date) between c.start_date AND c.end_date ");
-            sqlBuilder.append(" else ( Date(txn.created_date) between c.start_date AND c.end_date) and  ( " + sqlGenerator.subTime("txn.created_date") + " between " + sqlGenerator.subTime("c.start_time") + " AND " + sqlGenerator.subTime("c.end_time") + ")  end) or txn.txn_type = 101) ");
+            sqlBuilder.append(" else ( Date(txn.created_date) between c.start_date AND c.end_date) and  ( "
+                    + sqlGenerator.subTime("txn.created_date") + " between " + sqlGenerator.subTime("c.start_time") + " AND "
+                    + sqlGenerator.subTime("c.end_time") + ")  end) or txn.txn_type = 101) ");
             sqlBuilder.append(" and   txn.currency_code = ? ");
             sqlBuilder.append("    and o.hierarchy like ?  ) cashier_txns ");
             sqlBuilder.append("    UNION ");
@@ -794,7 +797,8 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             sqlBuilder.append("    where sav_txn.is_reversed = false and c.id = ? ");
             sqlBuilder.append(" and sav.currency_code = ? ");
             sqlBuilder.append("    and o.hierarchy like ? ");
-            sqlBuilder.append("    and sav_txn.transaction_date between c.start_date and " + sqlGenerator.addDate("c.end_date", "1", "day") + " ");
+            sqlBuilder.append(
+                    "    and sav_txn.transaction_date between c.start_date and " + sqlGenerator.addDate("c.end_date", "1", "day") + " ");
             sqlBuilder.append("    and (sav_txn.payment_detail_id IS NULL OR payType.is_cash_payment = true) ");
             sqlBuilder.append("    AND acnttrans.id IS NULL  ");
             sqlBuilder.append("    ) ");
@@ -833,7 +837,8 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             sqlBuilder.append("    where loan_txn.is_reversed = false and c.id = ? ");
             sqlBuilder.append(" and loan.currency_code = ? ");
             sqlBuilder.append("    and o.hierarchy like ? ");
-            sqlBuilder.append("    and loan_txn.transaction_date between c.start_date and " + sqlGenerator.addDate("c.end_date","1","day") + " ");
+            sqlBuilder.append(
+                    "    and loan_txn.transaction_date between c.start_date and " + sqlGenerator.addDate("c.end_date", "1", "day") + " ");
             sqlBuilder.append("    and (loan_txn.payment_detail_id IS NULL OR payType.is_cash_payment = true) ");
             sqlBuilder.append("    AND acnttrans.id IS NULL  ");
             sqlBuilder.append("    ) ");
@@ -867,7 +872,8 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             sqlBuilder.append("    where cli_txn.is_reversed = false AND c.id = ?    ");
             sqlBuilder.append(" and cli_txn.currency_code = ? ");
             sqlBuilder.append("    and o.hierarchy LIKE ? ");
-            sqlBuilder.append("    and cli_txn.transaction_date between c.start_date and " + sqlGenerator.addDate("c.end_date", "1", "day") + " ");
+            sqlBuilder.append(
+                    "    and cli_txn.transaction_date between c.start_date and " + sqlGenerator.addDate("c.end_date", "1", "day") + " ");
             sqlBuilder.append(" and (cli_txn.payment_detail_id IS NULL OR payType.is_cash_payment = true)  ");
             sqlBuilder.append("    ) ");
             sqlBuilder.append("    ) txns ");

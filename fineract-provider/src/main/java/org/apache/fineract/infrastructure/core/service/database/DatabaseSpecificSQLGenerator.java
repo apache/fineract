@@ -175,7 +175,8 @@ public class DatabaseSpecificSQLGenerator {
         } else if (databaseTypeResolver.isPostgreSQL()) {
             return format("(%s:: TIMESTAMP :: TIME)", dateTime);
         } else {
-            throw new IllegalStateException("Database type is not supported for subtracting time from datetime " + databaseTypeResolver.databaseType());
+            throw new IllegalStateException(
+                    "Database type is not supported for subtracting time from datetime " + databaseTypeResolver.databaseType());
         }
     }
 
