@@ -139,7 +139,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
         }
     }
-    
+
     private static final class TellerLookupMapper implements RowMapper<TellerData> {
 
         private final String schemaSql;
