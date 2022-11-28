@@ -350,7 +350,7 @@ final class LoanTransactionsApiResourceSwagger {
             @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
             public String externalId;
             @Schema(example = "28 June 2022")
-            public String date;
+            public LocalDate date;
 
         }
 

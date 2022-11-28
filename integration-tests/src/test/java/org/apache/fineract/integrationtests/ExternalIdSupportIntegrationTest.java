@@ -44,6 +44,8 @@ import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
+import org.apache.fineract.client.models.PutChargeTransactionChangesRequest;
+import org.apache.fineract.client.models.PutChargeTransactionChangesResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
@@ -181,13 +183,13 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
         assertEquals(waiveChargeExternalIdStr, response.getExternalId());
 
         // Check whether an external id was generated
-        HashMap undoWaiveLoanChargeResult = loanTransactionHelper.undoWaiveLoanCharge((long) loanId, waiveChargeExternalIdStr);
-        assertEquals(waiveChargeExternalIdStr, undoWaiveLoanChargeResult.get("subResourceExternalId"));
+        PutChargeTransactionChangesResponse undoWaiveLoanChargeResult = loanTransactionHelper.undoWaiveLoanCharge((long) loanId,
+                waiveChargeExternalIdStr, new PutChargeTransactionChangesRequest());
+        assertEquals(waiveChargeExternalIdStr, undoWaiveLoanChargeResult.getSubResourceExternalId());
 
         response = loanTransactionHelper.getLoanTransactionDetails((long) loanId, waiveChargeExternalIdStr);
         assertEquals(waiveChargeExternalIdStr, response.getExternalId());
-        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr,
-                Long.valueOf(undoWaiveLoanChargeResult.get("subResourceId").toString()));
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, undoWaiveLoanChargeResult.getSubResourceId());
         assertEquals(waiveChargeExternalIdStr, response.getExternalId());
         response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, waiveChargeExternalIdStr);
         assertEquals(waiveChargeExternalIdStr, response.getExternalId());
@@ -199,8 +201,9 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
         assertEquals(penalty1LoanChargeExternalId, waiveLoanChargeResult.getResourceExternalId());
 
         // Check whether an external id was generated
-        undoWaiveLoanChargeResult = loanTransactionHelper.undoWaiveLoanCharge(loanExternalIdStr, waiveLoanChargeResult.getSubResourceId());
-        assertNotNull(undoWaiveLoanChargeResult.get("subResourceExternalId"));
+        undoWaiveLoanChargeResult = loanTransactionHelper.undoWaiveLoanCharge(loanExternalIdStr, waiveLoanChargeResult.getSubResourceId(),
+                new PutChargeTransactionChangesRequest());
+        assertNotNull(undoWaiveLoanChargeResult.getSubResourceExternalId());
 
         // Check whether an external id was generated
         waiveChargeExternalIdStr = UUID.randomUUID().toString();
@@ -211,8 +214,8 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
 
         // Check whether an external id was generated
         undoWaiveLoanChargeResult = loanTransactionHelper.undoWaiveLoanCharge(loanExternalIdStr,
-                waiveLoanChargeResult.getSubResourceExternalId());
-        assertEquals(waiveChargeExternalIdStr, undoWaiveLoanChargeResult.get("subResourceExternalId"));
+                waiveLoanChargeResult.getSubResourceExternalId(), new PutChargeTransactionChangesRequest());
+        assertEquals(waiveChargeExternalIdStr, undoWaiveLoanChargeResult.getSubResourceExternalId());
 
         // Check whether an external id was generated
         final PostLoansLoanIdTransactionsResponse repaymentResult = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
