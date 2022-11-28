@@ -91,6 +91,7 @@ import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAccrualPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
+import org.apache.fineract.portfolio.loanaccount.service.ReplayedTransactionBusinessEventService;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
@@ -127,6 +128,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final DelinquencyWritePlatformService delinquencyWritePlatformService;
     private final LoanLifecycleStateMachine defaultLoanLifecycleStateMachine;
     private final ExternalIdFactory externalIdFactory;
+    private final ReplayedTransactionBusinessEventService replayedTransactionBusinessEventService;
 
     @Transactional
     @Override
@@ -210,11 +212,14 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         if (changedTransactionDetail != null) {
             for (Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+
                 saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
                 // update loan with references to the newly created transactions
                 loan.addLoanTransaction(mapEntry.getValue());
                 updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
             }
+            // Trigger transaction replayed event
+            replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
         }
 
         if (StringUtils.isNotBlank(noteText)) {
@@ -788,6 +793,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 loan.getLoanTransactions().add(mapEntry.getValue());
                 updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
             }
+            // Trigger transaction replayed event
+            replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
         }
 
         saveAndFlushLoanWithDataIntegrityViolationChecks(loan);

@@ -155,6 +155,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     private final ExternalIdFactory externalIdFactory;
     private final AccountTransferDetailRepository accountTransferDetailRepository;
     private final LoanChargeAssembler loanChargeAssembler;
+    private final ReplayedTransactionBusinessEventService replayedTransactionBusinessEventService;
 
     private static boolean isPartOfThisInstallment(LoanCharge loanCharge, LoanRepaymentScheduleInstallment e) {
         return e.getFromDate().isBefore(loanCharge.getDueDate()) && !loanCharge.getDueDate().isAfter(e.getDueDate());
@@ -246,6 +247,8 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                     loan.addLoanTransaction(mapEntry.getValue());
                     this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
                 }
+                // Trigger transaction replayed event
+                replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
             }
             this.loanRepositoryWrapper.save(loan);
         }
@@ -741,6 +744,8 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                         loan.addLoanTransaction(mapEntry.getValue());
                         this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
                     }
+                    // Trigger transaction replayed event
+                    replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
                 }
             }
 
@@ -1086,6 +1091,8 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                     loan.addLoanTransaction(mapEntry.getValue());
                     this.accountTransfersWritePlatformService.updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
                 }
+                // Trigger transaction replayed event
+                replayedTransactionBusinessEventService.raiseTransactionReplayedEvents(changedTransactionDetail);
             }
         }
     }

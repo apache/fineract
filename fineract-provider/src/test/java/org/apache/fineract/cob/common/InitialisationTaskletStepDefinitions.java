@@ -24,6 +24,8 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
 import io.cucumber.java8.En;
+import org.apache.fineract.infrastructure.core.domain.ActionContext;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -56,12 +58,14 @@ public class InitialisationTaskletStepDefinitions implements En {
         Then("InitialisationTasklet.execute result should match", () -> {
             assertEquals(RepeatStatus.FINISHED, resultItem);
             assertEquals(appUser, SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+            ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         });
 
         Then("throw exception InitialisationTasklet.execute method", () -> {
             assertThrows(RuntimeException.class, () -> {
                 resultItem = this.initialisationTasklet.execute(null, null);
             });
+            ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         });
     }
 }
