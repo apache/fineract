@@ -110,8 +110,8 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
     public ProvisioningEntryData retrieveProvisioningEntryData(Long entryId) {
         ProvisioningEntryDataMapperWithSumReserved mapper1 = new ProvisioningEntryDataMapperWithSumReserved();
         // Programmatic query, disable sonar
-        final String sql = "select" + mapper1.getSchema() + " where entry.id = ? group by entry.id, created.username, modified.username"; // NOSONAR
-        return this.jdbcTemplate.queryForObject(sql, mapper1, entryId);
+        final String sql = "select" + mapper1.getSchema() + " where entry.id = ? group by entry.id, created.username, modified.username";
+        return this.jdbcTemplate.queryForObject(sql, mapper1, entryId);// NOSONAR
     }
 
     private static final class ProvisioningEntryDataMapper implements RowMapper<ProvisioningEntryData> {
