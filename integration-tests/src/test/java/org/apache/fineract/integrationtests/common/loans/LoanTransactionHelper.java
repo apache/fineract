@@ -42,8 +42,11 @@ import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.DeleteLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.GetDelinquencyTagHistoryResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdChargesTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdCollectionData;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
@@ -53,11 +56,14 @@ import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionId
 import org.apache.fineract.client.models.GetPaymentTypesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
+import org.apache.fineract.client.models.PutLoansLoanIdChargesChargeIdRequest;
+import org.apache.fineract.client.models.PutLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
@@ -252,6 +258,22 @@ public class LoanTransactionHelper extends IntegrationTest {
     public ArrayList getLoanCharges(final Integer loanId) {
         final String GET_LOAN_CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/charges?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_CHARGES_URL, "");
+    }
+
+    public List<GetLoansLoanIdChargesChargeIdResponse> getLoanCharges(final Long loanId) {
+        return ok(fineract().loanCharges.retrieveAllLoanCharges(loanId));
+    }
+
+    public List<GetLoansLoanIdChargesChargeIdResponse> getLoanCharges(final String loanExternalId) {
+        return ok(fineract().loanCharges.retrieveAllLoanCharges1(loanExternalId));
+    }
+
+    public GetLoansLoanIdChargesTemplateResponse getLoanChargeTemplate(final Long loanId) {
+        return ok(fineract().loanCharges.retrieveTemplate8(loanId));
+    }
+
+    public GetLoansLoanIdChargesTemplateResponse getLoanChargeTemplate(final String loanExternalId) {
+        return ok(fineract().loanCharges.retrieveTemplate9(loanExternalId));
     }
 
     public List getRepaymentTemplate(final Integer loanId) {
@@ -503,9 +525,24 @@ public class LoanTransactionHelper extends IntegrationTest {
         return Utils.performServerPut(requestSpec, responseSpec, TRANSAC_URL, "", "");
     }
 
-    public PostLoansLoanIdChargesChargeIdResponse waiveLoanCharge(final Long loanId, final Long chargeId,
+    public PostLoansLoanIdChargesChargeIdResponse waiveLoanCharge(final Long loanId, final Long loanChargeId,
             final PostLoansLoanIdChargesChargeIdRequest request) {
-        return ok(fineract().loanCharges.executeLoanCharge1(loanId, chargeId, request, "waive"));
+        return ok(fineract().loanCharges.executeLoanCharge2(loanId, loanChargeId, request, "waive"));
+    }
+
+    public PostLoansLoanIdChargesChargeIdResponse waiveLoanCharge(final String loanExternalId, final Long loanChargeId,
+            final PostLoansLoanIdChargesChargeIdRequest request) {
+        return ok(fineract().loanCharges.executeLoanCharge4(loanExternalId, loanChargeId, request, "waive"));
+    }
+
+    public PostLoansLoanIdChargesChargeIdResponse waiveLoanCharge(final Long loanId, final String loanChargeExternalId,
+            final PostLoansLoanIdChargesChargeIdRequest request) {
+        return ok(fineract().loanCharges.executeLoanCharge3(loanId, loanChargeExternalId, request, "waive"));
+    }
+
+    public PostLoansLoanIdChargesChargeIdResponse waiveLoanCharge(final String loanExternalId, final String loanChargeExternalId,
+            final PostLoansLoanIdChargesChargeIdRequest request) {
+        return ok(fineract().loanCharges.executeLoanCharge5(loanExternalId, loanChargeExternalId, request, "waive"));
     }
 
     public PostLoansLoanIdTransactionsResponse makeLoanRepayment(final String loanExternalId,
@@ -674,6 +711,14 @@ public class LoanTransactionHelper extends IntegrationTest {
                 getWithdrawLoanApplicationBodyAsJSON(date));
     }
 
+    public PostLoansLoanIdChargesResponse addLoanCharge(final Long loanId, final PostLoansLoanIdChargesRequest request) {
+        return ok(fineract().loanCharges.executeLoanCharge(loanId, request, ""));
+    }
+
+    public PostLoansLoanIdChargesResponse addLoanCharge(final String loanExternalId, final PostLoansLoanIdChargesRequest request) {
+        return ok(fineract().loanCharges.executeLoanCharge1(loanExternalId, request, ""));
+    }
+
     public Integer addChargesForLoan(final Integer loanId, final String request) {
         log.info("--------------------------------- ADD CHARGES FOR LOAN --------------------------------");
         final String ADD_CHARGES_URL = LOAN_ACCOUNT_URL + "/" + loanId + "/charges?" + Utils.TENANT_IDENTIFIER;
@@ -710,6 +755,42 @@ public class LoanTransactionHelper extends IntegrationTest {
         return (Integer) response.get("resourceId");
     }
 
+    public PutLoansLoanIdChargesChargeIdResponse updateLoanCharge(final Long loanId, final Long loanChargeId,
+            final PutLoansLoanIdChargesChargeIdRequest request) {
+        return ok(fineract().loanCharges.updateLoanCharge(loanId, loanChargeId, request));
+    }
+
+    public PutLoansLoanIdChargesChargeIdResponse updateLoanCharge(final Long loanId, final String loanChargeExternalId,
+            final PutLoansLoanIdChargesChargeIdRequest request) {
+        return ok(fineract().loanCharges.updateLoanCharge1(loanId, loanChargeExternalId, request));
+    }
+
+    public PutLoansLoanIdChargesChargeIdResponse updateLoanCharge(final String loanExternalId, final Long loanChargeId,
+            final PutLoansLoanIdChargesChargeIdRequest request) {
+        return ok(fineract().loanCharges.updateLoanCharge2(loanExternalId, loanChargeId, request));
+    }
+
+    public PutLoansLoanIdChargesChargeIdResponse updateLoanCharge(final String loanExternalId, final String loanChargeExternalId,
+            final PutLoansLoanIdChargesChargeIdRequest request) {
+        return ok(fineract().loanCharges.updateLoanCharge3(loanExternalId, loanChargeExternalId, request));
+    }
+
+    public DeleteLoansLoanIdChargesChargeIdResponse deleteLoanCharge(final Long loanId, final Long loanChargeId) {
+        return ok(fineract().loanCharges.deleteLoanCharge(loanId, loanChargeId));
+    }
+
+    public DeleteLoansLoanIdChargesChargeIdResponse deleteLoanCharge(final Long loanId, final String loanChargeExternalId) {
+        return ok(fineract().loanCharges.deleteLoanCharge1(loanId, loanChargeExternalId));
+    }
+
+    public DeleteLoansLoanIdChargesChargeIdResponse deleteLoanCharge(final String loanExternalId, final Long loanChargeId) {
+        return ok(fineract().loanCharges.deleteLoanCharge2(loanExternalId, loanChargeId));
+    }
+
+    public DeleteLoansLoanIdChargesChargeIdResponse deleteLoanCharge(final String loanExternalId, final String loanChargeExternalId) {
+        return ok(fineract().loanCharges.deleteLoanCharge3(loanExternalId, loanChargeExternalId));
+    }
+
     public Integer deleteChargesForLoan(final Integer loanId, final Integer loanchargeId) {
         log.info("--------------------------------- DELETE CHARGES FOR LOAN --------------------------------");
         final String DELETE_CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/charges/" + loanchargeId + "?"
@@ -735,7 +816,12 @@ public class LoanTransactionHelper extends IntegrationTest {
 
     public PostLoansLoanIdChargesChargeIdResponse chargeAdjustment(final Long loanId, final Long chargeId,
             final PostLoansLoanIdChargesChargeIdRequest request) {
-        return ok(fineract().loanCharges.executeLoanCharge1(loanId, chargeId, request, "adjustment"));
+        return ok(fineract().loanCharges.executeLoanCharge2(loanId, chargeId, request, "adjustment"));
+    }
+
+    public PostLoansLoanIdChargesChargeIdResponse chargeAdjustment(final String loanExternalId, final String loanChargeExternalId,
+            final PostLoansLoanIdChargesChargeIdRequest request) {
+        return ok(fineract().loanCharges.executeLoanCharge5(loanExternalId, loanChargeExternalId, request, "adjustment"));
     }
 
     public Integer undoWaiveChargesForLoanReturnResourceId(final Integer loanId, final Integer transactionId, final String body) {
@@ -754,11 +840,19 @@ public class LoanTransactionHelper extends IntegrationTest {
         return (Integer) response.get("resourceId");
     }
 
-    public HashMap payChargesForLoan(final Integer loanId, final Integer loanchargeId, final String json, final String responseAttribute) {
-        log.info("--------------------------------- WAIVE CHARGES FOR LOAN --------------------------------");
-        final String CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/charges/" + loanchargeId + "?command=pay&"
-                + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPost(requestSpec, responseSpec, CHARGES_URL, json, responseAttribute);
+    public PostLoansLoanIdChargesChargeIdResponse payLoanCharge(final Long loanId, final Long loanChargeId,
+            final PostLoansLoanIdChargesChargeIdRequest request) {
+        return ok(fineract().loanCharges.executeLoanCharge2(loanId, loanChargeId, request, "pay"));
+    }
+
+    public PostLoansLoanIdChargesChargeIdResponse payLoanCharge(final String loanExternalId, final Long loanChargeId,
+            final PostLoansLoanIdChargesChargeIdRequest request) {
+        return ok(fineract().loanCharges.executeLoanCharge4(loanExternalId, loanChargeId, request, "pay"));
+    }
+
+    public PostLoansLoanIdChargesChargeIdResponse payLoanCharge(final String loanExternalId, final String loanChargeExternalId,
+            final PostLoansLoanIdChargesChargeIdRequest request) {
+        return ok(fineract().loanCharges.executeLoanCharge5(loanExternalId, loanChargeExternalId, request, "pay"));
     }
 
     public ArrayList<HashMap> getLoanTransactionDetails(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -772,6 +866,22 @@ public class LoanTransactionHelper extends IntegrationTest {
         final String GET_LOAN_CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/charges/" + chargeId + "?"
                 + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_CHARGES_URL, "");
+    }
+
+    public GetLoansLoanIdChargesChargeIdResponse getLoanCharge(final Long loanId, final Long loanChargeId) {
+        return ok(fineract().loanCharges.retrieveLoanCharge(loanId, loanChargeId));
+    }
+
+    public GetLoansLoanIdChargesChargeIdResponse getLoanCharge(final String loanExternalId, final Long loanChargeId) {
+        return ok(fineract().loanCharges.retrieveLoanCharge2(loanExternalId, loanChargeId));
+    }
+
+    public GetLoansLoanIdChargesChargeIdResponse getLoanCharge(final Long loanId, final String loanChargeExternalId) {
+        return ok(fineract().loanCharges.retrieveLoanCharge1(loanId, loanChargeExternalId));
+    }
+
+    public GetLoansLoanIdChargesChargeIdResponse getLoanCharge(final String loanExternalId, final String loanChargeExternalId) {
+        return ok(fineract().loanCharges.retrieveLoanCharge3(loanExternalId, loanChargeExternalId));
     }
 
     public Object getLoanTransactionDetails(final Integer loanId, final Integer txnId, final String param) {
@@ -997,16 +1107,24 @@ public class LoanTransactionHelper extends IntegrationTest {
     }
 
     public static String getSpecifiedDueDateChargesForLoanAsJSON(final String chargeId) {
-        return getSpecifiedDueDateChargesForLoanAsJSON(chargeId, "12 January 2013", "100");
+        return getSpecifiedDueDateChargesForLoanAsJSON(chargeId, "12 January 2013", "100", null);
     }
 
     public static String getSpecifiedDueDateChargesForLoanAsJSON(final String chargeId, final String dueDate, final String amount) {
+        return getSpecifiedDueDateChargesForLoanAsJSON(chargeId, dueDate, amount, null);
+    }
+
+    public static String getSpecifiedDueDateChargesForLoanAsJSON(final String chargeId, final String dueDate, final String amount,
+            final String externalId) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en_GB");
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("amount", amount);
         map.put("dueDate", dueDate);
         map.put("chargeId", chargeId);
+        if (externalId != null) {
+            map.put("externalId", externalId);
+        }
         String json = new Gson().toJson(map);
         log.info("{}", json);
         return json;

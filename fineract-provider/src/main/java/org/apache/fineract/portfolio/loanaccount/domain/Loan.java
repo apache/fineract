@@ -1950,9 +1950,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             this.disbursementDetails.add(disbursementDetails);
             for (LoanTrancheCharge trancheCharge : trancheCharges) {
                 Charge chargeDefinition = trancheCharge.getCharge();
-                final LoanCharge loanCharge = LoanCharge.createNewWithoutLoan(chargeDefinition, principal, null, null, null,
-                        expectedDisbursementDate, null, null);
-                loanCharge.update(this);
+                ExternalId externalId = ExternalId.empty();
+                if (TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled()) {
+                    externalId = ExternalId.generate();
+                }
+                final LoanCharge loanCharge = new LoanCharge(this, chargeDefinition, principal, null, null, null, expectedDisbursementDate,
+                        null, null, BigDecimal.ZERO, externalId);
                 LoanTrancheDisbursementCharge loanTrancheDisbursementCharge = new LoanTrancheDisbursementCharge(loanCharge,
                         disbursementDetails);
                 loanCharge.updateLoanTrancheDisbursementCharge(loanTrancheDisbursementCharge);
