@@ -85,8 +85,8 @@ public class LoanCOBManagerConfiguration {
 
     @Bean
     public Step loanCOBStep() {
-        return stepBuilderFactory.get("Loan COB partition - Step").partitioner(LoanCOBConstant.LOAN_COB_WORKER_STEP, partitioner(null))
-                .outputChannel(outboundRequests).build();
+        return stepBuilderFactory.get(LoanCOBConstant.LOAN_COB_PARTITIONER_STEP)
+                .partitioner(LoanCOBConstant.LOAN_COB_WORKER_STEP, partitioner(null)).outputChannel(outboundRequests).build();
     }
 
     @Bean
