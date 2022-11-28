@@ -168,4 +168,24 @@ public class DatabaseSpecificSQLGenerator {
             throw new IllegalStateException("Database type is not supported for current schema " + databaseTypeResolver.databaseType());
         }
     }
+
+    public String subTime(String dateTime) {
+        if (databaseTypeResolver.isMySQL()) {
+            return format("TIME(%s)", dateTime);
+        } else if (databaseTypeResolver.isPostgreSQL()) {
+            return format("(%s:: TIMESTAMP :: TIME)", dateTime);
+        } else {
+            throw new IllegalStateException("Database type is not supported for subtracting time from datetime " + databaseTypeResolver.databaseType());
+        }
+    }
+
+    public String addDate(String date, String multiplier, String unit) {
+        if (databaseTypeResolver.isMySQL()) {
+            return format("DATE_ADD(%s, INTERVAL %s %s)", date, multiplier, unit);
+        } else if (databaseTypeResolver.isPostgreSQL()) {
+            return format("(%s::TIMESTAMP + %s * INTERVAL '1 %s')", date, multiplier, unit);
+        } else {
+            throw new IllegalStateException("Database type is not supported for adding date " + databaseTypeResolver.databaseType());
+        }
+    }
 }
