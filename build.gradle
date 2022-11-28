@@ -58,15 +58,15 @@ buildscript {
 plugins {
     id "org.barfuin.gradle.taskinfo" version "1.4.0"
     id 'com.adarshr.test-logger' version '3.2.0'
-    id 'com.diffplug.spotless' version '6.11.0' apply false
+    id 'com.diffplug.spotless' version '6.12.0' apply false
     id 'org.nosphere.apache.rat' version '0.8.0' apply false
     id 'com.github.hierynomus.license' version '0.16.1' apply false
     id 'com.github.jk1.dependency-license-report' version '2.1' apply false
     id 'org.openapi.generator' version '6.2.1' apply false
     id 'org.zeroturnaround.gradle.jrebel' version '1.1.12' apply false
-    id 'org.springframework.boot' version '2.7.5' apply false
+    id 'org.springframework.boot' version '2.7.6' apply false
     id 'net.ltgt.errorprone' version '2.0.2' apply false
-    id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.6' apply false
+    id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.7' apply false
     id 'com.gorylenko.gradle-git-properties' version '2.4.1' apply false
     id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
     id 'org.asciidoctor.jvm.pdf' version '3.3.2' apply false
