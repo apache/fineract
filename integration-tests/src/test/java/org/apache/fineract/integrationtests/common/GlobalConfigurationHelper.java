@@ -98,9 +98,9 @@ public class GlobalConfigurationHelper {
         ArrayList<HashMap> expectedGlobalConfigurations = getAllDefaultGlobalConfigurations();
         ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
 
-        // There are currently 45 global configurations.
-        Assertions.assertEquals(45, expectedGlobalConfigurations.size());
-        Assertions.assertEquals(45, actualGlobalConfigurations.size());
+        // There are currently 46 global configurations.
+        Assertions.assertEquals(46, expectedGlobalConfigurations.size());
+        Assertions.assertEquals(46, actualGlobalConfigurations.size());
 
         for (int i = 0; i < expectedGlobalConfigurations.size(); i++) {
 
@@ -496,6 +496,13 @@ public class GlobalConfigurationHelper {
         isAutomaticExternalIdGenerationEnabled.put("trapDoor", false);
         defaults.add(isAutomaticExternalIdGenerationEnabled);
 
+        HashMap<String, Object> purgeProcessCommandDaysDefault = new HashMap<>();
+        purgeProcessCommandDaysDefault.put("id", 51);
+        purgeProcessCommandDaysDefault.put("name", "purge-processed-commands-older-than-days");
+        purgeProcessCommandDaysDefault.put("value", 0);
+        purgeProcessCommandDaysDefault.put("enabled", false);
+        purgeProcessCommandDaysDefault.put("trapDoor", false);
+        defaults.add(purgeProcessCommandDaysDefault);
         return defaults;
     }
 

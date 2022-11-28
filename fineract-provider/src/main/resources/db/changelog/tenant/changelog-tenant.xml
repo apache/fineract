@@ -94,4 +94,5 @@
     <include file="parts/0072_add_result_and status_to_command_source.xml" relativeToChangelogFile="true" />
     <include file="parts/0073_add_result_status_code_to_command_source.xml" relativeToChangelogFile="true" />
     <include file="parts/0074_add_last_cob_business_date_column_to_loan.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0075_add_processed_commands_purge_job.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
