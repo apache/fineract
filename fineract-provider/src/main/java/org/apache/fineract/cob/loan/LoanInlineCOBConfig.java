@@ -22,7 +22,6 @@ import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.common.ResetContextTasklet;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.listener.InlineCOBLoanItemListener;
-import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameterRepository;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
@@ -60,12 +59,10 @@ public class LoanInlineCOBConfig {
     private TransactionTemplate transactionTemplate;
     @Autowired
     private CustomJobParameterRepository loanIdListRepository;
-    @Autowired
-    private GoogleGsonSerializerHelper googleGsonSerializerHelper;
 
     @Bean
     public InlineLoanCOBBuildExecutionContextTasklet inlineLoanCOBBuildExecutionContextTasklet() {
-        return new InlineLoanCOBBuildExecutionContextTasklet(googleGsonSerializerHelper, cobBusinessStepService, loanIdListRepository);
+        return new InlineLoanCOBBuildExecutionContextTasklet(cobBusinessStepService, loanIdListRepository);
     }
 
     @Bean

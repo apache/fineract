@@ -16,23 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.infrastructure.jobs.data.partitionedjobs;
 
-public final class LoanCOBConstant {
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.apache.fineract.cob.loan.LoanCOBConstant;
 
-    public static final String JOB_NAME = "LOAN_COB";
-    public static final String LOAN_COB_JOB_NAME = "LOAN_CLOSE_OF_BUSINESS";
-    public static final String LOAN_IDS = "loanIds";
-    public static final String BUSINESS_STEP_MAP = "businessStepMap";
-    public static final String LOAN_COB_WORKER_STEP = "loanCOBWorkerStep";
+@RequiredArgsConstructor
+public enum PartitionedJob {
 
-    public static final String ALREADY_LOCKED_BY_INLINE_COB_OR_PROCESSED_LOAN_IDS = "alreadyLockedOrProcessedLoanIds";
-    public static final String INLINE_LOAN_COB_JOB_NAME = "INLINE_LOAN_COB";
-    public static final String BUSINESS_DATE_PARAMETER_NAME = "BusinessDate";
+    LOAN_COB(LoanCOBConstant.LOAN_COB_PARTITIONER_STEP);
 
-    public static final String LOAN_COB_PARTITIONER_STEP = "Loan COB partition - Step";
+    @Getter
+    private final String partitionerStepName;
 
-    private LoanCOBConstant() {
-
+    public static boolean existsByJobName(String jobName) {
+        PartitionedJob partitionedJob = null;
+        for (PartitionedJob job : values()) {
+            if (jobName.equalsIgnoreCase(job.name())) {
+                partitionedJob = job;
+            }
+        }
+        return partitionedJob != null;
     }
 }
