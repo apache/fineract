@@ -30,14 +30,22 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
+import org.apache.fineract.client.models.DeleteLoansLoanIdChargesChargeIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdChargesTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
+import org.apache.fineract.client.models.PutLoansLoanIdChargesChargeIdRequest;
+import org.apache.fineract.client.models.PutLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
@@ -113,11 +121,38 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
         LocalDate targetDate = LocalDate.of(2022, 9, 7);
         final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
+        String penalty1LoanChargeExternalId = UUID.randomUUID().toString();
         Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
+                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10",
+                        penalty1LoanChargeExternalId));
 
-        Integer penalty2LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
+        // Get loan charges
+        List<GetLoansLoanIdChargesChargeIdResponse> loanChargesResult = loanTransactionHelper.getLoanCharges((long) loanId);
+        assertEquals(penalty1LoanChargeExternalId, loanChargesResult.get(0).getExternalId());
+        loanChargesResult = loanTransactionHelper.getLoanCharges(loanExternalIdStr);
+        assertEquals(penalty1LoanChargeExternalId, loanChargesResult.get(0).getExternalId());
+
+        // Get loan charge template
+        GetLoansLoanIdChargesTemplateResponse loanChargeTemplateResult = loanTransactionHelper.getLoanChargeTemplate((long) loanId);
+        assertNotNull(loanChargeTemplateResult);
+        loanChargeTemplateResult = loanTransactionHelper.getLoanChargeTemplate(loanExternalIdStr);
+        assertNotNull(loanChargeTemplateResult);
+
+        // Get loan charge
+        GetLoansLoanIdChargesChargeIdResponse loanChargeResult = loanTransactionHelper.getLoanCharge((long) loanId,
+                (long) penalty1LoanChargeId);
+        assertEquals(penalty1LoanChargeExternalId, loanChargeResult.getExternalId());
+        loanChargeResult = loanTransactionHelper.getLoanCharge(loanExternalIdStr, (long) penalty1LoanChargeId);
+        assertEquals(penalty1LoanChargeExternalId, loanChargeResult.getExternalId());
+        loanChargeResult = loanTransactionHelper.getLoanCharge((long) loanId, penalty1LoanChargeExternalId);
+        assertEquals(penalty1LoanChargeExternalId, loanChargeResult.getExternalId());
+        loanChargeResult = loanTransactionHelper.getLoanCharge(loanExternalIdStr, penalty1LoanChargeExternalId);
+        assertEquals(penalty1LoanChargeExternalId, loanChargeResult.getExternalId());
+
+        PostLoansLoanIdChargesResponse penalty2Result = this.loanTransactionHelper.addLoanCharge(loanExternalIdStr,
+                new PostLoansLoanIdChargesRequest().chargeId((long) penalty).amount(10.0).dueDate(penaltyCharge1AddedDate)
+                        .dateFormat("dd MMMM yyyy").locale("en"));
+        assertNotNull(penalty2Result.getResourceExternalId());
 
         // Check whether we can fetch transaction templates with proper result http code (HTTP 200..300)
         ok(fineract().loanTransactions.retrieveTransactionTemplate1(loanExternalIdStr, "repayment", null, null, null));
@@ -135,6 +170,7 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
         PostLoansLoanIdChargesChargeIdResponse waiveLoanChargeResult = loanTransactionHelper.waiveLoanCharge((long) loanId,
                 (long) penalty1LoanChargeId, new PostLoansLoanIdChargesChargeIdRequest().externalId(waiveChargeExternalIdStr));
         assertEquals(waiveChargeExternalIdStr, waiveLoanChargeResult.getSubResourceExternalId());
+        assertEquals(penalty1LoanChargeExternalId, waiveLoanChargeResult.getResourceExternalId());
 
         GetLoansLoanIdTransactionsTransactionIdResponse response = loanTransactionHelper.getLoanTransactionDetails((long) loanId,
                 waiveChargeExternalIdStr);
@@ -157,9 +193,10 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
         assertEquals(waiveChargeExternalIdStr, response.getExternalId());
 
         // Check whether an external id was generated
-        waiveLoanChargeResult = loanTransactionHelper.waiveLoanCharge((long) loanId, (long) penalty1LoanChargeId,
+        waiveLoanChargeResult = loanTransactionHelper.waiveLoanCharge(loanExternalIdStr, (long) penalty1LoanChargeId,
                 new PostLoansLoanIdChargesChargeIdRequest());
         assertNotNull(waiveLoanChargeResult.getSubResourceExternalId());
+        assertEquals(penalty1LoanChargeExternalId, waiveLoanChargeResult.getResourceExternalId());
 
         // Check whether an external id was generated
         undoWaiveLoanChargeResult = loanTransactionHelper.undoWaiveLoanCharge(loanExternalIdStr, waiveLoanChargeResult.getSubResourceId());
@@ -167,9 +204,10 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
 
         // Check whether an external id was generated
         waiveChargeExternalIdStr = UUID.randomUUID().toString();
-        waiveLoanChargeResult = loanTransactionHelper.waiveLoanCharge((long) loanId, (long) penalty1LoanChargeId,
+        waiveLoanChargeResult = loanTransactionHelper.waiveLoanCharge(loanExternalIdStr, penalty1LoanChargeExternalId,
                 new PostLoansLoanIdChargesChargeIdRequest().externalId(waiveChargeExternalIdStr));
         assertEquals(waiveChargeExternalIdStr, waiveLoanChargeResult.getSubResourceExternalId());
+        assertEquals(penalty1LoanChargeExternalId, waiveLoanChargeResult.getResourceExternalId());
 
         // Check whether an external id was generated
         undoWaiveLoanChargeResult = loanTransactionHelper.undoWaiveLoanCharge(loanExternalIdStr,
@@ -389,7 +427,73 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
         final HashMap loanWithInterest = this.loanTransactionHelper.getLoanId(loanApplicationJSON, "");
         Integer loanWithInterestId = (Integer) loanWithInterest.get("resourceId");
 
+        String chargeExternalId = UUID.randomUUID().toString();
+        PostLoansLoanIdChargesResponse loanChargeForApprovedLoanResult = this.loanTransactionHelper.addLoanCharge(loanExternalIdStr,
+                new PostLoansLoanIdChargesRequest().externalId(chargeExternalId).amount(1.0).chargeId((long) penalty)
+                        .dateFormat("dd MMMM yyyy").locale("en").dueDate(formattedDate));
+
+        PutLoansLoanIdChargesChargeIdResponse updatedLoanChargeForApprovedLoanResult = this.loanTransactionHelper.updateLoanCharge(
+                (long) loanWithInterestId, loanChargeForApprovedLoanResult.getResourceId(),
+                new PutLoansLoanIdChargesChargeIdRequest().amount(2.0));
+        assertEquals(loanChargeForApprovedLoanResult.getResourceId(), updatedLoanChargeForApprovedLoanResult.getResourceId());
+        assertEquals(loanChargeForApprovedLoanResult.getResourceExternalId(),
+                updatedLoanChargeForApprovedLoanResult.getResourceExternalId());
+
+        DeleteLoansLoanIdChargesChargeIdResponse deleteLoanChargeResult = this.loanTransactionHelper
+                .deleteLoanCharge((long) loanWithInterestId, loanChargeForApprovedLoanResult.getResourceId());
+        assertEquals(loanChargeForApprovedLoanResult.getResourceId(), deleteLoanChargeResult.getResourceId());
+        assertEquals(loanChargeForApprovedLoanResult.getResourceExternalId(), deleteLoanChargeResult.getResourceExternalId());
+
+        chargeExternalId = UUID.randomUUID().toString();
+        loanChargeForApprovedLoanResult = this.loanTransactionHelper.addLoanCharge(loanExternalIdStr,
+                new PostLoansLoanIdChargesRequest().externalId(chargeExternalId).amount(1.0).chargeId((long) penalty)
+                        .dateFormat("dd MMMM yyyy").locale("en").dueDate(formattedDate));
+
+        updatedLoanChargeForApprovedLoanResult = this.loanTransactionHelper.updateLoanCharge((long) loanWithInterestId,
+                loanChargeForApprovedLoanResult.getResourceExternalId(), new PutLoansLoanIdChargesChargeIdRequest().amount(1.0));
+        assertEquals(loanChargeForApprovedLoanResult.getResourceId(), updatedLoanChargeForApprovedLoanResult.getResourceId());
+        assertEquals(loanChargeForApprovedLoanResult.getResourceExternalId(),
+                updatedLoanChargeForApprovedLoanResult.getResourceExternalId());
+
+        deleteLoanChargeResult = this.loanTransactionHelper.deleteLoanCharge((long) loanWithInterestId,
+                loanChargeForApprovedLoanResult.getResourceExternalId());
+        assertEquals(loanChargeForApprovedLoanResult.getResourceId(), deleteLoanChargeResult.getResourceId());
+        assertEquals(loanChargeForApprovedLoanResult.getResourceExternalId(), deleteLoanChargeResult.getResourceExternalId());
+
+        chargeExternalId = UUID.randomUUID().toString();
+        loanChargeForApprovedLoanResult = this.loanTransactionHelper.addLoanCharge(loanExternalIdStr,
+                new PostLoansLoanIdChargesRequest().externalId(chargeExternalId).amount(1.0).chargeId((long) penalty)
+                        .dateFormat("dd MMMM yyyy").locale("en").dueDate(formattedDate));
+
+        updatedLoanChargeForApprovedLoanResult = this.loanTransactionHelper.updateLoanCharge(loanExternalIdStr,
+                loanChargeForApprovedLoanResult.getResourceId(), new PutLoansLoanIdChargesChargeIdRequest().amount(1.0));
+        assertEquals(loanChargeForApprovedLoanResult.getResourceId(), updatedLoanChargeForApprovedLoanResult.getResourceId());
+        assertEquals(loanChargeForApprovedLoanResult.getResourceExternalId(),
+                updatedLoanChargeForApprovedLoanResult.getResourceExternalId());
+
+        deleteLoanChargeResult = this.loanTransactionHelper.deleteLoanCharge(loanExternalIdStr,
+                loanChargeForApprovedLoanResult.getResourceId());
+        assertEquals(loanChargeForApprovedLoanResult.getResourceId(), deleteLoanChargeResult.getResourceId());
+        assertEquals(loanChargeForApprovedLoanResult.getResourceExternalId(), deleteLoanChargeResult.getResourceExternalId());
+
+        chargeExternalId = UUID.randomUUID().toString();
+        loanChargeForApprovedLoanResult = this.loanTransactionHelper.addLoanCharge(loanExternalIdStr,
+                new PostLoansLoanIdChargesRequest().externalId(chargeExternalId).amount(1.0).chargeId((long) penalty)
+                        .dateFormat("dd MMMM yyyy").locale("en").dueDate(formattedDate));
+
+        updatedLoanChargeForApprovedLoanResult = this.loanTransactionHelper.updateLoanCharge(loanExternalIdStr,
+                loanChargeForApprovedLoanResult.getResourceExternalId(), new PutLoansLoanIdChargesChargeIdRequest().amount(2.0));
+        assertEquals(loanChargeForApprovedLoanResult.getResourceId(), updatedLoanChargeForApprovedLoanResult.getResourceId());
+        assertEquals(loanChargeForApprovedLoanResult.getResourceExternalId(),
+                updatedLoanChargeForApprovedLoanResult.getResourceExternalId());
+
+        deleteLoanChargeResult = this.loanTransactionHelper.deleteLoanCharge(loanExternalIdStr,
+                loanChargeForApprovedLoanResult.getResourceExternalId());
+        assertEquals(loanChargeForApprovedLoanResult.getResourceId(), deleteLoanChargeResult.getResourceId());
+        assertEquals(loanChargeForApprovedLoanResult.getResourceExternalId(), deleteLoanChargeResult.getResourceExternalId());
+
         this.loanTransactionHelper.approveLoan(formattedDate, loanWithInterestId);
+
         final HashMap disbursedLoanWithInterestResult = this.loanTransactionHelper.disburseLoan(formattedDate, loanWithInterestId, "1000",
                 null);
         // Check whether an external id was generated
@@ -397,14 +501,16 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
         LocalDate aMonthBeforePlus3Days = aMonthBefore.plusDays(3);
         formattedDate = dateFormatter.format(aMonthBeforePlus3Days);
 
-        Integer penalty3LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanWithInterestId,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), formattedDate, "10"));
+        String penalty3LoanChargeExternalId = UUID.randomUUID().toString();
+        Integer penalty3LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanWithInterestId, LoanTransactionHelper
+                .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), formattedDate, "10", penalty3LoanChargeExternalId));
 
         Integer penalty4LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanWithInterestId,
                 LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty2), formattedDate, "1000"));
 
-        Integer penalty5LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanWithInterestId,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty2), formattedDate, "1000"));
+        String penalty5LoanChargeExternalId = UUID.randomUUID().toString();
+        Integer penalty5LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanWithInterestId, LoanTransactionHelper
+                .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty2), formattedDate, "1000", penalty5LoanChargeExternalId));
 
         // Check whether an external id was generated
         final PostLoansLoanIdTransactionsResponse waiveInterestResult = loanTransactionHelper.makeWaiveInterest(loanExternalIdStr,
@@ -520,6 +626,7 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
                 (long) penalty3LoanChargeId,
                 new PostLoansLoanIdChargesChargeIdRequest().externalId(chargeAdjustmentExternalIdStr).amount(1.0).locale("en"));
         assertEquals(chargeAdjustmentExternalIdStr, chargeAdjustmentResult.getSubResourceExternalId());
+        assertEquals(penalty3LoanChargeExternalId, chargeAdjustmentResult.getResourceExternalId());
 
         response = loanTransactionHelper.getLoanTransactionDetails((long) loanWithInterestId, chargeAdjustmentExternalIdStr);
         assertEquals(chargeAdjustmentExternalIdStr, response.getExternalId());
@@ -529,23 +636,27 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
         assertEquals(chargeAdjustmentExternalIdStr, response.getExternalId());
 
         // Check whether an external id was generated
-        chargeAdjustmentResult = loanTransactionHelper.chargeAdjustment((long) loanWithInterestId, (long) penalty3LoanChargeId,
+        chargeAdjustmentResult = loanTransactionHelper.chargeAdjustment(loanExternalIdStr, penalty3LoanChargeExternalId,
                 new PostLoansLoanIdChargesChargeIdRequest().amount(1.0).locale("en"));
         assertNotNull(chargeAdjustmentResult.getSubResourceExternalId());
+        assertEquals(penalty3LoanChargeExternalId, chargeAdjustmentResult.getResourceExternalId());
 
-        HashMap payChargeResult = this.loanTransactionHelper.payChargesForLoan(loanWithInterestId, penalty4LoanChargeId,
-                LoanTransactionHelper.getPayChargeJSON(formattedDate, null), "");
-        assertNotNull(payChargeResult.get("subResourceExternalId"));
+        PostLoansLoanIdChargesChargeIdResponse payChargeResult = this.loanTransactionHelper.payLoanCharge(loanExternalIdStr,
+                (long) penalty4LoanChargeId,
+                new PostLoansLoanIdChargesChargeIdRequest().locale("en").dateFormat("dd MMMM yyyy").transactionDate(formattedDate));
+        assertNotNull(payChargeResult.getSubResourceExternalId());
+        assertNotNull(payChargeResult.getResourceExternalId());
 
         String payChargeExternalIdStr = UUID.randomUUID().toString();
-        payChargeResult = this.loanTransactionHelper.payChargesForLoan(loanWithInterestId, penalty5LoanChargeId,
-                LoanTransactionHelper.getPayChargeJSON(formattedDate, null, payChargeExternalIdStr), "");
-        assertEquals(payChargeExternalIdStr, payChargeResult.get("subResourceExternalId"));
+        payChargeResult = this.loanTransactionHelper.payLoanCharge(loanExternalIdStr, penalty5LoanChargeExternalId,
+                new PostLoansLoanIdChargesChargeIdRequest().locale("en").dateFormat("dd MMMM yyyy").transactionDate(formattedDate)
+                        .externalId(payChargeExternalIdStr));
+        assertEquals(payChargeExternalIdStr, payChargeResult.getSubResourceExternalId());
+        assertEquals(penalty5LoanChargeExternalId, payChargeResult.getResourceExternalId());
 
         response = loanTransactionHelper.getLoanTransactionDetails((long) loanWithInterestId, payChargeExternalIdStr);
         assertEquals(payChargeExternalIdStr, response.getExternalId());
-        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr,
-                Long.valueOf(payChargeResult.get("subResourceId").toString()));
+        response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, payChargeResult.getSubResourceId());
         assertEquals(payChargeExternalIdStr, response.getExternalId());
         response = loanTransactionHelper.getLoanTransactionDetails(loanExternalIdStr, payChargeExternalIdStr);
         assertEquals(payChargeExternalIdStr, response.getExternalId());

@@ -152,8 +152,8 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
     private final ConfigurationDomainService configurationDomainService;
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
     private final ExternalIdFactory externalIdFactory;
-
     private final AccountTransferDetailRepository accountTransferDetailRepository;
+    private final LoanChargeAssembler loanChargeAssembler;
 
     private static boolean isPartOfThisInstallment(LoanCharge loanCharge, LoanRepaymentScheduleInstallment e) {
         return e.getFromDate().isBefore(loanCharge.getDueDate()) && !loanCharge.getDueDate().isAfter(e.getDueDate());
@@ -185,10 +185,17 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         LocalDate recalculateFrom = loan.fetchInterestRecalculateFromDate();
         if (chargeDefinition.isPercentageOfDisbursementAmount()) {
             LoanTrancheDisbursementCharge loanTrancheDisbursementCharge;
+            ExternalId externalId = externalIdFactory.createFromCommand(command, "externalId");
+            boolean needToGenerateNewExternalId = false;
             for (LoanDisbursementDetails disbursementDetail : loanDisburseDetails) {
                 if (disbursementDetail.actualDisbursementDate() == null) {
-                    loanCharge = LoanCharge.createNewWithoutLoan(chargeDefinition, disbursementDetail.principal(), null, null, null,
-                            disbursementDetail.expectedDisbursementDateAsLocalDate(), null, null);
+                    // If multiple charges to be applied, only the first one will get the provided externalId, for the
+                    // rest we generate new ones (if needed)
+                    if (needToGenerateNewExternalId) {
+                        externalId = externalIdFactory.create();
+                    }
+                    loanCharge = loanChargeAssembler.createNewWithoutLoan(chargeDefinition, disbursementDetail.principal(), null, null,
+                            null, disbursementDetail.expectedDisbursementDateAsLocalDate(), null, null, externalId);
                     loanTrancheDisbursementCharge = new LoanTrancheDisbursementCharge(loanCharge, disbursementDetail);
                     loanCharge.updateLoanTrancheDisbursementCharge(loanTrancheDisbursementCharge);
                     businessEventNotifierService.notifyPreBusinessEvent(new LoanAddChargeBusinessEvent(loanCharge));
@@ -198,6 +205,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                     if (recalculateFrom.isAfter(disbursementDetail.expectedDisbursementDateAsLocalDate())) {
                         recalculateFrom = disbursementDetail.expectedDisbursementDateAsLocalDate();
                     }
+                    needToGenerateNewExternalId = true;
                 }
             }
             if (loanCharge == null) {
@@ -207,7 +215,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
             }
             loan.addTrancheLoanCharge(chargeDefinition);
         } else {
-            loanCharge = LoanCharge.createNewFromJson(loan, chargeDefinition, command);
+            loanCharge = loanChargeAssembler.createNewFromJson(loan, chargeDefinition, command);
             businessEventNotifierService.notifyPreBusinessEvent(new LoanAddChargeBusinessEvent(loanCharge));
 
             validateAddLoanCharge(loan, chargeDefinition, loanCharge);
@@ -252,6 +260,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         businessEventNotifierService.notifyPostBusinessEvent(new LoanAddChargeBusinessEvent(loanCharge));
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()) //
                 .withEntityId(loanCharge.getId()) //
+                .withEntityExternalId(loanCharge.getExternalId()) //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
                 .withGroupId(loan.getGroupId()) //
@@ -346,7 +355,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                     LoanChargeWaiveCannotBeReversedException.LoanChargeWaiveCannotUndoReason.LOAN_INACTIVE, loanCharge.getId());
         }
 
-        final Map<String, Object> changes = new LinkedHashMap<>(3);
+        final Map<String, Object> changes = new LinkedHashMap<>();
 
         businessEventNotifierService.notifyPreBusinessEvent(new LoanWaiveChargeUndoBusinessEvent(loanCharge));
 
@@ -367,6 +376,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(loanCharge.getId()) //
+                .withEntityExternalId(loanCharge.getExternalId()) //
                 .withSubEntityId(loanTransaction.getId()) //
                 .withSubEntityExternalId(loanTransaction.getExternalId()) //
                 .withLoanId(loanId) //
@@ -399,6 +409,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(loanChargeId) //
+                .withEntityExternalId(loanCharge.getExternalId()) //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
                 .withGroupId(loan.getGroupId()) //
@@ -458,7 +469,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
             loanInstallmentNumber = chargePerInstallment.getRepaymentInstallment().getInstallmentNumber();
         }
 
-        final Map<String, Object> changes = new LinkedHashMap<>(3);
+        final Map<String, Object> changes = new LinkedHashMap<>();
         changes.put(LoanApiConstants.externalIdParameterName, externalId);
 
         final List<Long> existingTransactionIds = new ArrayList<>();
@@ -490,6 +501,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(loanChargeId) //
+                .withEntityExternalId(loanCharge.getExternalId()) //
                 .withSubEntityId(waiveTransaction.getId()) //
                 .withSubEntityExternalId(waiveTransaction.getExternalId()) //
                 .withOfficeId(loan.getOfficeId()) //
@@ -523,6 +535,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(loanChargeId) //
+                .withEntityExternalId(loanCharge.getExternalId()) //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
                 .withGroupId(loan.getGroupId()) //
@@ -613,6 +626,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(loanChargeId) //
+                .withEntityExternalId(loanCharge.getExternalId()) //
                 .withSubEntityId(loanTransaction.getId()).withSubEntityExternalId(loanTransaction.getExternalId())
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
@@ -629,7 +643,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
         final LocalDate transactionDate = DateUtils.getBusinessLocalDate();
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("amount");
-        final ExternalId txnExternalId = externalIdFactory.createFromCommand(command, "externalId");
+        final ExternalId externalId = externalIdFactory.createFromCommand(command, "externalId");
         final String locale = command.locale();
 
         loanChargeAdjustmentEntranceValidation(loanCharge, transactionAmount);
@@ -637,7 +651,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
 
         final CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder();
 
-        LoanTransaction loanTransaction = applyChargeAdjustment(loan, loanCharge, transactionAmount, transactionDate, txnExternalId);
+        LoanTransaction loanTransaction = applyChargeAdjustment(loan, loanCharge, transactionAmount, transactionDate, externalId);
 
         // Update loan transaction on repayment.
         if (AccountType.fromInt(loan.getLoanType()).isIndividualAccount()) {
@@ -658,13 +672,15 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
         businessEventNotifierService.notifyPostBusinessEvent(new LoanChargeAdjustmentPostBusinessEvent(loanTransaction));
         Map<String, Object> changes = new HashMap<>();
-        changes.put("externalId", txnExternalId);
+        changes.put("externalId", externalId);
         changes.put("amount", transactionAmount);
         changes.put("transactionDate", transactionDate);
         changes.put("locale", locale);
         return commandProcessingResultBuilder.withCommandId(command.commandId()) //
                 .withLoanId(loanId) //
-                .withEntityId(loanChargeId).withSubEntityId(loanTransaction.getId()) //
+                .withEntityId(loanChargeId) //
+                .withEntityExternalId(loanCharge.getExternalId()) //
+                .withSubEntityId(loanTransaction.getId()) //
                 .withSubEntityExternalId(loanTransaction.getExternalId()) //
                 .with(changes) //
                 .build();
@@ -1008,7 +1024,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
             businessEventNotifierService.notifyPreBusinessEvent(new LoanApplyOverdueChargeBusinessEvent(loan));
             for (Map.Entry<Integer, LocalDate> entry : scheduleDates.entrySet()) {
 
-                final LoanCharge loanCharge = LoanCharge.createNewFromJson(loan, chargeDefinition, command, entry.getValue());
+                final LoanCharge loanCharge = loanChargeAssembler.createNewFromJson(loan, chargeDefinition, command, entry.getValue());
 
                 if (BigDecimal.ZERO.compareTo(loanCharge.amount()) == 0) {
                     continue;
