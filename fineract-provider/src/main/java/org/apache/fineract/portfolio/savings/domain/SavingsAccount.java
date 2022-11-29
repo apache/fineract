@@ -2578,10 +2578,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     public void validateNewApplicationState(final LocalDate todayDateOfTenant, final String resourceName) {
 
-        // validateWithdrawalFeeDetails();
-        // validateAnnualFeeDetails();
-
         final LocalDate submittedOn = getSubmittedOnLocalDate();
+        final LocalDate vaultTargetDate = getVaultTargetDate();
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -2605,7 +2603,10 @@ public class SavingsAccount extends AbstractPersistableCustom {
             baseDataValidator.reset().parameter(SavingsApiConstants.submittedOnDateParamName).value(this.group.getActivationLocalDate())
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.client.activation.date");
         }
-
+        if (submittedOn.isAfter(vaultTargetDate)) {
+            baseDataValidator.reset().parameter(SavingsApiConstants.VAULT_TARGET_DATE).value(vaultTargetDate)
+                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.After.Vault.Target.Date");
+        }
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }

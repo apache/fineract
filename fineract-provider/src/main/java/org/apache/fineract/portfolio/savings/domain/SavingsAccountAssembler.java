@@ -339,11 +339,10 @@ public class SavingsAccountAssembler {
                 overdraftLimit, enforceMinRequiredBalance, minRequiredBalance, maxAllowedLienLimit, lienAllowed,
                 nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
-
+        account.setVaultTribeDetails(vaultTargetAmount, vaultTargetDate);
         account.validateNewApplicationState(DateUtils.getBusinessLocalDate(), SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         account.validateAccountValuesWithProduct();
-        account.setVaultTribeDetails(vaultTargetAmount, vaultTargetDate);
 
         return account;
     }
