@@ -16,20 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.cob.service;
 
-import java.time.LocalDate;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.cob.data.IsCatchUpRunningDTO;
+import org.apache.fineract.cob.data.OldestCOBProcessedLoanDTO;
 
-@RequiredArgsConstructor
-public class RetrieveAllNonClosedLoanIdServiceImpl implements RetrieveLoanIdService {
+public interface LoanCOBCatchUpService {
 
-    private final LoanRepository loanRepository;
+    OldestCOBProcessedLoanDTO getOldestCOBProcessedLoan();
 
-    @Override
-    public List<Long> retrieveLoanIdsNDaysBehind(Long numberOfDays, LocalDate businessDate) {
-        return loanRepository.findAllNonClosedLoanIdsByLastClosedBusinessDate(businessDate.minusDays(numberOfDays));
-    }
+    void executeLoanCOBCatchUp();
+
+    IsCatchUpRunningDTO isCatchUpRunning();
 }

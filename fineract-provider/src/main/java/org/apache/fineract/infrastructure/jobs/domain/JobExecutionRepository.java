@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.jobs.domain;
 import static org.springframework.batch.core.BatchStatus.COMPLETED;
 import static org.springframework.batch.core.BatchStatus.FAILED;
 import static org.springframework.batch.core.BatchStatus.STARTED;
+import static org.springframework.batch.core.BatchStatus.STARTING;
 
 import java.util.List;
 import java.util.Map;
@@ -83,5 +84,18 @@ public class JobExecutionRepository {
         namedParameterJdbcTemplate.update(
                 "UPDATE BATCH_JOB_EXECUTION SET STATUS = :status, START_TIME = null, END_TIME = null WHERE JOB_EXECUTION_ID = :jobExecutionId",
                 Map.of("status", FAILED.name(), "jobExecutionId", stuckJobId));
+    }
+
+    public List<Long> getRunningJobsByExecutionParameter(String jobName, String parameterKeyName, String parameterValue) {
+        return namedParameterJdbcTemplate.queryForList("SELECT bje.JOB_EXECUTION_ID FROM BATCH_JOB_INSTANCE bji "
+                + "INNER JOIN BATCH_JOB_EXECUTION bje ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID "
+                + "INNER JOIN BATCH_JOB_EXECUTION_PARAMS bjep ON bje.JOB_EXECUTION_ID = bjep.JOB_EXECUTION_ID "
+                + "WHERE bje.STATUS IN (:statuses) AND bji.JOB_NAME = :jobName AND bjep.KEY_NAME = :parameterKeyName AND bjep.STRING_VAL = :parameterValue AND bje.JOB_INSTANCE_ID NOT IN ("
+                + "SELECT bje.JOB_INSTANCE_ID FROM BATCH_JOB_INSTANCE bji "
+                + "INNER JOIN BATCH_JOB_EXECUTION bje ON bji.JOB_INSTANCE_ID = bje.JOB_INSTANCE_ID "
+                + "WHERE bje.STATUS = :completedStatus AND bji.JOB_NAME = :jobName)",
+                Map.of("statuses", List.of(STARTED.name(), STARTING.name()), "jobName", jobName, "completedStatus", COMPLETED.name(),
+                        "parameterKeyName", parameterKeyName, "parameterValue", parameterValue),
+                Long.class);
     }
 }
