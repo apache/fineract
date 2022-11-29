@@ -21,6 +21,8 @@ package org.apache.fineract.cob.service;
 import static org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRES_NEW;
 
 import com.google.gson.Gson;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -102,7 +104,9 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
             throw new JobNotFoundException(jobName, e);
         }
         JobParameters jobParameters = new JobParametersBuilder(jobExplorer).getNextJobParameters(inlineLoanCOBJob)
-                .addJobParameters(new JobParameters(getJobParametersMap(loanIds))).toJobParameters();
+                .addJobParameters(new JobParameters(
+                        getJobParametersMap(loanIds, ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE))))
+                .toJobParameters();
         JobExecution jobExecution;
         try {
             jobExecution = jobLauncher.run(inlineLoanCOBJob, jobParameters);
@@ -141,16 +145,18 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
         return loanAccountLocks;
     }
 
-    private Map<String, JobParameter> getJobParametersMap(List<Long> loanIds) {
+    private Map<String, JobParameter> getJobParametersMap(List<Long> loanIds, LocalDate businessDate) {
         // TODO: refactor for a more generic solution
         String parameterJson = gson.toJson(loanIds);
         CustomJobParameter loanIdsJobParameter = new CustomJobParameter();
         loanIdsJobParameter.setParameterJson(parameterJson);
         Long loanIdsJobParameterId = customJobParameterRepository.saveAndFlush(loanIdsJobParameter).getId();
+        CustomJobParameter businessDateJobParameter = new CustomJobParameter();
+        businessDateJobParameter.setParameterJson(gson.toJson(businessDate.format(DateTimeFormatter.ISO_DATE)));
+        Long businessDateJobParameterId = customJobParameterRepository.saveAndFlush(businessDateJobParameter).getId();
         Map<String, JobParameter> jobParameterMap = new HashMap<>();
         jobParameterMap.put(SpringBatchJobConstants.CUSTOM_JOB_PARAMETER_ID_KEY, new JobParameter(loanIdsJobParameterId));
-        String businessDate = ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE).toString();
-        jobParameterMap.put(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME, new JobParameter(businessDate));
+        jobParameterMap.put(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME, new JobParameter(businessDateJobParameterId));
         return jobParameterMap;
     }
 
