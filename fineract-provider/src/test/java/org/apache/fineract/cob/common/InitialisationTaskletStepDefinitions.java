@@ -24,14 +24,26 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
 import io.cucumber.java8.En;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import org.apache.fineract.cob.loan.LoanCOBConstant;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.scope.context.ChunkContext;
+import org.springframework.batch.core.scope.context.StepContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 public class InitialisationTaskletStepDefinitions implements En {
+
+    private static final LocalDate TODAY = LocalDate.now(ZoneId.systemDefault());
 
     private AppUserRepositoryWrapper userRepository = mock(AppUserRepositoryWrapper.class);
 
@@ -39,6 +51,7 @@ public class InitialisationTaskletStepDefinitions implements En {
 
     private AppUser appUser = mock(AppUser.class);
     private RepeatStatus resultItem;
+    private ChunkContext chunkContext;
 
     public InitialisationTaskletStepDefinitions() {
         Given("/^The InitialisationTasklet.execute method with action (.*)$/", (String action) -> {
@@ -48,16 +61,29 @@ public class InitialisationTaskletStepDefinitions implements En {
             } else {
                 lenient().when(this.userRepository.fetchSystemUser()).thenReturn(appUser);
             }
-
+            HashMap<BusinessDateType, LocalDate> businessDates = new HashMap<>();
+            LocalDate businessDate = TODAY;
+            LocalDate cobBusinessDate = businessDate.minusDays(1);
+            businessDates.put(BusinessDateType.BUSINESS_DATE, businessDate);
+            businessDates.put(BusinessDateType.COB_DATE, cobBusinessDate);
+            ThreadLocalContextUtil.setBusinessDates(businessDates);
+            JobExecution jobExecution = new JobExecution(1L);
+            jobExecution.getExecutionContext().put(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME,
+                    cobBusinessDate.format(DateTimeFormatter.ISO_DATE));
+            StepExecution stepExecution = new StepExecution("step", jobExecution);
+            StepContext stepContext = new StepContext(stepExecution);
+            chunkContext = new ChunkContext(stepContext);
         });
 
         When("InitialisationTasklet.execute method executed", () -> {
-            resultItem = this.initialisationTasklet.execute(null, null);
+            resultItem = this.initialisationTasklet.execute(null, chunkContext);
         });
 
         Then("InitialisationTasklet.execute result should match", () -> {
             assertEquals(RepeatStatus.FINISHED, resultItem);
             assertEquals(appUser, SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+            assertEquals(TODAY, ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.BUSINESS_DATE));
+            assertEquals(TODAY.minusDays(1), ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE));
             ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         });
 
@@ -65,6 +91,8 @@ public class InitialisationTaskletStepDefinitions implements En {
             assertThrows(RuntimeException.class, () -> {
                 resultItem = this.initialisationTasklet.execute(null, null);
             });
+            assertEquals(TODAY, ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.BUSINESS_DATE));
+            assertEquals(TODAY.minusDays(1), ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE));
             ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         });
     }
