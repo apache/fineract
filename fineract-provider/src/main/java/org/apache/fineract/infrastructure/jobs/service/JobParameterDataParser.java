@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
 import org.springframework.stereotype.Component;
@@ -38,7 +39,7 @@ public class JobParameterDataParser {
     private final FromJsonHelper jsonHelper;
 
     public Set<JobParameterDTO> parseExecution(String requestBody) {
-        if (Objects.isNull(requestBody)) {
+        if (StringUtils.isBlank(requestBody)) {
             return Collections.emptySet();
         }
         JsonObject element = JsonParser.parseString(requestBody).getAsJsonObject();
