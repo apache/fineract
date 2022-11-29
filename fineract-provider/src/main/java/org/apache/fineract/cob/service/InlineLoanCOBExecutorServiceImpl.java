@@ -24,6 +24,7 @@ import com.google.gson.Gson;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.cob.data.LoanIdAndLastClosedBusinessDate;
 import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
@@ -49,6 +51,7 @@ import org.apache.fineract.infrastructure.jobs.exception.JobNotFoundException;
 import org.apache.fineract.infrastructure.jobs.service.InlineExecutorService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.springbatch.SpringBatchJobConstants;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
@@ -73,8 +76,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<Long> {
 
     private static final String JOB_EXECUTION_FAILED_MESSAGE = "Job execution failed for job with name: ";
-
-    private final GoogleGsonSerializerHelper gsonFactory;
     private final LoanAccountLockRepository loanAccountLockRepository;
     private final InlineLoanCOBExecutionDataParser dataParser;
     private final JobLauncher jobLauncher;
@@ -83,6 +84,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
     private final TransactionTemplate transactionTemplate;
     private final CustomJobParameterRepository customJobParameterRepository;
     private final PlatformSecurityContext context;
+    private final LoanRepository loanRepository;
 
     private final Gson gson = GoogleGsonSerializerHelper.createSimpleGson();
 
@@ -96,6 +98,32 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
 
     @Override
     public void execute(List<Long> loanIds, String jobName) {
+        LocalDate cobBusinessDate = ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE);
+        List<LoanIdAndLastClosedBusinessDate> loansToBeProcessed = getLoansToBeProcessed(loanIds, cobBusinessDate);
+        LocalDate executingBusinessDate = getOldestCOBBusinessDate(loansToBeProcessed).plusDays(1);
+        if (!loansToBeProcessed.isEmpty()) {
+            while (!executingBusinessDate.isAfter(cobBusinessDate)) {
+                execute(getLoanIdsToBeProcessed(loansToBeProcessed, executingBusinessDate), jobName, executingBusinessDate);
+                executingBusinessDate = executingBusinessDate.plusDays(1);
+            }
+        }
+    }
+
+    private List<Long> getLoanIdsToBeProcessed(List<LoanIdAndLastClosedBusinessDate> loansToBeProcessed, LocalDate executingBusinessDate) {
+        List<Long> loanIdsToBeProcessed = new ArrayList<>();
+        loansToBeProcessed.forEach(loan -> {
+            if (loan.getLastClosedBusinessDate() != null) {
+                if (loan.getLastClosedBusinessDate().isBefore(executingBusinessDate)) {
+                    loanIdsToBeProcessed.add(loan.getId());
+                }
+            } else {
+                loanIdsToBeProcessed.add(loan.getId());
+            }
+        });
+        return loanIdsToBeProcessed;
+    }
+
+    private void execute(List<Long> loanIds, String jobName, LocalDate businessDate) {
         lockLoanAccounts(loanIds);
         Job inlineLoanCOBJob;
         try {
@@ -104,9 +132,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
             throw new JobNotFoundException(jobName, e);
         }
         JobParameters jobParameters = new JobParametersBuilder(jobExplorer).getNextJobParameters(inlineLoanCOBJob)
-                .addJobParameters(new JobParameters(
-                        getJobParametersMap(loanIds, ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE))))
-                .toJobParameters();
+                .addJobParameters(new JobParameters(getJobParametersMap(loanIds, businessDate))).toJobParameters();
         JobExecution jobExecution;
         try {
             jobExecution = jobLauncher.run(inlineLoanCOBJob, jobParameters);
@@ -118,6 +144,18 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
             log.error("{}{}", JOB_EXECUTION_FAILED_MESSAGE, jobName);
             throw new PlatformInternalServerException("error.msg.sheduler.job.execution.failed", JOB_EXECUTION_FAILED_MESSAGE, jobName);
         }
+    }
+
+    private LocalDate getOldestCOBBusinessDate(List<LoanIdAndLastClosedBusinessDate> loans) {
+        LoanIdAndLastClosedBusinessDate oldestLoan = loans.stream().min(Comparator
+                .comparing(LoanIdAndLastClosedBusinessDate::getLastClosedBusinessDate, Comparator.nullsLast(Comparator.naturalOrder())))
+                .orElse(null);
+        return oldestLoan != null && oldestLoan.getLastClosedBusinessDate() != null ? oldestLoan.getLastClosedBusinessDate()
+                : ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE).minusDays(1);
+    }
+
+    private List<LoanIdAndLastClosedBusinessDate> getLoansToBeProcessed(List<Long> loanIds, LocalDate cobBusinessDate) {
+        return loanRepository.findAllNonClosedLoansBehindByLoanIds(cobBusinessDate, loanIds);
     }
 
     private List<LoanAccountLock> getLoanAccountLocks(List<Long> loanIds) {

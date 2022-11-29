@@ -78,6 +78,7 @@ import org.apache.fineract.client.services.InterestRateSlabAKAInterestBandsApi;
 import org.apache.fineract.client.services.JournalEntriesApi;
 import org.apache.fineract.client.services.ListReportMailingJobHistoryApi;
 import org.apache.fineract.client.services.LoanChargesApi;
+import org.apache.fineract.client.services.LoanCobCatchUpApi;
 import org.apache.fineract.client.services.LoanCollateralApi;
 import org.apache.fineract.client.services.LoanDisbursementDetailsApi;
 import org.apache.fineract.client.services.LoanProductsApi;
@@ -212,6 +213,7 @@ public final class FineractClient {
     public final JournalEntriesApi journalEntries;
     public final ListReportMailingJobHistoryApi reportMailings;
     public final LoanChargesApi loanCharges;
+    public final LoanCobCatchUpApi loanCobCatchUpApi;
     public final LoanCollateralApi loanCollaterals;
     public final LoanProductsApi loanProducts;
     public final LoanReschedulingApi loanSchedules;
@@ -326,6 +328,7 @@ public final class FineractClient {
         journalEntries = retrofit.create(JournalEntriesApi.class);
         reportMailings = retrofit.create(ListReportMailingJobHistoryApi.class);
         loanCharges = retrofit.create(LoanChargesApi.class);
+        loanCobCatchUpApi = retrofit.create(LoanCobCatchUpApi.class);
         loanCollaterals = retrofit.create(LoanCollateralApi.class);
         loanProducts = retrofit.create(LoanProductsApi.class);
         loanSchedules = retrofit.create(LoanReschedulingApi.class);

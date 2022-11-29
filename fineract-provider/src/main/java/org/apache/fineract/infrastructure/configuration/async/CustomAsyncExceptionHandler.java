@@ -16,20 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.infrastructure.configuration.async;
 
-import java.time.LocalDate;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import java.lang.reflect.Method;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 
-@RequiredArgsConstructor
-public class RetrieveAllNonClosedLoanIdServiceImpl implements RetrieveLoanIdService {
-
-    private final LoanRepository loanRepository;
+@Slf4j
+public class CustomAsyncExceptionHandler implements AsyncUncaughtExceptionHandler {
 
     @Override
-    public List<Long> retrieveLoanIdsNDaysBehind(Long numberOfDays, LocalDate businessDate) {
-        return loanRepository.findAllNonClosedLoanIdsByLastClosedBusinessDate(businessDate.minusDays(numberOfDays));
+    public void handleUncaughtException(Throwable throwable, Method method, Object... obj) {
+
+        log.error("Exception message - {}", throwable.getMessage());
+        log.error("Method name - {}", method.getName());
+        for (Object param : obj) {
+            log.error("Parameter value - {}", param);
+        }
     }
 }

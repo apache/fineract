@@ -16,20 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.cob.data;
 
 import java.time.LocalDate;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 
-@RequiredArgsConstructor
-public class RetrieveAllNonClosedLoanIdServiceImpl implements RetrieveLoanIdService {
+public interface LoanIdAndLastClosedBusinessDate {
 
-    private final LoanRepository loanRepository;
+    Long getId();
 
-    @Override
-    public List<Long> retrieveLoanIdsNDaysBehind(Long numberOfDays, LocalDate businessDate) {
-        return loanRepository.findAllNonClosedLoanIdsByLastClosedBusinessDate(businessDate.minusDays(numberOfDays));
-    }
+    LocalDate getLastClosedBusinessDate();
 }

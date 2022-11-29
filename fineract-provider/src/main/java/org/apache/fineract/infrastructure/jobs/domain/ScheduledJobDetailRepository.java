@@ -45,4 +45,6 @@ public interface ScheduledJobDetailRepository
     @Query("select jobDetail from ScheduledJobDetail jobDetail where jobDetail.nodeId = :nodeId or jobDetail.nodeId = 0")
     List<ScheduledJobDetail> findAllJobs(@Param("nodeId") Integer nodeId);
 
+    ScheduledJobDetail findByJobName(String jobName);
+
 }

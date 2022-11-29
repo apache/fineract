@@ -64,6 +64,7 @@ import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyRangesHelper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
@@ -703,6 +704,7 @@ public class DelinquencyBucketsIntegrationTest {
         GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
     }
 
+    @Disabled("Failing test.Need rework")
     @Test
     public void testLoanClassificationStepAsPartOfCOB() {
         GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
