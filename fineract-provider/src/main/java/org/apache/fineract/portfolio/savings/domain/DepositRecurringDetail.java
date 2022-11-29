@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.savings.domain;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.adjustAdvanceTowardsFuturePaymentsParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.allowWithdrawalParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.isMandatoryDepositParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.allowFreeWithdrawalParamName;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -41,6 +42,9 @@ public class DepositRecurringDetail {
     @Column(name = "allow_withdrawal", nullable = true)
     private boolean allowWithdrawal;
 
+    @Column(name = "allow_free_withdrawal", nullable = true)
+    private boolean allowFreeWithdrawal;
+
     @Column(name = "adjust_advance_towards_future_payments", nullable = true)
     private boolean adjustAdvanceTowardsFuturePayments;
 
@@ -49,15 +53,17 @@ public class DepositRecurringDetail {
     }
 
     public static DepositRecurringDetail createFrom(final boolean isMandatoryDeposit, boolean allowWithdrawal,
-            boolean adjustAdvanceTowardsFuturePayments) {
+            boolean adjustAdvanceTowardsFuturePayments, boolean allowFreeWithdrawal) {
 
-        return new DepositRecurringDetail(isMandatoryDeposit, allowWithdrawal, adjustAdvanceTowardsFuturePayments);
+        return new DepositRecurringDetail(isMandatoryDeposit, allowWithdrawal, adjustAdvanceTowardsFuturePayments, allowFreeWithdrawal);
     }
 
-    private DepositRecurringDetail(final boolean isMandatoryDeposit, boolean allowWithdrawal, boolean adjustAdvanceTowardsFuturePayments) {
+    private DepositRecurringDetail(final boolean isMandatoryDeposit, boolean allowWithdrawal, boolean adjustAdvanceTowardsFuturePayments,
+                                   boolean allowFreeWithdrawal) {
         this.isMandatoryDeposit = isMandatoryDeposit;
         this.allowWithdrawal = allowWithdrawal;
         this.adjustAdvanceTowardsFuturePayments = adjustAdvanceTowardsFuturePayments;
+        this.allowFreeWithdrawal = allowFreeWithdrawal;
     }
 
     public Map<String, Object> update(final JsonCommand command) {
@@ -81,6 +87,12 @@ public class DepositRecurringDetail {
             this.adjustAdvanceTowardsFuturePayments = newValue;
         }
 
+        if (command.isChangeInBooleanParameterNamed(allowFreeWithdrawalParamName, this.allowFreeWithdrawal)) {
+            final boolean newValue = command.booleanObjectValueOfParameterNamed(allowFreeWithdrawalParamName);
+            actualChanges.put(allowFreeWithdrawalParamName, newValue);
+            this.allowFreeWithdrawal = newValue;
+        }
+
         return actualChanges;
     }
 
@@ -92,11 +104,16 @@ public class DepositRecurringDetail {
         return this.allowWithdrawal;
     }
 
+    public boolean allowFreeWithdrawal() {
+        return this.allowFreeWithdrawal;
+    }
+
+
     public boolean adjustAdvanceTowardsFuturePayments() {
         return this.adjustAdvanceTowardsFuturePayments;
     }
 
     public DepositRecurringDetail copy() {
-        return DepositRecurringDetail.createFrom(this.isMandatoryDeposit, this.allowWithdrawal, this.adjustAdvanceTowardsFuturePayments);
+        return DepositRecurringDetail.createFrom(this.isMandatoryDeposit, this.allowWithdrawal, this.adjustAdvanceTowardsFuturePayments, this.allowFreeWithdrawal);
     }
 }
