@@ -373,6 +373,12 @@ public class SavingsAccount extends AbstractPersistableCustom {
     @Transient
     private BigDecimal depositAmountToDeriveBalanceForStampDuty;
 
+    @Column(name = "vault_target_amount", scale = 6, precision = 19)
+    private BigDecimal vaultTargetAmount;
+
+    @Column(name = "vault_target_date")
+    private LocalDate vaultTargetDate;
+
     protected SavingsAccount() {
         //
     }
@@ -2087,6 +2093,21 @@ public class SavingsAccount extends AbstractPersistableCustom {
             this.withdrawalFeeApplicableForTransfer = newValue;
         }
 
+        if (command.isChangeInLocalDateParameterNamed(SavingsApiConstants.VAULT_TARGET_DATE, getVaultTargetDate())) {
+            final String newValueAsString = command.stringValueOfParameterNamed(SavingsApiConstants.VAULT_TARGET_DATE);
+            actualChanges.put(SavingsApiConstants.VAULT_TARGET_DATE, newValueAsString);
+            actualChanges.put(SavingsApiConstants.localeParamName, localeAsInput);
+            actualChanges.put(SavingsApiConstants.dateFormatParamName, dateFormat);
+            this.vaultTargetDate = command.localDateValueOfParameterNamed(SavingsApiConstants.VAULT_TARGET_DATE);
+        }
+        if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(SavingsApiConstants.VAULT_TARGET_AMOUNT,
+                getVaultTargetAmount())) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(SavingsApiConstants.VAULT_TARGET_AMOUNT);
+            actualChanges.put(SavingsApiConstants.VAULT_TARGET_AMOUNT, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.vaultTargetAmount = Money.of(this.currency, newValue).getAmount();
+        }
+
         // charges
         final String chargesParamName = "charges";
         if (command.hasParameter(chargesParamName)) {
@@ -2557,10 +2578,8 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     public void validateNewApplicationState(final LocalDate todayDateOfTenant, final String resourceName) {
 
-        // validateWithdrawalFeeDetails();
-        // validateAnnualFeeDetails();
-
         final LocalDate submittedOn = getSubmittedOnLocalDate();
+        final LocalDate vaultTargetDate = getVaultTargetDate();
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -2584,7 +2603,10 @@ public class SavingsAccount extends AbstractPersistableCustom {
             baseDataValidator.reset().parameter(SavingsApiConstants.submittedOnDateParamName).value(this.group.getActivationLocalDate())
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.client.activation.date");
         }
-
+        if (submittedOn.isAfter(vaultTargetDate)) {
+            baseDataValidator.reset().parameter(SavingsApiConstants.VAULT_TARGET_DATE).value(vaultTargetDate)
+                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.After.Vault.Target.Date");
+        }
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
@@ -5007,5 +5029,20 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
+    }
+
+    public void setVaultTribeDetails(BigDecimal vaultTargetAmount, LocalDate vaultTargetDate) {
+        if (vaultTargetAmount != null && vaultTargetDate != null) {
+            this.vaultTargetAmount = vaultTargetAmount;
+            this.vaultTargetDate = vaultTargetDate;
+        }
+    }
+
+    public BigDecimal getVaultTargetAmount() {
+        return vaultTargetAmount;
+    }
+
+    public LocalDate getVaultTargetDate() {
+        return vaultTargetDate;
     }
 }

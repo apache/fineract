@@ -19,6 +19,8 @@
 package org.apache.fineract.portfolio.savings.domain;
 
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.VAULT_TARGET_AMOUNT;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.VAULT_TARGET_DATE;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.accountNoParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.clientIdParamName;
@@ -321,6 +323,14 @@ public class SavingsAccountAssembler {
                 throw new UnsupportedParameterException(Arrays.asList(withHoldTaxParamName));
             }
         }
+        BigDecimal vaultTargetAmount = null;
+        if (command.parameterExists(VAULT_TARGET_AMOUNT)) {
+            vaultTargetAmount = command.bigDecimalValueOfParameterNamed(VAULT_TARGET_AMOUNT);
+        }
+        LocalDate vaultTargetDate = null;
+        if (command.parameterExists(VAULT_TARGET_DATE)) {
+            vaultTargetDate = this.fromApiJsonHelper.extractLocalDateNamed(VAULT_TARGET_DATE, element);
+        }
 
         final SavingsAccount account = SavingsAccount.createNewApplicationForSubmittal(client, group, product, fieldOfficer, accountNo,
                 externalId, accountType, submittedOnDate, submittedBy, interestRate, interestCompoundingPeriodType,
@@ -329,7 +339,7 @@ public class SavingsAccountAssembler {
                 overdraftLimit, enforceMinRequiredBalance, minRequiredBalance, maxAllowedLienLimit, lienAllowed,
                 nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
-
+        account.setVaultTribeDetails(vaultTargetAmount, vaultTargetDate);
         account.validateNewApplicationState(DateUtils.getBusinessLocalDate(), SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         account.validateAccountValuesWithProduct();

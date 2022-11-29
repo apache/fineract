@@ -60,4 +60,5 @@
     <include file="parts/0036_add_isUSDProduct_in_savings_product_table.xml" relativeToChangelogFile="true"/>
     <include file="parts/0037_create_table_for_Fx_rate.xml" relativeToChangelogFile="true"/>
     <include file="parts/MON-93_permission_fd_partial_liquidation.xml" relativeToChangelogFile="true"/>
+    <include file="parts/MON-110_Vault_Tribe.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

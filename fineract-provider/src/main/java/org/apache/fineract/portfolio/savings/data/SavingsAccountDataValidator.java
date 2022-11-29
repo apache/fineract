@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.savings.data;
 
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.VAULT_TARGET_AMOUNT;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.VAULT_TARGET_DATE;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.accountNoParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.amountParamName;
@@ -221,6 +223,16 @@ public class SavingsAccountDataValidator {
             baseDataValidator.reset().parameter(SavingsApiConstants.datatables).value(datatables).notNull().jsonArrayNotEmpty();
         }
 
+        if (this.fromApiJsonHelper.parameterExists(VAULT_TARGET_AMOUNT, element)
+                || this.fromApiJsonHelper.parameterExists(VAULT_TARGET_DATE, element)) {
+
+            final BigDecimal vaultTargetAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(VAULT_TARGET_AMOUNT, element);
+            baseDataValidator.reset().parameter(VAULT_TARGET_AMOUNT).value(vaultTargetAmount).notNull().zeroOrPositiveAmount();
+
+            final LocalDate vaultTargetDate = this.fromApiJsonHelper.extractLocalDateNamed(VAULT_TARGET_DATE, element);
+            baseDataValidator.reset().parameter(VAULT_TARGET_DATE).value(vaultTargetDate).notNull();
+        }
+
         validateSavingsCharges(element, baseDataValidator);
 
         validateOverdraftParams(baseDataValidator, element);
@@ -406,6 +418,16 @@ public class SavingsAccountDataValidator {
         if (this.fromApiJsonHelper.parameterExists(withHoldTaxParamName, element)) {
             final String withHoldTax = this.fromApiJsonHelper.extractStringNamed(withHoldTaxParamName, element);
             baseDataValidator.reset().parameter(withHoldTaxParamName).value(withHoldTax).ignoreIfNull().validateForBooleanValue();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(VAULT_TARGET_AMOUNT, element)
+                || this.fromApiJsonHelper.parameterExists(VAULT_TARGET_DATE, element)) {
+
+            final BigDecimal vaultTargetAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(VAULT_TARGET_AMOUNT, element);
+            baseDataValidator.reset().parameter(VAULT_TARGET_AMOUNT).value(vaultTargetAmount).notNull().zeroOrPositiveAmount();
+
+            final LocalDate vaultTargetDate = this.fromApiJsonHelper.extractLocalDateNamed(VAULT_TARGET_DATE, element);
+            baseDataValidator.reset().parameter(VAULT_TARGET_DATE).value(vaultTargetDate).notNull();
         }
 
         validateOverdraftParams(baseDataValidator, element);
