@@ -1011,4 +1011,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
     public boolean isFdaPreclosureFee() {
         return ChargeTimeType.fromInt(this.chargeTime).isFdaPreclosureFee();
     }
+
+
+
 }

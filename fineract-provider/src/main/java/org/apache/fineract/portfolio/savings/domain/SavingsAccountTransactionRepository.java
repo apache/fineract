@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.savings.domain;
 import java.time.LocalDate;
 import java.util.List;
 import javax.persistence.LockModeType;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
@@ -55,4 +56,8 @@ public interface SavingsAccountTransactionRepository
 
     @Query("SELECT sat FROM SavingsAccountTransaction sat WHERE sat.savingsAccount.id = :savingsId ORDER BY sat.dateOf, sat.createdDate, sat.id")
     List<SavingsAccountTransaction> getTransactionsByAccountId(@Param("savingsId") Long savingsId);
+
+    @Query("SELECT sat FROM SavingsAccountTransaction sat WHERE sat.savingsAccount.id = :savingsId and sat.typeOf = :type ORDER BY sat.dateOf, sat.createdDate, sat.id")
+    List<SavingsAccountTransaction> getTransactionsByAccountIdAndType(@Param("savingsId") Long savingsId, @Param("type") Integer type);
+
 }
