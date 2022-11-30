@@ -62,6 +62,8 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentScheduleInstallmentData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargePaidByReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
@@ -576,6 +578,9 @@ public class LoanTransactionsApiResource {
         if (resolvedLoanTransactionId == null) {
             externalTransactionId.throwExceptionIfEmpty();
             resolvedLoanTransactionId = this.loanReadPlatformService.retrieveLoanTransactionIdByExternalId(externalTransactionId);
+            if (resolvedLoanTransactionId == null) {
+                throw new LoanTransactionNotFoundException(externalTransactionId);
+            }
         }
         return resolvedLoanTransactionId;
     }
@@ -585,6 +590,9 @@ public class LoanTransactionsApiResource {
         if (resolvedLoanId == null) {
             loanExternalId.throwExceptionIfEmpty();
             resolvedLoanId = this.loanReadPlatformService.retrieveLoanIdByExternalId(loanExternalId.getValue());
+            if (resolvedLoanId == null) {
+                throw new LoanNotFoundException(loanExternalId);
+            }
         }
         return resolvedLoanId;
     }
