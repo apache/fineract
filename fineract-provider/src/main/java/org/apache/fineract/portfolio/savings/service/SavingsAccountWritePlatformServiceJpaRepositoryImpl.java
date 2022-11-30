@@ -126,6 +126,7 @@ import org.apache.fineract.portfolio.savings.exception.SavingsAccountTransaction
 import org.apache.fineract.portfolio.savings.exception.SavingsOfficerAssignmentException;
 import org.apache.fineract.portfolio.savings.exception.SavingsOfficerUnassignmentException;
 import org.apache.fineract.portfolio.savings.exception.TransactionUpdateNotAllowedException;
+import org.apache.fineract.portfolio.savings.exception.UnlockSavingsAccountException;
 import org.apache.fineract.portfolio.transfer.api.TransferApiConstants;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
@@ -1503,6 +1504,46 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.savingAccountRepositoryWrapper.save(account);
 
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult unlockAccount(Long savingsId, JsonCommand command) {
+        this.context.authenticatedUser();
+
+        final boolean unlocked = command.booleanPrimitiveValueOfParameterNamed("unlocked");
+        final LocalDate unlockedDate = command.localDateValueOfParameterNamed("unlockedDate");
+        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
+        checkClientOrGroupActive(account);
+        if (unlocked) {
+
+            if (unlockedDate == null) {
+
+                throw new UnlockSavingsAccountException(UnlockSavingsAccountException.UnlockSavingsAccountExceptionType.VALID_DATE);
+            }
+            if (unlockedDate.isBefore(account.accountSubmittedOrActivationDate())) {
+                throw new UnlockSavingsAccountException(UnlockSavingsAccountException.UnlockSavingsAccountExceptionType.ACTIVATION_DATE);
+            }
+
+            LocalDate today = DateUtils.getLocalDateOfTenant();
+            if (unlockedDate.isAfter(today)) {
+                throw new PostInterestAsOnDateException(PostInterestAsOnExceptionType.FUTURE_DATE);
+            }
+
+            account.setUnlocked(unlocked);
+            account.setUnlockDate(unlockedDate);
+
+            this.savingAccountRepositoryWrapper.save(account);
+        }
+
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(savingsId) //
+                .withOfficeId(account.officeId()) //
+                .withClientId(account.clientId()) //
+                .withGroupId(account.groupId()) //
+                .withSavingsId(savingsId) //
+                .build();
+
     }
 
     @Transactional

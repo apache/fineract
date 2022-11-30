@@ -3520,6 +3520,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder unlockSavingsAccount(final Long accountId) {
+        this.actionName = "UNLOCK";
+        this.entityName = "SAVINGSACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = accountId;
+        this.href = "/savingsaccounts/" + accountId + "?command=unlock";
+        return this;
+    }
+
     public CommandWrapperBuilder topUpFixedDepositAccount(final Long accountId) {
         this.actionName = "TOP_UP";
         this.entityName = "FIXEDDEPOSITACCOUNT";

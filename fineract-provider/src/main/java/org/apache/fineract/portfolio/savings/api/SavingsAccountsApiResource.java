@@ -450,6 +450,7 @@ public class SavingsAccountsApiResource {
             + "Block Savings Account Debit transactions:\n\n" + "All types of debit operations from Savings account wil be blocked\n\n"
             + "Unblock Savings Account debit transactions:\n\n"
             + "It unblocks the Saving account's debit operations. Now all types of debits can be transacted from Savings account\n\n"
+            + "It unlocks the Saving account which subscribes to a GSIM Account for Vault Tribe Implementation\n\n"
             + "Showing request/response for 'Unassign Savings Officer'")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdRequest.class)))
     @ApiResponses({
@@ -522,6 +523,9 @@ public class SavingsAccountsApiResource {
         } else if (is(commandParam, "postAccrualInterestAsOn")) {
             final CommandWrapper commandRequest = builder.savingsAccountAccrualInterestPosting(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "unlock")) {
+            final CommandWrapper commandRequest = builder.unlockSavingsAccount(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
         if (result == null) {
@@ -531,7 +535,8 @@ public class SavingsAccountsApiResource {
                             "postInterest", "postAccrualInterestAsOn", "close", "assignSavingsOfficer", "unassignSavingsOfficer",
                             SavingsApiConstants.COMMAND_BLOCK_DEBIT, SavingsApiConstants.COMMAND_UNBLOCK_DEBIT,
                             SavingsApiConstants.COMMAND_BLOCK_CREDIT, SavingsApiConstants.COMMAND_UNBLOCK_CREDIT,
-                            SavingsApiConstants.COMMAND_BLOCK_ACCOUNT, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT });
+                            SavingsApiConstants.COMMAND_BLOCK_ACCOUNT, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT,
+                            SavingsApiConstants.COMMAND_UNLOCK });
         }
 
         return this.toApiJsonSerializer.serialize(result);

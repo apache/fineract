@@ -379,6 +379,12 @@ public class SavingsAccount extends AbstractPersistableCustom {
     @Column(name = "vault_target_date")
     private LocalDate vaultTargetDate;
 
+    @Column(name = "unlock_date")
+    private LocalDate unlockDate;
+
+    @Column(name = "is_unlocked")
+    private boolean unlocked;
+
     protected SavingsAccount() {
         //
     }
@@ -2603,7 +2609,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
             baseDataValidator.reset().parameter(SavingsApiConstants.submittedOnDateParamName).value(this.group.getActivationLocalDate())
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.client.activation.date");
         }
-        if (submittedOn.isAfter(vaultTargetDate)) {
+        if (vaultTargetDate != null && submittedOn.isAfter(vaultTargetDate)) {
             baseDataValidator.reset().parameter(SavingsApiConstants.VAULT_TARGET_DATE).value(vaultTargetDate)
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.After.Vault.Target.Date");
         }
@@ -5044,5 +5050,13 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     public LocalDate getVaultTargetDate() {
         return vaultTargetDate;
+    }
+
+    public void setUnlockDate(LocalDate unlockDate) {
+        this.unlockDate = unlockDate;
+    }
+
+    public void setUnlocked(boolean unlocked) {
+        this.unlocked = unlocked;
     }
 }
