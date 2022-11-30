@@ -45,6 +45,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -71,15 +72,13 @@ import org.apache.fineract.portfolio.savings.service.SavingsAccountChargeReadPla
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 @Path("/savingsaccounts")
 @Component
-@Scope("singleton")
 @Tag(name = "Savings Account", description = "Savings accounts are instances of a particular savings product created for an individual or group. An application process around the creation of accounts is also supported.")
+@RequiredArgsConstructor
 public class SavingsAccountsApiResource {
 
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
@@ -90,24 +89,6 @@ public class SavingsAccountsApiResource {
     private final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService;
     private final BulkImportWorkbookService bulkImportWorkbookService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
-
-    @Autowired
-    public SavingsAccountsApiResource(final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
-            final PlatformSecurityContext context, final DefaultToApiJsonSerializer<SavingsAccountData> toApiJsonSerializer,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService,
-            final BulkImportWorkbookService bulkImportWorkbookService,
-            final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService) {
-        this.savingsAccountReadPlatformService = savingsAccountReadPlatformService;
-        this.context = context;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.savingsAccountChargeReadPlatformService = savingsAccountChargeReadPlatformService;
-        this.bulkImportWorkbookService = bulkImportWorkbookService;
-        this.bulkImportWorkbookPopulatorService = bulkImportWorkbookPopulatorService;
-    }
 
     @GET
     @Path("template")
@@ -124,14 +105,13 @@ public class SavingsAccountsApiResource {
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @Parameter(description = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
             @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
+        context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
 
-        final SavingsAccountData savingsAccount = this.savingsAccountReadPlatformService.retrieveTemplate(clientId, groupId, productId,
+        final SavingsAccountData savingsAccount = savingsAccountReadPlatformService.retrieveTemplate(clientId, groupId, productId,
                 staffInSelectedOfficeOnly);
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, savingsAccount,
-                SavingsApiSetConstants.SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return toApiJsonSerializer.serialize(settings, savingsAccount, SavingsApiSetConstants.SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -150,14 +130,14 @@ public class SavingsAccountsApiResource {
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
             @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder) {
 
-        this.context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
+        context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         final SearchParameters searchParameters = SearchParameters.forSavings(sqlSearch, externalId, offset, limit, orderBy, sortOrder);
 
-        final Page<SavingsAccountData> products = this.savingsAccountReadPlatformService.retrieveAll(searchParameters);
+        final Page<SavingsAccountData> products = savingsAccountReadPlatformService.retrieveAll(searchParameters);
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, products, SavingsApiSetConstants.SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return toApiJsonSerializer.serialize(settings, products, SavingsApiSetConstants.SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
@@ -175,9 +155,9 @@ public class SavingsAccountsApiResource {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createSavingsAccount().withJson(apiRequestBodyAsJson).build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return toApiJsonSerializer.serialize(result);
     }
 
     @POST
@@ -188,9 +168,9 @@ public class SavingsAccountsApiResource {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createGSIMAccount().withJson(apiRequestBodyAsJson).build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return toApiJsonSerializer.serialize(result);
     }
 
     @GET
@@ -206,21 +186,21 @@ public class SavingsAccountsApiResource {
             @DefaultValue("all") @QueryParam("chargeStatus") @Parameter(description = "chargeStatus") final String chargeStatus,
             @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
+        context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         if (!(is(chargeStatus, "all") || is(chargeStatus, "active") || is(chargeStatus, "inactive"))) {
             throw new UnrecognizedQueryParamException("status", chargeStatus, new Object[] { "all", "active", "inactive" });
         }
 
-        final SavingsAccountData savingsAccount = this.savingsAccountReadPlatformService.retrieveOne(accountId);
+        final SavingsAccountData savingsAccount = savingsAccountReadPlatformService.retrieveOne(accountId);
 
         final Set<String> mandatoryResponseParameters = new HashSet<>();
         final SavingsAccountData savingsAccountTemplate = populateTemplateAndAssociations(accountId, savingsAccount,
                 staffInSelectedOfficeOnly, chargeStatus, uriInfo, mandatoryResponseParameters);
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);
-        return this.toApiJsonSerializer.serialize(settings, savingsAccountTemplate,
+        return toApiJsonSerializer.serialize(settings, savingsAccountTemplate,
                 SavingsApiSetConstants.SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS);
     }
 
@@ -240,7 +220,7 @@ public class SavingsAccountsApiResource {
 
             if (associationParameters.contains(SavingsApiConstants.transactions)) {
                 mandatoryResponseParameters.add(SavingsApiConstants.transactions);
-                final Collection<SavingsAccountTransactionData> currentTransactions = this.savingsAccountReadPlatformService
+                final Collection<SavingsAccountTransactionData> currentTransactions = savingsAccountReadPlatformService
                         .retrieveAllTransactions(accountId, DepositAccountType.SAVINGS_DEPOSIT);
                 if (!CollectionUtils.isEmpty(currentTransactions)) {
                     transactions = currentTransactions;
@@ -249,7 +229,7 @@ public class SavingsAccountsApiResource {
 
             if (associationParameters.contains(SavingsApiConstants.charges)) {
                 mandatoryResponseParameters.add(SavingsApiConstants.charges);
-                final Collection<SavingsAccountChargeData> currentCharges = this.savingsAccountChargeReadPlatformService
+                final Collection<SavingsAccountChargeData> currentCharges = savingsAccountChargeReadPlatformService
                         .retrieveSavingsAccountCharges(accountId, chargeStatus);
                 if (!CollectionUtils.isEmpty(currentCharges)) {
                     charges = currentCharges;
@@ -258,10 +238,10 @@ public class SavingsAccountsApiResource {
         }
 
         SavingsAccountData templateData = null;
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (settings.isTemplate()) {
-            templateData = this.savingsAccountReadPlatformService.retrieveTemplate(savingsAccount.getClientId(),
-                    savingsAccount.getGroupId(), savingsAccount.getSavingsProductId(), staffInSelectedOfficeOnly);
+            templateData = savingsAccountReadPlatformService.retrieveTemplate(savingsAccount.getClientId(), savingsAccount.getGroupId(),
+                    savingsAccount.getSavingsProductId(), staffInSelectedOfficeOnly);
         }
 
         return SavingsAccountData.withTemplateOptions(savingsAccount, templateData, transactions, charges);
@@ -286,43 +266,29 @@ public class SavingsAccountsApiResource {
         if (is(commandParam, "updateWithHoldTax")) {
             final CommandWrapper commandRequest = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson).updateWithHoldTax(accountId)
                     .build();
-            final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
+            final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return toApiJsonSerializer.serialize(result);
         }
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateSavingsAccount(accountId).withJson(apiRequestBodyAsJson)
                 .build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return toApiJsonSerializer.serialize(result);
     }
 
     @PUT
     @Path("/gsim/{parentAccountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    /*
-     * public String updateGsim(@PathParam("parentAccountId") final Long parentAccountId, final String
-     * apiRequestBodyAsJson,
-     *
-     * @QueryParam("command") final String commandParam) {
-     */
     public String updateGsim(@PathParam("parentAccountId") final Long parentAccountId, final String apiRequestBodyAsJson) {
-
-        /*
-         * if (is(commandParam, "updateWithHoldTax")) { final CommandWrapper commandRequest = new
-         * CommandWrapperBuilder().withJson(apiRequestBodyAsJson). updateWithHoldTax(accountId) .build(); final
-         * CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource( commandRequest);
-         * return this.toApiJsonSerializer.serialize(result); }
-         */
-
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateGSIMAccount(parentAccountId).withJson(apiRequestBodyAsJson)
                 .build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return toApiJsonSerializer.serialize(result);
     }
 
     @POST
@@ -342,31 +308,31 @@ public class SavingsAccountsApiResource {
         CommandProcessingResult result = null;
         if (is(commandParam, "reject")) {
             final CommandWrapper commandRequest = builder.rejectGSIMAccountApplication(parentAccountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "withdrawnByApplicant")) {
             final CommandWrapper commandRequest = builder.withdrawSavingsAccountApplication(parentAccountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "approve")) {
             final CommandWrapper commandRequest = builder.approveGSIMAccountApplication(parentAccountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "undoapproval")) {
             final CommandWrapper commandRequest = builder.undoGSIMApplicationApproval(parentAccountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "activate")) {
             final CommandWrapper commandRequest = builder.gsimAccountActivation(parentAccountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "calculateInterest")) {
             final CommandWrapper commandRequest = builder.withNoJsonBody().savingsAccountInterestCalculation(parentAccountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "postInterest")) {
             final CommandWrapper commandRequest = builder.savingsAccountInterestPosting(parentAccountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "applyAnnualFees")) {
             final CommandWrapper commandRequest = builder.savingsAccountApplyAnnualFees(parentAccountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "close")) {
             final CommandWrapper commandRequest = builder.closeGSIMApplication(parentAccountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
         if (result == null) {
             throw new UnrecognizedQueryParamException("command", commandParam,
@@ -377,7 +343,7 @@ public class SavingsAccountsApiResource {
                             SavingsApiConstants.COMMAND_BLOCK_ACCOUNT, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT });
         }
 
-        return this.toApiJsonSerializer.serialize(result);
+        return toApiJsonSerializer.serialize(result);
     }
 
     @POST
@@ -433,57 +399,57 @@ public class SavingsAccountsApiResource {
         CommandProcessingResult result = null;
         if (is(commandParam, "reject")) {
             final CommandWrapper commandRequest = builder.rejectSavingsAccountApplication(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "withdrawnByApplicant")) {
             final CommandWrapper commandRequest = builder.withdrawSavingsAccountApplication(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "approve")) {
             final CommandWrapper commandRequest = builder.approveSavingsAccountApplication(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "undoapproval")) {
             final CommandWrapper commandRequest = builder.undoSavingsAccountApplication(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "activate")) {
             final CommandWrapper commandRequest = builder.savingsAccountActivation(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "calculateInterest")) {
             final CommandWrapper commandRequest = builder.withNoJsonBody().savingsAccountInterestCalculation(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "postInterest")) {
             final CommandWrapper commandRequest = builder.savingsAccountInterestPosting(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "applyAnnualFees")) {
             final CommandWrapper commandRequest = builder.savingsAccountApplyAnnualFees(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "close")) {
             final CommandWrapper commandRequest = builder.closeSavingsAccountApplication(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "assignSavingsOfficer")) {
             final CommandWrapper commandRequest = builder.assignSavingsOfficer(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return toApiJsonSerializer.serialize(result);
         } else if (is(commandParam, "unassignSavingsOfficer")) {
             final CommandWrapper commandRequest = builder.unassignSavingsOfficer(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return toApiJsonSerializer.serialize(result);
         } else if (is(commandParam, SavingsApiConstants.COMMAND_BLOCK_DEBIT)) {
             final CommandWrapper commandRequest = builder.blockDebitsFromSavingsAccount(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, SavingsApiConstants.COMMAND_UNBLOCK_DEBIT)) {
             final CommandWrapper commandRequest = builder.unblockDebitsFromSavingsAccount(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, SavingsApiConstants.COMMAND_BLOCK_CREDIT)) {
             final CommandWrapper commandRequest = builder.blockCreditsToSavingsAccount(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, SavingsApiConstants.COMMAND_UNBLOCK_CREDIT)) {
             final CommandWrapper commandRequest = builder.unblockCreditsToSavingsAccount(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, SavingsApiConstants.COMMAND_BLOCK_ACCOUNT)) {
             final CommandWrapper commandRequest = builder.blockSavingsAccount(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT)) {
             final CommandWrapper commandRequest = builder.unblockSavingsAccount(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
         if (result == null) {
@@ -496,7 +462,7 @@ public class SavingsAccountsApiResource {
                             SavingsApiConstants.COMMAND_BLOCK_ACCOUNT, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT });
         }
 
-        return this.toApiJsonSerializer.serialize(result);
+        return toApiJsonSerializer.serialize(result);
     }
 
     private boolean is(final String commandParam, final String commandValue) {
@@ -514,9 +480,9 @@ public class SavingsAccountsApiResource {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteSavingsAccount(accountId).build();
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return toApiJsonSerializer.serialize(result);
     }
 
     @GET
@@ -535,9 +501,9 @@ public class SavingsAccountsApiResource {
     public String postSavingsTemplate(@FormDataParam("file") InputStream uploadedInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("locale") final String locale,
             @FormDataParam("dateFormat") final String dateFormat) {
-        final Long importDocumentId = this.bulkImportWorkbookService.importWorkbook(GlobalEntityType.SAVINGS_ACCOUNT.toString(),
+        final Long importDocumentId = bulkImportWorkbookService.importWorkbook(GlobalEntityType.SAVINGS_ACCOUNT.toString(),
                 uploadedInputStream, fileDetail, locale, dateFormat);
-        return this.toApiJsonSerializer.serialize(importDocumentId);
+        return toApiJsonSerializer.serialize(importDocumentId);
     }
 
     @GET
@@ -556,8 +522,8 @@ public class SavingsAccountsApiResource {
     public String postSavingsTransactionTemplate(@FormDataParam("file") InputStream uploadedInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("locale") final String locale,
             @FormDataParam("dateFormat") final String dateFormat) {
-        final Long importDocumentId = this.bulkImportWorkbookService.importWorkbook(GlobalEntityType.SAVINGS_TRANSACTIONS.toString(),
+        final Long importDocumentId = bulkImportWorkbookService.importWorkbook(GlobalEntityType.SAVINGS_TRANSACTIONS.toString(),
                 uploadedInputStream, fileDetail, locale, dateFormat);
-        return this.toApiJsonSerializer.serialize(importDocumentId);
+        return toApiJsonSerializer.serialize(importDocumentId);
     }
 }

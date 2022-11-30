@@ -151,13 +151,11 @@ import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 @Path("/loans")
 @Component
-@Scope("singleton")
 @Tag(name = "Loans", description = "The API concept of loans models the loan application process and the loan contract/monitoring process.\n"
         + "\n" + "Field Descriptions\n" + "accountNo\n"
         + "The account no. associated with this loan. Is auto generated if not provided at loan application creation time.\n"
