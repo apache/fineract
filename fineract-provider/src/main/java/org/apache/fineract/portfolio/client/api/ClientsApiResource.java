@@ -73,12 +73,10 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Path("/clients")
 @Component
-@Scope("singleton")
 @Tag(name = "Client", description = "Clients are people and businesses that have applied (or may apply) to an MFI for loans.\n" + "\n"
         + "Clients can be created in Pending or straight into Active state.")
 @RequiredArgsConstructor
@@ -109,24 +107,24 @@ public class ClientsApiResource {
             @QueryParam("commandParam") @Parameter(description = "commandParam") final String commandParam,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @Parameter(description = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly) {
 
-        this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
+        context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
 
         ClientData clientData = null;
-        this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
+        context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
         if (is(commandParam, "close")) {
-            clientData = this.clientReadPlatformService.retrieveAllNarrations(ClientApiConstants.CLIENT_CLOSURE_REASON);
+            clientData = clientReadPlatformService.retrieveAllNarrations(ClientApiConstants.CLIENT_CLOSURE_REASON);
         } else if (is(commandParam, "acceptTransfer")) {
-            clientData = this.clientReadPlatformService.retrieveAllNarrations(ClientApiConstants.CLIENT_CLOSURE_REASON);
+            clientData = clientReadPlatformService.retrieveAllNarrations(ClientApiConstants.CLIENT_CLOSURE_REASON);
         } else if (is(commandParam, "reject")) {
-            clientData = this.clientReadPlatformService.retrieveAllNarrations(ClientApiConstants.CLIENT_REJECT_REASON);
+            clientData = clientReadPlatformService.retrieveAllNarrations(ClientApiConstants.CLIENT_REJECT_REASON);
         } else if (is(commandParam, "withdraw")) {
-            clientData = this.clientReadPlatformService.retrieveAllNarrations(ClientApiConstants.CLIENT_WITHDRAW_REASON);
+            clientData = clientReadPlatformService.retrieveAllNarrations(ClientApiConstants.CLIENT_WITHDRAW_REASON);
         } else {
-            clientData = this.clientReadPlatformService.retrieveTemplate(officeId, staffInSelectedOfficeOnly);
+            clientData = clientReadPlatformService.retrieveTemplate(officeId, staffInSelectedOfficeOnly);
         }
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, clientData, ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return toApiJsonSerializer.serialize(settings, clientData, ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -152,24 +150,20 @@ public class ClientsApiResource {
             @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder,
             @QueryParam("orphansOnly") @Parameter(description = "orphansOnly") final Boolean orphansOnly) {
 
-        return this.retrieveAll(uriInfo, sqlSearch, officeId, externalId, displayName, firstname, lastname, status, hierarchy, offset,
-                limit, orderBy, sortOrder, orphansOnly, false);
+        return retrieveAll(uriInfo, sqlSearch, officeId, externalId, displayName, firstname, lastname, status, hierarchy, offset, limit,
+                orderBy, sortOrder, orphansOnly, false);
     }
 
     public String retrieveAll(final UriInfo uriInfo, final String sqlSearch, final Long officeId, final String externalId,
             final String displayName, final String firstname, final String lastname, final String status, final String hierarchy,
             final Integer offset, final Integer limit, final String orderBy, final String sortOrder, final Boolean orphansOnly,
             final boolean isSelfUser) {
-
-        this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
-
+        context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
         final SearchParameters searchParameters = SearchParameters.forClients(sqlSearch, officeId, externalId, displayName, firstname,
                 lastname, status, hierarchy, offset, limit, orderBy, sortOrder, orphansOnly, isSelfUser);
-
-        final Page<ClientData> clientData = this.clientReadPlatformService.retrieveAll(searchParameters);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, clientData, ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);
+        final Page<ClientData> clientData = clientReadPlatformService.retrieveAll(searchParameters);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return toApiJsonSerializer.serialize(settings, clientData, ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -184,22 +178,21 @@ public class ClientsApiResource {
             @Context final UriInfo uriInfo,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @Parameter(description = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly) {
 
-        this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
+        context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        ClientData clientData = this.clientReadPlatformService.retrieveOne(clientId);
+        ClientData clientData = clientReadPlatformService.retrieveOne(clientId);
         if (settings.isTemplate()) {
-            final ClientData templateData = this.clientReadPlatformService.retrieveTemplate(clientData.getOfficeId(),
-                    staffInSelectedOfficeOnly);
+            final ClientData templateData = clientReadPlatformService.retrieveTemplate(clientData.getOfficeId(), staffInSelectedOfficeOnly);
             clientData = ClientData.templateOnTop(clientData, templateData);
-            Collection<SavingsAccountData> savingAccountOptions = this.savingsAccountReadPlatformService.retrieveForLookup(clientId, null);
+            Collection<SavingsAccountData> savingAccountOptions = savingsAccountReadPlatformService.retrieveForLookup(clientId, null);
             if (savingAccountOptions != null && savingAccountOptions.size() > 0) {
                 clientData = ClientData.templateWithSavingAccountOptions(clientData, savingAccountOptions);
             }
         }
 
-        return this.toApiJsonSerializer.serialize(settings, clientData, ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);
+        return toApiJsonSerializer.serialize(settings, clientData, ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
@@ -220,9 +213,9 @@ public class ClientsApiResource {
                 .withJson(apiRequestBodyAsJson) //
                 .build(); //
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return toApiJsonSerializer.serialize(result);
     }
 
     @PUT
@@ -244,9 +237,9 @@ public class ClientsApiResource {
                 .withJson(apiRequestBodyAsJson) //
                 .build(); //
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return toApiJsonSerializer.serialize(result);
     }
 
     @DELETE
@@ -263,9 +256,9 @@ public class ClientsApiResource {
                 .deleteClient(clientId) //
                 .build(); //
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return this.toApiJsonSerializer.serialize(result);
+        return toApiJsonSerializer.serialize(result);
     }
 
     @POST
@@ -315,51 +308,51 @@ public class ClientsApiResource {
         CommandWrapper commandRequest = null;
         if (is(commandParam, "activate")) {
             commandRequest = builder.activateClient(clientId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "assignStaff")) {
             commandRequest = builder.assignClientStaff(clientId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return toApiJsonSerializer.serialize(result);
         } else if (is(commandParam, "unassignStaff")) {
             commandRequest = builder.unassignClientStaff(clientId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return toApiJsonSerializer.serialize(result);
         } else if (is(commandParam, "close")) {
             commandRequest = builder.closeClient(clientId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "proposeTransfer")) {
             commandRequest = builder.proposeClientTransfer(clientId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "proposeAndAcceptTransfer")) {
             commandRequest = builder.proposeAndAcceptClientTransfer(clientId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "withdrawTransfer")) {
             commandRequest = builder.withdrawClientTransferRequest(clientId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "acceptTransfer")) {
             commandRequest = builder.acceptClientTransfer(clientId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "rejectTransfer")) {
             commandRequest = builder.rejectClientTransfer(clientId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "updateSavingsAccount")) {
             commandRequest = builder.updateClientSavingsAccount(clientId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "reject")) {
             commandRequest = builder.rejectClient(clientId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "withdraw")) {
             commandRequest = builder.withdrawClient(clientId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "reactivate")) {
             commandRequest = builder.reActivateClient(clientId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "undoRejection")) {
             commandRequest = builder.undoRejection(clientId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "undoWithdrawal")) {
             commandRequest = builder.undoWithdrawal(clientId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
         if (result == null) {
@@ -368,7 +361,7 @@ public class ClientsApiResource {
                             "acceptTransfer", "rejectTransfer", "updateSavingsAccount", "reject", "withdraw", "reactivate" });
         }
 
-        return this.toApiJsonSerializer.serialize(result);
+        return toApiJsonSerializer.serialize(result);
     }
 
     private boolean is(final String commandParam, final String commandValue) {
@@ -388,15 +381,15 @@ public class ClientsApiResource {
     public String retrieveAssociatedAccounts(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
+        context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
 
-        final AccountSummaryCollectionData clientAccount = this.accountDetailsReadPlatformService.retrieveClientAccountDetails(clientId);
+        final AccountSummaryCollectionData clientAccount = accountDetailsReadPlatformService.retrieveClientAccountDetails(clientId);
 
         final Set<String> CLIENT_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(
                 Arrays.asList("loanAccounts", "savingsAccounts", "shareAccounts"));
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.clientAccountSummaryToApiJsonSerializer.serialize(settings, clientAccount, CLIENT_ACCOUNTS_DATA_PARAMETERS);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return clientAccountSummaryToApiJsonSerializer.serialize(settings, clientAccount, CLIENT_ACCOUNTS_DATA_PARAMETERS);
     }
 
     @GET
@@ -417,7 +410,7 @@ public class ClientsApiResource {
             @FormDataParam("locale") final String locale, @FormDataParam("dateFormat") final String dateFormat) {
         final Long importDocumentId = bulkImportWorkbookService.importWorkbook(legalFormType, uploadedInputStream, fileDetail, locale,
                 dateFormat);
-        return this.toApiJsonSerializer.serialize(importDocumentId);
+        return toApiJsonSerializer.serialize(importDocumentId);
     }
 
     @GET
@@ -426,11 +419,11 @@ public class ClientsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveObligeeDetails(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
+        context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
 
-        final List<ObligeeData> ObligeeList = this.guarantorReadPlatformService.retrieveObligeeDetails(clientId);
+        final List<ObligeeData> ObligeeList = guarantorReadPlatformService.retrieveObligeeDetails(clientId);
 
-        return this.toApiJsonSerializer.serialize(ObligeeList);
+        return toApiJsonSerializer.serialize(ObligeeList);
     }
 
     @GET
@@ -439,8 +432,8 @@ public class ClientsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveTransferTemplate(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
-        final LocalDate transferDate = this.clientReadPlatformService.retrieveClientTransferProposalDate(clientId);
-        return this.toApiJsonSerializer.serialize(transferDate);
+        context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
+        final LocalDate transferDate = clientReadPlatformService.retrieveClientTransferProposalDate(clientId);
+        return toApiJsonSerializer.serialize(transferDate);
     }
 }

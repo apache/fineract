@@ -124,7 +124,6 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
     public SmsData retrieveOne(final Long resourceId) {
         try {
             final String sql = "select " + this.smsRowMapper.schema() + " where smo.id = ?";
-
             return this.jdbcTemplate.queryForObject(sql, this.smsRowMapper, new Object[] { resourceId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new SmsNotFoundException(resourceId, e);
