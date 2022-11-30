@@ -52,6 +52,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdSummary;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.GetPaymentTypesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
@@ -1610,6 +1611,12 @@ public class LoanTransactionHelper extends IntegrationTest {
         final String chargebackPayload = new Gson().toJson(map);
         log.info("{}", chargebackPayload);
         return chargebackPayload;
+    }
+
+    public GetLoansLoanIdTransactionsTemplateResponse retrieveTransactionTemplate(String loanExternalIdStr, String command,
+            String dateFormat, String transactionDate, String locale) {
+        return ok(
+                fineract().loanTransactions.retrieveTransactionTemplate1(loanExternalIdStr, command, dateFormat, transactionDate, locale));
     }
 
 }

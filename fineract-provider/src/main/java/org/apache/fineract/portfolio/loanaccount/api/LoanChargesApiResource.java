@@ -58,9 +58,11 @@ import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
+import org.apache.fineract.portfolio.charge.exception.LoanChargeNotFoundException;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInstallmentChargeData;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.springframework.context.annotation.Scope;
@@ -549,6 +551,9 @@ public class LoanChargesApiResource {
         if (resolvedLoanChargeId == null) {
             loanChargeExternalId.throwExceptionIfEmpty();
             resolvedLoanChargeId = this.loanChargeReadPlatformService.retrieveLoanChargeIdByExternalId(loanChargeExternalId);
+            if (resolvedLoanChargeId == null) {
+                throw new LoanChargeNotFoundException(loanChargeExternalId);
+            }
         }
         return resolvedLoanChargeId;
     }
@@ -558,6 +563,9 @@ public class LoanChargesApiResource {
         if (resolvedLoanId == null) {
             loanExternalId.throwExceptionIfEmpty();
             resolvedLoanId = this.loanReadPlatformService.retrieveLoanIdByExternalId(loanExternalId.getValue());
+            if (resolvedLoanId == null) {
+                throw new LoanNotFoundException(loanExternalId);
+            }
         }
         return resolvedLoanId;
     }
