@@ -19,11 +19,10 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-
-import java.util.List;
 
 @Getter
 @Setter
@@ -82,6 +81,7 @@ public class FineractProperties {
     @Getter
     @Setter
     public static class FineractContentProperties {
+
         private boolean regexWhitelistEnabled;
         private List<String> regexWhitelist;
         private boolean mimeWhitelistEnabled;

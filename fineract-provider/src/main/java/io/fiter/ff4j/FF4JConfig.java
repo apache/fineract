@@ -33,8 +33,8 @@ public class FF4JConfig {
     @Bean
     public FF4j getFF4j() {
 
-        final String templateRepository = fineractProperties.getContent().getFilesystem().getRootFolder() + File.separator + "ff4j" + File.separator
-                + this.ff4jFileName;
+        final String templateRepository = fineractProperties.getContent().getFilesystem().getRootFolder() + File.separator + "ff4j"
+                + File.separator + this.ff4jFileName;
         final File configFile = new File(templateRepository);
         InputStream targetStream = null;
         try {

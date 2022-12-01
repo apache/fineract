@@ -49,7 +49,6 @@ public class FileSystemContentPathSanitizer implements ContentPathSanitizer {
 
     private static Pattern OVERWRITE_SIBLING_IMAGE = Pattern.compile(".*\\.\\./+[0-9]+/+.*");
 
-
     @Autowired
     public FileSystemContentPathSanitizer(final FineractProperties fineractProperties) {
         this.fineractProperties = fineractProperties;

@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.contentrepository;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
 import org.springframework.stereotype.Component;
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
