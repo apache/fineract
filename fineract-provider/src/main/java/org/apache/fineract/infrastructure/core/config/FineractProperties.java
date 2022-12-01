@@ -23,6 +23,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.List;
+
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "fineract")
@@ -35,6 +37,14 @@ public class FineractProperties {
     private FineractModeProperties mode;
 
     private FineractCorrelationProperties correlation;
+
+
+
+    private FineractContentProperties content;
+
+
+
+
 
     @Getter
     @Setter
@@ -73,5 +83,108 @@ public class FineractProperties {
 
         private boolean enabled;
         private String headerName;
+    }
+
+    public static class FineractContentProperties {
+        private boolean regexWhitelistEnabled;
+        private List<String> regexWhitelist;
+        private boolean mimeWhitelistEnabled;
+        private List<String> mimeWhitelist;
+        private FineractContentFilesystemProperties filesystem;
+        private FineractContentS3Properties s3;
+
+        public boolean isRegexWhitelistEnabled() {
+            return regexWhitelistEnabled;
+        }
+
+        public void setRegexWhitelistEnabled(boolean regexWhitelistEnabled) {
+            this.regexWhitelistEnabled = regexWhitelistEnabled;
+        }
+
+        public List<String> getRegexWhitelist() {
+            return regexWhitelist;
+        }
+
+        public void setRegexWhitelist(List<String> regexWhitelist) {
+            this.regexWhitelist = regexWhitelist;
+        }
+
+        public boolean isMimeWhitelistEnabled() {
+            return mimeWhitelistEnabled;
+        }
+
+        public void setMimeWhitelistEnabled(boolean mimeWhitelistEnabled) {
+            this.mimeWhitelistEnabled = mimeWhitelistEnabled;
+        }
+
+        public List<String> getMimeWhitelist() {
+            return mimeWhitelist;
+        }
+
+        public void setMimeWhitelist(List<String> mimeWhitelist) {
+            this.mimeWhitelist = mimeWhitelist;
+        }
+
+        public FineractContentFilesystemProperties getFilesystem() {
+            return filesystem;
+        }
+
+        public void setFilesystem(FineractContentFilesystemProperties filesystem) {
+            this.filesystem = filesystem;
+        }
+
+        public FineractContentS3Properties getS3() {
+            return s3;
+        }
+
+        public void setS3(FineractContentS3Properties s3) {
+            this.s3 = s3;
+        }
+    }
+
+
+
+    public static class FineractContentFilesystemProperties {
+
+        private String rootFolder;
+
+        public String getRootFolder() {
+            return rootFolder;
+        }
+
+        public void setRootFolder(String rootFolder) {
+            this.rootFolder = rootFolder;
+        }
+    }
+
+    public static class FineractContentS3Properties {
+
+        private String bucketName;
+        private String accessKey;
+        private String secretKey;
+
+        public String getBucketName() {
+            return bucketName;
+        }
+
+        public void setBucketName(String bucketName) {
+            this.bucketName = bucketName;
+        }
+
+        public String getAccessKey() {
+            return accessKey;
+        }
+
+        public void setAccessKey(String accessKey) {
+            this.accessKey = accessKey;
+        }
+
+        public String getSecretKey() {
+            return secretKey;
+        }
+
+        public void setSecretKey(String secretKey) {
+            this.secretKey = secretKey;
+        }
     }
 }

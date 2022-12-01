@@ -62,6 +62,7 @@ import org.apache.fineract.infrastructure.campaigns.email.exception.EmailCampaig
 import org.apache.fineract.infrastructure.campaigns.email.exception.EmailCampaignNotFound;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
@@ -76,7 +77,6 @@ import org.apache.fineract.infrastructure.dataqueries.domain.ReportRepository;
 import org.apache.fineract.infrastructure.dataqueries.exception.ReportNotFoundException;
 import org.apache.fineract.infrastructure.dataqueries.service.GenericDataService;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadReportingService;
-import org.apache.fineract.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
@@ -118,6 +118,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
     private final LoanRepository loanRepository;
     private final SavingsAccountRepository savingsAccountRepository;
     private final EmailMessageJobEmailService emailMessageJobEmailService;
+    private final FineractProperties fineractProperties;
 
     @Autowired
     public EmailCampaignWritePlatformCommandHandlerImpl(final PlatformSecurityContext context,
@@ -125,7 +126,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
             final EmailCampaignReadPlatformService emailCampaignReadPlatformService, final ReportRepository reportRepository,
             final EmailMessageRepository emailMessageRepository, final ClientRepositoryWrapper clientRepositoryWrapper,
             final ReadReportingService readReportingService, final GenericDataService genericDataService,
-            final FromJsonHelper fromJsonHelper, final LoanRepository loanRepository,
+            final FromJsonHelper fromJsonHelper, final LoanRepository loanRepository, final FineractProperties fineractProperties,
             final SavingsAccountRepository savingsAccountRepository, final EmailMessageJobEmailService emailMessageJobEmailService) {
         this.context = context;
         this.emailCampaignRepository = emailCampaignRepository;
@@ -140,6 +141,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
         this.loanRepository = loanRepository;
         this.savingsAccountRepository = savingsAccountRepository;
         this.emailMessageJobEmailService = emailMessageJobEmailService;
+        this.fineractProperties = fineractProperties;
     }
 
     @Transactional
@@ -747,7 +749,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
             final ByteArrayOutputStream byteArrayOutputStream = this.readReportingService.generatePentahoReportAsOutputStream(reportName,
                     emailAttachmentFileFormat.getValue(), reportParams, null, emailCampaign.getApprovedBy(), errorLog);
 
-            final String fileLocation = FileSystemContentRepository.FINERACT_BASE_DIR + File.separator + "";
+            final String fileLocation = fineractProperties.getContent().getFilesystem().getRootFolder() + File.separator + "";
             final String fileNameWithoutExtension = fileLocation + File.separator + reportName;
 
             // check if file directory exists, if not create directory

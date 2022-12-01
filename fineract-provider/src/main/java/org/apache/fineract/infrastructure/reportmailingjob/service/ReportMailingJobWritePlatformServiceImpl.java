@@ -32,6 +32,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
@@ -39,7 +40,6 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.dataqueries.domain.Report;
 import org.apache.fineract.infrastructure.dataqueries.domain.ReportRepositoryWrapper;
 import org.apache.fineract.infrastructure.dataqueries.service.ReadReportingService;
-import org.apache.fineract.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
@@ -84,6 +84,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
     private final ReportingProcessServiceProvider reportingProcessServiceProvider;
     private final ReportMailingJobRunHistoryRepository reportMailingJobRunHistoryRepository;
     private static final String DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private final FineractProperties fineractProperties;
 
     @Autowired
     public ReportMailingJobWritePlatformServiceImpl(final ReportRepositoryWrapper reportRepositoryWrapper,
@@ -92,7 +93,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
             final ReportMailingJobRepository reportMailingJobRepository, final PlatformSecurityContext platformSecurityContext,
             final ReportMailingJobEmailService reportMailingJobEmailService, final ReadReportingService readReportingService,
             final ReportMailingJobRunHistoryRepository reportMailingJobRunHistoryRepository,
-            final ReportingProcessServiceProvider reportingProcessServiceProvider) {
+            final ReportingProcessServiceProvider reportingProcessServiceProvider, final FineractProperties fineractProperties) {
         this.reportRepositoryWrapper = reportRepositoryWrapper;
         this.reportMailingJobValidator = reportMailingJobValidator;
         this.reportMailingJobRepositoryWrapper = reportMailingJobRepositoryWrapper;
@@ -102,6 +103,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
         this.readReportingService = readReportingService;
         this.reportMailingJobRunHistoryRepository = reportMailingJobRunHistoryRepository;
         this.reportingProcessServiceProvider = reportingProcessServiceProvider;
+        this.fineractProperties = fineractProperties;
     }
 
     @Override
@@ -442,7 +444,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
 
                 if (reponseObject != null && reponseObject.getClass().equals(ByteArrayOutputStream.class)) {
                     final ByteArrayOutputStream byteArrayOutputStream = ByteArrayOutputStream.class.cast(reponseObject);
-                    final String fileLocation = FileSystemContentRepository.FINERACT_BASE_DIR + File.separator + "";
+                    final String fileLocation = fineractProperties.getContent().getFilesystem().getRootFolder() + File.separator + "";
                     final String fileNameWithoutExtension = fileLocation + File.separator + reportName;
 
                     // check if file directory exists, if not create directory

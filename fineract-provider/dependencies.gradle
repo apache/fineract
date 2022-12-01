@@ -56,6 +56,9 @@ dependencies {
             'org.apache.poi:poi',
             'org.apache.poi:poi-ooxml',
             'org.apache.tika:tika-core',
+            'org.apache.tika:tika-parser-microsoft-module',
+            'org.apache.tika:tika-parser-miscoffice-module',
+
             'org.liquibase:liquibase-core',
 
             'com.github.librepdf:openpdf',

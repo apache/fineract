@@ -40,6 +40,7 @@ import javax.ws.rs.core.StreamingOutput;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
@@ -50,7 +51,6 @@ import org.apache.fineract.infrastructure.dataqueries.data.ReportParameterJoinDa
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
 import org.apache.fineract.infrastructure.dataqueries.exception.ReportNotFoundException;
-import org.apache.fineract.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.SqlInjectionPreventerService;
 import org.apache.fineract.infrastructure.security.utils.LogParameterEscapeUtil;
@@ -72,6 +72,17 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     private final GenericDataService genericDataService;
     private final SqlInjectionPreventerService sqlInjectionPreventerService;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
+    private final FineractProperties fineractProperties;
+
+    @Autowired
+    public ReadReportingServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
+            final GenericDataService genericDataService, final FineractProperties fineractProperties) {
+        this.context = context;
+        this.dataSource = dataSource;
+        this.jdbcTemplate = new JdbcTemplate(this.dataSource);
+        this.genericDataService = genericDataService;
+        this.fineractProperties = fineractProperties;
+    }
 
     @Override
     public StreamingOutput retrieveReportCSV(final String name, final String type, final Map<String, String> queryParams,
@@ -244,7 +255,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     public String retrieveReportPDF(final String reportName, final String type, final Map<String, String> queryParams,
             final boolean isSelfServiceUserReport) {
 
-        final String fileLocation = FileSystemContentRepository.FINERACT_BASE_DIR + File.separator + "";
+        final String fileLocation = fineractProperties.getContent().getFilesystem().getRootFolder() + File.separator + "";
         if (!new File(fileLocation).isDirectory()) {
             new File(fileLocation).mkdirs();
         }
