@@ -1511,30 +1511,47 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     public CommandProcessingResult unlockAccount(Long savingsId, JsonCommand command) {
         this.context.authenticatedUser();
 
-        final boolean unlocked = command.booleanPrimitiveValueOfParameterNamed("unlocked");
         final LocalDate unlockedDate = command.localDateValueOfParameterNamed("unlockedDate");
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
         checkClientOrGroupActive(account);
-        if (unlocked) {
 
-            if (unlockedDate == null) {
-
-                throw new UnlockSavingsAccountException(UnlockSavingsAccountException.UnlockSavingsAccountExceptionType.VALID_DATE);
-            }
-            if (unlockedDate.isBefore(account.accountSubmittedOrActivationDate())) {
-                throw new UnlockSavingsAccountException(UnlockSavingsAccountException.UnlockSavingsAccountExceptionType.ACTIVATION_DATE);
-            }
-
-            LocalDate today = DateUtils.getLocalDateOfTenant();
-            if (unlockedDate.isAfter(today)) {
-                throw new PostInterestAsOnDateException(PostInterestAsOnExceptionType.FUTURE_DATE);
-            }
-
-            account.setUnlocked(unlocked);
-            account.setUnlockDate(unlockedDate);
-
-            this.savingAccountRepositoryWrapper.save(account);
+        if (!account.getAccountType().isGSIMAccount()) {
+            throw new UnlockSavingsAccountException(UnlockSavingsAccountException.UnlockSavingsAccountExceptionType.INVALID_ACCOUNT_TYPE);
         }
+        if (!account.getStatus().isActive()) {
+            throw new UnlockSavingsAccountException(UnlockSavingsAccountException.UnlockSavingsAccountExceptionType.INVALID_ACCOUNT_STATUS);
+        }
+
+        if (account.getLockinPeriodFrequencyType() == null || account.getLockinPeriodFrequency() == null) {
+            throw new UnlockSavingsAccountException(
+                    UnlockSavingsAccountException.UnlockSavingsAccountExceptionType.INVALID_LOCK_IN_DETAILS);
+        }
+
+        if (unlockedDate == null) {
+
+            throw new UnlockSavingsAccountException(UnlockSavingsAccountException.UnlockSavingsAccountExceptionType.VALID_DATE);
+        }
+        if (account.getLockedInUntilDate() == null) {
+
+            throw new UnlockSavingsAccountException(UnlockSavingsAccountException.UnlockSavingsAccountExceptionType.VALID_DATE);
+        }
+        if (unlockedDate.isBefore(account.accountSubmittedOrActivationDate())) {
+            throw new UnlockSavingsAccountException(UnlockSavingsAccountException.UnlockSavingsAccountExceptionType.ACTIVATION_DATE);
+        }
+        if (unlockedDate.isAfter(account.getLockedInUntilDate())) {
+            throw new UnlockSavingsAccountException(
+                    UnlockSavingsAccountException.UnlockSavingsAccountExceptionType.UNLOCK_DATE_IS_AFTER_LOCKED_DATE);
+        }
+
+        LocalDate today = DateUtils.getLocalDateOfTenant();
+        if (unlockedDate.isAfter(today)) {
+            throw new PostInterestAsOnDateException(PostInterestAsOnExceptionType.FUTURE_DATE);
+        }
+
+        account.setUnlocked(Boolean.TRUE);
+        account.setUnlockDate(unlockedDate);
+
+        this.savingAccountRepositoryWrapper.save(account);
 
         return new CommandProcessingResultBuilder() //
                 .withEntityId(savingsId) //

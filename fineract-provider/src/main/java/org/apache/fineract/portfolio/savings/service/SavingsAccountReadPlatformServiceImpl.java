@@ -52,6 +52,7 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
 import org.apache.fineract.portfolio.account.data.AccountTransferData;
+import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.client.data.ClientData;
@@ -604,7 +605,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                             enforceMinRequiredBalance, maxAllowedLienLimit, lienAllowed, minBalanceForInterestCalculation, onHoldFunds,
                             nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax, taxGroupData,
                             lastActiveTransactionDate, isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat,
-                            onHoldAmount, numOfCreditTransaction, numOfDebitTransaction, blockNarration, null, null);
+                            onHoldAmount, numOfCreditTransaction, numOfDebitTransaction, blockNarration, null, null, null, null);
 
                     savingsAccountData.setClientData(clientData);
                     savingsAccountData.setGroupGeneralData(groupGeneralData);
@@ -856,7 +857,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sp.num_of_credit_transaction as numOfCreditTransaction,");
             sqlBuilder.append("sp.num_of_debit_transaction as numOfDebitTransaction,");
             sqlBuilder.append("cvn.code_value as blockNarrationValue, ");
-            sqlBuilder.append("sa.vault_target_amount as vaultTargetAmount , sa.vault_target_date as vaultTargetDate ");
+            sqlBuilder.append("sa.vault_target_amount as vaultTargetAmount , sa.vault_target_date as vaultTargetDate, ");
+            sqlBuilder.append("sa.account_type_enum as accountType, ");
+            sqlBuilder.append("sa.lockedin_until_date_derived as lockedInUntilDate ");
             sqlBuilder.append("from m_savings_account sa ");
             sqlBuilder.append("join m_savings_product sp ON sa.product_id = sp.id ");
             sqlBuilder.append("join m_currency curr on curr.code = sa.currency_code ");
@@ -886,7 +889,10 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final String accountNo = rs.getString("accountNo");
             final String externalId = rs.getString("externalId");
             final Integer depositTypeId = rs.getInt("depositType");
+            final Integer accountTypeId = rs.getInt("accountType");
+            final LocalDate lockedInUntilDate = JdbcSupport.getLocalDate(rs, "lockedInUntilDate");
             final EnumOptionData depositType = SavingsEnumerations.depositType(depositTypeId);
+            final AccountType accountType = AccountType.fromInt(accountTypeId);
 
             final Long groupId = JdbcSupport.getLong(rs, "groupId");
             final String groupName = rs.getString("groupName");
@@ -1103,7 +1109,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     maxAllowedLienLimit, lienAllowed, minBalanceForInterestCalculation, onHoldFunds, nominalAnnualInterestRateOverdraft,
                     minOverdraftForInterestCalculation, withHoldTax, taxGroupData, lastActiveTransactionDate, isDormancyTrackingActive,
                     daysToInactive, daysToDormancy, daysToEscheat, onHoldAmount, numOfCreditTransaction, numOfDebitTransaction,
-                    blockNarration, vaultTargetDate, vaultTargetAmount);
+                    blockNarration, vaultTargetDate, vaultTargetAmount, accountType, lockedInUntilDate);
         }
     }
 
@@ -1716,7 +1722,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     maxAllowedLienLimit, lienAllowed, minBalanceForInterestCalculation, onHoldFunds, nominalAnnualInterestRateOverdraft,
                     minOverdraftForInterestCalculation, withHoldTax, taxGroupData, lastActiveTransactionDate, isDormancyTrackingActive,
                     daysToInactive, daysToDormancy, daysToEscheat, savingsAmountOnHold, numOfCreditTransaction, numOfDebitTransaction, null,
-                    null, null);
+                    null, null, null, null);
         }
     }
 

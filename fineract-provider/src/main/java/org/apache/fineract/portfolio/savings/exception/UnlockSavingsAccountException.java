@@ -24,7 +24,7 @@ public class UnlockSavingsAccountException extends AbstractPlatformDomainRuleExc
 
     public enum UnlockSavingsAccountExceptionType {
 
-        FUTURE_DATE, VALID_DATE, ACTIVATION_DATE, LAST_TRANSACTION_DATE;
+        FUTURE_DATE, VALID_DATE, ACTIVATION_DATE, INVALID_ACCOUNT_TYPE, INVALID_ACCOUNT_STATUS, INVALID_LOCK_IN_DETAILS, UNLOCK_DATE_IS_AFTER_LOCKED_DATE;
 
         public String errorMessage() {
             if (name().toString().equalsIgnoreCase("FUTURE_DATE")) {
@@ -32,9 +32,15 @@ public class UnlockSavingsAccountException extends AbstractPlatformDomainRuleExc
             } else if (name().toString().equalsIgnoreCase("VALID_DATE")) {
                 return "Please Pass a valid date";
             } else if (name().toString().equalsIgnoreCase("ACTIVATION_DATE")) {
-                return "Post Interest Date must be after the Activation date";
-            } else if (name().toString().equalsIgnoreCase("LAST_TRANSACTION_DATE")) {
-                return "Cannot Post Interest before last transaction date";
+                return "Unlock Date must be after the Activation date";
+            } else if (name().toString().equalsIgnoreCase("INVALID_ACCOUNT_TYPE")) {
+                return "Invalid AccountType Detected . Expected GSIM Account Type";
+            } else if (name().toString().equalsIgnoreCase("INVALID_ACCOUNT_STATUS")) {
+                return "Invalid Account Status Detected . Expected ACTIVE Account STATUS";
+            } else if (name().toString().equalsIgnoreCase("INVALID_LOCK_IN_DETAILS")) {
+                return "Invalid LockIn Details Detected ";
+            } else if (name().toString().equalsIgnoreCase("UNLOCK_DATE_IS_AFTER_LOCKED_DATE")) {
+                return "Unlock Date can't be after locked period ";
             }
             return name().toString();
         }
@@ -46,8 +52,14 @@ public class UnlockSavingsAccountException extends AbstractPlatformDomainRuleExc
                 return "error.msg.nullDatePassed";
             } else if (name().toString().equalsIgnoreCase("ACTIVATION_DATE")) {
                 return "error.msg.before activation date";
-            } else if (name().toString().equalsIgnoreCase("LAST_TRANSACTION_DATE")) {
-                return "error.msg.countInterest";
+            } else if (name().toString().equalsIgnoreCase("INVALID_ACCOUNT_TYPE")) {
+                return "error.msg.invalid.account.type";
+            } else if (name().toString().equalsIgnoreCase("INVALID_ACCOUNT_STATUS")) {
+                return "error.msg.invalid.account.status";
+            } else if (name().toString().equalsIgnoreCase("INVALID_LOCK_IN_DETAILS")) {
+                return "error.msg.invalid.lockIn.details";
+            } else if (name().toString().equalsIgnoreCase("UNLOCK_DATE_IS_AFTER_LOCKED_DATE")) {
+                return "error.msg.unlock.date.shouldn't.be.after.locked.date";
             }
             return name().toString();
         }
