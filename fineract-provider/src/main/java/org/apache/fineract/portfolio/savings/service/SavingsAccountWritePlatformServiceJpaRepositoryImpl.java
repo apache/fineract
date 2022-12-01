@@ -1511,7 +1511,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     public CommandProcessingResult unlockAccount(Long savingsId, JsonCommand command) {
         this.context.authenticatedUser();
 
-        final LocalDate unlockedDate = command.localDateValueOfParameterNamed("unlockedDate");
+        final LocalDate unlockedDate = command.localDateValueOfParameterNamed("unlockdate");
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
         checkClientOrGroupActive(account);
 
