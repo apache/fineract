@@ -19,10 +19,8 @@
 package org.apache.fineract.infrastructure.documentmanagement.contentrepository;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.configuration.data.S3CredentialsData;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import java.util.List;
 
@@ -33,13 +31,6 @@ public class ContentRepositoryFactory {
     // TODO: all configuration should be really moved to application.properties
     private final ConfigurationDomainService configurationService;
     private final List<ContentRepository> contentRepositories;
-
-    @Autowired
-    public ContentRepositoryFactory(final ApplicationContext applicationContext,
-            final ExternalServicesPropertiesReadPlatformService externalServicesReadPlatformService) {
-        this.applicationContext = applicationContext;
-        this.externalServicesReadPlatformService = externalServicesReadPlatformService;
-    }
 
     public ContentRepository getRepository() {
         if (configurationService.isAmazonS3Enabled()) {

@@ -25,6 +25,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.Base64EncodedImage;
@@ -35,26 +38,18 @@ import org.apache.fineract.infrastructure.documentmanagement.data.FileData;
 import org.apache.fineract.infrastructure.documentmanagement.data.ImageData;
 import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
 import org.apache.fineract.infrastructure.documentmanagement.exception.ContentManagementException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+
+@Slf4j
+@RequiredArgsConstructor
 @Component
 @ConditionalOnProperty("fineract.content.filesystem.enabled")
 public class FileSystemContentRepository implements ContentRepository {
 
-    private static final Logger log = LoggerFactory.getLogger(FileSystemContentRepository.class);
-
     private final FileSystemContentPathSanitizer pathSanitizer;
     private final FineractProperties fineractProperties;
-
-    @Autowired
-    public FileSystemContentRepository(final FileSystemContentPathSanitizer pathSanitizer,final FineractProperties fineractProperties) {
-        this.pathSanitizer = pathSanitizer;
-        this.fineractProperties = fineractProperties;
-    }
 
     @Override
     public String saveFile(final InputStream uploadedInputStream, final DocumentCommand documentCommand) {

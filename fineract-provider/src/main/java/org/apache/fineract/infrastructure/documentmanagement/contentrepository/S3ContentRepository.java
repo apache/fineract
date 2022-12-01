@@ -43,9 +43,6 @@ import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
 import org.apache.fineract.infrastructure.documentmanagement.exception.ContentManagementException;
 import org.apache.fineract.infrastructure.documentmanagement.exception.DocumentNotFoundException;
 import org.apache.fineract.infrastructure.security.utils.LogParameterEscapeUtil;
-import org.apache.fineract.infrastructure.security.utils.LogParameterEscapeUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -53,8 +50,6 @@ import org.springframework.stereotype.Component;
 @Component
 @ConditionalOnProperty("fineract.content.s3.enabled")
 public class S3ContentRepository implements ContentRepository {
-
-    private static final Logger log = LoggerFactory.getLogger(S3ContentRepository.class);
 
     private final AmazonS3 s3Client;
     private final FineractProperties fineractProperties;

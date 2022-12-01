@@ -74,16 +74,6 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final FineractProperties fineractProperties;
 
-    @Autowired
-    public ReadReportingServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-            final GenericDataService genericDataService, final FineractProperties fineractProperties) {
-        this.context = context;
-        this.dataSource = dataSource;
-        this.jdbcTemplate = new JdbcTemplate(this.dataSource);
-        this.genericDataService = genericDataService;
-        this.fineractProperties = fineractProperties;
-    }
-
     @Override
     public StreamingOutput retrieveReportCSV(final String name, final String type, final Map<String, String> queryParams,
             final boolean isSelfServiceUserReport) {
