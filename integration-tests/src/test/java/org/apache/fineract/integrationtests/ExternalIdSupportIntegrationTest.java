@@ -700,6 +700,23 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
         // Check whether the provided external id was retrieved
         assertEquals(txnExternalIdStr, disbursedLoanResult.get("resourceExternalId"));
 
+        // Second loan
+        final HashMap loan2 = applyForLoanApplication(client.getClientId().intValue(), loanProductID, null);
+        Integer loan2Id = (Integer) loan2.get("resourceId");
+        this.loanTransactionHelper.approveLoan("02 September 2022", loan2Id);
+        final HashMap disbursedLoan2Result = this.loanTransactionHelper.disburseLoan("03 September 2022", loan2Id, "1000", null);
+
+        Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
+                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
+
+        LocalDate targetDate = LocalDate.of(2022, 9, 7);
+        final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
+
+        String penalty1LoanChargeExternalId = UUID.randomUUID().toString();
+        Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loan2Id,
+                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10",
+                        penalty1LoanChargeExternalId));
+
         // NEGATIVE SCENARIOS
 
         // GET
@@ -761,6 +778,16 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
                 () -> this.loanTransactionHelper.getLoanCharge("randomNonExistingLoanExternalId", "randomNonExistingLoanChargeExternalId"));
         assertEquals(404, exception.getResponse().code());
         assertTrue(exception.getMessage().contains("error.msg.loan.external.id.invalid"));
+
+        exception = assertThrows(CallFailedRuntimeException.class,
+                () -> this.loanTransactionHelper.getLoanCharge(-1L, (long) penalty1LoanChargeId));
+        assertEquals(404, exception.getResponse().code());
+        assertTrue(exception.getMessage().contains("error.msg.loanCharge.id.invalid.for.given.loan"));
+
+        exception = assertThrows(CallFailedRuntimeException.class,
+                () -> this.loanTransactionHelper.getLoanCharge(loanExternalIdStr, (long) penalty1LoanChargeId));
+        assertEquals(404, exception.getResponse().code());
+        assertTrue(exception.getMessage().contains("error.msg.loanCharge.id.invalid.for.given.loan"));
 
         exception = assertThrows(CallFailedRuntimeException.class,
                 () -> this.loanTransactionHelper.getLoanCharge(loanExternalIdStr, "randomNonExistingLoanChargeExternalId"));
