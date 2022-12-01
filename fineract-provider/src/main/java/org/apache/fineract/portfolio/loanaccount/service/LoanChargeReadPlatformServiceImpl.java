@@ -36,6 +36,7 @@ import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.domain.Charge;
+import org.apache.fineract.portfolio.charge.exception.LoanChargeNotFoundException;
 import org.apache.fineract.portfolio.charge.service.ChargeDropdownReadPlatformService;
 import org.apache.fineract.portfolio.charge.service.ChargeEnumerations;
 import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
@@ -47,6 +48,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -169,20 +171,20 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
 
     @Override
     public LoanChargeData retrieveLoanChargeDetails(final Long id, final Long loanId) {
-        final LoanChargeMapper rm = new LoanChargeMapper();
-
-        final String sql = "select " + rm.schema() + " where lc.id=? and lc.loan_id=?";
-
-        return this.jdbcTemplate.queryForObject(sql, rm, id, loanId); // NOSONAR
+        try {
+            final LoanChargeMapper rm = new LoanChargeMapper();
+            final String sql = "select " + rm.schema() + " where lc.id=? and lc.loan_id=?";
+            return this.jdbcTemplate.queryForObject(sql, rm, id, loanId); // NOSONAR
+        } catch (final EmptyResultDataAccessException e) {
+            throw new LoanChargeNotFoundException(id, loanId, e);
+        }
     }
 
     @Override
     public Collection<LoanChargeData> retrieveLoanCharges(final Long loanId) {
         final LoanChargeMapper rm = new LoanChargeMapper();
-
         final String sql = "select " + rm.schema() + " where lc.loan_id=? AND lc.is_active = true"
                 + " order by coalesce(lc.due_for_collection_as_of_date,date(coalesce(dd.disbursedon_date,dd.expected_disburse_date))),lc.charge_time_enum ASC, lc.due_for_collection_as_of_date ASC, lc.is_penalty ASC";
-
         return this.jdbcTemplate.query(sql, rm, loanId); // NOSONAR
     }
 
