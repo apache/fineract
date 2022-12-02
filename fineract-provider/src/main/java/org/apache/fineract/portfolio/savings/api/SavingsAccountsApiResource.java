@@ -523,9 +523,6 @@ public class SavingsAccountsApiResource {
         } else if (is(commandParam, "postAccrualInterestAsOn")) {
             final CommandWrapper commandRequest = builder.savingsAccountAccrualInterestPosting(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "unlock")) {
-            final CommandWrapper commandRequest = builder.unlockSavingsAccount(accountId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
         if (result == null) {
@@ -535,8 +532,7 @@ public class SavingsAccountsApiResource {
                             "postInterest", "postAccrualInterestAsOn", "close", "assignSavingsOfficer", "unassignSavingsOfficer",
                             SavingsApiConstants.COMMAND_BLOCK_DEBIT, SavingsApiConstants.COMMAND_UNBLOCK_DEBIT,
                             SavingsApiConstants.COMMAND_BLOCK_CREDIT, SavingsApiConstants.COMMAND_UNBLOCK_CREDIT,
-                            SavingsApiConstants.COMMAND_BLOCK_ACCOUNT, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT,
-                            SavingsApiConstants.COMMAND_UNLOCK });
+                            SavingsApiConstants.COMMAND_BLOCK_ACCOUNT, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT });
         }
 
         return this.toApiJsonSerializer.serialize(result);
