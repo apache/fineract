@@ -185,6 +185,9 @@ public class ClientApiConstants {
 
     public static final String clientEntityName = "clients";
 
+    public static final Set<String> CLIENT_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList("loanAccounts", "savingsAccounts", "shareAccounts"));
+
     /**
      * These parameters will match the class level parameters of {@link ClientData}. Where possible, we try to get
      * response parameters to match those of request parameters.

@@ -22,9 +22,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -39,12 +37,14 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.documentmanagement.domain.Image;
@@ -57,6 +57,8 @@ import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "m_client", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "account_no_UNIQUE"), //
         @UniqueConstraint(columnNames = { "mobile_no" }, name = "mobile_no_UNIQUE") })
 public class Client extends AbstractAuditableWithUTCDateTimeCustom {
@@ -117,7 +119,7 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
     private boolean isStaff;
 
     @Column(name = "external_id", length = 100, unique = true)
-    private String externalId;
+    private ExternalId externalId;
 
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
@@ -224,56 +226,22 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<ClientCollateralManagement> clientCollateralManagements = new HashSet<>();
 
-    public static Client createNew(final AppUser currentUser, final Office clientOffice, final Group clientParentGroup, final Staff staff,
-            final Long savingsProductId, final CodeValue gender, final CodeValue clientType, final CodeValue clientClassification,
-            final Integer legalForm, final JsonCommand command) {
-
-        final String accountNo = command.stringValueOfParameterNamed(ClientApiConstants.accountNoParamName);
-        final String externalId = command.stringValueOfParameterNamed(ClientApiConstants.externalIdParamName);
-        final String mobileNo = command.stringValueOfParameterNamed(ClientApiConstants.mobileNoParamName);
-        final String emailAddress = command.stringValueOfParameterNamed(ClientApiConstants.emailAddressParamName);
-
-        final String firstname = command.stringValueOfParameterNamed(ClientApiConstants.firstnameParamName);
-        final String middlename = command.stringValueOfParameterNamed(ClientApiConstants.middlenameParamName);
-        final String lastname = command.stringValueOfParameterNamed(ClientApiConstants.lastnameParamName);
-        final String fullname = command.stringValueOfParameterNamed(ClientApiConstants.fullnameParamName);
-
-        final boolean isStaff = command.booleanPrimitiveValueOfParameterNamed(ClientApiConstants.isStaffParamName);
-
-        final LocalDate dataOfBirth = command.localDateValueOfParameterNamed(ClientApiConstants.dateOfBirthParamName);
-
-        ClientStatus status = ClientStatus.PENDING;
-        boolean active = false;
-        if (command.hasParameter("active")) {
-            active = command.booleanPrimitiveValueOfParameterNamed(ClientApiConstants.activeParamName);
-        }
-
-        LocalDate activationDate = null;
-        LocalDate officeJoiningDate = null;
-        if (active) {
-            status = ClientStatus.ACTIVE;
-            activationDate = command.localDateValueOfParameterNamed(ClientApiConstants.activationDateParamName);
-            officeJoiningDate = activationDate;
-        }
-
-        LocalDate submittedOnDate = DateUtils.getBusinessLocalDate();
-        if (command.hasParameter(ClientApiConstants.submittedOnDateParamName)) {
-            submittedOnDate = command.localDateValueOfParameterNamed(ClientApiConstants.submittedOnDateParamName);
-        }
-        if (active && submittedOnDate.isAfter(activationDate)) {
-            submittedOnDate = activationDate;
-        }
-        final Long savingsAccountId = null;
-        return new Client(currentUser, status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname,
+    public static Client instance(final AppUser currentUser, final ClientStatus status, final Office office, final Group clientParentGroup,
+            final String accountNo, final String firstname, final String middlename, final String lastname, final String fullname,
+            final LocalDate activationDate, final LocalDate officeJoiningDate, final ExternalId externalId, final String mobileNo,
+            final String emailAddress, final Staff staff, final LocalDate submittedOnDate, final Long savingsProductId,
+            final Long savingsAccountId, final LocalDate dateOfBirth, final CodeValue gender, final CodeValue clientType,
+            final CodeValue clientClassification, final Integer legalForm, final Boolean isStaff) {
+        return new Client(currentUser, status, office, clientParentGroup, accountNo, firstname, middlename, lastname, fullname,
                 activationDate, officeJoiningDate, externalId, mobileNo, emailAddress, staff, submittedOnDate, savingsProductId,
-                savingsAccountId, dataOfBirth, gender, clientType, clientClassification, legalForm, isStaff);
+                savingsAccountId, dateOfBirth, gender, clientType, clientClassification, legalForm, isStaff);
     }
 
     protected Client() {}
 
     private Client(final AppUser currentUser, final ClientStatus status, final Office office, final Group clientParentGroup,
             final String accountNo, final String firstname, final String middlename, final String lastname, final String fullname,
-            final LocalDate activationDate, final LocalDate officeJoiningDate, final String externalId, final String mobileNo,
+            final LocalDate activationDate, final LocalDate officeJoiningDate, final ExternalId externalId, final String mobileNo,
             final String emailAddress, final Staff staff, final LocalDate submittedOnDate, final Long savingsProductId,
             final Long savingsAccountId, final LocalDate dateOfBirth, final CodeValue gender, final CodeValue clientType,
             final CodeValue clientClassification, final Integer legalForm, final Boolean isStaff) {
@@ -289,9 +257,7 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
 
         this.status = status.getValue();
         this.office = office;
-        if (StringUtils.isNotBlank(externalId)) {
-            this.externalId = externalId.trim();
-        }
+        this.externalId = externalId;
 
         if (StringUtils.isNotBlank(mobileNo)) {
             this.mobileNo = mobileNo.trim();
@@ -358,7 +324,7 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
 
     }
 
-    private void validateUpdate() {
+    public void validateUpdate() {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         // Not validating name parts while update request as firstname/lastname
         // can be along with fullname
@@ -378,10 +344,6 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
 
     public void setAccountNumberRequiresAutoGeneration(final boolean accountNumberRequiresAutoGeneration) {
         this.accountNumberRequiresAutoGeneration = accountNumberRequiresAutoGeneration;
-    }
-
-    public boolean identifiedBy(final String identifier) {
-        return identifier.equalsIgnoreCase(this.externalId);
     }
 
     public boolean identifiedBy(final Long clientId) {
@@ -463,156 +425,6 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
         return ClientStatus.fromInt(this.status).isWithdrawn();
     }
 
-    public Map<String, Object> update(final JsonCommand command) {
-
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
-
-        if (command.isChangeInIntegerParameterNamed(ClientApiConstants.statusParamName, this.status)) {
-            final Integer newValue = command.integerValueOfParameterNamed(ClientApiConstants.statusParamName);
-            actualChanges.put(ClientApiConstants.statusParamName, ClientEnumerations.status(newValue));
-            this.status = ClientStatus.fromInt(newValue).getValue();
-        }
-
-        if (command.isChangeInStringParameterNamed(ClientApiConstants.accountNoParamName, this.accountNumber)) {
-            final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.accountNoParamName);
-            actualChanges.put(ClientApiConstants.accountNoParamName, newValue);
-            this.accountNumber = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        if (command.isChangeInStringParameterNamed(ClientApiConstants.externalIdParamName, this.externalId)) {
-            final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.externalIdParamName);
-            actualChanges.put(ClientApiConstants.externalIdParamName, newValue);
-            this.externalId = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        if (command.isChangeInStringParameterNamed(ClientApiConstants.mobileNoParamName, this.mobileNo)) {
-            final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.mobileNoParamName);
-            actualChanges.put(ClientApiConstants.mobileNoParamName, newValue);
-            this.mobileNo = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        if (command.isChangeInStringParameterNamed(ClientApiConstants.emailAddressParamName, this.emailAddress)) {
-            final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.emailAddressParamName);
-            actualChanges.put(ClientApiConstants.emailAddressParamName, newValue);
-            this.emailAddress = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        if (command.isChangeInStringParameterNamed(ClientApiConstants.firstnameParamName, this.firstname)) {
-            final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.firstnameParamName);
-            actualChanges.put(ClientApiConstants.firstnameParamName, newValue);
-            this.firstname = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        if (command.isChangeInStringParameterNamed(ClientApiConstants.middlenameParamName, this.middlename)) {
-            final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.middlenameParamName);
-            actualChanges.put(ClientApiConstants.middlenameParamName, newValue);
-            this.middlename = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        if (command.isChangeInStringParameterNamed(ClientApiConstants.lastnameParamName, this.lastname)) {
-            final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.lastnameParamName);
-            actualChanges.put(ClientApiConstants.lastnameParamName, newValue);
-            this.lastname = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        if (command.isChangeInStringParameterNamed(ClientApiConstants.fullnameParamName, this.fullname)) {
-            final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.fullnameParamName);
-            actualChanges.put(ClientApiConstants.fullnameParamName, newValue);
-            this.fullname = newValue;
-        }
-
-        if (command.isChangeInLongParameterNamed(ClientApiConstants.staffIdParamName, staffId())) {
-            final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.staffIdParamName);
-            actualChanges.put(ClientApiConstants.staffIdParamName, newValue);
-        }
-
-        if (command.isChangeInLongParameterNamed(ClientApiConstants.genderIdParamName, genderId())) {
-            final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.genderIdParamName);
-            actualChanges.put(ClientApiConstants.genderIdParamName, newValue);
-        }
-
-        if (command.isChangeInLongParameterNamed(ClientApiConstants.savingsProductIdParamName, savingsProductId())) {
-            final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.savingsProductIdParamName);
-            actualChanges.put(ClientApiConstants.savingsProductIdParamName, newValue);
-        }
-
-        if (command.isChangeInLongParameterNamed(ClientApiConstants.genderIdParamName, genderId())) {
-            final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.genderIdParamName);
-            actualChanges.put(ClientApiConstants.genderIdParamName, newValue);
-        }
-
-        if (command.isChangeInLongParameterNamed(ClientApiConstants.clientTypeIdParamName, clientTypeId())) {
-            final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.clientTypeIdParamName);
-            actualChanges.put(ClientApiConstants.clientTypeIdParamName, newValue);
-        }
-
-        if (command.isChangeInLongParameterNamed(ClientApiConstants.clientClassificationIdParamName, clientClassificationId())) {
-            final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.clientClassificationIdParamName);
-            actualChanges.put(ClientApiConstants.clientClassificationIdParamName, newValue);
-        }
-
-        if (command.isChangeInIntegerParameterNamed(ClientApiConstants.legalFormIdParamName, this.getLegalForm())) {
-            final Integer newValue = command.integerValueOfParameterNamed(ClientApiConstants.legalFormIdParamName);
-            if (newValue != null) {
-                LegalForm legalForm = LegalForm.fromInt(newValue);
-                if (legalForm != null) {
-                    actualChanges.put(ClientApiConstants.legalFormIdParamName, ClientEnumerations.legalForm(newValue));
-                    this.setLegalForm(legalForm.getValue());
-                    if (legalForm.isPerson()) {
-                        this.fullname = null;
-                    } else if (legalForm.isEntity()) {
-                        this.firstname = null;
-                        this.lastname = null;
-                        this.displayName = null;
-                    }
-                } else {
-                    actualChanges.put(ClientApiConstants.legalFormIdParamName, null);
-                    this.setLegalForm(null);
-                }
-            } else {
-                actualChanges.put(ClientApiConstants.legalFormIdParamName, null);
-                this.setLegalForm(null);
-            }
-        }
-
-        final String dateFormatAsInput = command.dateFormat();
-        final String localeAsInput = command.locale();
-
-        if (command.isChangeInLocalDateParameterNamed(ClientApiConstants.activationDateParamName, getActivationLocalDate())) {
-            final String valueAsInput = command.stringValueOfParameterNamed(ClientApiConstants.activationDateParamName);
-            actualChanges.put(ClientApiConstants.activationDateParamName, valueAsInput);
-            actualChanges.put(ClientApiConstants.dateFormatParamName, dateFormatAsInput);
-            actualChanges.put(ClientApiConstants.localeParamName, localeAsInput);
-
-            this.activationDate = command.localDateValueOfParameterNamed(ClientApiConstants.activationDateParamName);
-            this.officeJoiningDate = this.activationDate;
-        }
-
-        if (command.isChangeInLocalDateParameterNamed(ClientApiConstants.dateOfBirthParamName, dateOfBirthLocalDate())) {
-            final String valueAsInput = command.stringValueOfParameterNamed(ClientApiConstants.dateOfBirthParamName);
-            actualChanges.put(ClientApiConstants.dateOfBirthParamName, valueAsInput);
-            actualChanges.put(ClientApiConstants.dateFormatParamName, dateFormatAsInput);
-            actualChanges.put(ClientApiConstants.localeParamName, localeAsInput);
-
-            this.dateOfBirth = command.localDateValueOfParameterNamed(ClientApiConstants.dateOfBirthParamName);
-        }
-
-        if (command.isChangeInLocalDateParameterNamed(ClientApiConstants.submittedOnDateParamName, getSubmittedOnDate())) {
-            final String valueAsInput = command.stringValueOfParameterNamed(ClientApiConstants.submittedOnDateParamName);
-            actualChanges.put(ClientApiConstants.submittedOnDateParamName, valueAsInput);
-            actualChanges.put(ClientApiConstants.dateFormatParamName, dateFormatAsInput);
-            actualChanges.put(ClientApiConstants.localeParamName, localeAsInput);
-
-            this.submittedOnDate = command.localDateValueOfParameterNamed(ClientApiConstants.submittedOnDateParamName);
-        }
-
-        validateUpdate();
-
-        deriveDisplayName();
-
-        return actualChanges;
-    }
-
     private void validateNameParts(final List<ApiParameterError> dataValidationErrors) {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("client");
 
@@ -686,7 +498,7 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
         }
     }
 
-    private void deriveDisplayName() {
+    public void deriveDisplayName() {
 
         StringBuilder nameBuilder = new StringBuilder();
         Integer legalForm = this.getLegalForm();
@@ -715,10 +527,6 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
         this.displayName = nameBuilder.toString();
     }
 
-    public LocalDate getSubmittedOnDate() {
-        return this.submittedOnDate;
-    }
-
     public LocalDate getActivationLocalDate() {
         return this.activationDate;
     }
@@ -737,10 +545,6 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
 
     public void setImage(final Image image) {
         this.image = image;
-    }
-
-    public Image getImage() {
-        return this.image;
     }
 
     public String mobileNo() {
@@ -763,28 +567,12 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
         return this.isStaff;
     }
 
-    public String getExternalId() {
-        return this.externalId;
-    }
-
     public void setEmailAddress(final String emailAddress) {
         this.emailAddress = emailAddress;
     }
 
-    public String getDisplayName() {
-        return this.displayName;
-    }
-
     public void setDisplayName(final String displayName) {
         this.displayName = displayName;
-    }
-
-    public Office getOffice() {
-        return this.office;
-    }
-
-    public Office getTransferToOffice() {
-        return this.transferToOffice;
     }
 
     public void updateOffice(final Office office) {
@@ -799,7 +587,7 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
         this.officeJoiningDate = date;
     }
 
-    private Long staffId() {
+    public Long staffId() {
         Long staffId = null;
         if (this.staff != null) {
             staffId = this.staff.getId();
@@ -811,10 +599,6 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
         this.staff = staff;
     }
 
-    public Staff getStaff() {
-        return this.staff;
-    }
-
     public void unassignStaff() {
         this.staff = null;
     }
@@ -823,19 +607,11 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
         this.staff = staff;
     }
 
-    public Set<Group> getGroups() {
-        return this.groups;
-    }
-
     public void close(final AppUser currentUser, final CodeValue closureReason, final LocalDate closureDate) {
         this.closureReason = closureReason;
         this.closureDate = closureDate;
         this.closedBy = currentUser;
         this.status = ClientStatus.CLOSED.getValue();
-    }
-
-    public Integer getStatus() {
-        return this.status;
     }
 
     public CodeValue subStatus() {
@@ -848,10 +624,6 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
             subStatusId = this.subStatus.getId();
         }
         return subStatusId;
-    }
-
-    public void setStatus(final Integer status) {
-        this.status = status;
     }
 
     public boolean isActivatedAfter(final LocalDate submittedOn) {
@@ -913,20 +685,8 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
         return clientClassificationId;
     }
 
-    public LocalDate getClosureDate() {
-        return this.closureDate;
-    }
-
     public LocalDate getRejectedDate() {
         return this.rejectionDate;
-    }
-
-    public LocalDate getWithdrawalDate() {
-        return this.withdrawalDate;
-    }
-
-    public LocalDate getReopenedDate() {
-        return this.reopenedDate;
     }
 
     public CodeValue gender() {
@@ -983,18 +743,12 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
         this.reactivateDate = reactivateDate;
         this.reactivatedBy = currentUser;
         this.status = ClientStatus.PENDING.getValue();
-
     }
 
     public void reOpened(AppUser currentUser, LocalDate reopenedDate) {
         this.reopenedDate = reopenedDate;
         this.reopenedBy = currentUser;
         this.status = ClientStatus.PENDING.getValue();
-
-    }
-
-    public Integer getLegalForm() {
-        return legalForm;
     }
 
     public void setLegalForm(Integer legalForm) {
@@ -1005,24 +759,22 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
         this.groups.size();
     }
 
-    public String getFirstname() {
-        return this.firstname;
-    }
-
-    public String getMiddlename() {
-        return this.middlename;
-    }
-
-    public String getLastname() {
-        return this.lastname;
-    }
-
     public LocalDate getProposedTransferDate() {
         return proposedTransferDate;
     }
 
     public void updateProposedTransferDate(LocalDate proposedTransferDate) {
         this.proposedTransferDate = proposedTransferDate;
+    }
+
+    public void resetDerivedNames(final LegalForm legalForm) {
+        if (legalForm.isPerson()) {
+            setFullname(null);
+        } else if (legalForm.isEntity()) {
+            setFirstname(null);
+            setLastname(null);
+            setDisplayName(null);
+        }
     }
 
 }

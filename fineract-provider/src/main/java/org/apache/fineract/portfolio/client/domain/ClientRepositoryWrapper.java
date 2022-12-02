@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.client.domain;
 import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.client.exception.ClientNotFoundException;
@@ -86,8 +87,21 @@ public class ClientRepositoryWrapper {
     public Client getClientByAccountNumber(String accountNumber) {
         Client client = this.repository.getClientByAccountNumber(accountNumber);
         if (client == null) {
-            throw new ClientNotFoundException(accountNumber);
+            throw new ClientNotFoundException(accountNumber, "account.number");
         }
         return client;
     }
+
+    public Client getClientByClientIdAndHierarchy(final Long clientId, final String hierarchySearchString) {
+        Client client = this.repository.fetchByClientIdAndHierarchy(clientId, hierarchySearchString, hierarchySearchString);
+        if (client == null) {
+            throw new ClientNotFoundException(clientId.toString(), "client.id");
+        }
+        return client;
+    }
+
+    public Long findIdByExternalId(final ExternalId externalId) {
+        return this.repository.findIdByExternalId(externalId);
+    }
+
 }

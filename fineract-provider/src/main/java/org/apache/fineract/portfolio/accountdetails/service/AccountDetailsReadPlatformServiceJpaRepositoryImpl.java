@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
@@ -45,28 +46,18 @@ import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountApplicationTimelineData;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountStatusEnumData;
 import org.apache.fineract.portfolio.shareaccounts.service.SharesEnumerations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@AllArgsConstructor
 public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements AccountDetailsReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final ClientReadPlatformService clientReadPlatformService;
     private final GroupReadPlatformService groupReadPlatformService;
     private final ColumnValidator columnValidator;
-
-    @Autowired
-    public AccountDetailsReadPlatformServiceJpaRepositoryImpl(final ClientReadPlatformService clientReadPlatformService,
-            final JdbcTemplate jdbcTemplate, final GroupReadPlatformService groupReadPlatformService,
-            final ColumnValidator columnValidator) {
-        this.clientReadPlatformService = clientReadPlatformService;
-        this.jdbcTemplate = jdbcTemplate;
-        this.groupReadPlatformService = groupReadPlatformService;
-        this.columnValidator = columnValidator;
-    }
 
     @Override
     public AccountSummaryCollectionData retrieveClientAccountDetails(final Long clientId) {

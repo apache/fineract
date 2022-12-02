@@ -76,7 +76,7 @@ public class LoanAccountData {
     private Long clientId;
     private String clientAccountNo;
     private String clientName;
-    private String clientExternalId;
+    private ExternalId clientExternalId;
     private Long clientOfficeId;
     private GroupGeneralData group;
     private Long loanProductId;
@@ -315,7 +315,7 @@ public class LoanAccountData {
      * Used to produce a {@link LoanAccountData} with only client information defaulted.
      */
     public static LoanAccountData clientDefaults(final Long clientId, final String clientAccountNo, final String clientName,
-            final Long clientOfficeId, final String clientExternalId, final LocalDate expectedDisbursementDate) {
+            final Long clientOfficeId, final ExternalId clientExternalId, final LocalDate expectedDisbursementDate) {
 
         return new LoanAccountData().setTimeline(LoanApplicationTimelineData.templateDefault(expectedDisbursementDate))
                 .setIsVariableInstallmentsAllowed(false).setDelinquent(CollectionData.template()).setClientId(clientId)
@@ -628,7 +628,7 @@ public class LoanAccountData {
      */
     public static LoanAccountData basicLoanDetails(final Long id, final String accountNo, final LoanStatusEnumData status,
             final ExternalId externalId, final Long clientId, final String clientAccountNo, final String clientName,
-            final Long clientOfficeId, final String clientExternalId, final GroupGeneralData group, final EnumOptionData loanType,
+            final Long clientOfficeId, final ExternalId clientExternalId, final GroupGeneralData group, final EnumOptionData loanType,
             final Long loanProductId, final String loanProductName, final String loanProductDescription,
             final boolean isLoanProductLinkedToFloatingRate, final Long fundId, final String fundName, final Long loanPurposeId,
             final String loanPurposeName, final Long loanOfficerId, final String loanOfficerName, final CurrencyData currencyData,
