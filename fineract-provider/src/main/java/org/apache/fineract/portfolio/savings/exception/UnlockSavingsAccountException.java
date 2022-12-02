@@ -24,7 +24,7 @@ public class UnlockSavingsAccountException extends AbstractPlatformDomainRuleExc
 
     public enum UnlockSavingsAccountExceptionType {
 
-        FUTURE_DATE, VALID_DATE, ACTIVATION_DATE, INVALID_ACCOUNT_TYPE, INVALID_ACCOUNT_STATUS, INVALID_LOCK_IN_DETAILS, UNLOCK_DATE_IS_AFTER_LOCKED_DATE;
+        FUTURE_DATE, VALID_DATE, ACTIVATION_DATE, INVALID_ACCOUNT_TYPE, INVALID_ACCOUNT_STATUS, INVALID_LOCK_IN_DETAILS, UNLOCK_DATE_IS_AFTER_LOCKED_DATE, ACCOUNT_ALREADY_UNLOCKED;
 
         public String errorMessage() {
             if (name().toString().equalsIgnoreCase("FUTURE_DATE")) {
@@ -41,6 +41,8 @@ public class UnlockSavingsAccountException extends AbstractPlatformDomainRuleExc
                 return "Invalid LockIn Details Detected ";
             } else if (name().toString().equalsIgnoreCase("UNLOCK_DATE_IS_AFTER_LOCKED_DATE")) {
                 return "Unlock Date can't be after locked period ";
+            } else if (name().toString().equalsIgnoreCase("ACCOUNT_ALREADY_UNLOCKED")) {
+                return "This Account is Already Unlocked ";
             }
             return name().toString();
         }
@@ -60,6 +62,8 @@ public class UnlockSavingsAccountException extends AbstractPlatformDomainRuleExc
                 return "error.msg.invalid.lockIn.details";
             } else if (name().toString().equalsIgnoreCase("UNLOCK_DATE_IS_AFTER_LOCKED_DATE")) {
                 return "error.msg.unlock.date.shouldn't.be.after.locked.date";
+            } else if (name().toString().equalsIgnoreCase("ACCOUNT_ALREADY_UNLOCKED")) {
+                return "error.msg.account.already.unlocked";
             }
             return name().toString();
         }

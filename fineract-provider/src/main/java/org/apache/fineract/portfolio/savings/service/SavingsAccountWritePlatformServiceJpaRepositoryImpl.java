@@ -1515,6 +1515,11 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
         checkClientOrGroupActive(account);
 
+        if (account.isUnlocked() || account.getUnlockDate() != null) {
+            throw new UnlockSavingsAccountException(
+                    UnlockSavingsAccountException.UnlockSavingsAccountExceptionType.ACCOUNT_ALREADY_UNLOCKED);
+        }
+
         if (!account.getAccountType().isGSIMAccount()) {
             throw new UnlockSavingsAccountException(UnlockSavingsAccountException.UnlockSavingsAccountExceptionType.INVALID_ACCOUNT_TYPE);
         }

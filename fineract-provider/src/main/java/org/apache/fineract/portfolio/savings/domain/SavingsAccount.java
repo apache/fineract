@@ -5071,4 +5071,12 @@ public class SavingsAccount extends AbstractPersistableCustom {
     public void setUnlocked(boolean unlocked) {
         this.unlocked = unlocked;
     }
+
+    public boolean isUnlocked() {
+        return unlocked;
+    }
+
+    public LocalDate getUnlockDate() {
+        return unlockDate;
+    }
 }
