@@ -110,6 +110,10 @@ public final class ChargeEnumerations {
                 optionData = new EnumOptionData(ChargeTimeType.FDA_PARTIAL_LIQUIDATION_FEE.getValue().longValue(),
                         ChargeTimeType.FDA_PARTIAL_LIQUIDATION_FEE.getCode(), "Partial Liquidation Fee");
             break;
+            case INTEREST_FORFEITED:
+                optionData = new EnumOptionData(ChargeTimeType.INTEREST_FORFEITED.getValue().longValue(),
+                        ChargeTimeType.INTEREST_FORFEITED.getCode(), " Interest Forfeited");
+                break;
             default:
                 optionData = new EnumOptionData(ChargeTimeType.INVALID.getValue().longValue(), ChargeTimeType.INVALID.getCode(), "Invalid");
             break;

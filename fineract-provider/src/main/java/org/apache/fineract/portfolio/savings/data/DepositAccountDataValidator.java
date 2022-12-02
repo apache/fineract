@@ -82,6 +82,8 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.portfolio.charge.domain.Charge;
+import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.DepositAccountOnClosureType;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
@@ -91,7 +93,14 @@ import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYea
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
+import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
+import org.apache.fineract.portfolio.savings.domain.RecurringDepositProductRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
+import org.apache.fineract.portfolio.savings.domain.DepositProductRecurringDetail;
+import org.apache.fineract.portfolio.savings.domain.RecurringDepositProduct;
+import org.apache.fineract.portfolio.savings.exception.DepositPeriodForAccountNotCompatibleWithChargeAddedForFreeWithdrawalException;
+import org.apache.fineract.portfolio.savings.exception.RecurringDepositProductNotFoundException;
+import org.jfree.util.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -106,12 +115,19 @@ public class DepositAccountDataValidator {
      */
     private final SavingsAccountFeatureValidator featureValidator;
 
+    private final ChargeRepositoryWrapper chargeRepository;
+
+    private final RecurringDepositProductRepository recurringDepositProductRepository;
+
     @Autowired
     public DepositAccountDataValidator(final FromJsonHelper fromApiJsonHelper, final DepositProductDataValidator productDataValidator,
-            final SavingsAccountFeatureValidator featureValidator) {
+                                       final SavingsAccountFeatureValidator featureValidator, ChargeRepositoryWrapper chargeRepository,
+                                       RecurringDepositProductRepository recurringDepositProductRepository) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.productDataValidator = productDataValidator;
         this.featureValidator = featureValidator;
+        this.chargeRepository = chargeRepository;
+        this.recurringDepositProductRepository = recurringDepositProductRepository;
     }
 
     public void validateFixedDepositForSubmit(final String json) {
@@ -179,6 +195,7 @@ public class DepositAccountDataValidator {
         validateDepositTermDeatilForSubmit(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
         validateRecurringDetailForSubmit(element, baseDataValidator);
         validateSavingsCharges(element, baseDataValidator);
+        validateFreeWithdrawalCharges(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
         validateWithHoldTax(element, baseDataValidator);
         featureValidator.validateDepositDetailsForUpdate(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -203,6 +220,7 @@ public class DepositAccountDataValidator {
         validateDepositTermDeatilForUpdate(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
         validateRecurringDetailForUpdate(element, baseDataValidator);
         // validateSavingsCharges(element, baseDataValidator);
+        validateFreeWithdrawalCharges(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
         validateWithHoldTax(element, baseDataValidator);
         featureValidator.validateDepositDetailsForUpdate(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -758,6 +776,45 @@ public class DepositAccountDataValidator {
         if (this.fromApiJsonHelper.parameterExists(withHoldTaxParamName, element)) {
             final String withHoldTax = this.fromApiJsonHelper.extractStringNamed(withHoldTaxParamName, element);
             baseDataValidator.reset().parameter(withHoldTaxParamName).value(withHoldTax).ignoreIfNull().validateForBooleanValue();
+        }
+    }
+
+    private void validateFreeWithdrawalCharges(final JsonElement element, final DataValidatorBuilder baseDataValidator, final DepositAccountType depositType) {
+
+        if (element.isJsonObject()) {
+            final Long productId = this.fromApiJsonHelper.extractLongNamed(productIdParamName, element);
+            SavingsProduct product = this.recurringDepositProductRepository.findById(productId)
+                    .orElseThrow(() -> new RecurringDepositProductNotFoundException(productId));
+            final DepositProductRecurringDetail prodRecurringDetail = ((RecurringDepositProduct) product).depositRecurringDetail();
+            if (prodRecurringDetail.recurringDetail().allowFreeWithdrawal()) {
+                final JsonObject topLevelJsonElement = element.getAsJsonObject();
+                if (topLevelJsonElement.has(chargesParamName) && topLevelJsonElement.get(chargesParamName).isJsonArray()) {
+                    final JsonArray array = topLevelJsonElement.get(chargesParamName).getAsJsonArray();
+                    for (int i = 0; i < array.size(); i++) {
+
+                        final JsonObject savingsChargeElement = array.get(i).getAsJsonObject();
+
+                        final Long chargeId = this.fromApiJsonHelper.extractLongNamed(chargeIdParamName, savingsChargeElement);
+                        baseDataValidator.reset().parameter(chargeIdParamName).value(chargeId).longGreaterThanZero();
+
+                        if (chargeId != null && depositType.isRecurringDeposit()) {
+                            Charge charge = this.chargeRepository.findOneWithNotFoundDetection(chargeId);
+                            if (charge.isActive() && charge.isEnableFreeWithdrawal()) {
+                                final Integer depositPeriod = fromApiJsonHelper.extractIntegerSansLocaleNamed(depositPeriodParamName, element);
+                                Integer freeWithdrawalCount = charge.getFrequencyFreeWithdrawalCharge();
+                                if (depositPeriod <= 3 && !freeWithdrawalCount.equals(1)) {
+                                    Log.info("charge is wrong " + depositPeriod);
+                                    throw new DepositPeriodForAccountNotCompatibleWithChargeAddedForFreeWithdrawalException(depositPeriod, freeWithdrawalCount);
+                                } else if ((depositPeriod > 3 && depositPeriod <= 12) && !freeWithdrawalCount.equals(2)) {
+                                    Log.info("charge is wrong " + depositPeriod);
+                                    throw new DepositPeriodForAccountNotCompatibleWithChargeAddedForFreeWithdrawalException(depositPeriod, freeWithdrawalCount);
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
         }
     }
 

@@ -55,6 +55,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalA
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.shortNameParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.allowFreeWithdrawalParamName;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -534,6 +535,7 @@ public class DepositProductAssembler {
 
         Boolean isMandatoryDeposit = command.booleanObjectValueOfParameterNamed(isMandatoryDepositParamName);
         Boolean allowWithdrawal = command.booleanObjectValueOfParameterNamed(allowWithdrawalParamName);
+        Boolean allowFreeWithdrawal = command.booleanObjectValueOfParameterNamed(allowFreeWithdrawalParamName);
         Boolean adjustAdvanceTowardsFuturePayments = command
                 .booleanObjectValueOfParameterNamed(adjustAdvanceTowardsFuturePaymentsParamName);
 
@@ -548,7 +550,7 @@ public class DepositProductAssembler {
         }
 
         final DepositRecurringDetail depositRecurringDetail = DepositRecurringDetail.createFrom(isMandatoryDeposit, allowWithdrawal,
-                adjustAdvanceTowardsFuturePayments);
+                adjustAdvanceTowardsFuturePayments, allowFreeWithdrawal);
 
         return depositRecurringDetail;
     }

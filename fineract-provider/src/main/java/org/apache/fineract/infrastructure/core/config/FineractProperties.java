@@ -19,6 +19,7 @@
 
 package org.apache.fineract.infrastructure.core.config;
 
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -35,6 +36,8 @@ public class FineractProperties {
     private FineractModeProperties mode;
 
     private FineractCorrelationProperties correlation;
+
+    private FineractContentProperties content;
 
     @Getter
     @Setter
@@ -73,5 +76,33 @@ public class FineractProperties {
 
         private boolean enabled;
         private String headerName;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractContentProperties {
+
+        private boolean regexWhitelistEnabled;
+        private List<String> regexWhitelist;
+        private boolean mimeWhitelistEnabled;
+        private List<String> mimeWhitelist;
+        private FineractContentFilesystemProperties filesystem;
+        private FineractContentS3Properties s3;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractContentFilesystemProperties {
+
+        private String rootFolder;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractContentS3Properties {
+
+        private String bucketName;
+        private String accessKey;
+        private String secretKey;
     }
 }

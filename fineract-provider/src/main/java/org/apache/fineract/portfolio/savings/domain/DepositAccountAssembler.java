@@ -104,6 +104,7 @@ import org.apache.fineract.portfolio.savings.service.SavingsAccountActionService
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.allowFreeWithdrawalParamName;
 
 @Service
 public class DepositAccountAssembler {
@@ -460,7 +461,7 @@ public class DepositAccountAssembler {
         }
 
         final DepositRecurringDetail depositRecurringDetail = DepositRecurringDetail.createFrom(isMandatoryDeposit, allowWithdrawal,
-                adjustAdvanceTowardsFuturePayments);
+                adjustAdvanceTowardsFuturePayments, false);
         return DepositAccountRecurringDetail.createNew(recurringDepositAmount, depositRecurringDetail, null, isCalendarInherited);
     }
 
@@ -470,6 +471,7 @@ public class DepositAccountAssembler {
         final BigDecimal recurringDepositAmount = command.bigDecimalValueOfParameterNamed(mandatoryRecommendedDepositAmountParamName);
         boolean isMandatoryDeposit;
         boolean allowWithdrawal;
+        boolean allowFreeWithdrawal;
         boolean adjustAdvanceTowardsFuturePayments;
         boolean isCalendarInherited;
 
@@ -497,8 +499,14 @@ public class DepositAccountAssembler {
             isCalendarInherited = false;
         }
 
+        if (command.parameterExists(allowFreeWithdrawalParamName)) {
+            allowFreeWithdrawal = command.booleanObjectValueOfParameterNamed(allowFreeWithdrawalParamName);
+        } else {
+            allowFreeWithdrawal = prodRecurringDetail.allowFreeWithdrawal();
+        }
+
         final DepositRecurringDetail depositRecurringDetail = DepositRecurringDetail.createFrom(isMandatoryDeposit, allowWithdrawal,
-                adjustAdvanceTowardsFuturePayments);
+                adjustAdvanceTowardsFuturePayments, allowFreeWithdrawal);
         final DepositAccountRecurringDetail depositAccountRecurringDetail = DepositAccountRecurringDetail.createNew(recurringDepositAmount,
                 depositRecurringDetail, null, isCalendarInherited);
         return depositAccountRecurringDetail;

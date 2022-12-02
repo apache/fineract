@@ -60,6 +60,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.shortNam
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.allowFreeWithdrawalParamName;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -699,6 +700,12 @@ public class DepositProductDataValidator {
         baseDataValidator.reset().parameter(isMandatoryDepositParamName).value(isMandatoryDeposit).ignoreIfNull().validateForBooleanValue();
         final Boolean allowWithdrawal = this.fromApiJsonHelper.extractBooleanNamed(allowWithdrawalParamName, element);
         baseDataValidator.reset().parameter(allowWithdrawalParamName).value(allowWithdrawal).ignoreIfNull().validateForBooleanValue();
+
+        if (fromApiJsonHelper.parameterExists(allowFreeWithdrawalParamName, element)) {
+            final Boolean allowFreeWithdrawal = this.fromApiJsonHelper.extractBooleanNamed(allowFreeWithdrawalParamName, element);
+            baseDataValidator.reset().parameter(allowFreeWithdrawalParamName).value(allowFreeWithdrawal).ignoreIfNull().validateForBooleanValue();
+        }
+
         final Boolean adjustAdvanceTowardsFuturePayments = this.fromApiJsonHelper
                 .extractBooleanNamed(adjustAdvanceTowardsFuturePaymentsParamName, element);
         baseDataValidator.reset().parameter(adjustAdvanceTowardsFuturePaymentsParamName).value(adjustAdvanceTowardsFuturePayments)

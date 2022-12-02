@@ -217,6 +217,8 @@ public final class DepositsApiConstants {
     public static final String closureOnParamName = "closureOn";
     public static final String transferParamName = "transfer";
     public static final String withdrawParamName = "withdraw";
+    public static final String allowFreeWithdrawalParamName = "allowFreeWithdrawal";
+
 
     /**
      * Deposit Product Parameters
@@ -257,7 +259,7 @@ public final class DepositsApiConstants {
     private static final Set<String> RECURRING_DETAILS_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(mandatoryRecommendedDepositAmountParamName, isMandatoryDepositParamName, allowWithdrawalParamName,
                     adjustAdvanceTowardsFuturePaymentsParamName, recurringFrequencyTypeParamName, recurringFrequencyParamName,
-                    isCalendarInheritedParamName));
+                    isCalendarInheritedParamName, allowFreeWithdrawalParamName));
 
     private static final Set<String> RECURRING_DETAILS_RESPONSE_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(mandatoryRecommendedDepositAmountParamName, isMandatoryDepositParamName, allowWithdrawalParamName,
@@ -327,6 +329,8 @@ public final class DepositsApiConstants {
 
     public static final Set<String> RECURRING_DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS = recurringDepositAccountRequestData();
     public static final Set<String> RECURRING_DEPOSIT_ACCOUNT_RESPONSE_DATA_PARAMETERS = recurringDepositAccountResponseData();
+
+
 
     private static Set<String> fixedDepositAccountRequestData() {
         final Set<String> fixedDepositRequestData = new HashSet<>();

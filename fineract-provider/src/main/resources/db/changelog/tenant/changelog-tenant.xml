@@ -61,4 +61,6 @@
     <include file="parts/0037_create_table_for_Fx_rate.xml" relativeToChangelogFile="true"/>
     <include file="parts/MON-93_permission_fd_partial_liquidation.xml" relativeToChangelogFile="true"/>
     <include file="parts/MON-110_Vault_Tribe.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0038_add_free_withdrawal_in_recurring_details.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0039_add_free_withdrawal_in_recurring_details_product.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
