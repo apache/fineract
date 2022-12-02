@@ -1068,9 +1068,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
         final ExternalId txnExternalId = externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName);
-        // TODO: can it be refactored to use the 'externalId' for reversal?
-        final ExternalId reversalTxnExternalId = externalIdFactory.createFromCommand(command,
-                LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME);
+
+        // We dont need auto generation for reversal external id... if it is not provided, it remains null (empty)
+        final String reversalExternalId = command.stringValueOfParameterNamedAllowingNull(LoanApiConstants.REVERSAL_EXTERNAL_ID_PARAMNAME);
+        final ExternalId reversalTxnExternalId = ExternalIdFactory.produce(reversalExternalId);
 
         final Map<String, Object> changes = new LinkedHashMap<>();
         changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
