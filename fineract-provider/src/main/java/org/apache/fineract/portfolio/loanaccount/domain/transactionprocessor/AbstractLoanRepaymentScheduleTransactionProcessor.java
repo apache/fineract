@@ -185,7 +185,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                         loanTransaction.updateLoanTransactionToRepaymentScheduleMappings(
                                 newLoanTransaction.getLoanTransactionToRepaymentScheduleMappings());
                     } else {
-                        loanTransaction.reverse(loanTransaction.getExternalId());
+                        loanTransaction.reverse();
                         loanTransaction.updateExternalId(null);
                         newLoanTransaction.copyLoanTransactionRelations(loanTransaction.getLoanTransactionRelations());
                         // Adding Replayed relation from newly created transaction to reversed transaction
