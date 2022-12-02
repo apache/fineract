@@ -5,7 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import lombok.SneakyThrows;
-import org.apache.fineract.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.ff4j.FF4j;
 import org.ff4j.audit.repository.EventRepository;
 import org.ff4j.audit.repository.InMemoryEventRepository;
@@ -15,6 +15,7 @@ import org.ff4j.parser.yaml.YamlParser;
 import org.ff4j.property.store.InMemoryPropertyStore;
 import org.ff4j.property.store.PropertyStore;
 import org.ff4j.store.InMemoryFeatureStore;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,12 +26,15 @@ public class FF4JConfig {
     @Value("${fiter.features.ff4j}")
     private String ff4jFileName;
 
+    @Autowired
+    FineractProperties fineractProperties;
+
     @SneakyThrows
     @Bean
     public FF4j getFF4j() {
 
-        final String templateRepository = FileSystemContentRepository.FINERACT_BASE_DIR + File.separator + "ff4j" + File.separator
-                + this.ff4jFileName;
+        final String templateRepository = fineractProperties.getContent().getFilesystem().getRootFolder() + File.separator + "ff4j"
+                + File.separator + this.ff4jFileName;
         final File configFile = new File(templateRepository);
         InputStream targetStream = null;
         try {

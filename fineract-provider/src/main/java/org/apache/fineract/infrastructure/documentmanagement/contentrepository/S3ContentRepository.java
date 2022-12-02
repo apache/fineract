@@ -20,10 +20,7 @@ package org.apache.fineract.infrastructure.documentmanagement.contentrepository;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -36,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.Base64EncodedImage;
 import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCommand;
 import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
@@ -45,17 +43,20 @@ import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
 import org.apache.fineract.infrastructure.documentmanagement.exception.ContentManagementException;
 import org.apache.fineract.infrastructure.documentmanagement.exception.DocumentNotFoundException;
 import org.apache.fineract.infrastructure.security.utils.LogParameterEscapeUtil;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
 
 @Slf4j
+@Component
+@ConditionalOnProperty("fineract.content.s3.enabled")
 public class S3ContentRepository implements ContentRepository {
 
-    private final String s3BucketName;
     private final AmazonS3 s3Client;
+    private final FineractProperties fineractProperties;
 
-    public S3ContentRepository(final String bucketName, final String secretKey, final String accessKey) {
-        this.s3BucketName = bucketName;
-        this.s3Client = AmazonS3ClientBuilder.standard()
-                .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey))).build();
+    public S3ContentRepository(final AmazonS3 s3Client, final FineractProperties fineractProperties) {
+        this.s3Client = s3Client;
+        this.fineractProperties = fineractProperties;
     }
 
     @Override
@@ -142,7 +143,7 @@ public class S3ContentRepository implements ContentRepository {
 
     private void deleteObject(final String location) {
         try {
-            this.s3Client.deleteObject(new DeleteObjectRequest(this.s3BucketName, location));
+            this.s3Client.deleteObject(new DeleteObjectRequest(fineractProperties.getContent().getS3().getBucketName(), location));
         } catch (final AmazonServiceException ase) {
             throw new ContentManagementException(location, "message=" + ase.getMessage() + ", Error Type=" + ase.getErrorType(), ase);
         } catch (final AmazonClientException ace) {
@@ -156,7 +157,8 @@ public class S3ContentRepository implements ContentRepository {
             if (log.isDebugEnabled()) {
                 log.debug("Uploading a new object to S3 {}", LogParameterEscapeUtil.escapeLogParameter(s3UploadLocation));
             }
-            this.s3Client.putObject(new PutObjectRequest(this.s3BucketName, s3UploadLocation, inputStream, new ObjectMetadata()));
+            this.s3Client.putObject(new PutObjectRequest(fineractProperties.getContent().getS3().getBucketName(), s3UploadLocation,
+                    inputStream, new ObjectMetadata()));
         } catch (AmazonClientException ase) {
             throw new ContentManagementException(filename, ase.getMessage(), ase);
         }
@@ -164,8 +166,9 @@ public class S3ContentRepository implements ContentRepository {
 
     private S3Object getObject(String key) {
         try {
-            log.info("Downloading an object from Amazon S3 Bucket: {}, location: {}", this.s3BucketName, key);
-            return this.s3Client.getObject(new GetObjectRequest(this.s3BucketName, key));
+            log.debug("Downloading an object from Amazon S3 Bucket: {}, location: {}",
+                    fineractProperties.getContent().getS3().getBucketName(), key);
+            return this.s3Client.getObject(new GetObjectRequest(fineractProperties.getContent().getS3().getBucketName(), key));
         } catch (AmazonClientException ase) {
             throw new ContentManagementException(key, ase.getMessage(), ase);
         }
