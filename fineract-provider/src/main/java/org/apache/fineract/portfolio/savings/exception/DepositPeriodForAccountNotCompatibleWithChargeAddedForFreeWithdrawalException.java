@@ -21,10 +21,14 @@ package org.apache.fineract.portfolio.savings.exception;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
-public class DepositPeriodForAccountNotCompatibleWithChargeAddedForFreeWithdrawalException extends AbstractPlatformResourceNotFoundException {
+public class DepositPeriodForAccountNotCompatibleWithChargeAddedForFreeWithdrawalException
+        extends AbstractPlatformResourceNotFoundException {
 
-    public DepositPeriodForAccountNotCompatibleWithChargeAddedForFreeWithdrawalException(final Integer depositPeriod, Integer freeWithdrawalCount) {
+    public DepositPeriodForAccountNotCompatibleWithChargeAddedForFreeWithdrawalException(final Integer depositPeriod,
+            Integer freeWithdrawalCount) {
         super("error.msg.deposit.period.is.please.select.charge.which.have.no.free.withdrawal",
-                StringUtils.capitalize(" Deposit Period is " + depositPeriod + " Please select charge with free withdrawal " + freeWithdrawalCount), depositPeriod, freeWithdrawalCount);
+                StringUtils.capitalize(
+                        " Deposit Period is " + depositPeriod + " Please select charge with free withdrawal " + freeWithdrawalCount),
+                depositPeriod, freeWithdrawalCount);
     }
 }

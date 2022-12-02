@@ -27,8 +27,6 @@ import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import org.apache.commons.io.IOUtils;
 import org.apache.fineract.client.services.ImagesApi;
-import org.apache.fineract.client.util.Parts;
-import org.apache.fineract.infrastructure.documentmanagement.contentrepository.S3ContentRepository;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -95,9 +93,9 @@ public class ImageTest extends IntegrationTest {
             assertThat(body.contentLength()).isEqualTo(testPart.body().contentLength());
         }
 
-//        var staff = ok(fineract().staff.retrieveOne8(staffId));
-//        String expectedFileName = staff.getDisplayName() + "JPEG"; // without dot!
-//        assertThat(Parts.fileName(r)).hasValue(expectedFileName);
+        // var staff = ok(fineract().staff.retrieveOne8(staffId));
+        // String expectedFileName = staff.getDisplayName() + "JPEG"; // without dot!
+        // assertThat(Parts.fileName(r)).hasValue(expectedFileName);
     }
 
     @Test

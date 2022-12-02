@@ -23,6 +23,7 @@ import static org.apache.fineract.portfolio.collectionsheet.CollectionSheetConst
 import static org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants.transactionAmountParamName;
 import static org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants.transactionDateParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.adjustAdvanceTowardsFuturePaymentsParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.allowFreeWithdrawalParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.allowWithdrawalParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.chartIdParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.depositAmountParamName;
@@ -104,7 +105,6 @@ import org.apache.fineract.portfolio.savings.service.SavingsAccountActionService
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.allowFreeWithdrawalParamName;
 
 @Service
 public class DepositAccountAssembler {

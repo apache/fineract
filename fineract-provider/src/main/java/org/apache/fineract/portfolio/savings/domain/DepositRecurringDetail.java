@@ -19,9 +19,9 @@
 package org.apache.fineract.portfolio.savings.domain;
 
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.adjustAdvanceTowardsFuturePaymentsParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.allowFreeWithdrawalParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.allowWithdrawalParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.isMandatoryDepositParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.allowFreeWithdrawalParamName;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -59,7 +59,7 @@ public class DepositRecurringDetail {
     }
 
     private DepositRecurringDetail(final boolean isMandatoryDeposit, boolean allowWithdrawal, boolean adjustAdvanceTowardsFuturePayments,
-                                   boolean allowFreeWithdrawal) {
+            boolean allowFreeWithdrawal) {
         this.isMandatoryDeposit = isMandatoryDeposit;
         this.allowWithdrawal = allowWithdrawal;
         this.adjustAdvanceTowardsFuturePayments = adjustAdvanceTowardsFuturePayments;
@@ -108,12 +108,12 @@ public class DepositRecurringDetail {
         return this.allowFreeWithdrawal;
     }
 
-
     public boolean adjustAdvanceTowardsFuturePayments() {
         return this.adjustAdvanceTowardsFuturePayments;
     }
 
     public DepositRecurringDetail copy() {
-        return DepositRecurringDetail.createFrom(this.isMandatoryDeposit, this.allowWithdrawal, this.adjustAdvanceTowardsFuturePayments, this.allowFreeWithdrawal);
+        return DepositRecurringDetail.createFrom(this.isMandatoryDeposit, this.allowWithdrawal, this.adjustAdvanceTowardsFuturePayments,
+                this.allowFreeWithdrawal);
     }
 }

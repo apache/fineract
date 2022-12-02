@@ -113,7 +113,7 @@ public final class ChargeEnumerations {
             case INTEREST_FORFEITED:
                 optionData = new EnumOptionData(ChargeTimeType.INTEREST_FORFEITED.getValue().longValue(),
                         ChargeTimeType.INTEREST_FORFEITED.getCode(), " Interest Forfeited");
-                break;
+            break;
             default:
                 optionData = new EnumOptionData(ChargeTimeType.INVALID.getValue().longValue(), ChargeTimeType.INVALID.getCode(), "Invalid");
             break;

@@ -127,4 +127,6 @@ public interface SavingsAccountWritePlatformService {
 
     void payCharge(SavingsAccountCharge savingsAccountCharge, LocalDate transactionDate, BigDecimal amountPaid, DateTimeFormatter formatter,
             AppUser user);
+
+    CommandProcessingResult unlockAccount(Long savingsId, JsonCommand command);
 }

@@ -219,7 +219,6 @@ public final class DepositsApiConstants {
     public static final String withdrawParamName = "withdraw";
     public static final String allowFreeWithdrawalParamName = "allowFreeWithdrawal";
 
-
     /**
      * Deposit Product Parameters
      */
@@ -329,8 +328,6 @@ public final class DepositsApiConstants {
 
     public static final Set<String> RECURRING_DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS = recurringDepositAccountRequestData();
     public static final Set<String> RECURRING_DEPOSIT_ACCOUNT_RESPONSE_DATA_PARAMETERS = recurringDepositAccountResponseData();
-
-
 
     private static Set<String> fixedDepositAccountRequestData() {
         final Set<String> fixedDepositRequestData = new HashSet<>();

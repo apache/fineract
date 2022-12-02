@@ -49,4 +49,41 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="bosco@fiter.io" id="add_m_savings_account_unlock_date">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_savings_account" columnName="unlock_date"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_savings_account">
+            <column name="unlock_date" type="date">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_savings_account_is_unlocked">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_savings_account" columnName="is_unlocked"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_savings_account">
+            <column name="is_unlocked" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permissions_UNLOCK_SAVINGSACCOUNT">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM `m_permission` WHERE `code` = 'UNLOCK_SAVINGSACCOUNT'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            INSERT IGNORE INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('transaction_savings', 'UNLOCK_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'UNLOCK', '0');
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

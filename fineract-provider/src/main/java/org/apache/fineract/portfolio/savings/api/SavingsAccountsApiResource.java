@@ -450,6 +450,7 @@ public class SavingsAccountsApiResource {
             + "Block Savings Account Debit transactions:\n\n" + "All types of debit operations from Savings account wil be blocked\n\n"
             + "Unblock Savings Account debit transactions:\n\n"
             + "It unblocks the Saving account's debit operations. Now all types of debits can be transacted from Savings account\n\n"
+            + "It unlocks the Saving account which subscribes to a GSIM Account for Vault Tribe Implementation\n\n"
             + "Showing request/response for 'Unassign Savings Officer'")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SavingsAccountsApiResourceSwagger.PostSavingsAccountsAccountIdRequest.class)))
     @ApiResponses({
