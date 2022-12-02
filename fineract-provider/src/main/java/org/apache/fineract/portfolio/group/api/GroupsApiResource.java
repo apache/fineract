@@ -305,7 +305,7 @@ public class GroupsApiResource {
 
         final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
         if (template) {
-            final GroupGeneralData templateGroup = groupReadPlatformService.retrieveTemplate(group.officeId(), false,
+            final GroupGeneralData templateGroup = groupReadPlatformService.retrieveTemplate(group.getOfficeId(), false,
                     staffInSelectedOfficeOnly);
             group = GroupGeneralData.withTemplate(templateGroup, group);
         }

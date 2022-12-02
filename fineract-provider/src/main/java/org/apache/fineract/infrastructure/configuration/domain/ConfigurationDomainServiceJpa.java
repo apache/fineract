@@ -46,6 +46,8 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     private static final String DAYS_BEFORE_REPAYMENT_IS_DUE = "days-before-repayment-is-due";
     private static final String DAYS_AFTER_REPAYMENT_IS_OVERDUE = "days-after-repayment-is-overdue";
     private static final String ENABLE_EXTERNAL_ID_AUTO_GENERATION = "enable-auto-generated-external-id";
+    private static final String ENABLE_ADDRESS = "Enable-Address";
+
     private final PermissionRepository permissionRepository;
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
     private final PlatformCacheRepository cacheTypeRepository;
@@ -489,4 +491,11 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(ENABLE_EXTERNAL_ID_AUTO_GENERATION);
         return property.isEnabled();
     }
+
+    @Override
+    public boolean isAddressEnabled() {
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(ENABLE_ADDRESS);
+        return property.isEnabled();
+    }
+
 }

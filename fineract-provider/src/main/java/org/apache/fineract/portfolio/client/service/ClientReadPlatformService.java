@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.client.service;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.portfolio.client.data.ClientData;
@@ -59,5 +60,6 @@ public interface ClientReadPlatformService {
 
     LocalDate retrieveClientTransferProposalDate(Long clientId);
 
-    void validateClient(Long clientId);
+    Long retrieveClientIdByExternalId(ExternalId externalId);
+
 }

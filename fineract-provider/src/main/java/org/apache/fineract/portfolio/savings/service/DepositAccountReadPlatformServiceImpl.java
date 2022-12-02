@@ -338,7 +338,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         GroupGeneralData group = null;
         if (groupId != null) {
             group = this.groupReadPlatformService.retrieveOne(groupId);
-            officeId = group.officeId();
+            officeId = group.getOfficeId();
         }
 
         final Collection<EnumOptionData> preClosurePenalInterestOnTypeOptions = this.depositsDropdownReadPlatformService
