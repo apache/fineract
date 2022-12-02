@@ -24,6 +24,7 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.FIXED_D
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.RECURRING_DEPOSIT_PRODUCT_REQUEST_DATA_PARAMETERS;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.RECURRING_DEPOSIT_PRODUCT_RESOURCE_NAME;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.adjustAdvanceTowardsFuturePaymentsParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.allowFreeWithdrawalParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.allowWithdrawalParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.chartsParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.depositAmountParamName;
@@ -60,7 +61,6 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.shortNam
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.allowFreeWithdrawalParamName;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -703,7 +703,8 @@ public class DepositProductDataValidator {
 
         if (fromApiJsonHelper.parameterExists(allowFreeWithdrawalParamName, element)) {
             final Boolean allowFreeWithdrawal = this.fromApiJsonHelper.extractBooleanNamed(allowFreeWithdrawalParamName, element);
-            baseDataValidator.reset().parameter(allowFreeWithdrawalParamName).value(allowFreeWithdrawal).ignoreIfNull().validateForBooleanValue();
+            baseDataValidator.reset().parameter(allowFreeWithdrawalParamName).value(allowFreeWithdrawal).ignoreIfNull()
+                    .validateForBooleanValue();
         }
 
         final Boolean adjustAdvanceTowardsFuturePayments = this.fromApiJsonHelper

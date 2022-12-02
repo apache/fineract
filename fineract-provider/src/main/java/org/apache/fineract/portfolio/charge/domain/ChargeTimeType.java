@@ -38,9 +38,8 @@ public enum ChargeTimeType {
     SHARE_PURCHASE(14, "chargeTimeType.sharespurchase"), SHARE_REDEEM(15, "chargeTimeType.sharesredeem"),
 
     SAVINGS_NOACTIVITY_FEE(16, "chargeTimeType.savingsNoActivityFee"), DISBURSE_TO_SAVINGS(17,
-            "chargeTimeType.disburseToSavings"), FDA_PRE_CLOSURE_FEE(18,
-                    "chargeTimeType.fdaPreclosureFee"), FDA_PARTIAL_LIQUIDATION_FEE(19, "chargeTimeType.fdaPartialLiquidationFee"),
-    INTEREST_FORFEITED(20, "chargeTimeType.interestForfeited");
+            "chargeTimeType.disburseToSavings"), FDA_PRE_CLOSURE_FEE(18, "chargeTimeType.fdaPreclosureFee"), FDA_PARTIAL_LIQUIDATION_FEE(19,
+                    "chargeTimeType.fdaPartialLiquidationFee"), INTEREST_FORFEITED(20, "chargeTimeType.interestForfeited");
 
     private final Integer value;
     private final String code;
@@ -62,7 +61,7 @@ public enum ChargeTimeType {
         return new Integer[] { ChargeTimeType.DISBURSEMENT.getValue(), ChargeTimeType.SPECIFIED_DUE_DATE.getValue(),
                 ChargeTimeType.INSTALMENT_FEE.getValue(), ChargeTimeType.OVERDUE_INSTALLMENT.getValue(),
                 ChargeTimeType.TRANCHE_DISBURSEMENT.getValue(), ChargeTimeType.DISBURSE_TO_SAVINGS.getValue(),
-                ChargeTimeType.INTEREST_FORFEITED.getValue()};
+                ChargeTimeType.INTEREST_FORFEITED.getValue() };
     }
 
     public static Object[] validLoanChargeValues() {
@@ -197,7 +196,6 @@ public enum ChargeTimeType {
     public boolean isInstalmentFee() {
         return this.value.equals(ChargeTimeType.INSTALMENT_FEE.getValue());
     }
-
 
     public boolean isOverdueInstallment() {
         return this.value.equals(ChargeTimeType.OVERDUE_INSTALLMENT.getValue());

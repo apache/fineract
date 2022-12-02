@@ -124,9 +124,12 @@ import org.apache.fineract.portfolio.savings.domain.DepositAccountOnHoldTransact
 import org.apache.fineract.portfolio.savings.domain.DepositAccountOnHoldTransactionRepository;
 import org.apache.fineract.portfolio.savings.domain.DepositAccountRecurringDetail;
 import org.apache.fineract.portfolio.savings.domain.DepositAccountTermAndPreClosure;
+import org.apache.fineract.portfolio.savings.domain.DepositProductRecurringDetail;
 import org.apache.fineract.portfolio.savings.domain.DepositProductTermAndPreClosure;
 import org.apache.fineract.portfolio.savings.domain.FixedDepositAccount;
 import org.apache.fineract.portfolio.savings.domain.RecurringDepositAccount;
+import org.apache.fineract.portfolio.savings.domain.RecurringDepositProduct;
+import org.apache.fineract.portfolio.savings.domain.RecurringDepositProductRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountCharge;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountChargeRepositoryWrapper;
@@ -134,11 +137,13 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrap
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionRepository;
+import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
 import org.apache.fineract.portfolio.savings.exception.DepositAccountTransactionNotAllowedException;
 import org.apache.fineract.portfolio.savings.exception.Fx_RateTableShouldBeExistException;
 import org.apache.fineract.portfolio.savings.exception.InsufficientAccountBalanceException;
 import org.apache.fineract.portfolio.savings.exception.PostInterestAsOnDateException;
 import org.apache.fineract.portfolio.savings.exception.PostInterestAsOnDateException.PostInterestAsOnExceptionType;
+import org.apache.fineract.portfolio.savings.exception.RecurringDepositProductNotFoundException;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountTransactionNotFoundException;
 import org.apache.fineract.portfolio.savings.exception.TransactionUpdateNotAllowedException;
 import org.apache.fineract.portfolio.savings.request.FixedDepositActivationReq;
@@ -154,11 +159,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.apache.fineract.portfolio.savings.domain.RecurringDepositProduct;
-import org.apache.fineract.portfolio.savings.domain.DepositProductRecurringDetail;
-import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
-import org.apache.fineract.portfolio.savings.domain.RecurringDepositProductRepository;
-import org.apache.fineract.portfolio.savings.exception.RecurringDepositProductNotFoundException;
 
 @Service
 @Transactional
@@ -571,15 +571,16 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         checkClientOrGroupActive(account);
 
-        if(depositAccountType.isRecurringDeposit()){
+        if (depositAccountType.isRecurringDeposit()) {
             SavingsProduct product = this.recurringDepositProductRepository.findById(account.productId())
                     .orElseThrow(() -> new RecurringDepositProductNotFoundException(account.productId()));
             if (account.depositAccountType().isRecurringDeposit() && account.allowWithdrawal()) {
                 final DepositProductRecurringDetail prodRecurringDetail = ((RecurringDepositProduct) product).depositRecurringDetail();
                 if (prodRecurringDetail != null && prodRecurringDetail.recurringDetail().allowFreeWithdrawal()) {
-                    List<SavingsAccountTransaction> trans = this.savingsAccountTransactionRepository.getTransactionsByAccountIdAndType(account.getId(), SavingsAccountTransactionType.WITHDRAWAL.getValue());
+                    List<SavingsAccountTransaction> trans = this.savingsAccountTransactionRepository
+                            .getTransactionsByAccountIdAndType(account.getId(), SavingsAccountTransactionType.WITHDRAWAL.getValue());
 
-                    if (trans.size() >= getNumberOfFreeWithdrawal(account)){
+                    if (trans.size() >= getNumberOfFreeWithdrawal(account)) {
                         this.createWithdrawLimitExceedCharge(account, product);
                         this.applyInterestForfeitedCharges(account, getAppUserIfPresent(), transactionDate);
                     }
@@ -2173,22 +2174,25 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         if (account.depositAccountType().isRecurringDeposit() && account.allowWithdrawal()) {
             final DepositProductRecurringDetail prodRecurringDetail = ((RecurringDepositProduct) product).depositRecurringDetail();
-            if(prodRecurringDetail!= null && prodRecurringDetail.recurringDetail().allowFreeWithdrawal()){
+            if (prodRecurringDetail != null && prodRecurringDetail.recurringDetail().allowFreeWithdrawal()) {
 
-                List<SavingsAccountCharge> interestForfeitedCharges = account.getCharges().stream().filter(c ->Arrays.asList(ChargeTimeType.INTEREST_FORFEITED.getValue()).contains(c.getCharge().getChargeTimeType())).collect(Collectors.toList());
+                List<SavingsAccountCharge> interestForfeitedCharges = account.getCharges().stream().filter(
+                        c -> Arrays.asList(ChargeTimeType.INTEREST_FORFEITED.getValue()).contains(c.getCharge().getChargeTimeType()))
+                        .collect(Collectors.toList());
                 Charge charge = this.chargeRepository.findChargeByChargeTimeType(ChargeTimeType.INTEREST_FORFEITED);
                 LocalDate date = account.getActivationLocalDate();
                 BigDecimal amount = account.findAccrualInterestPostingTransactionFromTo(date);
                 for (SavingsAccountCharge chargeDef : interestForfeitedCharges) {
-                     date = chargeDef.getDueLocalDate();
-                     amount =  account.findAccrualInterestPostingTransactionFromTo(date);
+                    date = chargeDef.getDueLocalDate();
+                    amount = account.findAccrualInterestPostingTransactionFromTo(date);
                 }
-                if(amount.compareTo(BigDecimal.ZERO) > 0) {
+                if (amount.compareTo(BigDecimal.ZERO) > 0) {
                     if (charge != null && charge.isActive() && charge.isAllowedSavingsChargeTime()) {
                         SavingsAccountChargeReq savingsAccountChargeReq = new SavingsAccountChargeReq();
                         savingsAccountChargeReq.setAmount(amount);
                         savingsAccountChargeReq.setDueDate(DateUtils.getLocalDateOfTenant());
-                        SavingsAccountCharge savingsAccountCharge = SavingsAccountCharge.createNew(account, charge, savingsAccountChargeReq);
+                        SavingsAccountCharge savingsAccountCharge = SavingsAccountCharge.createNew(account, charge,
+                                savingsAccountChargeReq);
                         account.addCharge(DateUtils.getDefaultFormatter(), savingsAccountCharge, charge);
                         this.savingsAccountChargeRepositoryWrapper.save(savingsAccountCharge);
                         this.savingAccountRepositoryWrapper.saveAndFlush(account);
@@ -2198,13 +2202,16 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         }
     }
+
     private void applyInterestForfeitedCharges(SavingsAccount account, AppUser user, LocalDate closedDate) {
-        List<SavingsAccountCharge> interestForfeitedCharges = account.getCharges().stream().filter(c ->Arrays.asList(ChargeTimeType.INTEREST_FORFEITED.getValue()).contains(c.getCharge().getChargeTimeType())).collect(Collectors.toList());
+        List<SavingsAccountCharge> interestForfeitedCharges = account.getCharges().stream()
+                .filter(c -> Arrays.asList(ChargeTimeType.INTEREST_FORFEITED.getValue()).contains(c.getCharge().getChargeTimeType()))
+                .collect(Collectors.toList());
 
         for (SavingsAccountCharge charge : interestForfeitedCharges) {
             BigDecimal amount = charge.amount();
             charge.setAmountOutstanding(amount);
-            if (!charge.isPaid()){
+            if (!charge.isPaid()) {
                 this.savingsAccountWritePlatformService.payCharge(charge, closedDate, amount, DateUtils.getDefaultFormatter(), user);
                 charge.setAmountOutstanding(BigDecimal.ZERO);
             }
@@ -2226,8 +2233,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 }
             }
         }
-        return  0;
+        return 0;
     }
-
 
 }

@@ -93,11 +93,11 @@ import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYea
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
-import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
-import org.apache.fineract.portfolio.savings.domain.RecurringDepositProductRepository;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.DepositProductRecurringDetail;
 import org.apache.fineract.portfolio.savings.domain.RecurringDepositProduct;
+import org.apache.fineract.portfolio.savings.domain.RecurringDepositProductRepository;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
+import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
 import org.apache.fineract.portfolio.savings.exception.DepositPeriodForAccountNotCompatibleWithChargeAddedForFreeWithdrawalException;
 import org.apache.fineract.portfolio.savings.exception.RecurringDepositProductNotFoundException;
 import org.jfree.util.Log;
@@ -121,8 +121,8 @@ public class DepositAccountDataValidator {
 
     @Autowired
     public DepositAccountDataValidator(final FromJsonHelper fromApiJsonHelper, final DepositProductDataValidator productDataValidator,
-                                       final SavingsAccountFeatureValidator featureValidator, ChargeRepositoryWrapper chargeRepository,
-                                       RecurringDepositProductRepository recurringDepositProductRepository) {
+            final SavingsAccountFeatureValidator featureValidator, ChargeRepositoryWrapper chargeRepository,
+            RecurringDepositProductRepository recurringDepositProductRepository) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.productDataValidator = productDataValidator;
         this.featureValidator = featureValidator;
@@ -779,7 +779,8 @@ public class DepositAccountDataValidator {
         }
     }
 
-    private void validateFreeWithdrawalCharges(final JsonElement element, final DataValidatorBuilder baseDataValidator, final DepositAccountType depositType) {
+    private void validateFreeWithdrawalCharges(final JsonElement element, final DataValidatorBuilder baseDataValidator,
+            final DepositAccountType depositType) {
 
         if (element.isJsonObject()) {
             final Long productId = this.fromApiJsonHelper.extractLongNamed(productIdParamName, element);
@@ -800,14 +801,17 @@ public class DepositAccountDataValidator {
                         if (chargeId != null && depositType.isRecurringDeposit()) {
                             Charge charge = this.chargeRepository.findOneWithNotFoundDetection(chargeId);
                             if (charge.isActive() && charge.isEnableFreeWithdrawal()) {
-                                final Integer depositPeriod = fromApiJsonHelper.extractIntegerSansLocaleNamed(depositPeriodParamName, element);
+                                final Integer depositPeriod = fromApiJsonHelper.extractIntegerSansLocaleNamed(depositPeriodParamName,
+                                        element);
                                 Integer freeWithdrawalCount = charge.getFrequencyFreeWithdrawalCharge();
                                 if (depositPeriod <= 3 && !freeWithdrawalCount.equals(1)) {
                                     Log.info("charge is wrong " + depositPeriod);
-                                    throw new DepositPeriodForAccountNotCompatibleWithChargeAddedForFreeWithdrawalException(depositPeriod, freeWithdrawalCount);
+                                    throw new DepositPeriodForAccountNotCompatibleWithChargeAddedForFreeWithdrawalException(depositPeriod,
+                                            freeWithdrawalCount);
                                 } else if ((depositPeriod > 3 && depositPeriod <= 12) && !freeWithdrawalCount.equals(2)) {
                                     Log.info("charge is wrong " + depositPeriod);
-                                    throw new DepositPeriodForAccountNotCompatibleWithChargeAddedForFreeWithdrawalException(depositPeriod, freeWithdrawalCount);
+                                    throw new DepositPeriodForAccountNotCompatibleWithChargeAddedForFreeWithdrawalException(depositPeriod,
+                                            freeWithdrawalCount);
                                 }
                             }
                         }
