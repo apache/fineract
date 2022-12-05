@@ -119,6 +119,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanCollateralManagementData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanSummaryData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.data.PaidInAdvanceData;
@@ -711,6 +712,11 @@ public class LoansApiResource {
         List<RateData> rates = null;
         if (isRatesEnabled) {
             rates = this.rateReadService.retrieveLoanRates(loanId);
+        }
+
+        // updating summary with transaction amounts summary
+        if (loanRepayments != null) {
+            loanBasicDetails.setSummary(LoanSummaryData.withTransactionAmountsSummary(loanBasicDetails.getSummary(), loanRepayments));
         }
 
         final LoanAccountData loanAccount = LoanAccountData.associationsAndTemplate(loanBasicDetails, repaymentSchedule, loanRepayments,
