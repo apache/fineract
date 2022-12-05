@@ -640,10 +640,7 @@ public class LoanRepaymentScheduleInstallment extends AbstractAuditableWithUTCDa
     private void checkIfRepaymentPeriodObligationsAreMet(final LocalDate transactionDate, final MonetaryCurrency currency) {
         this.obligationsMet = getTotalOutstanding(currency).isZero();
         if (this.obligationsMet) {
-            this.obligationsMet = getCredits(currency).isZero();
-            if (this.obligationsMet) {
-                this.obligationsMetOnDate = transactionDate;
-            }
+            this.obligationsMetOnDate = transactionDate;
         } else {
             this.obligationsMetOnDate = null;
         }
