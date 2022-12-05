@@ -215,4 +215,7 @@ public class SavingsApiConstants {
     public static final String isUSDProductParamName = "isUSDProduct";
     public static final String VAULT_TARGET_AMOUNT = "vaultTargetAmount";
     public static final String VAULT_TARGET_DATE = "vaultTargetDate";
+    // FD Parital Liquidation
+    public static final String allowPartialLiquidation = "allowPartialLiquidation";
+    public static final String totalLiquidationAllowed = "totalLiquidationAllowed";
 }

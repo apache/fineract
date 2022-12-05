@@ -51,6 +51,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minRequi
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.productIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.submittedOnDateParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.totalLiquidationAllowed;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 
@@ -90,6 +91,7 @@ import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetailAssembler;
 import org.apache.fineract.portfolio.savings.DepositAccountOnClosureType;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
+import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYearType;
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
@@ -430,9 +432,13 @@ public class DepositAccountAssembler {
                 ? DepositAccountOnClosureType.fromInt(accountOnClosureTypeId)
                 : null;
         final Long transferToSavingsId = command.longValueOfParameterNamed(transferToSavingsIdParamName);
+
+        final Boolean allowPartialLiquidation = command.booleanObjectValueOfParameterNamed(SavingsApiConstants.allowPartialLiquidation);
+        final Integer totalPartialLiquidationsAllowed = command.integerValueOfParameterNamed(totalLiquidationAllowed);
+
         return DepositAccountTermAndPreClosure.createNew(updatedProductPreClosure, updatedProductTerm, account, depositAmount,
                 maturityAmount, maturityDate, depositPeriod, depositPeriodFrequency, expectedFirstDepositOnDate, accountOnClosureType,
-                trasferInterest, transferToSavingsId);
+                trasferInterest, transferToSavingsId, allowPartialLiquidation, totalPartialLiquidationsAllowed);
     }
 
     public DepositAccountRecurringDetail assembleAccountRecurringDetail(RecurringAccountDetailReq recurringAccountDetailReq,

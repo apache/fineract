@@ -55,6 +55,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.namePara
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.shortNameParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.totalLiquidationAllowed;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 
 import com.google.gson.JsonArray;
@@ -77,6 +78,7 @@ import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChart;
 import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartAssembler;
 import org.apache.fineract.portfolio.loanproduct.exception.InvalidCurrencyException;
 import org.apache.fineract.portfolio.savings.PreClosurePenalInterestOnType;
+import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYearType;
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
@@ -157,8 +159,11 @@ public class DepositProductAssembler {
         final DepositPreClosureDetail preClosureDetail = this.assemblePreClosureDetail(command);
         final DepositTermDetail depositTermDetail = this.assembleDepositTermDetail(command);
         final DepositProductAmountDetails depositProductAmountDetails = this.assembleDepositAmountDetails(command);
+
+        final Boolean allowPartialLiquidation = command.booleanObjectValueOfParameterNamed(SavingsApiConstants.allowPartialLiquidation);
+        final Integer totalPartialLiquidationsAllowed = command.integerValueOfParameterNamed(totalLiquidationAllowed);
         final DepositProductTermAndPreClosure productTermAndPreClosure = DepositProductTermAndPreClosure.createNew(preClosureDetail,
-                depositTermDetail, depositProductAmountDetails, null);
+                depositTermDetail, depositProductAmountDetails, null, allowPartialLiquidation, totalPartialLiquidationsAllowed);
 
         // Savings product charges
         final Set<Charge> charges = assembleListOfSavingsProductCharges(command, currencyCode);
@@ -254,7 +259,7 @@ public class DepositProductAssembler {
         final DepositTermDetail depositTermDetail = this.assembleDepositTermDetail(command);
         final DepositProductAmountDetails depositProductAmountDetails = this.assembleDepositAmountDetails(command);
         final DepositProductTermAndPreClosure productTermAndPreClosure = DepositProductTermAndPreClosure.createNew(preClosureDetail,
-                depositTermDetail, depositProductAmountDetails, null);
+                depositTermDetail, depositProductAmountDetails, null, null, null);
         final DepositRecurringDetail recurringDetail = this.assembleRecurringDetail(command);
         final DepositProductRecurringDetail productRecurringDetail = DepositProductRecurringDetail.createNew(recurringDetail, null);
 

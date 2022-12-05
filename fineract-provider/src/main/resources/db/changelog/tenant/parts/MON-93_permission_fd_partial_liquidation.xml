@@ -43,4 +43,44 @@
 
         </sql>
     </changeSet>
+
+    <changeSet author="naphlin@fiter.io" id="MON-93_add_partial_liq_acct_config">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_deposit_account_term_and_preclosure" columnName="allow_partial_liquidation"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_deposit_account_term_and_preclosure">
+            <column name="allow_partial_liquidation" type="boolean"/>
+            <column name="total_liquidation_allowed" type="integer"/>
+        </addColumn>
+
+    </changeSet>
+
+    <changeSet author="naphlin@fiter.io" id="MON-93_add_partial_liq_pdt_config">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_deposit_product_term_and_preclosure" columnName="allow_partial_liquidation"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_deposit_product_term_and_preclosure">
+            <column name="allow_partial_liquidation" type="boolean"/>
+            <column name="total_liquidation_allowed" type="integer"/>
+        </addColumn>
+
+    </changeSet>
+
+    <changeSet author="naphlin@fiter.io" id="MON-93_link_partially_liq_acct">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_deposit_account_term_and_preclosure" columnName="linked_origin_account_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_deposit_account_term_and_preclosure">
+            <column name="linked_origin_account_id" type="bigint">
+                <constraints references="m_savings_account(id)" foreignKeyName="FK_linked_origin_m_savings"/>
+            </column>
+        </addColumn>
+
+    </changeSet>
 </databaseChangeLog>

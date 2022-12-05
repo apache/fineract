@@ -60,4 +60,6 @@ public interface DepositAccountReadPlatformService {
     Collection<SavingsAccountTransactionData> retrieveAccrualTransactions(Long savingsId, DepositAccountType depositAccountType,
             Integer offset, Integer limit);
 
+    Integer retrieveTotalOfLinkedAccounts(Long originatingId);
+
 }

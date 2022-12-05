@@ -53,6 +53,8 @@ public final class FixedDepositProductData extends DepositProductData {
 
     private Collection<EnumOptionData> preClosurePenalInterestOnTypeOptions;
     private Collection<EnumOptionData> periodFrequencyTypeOptions;
+    private boolean allowPartialLiquidation;
+    private Integer totalLiquidationAllowed;
 
     public static FixedDepositProductData template(final CurrencyData currency, final EnumOptionData interestCompoundingPeriodType,
             final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
@@ -98,6 +100,8 @@ public final class FixedDepositProductData extends DepositProductData {
         final boolean withHoldTax = false;
         final TaxGroupData taxGroup = null;
         final boolean isUSDProduct = false;
+        final boolean allowPartialLiquidation = false;
+        final Integer totalLiquidationsAllowed = null;
 
         return new FixedDepositProductData(id, name, shortName, description, currency, nominalAnnualInterestRate,
                 interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
@@ -109,7 +113,7 @@ public final class FixedDepositProductData extends DepositProductData {
                 preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnType, preClosurePenalInterestOnTypeOptions,
                 minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType, inMultiplesOfDepositTerm,
                 inMultiplesOfDepositTermType, minDepositAmount, depositAmount, maxDepositAmount, periodFrequencyTypeOptions, withHoldTax,
-                taxGroup, taxGroupOptions, isUSDProduct);
+                taxGroup, taxGroupOptions, isUSDProduct, allowPartialLiquidation, totalLiquidationsAllowed);
     }
 
     public static FixedDepositProductData withCharges(final FixedDepositProductData existingProduct, final Collection<ChargeData> charges) {
@@ -131,7 +135,8 @@ public final class FixedDepositProductData extends DepositProductData {
                 existingProduct.maxDepositTermType, existingProduct.inMultiplesOfDepositTerm, existingProduct.inMultiplesOfDepositTermType,
                 existingProduct.minDepositAmount, existingProduct.depositAmount, existingProduct.maxDepositAmount,
                 existingProduct.periodFrequencyTypeOptions, existingProduct.withHoldTax, existingProduct.taxGroup,
-                existingProduct.taxGroupOptions, existingProduct.isUSDProduct);
+                existingProduct.taxGroupOptions, existingProduct.isUSDProduct, existingProduct.allowPartialLiquidation,
+                existingProduct.totalLiquidationAllowed);
     }
 
     /**
@@ -169,7 +174,8 @@ public final class FixedDepositProductData extends DepositProductData {
                 existingProduct.minDepositTermType, existingProduct.maxDepositTermType, existingProduct.inMultiplesOfDepositTerm,
                 existingProduct.inMultiplesOfDepositTermType, existingProduct.minDepositAmount, existingProduct.depositAmount,
                 existingProduct.maxDepositAmount, periodFrequencyTypeOptions, existingProduct.withHoldTax, existingProduct.taxGroup,
-                taxGroupOptions, existingProduct.isUSDProduct);
+                taxGroupOptions, existingProduct.isUSDProduct, existingProduct.allowPartialLiquidation,
+                existingProduct.totalLiquidationAllowed);
     }
 
     public static FixedDepositProductData withAccountingDetails(final FixedDepositProductData existingProduct,
@@ -206,14 +212,16 @@ public final class FixedDepositProductData extends DepositProductData {
                 existingProduct.maxDepositTermType, existingProduct.inMultiplesOfDepositTerm, existingProduct.inMultiplesOfDepositTermType,
                 existingProduct.minDepositAmount, existingProduct.depositAmount, existingProduct.maxDepositAmount,
                 existingProduct.periodFrequencyTypeOptions, existingProduct.withHoldTax, existingProduct.taxGroup,
-                existingProduct.taxGroupOptions, existingProduct.isUSDProduct);
+                existingProduct.taxGroupOptions, existingProduct.isUSDProduct, existingProduct.allowPartialLiquidation,
+                existingProduct.totalLiquidationAllowed);
     }
 
     public static FixedDepositProductData instance(final DepositProductData depositProductData, final boolean preClosurePenalApplicable,
             final BigDecimal preClosurePenalInterest, final EnumOptionData preClosurePenalInterestOnType, final Integer minDepositTerm,
             final Integer maxDepositTerm, final EnumOptionData minDepositTermType, final EnumOptionData maxDepositTermType,
             final Integer inMultiplesOfDepositTerm, final EnumOptionData inMultiplesOfDepositTermType, final BigDecimal minDepositAmount,
-            final BigDecimal depositAmount, final BigDecimal maxDepositAmount) {
+            final BigDecimal depositAmount, final BigDecimal maxDepositAmount, final boolean allowPartialLiquidation,
+            final Integer totalLiquidationsAllowed) {
 
         final Map<String, Object> accountingMappings = null;
         final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings = null;
@@ -252,7 +260,8 @@ public final class FixedDepositProductData extends DepositProductData {
                 preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnType, preClosurePenalInterestOnTypeOptions,
                 minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType, inMultiplesOfDepositTerm,
                 inMultiplesOfDepositTermType, minDepositAmount, depositAmount, maxDepositAmount, periodFrequencyTypeOptions,
-                depositProductData.withHoldTax, depositProductData.taxGroup, taxGroupOptions, depositProductData.isUSDProduct);
+                depositProductData.withHoldTax, depositProductData.taxGroup, taxGroupOptions, depositProductData.isUSDProduct,
+                allowPartialLiquidation, totalLiquidationsAllowed);
     }
 
     public static FixedDepositProductData lookup(final Long id, final String name) {
@@ -307,6 +316,8 @@ public final class FixedDepositProductData extends DepositProductData {
         final TaxGroupData taxGroup = null;
         final Collection<TaxGroupData> taxGroupOptions = null;
         final boolean isUSDProduct = false;
+        final boolean allowPartialLiquidation = false;
+        final Integer totalLiquidationsAllowed = null;
 
         return new FixedDepositProductData(id, name, shortName, description, currency, nominalAnnualInterestRate,
                 interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
@@ -318,7 +329,7 @@ public final class FixedDepositProductData extends DepositProductData {
                 preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnType, preClosurePenalInterestOnTypeOptions,
                 minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType, inMultiplesOfDepositTerm,
                 inMultiplesOfDepositTermType, minDepositAmount, depositAmount, maxDepositAmount, periodFrequencyTypeOptions, withHoldTax,
-                taxGroup, taxGroupOptions, isUSDProduct);
+                taxGroup, taxGroupOptions, isUSDProduct, allowPartialLiquidation, totalLiquidationsAllowed);
     }
 
     public static FixedDepositProductData withInterestChart(final FixedDepositProductData existingProduct,
@@ -341,7 +352,8 @@ public final class FixedDepositProductData extends DepositProductData {
                 existingProduct.maxDepositTermType, existingProduct.inMultiplesOfDepositTerm, existingProduct.inMultiplesOfDepositTermType,
                 existingProduct.minDepositAmount, existingProduct.depositAmount, existingProduct.maxDepositAmount,
                 existingProduct.periodFrequencyTypeOptions, existingProduct.withHoldTax, existingProduct.taxGroup,
-                existingProduct.taxGroupOptions, existingProduct.isUSDProduct);
+                existingProduct.taxGroupOptions, existingProduct.isUSDProduct, existingProduct.allowPartialLiquidation,
+                existingProduct.totalLiquidationAllowed);
 
     }
 
@@ -369,7 +381,8 @@ public final class FixedDepositProductData extends DepositProductData {
             final EnumOptionData maxDepositTermType, final Integer inMultiplesOfDepositTerm,
             final EnumOptionData inMultiplesOfDepositTermType, final BigDecimal minDepositAmount, final BigDecimal depositAmount,
             final BigDecimal maxDepositAmount, final Collection<EnumOptionData> periodFrequencyTypeOptions, final boolean withHoldTax,
-            final TaxGroupData taxGroup, final Collection<TaxGroupData> taxGroupOptions, boolean isUSDProduct) {
+            final TaxGroupData taxGroup, final Collection<TaxGroupData> taxGroupOptions, boolean isUSDProduct,
+            final boolean allowPartialLiquidation, final Integer totalLiquidationAllowed) {
 
         super(id, name, shortName, description, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, lockinPeriodFrequency,
@@ -397,6 +410,8 @@ public final class FixedDepositProductData extends DepositProductData {
         // template
         this.preClosurePenalInterestOnTypeOptions = preClosurePenalInterestOnTypeOptions;
         this.periodFrequencyTypeOptions = periodFrequencyTypeOptions;
+        this.allowPartialLiquidation = allowPartialLiquidation;
+        this.totalLiquidationAllowed = totalLiquidationAllowed;
     }
 
     public Integer getMinDepositTerm() {

@@ -20,8 +20,10 @@ package org.apache.fineract.portfolio.savings.service;
 
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.FIXED_DEPOSIT_PRODUCT_RESOURCE_NAME;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.accountingRuleParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowPartialLiquidation;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargesParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.totalLiquidationAllowed;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -142,6 +144,13 @@ public class FixedDepositProductWritePlatformServiceJpaRepositoryImpl implements
                     baseDataValidator.reset().parameter(taxGroupIdParamName).value(taxGroupId).notBlank();
                     throw new PlatformApiDataValidationException(dataValidationErrors);
                 }
+            }
+
+            if (changes.containsKey(allowPartialLiquidation) || changes.containsKey(totalLiquidationAllowed)) {
+                final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+                final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                        .resource(FIXED_DEPOSIT_PRODUCT_RESOURCE_NAME);
+                product.depositProductTermAndPreClosure().update(command, baseDataValidator);
             }
 
             // accounting related changes
