@@ -85,5 +85,18 @@
             INSERT IGNORE INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('transaction_savings', 'UNLOCK_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'UNLOCK', '0');
         </sql>
     </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_payment_detail_actual_transaction_type">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_payment_detail" columnName="actual_transaction_type"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_payment_detail">
+            <column name="actual_transaction_type" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>

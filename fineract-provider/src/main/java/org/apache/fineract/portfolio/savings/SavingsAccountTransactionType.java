@@ -42,7 +42,8 @@ public enum SavingsAccountTransactionType {
     WITHHOLD_TAX(18, "savingsAccountTransactionType.withholdTax"), ESCHEAT(19, "savingsAccountTransactionType.escheat"), AMOUNT_HOLD(20,
             "savingsAccountTransactionType.onHold"), AMOUNT_RELEASE(21, "savingsAccountTransactionType.release"), ACCRUAL_INTEREST_POSTING(
                     22, "savingsAccountTransactionType.accrualInterestPosting"), //
-    OVERDRAFT_ACCRUAL_INTEREST(25, "savingsAccountTransactionType.overdraftAccrualInterest");
+    OVERDRAFT_ACCRUAL_INTEREST(25, "savingsAccountTransactionType.overdraftAccrualInterest"), REVOKED_INTEREST(72,
+            "savingsAccountTransactionType.revokedInterest");
 
     private final Integer value;
     private final String code;
@@ -127,6 +128,9 @@ public enum SavingsAccountTransactionType {
             break;
             case 25:
                 savingsAccountTransactionType = SavingsAccountTransactionType.OVERDRAFT_ACCRUAL_INTEREST;
+            break;
+            case 72:
+                savingsAccountTransactionType = SavingsAccountTransactionType.REVOKED_INTEREST;
             break;
         }
         return savingsAccountTransactionType;
@@ -227,5 +231,9 @@ public enum SavingsAccountTransactionType {
 
     public boolean isOverdraftAccrualPosting() {
         return this.value.equals(SavingsAccountTransactionType.OVERDRAFT_ACCRUAL_INTEREST.getValue());
+    }
+
+    public boolean isRevokedInterest() {
+        return this.value.equals(SavingsAccountTransactionType.REVOKED_INTEREST.getValue());
     }
 }

@@ -94,6 +94,7 @@ import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.apache.fineract.portfolio.paymentdetail.PaymentDetailConstants;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
@@ -461,6 +462,20 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             BigDecimal currentBalance = gsim.getParentDeposit().subtract(transactionAmount);
             gsim.setParentDeposit(currentBalance);
             gsimRepository.save(gsim);
+
+            if (account.getLockedInUntilDate().isBefore(DateUtils.getBusinessLocalDate())) {
+                changes.put(PaymentDetailConstants.actualTransactionTypeParamName, SavingsAccountTransactionType.REVOKED_INTEREST);
+                final PaymentDetail paymentDetailRevoked = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command,
+                        changes);
+                // Revoke Accrued Interest if the locked date is not yet due and the account is subscribed to gsim
+                final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId, backdatedTxnsAllowedTill);
+                BigDecimal amount = savingsAccount.findAccrualInterestPostingTransactionToBeRevoked(transactionDate);
+                LOG.info("Amount to Revoke is :-" + amount);
+                if (amount.compareTo(BigDecimal.ZERO) > 0) {
+                    final SavingsAccountTransaction revokedInterestTx = this.savingsAccountDomainService.handleWithdrawal(savingsAccount,
+                            fmt, transactionDate, amount, paymentDetailRevoked, transactionBooleanValues, backdatedTxnsAllowedTill);
+                }
+            }
 
         }
 
