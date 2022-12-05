@@ -18,9 +18,6 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
-import org.apache.fineract.infrastructure.jobs.data.JobDetailDataValidator;
-import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetailRepository;
-import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobRunHistoryRepository;
 import org.apache.fineract.infrastructure.jobs.domain.SchedulerDetail;
 import org.apache.fineract.infrastructure.jobs.domain.SchedulerDetailRepository;
 import org.junit.jupiter.api.Assertions;
@@ -31,6 +28,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.Collections;
 import java.util.List;
@@ -42,36 +41,16 @@ import static org.mockito.BDDMockito.given;
 class SchedularWritePlatformServiceJpaRepositoryImplTest {
 
     @Mock
-    private ScheduledJobDetailRepository scheduledJobDetailsRepository;
-
-    @Mock
-    private ScheduledJobRunHistoryRepository scheduledJobRunHistoryRepository;
-
-    @Mock
     private SchedulerDetailRepository schedulerDetailRepository;
-
-    @Mock
-    private JobDetailDataValidator dataValidator;
 
     @InjectMocks
     private  SchedularWritePlatformServiceJpaRepositoryImpl schedularWritePlatformService;
 
     @Test
-    void testRetrieveSchedulerDetail_handle_null_response() {
-        // given
-        given(schedulerDetailRepository.findAll()).willReturn(null);
-
-        // when
-        final var result = schedularWritePlatformService.retrieveSchedulerDetail();
-
-        // then
-        Assertions.assertNull(result);
-    }
-
-    @Test
     void testRetrieveSchedulerDetail_handle_empty_response() {
         // given
-        given(schedulerDetailRepository.findAll()).willReturn(Collections.emptyList());
+        given(schedulerDetailRepository.findAll(PageRequest.of(0, 1)))
+                .willReturn(new PageImpl<>(Collections.emptyList()));
 
         // when
         final var result = schedularWritePlatformService.retrieveSchedulerDetail();
@@ -84,7 +63,8 @@ class SchedularWritePlatformServiceJpaRepositoryImplTest {
     void testRetrieveSchedulerDetail_handle_not_empty_response() {
         // given
         SchedulerDetail schedulerDetail = new SchedulerDetail();
-        given(schedulerDetailRepository.findAll()).willReturn(List.of(schedulerDetail));
+        given(schedulerDetailRepository.findAll(PageRequest.of(0, 1)))
+                .willReturn(new PageImpl<>(List.of(schedulerDetail)));
 
         // when
         final var result = schedularWritePlatformService.retrieveSchedulerDetail();

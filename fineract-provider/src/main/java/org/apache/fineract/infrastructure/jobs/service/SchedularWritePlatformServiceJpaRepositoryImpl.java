@@ -34,8 +34,11 @@ import org.apache.fineract.infrastructure.jobs.domain.SchedulerDetail;
 import org.apache.fineract.infrastructure.jobs.domain.SchedulerDetailRepository;
 import org.apache.fineract.infrastructure.jobs.exception.JobNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 @Service
 public class SchedularWritePlatformServiceJpaRepositoryImpl implements SchedularWritePlatformService {
@@ -104,12 +107,10 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
 
     @Override
     public SchedulerDetail retrieveSchedulerDetail() {
-        SchedulerDetail schedulerDetail = null;
-        final List<SchedulerDetail> schedulerDetailList = this.schedulerDetailRepository.findAll();
-        if (schedulerDetailList != null && schedulerDetailList.size() > 0) {
-            schedulerDetail = schedulerDetailList.get(0);
-        }
-        return schedulerDetail;
+        final Page<SchedulerDetail> schedulerDetailPage =
+                this.schedulerDetailRepository.findAll(PageRequest.of(0, 1));
+
+        return schedulerDetailPage.stream().findAny().orElse(null);
     }
 
     @Transactional
