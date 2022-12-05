@@ -18,7 +18,9 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -26,11 +28,15 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
 import org.apache.fineract.client.models.GetDelinquencyRangesResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
+import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
@@ -44,6 +50,7 @@ import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuil
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -186,6 +193,7 @@ public class DelinquencyAndChargebackIntegrationTest {
     @Test
     public void testLoanClassificationStepAsPartOfCOBRepeated() {
         GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+        List<LocalDate> expectedDates = new ArrayList();
 
         LocalDate businessDate = LocalDate.parse("2022-01-01", DateUtils.DEFAULT_DATE_FORMATTER);
         log.info("Current Business date {}", businessDate);
@@ -213,6 +221,7 @@ public class DelinquencyAndChargebackIntegrationTest {
 
         // Move the Business date 1 month to apply the first repayment
         businessDate = businessDate.plusMonths(1);
+        expectedDates.add(businessDate);
         BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
         log.info("Current Business date {}", businessDate);
 
@@ -231,6 +240,7 @@ public class DelinquencyAndChargebackIntegrationTest {
         log.info("Current Business date {}", businessDate);
 
         operationDate = Utils.dateFormatter.format(businessDate);
+        expectedDates.add(businessDate);
         loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, transactionAmount, loanId);
         assertNotNull(loanIdTransactionsResponse);
         transactionId = loanIdTransactionsResponse.getResourceId();
@@ -271,6 +281,7 @@ public class DelinquencyAndChargebackIntegrationTest {
 
         // Move the Business date few days to apply the repayment for Chargeback
         businessDate = LocalDate.parse("2022-03-20", DateUtils.DEFAULT_DATE_FORMATTER);
+        expectedDates.add(businessDate);
         operationDate = Utils.dateFormatter.format(businessDate);
         loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, transactionAmount, loanId);
         assertNotNull(loanIdTransactionsResponse);
@@ -280,6 +291,27 @@ public class DelinquencyAndChargebackIntegrationTest {
         // Get loan details expecting to have a delinquency classification
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         validateLoanAccount(getLoansLoanIdResponse, amountVal, "400.00", 7, Double.valueOf("400.00"));
+
+        // Pay the Loan to get this as Closed
+        loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, transactionAmount, loanId);
+        assertNotNull(loanIdTransactionsResponse);
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertEquals(LoanStatus.CLOSED_OBLIGATIONS_MET.getValue(), getLoansLoanIdResponse.getStatus().getId());
+        log.info("Loan id {} with status {}", loanId, getLoansLoanIdResponse.getStatus().getCode());
+
+        // Evaluate Installments
+        GetLoansLoanIdRepaymentSchedule getLoanRepaymentSchedule = getLoansLoanIdResponse.getRepaymentSchedule();
+        assertNotNull(getLoanRepaymentSchedule);
+        log.info("Loan with {} periods", getLoanRepaymentSchedule.getPeriods().size());
+
+        for (GetLoansLoanIdRepaymentPeriod period : getLoanRepaymentSchedule.getPeriods()) {
+            if (period.getPeriod() != null) {
+                log.info("Period number {} completed on date {}", period.getPeriod(), period.getObligationsMetOnDate());
+                assertNotNull(period.getObligationsMetOnDate());
+                assertEquals(expectedDates.get(period.getPeriod() - 1), period.getObligationsMetOnDate());
+                assertTrue(period.getComplete());
+            }
+        }
 
         GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
     }
