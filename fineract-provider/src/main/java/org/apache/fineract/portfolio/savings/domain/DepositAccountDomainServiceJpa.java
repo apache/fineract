@@ -46,6 +46,7 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
@@ -74,6 +75,7 @@ import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsTransactionBooleanValues;
+import org.apache.fineract.portfolio.savings.exception.Fx_RateTableShouldBeExistException;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountNotFoundException;
 import org.apache.fineract.portfolio.savings.request.FixedDepositPreClosureReq;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
@@ -102,19 +104,21 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
     private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
     private final SavingsAccountChargeRepository savingsAccountChargeRepository;
 
+    private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
+
     @Autowired
     public DepositAccountDomainServiceJpa(final PlatformSecurityContext context,
-            final SavingsAccountRepositoryWrapper savingsAccountRepository,
-            final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper,
-            final JournalEntryWritePlatformService journalEntryWritePlatformService, final AccountNumberGenerator accountNumberGenerator,
-            final DepositAccountAssembler depositAccountAssembler, final SavingsAccountDomainService savingsAccountDomainService,
-            final AccountTransfersWritePlatformService accountTransfersWritePlatformService,
-            final ConfigurationDomainService configurationDomainService,
-            final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
-            final CalendarInstanceRepository calendarInstanceRepository, final AccountAssociationsRepository accountAssociationsRepository,
-            final SavingsAccountTransactionRepository savingsAccountTransactionRepository,
-            final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
-            final SavingsAccountChargeRepository savingsAccountChargeRepository) {
+                                          final SavingsAccountRepositoryWrapper savingsAccountRepository,
+                                          final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper,
+                                          final JournalEntryWritePlatformService journalEntryWritePlatformService, final AccountNumberGenerator accountNumberGenerator,
+                                          final DepositAccountAssembler depositAccountAssembler, final SavingsAccountDomainService savingsAccountDomainService,
+                                          final AccountTransfersWritePlatformService accountTransfersWritePlatformService,
+                                          final ConfigurationDomainService configurationDomainService,
+                                          final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
+                                          final CalendarInstanceRepository calendarInstanceRepository, final AccountAssociationsRepository accountAssociationsRepository,
+                                          final SavingsAccountTransactionRepository savingsAccountTransactionRepository,
+                                          final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
+                                          final SavingsAccountChargeRepository savingsAccountChargeRepository, ReadWriteNonCoreDataService readWriteNonCoreDataService) {
         this.context = context;
         this.savingsAccountRepository = savingsAccountRepository;
         this.applicationCurrencyRepositoryWrapper = applicationCurrencyRepositoryWrapper;
@@ -130,6 +134,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
         this.savingsAccountChargeRepository = savingsAccountChargeRepository;
+        this.readWriteNonCoreDataService = readWriteNonCoreDataService;
     }
 
     @Transactional
@@ -346,6 +351,14 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                     PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS, null, null, transferDescription, null, fmt, null, null,
                     null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, toSavingsAccount, account,
                     isAccountTransfer, isExceptionForBalanceCheck);
+            if(account.getProduct().isUSDProduct()) {
+                if(this.readWriteNonCoreDataService.checkDatatableExists("Fx_rate") != null){
+                    accountTransferDTO.setFdToSavings(true);
+                }else{
+                    throw new Fx_RateTableShouldBeExistException();
+                }
+
+            }
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             updateAlreadyPostedTransactions(existingTransactionIds, account);
             account.updateClosedStatus();
@@ -522,6 +535,14 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                     PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS, null, null, transferDescription, locale, fmt, null, null,
                     null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, toSavingsAccount, account,
                     isRegularTransaction, isExceptionForBalanceCheck);
+            if(account.getProduct().isUSDProduct()) {
+                if(this.readWriteNonCoreDataService.retrieveDatatable("Fx_rate") != null){
+                    accountTransferDTO.setFdToSavings(true);
+                }else{
+                    throw new Fx_RateTableShouldBeExistException();
+                }
+
+            }
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             updateAlreadyPostedTransactions(existingTransactionIds, account);
         } else {

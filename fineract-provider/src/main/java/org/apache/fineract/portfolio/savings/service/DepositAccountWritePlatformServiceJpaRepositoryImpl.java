@@ -304,7 +304,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                             isRegularTransaction, isExceptionForBalanceCheck);
                     if (account.getProduct().isUSDProduct()) {
                         if (this.readWriteNonCoreDataService.retrieveDatatable("Fx_rate") != null) {
-                            accountTransferDTO.setUSDAccount(true);
+                            accountTransferDTO.setSavingsToFD(true);
                         } else {
                             throw new Fx_RateTableShouldBeExistException();
                         }

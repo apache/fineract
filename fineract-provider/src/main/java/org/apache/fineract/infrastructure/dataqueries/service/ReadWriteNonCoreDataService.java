@@ -73,4 +73,6 @@ public interface ReadWriteNonCoreDataService {
     Long countDatatableEntries(String datatableName, Long appTableId, String foreignKeyColumn);
 
     BigDecimal getFxLatestRate(final String datatableName, final Long appTableId);
+
+    public DatatableData checkDatatableExists(final String datatable);
 }
