@@ -40,6 +40,7 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.minDepo
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.preClosurePenalApplicableParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.preClosurePenalInterestOnTypeIdParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.preClosurePenalInterestParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowPartialLiquidation;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.descriptionParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.digitsAfterDecimalParamName;
@@ -59,6 +60,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.namePara
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.shortNameParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.totalLiquidationAllowed;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 
@@ -127,6 +129,8 @@ public class DepositProductDataValidator {
 
         validateDepositAmountForCreate(element, baseDataValidator);
 
+        validatePartialLiquidationSetting(element, baseDataValidator);
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -153,7 +157,23 @@ public class DepositProductDataValidator {
 
         validateDepositAmountForUpdate(element, baseDataValidator);
 
+        validatePartialLiquidationSetting(element, baseDataValidator);
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    private void validatePartialLiquidationSetting(JsonElement element, DataValidatorBuilder baseDataValidator) {
+
+        boolean allowLiquidation = false;
+        if (this.fromApiJsonHelper.parameterExists(allowPartialLiquidation, element)) {
+            allowLiquidation = this.fromApiJsonHelper.extractBooleanNamed(depositAmountParamName, element);
+        }
+
+        if (allowLiquidation && this.fromApiJsonHelper.parameterExists(totalLiquidationAllowed, element)) {
+            Integer maxLiquidationTimes = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(totalLiquidationAllowed, element);
+            baseDataValidator.reset().parameter(totalLiquidationAllowed).value(maxLiquidationTimes).notNull().positiveAmount();
+        }
+
     }
 
     public void validateForRecurringDepositCreate(final String json) {

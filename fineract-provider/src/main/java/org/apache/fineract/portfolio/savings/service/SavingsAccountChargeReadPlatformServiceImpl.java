@@ -176,13 +176,14 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
         final String accountMappingForChargeConfig = null;
         final List<GLAccountData> expenseAccountOptions = null;
         final List<GLAccountData> assetAccountOptions = null;
+        final List<EnumOptionData> periodTypes = null;
 
         // TODO AA : revisit for merge conflict - Not sure method signature
         return ChargeData.template(null, allowedChargeCalculationTypeOptions, null, allowedChargeTimeOptions, null,
                 loansChargeCalculationTypeOptions, loansChargeTimeTypeOptions, savingsChargeCalculationTypeOptions,
                 savingsChargeTimeTypeOptions, clientChargeCalculationTypeOptions, clientChargeTimeTypeOptions, feeFrequencyOptions,
                 incomeOrLiabilityAccountOptions, taxGroupOptions, shareChargeCalculationTypeOptions, shareChargeTimeTypeOptions,
-                accountMappingForChargeConfig, expenseAccountOptions, assetAccountOptions);
+                accountMappingForChargeConfig, expenseAccountOptions, assetAccountOptions, periodTypes);
     }
 
     @Override

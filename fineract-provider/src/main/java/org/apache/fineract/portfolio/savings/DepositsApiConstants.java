@@ -249,11 +249,13 @@ public final class DepositsApiConstants {
             Arrays.asList(minDepositTermParamName, maxDepositTermParamName, minDepositTermTypeIdParamName, maxDepositTermTypeIdParamName,
                     inMultiplesOfDepositTermParamName, inMultiplesOfDepositTermTypeIdParamName, depositAmountParamName,
                     depositMinAmountParamName, depositMaxAmountParamName, SavingProductAccountingParams.PENALTIES_RECEIVABLE.getValue(),
-                    SavingProductAccountingParams.FEES_RECEIVABLE.getValue(), SavingProductAccountingParams.INTEREST_PAYABLE.getValue()));
+                    SavingProductAccountingParams.FEES_RECEIVABLE.getValue(), SavingProductAccountingParams.INTEREST_PAYABLE.getValue(),
+                    SavingsApiConstants.allowPartialLiquidation, SavingsApiConstants.totalLiquidationAllowed));
 
-    private static final Set<String> DEPOSIT_TERM_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(minDepositTermParamName,
-            maxDepositTermParamName, minDepositTermType, maxDepositTermType, inMultiplesOfDepositTermParamName,
-            inMultiplesOfDepositTermType, depositAmountParamName, depositMinAmountParamName, depositMaxAmountParamName));
+    private static final Set<String> DEPOSIT_TERM_RESPONSE_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(minDepositTermParamName, maxDepositTermParamName, minDepositTermType, maxDepositTermType,
+                    inMultiplesOfDepositTermParamName, inMultiplesOfDepositTermType, depositAmountParamName, depositMinAmountParamName,
+                    depositMaxAmountParamName, SavingsApiConstants.allowPartialLiquidation, SavingsApiConstants.totalLiquidationAllowed));
 
     private static final Set<String> RECURRING_DETAILS_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(mandatoryRecommendedDepositAmountParamName, isMandatoryDepositParamName, allowWithdrawalParamName,

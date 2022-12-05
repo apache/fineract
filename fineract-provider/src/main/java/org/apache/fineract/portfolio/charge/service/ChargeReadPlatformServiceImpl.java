@@ -158,13 +158,14 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         final String accountMappingForChargeConfig = this.configurationDomainServiceJpa.getAccountMappingForCharge();
         final List<GLAccountData> expenseAccountOptions = this.accountingDropdownReadPlatformService.retrieveExpenseAccountOptions();
         final List<GLAccountData> assetAccountOptions = this.accountingDropdownReadPlatformService.retrieveAssetAccountOptions();
+        final Collection<EnumOptionData> periodTypes = this.accountingDropdownReadPlatformService.retrievePeriodTypeOptions();
 
         return ChargeData.template(currencyOptions, allowedChargeCalculationTypeOptions, allowedChargeAppliesToOptions,
                 allowedChargeTimeOptions, chargePaymentOptions, loansChargeCalculationTypeOptions, loansChargeTimeTypeOptions,
                 savingsChargeCalculationTypeOptions, savingsChargeTimeTypeOptions, clientChargeCalculationTypeOptions,
                 clientChargeTimeTypeOptions, feeFrequencyOptions, incomeOrLiabilityAccountOptions, taxGroupOptions,
                 shareChargeCalculationTypeOptions, shareChargeTimeTypeOptions, accountMappingForChargeConfig, expenseAccountOptions,
-                assetAccountOptions);
+                assetAccountOptions, periodTypes);
     }
 
     @Override

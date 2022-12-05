@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.accounting.common;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +30,8 @@ import org.apache.fineract.accounting.glaccount.domain.GLAccountUsage;
 import org.apache.fineract.accounting.glaccount.service.GLAccountReadPlatformService;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryType;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
+import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -161,6 +165,15 @@ public class AccountingDropdownReadPlatformServiceImpl implements AccountingDrop
         boolean includeEquityAccounts = true;
         return retrieveAccountMappingOptions(includeAssetAccounts, includeIncomeAccounts, includeExpenseAccounts, includeLiabilityAccounts,
                 includeEquityAccounts);
+    }
+
+    @Override
+    public Collection<EnumOptionData> retrievePeriodTypeOptions() {
+        final List<EnumOptionData> allowedOptions = Arrays.asList(
+                SavingsEnumerations.interestPostingPeriodType(SavingsPostingInterestPeriodType.DAILY), //
+                SavingsEnumerations.interestPostingPeriodType(SavingsPostingInterestPeriodType.MONTHLY));
+
+        return allowedOptions;
     }
 
 }

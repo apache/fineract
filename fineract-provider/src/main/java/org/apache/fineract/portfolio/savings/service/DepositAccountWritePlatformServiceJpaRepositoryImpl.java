@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.service;
 
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.changeTenureParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.closedOnDateParamName;
@@ -133,6 +134,7 @@ import org.apache.fineract.portfolio.savings.domain.RecurringDepositProductRepos
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountCharge;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountChargeRepositoryWrapper;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
@@ -195,6 +197,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     private final FromJsonHelper fromJsonHelper;
     private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
     private final AccountingProcessorHelper helper;
+    private final SavingsAccountRepository savingsAccountRepository;
 
     private final RecurringDepositProductRepository recurringDepositProductRepository;
 
@@ -224,7 +227,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             final AccountAssociationsRepository accountAssociationsRepository, ReadWriteNonCoreDataService readWriteNonCoreDataService,
             final SavingsAccountChargeRepositoryWrapper savingsAccountChargeRepositoryWrapper, final FromJsonHelper fromJsonHelper,
             AccountingProcessorHelper helper, RecurringDepositProductRepository recurringDepositProductRepository,
-            SavingsAccountWritePlatformService savingsAccountWritePlatformService) {
+            SavingsAccountWritePlatformService savingsAccountWritePlatformService, SavingsAccountRepository savingsAccountRepository) {
 
         this.context = context;
         this.savingAccountRepositoryWrapper = savingAccountRepositoryWrapper;
@@ -257,6 +260,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         this.helper = helper;
         this.recurringDepositProductRepository = recurringDepositProductRepository;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
+        this.savingsAccountRepository = savingsAccountRepository;
     }
 
     @Transactional
@@ -1942,16 +1946,56 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 DepositAccountType.FIXED_DEPOSIT);
         this.depositAccountTransactionDataValidator.validatePartialLiquidation(account, command);
         AccountAssociations accountAssociations = this.depositAccountDomainService.getLinkedSavingsAccount(accountId);
-
+        this.validateForLiquidationLimit(account);
         this.checkClientOrGroupActive(account);
         this.createPartialLiquidationCharge(account);
         this.preCloseAccount(command, new LinkedHashMap<>(), account, accountAssociations, false, paymentDetail);
         FixedDepositApplicationReq fixedDepositApplicationReq = this.generateFixedDepositApplicationReq(account, command);
         this.setDepositAmountForPartialLiquidation(fixedDepositApplicationReq, account, command);
-        FixedDepositAccount newFD = this.autoCreateNewFD(command, account, accountAssociations, fixedDepositApplicationReq);
 
+        FixedDepositAccount newFD = this.autoCreateNewFD(command, account, accountAssociations, fixedDepositApplicationReq);
+        newFD.getAccountTermAndPreClosure().setLinkedOriginAccountId(account.getId());
+        newFD.getAccountTermAndPreClosure().setAllowPartialLiquidation(account.getAccountTermAndPreClosure().getAllowPartialLiquidation());
+        newFD.getAccountTermAndPreClosure().setTotalLiquidationAllowed(account.getAccountTermAndPreClosure().getTotalLiquidationAllowed());
+
+        savingsAccountRepository.saveAndFlush(newFD);
         return new CommandProcessingResultBuilder().withEntityId(accountId).withOfficeId(account.officeId())
                 .withClientId(account.clientId()).withGroupId(account.groupId()).withSavingsId(newFD.getId()).build();
+    }
+
+    private void validateForLiquidationLimit(FixedDepositAccount account) {
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME);
+
+        Boolean allowLiquidation = account.getAccountTermAndPreClosure().getAllowPartialLiquidation();
+        if (allowLiquidation != null && allowLiquidation.equals(Boolean.FALSE)) {
+            baseDataValidator.failWithCodeNoParameterAddedToErrorCode("partial.liquidation.not.supported",
+                    "Partial liquidation is not allowed");
+        }
+
+        final Integer totalLiquidationsAllowed = account.getAccountTermAndPreClosure().getTotalLiquidationAllowed();
+
+        if (totalLiquidationsAllowed == null || totalLiquidationsAllowed < 1
+                || account.getAccountTermAndPreClosure().getLinkedOriginAccountId() == null) {
+            return;
+        }
+
+        final Integer currentTotalLiquidations = depositAccountReadPlatformService
+                .retrieveTotalOfLinkedAccounts(account.getAccountTermAndPreClosure().getLinkedOriginAccountId());
+
+        if ((currentTotalLiquidations - 1) >= totalLiquidationsAllowed) {
+            baseDataValidator.failWithCodeNoParameterAddedToErrorCode("partial.liquidation.limit.exceeded",
+                    "Total of partial liquidations has exceeded limit allowed");
+        }
+
+        if (!dataValidationErrors.isEmpty()) {
+            //
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
+
     }
 
     private void createPartialLiquidationCharge(FixedDepositAccount account) {
