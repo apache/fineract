@@ -94,7 +94,6 @@ import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
-import org.apache.fineract.portfolio.paymentdetail.PaymentDetailConstants;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
@@ -464,9 +463,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             gsimRepository.save(gsim);
 
             if (account.getLockedInUntilDate().isBefore(DateUtils.getBusinessLocalDate())) {
-                changes.put(PaymentDetailConstants.actualTransactionTypeParamName, SavingsAccountTransactionType.REVOKED_INTEREST);
-                final PaymentDetail paymentDetailRevoked = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command,
-                        changes);
+                final PaymentDetail paymentDetailRevoked = this.paymentDetailWritePlatformService
+                        .createAndPersistPaymentDetailForVaultTribe(command, changes, SavingsAccountTransactionType.REVOKED_INTEREST,
+                                withdrawal.getId().intValue(), transactionDate, paymentDetail.getId().intValue());
                 // Revoke Accrued Interest if the locked date is not yet due and the account is subscribed to gsim
                 final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId, backdatedTxnsAllowedTill);
                 BigDecimal amount = savingsAccount.findAccrualInterestPostingTransactionToBeRevoked(transactionDate);

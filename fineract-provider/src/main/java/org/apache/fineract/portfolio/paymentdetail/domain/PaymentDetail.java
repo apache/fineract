@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.paymentdetail.domain;
 
+import java.time.LocalDate;
 import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -58,6 +59,15 @@ public final class PaymentDetail extends AbstractPersistableCustom {
     @Column(name = "actual_transaction_type", length = 50)
     private String actualTransactionType;
 
+    @Column(name = "parent_savings_account_transaction_id")
+    private Integer parentSavingsAccountTransactionId;
+
+    @Column(name = "parent_transaction_payment_details_id")
+    private Integer parentTransactionPaymentDetailsId;
+
+    @Column(name = "transaction_date")
+    private LocalDate transactionDate;
+
     PaymentDetail() {
 
     }
@@ -69,7 +79,6 @@ public final class PaymentDetail extends AbstractPersistableCustom {
         final String routingCode = command.stringValueOfParameterNamed(PaymentDetailConstants.routingCodeParamName);
         final String receiptNumber = command.stringValueOfParameterNamed(PaymentDetailConstants.receiptNumberParamName);
         final String bankNumber = command.stringValueOfParameterNamed(PaymentDetailConstants.bankNumberParamName);
-        final String actualTransactionType = command.stringValueOfParameterNamed(PaymentDetailConstants.actualTransactionTypeParamName);
 
         if (StringUtils.isNotBlank(accountNumber)) {
             changes.put(PaymentDetailConstants.accountNumberParamName, accountNumber);
@@ -86,28 +95,25 @@ public final class PaymentDetail extends AbstractPersistableCustom {
         if (StringUtils.isNotBlank(bankNumber)) {
             changes.put(PaymentDetailConstants.bankNumberParamName, bankNumber);
         }
-        if (StringUtils.isNotBlank(actualTransactionType)) {
-            changes.put(PaymentDetailConstants.actualTransactionTypeParamName, actualTransactionType);
-        }
+
         final PaymentDetail paymentDetail = new PaymentDetail(paymentType, accountNumber, checkNumber, routingCode, receiptNumber,
-                bankNumber,actualTransactionType);
+                bankNumber);
         return paymentDetail;
     }
 
     public static PaymentDetail instance(final PaymentType paymentType, final String accountNumber, final String checkNumber,
             final String routingCode, final String receiptNumber, final String bankNumber) {
-        return new PaymentDetail(paymentType, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber,null);
+        return new PaymentDetail(paymentType, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber);
     }
 
     private PaymentDetail(final PaymentType paymentType, final String accountNumber, final String checkNumber, final String routingCode,
-            final String receiptNumber,final String bankNumber,final String actualTransactionType) {
+            final String receiptNumber, final String bankNumber) {
         this.paymentType = paymentType;
         this.accountNumber = accountNumber;
         this.checkNumber = checkNumber;
         this.routingCode = routingCode;
         this.receiptNumber = receiptNumber;
         this.bankNumber = bankNumber;
-        this.actualTransactionType = actualTransactionType;
     }
 
     public PaymentDetailData toData() {
@@ -127,5 +133,21 @@ public final class PaymentDetail extends AbstractPersistableCustom {
 
     public String getRoutingCode() {
         return routingCode;
+    }
+
+    public void setActualTransactionType(String actualTransactionType) {
+        this.actualTransactionType = actualTransactionType;
+    }
+
+    public void setParentSavingsAccountTransactionId(Integer parentSavingsAccountTransactionId) {
+        this.parentSavingsAccountTransactionId = parentSavingsAccountTransactionId;
+    }
+
+    public void setParentTransactionPaymentDetailsId(Integer parentTransactionPaymentDetailsId) {
+        this.parentTransactionPaymentDetailsId = parentTransactionPaymentDetailsId;
+    }
+
+    public void setTransactionDate(LocalDate transactionDate) {
+        this.transactionDate = transactionDate;
     }
 }

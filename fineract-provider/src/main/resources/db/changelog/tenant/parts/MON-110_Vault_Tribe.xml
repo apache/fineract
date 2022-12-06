@@ -98,5 +98,45 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_savings_account_transaction_parent_savings_account_transaction_id">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_payment_detail" columnName="parent_savings_account_transaction_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_payment_detail">
+            <column name="parent_savings_account_transaction_id" type="bigint(20)">
+                <constraints nullable="true" foreignKeyName="FK_m_savings_account_transaction_parent_savings_account_transaction_id" references="m_savings_account_transaction(id)"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_m_payment_detail_parent_transaction_payment_details_id">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_payment_detail" columnName="parent_transaction_payment_details_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_payment_detail">
+            <column name="parent_transaction_payment_details_id" type="bigint(20)">
+                <constraints nullable="true" foreignKeyName="FK_m_payment_detail_parent_transaction_payment_details_id" references="m_payment_detail(id)"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_payment_detail_transaction_date">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_payment_detail" columnName="transaction_date"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_payment_detail">
+            <column name="transaction_date" type="date">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>
