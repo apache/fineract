@@ -1632,6 +1632,173 @@ public class BatchApiTest {
     }
 
     /**
+     * Test for finding datatable entry by the query API and update its value
+     */
+    @Test
+    public void shouldFindOneToOneDatatableEntryByQueryAPIAndUpdateOneOfItsColumn() {
+        final String datatableName = Utils.randomNameGenerator(LOAN_APP_TABLE_NAME + "_", 5).toLowerCase();
+
+        final FromJsonHelper jsonHelper = new FromJsonHelper();
+        final Long loanId = jsonHelper.extractLongNamed("loanId", jsonHelper.parse(setupAccount()).getAsJsonObject());
+        // creating datatable with m_loan association
+        final Map<String, Object> columnMap = new HashMap<>();
+        final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
+
+        final String columnName1 = Utils.randomNameGenerator("COL1_", 5).toLowerCase();
+        final String columnName2 = Utils.randomNameGenerator("COL2_", 5).toLowerCase();
+        columnMap.put("datatableName", datatableName);
+        columnMap.put("apptableName", LOAN_APP_TABLE_NAME);
+        columnMap.put("entitySubType", "PERSON");
+        columnMap.put("multiRow", false);
+        DatatableHelper.addDatatableColumns(datatableColumnsList, columnName1, "String", true, 10, null);
+        DatatableHelper.addDatatableColumns(datatableColumnsList, columnName2, "String", false, 10, null);
+        columnMap.put("columns", datatableColumnsList);
+        final String datatableRequestJsonString = new Gson().toJson(columnMap);
+        LOG.info("CreateDataTable map : {}", datatableRequestJsonString);
+
+        this.datatableHelper.createDatatable(datatableRequestJsonString, "");
+
+        // Create a datatable entry so that it can be updated using BatchApi
+        final Map<String, Object> datatableEntryMap = new HashMap<>();
+        String columnValue1 = Utils.randomNameGenerator("VAL1_", 3);
+        String columnValue2 = Utils.randomNameGenerator("VAL2_", 3);
+        datatableEntryMap.put(columnName1, columnValue1);
+        datatableEntryMap.put(columnName2, columnValue2);
+        final String datatableEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
+        LOG.info("CreateDataTableEntry map : {}", datatableEntryRequestJsonString);
+
+        final Map<String, Object> datatableEntryResponse = this.datatableHelper.createDatatableEntry(datatableName, loanId.intValue(),
+                false, datatableEntryRequestJsonString);
+        final Integer datatableEntryResourceId = (Integer) datatableEntryResponse.get("resourceId");
+        assertNotNull(datatableEntryResourceId, "ERROR IN CREATING THE ENTITY DATATABLE RECORD");
+
+        final BatchRequest queryDatatableEntriesRequest = BatchHelper.queryDatatableEntries(datatableName, columnName1, columnValue1,
+                "loan_id");
+        final BatchRequest updateDatatableEntry = BatchHelper.updateDatatableEntry(datatableName, "$.[0].loan_id", columnName2,
+                columnValue2 + "1");
+
+        final List<BatchRequest> batchRequestsToQueryAndUpdateDatatableEntries = Arrays.asList(queryDatatableEntriesRequest,
+                updateDatatableEntry);
+        LOG.info("Batch Request : {}", BatchHelper.toJsonString(batchRequestsToQueryAndUpdateDatatableEntries));
+
+        final List<BatchResponse> responseOfQuertAndUpdateDatatableBatch = BatchHelper.postBatchRequestsWithEnclosingTransaction(
+                this.requestSpec, this.responseSpec, BatchHelper.toJsonString(batchRequestsToQueryAndUpdateDatatableEntries));
+
+        LOG.info("Batch Response : {}", new Gson().toJson(responseOfQuertAndUpdateDatatableBatch));
+
+        final BatchResponse batchQueryAndUpdateResponse1 = responseOfQuertAndUpdateDatatableBatch.get(0);
+        final BatchResponse batchQueryAndUpdateResponse2 = responseOfQuertAndUpdateDatatableBatch.get(1);
+        Assertions.assertEquals(HttpStatus.SC_OK, batchQueryAndUpdateResponse1.getStatusCode(),
+                "Verify Status Code 200 for create datatable entry");
+        Assertions.assertEquals(HttpStatus.SC_OK, batchQueryAndUpdateResponse2.getStatusCode(),
+                "Verify Status Code 200 for update datatable entry");
+
+        final JsonObject changes = jsonHelper.parse(batchQueryAndUpdateResponse2.getBody()).getAsJsonObject().get("changes")
+                .getAsJsonObject();
+        Assertions.assertEquals(changes.get(columnName2).getAsString(), columnValue2 + "1");
+    }
+
+    /**
+     * Test for finding datatable entry by the query API and update its value
+     */
+    @Test
+    public void shouldFindOneToManyDatatableEntryByQueryAPIAndUpdateOneOfItsColumn() {
+        final String datatableName = Utils.randomNameGenerator(LOAN_APP_TABLE_NAME + "_", 5).toLowerCase();
+
+        final FromJsonHelper jsonHelper = new FromJsonHelper();
+        final Long loanId = jsonHelper.extractLongNamed("loanId", jsonHelper.parse(setupAccount()).getAsJsonObject());
+        // creating datatable with m_loan association
+        final Map<String, Object> columnMap = new HashMap<>();
+        final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
+
+        final String columnName1 = Utils.randomNameGenerator("COL1_", 5).toLowerCase();
+        final String columnName2 = Utils.randomNameGenerator("COL2_", 5).toLowerCase();
+        columnMap.put("datatableName", datatableName);
+        columnMap.put("apptableName", LOAN_APP_TABLE_NAME);
+        columnMap.put("entitySubType", "PERSON");
+        columnMap.put("multiRow", true);
+        DatatableHelper.addDatatableColumns(datatableColumnsList, columnName1, "String", true, 10, null);
+        DatatableHelper.addDatatableColumns(datatableColumnsList, columnName2, "String", false, 10, null);
+        columnMap.put("columns", datatableColumnsList);
+        final String datatableRequestJsonString = new Gson().toJson(columnMap);
+        LOG.info("CreateDataTable map : {}", datatableRequestJsonString);
+
+        this.datatableHelper.createDatatable(datatableRequestJsonString, "");
+
+        // Create a datatable entry so that it can be updated using BatchApi
+        final Map<String, Object> datatableEntryMap = new HashMap<>();
+        String columnValue1 = Utils.randomNameGenerator("VAL1_", 3);
+        String columnValue2 = Utils.randomNameGenerator("VAL2_", 3);
+        datatableEntryMap.put(columnName1, columnValue1);
+        datatableEntryMap.put(columnName2, columnValue2);
+        final String datatableEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
+        LOG.info("CreateDataTableEntry map : {}", datatableEntryRequestJsonString);
+
+        final Map<String, Object> datatableEntryResponse = this.datatableHelper.createDatatableEntry(datatableName, loanId.intValue(),
+                false, datatableEntryRequestJsonString);
+        final Integer datatableEntryResourceId = (Integer) datatableEntryResponse.get("resourceId");
+        assertNotNull(datatableEntryResourceId, "ERROR IN CREATING THE ENTITY DATATABLE RECORD");
+
+        // Create datatable entry batch request
+        final BatchRequest createDatatableEntryRequest = BatchHelper.createDatatableEntryRequest(loanId, datatableName,
+                Arrays.asList(columnName1, columnName2));
+
+        // Get datatable entries batch request
+        final BatchRequest getDatatableEntriesRequest = BatchHelper.getDatatableByIdRequest(loanId, datatableName, null,
+                createDatatableEntryRequest.getReference());
+
+        final List<BatchRequest> batchRequestsDatatableEntries = Arrays.asList(createDatatableEntryRequest, getDatatableEntriesRequest);
+        LOG.info("Batch Request : {}", BatchHelper.toJsonString(batchRequestsDatatableEntries));
+
+        final List<BatchResponse> responseDatatableBatch = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec,
+                this.responseSpec, BatchHelper.toJsonString(batchRequestsDatatableEntries));
+
+        LOG.info("Batch Response : {}", new Gson().toJson(responseDatatableBatch));
+
+        final BatchResponse batchResponse1 = responseDatatableBatch.get(0);
+        final BatchResponse batchResponse2 = responseDatatableBatch.get(1);
+        Assertions.assertEquals(HttpStatus.SC_OK, batchResponse1.getStatusCode(), "Verify Status Code 200 for create datatable entry");
+        Assertions.assertEquals(HttpStatus.SC_OK, batchResponse2.getStatusCode(), "Verify Status Code 200 for update datatable entry");
+
+        final String getDatatableEntriesResponse = batchResponse2.getBody();
+
+        final Long createDatatableEntryId = jsonHelper.extractLongNamed("resourceId",
+                jsonHelper.parse(batchResponse1.getBody()).getAsJsonObject());
+
+        final JsonArray datatableEntries = jsonHelper.parse(getDatatableEntriesResponse).getAsJsonArray();
+        Assertions.assertEquals(2, datatableEntries.size());
+
+        // Ensure both resourceIds are available in response
+        Assertions.assertTrue(getDatatableEntriesResponse.contains(String.format("\"id\": %d", createDatatableEntryId)));
+        Assertions.assertTrue(getDatatableEntriesResponse.contains(String.format("\"id\": %d", datatableEntryResourceId)));
+
+        final BatchRequest queryDatatableEntriesRequest = BatchHelper.queryDatatableEntries(datatableName, columnName1, columnValue1,
+                "id,loan_id");
+        final BatchRequest updateDatatableEntry = BatchHelper.updateDatatableEntry(datatableName, "$.[0].loan_id", "$.[0].id", columnName2,
+                columnValue2 + "1");
+
+        final List<BatchRequest> batchRequestsToQueryAndUpdateDatatableEntries = Arrays.asList(queryDatatableEntriesRequest,
+                updateDatatableEntry);
+        LOG.info("Batch Request : {}", BatchHelper.toJsonString(batchRequestsToQueryAndUpdateDatatableEntries));
+
+        final List<BatchResponse> responseOfQuertAndUpdateDatatableBatch = BatchHelper.postBatchRequestsWithEnclosingTransaction(
+                this.requestSpec, this.responseSpec, BatchHelper.toJsonString(batchRequestsToQueryAndUpdateDatatableEntries));
+
+        LOG.info("Batch Response : {}", new Gson().toJson(responseOfQuertAndUpdateDatatableBatch));
+
+        final BatchResponse batchQueryAndUpdateResponse1 = responseOfQuertAndUpdateDatatableBatch.get(0);
+        final BatchResponse batchQueryAndUpdateResponse2 = responseOfQuertAndUpdateDatatableBatch.get(1);
+        Assertions.assertEquals(HttpStatus.SC_OK, batchQueryAndUpdateResponse1.getStatusCode(),
+                "Verify Status Code 200 for create datatable entry");
+        Assertions.assertEquals(HttpStatus.SC_OK, batchQueryAndUpdateResponse2.getStatusCode(),
+                "Verify Status Code 200 for update datatable entry");
+
+        final JsonObject changes = jsonHelper.parse(batchQueryAndUpdateResponse2.getBody()).getAsJsonObject().get("changes")
+                .getAsJsonObject();
+        Assertions.assertEquals(changes.get(columnName2).getAsString(), columnValue2 + "1");
+    }
+
+    /**
      * Delete datatable
      *
      * @param datatableName

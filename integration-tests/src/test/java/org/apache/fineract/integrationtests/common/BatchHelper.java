@@ -936,4 +936,83 @@ public final class BatchHelper {
         return br;
 
     }
+
+    /**
+     * Creates and returns a batch request to query datatable entry.
+     *
+     * @param datatableName
+     * @param columnName
+     * @param columnValue
+     * @param columnResult
+     * @return
+     */
+    public static BatchRequest queryDatatableEntries(final String datatableName, final String columnName, final String columnValue,
+            final String columnResult) {
+        final BatchRequest br = new BatchRequest();
+        String relativeUrl = String.format("datatables/%s/query", datatableName);
+        relativeUrl += "?columnFilter=" + columnName + "&" + "valueFilter=" + columnValue + "&" + "resultColumns=" + columnResult;
+
+        br.setRequestId(1L);
+        br.setRelativeUrl(relativeUrl);
+        br.setMethod(HttpMethod.GET);
+        br.setBody("{}");
+
+        return br;
+    }
+
+    /**
+     * Creates and returns a batch request to update datatable entry.
+     *
+     * @param datatableName
+     * @param resourceId
+     * @param subResourceId
+     * @param columnName
+     * @param columnValue
+     * @return
+     */
+    public static BatchRequest updateDatatableEntry(final String datatableName, final String resourceId, final String columnName,
+            final String columnValue) {
+        final BatchRequest br = new BatchRequest();
+        final String relativeUrl = String.format("datatables/%s/%s", datatableName, resourceId);
+        final Map<String, Object> datatableEntryMap = new HashMap<>();
+        datatableEntryMap.put(columnName, columnValue);
+        final String datatableEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
+        LOG.info("UpdateDataTableEntry map : {}", datatableEntryRequestJsonString);
+
+        br.setRequestId(2L);
+        br.setReference(1L);
+        br.setRelativeUrl(relativeUrl);
+        br.setMethod(HttpMethod.PUT);
+        br.setBody(datatableEntryRequestJsonString);
+
+        return br;
+    }
+
+    /**
+     * Creates and returns a batch request to update datatable entry.
+     *
+     * @param datatableName
+     * @param resourceId
+     * @param subResourceId
+     * @param columnName
+     * @param columnValue
+     * @return
+     */
+    public static BatchRequest updateDatatableEntry(final String datatableName, final String resourceId, final String subResourceId,
+            final String columnName, final String columnValue) {
+        final BatchRequest br = new BatchRequest();
+        final String relativeUrl = String.format("datatables/%s/%s/%s", datatableName, resourceId, subResourceId);
+        final Map<String, Object> datatableEntryMap = new HashMap<>();
+        datatableEntryMap.put(columnName, columnValue);
+        final String datatableEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
+        LOG.info("UpdateDataTableEntry map : {}", datatableEntryRequestJsonString);
+
+        br.setRequestId(2L);
+        br.setReference(1L);
+        br.setRelativeUrl(relativeUrl);
+        br.setMethod(HttpMethod.PUT);
+        br.setBody(datatableEntryRequestJsonString);
+
+        return br;
+    }
 }
