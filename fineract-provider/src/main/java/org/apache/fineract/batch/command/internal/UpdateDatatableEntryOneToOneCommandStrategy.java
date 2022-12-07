@@ -39,7 +39,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class UpdateDatatableEntryOneToManyCommandStrategy implements CommandStrategy {
+public class UpdateDatatableEntryOneToOneCommandStrategy implements CommandStrategy {
 
     private final DatatablesApiResource datatablesApiResource;
 
@@ -56,11 +56,10 @@ public class UpdateDatatableEntryOneToManyCommandStrategy implements CommandStra
         // Pluck out the datatable name, entity id & datatable entry id out of the relative path
         final String datatableName = pathParameters.get(1);
         final Long entityId = Long.parseLong(pathParameters.get(2));
-        final Long datatableEntryId = Long.parseLong(pathParameters.get(3));
 
         // Calls 'updateDatatableEntryOneToMany' function from
-        // 'DatatablesApiResource' to update a datatable entry on an existing entity in a one-many relationship
-        responseBody = datatablesApiResource.updateDatatableEntryOneToMany(datatableName, entityId, datatableEntryId, request.getBody());
+        // 'DatatablesApiResource' to update a datatable entry on an existing entity in a one-one relationship
+        responseBody = datatablesApiResource.updateDatatableEntryOnetoOne(datatableName, entityId, request.getBody());
 
         response.setStatusCode(200);
         // Sets the body of the response after datatable entry is successfully
