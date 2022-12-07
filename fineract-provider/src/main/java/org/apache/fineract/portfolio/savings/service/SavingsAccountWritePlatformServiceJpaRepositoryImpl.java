@@ -762,6 +762,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final boolean allowAccountTransferModification) {
         final SavingsAccountTransaction principalTransaction = this.savingsAccountTransactionRepository
                 .findOneByIdAndSavingsAccountId(transactionId, savingsId);
+        if (principalTransaction.isReversed()) {
+            throw new PlatformServiceUnavailableException("error.msg.saving.account.transaction.reversal.not.allowed",
+                    "Savings account transaction :" + transactionId + " is already reversed. This action is not Allowed", transactionId);
+        }
 
         CommandProcessingResult undoPrincipalTransaction = undoTransaction(savingsId, transactionId, allowAccountTransferModification);
 
@@ -770,6 +774,14 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         if (revokedInterestTransaction != null
                 && revokedInterestTransaction.getActualTransactionType().equals(SavingsAccountTransactionType.REVOKED_INTEREST.name())) {
+
+            if (principalTransaction.isReversed()) {
+                throw new PlatformServiceUnavailableException("error.msg.saving.account.transaction.reversal.not.allowed",
+                        "Savings account [Revoked Interest] transaction :" + transactionId
+                                + " is already reversed. This action is not Allowed",
+                        transactionId);
+            }
+
             undoTransaction(revokedInterestTransaction.getSavingsAccountId(), revokedInterestTransaction.getId(),
                     allowAccountTransferModification);
         }
