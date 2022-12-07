@@ -29,4 +29,7 @@ public interface VaultTribeCustomSavingsAccountTransactionRepository
     @Query(value = "SELECT tx.id AS id,tx.payment_detail_id AS paymentDetailId,tx.savings_account_id AS savingsAccountId,dp.actual_transaction_type As actualTransactionType,tx.is_reversed AS isReversed FROM m_payment_detail dp INNER JOIN m_savings_account_transaction tx ON dp.id = tx.payment_detail_id WHERE dp.parent_savings_account_transaction_id = ?1 AND dp.parent_transaction_payment_details_id = ?2", nativeQuery = true)
     RevokedInterestTransactionData findRevokedInterestTransaction(Long transactionId, Long paymentDetailsId);
 
+    @Query(value = "SELECT tx.id AS id,tx.payment_detail_id AS paymentDetailId,tx.savings_account_id AS savingsAccountId,dp.actual_transaction_type As actualTransactionType, tx.is_reversed AS isReversed,tx.transaction_type_enum AS transactionType FROM m_savings_account_transaction tx INNER JOIN m_savings_account sa ON tx.savings_account_id = sa.id LEFT JOIN m_payment_detail dp ON dp.id = tx.payment_detail_id WHERE tx.id = ?1 AND sa.id = ?2;", nativeQuery = true)
+    RevokedInterestTransactionData findSavingsAccountTransaction(Long transactionId, Long savingsAccountId);
+
 }
