@@ -2267,8 +2267,8 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         if (account.charges().size() > 0) {
             for (SavingsAccountCharge charge : account.charges()) {
                 if (charge.isEnableFreeWithdrawal()) {
-                        Charge chargeDef = this.chargeRepository.findOneWithNotFoundDetection(charge.getCharge().getId());
-                        return chargeDef.getFrequencyFreeWithdrawalCharge();
+                    Charge chargeDef = this.chargeRepository.findOneWithNotFoundDetection(charge.getCharge().getId());
+                    return chargeDef.getFrequencyFreeWithdrawalCharge();
                 }
             }
         }

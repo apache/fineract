@@ -60,7 +60,7 @@ public enum ChargeTimeType {
     public static Object[] validLoanValues() {
         return new Integer[] { ChargeTimeType.DISBURSEMENT.getValue(), ChargeTimeType.SPECIFIED_DUE_DATE.getValue(),
                 ChargeTimeType.INSTALMENT_FEE.getValue(), ChargeTimeType.OVERDUE_INSTALLMENT.getValue(),
-                ChargeTimeType.TRANCHE_DISBURSEMENT.getValue(), ChargeTimeType.DISBURSE_TO_SAVINGS.getValue()};
+                ChargeTimeType.TRANCHE_DISBURSEMENT.getValue(), ChargeTimeType.DISBURSE_TO_SAVINGS.getValue() };
     }
 
     public static Object[] validLoanChargeValues() {
@@ -73,7 +73,7 @@ public enum ChargeTimeType {
                 ChargeTimeType.SAVINGS_CLOSURE.getValue(), ChargeTimeType.WITHDRAWAL_FEE.getValue(), ChargeTimeType.ANNUAL_FEE.getValue(),
                 ChargeTimeType.MONTHLY_FEE.getValue(), ChargeTimeType.OVERDRAFT_FEE.getValue(), ChargeTimeType.WEEKLY_FEE.getValue(),
                 ChargeTimeType.SAVINGS_NOACTIVITY_FEE.getValue(), ChargeTimeType.FDA_PARTIAL_LIQUIDATION_FEE.getValue(),
-                ChargeTimeType.INTEREST_FORFEITED.getValue()};
+                ChargeTimeType.INTEREST_FORFEITED.getValue() };
     }
 
     public static Object[] validClientValues() {
