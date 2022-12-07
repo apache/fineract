@@ -474,7 +474,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 // Revoke Accrued Interest if the locked date is not yet due and the account is subscribed to gsim
                 final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId, backdatedTxnsAllowedTill);
                 BigDecimal amount = savingsAccount.findAccrualInterestPostingTransactionToBeRevoked(transactionDate);
-                LOG.info("Amount to Revoke is :-" + amount);
+
                 if (amount.compareTo(BigDecimal.ZERO) > 0) {
                     final SavingsAccountTransaction revokedInterestTx = this.savingsAccountDomainService.handleWithdrawal(savingsAccount,
                             fmt, transactionDate, amount, paymentDetailRevoked, transactionBooleanValues, backdatedTxnsAllowedTill);

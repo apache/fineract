@@ -5072,9 +5072,6 @@ public class SavingsAccount extends AbstractPersistableCustom {
             if ((transaction.isAccrualInterestPostingAndNotReversed() || transaction.isOverdraftAccrualInterestAndNotReversed())
                     && transaction.getTransactionLocalDate().isBefore(postingDate)) {
                 amount = amount.add(transaction.getAmount());
-
-                LOG.info(transaction.getId() + " Transaction Amount :-" + transaction.getAmount() + " Date :-"
-                        + transaction.getTransactionLocalDate() + " Type :-" + transaction.getTypeOf());
             }
         }
         return amount;
