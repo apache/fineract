@@ -795,7 +795,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             sqlBuilder.append("datp.deposit_period_frequency_enum as depositPeriodFrequencyTypeId, ");
             sqlBuilder.append("datp.on_account_closure_enum as onAccountClosureId, ");
             sqlBuilder.append("datp.transfer_interest_to_linked_account as transferInterestToSavings, ");
-            sqlBuilder.append("datp.transfer_to_savings_account_id as transferToSavingsId ");
+            sqlBuilder.append("datp.transfer_to_savings_account_id as transferToSavingsId, ");
+            sqlBuilder.append("datp.allow_partial_liquidation as allowPartialLiquidation, ");
+            sqlBuilder.append("datp.total_liquidation_allowed as totalLiquidationAllowed ");
 
             sqlBuilder.append(super.selectTablesSql());
 
@@ -845,10 +847,14 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
             final Long transferToSavingsId = JdbcSupport.getLong(rs, "transferToSavingsId");
 
+            final Boolean allowPartialLiquidation = rs.getBoolean("allowPartialLiquidation");
+            final Integer totalLiquidationAllowed = rs.getInt("totalLiquidationAllowed");
+
             return FixedDepositAccountData.instance(depositAccountData, preClosurePenalApplicable, preClosurePenalInterest,
                     preClosurePenalInterestOnType, minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
                     inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount, maturityAmount, maturityDate, depositPeriod,
-                    depositPeriodFrequencyType, onAccountClosureType, transferInterestToSavings, transferToSavingsId);
+                    depositPeriodFrequencyType, onAccountClosureType, transferInterestToSavings, transferToSavingsId,
+                    allowPartialLiquidation, totalLiquidationAllowed);
         }
     }
 
@@ -1237,7 +1243,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             sqlBuilder.append("dptp.min_deposit_term_type_enum as minDepositTermTypeId, ");
             sqlBuilder.append("dptp.max_deposit_term_type_enum as maxDepositTermTypeId, ");
             sqlBuilder.append("dptp.in_multiples_of_deposit_term as inMultiplesOfDepositTerm, ");
-            sqlBuilder.append("dptp.in_multiples_of_deposit_term_type_enum as inMultiplesOfDepositTermTypeId ");
+            sqlBuilder.append("dptp.in_multiples_of_deposit_term_type_enum as inMultiplesOfDepositTermTypeId, ");
+            sqlBuilder.append("dptp.allow_partial_liquidation as allowPartialLiquidation, ");
+            sqlBuilder.append("dptp.total_liquidation_allowed as totalLiquidationAllowed ");
 
             sqlBuilder.append(super.selectTablesSql());
 
@@ -1281,10 +1289,14 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final EnumOptionData onAccountClosureType = null;
             final Boolean transferInterestToSavings = false;
 
+            final Boolean allowPartialLiquidation = rs.getBoolean("allowPartialLiquidation");
+            final Integer totalLiquidationAllowed = rs.getInt("totalLiquidationAllowed");
+
             return FixedDepositAccountData.instance(depositAccountData, preClosurePenalApplicable, preClosurePenalInterest,
                     preClosurePenalInterestOnType, minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
                     inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount, maturityAmount, maturityDate, depositPeriod,
-                    depositPeriodFrequencyType, onAccountClosureType, transferInterestToSavings, null);
+                    depositPeriodFrequencyType, onAccountClosureType, transferInterestToSavings, null, allowPartialLiquidation,
+                    totalLiquidationAllowed);
         }
     }
 
@@ -1552,5 +1564,17 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
         return this.jdbcTemplate.query(sql, this.transactionsMapper,
                 new Object[] { savingsId, depositAccountType.getValue(), limit, offset });
+    }
+
+    @Override
+    public Integer retrieveTotalOfLinkedAccounts(Long originatingId) {
+
+        final String query = "WITH RECURSIVE linked_accounts AS ( "
+                + " SELECT linked_origin_account_id  FROM m_deposit_account_term_and_preclosure m " + " where linked_origin_account_id = ? "
+                + " union all " + " select id  from m_deposit_account_term_and_preclosure , linked_accounts "
+                + " where linked_accounts.linked_origin_account_id = m_deposit_account_term_and_preclosure.linked_origin_account_id " + ") "
+                + "select count(1)  from linked_accounts";
+
+        return this.jdbcTemplate.queryForObject(query, Integer.class, originatingId);
     }
 }

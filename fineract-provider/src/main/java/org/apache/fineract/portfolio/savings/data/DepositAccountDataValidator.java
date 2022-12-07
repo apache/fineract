@@ -42,6 +42,7 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.recurri
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transferInterestToSavingsParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transferToSavingsIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.accountNoParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowPartialLiquidation;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.amountParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargeIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargesParamName;
@@ -61,6 +62,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minRequi
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.productIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.submittedOnDateParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.totalLiquidationAllowed;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 
 import com.google.gson.JsonArray;
@@ -149,6 +151,7 @@ public class DepositAccountDataValidator {
         validateDepositTermDeatilForSubmit(element, baseDataValidator, DepositAccountType.FIXED_DEPOSIT);
         validateSavingsCharges(element, baseDataValidator);
         validateWithHoldTax(element, baseDataValidator);
+        validatePartialLiquidationSetting(element, baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -172,6 +175,7 @@ public class DepositAccountDataValidator {
         validateDepositTermDeatilForUpdate(element, baseDataValidator, DepositAccountType.FIXED_DEPOSIT);
         // validateSavingsCharges(element, baseDataValidator);
         validateWithHoldTax(element, baseDataValidator);
+        validatePartialLiquidationSetting(element, baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -820,6 +824,20 @@ public class DepositAccountDataValidator {
                 }
             }
         }
+    }
+
+    private void validatePartialLiquidationSetting(JsonElement element, DataValidatorBuilder baseDataValidator) {
+
+        boolean allowLiquidation = false;
+        if (this.fromApiJsonHelper.parameterExists(allowPartialLiquidation, element)) {
+            allowLiquidation = this.fromApiJsonHelper.extractBooleanNamed(depositAmountParamName, element);
+        }
+
+        if (allowLiquidation && this.fromApiJsonHelper.parameterExists(totalLiquidationAllowed, element)) {
+            Integer maxLiquidationTimes = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(totalLiquidationAllowed, element);
+            baseDataValidator.reset().parameter(totalLiquidationAllowed).value(maxLiquidationTimes).notNull().positiveAmount();
+        }
+
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {

@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.savings.domain;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -29,6 +30,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.charge.domain.Charge;
+import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 
 @Entity
 @Table(name = "m_deposit_product_term_and_preclosure")
@@ -51,22 +53,33 @@ public class DepositProductTermAndPreClosure extends AbstractPersistableCustom {
     @Embedded
     private DepositProductAmountDetails depositProductAmountDetails;
 
+    @Column(name = "allow_partial_liquidation")
+    private Boolean allowPartialLiquidation;
+
+    @Column(name = "total_liquidation_allowed")
+    private Integer totalLiquidationAllowed;
+
     protected DepositProductTermAndPreClosure() {
 
     }
 
     public static DepositProductTermAndPreClosure createNew(DepositPreClosureDetail preClosureDetail, DepositTermDetail depositTermDetail,
-            DepositProductAmountDetails depositProductMinMaxAmountDetails, SavingsProduct product) {
+            DepositProductAmountDetails depositProductMinMaxAmountDetails, SavingsProduct product, Boolean allowPartialLiquidation,
+            Integer totalLiquidationAllowed) {
 
-        return new DepositProductTermAndPreClosure(preClosureDetail, depositTermDetail, depositProductMinMaxAmountDetails, product);
+        return new DepositProductTermAndPreClosure(preClosureDetail, depositTermDetail, depositProductMinMaxAmountDetails, product,
+                allowPartialLiquidation, totalLiquidationAllowed);
     }
 
     private DepositProductTermAndPreClosure(DepositPreClosureDetail preClosureDetail, DepositTermDetail depositTermDetail,
-            DepositProductAmountDetails depositProductMinMaxAmountDetails, SavingsProduct product) {
+            DepositProductAmountDetails depositProductMinMaxAmountDetails, SavingsProduct product, Boolean allowPartialLiquidation,
+            Integer totalLiquidationAllowed) {
         this.preClosureDetail = preClosureDetail;
         this.depositTermDetail = depositTermDetail;
         this.depositProductAmountDetails = depositProductMinMaxAmountDetails;
         this.product = (FixedDepositProduct) product;
+        this.totalLiquidationAllowed = totalLiquidationAllowed;
+        this.allowPartialLiquidation = allowPartialLiquidation;
     }
 
     public Map<String, Object> update(final JsonCommand command, final DataValidatorBuilder baseDataValidator) {
@@ -82,6 +95,19 @@ public class DepositProductTermAndPreClosure extends AbstractPersistableCustom {
         if (this.depositProductAmountDetails != null) {
             actualChanges.putAll(this.depositProductAmountDetails.update(command));
         }
+
+        if (command.isChangeInBooleanParameterNamed(SavingsApiConstants.allowPartialLiquidation, this.allowPartialLiquidation)) {
+            final Boolean newValue = command.booleanObjectValueOfParameterNamed(SavingsApiConstants.allowPartialLiquidation);
+            actualChanges.put(SavingsApiConstants.allowPartialLiquidation, newValue);
+            this.allowPartialLiquidation = newValue;
+        }
+
+        if (command.isChangeInIntegerParameterNamed(SavingsApiConstants.totalLiquidationAllowed, this.totalLiquidationAllowed)) {
+            final Integer newValue = command.integerValueOfParameterNamed(SavingsApiConstants.totalLiquidationAllowed);
+            actualChanges.put(SavingsApiConstants.totalLiquidationAllowed, newValue);
+            this.totalLiquidationAllowed = newValue;
+        }
+
         return actualChanges;
     }
 
@@ -108,4 +134,5 @@ public class DepositProductTermAndPreClosure extends AbstractPersistableCustom {
     public void setPreClosureCharge(Charge preClosureCharge) {
         this.preClosureCharge = preClosureCharge;
     }
+
 }

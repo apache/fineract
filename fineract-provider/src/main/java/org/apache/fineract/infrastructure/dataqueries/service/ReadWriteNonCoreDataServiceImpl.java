@@ -1960,4 +1960,28 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         return count;
     }
 
+    @Override
+    public DatatableData checkDatatableExists(final String datatable) {
+
+        // PERMITTED datatables
+        SQLInjectionValidator.validateSQLInput(datatable);
+        final String sql = "select application_table_name, registered_table_name, entity_subtype from x_registered_table  \n" +
+                "where registered_table_name=?";
+
+        DatatableData datatableData = null;
+
+        final SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, new Object[] { datatable }); // NOSONAR
+        if (rowSet.next()) {
+            final String appTableName = rowSet.getString("application_table_name");
+            final String registeredDatatableName = rowSet.getString("registered_table_name");
+            final String entitySubType = rowSet.getString("entity_subtype");
+            final List<ResultsetColumnHeaderData> columnHeaderData = this.genericDataService
+                    .fillResultsetColumnHeaders(registeredDatatableName, true);
+
+            datatableData = DatatableData.create(appTableName, registeredDatatableName, entitySubType, columnHeaderData);
+        }
+
+        return datatableData;
+    }
+
 }

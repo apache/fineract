@@ -56,7 +56,8 @@ public class AccountTransferDTO {
     private final Boolean isRegularTransaction;
     private final Boolean isExceptionForBalanceCheck;
 
-    private boolean isUSDAccount = false;
+    private boolean fdToSavings = false;
+    private boolean savingsToFD = false;
 
     public AccountTransferDTO(final LocalDate transactionDate, final BigDecimal transactionAmount,
             final PortfolioAccountType fromAccountType, final PortfolioAccountType toAccountType, final Long fromAccountId,
@@ -224,11 +225,19 @@ public class AccountTransferDTO {
         return this.isExceptionForBalanceCheck;
     }
 
-    public boolean isUSDAccount() {
-        return isUSDAccount;
+    public boolean isFdToSavings() {
+        return fdToSavings;
     }
 
-    public void setUSDAccount(boolean USDAccount) {
-        isUSDAccount = USDAccount;
+    public void setFdToSavings(boolean fdToSavings) {
+        this.fdToSavings = fdToSavings;
+    }
+
+    public boolean isSavingsToFD() {
+        return savingsToFD;
+    }
+
+    public void setSavingsToFD(boolean savingsToFD) {
+        this.savingsToFD = savingsToFD;
     }
 }

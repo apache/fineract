@@ -235,7 +235,9 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             sqlBuilder.append("dptp.in_multiples_of_deposit_term as inMultiplesOfDepositTerm, ");
             sqlBuilder.append("dptp.in_multiples_of_deposit_term_type_enum as inMultiplesOfDepositTermTypeId, ");
             sqlBuilder.append("dptp.min_deposit_amount as minDepositAmount, dptp.deposit_amount as depositAmount, ");
-            sqlBuilder.append("dptp.max_deposit_amount as maxDepositAmount ");
+            sqlBuilder.append("dptp.max_deposit_amount as maxDepositAmount, ");
+            sqlBuilder.append("dptp.allow_partial_liquidation as allowPartialLiquidation, ");
+            sqlBuilder.append("dptp.total_liquidation_allowed as totalLiquidationAllowed ");
             sqlBuilder.append("from m_savings_product sp ");
             sqlBuilder.append("left join m_deposit_product_term_and_preclosure dptp on sp.id=dptp.savings_product_id ");
             sqlBuilder.append("join m_currency curr on curr.code = sp.currency_code ");
@@ -275,10 +277,13 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             final BigDecimal minDepositAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "minDepositAmount");
             final BigDecimal depositAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "depositAmount");
             final BigDecimal maxDepositAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "maxDepositAmount");
+            final boolean allowPartialLiquidation = rs.getBoolean("allowPartialLiquidation");
+            final Integer totalLiquidationsAllowed = rs.getInt("totalLiquidationAllowed");
 
             return FixedDepositProductData.instance(depositProductData, preClosurePenalApplicable, preClosurePenalInterest,
                     preClosurePenalInterestOnType, minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
-                    inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, minDepositAmount, depositAmount, maxDepositAmount);
+                    inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, minDepositAmount, depositAmount, maxDepositAmount,
+                    allowPartialLiquidation, totalLiquidationsAllowed);
         }
     }
 

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.accounting.common;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
@@ -46,5 +47,7 @@ public interface AccountingDropdownReadPlatformService {
     List<GLAccountData> retrieveExpenseAccountOptions();
 
     List<GLAccountData> retrieveAssetAccountOptions();
+
+    Collection<EnumOptionData> retrievePeriodTypeOptions();
 
 }
