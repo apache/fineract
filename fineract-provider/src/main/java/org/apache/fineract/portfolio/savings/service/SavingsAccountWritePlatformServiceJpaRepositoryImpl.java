@@ -81,6 +81,7 @@ import org.apache.fineract.portfolio.account.domain.StandingInstructionRepositor
 import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
 import org.apache.fineract.portfolio.account.service.AccountAssociationsReadPlatformService;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
+import org.apache.fineract.portfolio.accountdetails.data.RevokedInterestTransactionData;
 import org.apache.fineract.portfolio.businessevent.domain.savings.SavingsActivateBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.savings.SavingsCloseBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
@@ -118,6 +119,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrap
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionRepository;
+import org.apache.fineract.portfolio.savings.domain.VaultTribeCustomSavingsAccountTransactionRepository;
 import org.apache.fineract.portfolio.savings.exception.PostInterestAsOnDateException;
 import org.apache.fineract.portfolio.savings.exception.PostInterestAsOnDateException.PostInterestAsOnExceptionType;
 import org.apache.fineract.portfolio.savings.exception.PostInterestClosingDateException;
@@ -147,6 +149,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final SavingsAccountRepositoryWrapper savingAccountRepositoryWrapper;
     private final StaffRepositoryWrapper staffRepository;
     private final SavingsAccountTransactionRepository savingsAccountTransactionRepository;
+    private final VaultTribeCustomSavingsAccountTransactionRepository vaultTribeCustomSavingsAccountTransactionRepository;
     private final SavingsAccountAssembler savingAccountAssembler;
     private final SavingsAccountTransactionDataValidator savingsAccountTransactionDataValidator;
     private final SavingsAccountChargeDataValidator savingsAccountChargeDataValidator;
@@ -195,7 +198,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final AppUserRepositoryWrapper appuserRepository, final StandingInstructionRepository standingInstructionRepository,
             final BusinessEventNotifierService businessEventNotifierService, final GSIMRepositoy gsimRepository,
             final JdbcTemplate jdbcTemplate, final SavingsAccountInterestPostingService savingsAccountInterestPostingService,
-            final CodeValueRepositoryWrapper codeValueRepositoryWrapper) {
+            final CodeValueRepositoryWrapper codeValueRepositoryWrapper,
+            final VaultTribeCustomSavingsAccountTransactionRepository vaultTribeCustomSavingsAccountTransactionRepository) {
         this.context = context;
         this.savingAccountRepositoryWrapper = savingAccountRepositoryWrapper;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
@@ -225,6 +229,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.jdbcTemplate = jdbcTemplate;
         this.savingsAccountInterestPostingService = savingsAccountInterestPostingService;
         this.codeValueRepositoryWrapper = codeValueRepositoryWrapper;
+        this.vaultTribeCustomSavingsAccountTransactionRepository = vaultTribeCustomSavingsAccountTransactionRepository;
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountWritePlatformServiceJpaRepositoryImpl.class);
@@ -753,6 +758,24 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     }
 
     @Override
+    public CommandProcessingResult undoAndUnRevokeTransaction(final Long savingsId, final Long transactionId,
+            final boolean allowAccountTransferModification) {
+        final SavingsAccountTransaction principalTransaction = this.savingsAccountTransactionRepository
+                .findOneByIdAndSavingsAccountId(transactionId, savingsId);
+
+        CommandProcessingResult undoPrincipalTransaction = undoTransaction(savingsId, transactionId, allowAccountTransferModification);
+
+        RevokedInterestTransactionData revokedInterestTransaction = this.vaultTribeCustomSavingsAccountTransactionRepository
+                .findRevokedInterestTransaction(principalTransaction.getId(), principalTransaction.getPaymentDetail().getId());
+
+        if (revokedInterestTransaction != null
+                && revokedInterestTransaction.getActualTransactionType().equals(SavingsAccountTransactionType.REVOKED_INTEREST.name())) {
+            undoTransaction(revokedInterestTransaction.getSavingsAccountId(), revokedInterestTransaction.getId(),
+                    allowAccountTransferModification);
+        }
+        return undoPrincipalTransaction;
+    }
+
     public CommandProcessingResult undoTransaction(final Long savingsId, final Long transactionId,
             final boolean allowAccountTransferModification) {
         Boolean includePostingAndWithHoldTax = false;

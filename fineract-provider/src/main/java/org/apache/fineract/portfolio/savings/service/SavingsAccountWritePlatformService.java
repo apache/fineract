@@ -47,7 +47,7 @@ public interface SavingsAccountWritePlatformService {
     CommandProcessingResult reverseTransaction(Long savingsId, Long transactionId, boolean allowAccountTransferModification,
             JsonCommand command);
 
-    CommandProcessingResult undoTransaction(Long savingsId, Long transactionId, boolean allowAccountTransferModification);
+    CommandProcessingResult undoAndUnRevokeTransaction(Long savingsId, Long transactionId, boolean allowAccountTransferModification);
 
     CommandProcessingResult adjustSavingsTransaction(Long savingsId, Long transactionId, JsonCommand command);
 

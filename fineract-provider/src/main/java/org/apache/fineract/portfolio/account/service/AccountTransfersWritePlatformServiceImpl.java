@@ -302,12 +302,13 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                 this.loanAccountDomainService.reverseTransfer(accountTransfer.getToLoanTransaction());
             }
             if (accountTransfer.getFromTransaction() != null) {
-                this.savingsAccountWritePlatformService.undoTransaction(
+                this.savingsAccountWritePlatformService.undoAndUnRevokeTransaction(
                         accountTransfer.accountTransferDetails().fromSavingsAccount().getId(), accountTransfer.getFromTransaction().getId(),
                         true);
             }
             if (accountTransfer.getToSavingsTransaction() != null) {
-                this.savingsAccountWritePlatformService.undoTransaction(accountTransfer.accountTransferDetails().toSavingsAccount().getId(),
+                this.savingsAccountWritePlatformService.undoAndUnRevokeTransaction(
+                        accountTransfer.accountTransferDetails().toSavingsAccount().getId(),
                         accountTransfer.getToSavingsTransaction().getId(), true);
             }
             accountTransfer.reverse();
