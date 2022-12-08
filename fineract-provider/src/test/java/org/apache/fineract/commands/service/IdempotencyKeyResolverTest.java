@@ -18,46 +18,47 @@
  */
 package org.apache.fineract.commands.service;
 
+import static org.mockito.Mockito.when;
+
+import java.util.HashMap;
 import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.domain.BatchRequestContextHolder;
+import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
+import org.mockito.Spy;
 
 public class IdempotencyKeyResolverTest {
 
     @Mock
     private IdempotencyKeyGenerator idempotencyKeyGenerator;
 
-    @Mock
-    private FineractProperties fineractProperties;
-
     @InjectMocks
     private IdempotencyKeyResolver underTest;
+
+    @Spy
+    private FineractRequestContextHolder fineractRequestContextHolder;
 
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
+        BatchRequestContextHolder.setRequestAttributes(new HashMap<>());
+    }
+
+    @AfterEach
+    public void tearDown() {
+        BatchRequestContextHolder.resetRequestAttributes();
     }
 
     @Test
     public void testIPKResolveFromRequest() {
-        String idkh = "foo";
         String idk = "bar";
-        Mockito.when(fineractProperties.getIdempotencyKeyHeaderName()).thenReturn(idkh);
-
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader(idkh, idk);
-        RequestAttributes requestAttributes = new ServletRequestAttributes(request);
-        RequestContextHolder.setRequestAttributes(requestAttributes);
+        fineractRequestContextHolder.setAttribute(SynchronousCommandProcessingService.IDEMPOTENCY_KEY_ATTRIBUTE, idk);
         CommandWrapper wrapper = CommandWrapper.wrap("act", "ent", 1L, 1L);
         String resolvedIdk = underTest.resolve(wrapper);
         Assertions.assertEquals(idk, resolvedIdk);
@@ -66,8 +67,7 @@ public class IdempotencyKeyResolverTest {
     @Test
     public void testIPKResolveFromGenerate() {
         String idk = "idk";
-        Mockito.when(idempotencyKeyGenerator.create()).thenReturn(idk);
-        RequestContextHolder.setRequestAttributes(null);
+        when(idempotencyKeyGenerator.create()).thenReturn(idk);
         CommandWrapper wrapper = CommandWrapper.wrap("act", "ent", 1L, 1L);
         String resolvedIdk = underTest.resolve(wrapper);
         Assertions.assertEquals(idk, resolvedIdk);
@@ -75,7 +75,6 @@ public class IdempotencyKeyResolverTest {
 
     @Test
     public void testIPKResolveFromWrapper() {
-        RequestContextHolder.setRequestAttributes(null);
         String idk = "idk";
         CommandWrapper wrapper = new CommandWrapper(null, null, null, null, null, null, null, null, null, null, null, null, null, null,
                 null, null, null, idk);

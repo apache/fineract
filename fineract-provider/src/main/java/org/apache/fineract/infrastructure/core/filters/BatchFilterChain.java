@@ -16,28 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.batch.domain;
+package org.apache.fineract.infrastructure.core.filters;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
+import javax.ws.rs.core.UriInfo;
+import org.apache.fineract.batch.domain.BatchRequest;
+import org.apache.fineract.batch.domain.BatchResponse;
 
-/**
- * Provides an object to handle HTTP headers as name and value pairs for Batch API. It is used in {@link BatchRequest}
- * and {@link BatchResponse} to store the information regarding the headers in incoming and outgoing JSON Strings.
- *
- * @author Rishabh Shukla
- *
- * @see BatchRequest
- * @see BatchResponse
- */
-@NoArgsConstructor
-@AllArgsConstructor
-@Data
-@Accessors(chain = true)
-public class Header {
+public interface BatchFilterChain {
 
-    private String name;
-    private String value;
+    BatchResponse serviceCall(BatchRequest batchRequest, UriInfo uriInfo);
 }

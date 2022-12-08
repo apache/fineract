@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.core.filters;
 
+import io.vavr.collection.List;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -25,13 +26,19 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
+import org.apache.fineract.batch.domain.BatchRequest;
+import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.batch.domain.Header;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
 import org.apache.fineract.commands.service.CommandSourceService;
 import org.apache.fineract.commands.service.SynchronousCommandProcessingService;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -40,10 +47,14 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 @RequiredArgsConstructor
 @Slf4j
 @Component
-public class IdempotencyStoreFilter extends OncePerRequestFilter {
+public class IdempotencyStoreFilter extends OncePerRequestFilter implements BatchFilter {
 
     private final CommandSourceRepository commandSourceRepository;
     private final CommandSourceService commandSourceService;
+
+    private final FineractProperties fineractProperties;
+
+    private final FineractRequestContextHolder fineractRequestContextHolder;
 
     @Override
     protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response,
@@ -52,21 +63,32 @@ public class IdempotencyStoreFilter extends OncePerRequestFilter {
         if (isAllowedContentTypeRequest(request)) {
             wrapper.setValue(new ContentCachingResponseWrapper(response));
         }
+        extractIdempotentKeyFromHttpServletRequest(request).ifPresent(idempotentKey -> fineractRequestContextHolder
+                .setAttribute(SynchronousCommandProcessingService.IDEMPOTENCY_KEY_ATTRIBUTE, idempotentKey, request));
 
         filterChain.doFilter(request, wrapper.getValue() != null ? wrapper.getValue() : response);
         Optional<Long> commandId = getCommandId(request);
         boolean isSuccessWithoutStored = isStoreIdempotencyKey(request) && commandId.isPresent() && isAllowedContentTypeResponse(response)
                 && wrapper.getValue() != null;
         if (isSuccessWithoutStored) {
-            commandSourceRepository.findById(commandId.get()).ifPresent(commandSource -> {
-                commandSource.setResultStatusCode(response.getStatus());
-                commandSource.setResult(new String(wrapper.getValue().getContentAsByteArray(), StandardCharsets.UTF_8));
-                commandSourceService.saveResult(commandSource);
-            });
+            storeCommandResult(response.getStatus(), new String(wrapper.getValue().getContentAsByteArray(), StandardCharsets.UTF_8),
+                    commandId);
         }
         if (wrapper.getValue() != null) {
             wrapper.getValue().copyBodyToResponse();
         }
+    }
+
+    private void storeCommandResult(int response, String body, Optional<Long> commandId) {
+        commandSourceRepository.findById(commandId.get()).ifPresent(commandSource -> {
+            commandSource.setResultStatusCode(response);
+            commandSource.setResult(body);
+            commandSourceService.saveResult(commandSource);
+        });
+    }
+
+    private Optional<String> extractIdempotentKeyFromHttpServletRequest(HttpServletRequest request) {
+        return Optional.ofNullable(request.getHeader(fineractProperties.getIdempotencyKeyHeaderName()));
     }
 
     private boolean isAllowedContentTypeResponse(HttpServletResponse response) {
@@ -80,12 +102,37 @@ public class IdempotencyStoreFilter extends OncePerRequestFilter {
     }
 
     private boolean isStoreIdempotencyKey(HttpServletRequest request) {
-        return Optional.ofNullable(request.getAttribute(SynchronousCommandProcessingService.IDEMPOTENCY_KEY_STORE_FLAG))
+        return Optional
+                .ofNullable(
+                        fineractRequestContextHolder.getAttribute(SynchronousCommandProcessingService.IDEMPOTENCY_KEY_STORE_FLAG, request))
                 .filter(Boolean.class::isInstance).map(Boolean.class::cast).orElse(false);
     }
 
     private Optional<Long> getCommandId(HttpServletRequest request) {
-        return Optional.ofNullable(request.getAttribute(SynchronousCommandProcessingService.COMMAND_SOURCE_ID))
+        return Optional
+                .ofNullable(fineractRequestContextHolder.getAttribute(SynchronousCommandProcessingService.COMMAND_SOURCE_ID, request))
                 .filter(Long.class::isInstance).map(Long.class::cast);
+    }
+
+    private Optional<String> extractIdempotentKeyFromBatchRequest(BatchRequest request) {
+        return Optional.ofNullable(request.getHeaders()) //
+                .map(List::ofAll) //
+                .flatMap(headers -> headers.find(header -> header.getName().equals(fineractProperties.getIdempotencyKeyHeaderName()))
+                        .toJavaOptional()) //
+                .map(Header::getValue); //
+
+    }
+
+    @Override
+    public BatchResponse doFilter(BatchRequest batchRequest, UriInfo uriInfo, BatchFilterChain chain) {
+        extractIdempotentKeyFromBatchRequest(batchRequest).ifPresent(idempotentKey -> fineractRequestContextHolder
+                .setAttribute(SynchronousCommandProcessingService.IDEMPOTENCY_KEY_ATTRIBUTE, idempotentKey));
+        BatchResponse result = chain.serviceCall(batchRequest, uriInfo);
+        Optional<Long> commandId = getCommandId(null);
+        boolean isSuccessWithoutStored = isStoreIdempotencyKey(null) && commandId.isPresent();
+        if (isSuccessWithoutStored) {
+            storeCommandResult(result.getStatusCode(), result.getBody(), commandId);
+        }
+        return result;
     }
 }
