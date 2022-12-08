@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.charge.service;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import javax.persistence.PersistenceException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -34,6 +35,8 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.portfolio.charge.api.ChargesApiConstants;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepository;
+import org.apache.fineract.portfolio.charge.domain.ChargeSlab;
+import org.apache.fineract.portfolio.charge.domain.ChargeSlabRepository;
 import org.apache.fineract.portfolio.charge.exception.ChargeCannotBeDeletedException;
 import org.apache.fineract.portfolio.charge.exception.ChargeCannotBeUpdatedException;
 import org.apache.fineract.portfolio.charge.exception.ChargeNotFoundException;
@@ -68,13 +71,15 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
     private final GLAccountRepositoryWrapper glAccountRepository;
     private final TaxGroupRepositoryWrapper taxGroupRepository;
     private final PaymentTypeRepositoryWrapper paymentTyperepositoryWrapper;
+    private final ChargeSlabRepository chargeSlabRepository;
 
     @Autowired
     public ChargeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final ChargeDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer, final ChargeRepository chargeRepository,
             final LoanProductRepository loanProductRepository, final JdbcTemplate jdbcTemplate,
             final FineractEntityAccessUtil fineractEntityAccessUtil, final GLAccountRepositoryWrapper glAccountRepository,
-            final TaxGroupRepositoryWrapper taxGroupRepository, final PaymentTypeRepositoryWrapper paymentTyperepositoryWrapper) {
+            final TaxGroupRepositoryWrapper taxGroupRepository, final PaymentTypeRepositoryWrapper paymentTyperepositoryWrapper,
+            ChargeSlabRepository chargeSlabRepository) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.jdbcTemplate = jdbcTemplate;
@@ -84,6 +89,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
         this.glAccountRepository = glAccountRepository;
         this.taxGroupRepository = taxGroupRepository;
         this.paymentTyperepositoryWrapper = paymentTyperepositoryWrapper;
+        this.chargeSlabRepository = chargeSlabRepository;
     }
 
     @Transactional
@@ -117,9 +123,15 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
                 }
             }
 
-            final Charge charge = Charge.fromJson(command, glAccount, taxGroup, paymentType);
+            final boolean chargeVarying = command.parameterExists("chart");
+            final Charge charge = Charge.fromJson(command, glAccount, taxGroup, paymentType, chargeVarying);
+
             this.chargeRepository.saveAndFlush(charge);
 
+            if (chargeVarying) {
+                final List<ChargeSlab> slab = ChargeSlab.assembleFrom(command, charge);
+                chargeSlabRepository.saveAll(slab);
+            }
             // check if the office specific products are enabled. If yes, then
             // save this savings product against a specific office
             // i.e. this savings product is specific for this office.

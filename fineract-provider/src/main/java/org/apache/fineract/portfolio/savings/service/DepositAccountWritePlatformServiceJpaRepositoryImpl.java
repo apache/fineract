@@ -62,6 +62,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -99,6 +100,8 @@ import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
+import org.apache.fineract.portfolio.charge.domain.ChargeSlab;
+import org.apache.fineract.portfolio.charge.domain.ChargeSlabRepository;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
@@ -159,6 +162,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -202,6 +206,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     private final RecurringDepositProductRepository recurringDepositProductRepository;
 
     private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
+    private final ChargeSlabRepository chargeSlabRepository;
 
     @Autowired
     public DepositAccountWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -227,7 +232,8 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             final AccountAssociationsRepository accountAssociationsRepository, ReadWriteNonCoreDataService readWriteNonCoreDataService,
             final SavingsAccountChargeRepositoryWrapper savingsAccountChargeRepositoryWrapper, final FromJsonHelper fromJsonHelper,
             AccountingProcessorHelper helper, RecurringDepositProductRepository recurringDepositProductRepository,
-            SavingsAccountWritePlatformService savingsAccountWritePlatformService, SavingsAccountRepository savingsAccountRepository) {
+            SavingsAccountWritePlatformService savingsAccountWritePlatformService, SavingsAccountRepository savingsAccountRepository,
+            ChargeSlabRepository chargeSlabRepository) {
 
         this.context = context;
         this.savingAccountRepositoryWrapper = savingAccountRepositoryWrapper;
@@ -261,6 +267,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         this.recurringDepositProductRepository = recurringDepositProductRepository;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
         this.savingsAccountRepository = savingsAccountRepository;
+        this.chargeSlabRepository = chargeSlabRepository;
     }
 
     @Transactional
@@ -1651,8 +1658,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
     private Set<SavingsAccountCharge> generateCharges(FixedDepositAccount account) {
         final Set<SavingsAccountCharge> charges = new HashSet<>();
-        account.getCharges().stream().filter(charge -> !charge.getCharge().isPartialLiquidationCharge())
-                .forEach(charge -> charges.add(charge.copy()));
+        account.getCharges().stream().forEach(charge -> charges.add(charge.copy()));
         return charges;
     }
 
@@ -1946,9 +1952,15 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 DepositAccountType.FIXED_DEPOSIT);
         this.depositAccountTransactionDataValidator.validatePartialLiquidation(account, command);
         AccountAssociations accountAssociations = this.depositAccountDomainService.getLinkedSavingsAccount(accountId);
-        this.validateForLiquidationLimit(account);
+
+        Integer currentTotalLiquidations = depositAccountReadPlatformService
+                .retrieveTotalOfLinkedAccounts(account.getAccountTermAndPreClosure().getLinkedOriginAccountId());
+        if (currentTotalLiquidations > 0) {
+            currentTotalLiquidations = currentTotalLiquidations - 1;
+        }
+        this.validateForLiquidationLimit(account, currentTotalLiquidations);
         this.checkClientOrGroupActive(account);
-        this.createPartialLiquidationCharge(account);
+        this.createPartialLiquidationCharge(account, currentTotalLiquidations);
         this.preCloseAccount(command, new LinkedHashMap<>(), account, accountAssociations, false, paymentDetail);
         FixedDepositApplicationReq fixedDepositApplicationReq = this.generateFixedDepositApplicationReq(account, command);
         this.setDepositAmountForPartialLiquidation(fixedDepositApplicationReq, account, command);
@@ -1963,7 +1975,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 .withClientId(account.clientId()).withGroupId(account.groupId()).withSavingsId(newFD.getId()).build();
     }
 
-    private void validateForLiquidationLimit(FixedDepositAccount account) {
+    private void validateForLiquidationLimit(FixedDepositAccount account, Integer currentTotalLiquidations) {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -1982,10 +1994,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             return;
         }
 
-        final Integer currentTotalLiquidations = depositAccountReadPlatformService
-                .retrieveTotalOfLinkedAccounts(account.getAccountTermAndPreClosure().getLinkedOriginAccountId());
-
-        if ((currentTotalLiquidations - 1) >= totalLiquidationsAllowed) {
+        if (currentTotalLiquidations >= totalLiquidationsAllowed) {
             baseDataValidator.failWithCodeNoParameterAddedToErrorCode("partial.liquidation.limit.exceeded",
                     "Total of partial liquidations has exceeded limit allowed");
         }
@@ -1998,7 +2007,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
     }
 
-    private void createPartialLiquidationCharge(FixedDepositAccount account) {
+    private void createPartialLiquidationCharge(FixedDepositAccount account, Integer currentTotalLiquidationCount) {
         Charge charge = this.chargeRepository.findChargeByChargeTimeType(ChargeTimeType.FDA_PARTIAL_LIQUIDATION_FEE);
         if (charge != null) {
             List<SavingsAccountCharge> preclosureCharges = this.savingsAccountChargeRepositoryWrapper.findFdaPreclosureCharges(
@@ -2010,8 +2019,33 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 account.addCharge(DateUtils.getDefaultFormatter(), savingsAccountCharge, charge);
                 this.savingsAccountChargeRepositoryWrapper.save(savingsAccountCharge);
                 this.savingAccountRepositoryWrapper.saveAndFlush(account);
+            } else {
+                preclosureCharges.stream().filter(t -> t.getCharge().getHasVaryingCharge()).forEach(k -> {
+                    final BigDecimal ch = determineChargeAmount(k.getCharge(), currentTotalLiquidationCount);
+                    k.setAmount(ch);
+                    this.savingsAccountChargeRepositoryWrapper.save(k);
+                });
+                this.savingsAccountRepository.saveAndFlush(account);
+
             }
         }
+    }
+
+    private BigDecimal determineChargeAmount(Charge charge, Integer periodNumber) {
+        if (!charge.getHasVaryingCharge()) {
+            return charge.getAmount();
+        }
+
+        List<ChargeSlab> slab = chargeSlabRepository.findCorrectChargeByPeriodNumberAndChargeId(periodNumber, charge.getId(),
+                PageRequest.of(0, 1));
+
+        if (!slab.isEmpty()) {
+            return slab.get(0).getValue();
+
+        } else {
+            throw new PlatformDataIntegrityException("charge.slab.period.not.found", "No charge could be found to match period and charge");
+        }
+
     }
 
     private void createPartialLiquidationChargeSummary(FixedDepositAccount account) {

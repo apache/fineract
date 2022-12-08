@@ -839,7 +839,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             }
             amount = amount.subtract(withholdTaxAmount);
             if (chargeCalculationType.isPercentageBased()) {
-                charge.setPercentage(charge.getCharge().getAmount());
+                charge.setPercentage(charge.getCharge().getHasVaryingCharge() ? charge.getAmount() : charge.getCharge().getAmount());
                 charge.setAmountPercentageAppliedTo(amount);
                 charge.setAmount(charge.percentageOf(amount, charge.getPercentage()));
             } else {

@@ -37,6 +37,7 @@ import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAcc
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
+import org.apache.fineract.portfolio.charge.data.ChargeSlabData;
 import org.apache.fineract.portfolio.charge.domain.ChargeAppliesTo;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.charge.exception.ChargeNotFoundException;
@@ -124,7 +125,17 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
 
             sql = sql + " ;";
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { chargeId }); // NOSONAR
+            final ChargeData chargeData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { chargeId }); // NOSONAR
+
+            if (chargeData.getVaryAmounts()) {
+                ChargeSlabMapper slabMapper = new ChargeSlabMapper();
+                final String slabSQL = "select " + slabMapper.getSchema() + " where c.charge_id = ? order by c.from_period asc";
+                List<ChargeSlabData> slabData = this.jdbcTemplate.query(slabSQL, slabMapper, new Object[] { chargeId });
+                chargeData.setCharges(slabData);
+            }
+
+            return chargeData;
+
         } catch (final EmptyResultDataAccessException e) {
             throw new ChargeNotFoundException(chargeId, e);
         }
@@ -294,8 +305,9 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                     + "oc.internationalized_name_code as currencyNameCode, c.fee_on_day as feeOnDay, c.fee_on_month as feeOnMonth, "
                     + "c.fee_interval as feeInterval, c.fee_frequency as feeFrequency,c.min_cap as minCap,c.max_cap as maxCap, "
                     + "c.income_or_liability_account_id as glAccountId , acc.name as glAccountName, acc.gl_code as glCode, "
-                    + "tg.id as taxGroupId, c.is_payment_type as isPaymentType, pt.id as paymentTypeId, pt.value as paymentTypeName, tg.name as taxGroupName, c.min_amount AS minAmount, c.max_amount AS maxAmount "
-                    + "from m_charge c " + "join m_organisation_currency oc on c.currency_code = oc.code "
+                    + "tg.id as taxGroupId, c.is_payment_type as isPaymentType, pt.id as paymentTypeId, pt.value as paymentTypeName, tg.name as taxGroupName, c.min_amount AS minAmount, c.max_amount AS maxAmount ,"
+                    + " c.has_varying_charge as varyAmounts " + "from m_charge c "
+                    + "join m_organisation_currency oc on c.currency_code = oc.code "
                     + " LEFT JOIN acc_gl_account acc on acc.id = c.income_or_liability_account_id "
                     + " LEFT JOIN m_tax_group tg on tg.id = c.tax_group_id " + " LEFT JOIN m_payment_type pt on pt.id = c.payment_type_id ";
         }
@@ -385,6 +397,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             final Long paymentTypeId = JdbcSupport.getLong(rs, "paymentTypeId");
 
             final String paymentTypeName = rs.getString("paymentTypeName");
+            final Boolean varyAmounts = rs.getBoolean("varyAmounts");
             PaymentTypeData paymentTypeData = null;
             if (paymentTypeId != null) {
                 paymentTypeData = PaymentTypeData.instance(paymentTypeId, paymentTypeName);
@@ -393,7 +406,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             return ChargeData.instance(id, name, amount, currency, chargeTimeType, chargeAppliesToType, chargeCalculationType,
                     chargePaymentMode, feeOnMonthDay, feeInterval, penalty, active, isFreeWithdrawal, freeWithdrawalChargeFrequency,
                     restartFrequency, restartFrequencyEnum, isPaymentType, paymentTypeData, minCap, maxCap, feeFrequencyType, glAccountData,
-                    taxGroupData, minAmount, maxAmount);
+                    taxGroupData, minAmount, maxAmount, varyAmounts);
         }
     }
 
@@ -475,5 +488,22 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         sql += " order by c.name ";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.SHARES.getValue() }); // NOSONAR
+    }
+
+    private static class ChargeSlabMapper implements RowMapper<ChargeSlabData> {
+
+        public String getSchema() {
+            return "c.id as id, c.from_period as fromPeriod, c.to_period as toPeriod, c.value as value\n" + "from m_fee_charge_slab c";
+        }
+
+        @Override
+        public ChargeSlabData mapRow(ResultSet rs, int rowNum) throws SQLException {
+            final Long id = rs.getLong("id");
+            final Integer fromPeriod = rs.getInt("fromPeriod");
+            final Integer toPeriod = rs.getInt("toPeriod");
+            final BigDecimal value = rs.getBigDecimal("value");
+
+            return new ChargeSlabData(id, fromPeriod, toPeriod, value);
+        }
     }
 }

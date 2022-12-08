@@ -628,6 +628,10 @@ public class SavingsAccountCharge extends AbstractPersistableCustom {
         return Money.of(currency, this.amountPaid).plus(amountWaivedOrWrittenOff).isGreaterThanZero();
     }
 
+    public BigDecimal getAmount() {
+        return this.amount;
+    }
+
     public Money getAmount(final MonetaryCurrency currency) {
         return Money.of(currency, this.amount);
     }
