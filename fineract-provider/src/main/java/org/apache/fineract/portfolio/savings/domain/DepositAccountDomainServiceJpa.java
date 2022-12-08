@@ -108,17 +108,17 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
 
     @Autowired
     public DepositAccountDomainServiceJpa(final PlatformSecurityContext context,
-                                          final SavingsAccountRepositoryWrapper savingsAccountRepository,
-                                          final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper,
-                                          final JournalEntryWritePlatformService journalEntryWritePlatformService, final AccountNumberGenerator accountNumberGenerator,
-                                          final DepositAccountAssembler depositAccountAssembler, final SavingsAccountDomainService savingsAccountDomainService,
-                                          final AccountTransfersWritePlatformService accountTransfersWritePlatformService,
-                                          final ConfigurationDomainService configurationDomainService,
-                                          final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
-                                          final CalendarInstanceRepository calendarInstanceRepository, final AccountAssociationsRepository accountAssociationsRepository,
-                                          final SavingsAccountTransactionRepository savingsAccountTransactionRepository,
-                                          final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
-                                          final SavingsAccountChargeRepository savingsAccountChargeRepository, ReadWriteNonCoreDataService readWriteNonCoreDataService) {
+            final SavingsAccountRepositoryWrapper savingsAccountRepository,
+            final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper,
+            final JournalEntryWritePlatformService journalEntryWritePlatformService, final AccountNumberGenerator accountNumberGenerator,
+            final DepositAccountAssembler depositAccountAssembler, final SavingsAccountDomainService savingsAccountDomainService,
+            final AccountTransfersWritePlatformService accountTransfersWritePlatformService,
+            final ConfigurationDomainService configurationDomainService,
+            final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
+            final CalendarInstanceRepository calendarInstanceRepository, final AccountAssociationsRepository accountAssociationsRepository,
+            final SavingsAccountTransactionRepository savingsAccountTransactionRepository,
+            final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
+            final SavingsAccountChargeRepository savingsAccountChargeRepository, ReadWriteNonCoreDataService readWriteNonCoreDataService) {
         this.context = context;
         this.savingsAccountRepository = savingsAccountRepository;
         this.applicationCurrencyRepositoryWrapper = applicationCurrencyRepositoryWrapper;
@@ -351,10 +351,10 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                     PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS, null, null, transferDescription, null, fmt, null, null,
                     null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, toSavingsAccount, account,
                     isAccountTransfer, isExceptionForBalanceCheck);
-            if(account.getProduct().isUSDProduct()) {
-                if(this.readWriteNonCoreDataService.checkDatatableExists("Fx_rate") != null){
+            if (account.getProduct().isUSDProduct()) {
+                if (this.readWriteNonCoreDataService.checkDatatableExists("Fx_rate") != null) {
                     accountTransferDTO.setFdToSavings(true);
-                }else{
+                } else {
                     throw new Fx_RateTableShouldBeExistException();
                 }
 
@@ -535,10 +535,10 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                     PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS, null, null, transferDescription, locale, fmt, null, null,
                     null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, toSavingsAccount, account,
                     isRegularTransaction, isExceptionForBalanceCheck);
-            if(account.getProduct().isUSDProduct()) {
-                if(this.readWriteNonCoreDataService.retrieveDatatable("Fx_rate") != null){
+            if (account.getProduct().isUSDProduct()) {
+                if (this.readWriteNonCoreDataService.retrieveDatatable("Fx_rate") != null) {
                     accountTransferDTO.setFdToSavings(true);
-                }else{
+                } else {
                     throw new Fx_RateTableShouldBeExistException();
                 }
 

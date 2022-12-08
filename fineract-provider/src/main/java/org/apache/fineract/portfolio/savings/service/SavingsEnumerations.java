@@ -215,6 +215,10 @@ public final class SavingsEnumerations {
                 optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.AMOUNT_RELEASE.getValue().longValue(),
                         SavingsAccountTransactionType.AMOUNT_RELEASE.getCode(), "Release Amount");
             break;
+            case REVOKED_INTEREST:
+                optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.REVOKED_INTEREST.getValue().longValue(),
+                        SavingsAccountTransactionType.REVOKED_INTEREST.getCode(), "Revoked Interest");
+            break;
         }
         return optionData;
     }

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.paymentdetail.service;
 
+import java.time.LocalDate;
 import java.util.Map;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.portfolio.paymentdetail.PaymentDetailConstants;
@@ -25,6 +26,7 @@ import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetailRepository;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
+import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,6 +62,21 @@ public class PaymentDetailWritePlatformServiceJpaRepositoryImpl implements Payme
     @Transactional
     public PaymentDetail persistPaymentDetail(final PaymentDetail paymentDetail) {
         return this.paymentDetailRepository.save(paymentDetail);
+    }
+
+    @Override
+    public PaymentDetail createAndPersistPaymentDetailForVaultTribe(JsonCommand command, Map<String, Object> changes,
+            SavingsAccountTransactionType savingsAccountTransactionType, Integer parentSavingsAccountTransactionId,
+            LocalDate transactionDate, Integer parentTransactionPaymentDetailsId) {
+        final PaymentDetail paymentDetail = createPaymentDetail(command, changes);
+        if (paymentDetail != null) {
+            paymentDetail.setActualTransactionType(savingsAccountTransactionType.name());
+            paymentDetail.setParentSavingsAccountTransactionId(parentSavingsAccountTransactionId);
+            paymentDetail.setTransactionDate(transactionDate);
+            paymentDetail.setParentTransactionPaymentDetailsId(parentTransactionPaymentDetailsId);
+            return persistPaymentDetail(paymentDetail);
+        }
+        return paymentDetail;
     }
 
     @Override
