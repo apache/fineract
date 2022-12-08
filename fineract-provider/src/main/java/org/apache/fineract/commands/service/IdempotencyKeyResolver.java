@@ -21,29 +21,24 @@ package org.apache.fineract.commands.service;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Component
 @RequiredArgsConstructor
 public class IdempotencyKeyResolver {
 
+    private final FineractRequestContextHolder fineractRequestContextHolder;
+
     private final IdempotencyKeyGenerator idempotencyKeyGenerator;
 
-    private final FineractProperties fineractProperties;
-
     public String resolve(CommandWrapper wrapper) {
-        return Optional.ofNullable(wrapper.getIdempotencyKey())
-                .orElseGet(() -> getHeaderAttribute().orElseGet(idempotencyKeyGenerator::create));
+        return Optional.ofNullable(wrapper.getIdempotencyKey()).orElseGet(() -> getAttribute().orElseGet(idempotencyKeyGenerator::create));
     }
 
-    private Optional<String> getHeaderAttribute() {
-        return Optional.ofNullable(RequestContextHolder.getRequestAttributes()) //
-                .filter(ServletRequestAttributes.class::isInstance) //
-                .map(ServletRequestAttributes.class::cast) //
-                .map(ServletRequestAttributes::getRequest) //
-                .map(request -> request.getHeader(fineractProperties.getIdempotencyKeyHeaderName()));
+    private Optional<String> getAttribute() {
+        return Optional.ofNullable(fineractRequestContextHolder.getAttribute(SynchronousCommandProcessingService.IDEMPOTENCY_KEY_ATTRIBUTE))
+                .map(String::valueOf);
+
     }
 }

@@ -29,7 +29,6 @@ import java.lang.reflect.Type;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +44,7 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.apache.fineract.infrastructure.core.exception.AbstractIdempotentCommandException;
 import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessFailedException;
 import org.apache.fineract.infrastructure.core.exception.IdempotentCommandProcessSucceedException;
@@ -59,8 +59,6 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
 
 @Service
 @Slf4j
@@ -68,6 +66,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 public class SynchronousCommandProcessingService implements CommandProcessingService {
 
     public static final String IDEMPOTENCY_KEY_STORE_FLAG = "idempotencyKeyStoreFlag";
+
+    public static final String IDEMPOTENCY_KEY_ATTRIBUTE = "IdempotencyKeyAttribute";
     public static final String COMMAND_SOURCE_ID = "commandSourceId";
     private final PlatformSecurityContext context;
     private final ApplicationContext applicationContext;
@@ -78,6 +78,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     private final IdempotencyKeyResolver idempotencyKeyResolver;
     private final IdempotencyKeyGenerator idempotencyKeyGenerator;
     private final CommandSourceService commandSourceService;
+
+    private final FineractRequestContextHolder fineractRequestContextHolder;
     private final Gson gson = GoogleGsonSerializerHelper.createSimpleGson();
 
     @Override
@@ -147,9 +149,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         saveCommandToRequest(savedCommandSource);
     }
 
-    private static void saveCommandToRequest(CommandSource savedCommandSource) {
-        Optional.ofNullable(RequestContextHolder.getRequestAttributes()).ifPresent(requestAttributes -> requestAttributes
-                .setAttribute(COMMAND_SOURCE_ID, savedCommandSource.getId(), RequestAttributes.SCOPE_REQUEST));
+    private void saveCommandToRequest(CommandSource savedCommandSource) {
+        fineractRequestContextHolder.setAttribute(COMMAND_SOURCE_ID, savedCommandSource.getId());
     }
 
     private void publishHookErrorEvent(CommandWrapper wrapper, JsonCommand command, Throwable t) {
@@ -176,9 +177,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     }
 
     private void setIdempotencyKeyStoreFlag(boolean flag) {
-        Optional.ofNullable(RequestContextHolder.getRequestAttributes()).ifPresent(
-                requestAttributes -> requestAttributes.setAttribute(IDEMPOTENCY_KEY_STORE_FLAG, flag, RequestAttributes.SCOPE_REQUEST));
-
+        fineractRequestContextHolder.setAttribute(IDEMPOTENCY_KEY_STORE_FLAG, flag);
     }
 
     @Transactional
