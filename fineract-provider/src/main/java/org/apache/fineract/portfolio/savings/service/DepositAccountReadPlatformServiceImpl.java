@@ -1569,11 +1569,12 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
     @Override
     public Integer retrieveTotalOfLinkedAccounts(Long originatingId) {
 
-        final String query = "WITH RECURSIVE linked_accounts AS ( "
-                + " SELECT linked_origin_account_id  FROM m_deposit_account_term_and_preclosure m " + " where linked_origin_account_id = ? "
-                + " union all " + " select id  from m_deposit_account_term_and_preclosure , linked_accounts "
-                + " where linked_accounts.linked_origin_account_id = m_deposit_account_term_and_preclosure.linked_origin_account_id " + ") "
-                + "select count(1)  from linked_accounts";
+        final String query = "WITH RECURSIVE linked_accounts AS (\n"
+                + " SELECT id,linked_origin_account_id  FROM m_deposit_account_term_and_preclosure m  where linked_origin_account_id = ?\n"
+                + " union all \n"
+                + " select m_deposit_account_term_and_preclosure.id,m_deposit_account_term_and_preclosure.linked_origin_account_id  from m_deposit_account_term_and_preclosure , linked_accounts\n"
+                + " where linked_accounts.linked_origin_account_id = m_deposit_account_term_and_preclosure.savings_account_id  \n" + " )\n"
+                + "select count(1) from linked_accounts";
 
         return this.jdbcTemplate.queryForObject(query, Integer.class, originatingId);
     }

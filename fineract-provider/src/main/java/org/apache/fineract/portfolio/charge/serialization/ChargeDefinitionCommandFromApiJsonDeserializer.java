@@ -57,7 +57,7 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
                     "chargeCalculationType", "chargeCalculationTypeOptions", "penalty", "active", "chargePaymentMode", "feeOnMonthDay",
                     "feeInterval", "monthDayFormat", "minCap", "maxCap", "feeFrequency", "enableFreeWithdrawalCharge",
                     "freeWithdrawalFrequency", "restartCountFrequency", "countFrequencyType", "paymentTypeId", "enablePaymentType",
-                    "minAmount", "maxAmount", ChargesApiConstants.glAccountIdParamName, ChargesApiConstants.taxGroupIdParamName));
+                    "minAmount", "maxAmount", "chart", ChargesApiConstants.glAccountIdParamName, ChargesApiConstants.taxGroupIdParamName));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -240,8 +240,10 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
         final String currencyCode = this.fromApiJsonHelper.extractStringNamed("currencyCode", element);
         baseDataValidator.reset().parameter("currencyCode").value(currencyCode).notBlank().notExceedingLengthOf(3);
 
-        final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("amount", element.getAsJsonObject());
-        baseDataValidator.reset().parameter("amount").value(amount).notNull().positiveAmount();
+        if (!this.fromApiJsonHelper.parameterExists("chart", element)) {
+            final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("amount", element.getAsJsonObject());
+            baseDataValidator.reset().parameter("amount").value(amount).notNull().positiveAmount();
+        }
 
         if (this.fromApiJsonHelper.parameterExists("penalty", element)) {
             final Boolean penalty = this.fromApiJsonHelper.extractBooleanNamed("penalty", element);

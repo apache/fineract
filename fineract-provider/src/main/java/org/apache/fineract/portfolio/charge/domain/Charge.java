@@ -139,11 +139,14 @@ public class Charge extends AbstractPersistableCustom {
     @JoinColumn(name = "tax_group_id")
     private TaxGroup taxGroup;
 
+    @Column(name = "has_varying_charge")
+    private Boolean hasVaryingCharge;
+
     public static Charge fromJson(final JsonCommand command, final GLAccount account, final TaxGroup taxGroup,
-            final PaymentType paymentType) {
+            final PaymentType paymentType, final Boolean chargeVarying) {
 
         final String name = command.stringValueOfParameterNamed("name");
-        final BigDecimal amount = command.bigDecimalValueOfParameterNamed("amount");
+        BigDecimal amount = command.bigDecimalValueOfParameterNamed("amount");
         final BigDecimal minAmount = command.bigDecimalValueOfParameterNamed("minAmount");
         final BigDecimal maxAmount = command.bigDecimalValueOfParameterNamed("maxAmount");
         final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
@@ -181,9 +184,15 @@ public class Charge extends AbstractPersistableCustom {
             countFrequencyType = PeriodFrequencyType.fromInt(command.integerValueOfParameterNamed("countFrequencyType"));
         }
 
+        if (chargeVarying) {
+            amount = BigDecimal.ZERO;
+
+        }
+
         return new Charge(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculationType, penalty, active, paymentMode,
                 feeOnMonthDay, feeInterval, minCap, maxCap, feeFrequency, enableFreeWithdrawalCharge, freeWithdrawalFrequency,
-                restartCountFrequency, countFrequencyType, account, taxGroup, enablePaymentType, paymentType, minAmount, maxAmount);
+                restartCountFrequency, countFrequencyType, account, taxGroup, enablePaymentType, paymentType, minAmount, maxAmount,
+                chargeVarying);
     }
 
     protected Charge() {}
@@ -194,7 +203,7 @@ public class Charge extends AbstractPersistableCustom {
             final BigDecimal maxCap, final Integer feeFrequency, final boolean enableFreeWithdrawalCharge,
             final Integer freeWithdrawalFrequency, final Integer restartFrequency, final PeriodFrequencyType restartFrequencyEnum,
             final GLAccount account, final TaxGroup taxGroup, final boolean enablePaymentType, final PaymentType paymentType,
-            final BigDecimal minAmount, final BigDecimal maxAmount) {
+            final BigDecimal minAmount, final BigDecimal maxAmount, Boolean hasVaryingCharge) {
         this.name = name;
         this.amount = amount;
         this.minAmount = minAmount;
@@ -281,6 +290,7 @@ public class Charge extends AbstractPersistableCustom {
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
+        this.hasVaryingCharge = hasVaryingCharge;
     }
 
     public String getName() {
@@ -711,7 +721,8 @@ public class Charge extends AbstractPersistableCustom {
         return ChargeData.instance(getId(), this.name, this.amount, currency, chargeTimeType, chargeAppliesTo, chargeCalculationType,
                 chargePaymentmode, getFeeOnMonthDay(), this.feeInterval, this.penalty, this.active, this.enableFreeWithdrawal,
                 this.freeWithdrawalFrequency, this.restartFrequency, this.restartFrequencyEnum, this.enablePaymentType, paymentTypeData,
-                this.minCap, this.maxCap, feeFrequencyType, accountData, taxGroupData, this.minAmount, this.maxAmount);
+                this.minCap, this.maxCap, feeFrequencyType, accountData, taxGroupData, this.minAmount, this.maxAmount,
+                this.hasVaryingCharge);
     }
 
     public Integer getChargePaymentMode() {
@@ -814,5 +825,14 @@ public class Charge extends AbstractPersistableCustom {
     public int hashCode() {
         return Objects.hash(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculation, chargePaymentMode, feeOnDay,
                 feeInterval, feeOnMonth, penalty, active, deleted, minCap, maxCap, feeFrequency, account, taxGroup);
+    }
+
+    public Boolean getHasVaryingCharge() {
+        if (this.hasVaryingCharge == null) {
+            return false;
+        } else {
+            return this.hasVaryingCharge;
+        }
+
     }
 }

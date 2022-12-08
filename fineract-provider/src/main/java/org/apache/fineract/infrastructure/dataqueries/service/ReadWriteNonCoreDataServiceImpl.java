@@ -1965,8 +1965,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         // PERMITTED datatables
         SQLInjectionValidator.validateSQLInput(datatable);
-        final String sql = "select application_table_name, registered_table_name, entity_subtype from x_registered_table  \n" +
-                "where registered_table_name=?";
+        final String sql = "select application_table_name, registered_table_name, entity_subtype from x_registered_table  \n"
+                + "where registered_table_name=?";
 
         DatatableData datatableData = null;
 

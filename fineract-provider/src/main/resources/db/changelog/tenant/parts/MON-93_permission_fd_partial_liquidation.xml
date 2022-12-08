@@ -83,4 +83,38 @@
         </addColumn>
 
     </changeSet>
+
+    <changeSet author="naphlin@fiter.io" id="MON-93_add_varying_charge_slab">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_fee_charge_slab"/>
+            </not>
+        </preConditions>
+     <createTable tableName="m_fee_charge_slab">
+         <column name="id"  type="bigint(20)" autoIncrement="true">
+            <constraints primaryKey="true"/>
+         </column>
+         <column name="charge_id" type="bigint(20)">
+             <constraints references="m_charge(id)" foreignKeyName="FK_charge_id_charge_slab_id" nullable="false"/>
+         </column>
+         <column name="description" type="text"></column>
+         <column name="period_type_enum" type="integer"></column>
+         <column name="from_period" type="integer"></column>
+         <column name="to_period" type="integer"></column>
+         <column name="value" type="decimal(19,6)"></column>
+     </createTable>
+
+    </changeSet>
+
+    <changeSet author="naphlin@fiter.io" id="MON-93_add_varying_charge_slab_flag">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_charge" columnName="has_varying_charge"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_charge">
+            <column name="has_varying_charge" type="boolean"></column>
+        </addColumn>
+
+    </changeSet>
 </databaseChangeLog>

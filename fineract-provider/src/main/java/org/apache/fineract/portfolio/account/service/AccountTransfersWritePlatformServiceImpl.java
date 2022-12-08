@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -67,13 +68,14 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountDomainService;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
+import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
 
-
+@Slf4j
 @Service
 public class AccountTransfersWritePlatformServiceImpl implements AccountTransfersWritePlatformService {
 
@@ -424,16 +426,21 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
 
             BigDecimal withdrawalTransactionAmount = accountTransferDTO.getTransactionAmount();
             BigDecimal depositTransactionAmount = accountTransferDTO.getTransactionAmount();
-            BigDecimal rate = this.readWriteNonCoreDataService.getFxLatestRate("Fx_rate", fromSavingsAccount.officeId());
-            if(rate != null){
-                if(accountTransferDTO.isSavingsToFD()){
-                    BigDecimal newAmount = accountTransferDTO.getTransactionAmount().multiply(rate);
-                    withdrawalTransactionAmount = newAmount;
-                }else if(accountTransferDTO.isFdToSavings()){
-                    BigDecimal newAmount = accountTransferDTO.getTransactionAmount().multiply(rate);
-                    depositTransactionAmount = newAmount;
-                }
+            try {
+                BigDecimal rate = this.readWriteNonCoreDataService.getFxLatestRate("Fx_rate", fromSavingsAccount.officeId());
+                if (rate != null) {
+                    if (accountTransferDTO.isSavingsToFD()) {
+                        BigDecimal newAmount = accountTransferDTO.getTransactionAmount().multiply(rate);
+                        withdrawalTransactionAmount = newAmount;
+                    } else if (accountTransferDTO.isFdToSavings()) {
+                        BigDecimal newAmount = accountTransferDTO.getTransactionAmount().multiply(rate);
+                        depositTransactionAmount = newAmount;
+                    }
 
+                }
+            } catch (EmptyResultDataAccessException ex) {
+                ex.printStackTrace();
+                log.error(ex.getMessage());
             }
 
             final SavingsAccountTransaction withdrawal = this.savingsAccountDomainService.handleWithdrawal(fromSavingsAccount,
@@ -441,8 +448,8 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                     transactionBooleanValues, backdatedTxnsAllowedTill);
 
             final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(toSavingsAccount,
-                    accountTransferDTO.getFmt(), transactionDate, depositTransactionAmount,
-                    accountTransferDTO.getPaymentDetail(), isAccountTransfer, isRegularTransaction, backdatedTxnsAllowedTill);
+                    accountTransferDTO.getFmt(), transactionDate, depositTransactionAmount, accountTransferDTO.getPaymentDetail(),
+                    isAccountTransfer, isRegularTransaction, backdatedTxnsAllowedTill);
 
             accountTransferDetails = this.accountTransferAssembler.assembleSavingsToSavingsTransfer(accountTransferDTO, fromSavingsAccount,
                     toSavingsAccount, withdrawal, deposit);
