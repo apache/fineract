@@ -1386,7 +1386,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         SavingsAccountTransactionsMapper() {
 
             final StringBuilder sqlBuilder = new StringBuilder(400);
-            sqlBuilder.append("tr.id as transactionId, tr.transaction_type_enum as transactionType, ");
+            sqlBuilder.append("tr.id as transactionId,");
+            sqlBuilder.append(
+                    "CASE WHEN tr.transaction_type_enum = 2 AND  pd.actual_transaction_type = 'REVOKED_INTEREST' THEN 72  ELSE tr.transaction_type_enum END as transactionType, ");
             sqlBuilder.append("tr.transaction_date as transactionDate, tr.amount as transactionAmount,");
             sqlBuilder.append(" tr.release_id_of_hold_amount as releaseTransactionId,");
             sqlBuilder.append(" tr.reason_for_block as reasonForBlock,");

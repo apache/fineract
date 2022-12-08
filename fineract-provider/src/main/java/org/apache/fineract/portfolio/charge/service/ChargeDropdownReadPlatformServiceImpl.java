@@ -104,7 +104,7 @@ public class ChargeDropdownReadPlatformServiceImpl implements ChargeDropdownRead
                 chargeTimeType(ChargeTimeType.WITHDRAWAL_FEE), chargeTimeType(ChargeTimeType.ANNUAL_FEE),
                 chargeTimeType(ChargeTimeType.MONTHLY_FEE), chargeTimeType(ChargeTimeType.WEEKLY_FEE),
                 chargeTimeType(ChargeTimeType.OVERDRAFT_FEE), chargeTimeType(ChargeTimeType.SAVINGS_NOACTIVITY_FEE),
-                chargeTimeType(ChargeTimeType.FDA_PARTIAL_LIQUIDATION_FEE));
+                chargeTimeType(ChargeTimeType.FDA_PARTIAL_LIQUIDATION_FEE), chargeTimeType(ChargeTimeType.INTEREST_FORFEITED));
     }
 
     @Override

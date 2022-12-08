@@ -1607,7 +1607,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
 
-        if (isAccountLocked(transactionDTO.getTransactionDate())) {
+        if (isAccountLocked(transactionDTO.getTransactionDate()) && !this.unlocked) {
             final String defaultUserMessage = "Withdrawal is not allowed. No withdrawals are allowed until after "
                     + getLockedInUntilLocalDate().format(transactionDTO.getFormatter());
             final ApiParameterError error = ApiParameterError.parameterError(
@@ -5064,11 +5064,32 @@ public class SavingsAccount extends AbstractPersistableCustom {
         return amount;
     }
 
+    public BigDecimal findAccrualInterestPostingTransactionToBeRevoked(final LocalDate postingDate) {
+        BigDecimal amount = BigDecimal.ZERO;
+        List<SavingsAccountTransaction> trans = getTransactions();
+        for (final SavingsAccountTransaction transaction : trans) {
+
+            if ((transaction.isAccrualInterestPostingAndNotReversed() || transaction.isOverdraftAccrualInterestAndNotReversed())
+                    && transaction.getTransactionLocalDate().isBefore(postingDate)) {
+                amount = amount.add(transaction.getAmount());
+            }
+        }
+        return amount;
+    }
+
     public void setUnlockDate(LocalDate unlockDate) {
         this.unlockDate = unlockDate;
     }
 
     public void setUnlocked(boolean unlocked) {
         this.unlocked = unlocked;
+    }
+
+    public boolean isUnlocked() {
+        return unlocked;
+    }
+
+    public LocalDate getUnlockDate() {
+        return unlockDate;
     }
 }
