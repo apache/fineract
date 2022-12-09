@@ -62,7 +62,7 @@ public class LoanChargeSpecificDueDateTest {
     }
 
     @Test
-    public void testApplyLoanSpecificDueDateChargeWithDisbursementDate() {
+    public void testApplyLoanSpecificDueDateFeeWithDisbursementDate() {
 
         final LocalDate todaysDate = Utils.getLocalDateOfTenant();
 
@@ -82,7 +82,7 @@ public class LoanChargeSpecificDueDateTest {
 
         // Get loan details
         GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
-        validateLoanAccount(getLoansLoanIdResponse, Double.valueOf(principalAmount), Double.valueOf("0.00"));
+        validateLoanAccount(getLoansLoanIdResponse, Double.valueOf(principalAmount), Double.valueOf("0.00"), false);
 
         // Apply Loan Charge with specific due date
 
@@ -99,7 +99,7 @@ public class LoanChargeSpecificDueDateTest {
 
         // Get loan details expecting to have a delinquency classification
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
-        validateLoanAccount(getLoansLoanIdResponse, Double.valueOf(principalAmount), Double.valueOf("10.00"));
+        validateLoanAccount(getLoansLoanIdResponse, Double.valueOf(principalAmount), Double.valueOf("10.00"), false);
 
         // Make a full repayment to close the Loan
         Float amount = Float.valueOf("1010.00");
@@ -110,7 +110,62 @@ public class LoanChargeSpecificDueDateTest {
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
         assertNotNull(getLoansLoanIdResponse);
-        validateLoanAccount(getLoansLoanIdResponse, Double.valueOf("0.00"), Double.valueOf("0.00"));
+        validateLoanAccount(getLoansLoanIdResponse, Double.valueOf("0.00"), Double.valueOf("0.00"), false);
+
+    }
+
+    @Test
+    public void testApplyLoanSpecificDueDatePenaltyWithDisbursementDate() {
+
+        final LocalDate todaysDate = Utils.getLocalDateOfTenant();
+
+        // Client and Loan account creation
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper, null);
+        assertNotNull(getLoanProductsProductResponse);
+
+        // Older date to have more than one overdue installment
+        LocalDate transactionDate = todaysDate;
+        String operationDate = Utils.dateFormatter.format(transactionDate);
+        log.info("Operation date {}", transactionDate);
+
+        // Create Loan Account
+        final Integer loanId = createLoanAccount(loanTransactionHelper, clientId.toString(),
+                getLoanProductsProductResponse.getId().toString(), operationDate);
+
+        // Get loan details
+        GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        validateLoanAccount(getLoansLoanIdResponse, Double.valueOf(principalAmount), Double.valueOf("0.00"), true);
+
+        // Apply Loan Charge with specific due date
+
+        final String feeAmount = "10.00";
+        String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, feeAmount, true);
+        final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
+        assertNotNull(postChargesResponse);
+        final Long loanChargeId = postChargesResponse.getResourceId();
+        assertNotNull(loanChargeId);
+
+        payloadJSON = LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(loanChargeId.toString(), operationDate, feeAmount);
+        PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = loanTransactionHelper.addChargeForLoan(loanId, payloadJSON,
+                responseSpec);
+        assertNotNull(postLoansLoanIdChargesResponse);
+
+        // Get loan details expecting to have a delinquency classification
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        validateLoanAccount(getLoansLoanIdResponse, Double.valueOf(principalAmount), Double.valueOf("10.00"), true);
+
+        // Make a full repayment to close the Loan
+        Float amount = Float.valueOf("1010.00");
+        PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, amount,
+                loanId);
+        assertNotNull(loanIdTransactionsResponse);
+        log.info("Loan Transaction Id: {} {}", loanId, loanIdTransactionsResponse.getResourceId());
+
+        getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+        assertNotNull(getLoansLoanIdResponse);
+        validateLoanAccount(getLoansLoanIdResponse, Double.valueOf("0.00"), Double.valueOf("0.00"), true);
+        loanTransactionHelper.validateLoanStatus(getLoansLoanIdResponse, "loanStatusType.closed.obligations.met");
 
     }
 
@@ -137,11 +192,15 @@ public class LoanChargeSpecificDueDateTest {
         return loanId;
     }
 
-    private void validateLoanAccount(GetLoansLoanIdResponse getLoansLoanIdResponse, Double principal, Double fees) {
+    private void validateLoanAccount(GetLoansLoanIdResponse getLoansLoanIdResponse, Double principal, Double fees, boolean isPenalty) {
         assertNotNull(getLoansLoanIdResponse);
         loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
         loanTransactionHelper.validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, principal);
-        loanTransactionHelper.validateLoanFeesOustandingBalance(getLoansLoanIdResponse, fees);
+        if (isPenalty) {
+            loanTransactionHelper.validateLoanPenaltiesOustandingBalance(getLoansLoanIdResponse, fees);
+        } else {
+            loanTransactionHelper.validateLoanFeesOustandingBalance(getLoansLoanIdResponse, fees);
+        }
         loanTransactionHelper.validateLoanTotalOustandingBalance(getLoansLoanIdResponse, (principal + fees));
     }
 
