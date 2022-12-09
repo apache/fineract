@@ -83,9 +83,9 @@ public class ReadWriteNonCoreDataServiceImplTest {
         when(sqlRS.getObject(ArgumentMatchers.anyString())).thenReturn("value1").thenReturn("value2");
         when(databaseTypeResolver.isPostgreSQL()).thenReturn(true);
 
-        ResultsetColumnHeaderData cf1 = ResultsetColumnHeaderData.detailed("cf1", "text", 10L, false, false, null, null);
-        ResultsetColumnHeaderData rc1 = ResultsetColumnHeaderData.detailed("rc1", "text", 10L, false, false, null, null);
-        ResultsetColumnHeaderData rc2 = ResultsetColumnHeaderData.detailed("rc2", "text", 10L, false, false, null, null);
+        ResultsetColumnHeaderData cf1 = ResultsetColumnHeaderData.detailed("cf1", "text", 10L, false, false, null, null, false, false);
+        ResultsetColumnHeaderData rc1 = ResultsetColumnHeaderData.detailed("rc1", "text", 10L, false, false, null, null, false, false);
+        ResultsetColumnHeaderData rc2 = ResultsetColumnHeaderData.detailed("rc2", "text", 10L, false, false, null, null, false, false);
         when(genericDataService.fillResultsetColumnHeaders("table")).thenReturn(List.of(cf1, rc1, rc2));
 
         List<JsonObject> results = underTest.queryDataTable("table", "cf1", "vf1", "rc1,rc2");
@@ -109,9 +109,9 @@ public class ReadWriteNonCoreDataServiceImplTest {
         when(sqlRS.getObject(ArgumentMatchers.anyString())).thenReturn("value1").thenReturn("value2");
         when(databaseTypeResolver.isPostgreSQL()).thenReturn(false);
         when(databaseTypeResolver.isMySQL()).thenReturn(false);
-        ResultsetColumnHeaderData cf1 = ResultsetColumnHeaderData.detailed("cf1", "text", 10L, false, false, null, null);
-        ResultsetColumnHeaderData rc1 = ResultsetColumnHeaderData.detailed("rc1", "text", 10L, false, false, null, null);
-        ResultsetColumnHeaderData rc2 = ResultsetColumnHeaderData.detailed("rc2", "text", 10L, false, false, null, null);
+        ResultsetColumnHeaderData cf1 = ResultsetColumnHeaderData.detailed("cf1", "text", 10L, false, false, null, null, false, false);
+        ResultsetColumnHeaderData rc1 = ResultsetColumnHeaderData.detailed("rc1", "text", 10L, false, false, null, null, false, false);
+        ResultsetColumnHeaderData rc2 = ResultsetColumnHeaderData.detailed("rc2", "text", 10L, false, false, null, null, false, false);
         when(genericDataService.fillResultsetColumnHeaders("table")).thenReturn(List.of(cf1, rc1, rc2));
 
         assertThrows(IllegalStateException.class, () -> underTest.queryDataTable("table", "cf1", "vf1", "rc1,rc2"));

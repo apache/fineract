@@ -18,18 +18,12 @@
  */
 package org.apache.fineract.infrastructure.core.service.database;
 
-import java.util.List;
-import javax.sql.DataSource;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-public interface DatabaseQueryService {
+@Getter
+@RequiredArgsConstructor
+public class IndexDetail {
 
-    boolean isSupported();
-
-    boolean isTablePresent(DataSource dataSource, String tableName);
-
-    // TODO: This needs to be improved to have a custom POJO return type instead of the raw SqlRowSet
-    SqlRowSet getTableColumns(DataSource dataSource, String tableName);
-
-    List<IndexDetail> getTableIndexes(DataSource dataSource, String tableName);
+    private final String indexName;
 }
