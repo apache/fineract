@@ -1563,6 +1563,13 @@ public class LoanTransactionHelper extends IntegrationTest {
         }
     }
 
+    public void validateLoanPenaltiesOustandingBalance(GetLoansLoanIdResponse getLoansLoanIdResponse, Double amountExpected) {
+        GetLoansLoanIdSummary getLoansLoanIdSummary = getLoansLoanIdResponse.getSummary();
+        assertNotNull(getLoansLoanIdSummary);
+        log.info("Loan with Fees Outstanding Balance {} expected {}", getLoansLoanIdSummary.getFeeChargesOutstanding(), amountExpected);
+        assertEquals(amountExpected, getLoansLoanIdSummary.getPenaltyChargesOutstanding());
+    }
+
     public void validateLoanTotalOustandingBalance(GetLoansLoanIdResponse getLoansLoanIdResponse, Double amountExpected) {
         GetLoansLoanIdSummary getLoansLoanIdSummary = getLoansLoanIdResponse.getSummary();
         if (getLoansLoanIdSummary != null) {

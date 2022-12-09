@@ -632,17 +632,6 @@ public class LoanCharge extends AbstractPersistableCustom {
         return target != null && target.isAfter(fromNotInclusive) && !target.isAfter(upToAndInclusive);
     }
 
-    public boolean isDueForCollectionFromIncludingAndUpToAndIncluding(final LocalDate fromNotInclusive, final LocalDate upToAndInclusive) {
-        final LocalDate dueDate = getDueLocalDate();
-        return occursOnDayFromAndIncludingAndUpToAndIncluding(fromNotInclusive, upToAndInclusive, dueDate);
-    }
-
-    private boolean occursOnDayFromAndIncludingAndUpToAndIncluding(final LocalDate fromAndInclusive, final LocalDate upToAndInclusive,
-            final LocalDate target) {
-        return target != null && (target.isEqual(fromAndInclusive) || target.isAfter(fromAndInclusive))
-                && !target.isAfter(upToAndInclusive);
-    }
-
     public boolean isFeeCharge() {
         return !this.penaltyCharge;
     }

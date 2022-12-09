@@ -119,8 +119,7 @@ public class LoanRepaymentScheduleProcessingWrapper {
                 } else if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd)) {
                     cumulative = cumulative.plus(loanCharge.amount());
                     // Special case for Loan Charges (Due Date) added the same disbursement date
-                } else if (period.isFirstPeriod()
-                        && loanCharge.isDueForCollectionFromIncludingAndUpToAndIncluding(periodStart, periodEnd)) {
+                } else if (period.isFirstPeriod() && periodStart.equals(loanCharge.getDueDate())) {
                     cumulative = cumulative.plus(loanCharge.amount());
                 }
             }
@@ -212,6 +211,9 @@ public class LoanRepaymentScheduleProcessingWrapper {
                     BigDecimal loanChargeAmt = amount.multiply(loanCharge.getPercentage()).divide(BigDecimal.valueOf(100));
                     cumulative = cumulative.plus(loanChargeAmt);
                 } else if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd)) {
+                    cumulative = cumulative.plus(loanCharge.amount());
+                    // Special case for Loan Charges (Due Date) added the same disbursement date
+                } else if (period.isFirstPeriod() && periodStart.equals(loanCharge.getDueDate())) {
                     cumulative = cumulative.plus(loanCharge.amount());
                 }
             }
