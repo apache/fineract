@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseIndependentQueryService;
+import org.apache.fineract.infrastructure.core.service.database.IndexDetail;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnValueData;
@@ -213,6 +214,7 @@ public class GenericDataServiceImpl implements GenericDataService {
     @Override
     public List<ResultsetColumnHeaderData> fillResultsetColumnHeaders(final String datatable) {
         final SqlRowSet columnDefinitions = getDatatableMetaData(datatable);
+        final List<IndexDetail> indexDefinitions = getDatatableIndexData(datatable);
 
         final List<ResultsetColumnHeaderData> columnHeaders = new ArrayList<>();
 
@@ -226,6 +228,11 @@ public class GenericDataServiceImpl implements GenericDataService {
 
             final boolean columnNullable = "YES".equalsIgnoreCase(isNullable) || "TRUE".equalsIgnoreCase(isNullable);
             final boolean columnIsPrimaryKey = "PRI".equalsIgnoreCase(isPrimaryKey) || "TRUE".equalsIgnoreCase(isPrimaryKey);
+            final boolean columnIsUnique = checkUnique(datatable, columnName, indexDefinitions);
+            boolean columnIsIndexed = false;
+            if (!columnIsUnique) {
+                columnIsIndexed = checkIndexed(datatable, columnName, indexDefinitions);
+            }
 
             List<ResultsetColumnValueData> columnValues = new ArrayList<>();
             String codeName = null;
@@ -238,10 +245,38 @@ public class GenericDataServiceImpl implements GenericDataService {
             }
 
             columnHeaders.add(ResultsetColumnHeaderData.detailed(columnName, columnType, columnLength, columnNullable, columnIsPrimaryKey,
-                    columnValues, codeName));
+                    columnValues, codeName, columnIsUnique, columnIsIndexed));
         }
 
         return columnHeaders;
+    }
+
+    private boolean checkUnique(String datatable, String columnName, List<IndexDetail> indexDefinitions) {
+        String keyNameToCheck = "uk_" + datatable + "_" + columnName;
+        return checkKeyPresent(keyNameToCheck, indexDefinitions);
+    }
+
+    private boolean checkIndexed(String datatable, String columnName, List<IndexDetail> indexDefinitions) {
+        String keyNameToCheck = "idx_" + datatable + "_" + columnName;
+        return checkKeyPresent(keyNameToCheck, indexDefinitions);
+    }
+
+    private boolean checkKeyPresent(String keyNameToCheck, List<IndexDetail> indexDefinitions) {
+        for (IndexDetail indexDetail : indexDefinitions) {
+            if (indexDetail.getIndexName().equals(keyNameToCheck)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @SuppressWarnings("AvoidHidingCauseException")
+    private List<IndexDetail> getDatatableIndexData(String datatable) {
+        try {
+            return databaseIndependentQueryService.getTableIndexes(dataSource, datatable);
+        } catch (IllegalArgumentException e) {
+            throw new DatatableNotFoundException(datatable);
+        }
     }
 
     /*
