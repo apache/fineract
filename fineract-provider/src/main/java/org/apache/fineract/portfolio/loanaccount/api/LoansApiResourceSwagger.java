@@ -1005,6 +1005,8 @@ final class LoansApiResourceSwagger {
         @Schema(example = "250.000000")
         public Double totalOverpaid;
         public LocalDate lastClosedBusinessDate;
+        @Schema(example = "[2013, 11, 1]")
+        public LocalDate overpaidOnDate;
     }
 
     @Schema(description = "GetLoansResponse")
