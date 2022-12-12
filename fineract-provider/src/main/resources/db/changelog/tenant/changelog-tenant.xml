@@ -96,4 +96,5 @@
     <include file="parts/0074_add_last_cob_business_date_column_to_loan.xml" relativeToChangelogFile="true"/>
     <include file="parts/0075_add_processed_commands_purge_job.xml" relativeToChangelogFile="true" />
     <include file="parts/0076_add_loan_transaction_enum_values.xml" relativeToChangelogFile="true" />
+    <include file="parts/0077_add_overpaid_date_for_loan.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
