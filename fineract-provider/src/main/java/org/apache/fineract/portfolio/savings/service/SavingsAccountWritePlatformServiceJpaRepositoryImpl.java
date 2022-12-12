@@ -467,7 +467,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             gsim.setParentDeposit(currentBalance);
             gsimRepository.save(gsim);
 
-            if (account.getLockedInUntilDate().isBefore(DateUtils.getBusinessLocalDate())) {
+            if (account.getLockedInUntilDate() != null && account.getLockedInUntilDate().isAfter(DateUtils.getBusinessLocalDate())) {
                 final PaymentDetail paymentDetailRevoked = this.paymentDetailWritePlatformService
                         .createAndPersistPaymentDetailForVaultTribe(command, changes, SavingsAccountTransactionType.REVOKED_INTEREST,
                                 withdrawal.getId().intValue(), transactionDate, paymentDetail.getId().intValue());
