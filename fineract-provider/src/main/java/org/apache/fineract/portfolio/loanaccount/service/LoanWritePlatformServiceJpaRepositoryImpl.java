@@ -920,7 +920,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("transactionAmount", command.stringValueOfParameterNamed("transactionAmount"));
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
-        changes.put("paymentTypeId", command.stringValueOfParameterNamed("paymentTypeId"));
+        changes.put("paymentTypeId", command.longValueOfParameterNamed("paymentTypeId"));
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
@@ -1078,7 +1078,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("transactionAmount", command.stringValueOfParameterNamed("transactionAmount"));
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
-        changes.put("paymentTypeId", command.stringValueOfParameterNamed("paymentTypeId"));
+        changes.put("paymentTypeId", command.longValueOfParameterNamed("paymentTypeId"));
 
         final List<Long> existingTransactionIds = new ArrayList<>();
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
@@ -1250,7 +1250,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("transactionAmount", command.stringValueOfParameterNamed(LoanApiConstants.TRANSACTION_AMOUNT_PARAMNAME));
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
-        changes.put("paymentTypeId", command.stringValueOfParameterNamed(LoanApiConstants.PAYMENT_TYPE_PARAMNAME));
+        changes.put("paymentTypeId", command.longValueOfParameterNamed(LoanApiConstants.PAYMENT_TYPE_PARAMNAME));
 
         final Money transactionAmountAsMoney = Money.of(loan.getCurrency(), transactionAmount);
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createPaymentDetail(command, changes);

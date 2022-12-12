@@ -280,9 +280,9 @@ final class LoanTransactionsApiResourceSwagger {
         public Long subResourceId;
         @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
         public String subResourceExternalId;
-        public PostLoansLoanIdTransactionsResponse.Changes changes;
+        public PostLoansLoanIdTransactionsResponse.PostLoansLoanIdTransactionsResponseChanges changes;
 
-        static final class Changes {
+        static final class PostLoansLoanIdTransactionsResponseChanges {
 
             @Schema(example = "en_GB")
             public String locale;
@@ -291,7 +291,7 @@ final class LoanTransactionsApiResourceSwagger {
             @Schema(example = "28 June 2022")
             public String transactionDate;
             @Schema(example = "50,000.00")
-            public Double transactionAmount;
+            public String transactionAmount;
             @Schema(example = "An optional note about why your adjusting or changing the transaction.")
             public String note;
             @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
@@ -331,7 +331,7 @@ final class LoanTransactionsApiResourceSwagger {
 
         private PutChargeTransactionChangesResponse() {}
 
-        static final class Changes {
+        static final class PutChargeTransactionChangesResponseChanges {
 
             @Schema(example = "10.0")
             public Double amount;
@@ -368,7 +368,7 @@ final class LoanTransactionsApiResourceSwagger {
         public Long subResourceId;
         @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
         public String subResourceExternalId;
-        public PutChargeTransactionChangesResponse.Changes changes;
+        public PutChargeTransactionChangesResponse.PutChargeTransactionChangesResponseChanges changes;
 
     }
 
