@@ -230,8 +230,8 @@ bootRun {
         implementation 'org.postgresql:postgresql:42.4.0'
         implementation 'mysql:mysql-connector-java:8.0.29'
 
-        implementation 'org.apache.poi:poi:4.1.2'
-        implementation 'org.apache.poi:poi-ooxml:4.1.2'
+        implementation 'org.apache.poi:poi:5.2.3'
+        implementation 'org.apache.poi:poi-ooxml:5.2.3'
         implementation 'org.apache.poi:poi-ooxml-schemas:4.1.2'
         implementation 'org.openjdk.nashorn:nashorn-core:15.1'
         implementation 'org.codehaus.groovy:groovy-jsr223:3.0.10'
