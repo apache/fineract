@@ -96,7 +96,7 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
                     transactionAmount = standingInstructionDuesData.totalDueAmount();
                 }
                 if (recurrenceType.isDuesRecurrence()) {
-                    isDueForTransfer = LocalDate.now(DateUtils.getDateTimeZoneOfTenant()).equals(standingInstructionDuesData.dueDate());
+                    isDueForTransfer = standingInstructionDuesData.dueDate()!=null && !standingInstructionDuesData.dueDate().isAfter(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
                 }
             }
 
