@@ -149,7 +149,7 @@ public final class SavingsAccountTransactionData implements Serializable {
 
     public boolean isDebit() {
         return isWithdrawal() || isWithdrawalFeeAndNotReversed() || isAnnualFeeAndNotReversed() || isPayCharge()
-                || isOverdraftInterestAndNotReversed() || isWithHoldTaxAndNotReversed();
+                || isOverdraftInterestAndNotReversed() || isWithHoldTaxAndNotReversed() || isRevokedInterest();
     }
 
     public boolean isWithdrawalFeeAndNotReversed() {
@@ -680,6 +680,10 @@ public final class SavingsAccountTransactionData implements Serializable {
 
     public boolean isWithdrawal() {
         return this.transactionType.isWithdrawal();
+    }
+
+    public boolean isRevokedInterest() {
+        return this.transactionType.isRevokedInterest();
     }
 
     public boolean isInterestPosting() {

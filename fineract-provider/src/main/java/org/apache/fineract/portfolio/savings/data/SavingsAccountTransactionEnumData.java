@@ -49,6 +49,7 @@ public class SavingsAccountTransactionEnumData implements Serializable {
     private final boolean accrualInterestPosting;
     private final boolean overdraftAccrualInterest;
     private final boolean writtenOff;
+    private final boolean revokedInterest;
 
     public SavingsAccountTransactionEnumData(final Long id, final String code, final String value) {
         this.id = id;
@@ -74,6 +75,7 @@ public class SavingsAccountTransactionEnumData implements Serializable {
         this.accrualInterestPosting = Long.valueOf(SavingsAccountTransactionType.ACCRUAL_INTEREST_POSTING.getValue()).equals(this.id);
         this.overdraftAccrualInterest = Long.valueOf(SavingsAccountTransactionType.OVERDRAFT_ACCRUAL_INTEREST.getValue()).equals(this.id);
         this.writtenOff = Long.valueOf(SavingsAccountTransactionType.WRITTEN_OFF.getValue()).equals(this.id);
+        this.revokedInterest = Long.valueOf(SavingsAccountTransactionType.REVOKED_INTEREST.getValue()).equals(this.id);
         // this.overdraftFee =
         // Long.valueOf(SavingsAccountTransactionType.OVERDRAFT_INTEREST.getValue()).equals(this.id);
     }
@@ -192,5 +194,9 @@ public class SavingsAccountTransactionEnumData implements Serializable {
 
     public boolean isWrittenOff() {
         return this.writtenOff;
+    }
+
+    public boolean isRevokedInterest() {
+        return revokedInterest;
     }
 }
