@@ -508,6 +508,7 @@ public class LoansApiResource {
 
         final Set<String> mandatoryResponseParameters = new HashSet<>();
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
+        final Collection<LoanTransactionData> currentLoanRepayments = this.loanReadPlatformService.retrieveLoanTransactions(loanId);
         if (!associationParameters.isEmpty()) {
             if (associationParameters.contains(DataTableApiConstant.allAssociateParamName)) {
                 associationParameters.addAll(Arrays.asList(DataTableApiConstant.repaymentScheduleAssociateParamName,
@@ -530,7 +531,6 @@ public class LoansApiResource {
 
             if (associationParameters.contains(DataTableApiConstant.transactionsAssociateParamName)) {
                 mandatoryResponseParameters.add(DataTableApiConstant.transactionsAssociateParamName);
-                final Collection<LoanTransactionData> currentLoanRepayments = this.loanReadPlatformService.retrieveLoanTransactions(loanId);
                 if (!CollectionUtils.isEmpty(currentLoanRepayments)) {
                     loanRepayments = currentLoanRepayments;
                 }
@@ -716,8 +716,9 @@ public class LoansApiResource {
         }
 
         // updating summary with transaction amounts summary
-        if (loanRepayments != null) {
-            loanBasicDetails.setSummary(LoanSummaryData.withTransactionAmountsSummary(loanBasicDetails.getSummary(), loanRepayments));
+        if (loanBasicDetails.getSummary() != null) {
+            loanBasicDetails
+                    .setSummary(LoanSummaryData.withTransactionAmountsSummary(loanBasicDetails.getSummary(), currentLoanRepayments));
         }
 
         final LoanAccountData loanAccount = LoanAccountData.associationsAndTemplate(loanBasicDetails, repaymentSchedule, loanRepayments,
