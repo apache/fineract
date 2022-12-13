@@ -681,6 +681,7 @@ public final class SavingsAccountTransactionData implements Serializable {
     public boolean isWithdrawal() {
         return this.transactionType.isWithdrawal();
     }
+
     public boolean isRevokedInterest() {
         return this.transactionType.isRevokedInterest();
     }
