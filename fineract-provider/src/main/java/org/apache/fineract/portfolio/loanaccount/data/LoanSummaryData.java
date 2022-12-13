@@ -25,6 +25,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Immutable data object representing loan summary information.
@@ -143,30 +144,41 @@ public class LoanSummaryData {
     public static LoanSummaryData withTransactionAmountsSummary(final LoanSummaryData defaultSummaryData,
             final Collection<LoanTransactionData> loanTransactions) {
 
-        BigDecimal totalMerchantRefund = computeTotalAmountForNonReversedTransactions(LoanTransactionType.MERCHANT_ISSUED_REFUND,
-                loanTransactions);
-        BigDecimal totalMerchantRefundReversed = computeTotalAmountForReversedTransactions(LoanTransactionType.MERCHANT_ISSUED_REFUND,
-                loanTransactions);
-        BigDecimal totalPayoutRefund = computeTotalAmountForNonReversedTransactions(LoanTransactionType.PAYOUT_REFUND, loanTransactions);
-        BigDecimal totalPayoutRefundReversed = computeTotalAmountForReversedTransactions(LoanTransactionType.PAYOUT_REFUND,
-                loanTransactions);
-        BigDecimal totalGoodwillCredit = computeTotalAmountForNonReversedTransactions(LoanTransactionType.GOODWILL_CREDIT,
-                loanTransactions);
-        BigDecimal totalGoodwillCreditReversed = computeTotalAmountForReversedTransactions(LoanTransactionType.GOODWILL_CREDIT,
-                loanTransactions);
-        BigDecimal totalChargeAdjustment = computeTotalAmountForNonReversedTransactions(LoanTransactionType.CHARGE_ADJUSTMENT,
-                loanTransactions);
-        BigDecimal totalChargeAdjustmentReversed = computeTotalAmountForReversedTransactions(LoanTransactionType.CHARGE_ADJUSTMENT,
-                loanTransactions);
-        BigDecimal totalChargeback = computeTotalAmountForNonReversedTransactions(LoanTransactionType.CHARGEBACK, loanTransactions);
-        BigDecimal totalCreditBalanceRefund = computeTotalAmountForNonReversedTransactions(LoanTransactionType.CREDIT_BALANCE_REFUND,
-                loanTransactions);
-        BigDecimal totalCreditBalanceRefundReversed = computeTotalAmountForReversedTransactions(LoanTransactionType.CREDIT_BALANCE_REFUND,
-                loanTransactions);
-        BigDecimal totalRepaymentTransaction = computeTotalAmountForNonReversedTransactions(LoanTransactionType.REPAYMENT,
-                loanTransactions);
-        BigDecimal totalRepaymentTransactionReversed = computeTotalAmountForReversedTransactions(LoanTransactionType.REPAYMENT,
-                loanTransactions);
+        BigDecimal totalMerchantRefund = BigDecimal.ZERO;
+        BigDecimal totalMerchantRefundReversed = BigDecimal.ZERO;
+        BigDecimal totalPayoutRefund = BigDecimal.ZERO;
+        BigDecimal totalPayoutRefundReversed = BigDecimal.ZERO;
+        BigDecimal totalGoodwillCredit = BigDecimal.ZERO;
+        BigDecimal totalGoodwillCreditReversed = BigDecimal.ZERO;
+        BigDecimal totalChargeAdjustment = BigDecimal.ZERO;
+        BigDecimal totalChargeAdjustmentReversed = BigDecimal.ZERO;
+        BigDecimal totalChargeback = BigDecimal.ZERO;
+        BigDecimal totalCreditBalanceRefund = BigDecimal.ZERO;
+        BigDecimal totalCreditBalanceRefundReversed = BigDecimal.ZERO;
+        BigDecimal totalRepaymentTransaction = BigDecimal.ZERO;
+        BigDecimal totalRepaymentTransactionReversed = BigDecimal.ZERO;
+
+        if (!CollectionUtils.isEmpty(loanTransactions)) {
+
+            totalMerchantRefund = computeTotalAmountForNonReversedTransactions(LoanTransactionType.MERCHANT_ISSUED_REFUND,
+                    loanTransactions);
+            totalMerchantRefundReversed = computeTotalAmountForReversedTransactions(LoanTransactionType.MERCHANT_ISSUED_REFUND,
+                    loanTransactions);
+            totalPayoutRefund = computeTotalAmountForNonReversedTransactions(LoanTransactionType.PAYOUT_REFUND, loanTransactions);
+            totalPayoutRefundReversed = computeTotalAmountForReversedTransactions(LoanTransactionType.PAYOUT_REFUND, loanTransactions);
+            totalGoodwillCredit = computeTotalAmountForNonReversedTransactions(LoanTransactionType.GOODWILL_CREDIT, loanTransactions);
+            totalGoodwillCreditReversed = computeTotalAmountForReversedTransactions(LoanTransactionType.GOODWILL_CREDIT, loanTransactions);
+            totalChargeAdjustment = computeTotalAmountForNonReversedTransactions(LoanTransactionType.CHARGE_ADJUSTMENT, loanTransactions);
+            totalChargeAdjustmentReversed = computeTotalAmountForReversedTransactions(LoanTransactionType.CHARGE_ADJUSTMENT,
+                    loanTransactions);
+            totalChargeback = computeTotalAmountForNonReversedTransactions(LoanTransactionType.CHARGEBACK, loanTransactions);
+            totalCreditBalanceRefund = computeTotalAmountForNonReversedTransactions(LoanTransactionType.CREDIT_BALANCE_REFUND,
+                    loanTransactions);
+            totalCreditBalanceRefundReversed = computeTotalAmountForReversedTransactions(LoanTransactionType.CREDIT_BALANCE_REFUND,
+                    loanTransactions);
+            totalRepaymentTransaction = computeTotalAmountForNonReversedTransactions(LoanTransactionType.REPAYMENT, loanTransactions);
+            totalRepaymentTransactionReversed = computeTotalAmountForReversedTransactions(LoanTransactionType.REPAYMENT, loanTransactions);
+        }
 
         return new LoanSummaryData(defaultSummaryData.currency, defaultSummaryData.principalDisbursed,
                 defaultSummaryData.principalAdjustments, defaultSummaryData.principalPaid, defaultSummaryData.principalWrittenOff,
