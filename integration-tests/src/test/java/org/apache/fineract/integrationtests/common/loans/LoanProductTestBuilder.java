@@ -136,6 +136,7 @@ public class LoanProductTestBuilder {
     private String fixedPrincipalPercentagePerInstallment;
     private String installmentAmountInMultiplesOf;
     private boolean canDefineInstallmentAmount;
+    private Integer delinquencyBucketId;
 
     public String build(final String chargeId) {
         final HashMap<String, Object> map = build(chargeId, null);
@@ -254,6 +255,10 @@ public class LoanProductTestBuilder {
             map.put("delinquencyBucketId", delinquencyBucketId);
         }
 
+        if (this.delinquencyBucketId != null) {
+            map.put("delinquencyBucketId", this.delinquencyBucketId);
+        }
+
         if (this.feeToIncomeAccountMappings != null) {
             map.put("feeToIncomeAccountMappings", this.feeToIncomeAccountMappings);
         }
@@ -266,6 +271,11 @@ public class LoanProductTestBuilder {
 
     public LoanProductTestBuilder withInstallmentAmountInMultiplesOf(String installmentAmountInMultiplesOf) {
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
+        return this;
+    }
+
+    public LoanProductTestBuilder withDelinquencyBucket(Integer delinquencyBucketId) {
+        this.delinquencyBucketId = delinquencyBucketId;
         return this;
     }
 

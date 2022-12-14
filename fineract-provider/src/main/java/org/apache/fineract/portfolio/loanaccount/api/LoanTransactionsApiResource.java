@@ -587,7 +587,7 @@ public class LoanTransactionsApiResource {
         Long resolvedLoanId = loanId;
         if (resolvedLoanId == null) {
             loanExternalId.throwExceptionIfEmpty();
-            resolvedLoanId = this.loanReadPlatformService.retrieveLoanIdByExternalId(loanExternalId.getValue());
+            resolvedLoanId = this.loanReadPlatformService.retrieveLoanIdByExternalId(loanExternalId);
             if (resolvedLoanId == null) {
                 throw new LoanNotFoundException(loanExternalId);
             }

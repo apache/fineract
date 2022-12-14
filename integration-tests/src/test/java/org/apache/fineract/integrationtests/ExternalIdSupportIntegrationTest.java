@@ -31,18 +31,29 @@ import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import org.apache.fineract.client.models.BusinessDateRequest;
 import org.apache.fineract.client.models.DeleteLoansLoanIdChargesChargeIdResponse;
+import org.apache.fineract.client.models.DeleteLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetDelinquencyRangesResponse;
+import org.apache.fineract.client.models.GetDelinquencyTagHistoryResponse;
+import org.apache.fineract.client.models.GetLoansApprovalTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesTemplateResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
+import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
+import org.apache.fineract.client.models.PostDelinquencyRangeResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
@@ -50,8 +61,12 @@ import org.apache.fineract.client.models.PutChargeTransactionChangesRequest;
 import org.apache.fineract.client.models.PutChargeTransactionChangesResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdChargesChargeIdResponse;
+import org.apache.fineract.client.models.PutLoansLoanIdRequest;
+import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -61,6 +76,9 @@ import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
+import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
+import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
+import org.apache.fineract.integrationtests.common.products.DelinquencyRangesHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -827,13 +845,241 @@ public class ExternalIdSupportIntegrationTest extends IntegrationTest {
         assertTrue(exception.getMessage().contains("error.msg.loanCharge.external.id.invalid"));
     }
 
+    @Test
+    public void loan() {
+        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, 50, true);
+        GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+        new BusinessDateHelper().updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
+                .date("2022.10.10").dateFormat("yyyy.MM.dd").locale("en"));
+        try {
+            ArrayList<Integer> rangeIds = new ArrayList<>();
+            // First Range
+            String jsonRange = DelinquencyRangesHelper.getAsJSON(1, 3);
+            PostDelinquencyRangeResponse delinquencyRangeResponse = DelinquencyRangesHelper.createDelinquencyRange(requestSpec,
+                    responseSpec, jsonRange);
+            rangeIds.add(delinquencyRangeResponse.getResourceId());
+            jsonRange = DelinquencyRangesHelper.getAsJSON(4, 60);
+
+            GetDelinquencyRangesResponse range = DelinquencyRangesHelper.getDelinquencyRange(requestSpec, responseSpec,
+                    delinquencyRangeResponse.getResourceId());
+
+            // Second Range
+            delinquencyRangeResponse = DelinquencyRangesHelper.createDelinquencyRange(requestSpec, responseSpec, jsonRange);
+            rangeIds.add(delinquencyRangeResponse.getResourceId());
+
+            String jsonBucket = DelinquencyBucketsHelper.getAsJSON(rangeIds);
+            PostDelinquencyBucketResponse delinquencyBucketResponse = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec,
+                    responseSpec, jsonBucket);
+
+            final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
+                    .withRepaymentAfterEvery("1").withNumberOfRepayments("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
+                    .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment()
+                    .withInterestTypeAsDecliningBalance().withAccountingRuleAsNone()
+                    .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withDaysInMonth("30").withDaysInYear("365")
+                    .withMoratorium("0", "0").withDelinquencyBucket(delinquencyBucketResponse.getResourceId())
+                    .withInArrearsTolerance("1001").withMultiDisburse().withDisallowExpectedDisbursements(true).build(null);
+            final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+
+            final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+
+            String loanExternalIdStr = UUID.randomUUID().toString();
+            final HashMap loan = applyForLoanApplication(client.getClientId().intValue(), loanProductID, loanExternalIdStr);
+            Integer loanId = (Integer) loan.get("resourceId");
+            String resourceExternalId = (String) loan.get("resourceExternalId");
+            assertEquals(loanExternalIdStr, resourceExternalId);
+
+            LocalDate actualDate = LocalDate.of(2022, 10, 10);
+
+            GetLoansApprovalTemplateResponse loanApprovalResult = this.loanTransactionHelper.getLoanApprovalTemplate(loanExternalIdStr);
+            assertEquals(actualDate, loanApprovalResult.getApprovalDate());
+            assertEquals(1000.0, loanApprovalResult.getApprovalAmount());
+            assertEquals(1000.0, loanApprovalResult.getNetDisbursalAmount());
+
+            GetLoansLoanIdResponse loanDetailsResult = this.loanTransactionHelper.getLoanDetails(loanExternalIdStr);
+            assertEquals(loanExternalIdStr, loanDetailsResult.getExternalId());
+
+            this.loanTransactionHelper.approveLoan("02 September 2022", loanId);
+            String txnExternalIdStr = UUID.randomUUID().toString();
+            final HashMap disbursedLoanResult = this.loanTransactionHelper.disburseLoan("03 September 2022", loanId, "1000",
+                    txnExternalIdStr);
+
+            // Check whether the provided external id was retrieved
+            assertEquals(txnExternalIdStr, disbursedLoanResult.get("resourceExternalId"));
+
+            String txnExternalIdStr2 = UUID.randomUUID().toString();
+            final HashMap disbursedLoanResult2 = this.loanTransactionHelper.disburseLoan("04 September 2022", loanId, "1000",
+                    txnExternalIdStr2);
+
+            // Check whether the provided external id was retrieved
+            assertEquals(txnExternalIdStr2, disbursedLoanResult2.get("resourceExternalId"));
+
+            PutLoansLoanIdResponse markLoanAsFraudResult = this.loanTransactionHelper.modifyLoanApplication(loanExternalIdStr,
+                    "markAsFraud", new PutLoansLoanIdRequest().fraud(true));
+            assertEquals(loanExternalIdStr, markLoanAsFraudResult.getResourceExternalId());
+
+            List<GetDelinquencyTagHistoryResponse> delinquencyTagHistoryResponseResult = this.loanTransactionHelper
+                    .getLoanDelinquencyTags(loanExternalIdStr);
+            assertEquals(1, delinquencyTagHistoryResponseResult.size());
+            assertEquals((long) loanId, delinquencyTagHistoryResponseResult.get(0).getLoanId());
+
+            String loanExternalIdStr2 = UUID.randomUUID().toString();
+            applyForLoanApplication(client.getClientId().intValue(), loanProductID, loanExternalIdStr2);
+
+            PutLoansLoanIdResponse modifyLoanApplicationResult = this.loanTransactionHelper.modifyLoanApplication(loanExternalIdStr2,
+                    "modify",
+                    new PutLoansLoanIdRequest().submittedOnDate("31 August 2022").dateFormat("dd MMMM yyyy").locale("en")
+                            .loanType("individual").productId(loanProductID).clientId(client.getClientId()).interestType(0)
+                            .interestCalculationPeriodType(1).interestRatePerPeriod(0).isEqualAmortization(false).loanTermFrequency(30)
+                            .loanTermFrequencyType(0).maxOutstandingLoanBalance(10000L).numberOfRepayments(1).principal(10000L)
+                            .repaymentEvery(30).repaymentFrequencyType(0).transactionProcessingStrategyCode("mifos-standard-strategy")
+                            .expectedDisbursementDate("2 September 2022").amortizationType(1));
+
+            assertEquals(loanExternalIdStr2, modifyLoanApplicationResult.getResourceExternalId());
+            DeleteLoansLoanIdResponse deleteLoanApplicationResult = this.loanTransactionHelper.deleteLoanApplication(loanExternalIdStr2);
+            assertEquals(loanExternalIdStr2, deleteLoanApplicationResult.getResourceExternalId());
+
+            String loanExternalIdStr3 = UUID.randomUUID().toString();
+            applyForLoanApplication(client.getClientId().intValue(), loanProductID, loanExternalIdStr3);
+            PostLoansLoanIdResponse result = this.loanTransactionHelper.rejectLoan(loanExternalIdStr3,
+                    new PostLoansLoanIdRequest().rejectedOnDate("2 September 2022").locale("en").dateFormat("dd MMMM yyyy"));
+            assertEquals(loanExternalIdStr3, result.getResourceExternalId());
+
+            String loanExternalIdStr4 = UUID.randomUUID().toString();
+            applyForLoanApplication(client.getClientId().intValue(), loanProductID, loanExternalIdStr4);
+            result = this.loanTransactionHelper.withdrawnByApplicantLoan(loanExternalIdStr4,
+                    new PostLoansLoanIdRequest().withdrawnOnDate("2 September 2022").locale("en").dateFormat("dd MMMM yyyy"));
+            assertEquals(loanExternalIdStr4, result.getResourceExternalId());
+
+            String loanExternalIdStr5 = UUID.randomUUID().toString();
+            applyForLoanApplication(client.getClientId().intValue(), loanProductID, loanExternalIdStr5);
+            this.loanTransactionHelper.approveLoan(loanExternalIdStr5, new PostLoansLoanIdRequest().approvedOnDate("2 September 2022")
+                    .approvedLoanAmount("1000").expectedDisbursementDate("2 September 2022").locale("en").dateFormat("dd MMMM yyyy"));
+            result = this.loanTransactionHelper.disburseLoan(loanExternalIdStr5, new PostLoansLoanIdRequest()
+                    .actualDisbursementDate("2 September 2022").transactionAmount("1000").locale("en").dateFormat("dd MMMM yyyy"));
+            // It's commented out for now, till it got fixed to return the loan externalId as well
+            // assertEquals(loanExternalIdStr5, result.getResourceExternalId());
+
+            String loanExternalIdStr6 = UUID.randomUUID().toString();
+            applyForLoanApplication(client.getClientId().intValue(), loanProductID, loanExternalIdStr6);
+            this.loanTransactionHelper.approveLoan(loanExternalIdStr6, new PostLoansLoanIdRequest().approvedOnDate("2 September 2022")
+                    .approvedLoanAmount("1000").expectedDisbursementDate("2 September 2022").locale("en").dateFormat("dd MMMM yyyy"));
+            result = this.loanTransactionHelper.undoApprovalLoan(loanExternalIdStr6, new PostLoansLoanIdRequest());
+            assertEquals(loanExternalIdStr6, result.getResourceExternalId());
+
+            final Integer savingsId = SavingsAccountHelper.openSavingsAccount(this.requestSpec, this.responseSpec,
+                    client.getClientId().intValue(), "10000.0");
+
+            String loanExternalIdStr7 = UUID.randomUUID().toString();
+            applyForLoanApplication(client.getClientId().intValue(), loanProductID, loanExternalIdStr7, savingsId.toString());
+            this.loanTransactionHelper.approveLoan(loanExternalIdStr7, new PostLoansLoanIdRequest().approvedOnDate("2 September 2022")
+                    .approvedLoanAmount("1000").expectedDisbursementDate("2 September 2022").locale("en").dateFormat("dd MMMM yyyy"));
+            result = this.loanTransactionHelper.disburseToSavingsLoan(loanExternalIdStr7, new PostLoansLoanIdRequest()
+                    .actualDisbursementDate("2 September 2022").transactionAmount("1000").locale("en").dateFormat("dd MMMM yyyy"));
+            assertEquals(loanExternalIdStr7, result.getResourceExternalId());
+
+            String loanExternalIdStr8 = UUID.randomUUID().toString();
+            applyForLoanApplication(client.getClientId().intValue(), loanProductID, loanExternalIdStr8);
+            this.loanTransactionHelper.approveLoan(loanExternalIdStr8, new PostLoansLoanIdRequest().approvedOnDate("2 September 2022")
+                    .approvedLoanAmount("1000").expectedDisbursementDate("2 September 2022").locale("en").dateFormat("dd MMMM yyyy"));
+            this.loanTransactionHelper.disburseLoan(loanExternalIdStr8, new PostLoansLoanIdRequest()
+                    .actualDisbursementDate("2 September 2022").transactionAmount("1000").locale("en").dateFormat("dd MMMM yyyy"));
+            result = this.loanTransactionHelper.undoDisbursalLoan(loanExternalIdStr8, new PostLoansLoanIdRequest());
+            assertEquals(loanExternalIdStr8, result.getResourceExternalId());
+
+            String loanExternalIdStr9 = UUID.randomUUID().toString();
+            applyForLoanApplication(client.getClientId().intValue(), loanProductID, loanExternalIdStr9);
+            this.loanTransactionHelper.approveLoan(loanExternalIdStr9, new PostLoansLoanIdRequest().approvedOnDate("2 September 2022")
+                    .approvedLoanAmount("1000").expectedDisbursementDate("2 September 2022").locale("en").dateFormat("dd MMMM yyyy"));
+            this.loanTransactionHelper.disburseLoan(loanExternalIdStr9, new PostLoansLoanIdRequest()
+                    .actualDisbursementDate("2 September 2022").transactionAmount("1000").locale("en").dateFormat("dd MMMM yyyy"));
+            this.loanTransactionHelper.disburseLoan(loanExternalIdStr9, new PostLoansLoanIdRequest()
+                    .actualDisbursementDate("3 September 2022").transactionAmount("1000").locale("en").dateFormat("dd MMMM yyyy"));
+            result = this.loanTransactionHelper.undoLastDisbursalLoan(loanExternalIdStr9, new PostLoansLoanIdRequest());
+            assertEquals(loanExternalIdStr9, result.getResourceExternalId());
+
+            Integer loanOfficerId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+            String loanExternalIdStr10 = UUID.randomUUID().toString();
+            applyForLoanApplication(client.getClientId().intValue(), loanProductID, loanExternalIdStr10);
+            result = this.loanTransactionHelper.assignLoanOfficerLoan(loanExternalIdStr10, new PostLoansLoanIdRequest()
+                    .assignmentDate("2 September 2022").locale("en").dateFormat("dd MMMM yyyy").toLoanOfficerId(loanOfficerId));
+            assertEquals(loanExternalIdStr10, result.getResourceExternalId());
+            result = this.loanTransactionHelper.unassignLoanOfficerLoan(loanExternalIdStr10,
+                    new PostLoansLoanIdRequest().unassignedDate("2 September 2022").locale("en").dateFormat("dd MMMM yyyy"));
+            assertEquals(loanExternalIdStr10, result.getResourceExternalId());
+
+            String loanExternalIdStr11 = UUID.randomUUID().toString();
+            applyForLoanApplication(client.getClientId().intValue(), loanProductID, loanExternalIdStr11);
+            result = this.loanTransactionHelper.recoverGuaranteesLoan(loanExternalIdStr11, new PostLoansLoanIdRequest());
+            assertEquals(loanExternalIdStr11, result.getResourceExternalId());
+
+            String loanExternalIdStr12 = UUID.randomUUID().toString();
+            applyForLoanApplication(client.getClientId().intValue(), loanProductID, loanExternalIdStr12);
+            result = this.loanTransactionHelper.assignDelinquencyLoan(loanExternalIdStr12, new PostLoansLoanIdRequest());
+            assertEquals(loanExternalIdStr12, result.getResourceExternalId());
+
+            String loanExternalIdStr13 = UUID.randomUUID().toString();
+            applyForLoanApplication(client.getClientId().intValue(), loanProductID, loanExternalIdStr13);
+            result = this.loanTransactionHelper.approveLoan(loanExternalIdStr13,
+                    new PostLoansLoanIdRequest().approvedOnDate("2 September 2022").approvedLoanAmount("1000")
+                            .expectedDisbursementDate("2 September 2022").locale("en").dateFormat("dd MMMM yyyy"));
+            assertEquals(loanExternalIdStr13, result.getResourceExternalId());
+
+            PostLoansLoanIdTransactionsResponse closeRescheduleResult = this.loanTransactionHelper.closeRescheduledLoan(loanExternalIdStr13,
+                    new PostLoansLoanIdTransactionsRequest().transactionDate("2 September 2022").locale("en").dateFormat("dd MMMM yyyy"));
+            assertEquals(loanExternalIdStr13, closeRescheduleResult.getResourceExternalId());
+
+            String loanExternalIdStr14 = UUID.randomUUID().toString();
+            applyForLoanApplication(client.getClientId().intValue(), loanProductID, loanExternalIdStr14);
+            String transactionExternalId = UUID.randomUUID().toString();
+            result = this.loanTransactionHelper.approveLoan(loanExternalIdStr14,
+                    new PostLoansLoanIdRequest().approvedOnDate("2 September 2022").approvedLoanAmount("1000")
+                            .expectedDisbursementDate("2 September 2022").locale("en").dateFormat("dd MMMM yyyy"));
+            assertEquals(loanExternalIdStr14, result.getResourceExternalId());
+            this.loanTransactionHelper.disburseLoan(loanExternalIdStr14, new PostLoansLoanIdRequest()
+                    .actualDisbursementDate("2 September 2022").transactionAmount("1000").locale("en").dateFormat("dd MMMM yyyy"));
+            PostLoansLoanIdTransactionsResponse closeResult = this.loanTransactionHelper.closeLoan(loanExternalIdStr14,
+                    new PostLoansLoanIdTransactionsRequest().transactionDate("3 September 2022").locale("en").dateFormat("dd MMMM yyyy")
+                            .externalId(transactionExternalId));
+            assertEquals(transactionExternalId, closeResult.getResourceExternalId());
+
+            String loanExternalIdStr15 = UUID.randomUUID().toString();
+            String transactionExternalId2 = UUID.randomUUID().toString();
+            applyForLoanApplication(client.getClientId().intValue(), loanProductID, loanExternalIdStr15);
+            result = this.loanTransactionHelper.approveLoan(loanExternalIdStr15,
+                    new PostLoansLoanIdRequest().approvedOnDate("2 September 2022").approvedLoanAmount("1000")
+                            .expectedDisbursementDate("2 September 2022").locale("en").dateFormat("dd MMMM yyyy"));
+            this.loanTransactionHelper.disburseLoan(loanExternalIdStr15, new PostLoansLoanIdRequest()
+                    .actualDisbursementDate("2 September 2022").transactionAmount("1000").locale("en").dateFormat("dd MMMM yyyy"));
+            assertEquals(loanExternalIdStr15, result.getResourceExternalId());
+            PostLoansLoanIdTransactionsResponse forecloseResult = this.loanTransactionHelper.forecloseLoan(loanExternalIdStr15,
+                    new PostLoansLoanIdTransactionsRequest().transactionDate("2 September 2022").locale("en").dateFormat("dd MMMM yyyy")
+                            .externalId(transactionExternalId2));
+            assertEquals(transactionExternalId2, forecloseResult.getResourceExternalId());
+
+        } finally {
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, 50, false);
+        }
+    }
+
+    private HashMap applyForLoanApplication(final Integer clientID, final Integer loanProductID, final String externalId,
+            final String linkAccountId) {
+        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("1")
+                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("1").withRepaymentEveryAfter("1")
+                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance()
+                .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
+                .withExpectedDisbursementDate("03 September 2022").withSubmittedOnDate("01 September 2022").withLoanType("individual")
+                .withExternalId(externalId).build(clientID.toString(), loanProductID.toString(), linkAccountId);
+        return (HashMap) this.loanTransactionHelper.createLoanAccount(loanApplicationJSON, "");
+    }
+
     private HashMap applyForLoanApplication(final Integer clientID, final Integer loanProductID, final String externalId) {
         final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("1")
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("1").withRepaymentEveryAfter("1")
                 .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance()
                 .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
                 .withExpectedDisbursementDate("03 September 2022").withSubmittedOnDate("01 September 2022").withLoanType("individual")
-                .withExternalId(externalId).build(clientID.toString(), loanProductID.toString(), null);
+                .withInArrearsTolerance("1001").withExternalId(externalId).build(clientID.toString(), loanProductID.toString(), null);
         return (HashMap) this.loanTransactionHelper.createLoanAccount(loanApplicationJSON, "");
     }
 }

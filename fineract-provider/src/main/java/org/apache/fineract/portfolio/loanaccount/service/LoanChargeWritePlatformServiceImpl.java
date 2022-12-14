@@ -631,7 +631,8 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                 .withCommandId(command.commandId()) //
                 .withEntityId(loanChargeId) //
                 .withEntityExternalId(loanCharge.getExternalId()) //
-                .withSubEntityId(loanTransaction.getId()).withSubEntityExternalId(loanTransaction.getExternalId())
+                .withSubEntityId(loanTransaction.getId()) //
+                .withSubEntityExternalId(loanTransaction.getExternalId()) //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
                 .withGroupId(loan.getGroupId()) //

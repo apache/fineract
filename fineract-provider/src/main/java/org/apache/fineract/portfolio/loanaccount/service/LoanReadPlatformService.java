@@ -158,5 +158,5 @@ public interface LoanReadPlatformService {
 
     Long retrieveLoanTransactionIdByExternalId(ExternalId externalId);
 
-    Long retrieveLoanIdByExternalId(String externalId);
+    Long retrieveLoanIdByExternalId(ExternalId externalId);
 }

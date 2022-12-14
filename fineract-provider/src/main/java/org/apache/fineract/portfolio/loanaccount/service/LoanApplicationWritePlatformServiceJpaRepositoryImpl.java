@@ -48,10 +48,12 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
@@ -217,8 +219,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             this.fromApiJsonDeserializer.validateForCreate(command.json(), isMeetingMandatoryForJLGLoans, loanProduct);
 
             // Validate If the externalId is already registered
-            final String externalId = this.fromJsonHelper.extractStringNamed("externalId", command.parsedJson());
-            if (StringUtils.isNotBlank(externalId)) {
+            final String externalIdStr = this.fromJsonHelper.extractStringNamed("externalId", command.parsedJson());
+            ExternalId externalId = ExternalIdFactory.produce(externalIdStr);
+            if (!externalId.isEmpty()) {
                 final boolean existByExternalId = this.loanRepositoryWrapper.existLoanByExternalId(externalId);
                 if (existByExternalId) {
                     throw new GeneralPlatformDomainRuleException("error.msg.loan.with.externalId.already.used",
@@ -518,6 +521,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withEntityId(newLoanApplication.getId()) //
+                    .withEntityExternalId(newLoanApplication.getExternalId()) //
                     .withOfficeId(newLoanApplication.getOfficeId()) //
                     .withClientId(newLoanApplication.getClientId()) //
                     .withGroupId(newLoanApplication.getGroupId()) //
@@ -1165,6 +1169,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             return new CommandProcessingResultBuilder() //
                     .withEntityId(loanId) //
+                    .withEntityExternalId(existingLoanApplication.getExternalId()) //
                     .withOfficeId(existingLoanApplication.getOfficeId()) //
                     .withClientId(existingLoanApplication.getClientId()) //
                     .withGroupId(existingLoanApplication.getGroupId()) //
@@ -1239,6 +1244,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         return new CommandProcessingResultBuilder() //
                 .withEntityId(loanId) //
+                .withEntityExternalId(loan.getExternalId()) //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
                 .withGroupId(loan.getGroupId()) //
@@ -1408,6 +1414,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(loan.getId()) //
+                .withEntityExternalId(loan.getExternalId()) //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
                 .withGroupId(loan.getGroupId()) //
@@ -1486,6 +1493,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(loan.getId()) //
+                .withEntityExternalId(loan.getExternalId()) //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
                 .withGroupId(loan.getGroupId()) //
@@ -1554,6 +1562,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(loan.getId()) //
+                .withEntityExternalId(loan.getExternalId()) //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
                 .withGroupId(loan.getGroupId()) //
@@ -1605,6 +1614,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(loan.getId()) //
+                .withEntityExternalId(loan.getExternalId()) //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
                 .withGroupId(loan.getGroupId()) //
