@@ -109,7 +109,10 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 LocalDate startDate = disbursementDate;
                 for (final LoanRepaymentScheduleInstallment installment : installments) {
                     for (final LoanCharge loanCharge : transferCharges) {
-                        if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(startDate, installment.getDueDate())) {
+                        if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(startDate, installment.getDueDate())
+                                // Special case for Loan Charges (Due Date) added the same disbursement date
+                                || (startDate.equals(disbursementDate) && loanCharge.getDueDate() != null
+                                        && loanCharge.getDueDate().equals(disbursementDate))) {
                             Money amountForProcess = loanCharge.getAmount(currency);
                             if (amountForProcess.isGreaterThan(loanTransaction.getAmount(currency))) {
                                 amountForProcess = loanTransaction.getAmount(currency);

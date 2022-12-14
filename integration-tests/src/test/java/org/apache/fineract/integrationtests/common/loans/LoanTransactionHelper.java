@@ -814,6 +814,15 @@ public class LoanTransactionHelper extends IntegrationTest {
         return (Integer) response.get("resourceId");
     }
 
+    public PostLoansLoanIdChargesChargeIdResponse applyLoanChargeCommand(final Integer loanId, final Long loanchargeId, final String commad,
+            final String json) {
+        log.info("--------------------------------- WAIVE CHARGES FOR LOAN --------------------------------");
+        final String CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/charges/" + loanchargeId + "?command=" + commad + "&"
+                + Utils.TENANT_IDENTIFIER;
+        final String response = Utils.performServerPost(requestSpec, responseSpec, CHARGES_URL, json, null);
+        return GSON.fromJson(response, PostLoansLoanIdChargesChargeIdResponse.class);
+    }
+
     public Integer waiveChargesForLoan(final Integer loanId, final Integer loanchargeId, final String json) {
         log.info("--------------------------------- WAIVE CHARGES FOR LOAN --------------------------------");
         final String CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/charges/" + loanchargeId + "?command=waive&"
