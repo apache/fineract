@@ -20,7 +20,7 @@ package org.apache.fineract.infrastructure.documentmanagement.contentrepository;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
 import org.springframework.stereotype.Component;
 
@@ -28,18 +28,26 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ContentRepositoryFactory {
 
-    // TODO: all configuration should be really moved to application.properties
-    private final ConfigurationDomainService configurationService;
+    private final FineractProperties fineractProperties;
     private final List<ContentRepository> contentRepositories;
 
     public ContentRepository getRepository() {
-        if (configurationService.isAmazonS3Enabled()) {
-            return getRepository(StorageType.S3);
+        if (fineractProperties.getContent() != null) {
+            if (fineractProperties.getContent().getFilesystem() != null
+                    && Boolean.TRUE.equals(fineractProperties.getContent().getFilesystem().getEnabled())) {
+                return getRepository(StorageType.FILE_SYSTEM);
+            } else if (fineractProperties.getContent().getS3() != null
+                    && Boolean.TRUE.equals(fineractProperties.getContent().getS3().getEnabled())) {
+                return getRepository(StorageType.S3);
+            }
         }
-        return getRepository(StorageType.FILE_SYSTEM);
+
+        throw new RuntimeException(
+                "No content repository enabled. Please set either 'fineract.content.filesystem.enabled=true' or 'fineract.content.s3.enabled=true' in your application.properties.");
     }
 
     public ContentRepository getRepository(StorageType storageType) {
-        return contentRepositories.stream().filter(cr -> cr.getStorageType().equals(storageType)).findFirst().orElseThrow();
+        return contentRepositories.stream().filter(cr -> cr.getStorageType().equals(storageType)).findFirst().orElseThrow(
+                () -> new RuntimeException(String.format("No content repository implementation found for storage type: %s", storageType)));
     }
 }

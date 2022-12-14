@@ -174,6 +174,7 @@ public class FineractProperties {
     @Setter
     public static class FineractContentFilesystemProperties {
 
+        private Boolean enabled;
         private String rootFolder;
     }
 
@@ -181,6 +182,7 @@ public class FineractProperties {
     @Setter
     public static class FineractContentS3Properties {
 
+        private Boolean enabled;
         private String bucketName;
         private String accessKey;
         private String secretKey;
