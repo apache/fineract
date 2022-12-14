@@ -47,7 +47,7 @@ public class LoanDelinquencyRangeChangeBusinessEventSerializer extends AbstractB
         LoanAccountData data = service.retrieveOne(event.get().getId());
         Long id = data.getId();
         String accountNumber = data.getAccountNo();
-        String externalId = data.getExternalId();
+        String externalId = data.getExternalId().getValue();
         DelinquencyRangeDataV1 delinquencyRange = mapper.map(data.getDelinquencyRange());
         return new LoanAccountDelinquencyRangeDataV1(id, accountNumber, externalId, delinquencyRange);
     }

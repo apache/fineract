@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -167,13 +168,13 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     @Query(FIND_BY_ACCOUNT_NUMBER)
     Loan findLoanAccountByAccountNumber(@Param("accountNumber") String accountNumber);
 
-    boolean existsByExternalId(@Param("externalId") String externalId);
+    boolean existsByExternalId(@Param("externalId") ExternalId externalId);
 
     @Query(FIND_ALL_NON_CLOSED)
     List<Long> findAllNonClosedLoanIds();
 
     @Query(FIND_ID_BY_EXTERNAL_ID)
-    Long findIdByExternalId(@Param("externalId") String externalId);
+    Long findIdByExternalId(@Param("externalId") ExternalId externalId);
 
     @Query(FIND_ALL_NON_CLOSED_ONE_DAY_BEHIND)
     List<Long> findAllNonClosedLoanIdsOneDayBehind(@Param("last_closed_business_date") LocalDate businessDate);

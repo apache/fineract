@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
@@ -238,7 +239,7 @@ public class LoanRepositoryWrapper {
         return this.repository.findNonClosedLoanByAccountNumber(accountNumber);
     }
 
-    public boolean existLoanByExternalId(final String externalId) {
+    public boolean existLoanByExternalId(final ExternalId externalId) {
         return this.repository.existsByExternalId(externalId);
     }
 
@@ -252,7 +253,7 @@ public class LoanRepositoryWrapper {
         return loan;
     }
 
-    public Long findIdByExternalId(String externalId) {
+    public Long findIdByExternalId(ExternalId externalId) {
         return this.repository.findIdByExternalId(externalId);
     }
 }

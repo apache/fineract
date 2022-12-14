@@ -48,7 +48,7 @@ public class LoanRepaymentBusinessEventSerializer extends AbstractBusinessEventS
         Loan loan = repaymentInstallment.getLoan();
         Long id = loan.getId();
         String accountNo = loan.getAccountNumber();
-        String externalId = loan.getExternalId();
+        String externalId = loan.getExternalId().getValue();
         String dueDate = dataTimeMapper.mapLocalDate(repaymentInstallment.getDueDate());
         MonetaryCurrency loanCurrency = loan.getCurrency();
         CurrencyDataV1 currency = CurrencyDataV1.newBuilder().setCode(loanCurrency.getCode())

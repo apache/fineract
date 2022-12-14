@@ -33,7 +33,9 @@ import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrappe
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepository;
 import org.apache.fineract.organisation.holiday.domain.HolidayStatusType;
@@ -107,6 +109,7 @@ public class LoanAssembler {
     private final LoanUtilService loanUtilService;
     private final RateAssembler rateAssembler;
     private final LoanLifecycleStateMachine defaultLoanLifecycleStateMachine;
+    private final ExternalIdFactory externalIdFactory;
 
     public Loan assembleFrom(final Long accountId) {
         final Loan loanAccount = this.loanRepository.findOneWithNotFoundDetection(accountId, true);
@@ -287,7 +290,8 @@ public class LoanAssembler {
             loanApplication.updateTransactionProcessingStrategy(transactionProcessingStrategyCode, transactionProcessingStrategyName);
         }
 
-        final String externalId = this.fromApiJsonHelper.extractStringNamed("externalId", element);
+        final String externalIdStr = this.fromApiJsonHelper.extractStringNamed("externalId", element);
+        ExternalId externalId = externalIdFactory.create(externalIdStr);
         final LocalDate submittedOnDate = this.fromApiJsonHelper.extractLocalDateNamed("submittedOnDate", element);
 
         if (loanApplication == null) {

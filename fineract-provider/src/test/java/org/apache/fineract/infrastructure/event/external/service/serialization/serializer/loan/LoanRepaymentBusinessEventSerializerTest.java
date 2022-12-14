@@ -37,6 +37,7 @@ import org.apache.fineract.avro.loan.v1.RepaymentDueDataV1;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.domain.loan.repayment.LoanRepaymentDueBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroDateTimeMapper;
@@ -87,7 +88,7 @@ public class LoanRepaymentBusinessEventSerializerTest {
 
         when(loanForProcessing.getId()).thenReturn(1L);
         when(loanForProcessing.getAccountNumber()).thenReturn("0001");
-        when(loanForProcessing.getExternalId()).thenReturn("externalId");
+        when(loanForProcessing.getExternalId()).thenReturn(ExternalIdFactory.produce("externalId"));
         when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
         when(loanSummary.getTotalOutstanding()).thenReturn(BigDecimal.valueOf(0.0));
         when(loanForProcessing.getCurrency()).thenReturn(loanCurrency);

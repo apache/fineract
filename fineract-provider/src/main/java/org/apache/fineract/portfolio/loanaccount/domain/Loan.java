@@ -69,6 +69,7 @@ import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.security.service.RandomPasswordGenerator;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.service.HolidayUtil;
@@ -194,7 +195,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     private String accountNumber;
 
     @Column(name = "external_id")
-    private String externalId;
+    private ExternalId externalId;
 
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = true)
@@ -1437,10 +1438,14 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             this.createStandingInstructionAtDisbursement = valueAsInput;
         }
 
-        if (command.isChangeInStringParameterNamed(EXTERNAL_ID, this.externalId)) {
+        if (command.isChangeInStringParameterNamed(EXTERNAL_ID, this.externalId.getValue())) {
             final String newValue = command.stringValueOfParameterNamed(EXTERNAL_ID);
-            actualChanges.put(EXTERNAL_ID, newValue);
-            this.externalId = StringUtils.defaultIfEmpty(newValue, null);
+            ExternalId externalId = ExternalIdFactory.produce(newValue);
+            if (externalId.isEmpty() && TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled()) {
+                externalId = ExternalId.generate();
+            }
+            actualChanges.put(EXTERNAL_ID, externalId);
+            this.externalId = externalId;
         }
 
         // add clientId, groupId and loanType changes to actual changes
@@ -2052,7 +2057,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public void loanApplicationSubmittal(final LoanScheduleModel loanSchedule, final LoanApplicationTerms loanApplicationTerms,
-            final LoanLifecycleStateMachine lifecycleStateMachine, final LocalDate submittedOn, final String externalId,
+            final LoanLifecycleStateMachine lifecycleStateMachine, final LocalDate submittedOn, final ExternalId externalId,
             final boolean allowTransactionsOnHoliday, final List<Holiday> holidays, final WorkingDays workingDays,
             final boolean allowTransactionsOnNonWorkingDay) {
 
@@ -3784,7 +3789,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             final LocalDate writtenOffOnLocalDate = command.localDateValueOfParameterNamed(TRANSACTION_DATE);
             final String txnExternalId = command.stringValueOfParameterNamedAllowingNull(EXTERNAL_ID);
 
-            ExternalId externalId = StringUtils.isBlank(txnExternalId) ? ExternalId.empty() : new ExternalId(txnExternalId);
+            ExternalId externalId = ExternalIdFactory.produce(txnExternalId);
 
             if (externalId.isEmpty() && TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled()) {
                 externalId = ExternalId.generate();
@@ -3878,7 +3883,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         final LocalDate closureDate = command.localDateValueOfParameterNamed(TRANSACTION_DATE);
         final String txnExternalId = command.stringValueOfParameterNamedAllowingNull(EXTERNAL_ID);
 
-        ExternalId externalId = StringUtils.isBlank(txnExternalId) ? ExternalId.empty() : new ExternalId(txnExternalId);
+        ExternalId externalId = ExternalIdFactory.produce(txnExternalId);
         if (externalId.isEmpty() && TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled()) {
             externalId = ExternalId.generate();
         }
@@ -6020,7 +6025,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return this.accountNumber;
     }
 
-    public String getExternalId() {
+    public ExternalId getExternalId() {
         return this.externalId;
     }
 

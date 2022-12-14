@@ -163,7 +163,8 @@ public class DelinquencyWritePlatformServiceImpl implements DelinquencyWritePlat
             final CollectionData collectionData = loanDelinquencyDomainService.getOverdueCollectionData(loan);
             changes = lookUpDelinquencyRange(loan, delinquencyBucket, collectionData.getDelinquentDays());
         }
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(loan.getId()).with(changes).build();
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(loan.getId())
+                .withEntityExternalId(loan.getExternalId()).with(changes).build();
     }
 
     @Override

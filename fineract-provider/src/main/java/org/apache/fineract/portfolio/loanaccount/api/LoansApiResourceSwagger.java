@@ -32,6 +32,19 @@ final class LoansApiResourceSwagger {
 
     private LoansApiResourceSwagger() {}
 
+    @Schema(description = "GetLoansApprovalTemplateResponse")
+    public static final class GetLoansApprovalTemplateResponse {
+
+        private GetLoansApprovalTemplateResponse() {}
+
+        @Schema(example = "[2012, 4, 3]")
+        public LocalDate approvalDate;
+        @Schema(example = "200.000000")
+        public Double approvalAmount;
+        @Schema(example = "200.000000")
+        public Double netDisbursalAmount;
+    }
+
     @Schema(description = "GetLoansTemplateResponse")
     public static final class GetLoansTemplateResponse {
 
@@ -935,6 +948,8 @@ final class LoansApiResourceSwagger {
 
         @Schema(example = "1")
         public Long id;
+        @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+        public String externalId;
         @Schema(example = "000000001")
         public Long accountNo;
         public GetLoansLoanIdStatus status;
@@ -1300,6 +1315,8 @@ final class LoansApiResourceSwagger {
         public Integer loanId;
         @Schema(example = "1")
         public Integer resourceId;
+        @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+        public String resourceExternalId;
         public PutLoansLoanIdChanges changes;
     }
 
@@ -1316,6 +1333,8 @@ final class LoansApiResourceSwagger {
         public Integer loanId;
         @Schema(example = "1")
         public Integer resourceId;
+        @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+        public String resourceExternalId;
     }
 
     @Schema(description = "PostLoansLoanIdRequest")
@@ -1337,6 +1356,9 @@ final class LoansApiResourceSwagger {
         public Integer toLoanOfficerId;
         @Schema(example = "02 September 2014")
         public String assignmentDate;
+
+        @Schema(example = "02 September 2014")
+        public String unassignedDate;
         @Schema(example = "en")
         public String locale;
         @Schema(example = "dd MMMM yyyy")
@@ -1359,6 +1381,10 @@ final class LoansApiResourceSwagger {
         public String approvedLoanAmount;
         @Schema(example = "28 June 2022")
         public String expectedDisbursementDate;
+        @Schema(example = "28 June 2022")
+        public String rejectedOnDate;
+        @Schema(example = "28 June 2022")
+        public String withdrawnOnDate;
         @Schema(description = "List of PostLoansLoanIdDisbursementData")
         public List<PostLoansLoanIdDisbursementData> disbursementData;
     }
@@ -1420,6 +1446,8 @@ final class LoansApiResourceSwagger {
         public Integer loanId;
         @Schema(example = "3")
         public Integer resourceId;
+        @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+        public String resourceExternalId;
         @Schema(description = "PostLoansLoanIdChanges")
         public PostLoansLoanIdChanges changes;
     }

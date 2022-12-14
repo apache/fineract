@@ -43,8 +43,10 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.DeleteLoansLoanIdChargesChargeIdResponse;
+import org.apache.fineract.client.models.DeleteLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetDelinquencyTagHistoryResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
+import org.apache.fineract.client.models.GetLoansApprovalTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdCollectionData;
@@ -59,6 +61,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
@@ -67,6 +70,7 @@ import org.apache.fineract.client.models.PutChargeTransactionChangesRequest;
 import org.apache.fineract.client.models.PutChargeTransactionChangesResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdChargesChargeIdResponse;
+import org.apache.fineract.client.models.PutLoansLoanIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
@@ -176,6 +180,11 @@ public class LoanTransactionHelper extends IntegrationTest {
         final String url = "/fineract-provider/api/v1/loans/" + loanId + "?" + Utils.TENANT_IDENTIFIER + "&command=" + command;
         final String response = Utils.performServerPut(this.requestSpec, responseSpec, url, payload, null);
         return GSON.fromJson(response, PutLoansLoanIdResponse.class);
+    }
+
+    public PutLoansLoanIdResponse modifyLoanApplication(final String loanExternalId, final String command,
+            final PutLoansLoanIdRequest request) {
+        return ok(fineract().loans.modifyLoanApplication1(loanExternalId, request, command));
     }
 
     public ArrayList getLoanRepaymentSchedule(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -920,6 +929,10 @@ public class LoanTransactionHelper extends IntegrationTest {
         return ok(fineract().loans.retrieveLoan(loanId, false, "all", null, null));
     }
 
+    public GetLoansLoanIdResponse getLoanDetails(final String loanExternalId) {
+        return ok(fineract().loans.retrieveLoan1(loanExternalId, false, "all", null, null));
+    }
+
     public GetLoansLoanIdTransactionsTransactionIdResponse getLoanTransaction(final Integer loanId, final Integer txnId) {
         final String GET_LOAN_CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/" + txnId + "?"
                 + Utils.TENANT_IDENTIFIER;
@@ -1626,4 +1639,75 @@ public class LoanTransactionHelper extends IntegrationTest {
                 fineract().loanTransactions.retrieveTransactionTemplate1(loanExternalIdStr, command, dateFormat, transactionDate, locale));
     }
 
+    public GetLoansApprovalTemplateResponse getLoanApprovalTemplate(String loanExternalIdStr) {
+        return ok(fineract().loans.retrieveApprovalTemplate1(loanExternalIdStr, "approval"));
+    }
+
+    public DeleteLoansLoanIdResponse deleteLoanApplication(String loanExternalId) {
+        return ok(fineract().loans.deleteLoanApplication1(loanExternalId));
+    }
+
+    public List<GetDelinquencyTagHistoryResponse> getLoanDelinquencyTags(String loanExternalId) {
+        return ok(fineract().loans.getDelinquencyTagHistory1(loanExternalId));
+    }
+
+    public PostLoansLoanIdResponse approveLoan(String loanExternalId, PostLoansLoanIdRequest request) {
+        return ok(fineract().loans.stateTransitions1(loanExternalId, request, "approve"));
+    }
+
+    public PostLoansLoanIdResponse rejectLoan(String loanExternalId, PostLoansLoanIdRequest request) {
+        return ok(fineract().loans.stateTransitions1(loanExternalId, request, "reject"));
+    }
+
+    public PostLoansLoanIdResponse withdrawnByApplicantLoan(String loanExternalId, PostLoansLoanIdRequest request) {
+        return ok(fineract().loans.stateTransitions1(loanExternalId, request, "withdrawnByApplicant"));
+    }
+
+    public PostLoansLoanIdResponse disburseLoan(String loanExternalId, PostLoansLoanIdRequest request) {
+        return ok(fineract().loans.stateTransitions1(loanExternalId, request, "disburse"));
+    }
+
+    public PostLoansLoanIdResponse disburseToSavingsLoan(String loanExternalId, PostLoansLoanIdRequest request) {
+        return ok(fineract().loans.stateTransitions1(loanExternalId, request, "disburseToSavings"));
+    }
+
+    public PostLoansLoanIdResponse undoApprovalLoan(String loanExternalId, PostLoansLoanIdRequest request) {
+        return ok(fineract().loans.stateTransitions1(loanExternalId, request, "undoapproval"));
+    }
+
+    public PostLoansLoanIdResponse undoDisbursalLoan(String loanExternalId, PostLoansLoanIdRequest request) {
+        return ok(fineract().loans.stateTransitions1(loanExternalId, request, "undodisbursal"));
+    }
+
+    public PostLoansLoanIdResponse undoLastDisbursalLoan(String loanExternalId, PostLoansLoanIdRequest request) {
+        return ok(fineract().loans.stateTransitions1(loanExternalId, request, "undolastdisbursal"));
+    }
+
+    public PostLoansLoanIdResponse assignLoanOfficerLoan(String loanExternalId, PostLoansLoanIdRequest request) {
+        return ok(fineract().loans.stateTransitions1(loanExternalId, request, "assignloanofficer"));
+    }
+
+    public PostLoansLoanIdResponse unassignLoanOfficerLoan(String loanExternalId, PostLoansLoanIdRequest request) {
+        return ok(fineract().loans.stateTransitions1(loanExternalId, request, "unassignloanofficer"));
+    }
+
+    public PostLoansLoanIdResponse recoverGuaranteesLoan(String loanExternalId, PostLoansLoanIdRequest request) {
+        return ok(fineract().loans.stateTransitions1(loanExternalId, request, "recoverGuarantees"));
+    }
+
+    public PostLoansLoanIdResponse assignDelinquencyLoan(String loanExternalId, PostLoansLoanIdRequest request) {
+        return ok(fineract().loans.stateTransitions1(loanExternalId, request, "assigndelinquency"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse closeRescheduledLoan(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction1(loanExternalId, request, "close-rescheduled"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse closeLoan(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction1(loanExternalId, request, "close"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse forecloseLoan(String loanExternalId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(fineract().loanTransactions.executeLoanTransaction1(loanExternalId, request, "foreclosure"));
+    }
 }
