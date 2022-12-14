@@ -55,6 +55,10 @@
     "allowedVersions": "<=1.2.11"
   },
   {
+    "matchPackageNames": ["gradle"],
+    "allowedVersions": "<=7.5.1"
+  },
+  {
     "depTypeList": ["dependencies"],
     "updateTypes": ["patch", "minor"],
     "groupName": "non-major"
