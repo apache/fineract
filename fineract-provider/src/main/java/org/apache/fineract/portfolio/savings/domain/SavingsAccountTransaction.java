@@ -715,7 +715,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
             }
         }
 
-        return EndOfDayBalance.from(getTransactionLocalDate(), openingBalance, endOfDayBalance, this.balanceNumberOfDays);
+        return EndOfDayBalance.from(getTransactionLocalDate(), openingBalance, endOfDayBalance, this.balanceNumberOfDays == null ? 1 : this.balanceNumberOfDays);
     }
 
     public EndOfDayBalance toEndOfDayBalanceBoundedBy(final Money openingBalance, final LocalDateInterval boundedBy) {

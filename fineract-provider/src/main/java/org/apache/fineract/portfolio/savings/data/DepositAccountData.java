@@ -85,6 +85,8 @@ public class DepositAccountData {
 
     protected final DepositAccountInterestRateChartData chartTemplate;
 
+    protected BigDecimal accruedInterestCarriedForward;
+
     // import fields
     private Long productId;
 
@@ -327,6 +329,10 @@ public class DepositAccountData {
 
     public CurrencyData currency() {
         return this.currency;
+    }
+
+    public void setAccruedInterestCarriedForward(BigDecimal accruedInterestCarriedForward) {
+        this.accruedInterestCarriedForward = accruedInterestCarriedForward;
     }
 
     @Override

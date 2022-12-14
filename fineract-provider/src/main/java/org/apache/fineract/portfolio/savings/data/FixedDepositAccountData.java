@@ -186,7 +186,7 @@ public final class FixedDepositAccountData extends DepositAccountData {
 
     public static FixedDepositAccountData withInterestChart(final FixedDepositAccountData account,
             final DepositAccountInterestRateChartData accountChart) {
-        return new FixedDepositAccountData(account.id, account.accountNo, account.externalId, account.groupId, account.groupName,
+        FixedDepositAccountData fixedDepositAccountData =  new FixedDepositAccountData(account.id, account.accountNo, account.externalId, account.groupId, account.groupName,
                 account.clientId, account.clientName, account.depositProductId, account.depositProductName, account.fieldOfficerId,
                 account.fieldOfficerName, account.status, account.timeline, account.currency, account.nominalAnnualInterestRate,
                 account.interestCompoundingPeriodType, account.interestPostingPeriodType, account.interestCalculationType,
@@ -205,6 +205,8 @@ public final class FixedDepositAccountData extends DepositAccountData {
                 account.linkedAccount, account.transferInterestToSavings, account.withHoldTax, account.taxGroup,
                 account.maturityInstructionOptions, account.transferToSavingsId, account.transferToSavingsAccount,
                 account.allowPartialLiquidation, account.totalLiquidationAllowed);
+        fixedDepositAccountData.setAccruedInterestCarriedForward(account.accruedInterestCarriedForward);
+        return fixedDepositAccountData;
     }
 
     public static FixedDepositAccountData associationsAndTemplate(final FixedDepositAccountData account, FixedDepositAccountData template,
@@ -215,7 +217,7 @@ public final class FixedDepositAccountData extends DepositAccountData {
             template = account;
         }
 
-        return new FixedDepositAccountData(account.id, account.accountNo, account.externalId, account.groupId, account.groupName,
+        FixedDepositAccountData fixedDepositAccountData = new FixedDepositAccountData(account.id, account.accountNo, account.externalId, account.groupId, account.groupName,
                 account.clientId, account.clientName, account.depositProductId, account.depositProductName, account.fieldOfficerId,
                 account.fieldOfficerName, account.status, account.timeline, account.currency, account.nominalAnnualInterestRate,
                 account.interestCompoundingPeriodType, account.interestPostingPeriodType, account.interestCalculationType,
@@ -233,6 +235,8 @@ public final class FixedDepositAccountData extends DepositAccountData {
                 account.onAccountClosure, account.onAccountClosureOptions, account.paymentTypeOptions, template.savingsAccounts,
                 linkedAccount, account.transferInterestToSavings, account.withHoldTax, account.taxGroup, account.maturityInstructionOptions,
                 account.transferToSavingsId, transferToSavingsAccount, account.allowPartialLiquidation, account.totalLiquidationAllowed);
+        fixedDepositAccountData.setAccruedInterestCarriedForward(account.accruedInterestCarriedForward);
+        return fixedDepositAccountData;
     }
 
     public static FixedDepositAccountData withTemplateOptions(final FixedDepositAccountData account,

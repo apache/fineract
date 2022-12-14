@@ -930,7 +930,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     protected boolean createWithHoldTransaction(final BigDecimal amount, final LocalDate date, final boolean backdatedTxnsAllowedTill) {
         boolean isTaxAdded = false;
-        if (this.taxGroup != null && amount.compareTo(BigDecimal.ZERO) > 0) {
+        if (this.taxGroup != null && amount != null && amount.compareTo(BigDecimal.ZERO) > 0) {
             Map<TaxComponent, BigDecimal> taxSplit = TaxUtils.splitTax(amount, date, this.taxGroup.getTaxGroupMappings(), amount.scale());
             BigDecimal totalTax = TaxUtils.totalTaxAmount(taxSplit);
             if (totalTax.compareTo(BigDecimal.ZERO) > 0) {
@@ -949,7 +949,7 @@ public class SavingsAccount extends AbstractPersistableCustom {
 
     protected boolean updateWithHoldTransaction(final BigDecimal amount, final SavingsAccountTransaction withholdTransaction) {
         boolean isTaxAdded = false;
-        if (this.taxGroup != null && amount.compareTo(BigDecimal.ZERO) > 0) {
+        if (this.taxGroup != null && amount != null && amount.compareTo(BigDecimal.ZERO) > 0) {
             Map<TaxComponent, BigDecimal> taxSplit = TaxUtils.splitTax(amount, withholdTransaction.transactionLocalDate(),
                     this.taxGroup.getTaxGroupMappings(), amount.scale());
             BigDecimal totalTax = TaxUtils.totalTaxAmount(taxSplit);

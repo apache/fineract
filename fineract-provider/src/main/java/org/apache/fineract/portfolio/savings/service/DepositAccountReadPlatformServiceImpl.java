@@ -795,6 +795,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             sqlBuilder.append("datp.deposit_period_frequency_enum as depositPeriodFrequencyTypeId, ");
             sqlBuilder.append("datp.on_account_closure_enum as onAccountClosureId, ");
             sqlBuilder.append("datp.transfer_interest_to_linked_account as transferInterestToSavings, ");
+            sqlBuilder.append("datp.interest_carried_forward_on_top_up as interestCarriedForward, ");
             sqlBuilder.append("datp.transfer_to_savings_account_id as transferToSavingsId, ");
             sqlBuilder.append("datp.allow_partial_liquidation as allowPartialLiquidation, ");
             sqlBuilder.append("datp.total_liquidation_allowed as totalLiquidationAllowed ");
@@ -844,17 +845,20 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final EnumOptionData onAccountClosureType = (onAccountClosureId == null) ? null
                     : SavingsEnumerations.depositAccountOnClosureType(onAccountClosureId);
             final Boolean transferInterestToSavings = rs.getBoolean("transferInterestToSavings");
-
+            final BigDecimal interestCarriedForward = rs.getBigDecimal("interestCarriedForward");
             final Long transferToSavingsId = JdbcSupport.getLong(rs, "transferToSavingsId");
 
             final Boolean allowPartialLiquidation = rs.getBoolean("allowPartialLiquidation");
             final Integer totalLiquidationAllowed = rs.getInt("totalLiquidationAllowed");
 
-            return FixedDepositAccountData.instance(depositAccountData, preClosurePenalApplicable, preClosurePenalInterest,
+            FixedDepositAccountData fixedDepositAccountData =  FixedDepositAccountData.instance(depositAccountData, preClosurePenalApplicable, preClosurePenalInterest,
                     preClosurePenalInterestOnType, minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
                     inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount, maturityAmount, maturityDate, depositPeriod,
                     depositPeriodFrequencyType, onAccountClosureType, transferInterestToSavings, transferToSavingsId,
                     allowPartialLiquidation, totalLiquidationAllowed);
+            fixedDepositAccountData.setAccruedInterestCarriedForward(interestCarriedForward);
+            return fixedDepositAccountData;
+
         }
     }
 
