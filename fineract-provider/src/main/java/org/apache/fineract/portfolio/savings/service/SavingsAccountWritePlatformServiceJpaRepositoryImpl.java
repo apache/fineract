@@ -468,19 +468,23 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             gsimRepository.save(gsim);
             // This Implementation is deactivated due to double posting. https://fiterio.atlassian.net/browse/MON-123
 
-//            if (account.getLockedInUntilDate() != null && account.getLockedInUntilDate().isAfter(DateUtils.getBusinessLocalDate())) {
-//                final PaymentDetail paymentDetailRevoked = this.paymentDetailWritePlatformService
-//                        .createAndPersistPaymentDetailForVaultTribe(command, changes, SavingsAccountTransactionType.REVOKED_INTEREST,
-//                                withdrawal.getId().intValue(), transactionDate, paymentDetail.getId().intValue());
-//                // Revoke Accrued Interest if the locked date is not yet due and the account is subscribed to gsim
-//                final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId, backdatedTxnsAllowedTill);
-//                BigDecimal amount = savingsAccount.findAccrualInterestPostingTransactionToBeRevoked(transactionDate);
-//
-//                if (amount.compareTo(BigDecimal.ZERO) > 0) {
-//                    final SavingsAccountTransaction revokedInterestTx = this.savingsAccountDomainService.handleWithdrawal(savingsAccount,
-//                            fmt, transactionDate, amount, paymentDetailRevoked, transactionBooleanValues, backdatedTxnsAllowedTill);
-//                }
-//            }
+            // if (account.getLockedInUntilDate() != null &&
+            // account.getLockedInUntilDate().isAfter(DateUtils.getBusinessLocalDate())) {
+            // final PaymentDetail paymentDetailRevoked = this.paymentDetailWritePlatformService
+            // .createAndPersistPaymentDetailForVaultTribe(command, changes,
+            // SavingsAccountTransactionType.REVOKED_INTEREST,
+            // withdrawal.getId().intValue(), transactionDate, paymentDetail.getId().intValue());
+            // // Revoke Accrued Interest if the locked date is not yet due and the account is subscribed to gsim
+            // final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId,
+            // backdatedTxnsAllowedTill);
+            // BigDecimal amount = savingsAccount.findAccrualInterestPostingTransactionToBeRevoked(transactionDate);
+            //
+            // if (amount.compareTo(BigDecimal.ZERO) > 0) {
+            // final SavingsAccountTransaction revokedInterestTx =
+            // this.savingsAccountDomainService.handleWithdrawal(savingsAccount,
+            // fmt, transactionDate, amount, paymentDetailRevoked, transactionBooleanValues, backdatedTxnsAllowedTill);
+            // }
+            // }
 
         }
 
