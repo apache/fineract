@@ -59,6 +59,10 @@
     "allowedVersions": "<=7.5.1"
   },
   {
+    "matchPackageNames": ["org.mariadb.jdbc:mariadb-java-client"],
+    "allowedVersions": "<=3.0.9"
+  },
+  {
     "depTypeList": ["dependencies"],
     "updateTypes": ["patch", "minor"],
     "groupName": "non-major"
