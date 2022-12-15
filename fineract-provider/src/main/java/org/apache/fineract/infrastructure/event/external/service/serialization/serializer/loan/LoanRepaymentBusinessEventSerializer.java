@@ -25,6 +25,7 @@ import org.apache.fineract.avro.generator.ByteBufferSerializable;
 import org.apache.fineract.avro.generic.v1.CurrencyDataV1;
 import org.apache.fineract.avro.loan.v1.LoanRepaymentDueDataV1;
 import org.apache.fineract.avro.loan.v1.RepaymentDueDataV1;
+import org.apache.fineract.avro.loan.v1.RepaymentPastDueDataV1;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.repayment.LoanRepaymentBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroDateTimeMapper;
@@ -46,25 +47,31 @@ public class LoanRepaymentBusinessEventSerializer extends AbstractBusinessEventS
         LoanRepaymentBusinessEvent event = (LoanRepaymentBusinessEvent) rawEvent;
         LoanRepaymentScheduleInstallment repaymentInstallment = event.get();
         Loan loan = repaymentInstallment.getLoan();
+
         Long id = loan.getId();
         String accountNo = loan.getAccountNumber();
         String externalId = loan.getExternalId().getValue();
-        String dueDate = dataTimeMapper.mapLocalDate(repaymentInstallment.getDueDate());
         MonetaryCurrency loanCurrency = loan.getCurrency();
         CurrencyDataV1 currency = CurrencyDataV1.newBuilder().setCode(loanCurrency.getCode())
                 .setDecimalPlaces(loanCurrency.getDigitsAfterDecimal()).setInMultiplesOf(loanCurrency.getCurrencyInMultiplesOf()).build();
-        BigDecimal totalLoanAmountDue = loan.getLoanSummary().getTotalOutstanding();
 
         Integer installmentNumber = repaymentInstallment.getInstallmentNumber();
+        String dueDate = dataTimeMapper.mapLocalDate(repaymentInstallment.getDueDate());
         BigDecimal principalAmountDue = repaymentInstallment.getPrincipalOutstanding(loanCurrency).getAmount();
         BigDecimal interestAmountDue = repaymentInstallment.getInterestOutstanding(loanCurrency).getAmount();
         BigDecimal feeChargeAmountDue = repaymentInstallment.getFeeChargesOutstanding(loanCurrency).getAmount();
         BigDecimal penaltyChargeAmountDue = repaymentInstallment.getPenaltyChargesOutstanding(loanCurrency).getAmount();
         BigDecimal totalAmountDue = repaymentInstallment.getTotalOutstanding(loanCurrency).getAmount();
 
-        RepaymentDueDataV1 repaymentDue = new RepaymentDueDataV1(installmentNumber, principalAmountDue, interestAmountDue,
+        RepaymentDueDataV1 repaymentDue = new RepaymentDueDataV1(installmentNumber, dueDate, principalAmountDue, interestAmountDue,
                 feeChargeAmountDue, penaltyChargeAmountDue, totalAmountDue);
-        return new LoanRepaymentDueDataV1(id, accountNo, externalId, dueDate, currency, totalLoanAmountDue, repaymentDue);
+
+        RepaymentPastDueDataV1 pastDue = new RepaymentPastDueDataV1(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
+                BigDecimal.ZERO);
+
+        LoanRepaymentDueDataV1 loanRepaymentDueDataV1 = LoanRepaymentDueDataV1.newBuilder().setLoanId(id).setLoanAccountNo(accountNo)
+                .setLoanExternalId(externalId).setCurrency(currency).setInstallment(repaymentDue).setPastDueAmount(pastDue).build();
+        return loanRepaymentDueDataV1;
     }
 
     @Override

@@ -4,32 +4,16 @@
     "type": "record",
     "fields": [
         {
-            "default": null,
-            "name": "id",
-            "type": [
-                "null",
-                "long"
-            ]
+            "name": "loanId",
+            "type": ["long"]
+        },
+        {
+            "name": "loanAccountNo",
+            "type": ["string"]
         },
         {
             "default": null,
-            "name": "accountNo",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "default": null,
-            "name": "externalId",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "default": null,
-            "name": "dueDate",
+            "name": "loanExternalId",
             "type": [
                 "null",
                 "string"
@@ -44,19 +28,15 @@
             ]
         },
         {
-            "default": null,
-            "name": "totalLoanAmountDue",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
+            "name": "installment",
+            "type": ["org.apache.fineract.avro.loan.v1.RepaymentDueDataV1"]
         },
         {
             "default": null,
-            "name": "repaymentDue",
+            "name": "pastDueAmount",
             "type": [
                 "null",
-                "org.apache.fineract.avro.loan.v1.RepaymentDueDataV1"
+                "org.apache.fineract.avro.loan.v1.RepaymentPastDueDataV1"
             ]
         }
     ]

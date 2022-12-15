@@ -19,6 +19,8 @@
 package org.apache.fineract.infrastructure.event.external.service.serialization.serializer.loan;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -31,9 +33,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import org.apache.avro.AvroRuntimeException;
 import org.apache.fineract.avro.generic.v1.CurrencyDataV1;
 import org.apache.fineract.avro.loan.v1.LoanRepaymentDueDataV1;
 import org.apache.fineract.avro.loan.v1.RepaymentDueDataV1;
+import org.apache.fineract.avro.loan.v1.RepaymentPastDueDataV1;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -54,8 +58,11 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class LoanRepaymentBusinessEventSerializerTest {
 
     @Mock
@@ -103,12 +110,52 @@ public class LoanRepaymentBusinessEventSerializerTest {
 
         // then
         CurrencyDataV1 currency = CurrencyDataV1.newBuilder().setCode("CODE").setDecimalPlaces(1).setInMultiplesOf(1).build();
-        RepaymentDueDataV1 repaymentDue = new RepaymentDueDataV1(1, BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0),
+        RepaymentDueDataV1 repaymentDue = new RepaymentDueDataV1(1, loanInstallmentRepaymentDueDate.format(DateTimeFormatter.ISO_DATE),
+                BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0),
+                BigDecimal.valueOf(0.0));
+        RepaymentPastDueDataV1 pastDue = new RepaymentPastDueDataV1(BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0),
                 BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0));
-        LoanRepaymentDueDataV1 expectedSerializedData = new LoanRepaymentDueDataV1(1L, "0001", "externalId",
-                loanInstallmentRepaymentDueDate.format(DateTimeFormatter.ISO_DATE), currency, BigDecimal.valueOf(0.0), repaymentDue);
+        LoanRepaymentDueDataV1 expectedSerializedData = new LoanRepaymentDueDataV1(1L, "0001", "externalId", currency, repaymentDue,
+                pastDue);
 
         assertEquals(data, expectedSerializedData);
+        moneyHelper.close();
+    }
+
+    @Test
+    public void testLoanRepaymentEventLoanIdMandatoryFieldValidation() {
+        // given
+        LoanRepaymentBusinessEventSerializer serializer = new LoanRepaymentBusinessEventSerializer(mapper);
+
+        LocalDate loanInstallmentRepaymentDueDate = DateUtils.getBusinessLocalDate().plusDays(1);
+
+        Loan loanForProcessing = Mockito.mock(Loan.class);
+        LoanProduct loanProduct = Mockito.mock(LoanProduct.class);
+        LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
+        MonetaryCurrency loanCurrency = Mockito.mock(MonetaryCurrency.class);
+        MockedStatic<MoneyHelper> moneyHelper = Mockito.mockStatic(MoneyHelper.class);
+
+        LoanRepaymentScheduleInstallment repaymentInstallment = new LoanRepaymentScheduleInstallment(loanForProcessing, 1,
+                LocalDate.now(ZoneId.systemDefault()), loanInstallmentRepaymentDueDate, BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0),
+                BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), false, new HashSet<>(), BigDecimal.valueOf(0.0));
+        LoanRepaymentDueBusinessEvent event = new LoanRepaymentDueBusinessEvent(repaymentInstallment);
+
+        // set mandatory loanID field as null
+        when(loanForProcessing.getId()).thenReturn(null);
+        when(loanForProcessing.getAccountNumber()).thenReturn("0001");
+        when(loanForProcessing.getExternalId()).thenReturn(ExternalIdFactory.produce("externalId"));
+        when(loanForProcessing.getLoanSummary()).thenReturn(loanSummary);
+        when(loanSummary.getTotalOutstanding()).thenReturn(BigDecimal.valueOf(0.0));
+        when(loanForProcessing.getCurrency()).thenReturn(loanCurrency);
+        when(loanCurrency.getCode()).thenReturn("CODE");
+        when(loanCurrency.getCurrencyInMultiplesOf()).thenReturn(1);
+        when(loanCurrency.getDigitsAfterDecimal()).thenReturn(1);
+        when(mapper.mapLocalDate(any())).thenReturn(loanInstallmentRepaymentDueDate.format(DateTimeFormatter.ISO_DATE));
+        moneyHelper.when(() -> MoneyHelper.getRoundingMode()).thenReturn(RoundingMode.UP);
+
+        // when
+        AvroRuntimeException exceptionThrown = assertThrows(AvroRuntimeException.class, () -> serializer.toAvroDTO(event));
+        assertTrue(exceptionThrown.getMessage().contains("does not accept null values"));
         moneyHelper.close();
     }
 }

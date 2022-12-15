@@ -1,27 +1,11 @@
 {
-    "name": "RepaymentDueDataV1",
+    "name": "RepaymentPastDueDataV1",
     "namespace": "org.apache.fineract.avro.loan.v1",
     "type": "record",
     "fields": [
         {
             "default": null,
-            "name": "installmentNumber",
-            "type": [
-                "null",
-                "int"
-            ]
-        },
-        {
-            "default": null,
-            "name": "installmentDueDate",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "default": null,
-            "name": "principalAmountDue",
+            "name": "totalAmount",
             "type": [
                 "null",
                 "bigdecimal"
@@ -29,7 +13,7 @@
         },
         {
             "default": null,
-            "name": "interestAmountDue",
+            "name": "principalAmount",
             "type": [
                 "null",
                 "bigdecimal"
@@ -37,7 +21,7 @@
         },
         {
             "default": null,
-            "name": "feeChargeAmountDue",
+            "name": "interestAmount",
             "type": [
                 "null",
                 "bigdecimal"
@@ -45,7 +29,7 @@
         },
         {
             "default": null,
-            "name": "penaltyChargeAmountDue",
+            "name": "feeAmount",
             "type": [
                 "null",
                 "bigdecimal"
@@ -53,7 +37,7 @@
         },
         {
             "default": null,
-            "name": "totalAmountDue",
+            "name": "penaltyAmount",
             "type": [
                 "null",
                 "bigdecimal"
