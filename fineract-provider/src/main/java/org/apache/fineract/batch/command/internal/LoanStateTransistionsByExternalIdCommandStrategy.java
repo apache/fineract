@@ -24,18 +24,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.ws.rs.core.UriInfo;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
-import org.apache.fineract.portfolio.loanaccount.api.LoanTransactionsApiResource;
+import org.apache.fineract.portfolio.loanaccount.api.LoansApiResource;
 import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 /**
- * Implements {@link CommandStrategy} and handles the creation of a transaction for a Loan. It passes the contents of
- * the body from the BatchRequest to {@link LoanTransactionsApiResource} and gets back the response. This class will
- * also catch any errors raised by {@link LoanTransactionsApiResource} and map those errors to appropriate status codes
- * in BatchResponse.
+ * Implements {@link CommandStrategy} to handle approval of a pending loan by its external id. It passes the contents of
+ * the body from the BatchRequest to {@link LoansApiResource} and gets back the response. This class will also catch any
+ * errors raised by {@link LoansApiResource} and map those errors to appropriate status codes in BatchResponse.
  *
  * @see CommandStrategy
  * @see BatchRequest
@@ -43,15 +43,15 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class CreateTransactionLoanCommandStrategy implements CommandStrategy {
+public class LoanStateTransistionsByExternalIdCommandStrategy implements CommandStrategy {
 
     /**
-     * Loan transactions api resource {@link LoanTransactionsApiResource}.
+     * Loans api resource {@link LoansApiResource}.
      */
-    private final LoanTransactionsApiResource loanTransactionsApiResource;
+    private final LoansApiResource loansApiResource;
 
     @Override
-    public BatchResponse execute(BatchRequest request, @SuppressWarnings("unused") UriInfo uriInfo) {
+    public BatchResponse execute(final BatchRequest request, @SuppressWarnings("unused") final UriInfo uriInfo) {
 
         final BatchResponse response = new BatchResponse();
         final String responseBody;
@@ -59,11 +59,13 @@ public class CreateTransactionLoanCommandStrategy implements CommandStrategy {
         response.setRequestId(request.getRequestId());
         response.setHeaders(request.getHeaders());
 
-        final List<String> pathParameters = Splitter.on('/').splitToList(request.getRelativeUrl());
-        final Long loanId = Long.parseLong(pathParameters.get(1));
+        // Expected pattern - loans\/external-id\/[\w\d_-]+\?command=***
+        final String relativeUrl = request.getRelativeUrl();
+        final List<String> pathParameters = Splitter.on('/').splitToList(relativeUrl);
+        final String loanExternalIdPathParameter = pathParameters.get(2);
 
         final Pattern commandPattern = Pattern.compile("^?command=[a-zA-Z]+");
-        final Matcher commandMatcher = commandPattern.matcher(pathParameters.get(2));
+        final Matcher commandMatcher = commandPattern.matcher(loanExternalIdPathParameter);
 
         if (!commandMatcher.find()) {
             // This would only occur if the CommandStrategyProvider is incorrectly configured.
@@ -76,13 +78,16 @@ public class CreateTransactionLoanCommandStrategy implements CommandStrategy {
         final String commandQueryParam = commandMatcher.group(0);
         final String command = commandQueryParam.substring(commandQueryParam.indexOf("=") + 1);
 
-        responseBody = loanTransactionsApiResource.executeLoanTransaction(loanId, command, request.getBody());
+        final String loanExternalId = StringUtils.substringBefore(loanExternalIdPathParameter, "?");
+
+        // Calls 'approve'/'disburse' function from 'LoansApiResource' to approve/disburse loan
+        responseBody = loansApiResource.stateTransitions(loanExternalId, command, request.getBody());
 
         response.setStatusCode(HttpStatus.SC_OK);
-        // Sets the body of the response after Charge has been successfully
-        // created
+        // Sets the body of the response after the successful approval of a loan
         response.setBody(responseBody);
 
         return response;
     }
+
 }

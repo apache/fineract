@@ -24,8 +24,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Stream;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.UriInfo;
@@ -33,7 +32,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.infrastructure.core.api.MutableUriInfo;
-import org.apache.fineract.portfolio.loanaccount.api.LoansApiResource;
+import org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -44,74 +43,60 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Test class for {@link GetLoanByIdCommandStrategy}.
+ * The {@link CollectChargesByLoanExternalIdCommandStrategy} test class.
  */
-public class GetLoanByIdCommandStrategyTest {
+public class CollectChargesByLoanExternalIdCommandStrategyTest {
 
+    /**
+     * Query parameter provider.
+     *
+     * @return the test data stream
+     */
     private static Stream<Arguments> provideQueryParameters() {
-        return Stream.of(Arguments.of(null, null, null, 0), Arguments.of("all", null, null, 1),
-                Arguments.of("repaymentSchedule,transactions", null, "guarantors,futureSchedule", 2),
-                Arguments.of("repaymentSchedule,transactions", "id,principal,annualInterestRate", null, 2),
-                Arguments.of("repaymentSchedule,transactions", "id,principal,annualInterestRate", "guarantors,futureSchedule", 3));
+        return Stream.of(Arguments.of(null, 0), Arguments.of("fields=name,amountOrPercentage", 1));
     }
 
     /**
-     * Test {@link GetLoanByIdCommandStrategy#execute} happy path scenario.
-     *
+     * Test {@link CollectChargesByLoanExternalIdCommandStrategy#execute} happy path scenario.
      */
     @ParameterizedTest
     @MethodSource("provideQueryParameters")
-    public void testExecuteSuccessScenario(final String associations, final String fields, final String exclude,
-            final int noOfQueryParams) {
-        // given
+    public void testExecuteSuccessScenario(final String queryParameter, final int numberOfQueryParams) {
         final TestContext testContext = new TestContext();
 
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final BatchRequest request = getBatchRequest(loanId, associations, exclude, fields);
-        final String responseBody = "{\\\"id\\\":2,\\\"accountNo\\\":\\\"000000002\\\"}";
+        final String loanExternalId = UUID.randomUUID().toString();
+        final BatchRequest request = getBatchRequest(loanExternalId, queryParameter);
+        final String responseBody = "someResponseBody";
 
-        given(testContext.loansApiResource.retrieveLoan(eq(loanId), eq(false), eq(associations), eq(exclude), eq(fields),
-                any(UriInfo.class))).willReturn(responseBody);
+        given(testContext.loanChargesApiResource.retrieveAllLoanCharges(eq(loanExternalId), any(UriInfo.class))).willReturn(responseBody);
 
-        // when
-        final BatchResponse response = testContext.underTest.execute(request, testContext.uriInfo);
+        final BatchResponse response = testContext.subjectToTest.execute(request, testContext.uriInfo);
 
-        // then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SC_OK);
         assertThat(response.getRequestId()).isEqualTo(request.getRequestId());
         assertThat(response.getHeaders()).isEqualTo(request.getHeaders());
         assertThat(response.getBody()).isEqualTo(responseBody);
 
-        verify(testContext.loansApiResource).retrieveLoan(eq(loanId), eq(false), eq(associations), eq(exclude), eq(fields),
-                testContext.uriInfoCaptor.capture());
+        verify(testContext.loanChargesApiResource).retrieveAllLoanCharges(eq(loanExternalId), testContext.uriInfoCaptor.capture());
         MutableUriInfo mutableUriInfo = testContext.uriInfoCaptor.getValue();
-        assertThat(mutableUriInfo.getAdditionalQueryParameters()).hasSize(noOfQueryParams);
+        assertThat(mutableUriInfo.getAdditionalQueryParameters()).hasSize(numberOfQueryParams);
     }
 
     /**
-     * Creates and returns a request with the given loan id.
+     * Creates and returns a request with the given loan external id.
      *
-     * @param loanId
-     *            the loan id
+     * @param loanExternalId
+     *            the loan external id
+     * @param queryParameter
+     *            the query parameter
      * @return BatchRequest
      */
-    private BatchRequest getBatchRequest(final Long loanId, final String associations, final String exclude, final String fields) {
-
+    private BatchRequest getBatchRequest(final String loanExternalId, final String queryParameter) {
         final BatchRequest br = new BatchRequest();
-        String relativeUrl = "loans/" + loanId;
+        String relativeUrl = "loans/external-id/" + loanExternalId + "/charges";
 
-        Set<String> queryParams = new HashSet<>();
-        if (associations != null) {
-            queryParams.add("associations=" + associations);
-        }
-        if (exclude != null) {
-            queryParams.add("exclude=" + exclude);
-        }
-        if (fields != null) {
-            queryParams.add("fields=" + fields);
-        }
-        if (!queryParams.isEmpty()) {
-            relativeUrl = relativeUrl + "?" + String.join("&", queryParams);
+        if (queryParameter != null) {
+            relativeUrl = relativeUrl + "?" + queryParameter;
         }
 
         br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
@@ -128,20 +113,35 @@ public class GetLoanByIdCommandStrategyTest {
      */
     private static class TestContext {
 
+        /**
+         * The subject to test
+         */
+        private final CollectChargesByLoanExternalIdCommandStrategy subjectToTest;
+
+        /**
+         * The mock uri info
+         */
         @Mock
         private UriInfo uriInfo;
 
+        /**
+         * The mock {@link LoanChargesApiResource} object.
+         */
         @Mock
-        private LoansApiResource loansApiResource;
+        private LoanChargesApiResource loanChargesApiResource;
 
+        /**
+         * The uri info captor
+         */
         @Captor
         private ArgumentCaptor<MutableUriInfo> uriInfoCaptor;
 
-        private final GetLoanByIdCommandStrategy underTest;
-
+        /**
+         * Test Context constructor
+         */
         TestContext() {
             MockitoAnnotations.openMocks(this);
-            underTest = new GetLoanByIdCommandStrategy(loansApiResource);
+            subjectToTest = new CollectChargesByLoanExternalIdCommandStrategy(loanChargesApiResource);
         }
     }
 }

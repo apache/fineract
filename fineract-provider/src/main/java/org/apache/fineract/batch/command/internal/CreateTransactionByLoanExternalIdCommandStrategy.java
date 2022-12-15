@@ -32,10 +32,10 @@ import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 /**
- * Implements {@link CommandStrategy} and handles the creation of a transaction for a Loan. It passes the contents of
- * the body from the BatchRequest to {@link LoanTransactionsApiResource} and gets back the response. This class will
- * also catch any errors raised by {@link LoanTransactionsApiResource} and map those errors to appropriate status codes
- * in BatchResponse.
+ * Implements {@link CommandStrategy} and handles the creation of a transaction for a Loan using External Id. It passes
+ * the contents of the body from the BatchRequest to {@link LoanTransactionsApiResource} and gets back the response.
+ * This class will also catch any errors raised by {@link LoanTransactionsApiResource} and map those errors to
+ * appropriate status codes in BatchResponse.
  *
  * @see CommandStrategy
  * @see BatchRequest
@@ -43,7 +43,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class CreateTransactionLoanCommandStrategy implements CommandStrategy {
+public class CreateTransactionByLoanExternalIdCommandStrategy implements CommandStrategy {
 
     /**
      * Loan transactions api resource {@link LoanTransactionsApiResource}.
@@ -59,11 +59,12 @@ public class CreateTransactionLoanCommandStrategy implements CommandStrategy {
         response.setRequestId(request.getRequestId());
         response.setHeaders(request.getHeaders());
 
+        // Expected Pattern - loans\/external-id\/[a-zA-Z0-9_-]*\/transactions\?command=[\w]+
         final List<String> pathParameters = Splitter.on('/').splitToList(request.getRelativeUrl());
-        final Long loanId = Long.parseLong(pathParameters.get(1));
+        final String loanExternalId = pathParameters.get(2);
 
         final Pattern commandPattern = Pattern.compile("^?command=[a-zA-Z]+");
-        final Matcher commandMatcher = commandPattern.matcher(pathParameters.get(2));
+        final Matcher commandMatcher = commandPattern.matcher(pathParameters.get(3));
 
         if (!commandMatcher.find()) {
             // This would only occur if the CommandStrategyProvider is incorrectly configured.
@@ -76,7 +77,7 @@ public class CreateTransactionLoanCommandStrategy implements CommandStrategy {
         final String commandQueryParam = commandMatcher.group(0);
         final String command = commandQueryParam.substring(commandQueryParam.indexOf("=") + 1);
 
-        responseBody = loanTransactionsApiResource.executeLoanTransaction(loanId, command, request.getBody());
+        responseBody = loanTransactionsApiResource.executeLoanTransaction(loanExternalId, command, request.getBody());
 
         response.setStatusCode(HttpStatus.SC_OK);
         // Sets the body of the response after Charge has been successfully

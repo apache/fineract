@@ -957,6 +957,8 @@ final class LoansApiResourceSwagger {
         public boolean disallowExpectedDisbursements;
         @Schema(example = "1")
         public Integer clientId;
+        @Schema(example = "5e77989e-aa11-11bc-b109-0242ac120004")
+        public String clientExternalId;
         @Schema(example = "Kampala first Client")
         public String clientName;
         @Schema(example = "2")
@@ -981,6 +983,8 @@ final class LoansApiResourceSwagger {
         public BigDecimal principal;
         @Schema(example = "1000.000000")
         public Double approvedPrincipal;
+        @Schema(example = "1001.000000")
+        public Double proposedPrincipal;
         @Schema(example = "200.000000")
         public Double netDisbursalAmount;
         @Schema(example = "12")
@@ -996,6 +1000,8 @@ final class LoansApiResourceSwagger {
         public GetLoansLoanIdInterestRateFrequencyType interestRateFrequencyType;
         @Schema(example = "24")
         public Integer annualInterestRate;
+        @Schema(example = "false")
+        public Boolean isFloatingInterestRate;
         public GetLoansLoanIdAmortizationType amortizationType;
         @Schema(example = "5.5")
         public BigDecimal fixedPrincipalPercentagePerInstallment;
@@ -1057,8 +1063,8 @@ final class LoansApiResourceSwagger {
         public String locale;
         @Schema(example = "1")
         public Integer productId;
-        @Schema(example = "100,000.00")
-        public String principal;
+        @Schema(example = "1000.00")
+        public BigDecimal principal;
         @Schema(example = "12")
         public Integer loanTermFrequency;
         @Schema(example = "2")
@@ -1163,9 +1169,11 @@ final class LoansApiResourceSwagger {
         @Schema(example = "1")
         public Integer clientId;
         @Schema(example = "1")
-        public Integer loanId;
+        public Long loanId;
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
+        @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+        public String resourceExternalId;
     }
 
     @Schema(description = "PutLoansLoanIdRequest")
@@ -1314,9 +1322,9 @@ final class LoansApiResourceSwagger {
         @Schema(example = "1")
         public Integer clientId;
         @Schema(example = "1")
-        public Integer loanId;
+        public Long loanId;
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
         @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
         public String resourceExternalId;
         public PutLoansLoanIdChanges changes;
@@ -1332,9 +1340,9 @@ final class LoansApiResourceSwagger {
         @Schema(example = "1")
         public Integer clientId;
         @Schema(example = "1")
-        public Integer loanId;
+        public Long loanId;
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
         @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
         public String resourceExternalId;
     }
@@ -1370,7 +1378,7 @@ final class LoansApiResourceSwagger {
         @Schema(example = "3e7791ce-aa10-11ec-b909-0242ac120002")
         public String externalId;
         @Schema(example = "5000.33")
-        public String transactionAmount;
+        public BigDecimal transactionAmount;
         @Schema(example = "Description of disbursement details.")
         public String note;
         @Schema(example = "28 June 2022")
@@ -1380,7 +1388,7 @@ final class LoansApiResourceSwagger {
         @Schema(example = "28 June 2022")
         public String approvedOnDate;
         @Schema(example = "1000")
-        public String approvedLoanAmount;
+        public BigDecimal approvedLoanAmount;
         @Schema(example = "28 June 2022")
         public String expectedDisbursementDate;
         @Schema(example = "28 June 2022")

@@ -19,6 +19,7 @@
 package org.apache.fineract.batch.command.internal;
 
 import com.google.common.base.Splitter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.UriInfo;
@@ -29,14 +30,15 @@ import org.apache.fineract.batch.command.CommandStrategyUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.infrastructure.core.api.MutableUriInfo;
-import org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource;
+import org.apache.fineract.portfolio.loanaccount.api.LoanTransactionsApiResource;
 import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 /**
- * Implements {@link CommandStrategy} to retrieve a charge by id. It passes the contents of the body from the
- * BatchRequest to {@link LoanChargesApiResource} and gets back the response. This class will also catch any errors
- * raised by {@link LoanChargesApiResource} and map those errors to appropriate status codes in BatchResponse.
+ * Implements {@link CommandStrategy} to retrieve a transaction by external id. It passes the contents of the body from
+ * the BatchRequest to {@link LoanTransactionsApiResource} and gets back the response. This class will also catch any
+ * errors raised by {@link LoanTransactionsApiResource} and map those errors to appropriate status codes in
+ * BatchResponse.
  *
  * @see CommandStrategy
  * @see BatchRequest
@@ -44,12 +46,12 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class GetChargeByIdCommandStrategy implements CommandStrategy {
+public class GetTransactionByExternalIdCommandStrategy implements CommandStrategy {
 
     /**
-     * Loan charges api resource {@link LoanChargesApiResource}.
+     * Loan transactions api resource {@link LoanTransactionsApiResource}.
      */
-    private final LoanChargesApiResource loanChargesApiResource;
+    private final LoanTransactionsApiResource loanTransactionsApiResource;
 
     @Override
     public BatchResponse execute(final BatchRequest request, final UriInfo uriInfo) {
@@ -63,17 +65,18 @@ public class GetChargeByIdCommandStrategy implements CommandStrategy {
 
         final String relativeUrl = request.getRelativeUrl();
 
-        // Get the loan and charge ids for use in loanChargesApiResource
+        // Expected pattern - loans\/external-id\/[\w\d_-]+\/transactions\/external-id\/[\w\d_-]+
+        // Get the loan and transaction ids for use in loanTransactionsApiResource
         final List<String> pathParameters = Splitter.on('/').splitToList(relativeUrl);
-        final Long loanId = Long.parseLong(pathParameters.get(1));
-        Long chargeId;
+        final String loanExternalId = pathParameters.get(2);
+        String transactionExternalId;
         if (relativeUrl.indexOf('?') > 0) {
-            chargeId = Long.parseLong(StringUtils.substringBeforeLast(pathParameters.get(3), "?"));
+            transactionExternalId = StringUtils.substringBeforeLast(pathParameters.get(5), "?");
         } else {
-            chargeId = Long.parseLong(pathParameters.get(3));
+            transactionExternalId = pathParameters.get(5);
         }
 
-        Map<String, String> queryParameters;
+        Map<String, String> queryParameters = new HashMap<>();
         if (relativeUrl.indexOf('?') > 0) {
             queryParameters = CommandStrategyUtils.getQueryParameters(relativeUrl);
 
@@ -81,8 +84,20 @@ public class GetChargeByIdCommandStrategy implements CommandStrategy {
             CommandStrategyUtils.addQueryParametersToUriInfo(parameterizedUriInfo, queryParameters);
         }
 
-        responseBody = loanChargesApiResource.retrieveLoanCharge(loanId, chargeId, parameterizedUriInfo);
+        String fields = null;
+        if (!queryParameters.isEmpty()) {
+            if (queryParameters.containsKey("fields")) {
+                fields = queryParameters.get("fields");
+            }
+        }
+
+        // Calls 'retrieveTransaction' function from 'loanTransactionsApiResource' using external id
+        responseBody = loanTransactionsApiResource.retrieveTransactionByLoanExternalIdAndTransactionExternalId(loanExternalId,
+                transactionExternalId, fields, uriInfo);
+
         response.setStatusCode(HttpStatus.SC_OK);
+
+        // Sets the body of the response after retrieving the transaction
         response.setBody(responseBody);
 
         return response;

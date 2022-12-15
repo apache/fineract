@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.batch.command.internal;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -26,9 +26,11 @@ import static org.mockito.Mockito.verify;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Stream;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.UriInfo;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
@@ -44,61 +46,76 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Test class for {@link GetLoanByIdCommandStrategy}.
+ * Test class for {@link GetLoanByExternalIdCommandStrategy}.
  */
-public class GetLoanByIdCommandStrategyTest {
+public class GetLoanByExternalIdCommandStrategyTest {
 
+    /**
+     * The query parameter provider.
+     *
+     * @return Arguments.
+     */
     private static Stream<Arguments> provideQueryParameters() {
-        return Stream.of(Arguments.of(null, null, null, 0), Arguments.of("all", null, null, 1),
-                Arguments.of("repaymentSchedule,transactions", null, "guarantors,futureSchedule", 2),
-                Arguments.of("repaymentSchedule,transactions", "id,principal,annualInterestRate", null, 2),
-                Arguments.of("repaymentSchedule,transactions", "id,principal,annualInterestRate", "guarantors,futureSchedule", 3));
+        return Stream.of(Arguments.of(null, null, null, null, 0), Arguments.of("all", null, null, null, 1),
+                Arguments.of("repaymentSchedule,transactions", null, "guarantors,futureSchedule", "true", 3),
+                Arguments.of("repaymentSchedule,transactions", "id,principal,annualInterestRate", null, "false", 3),
+                Arguments.of("repaymentSchedule,transactions", "id,principal,annualInterestRate", "guarantors,futureSchedule", "false", 4));
     }
 
     /**
-     * Test {@link GetLoanByIdCommandStrategy#execute} happy path scenario.
+     * Test {@link GetLoanByExternalIdCommandStrategy#execute} happy path scenario.
      *
      */
     @ParameterizedTest
     @MethodSource("provideQueryParameters")
     public void testExecuteSuccessScenario(final String associations, final String fields, final String exclude,
-            final int noOfQueryParams) {
+            final String staffInSelectedOfficeOnlyFlag, final int noOfQueryParams) {
         // given
         final TestContext testContext = new TestContext();
 
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final BatchRequest request = getBatchRequest(loanId, associations, exclude, fields);
+        final String loanExternalId = UUID.randomUUID().toString();
+        final BatchRequest request = getBatchRequest(loanExternalId, associations, exclude, fields, staffInSelectedOfficeOnlyFlag);
+        final Boolean staffInSelectedOfficeOnlyBooleanFlag = BooleanUtils.toBoolean(staffInSelectedOfficeOnlyFlag);
         final String responseBody = "{\\\"id\\\":2,\\\"accountNo\\\":\\\"000000002\\\"}";
 
-        given(testContext.loansApiResource.retrieveLoan(eq(loanId), eq(false), eq(associations), eq(exclude), eq(fields),
-                any(UriInfo.class))).willReturn(responseBody);
+        given(testContext.loansApiResource.retrieveLoan(eq(loanExternalId), eq(staffInSelectedOfficeOnlyBooleanFlag), eq(associations),
+                eq(exclude), eq(fields), any(UriInfo.class))).willReturn(responseBody);
 
         // when
         final BatchResponse response = testContext.underTest.execute(request, testContext.uriInfo);
 
         // then
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SC_OK);
-        assertThat(response.getRequestId()).isEqualTo(request.getRequestId());
-        assertThat(response.getHeaders()).isEqualTo(request.getHeaders());
-        assertThat(response.getBody()).isEqualTo(responseBody);
+        assertEquals(HttpStatus.SC_OK, response.getStatusCode());
+        assertEquals(request.getRequestId(), response.getRequestId());
+        assertEquals(request.getHeaders(), response.getHeaders());
+        assertEquals(responseBody, response.getBody());
 
-        verify(testContext.loansApiResource).retrieveLoan(eq(loanId), eq(false), eq(associations), eq(exclude), eq(fields),
-                testContext.uriInfoCaptor.capture());
-        MutableUriInfo mutableUriInfo = testContext.uriInfoCaptor.getValue();
-        assertThat(mutableUriInfo.getAdditionalQueryParameters()).hasSize(noOfQueryParams);
+        verify(testContext.loansApiResource).retrieveLoan(eq(loanExternalId), eq(staffInSelectedOfficeOnlyBooleanFlag), eq(associations),
+                eq(exclude), eq(fields), testContext.uriInfoCaptor.capture());
+        final MutableUriInfo mutableUriInfo = testContext.uriInfoCaptor.getValue();
+        assertEquals(noOfQueryParams, mutableUriInfo.getAdditionalQueryParameters().size());
     }
 
     /**
-     * Creates and returns a request with the given loan id.
+     * Creates and returns a request with the given loan external id.
      *
-     * @param loanId
-     *            the loan id
+     * @param loanExternalId
+     *            the loan external id
+     * @param associations
+     *            the associations query param
+     * @param exclude
+     *            exclude query param
+     * @param fields
+     *            fields query param
+     * @param staffInSelectedOfficeOnlyFlag
+     *            staff in selected office only query param
      * @return BatchRequest
      */
-    private BatchRequest getBatchRequest(final Long loanId, final String associations, final String exclude, final String fields) {
+    private BatchRequest getBatchRequest(final String loanExternalId, final String associations, final String exclude, final String fields,
+            final String staffInSelectedOfficeOnlyFlag) {
 
         final BatchRequest br = new BatchRequest();
-        String relativeUrl = "loans/" + loanId;
+        String relativeUrl = "loans/external-id/" + loanExternalId;
 
         Set<String> queryParams = new HashSet<>();
         if (associations != null) {
@@ -109,6 +126,9 @@ public class GetLoanByIdCommandStrategyTest {
         }
         if (fields != null) {
             queryParams.add("fields=" + fields);
+        }
+        if (staffInSelectedOfficeOnlyFlag != null) {
+            queryParams.add("staffInSelectedOfficeOnly=" + staffInSelectedOfficeOnlyFlag);
         }
         if (!queryParams.isEmpty()) {
             relativeUrl = relativeUrl + "?" + String.join("&", queryParams);
@@ -128,20 +148,32 @@ public class GetLoanByIdCommandStrategyTest {
      */
     private static class TestContext {
 
+        /**
+         * The Mock UriInfo
+         */
         @Mock
         private UriInfo uriInfo;
 
+        /**
+         * The Mock {@link LoansApiResource}
+         */
         @Mock
         private LoansApiResource loansApiResource;
 
+        /**
+         * The Captor for UriInfo
+         */
         @Captor
         private ArgumentCaptor<MutableUriInfo> uriInfoCaptor;
 
-        private final GetLoanByIdCommandStrategy underTest;
+        /**
+         * The class under test.
+         */
+        private final GetLoanByExternalIdCommandStrategy underTest;
 
         TestContext() {
             MockitoAnnotations.openMocks(this);
-            underTest = new GetLoanByIdCommandStrategy(loansApiResource);
+            underTest = new GetLoanByExternalIdCommandStrategy(loansApiResource);
         }
     }
 }

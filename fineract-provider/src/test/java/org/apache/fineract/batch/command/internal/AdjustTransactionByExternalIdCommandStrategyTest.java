@@ -20,9 +20,11 @@ package org.apache.fineract.batch.command.internal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+import java.util.UUID;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -36,27 +38,27 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Test class for {@link AdjustTransactionCommandStrategy}.
+ * Test class for {@link AdjustTransactionByExternalIdCommandStrategy}.
  */
-public class AdjustTransactionCommandStrategyTest {
+public class AdjustTransactionByExternalIdCommandStrategyTest {
 
     /**
-     * Test {@link AdjustTransactionCommandStrategy#execute} happy path scenario.
+     * Test {@link AdjustTransactionByExternalIdCommandStrategy#execute} happy path scenario.
      */
     @Test
     public void testExecuteWithoutCommandSuccessScenario() {
         // given
         final TestContext testContext = new TestContext();
 
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final Long transactionId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final BatchRequest request = getBatchRequest(loanId, transactionId, null);
+        final String loanExternalId = UUID.randomUUID().toString();
+        final String transactionExternalId = UUID.randomUUID().toString();
+        final BatchRequest request = getBatchRequest(loanExternalId, transactionExternalId, null);
         final String responseBody = "{\"officeId\":1,\"clientId\":107,\"loanId\":71,\"resourceId\":193,\"changes\""
                 + ":{\"transactionDate\":\"03 October 2022\",\"transactionAmount\":\"500\",\"locale\":\"en\",\"dateFormat\":"
                 + "\"dd MMMM yyyy\",\"paymentTypeId\":\"\"}}";
 
-        given(testContext.loanTransactionsApiResource.adjustLoanTransaction(eq(loanId), eq(transactionId), eq(request.getBody()), eq(null)))
-                .willReturn(responseBody);
+        given(testContext.loanTransactionsApiResource.adjustLoanTransaction(eq(loanExternalId), eq(transactionExternalId),
+                eq(request.getBody()), eq(null))).willReturn(responseBody);
 
         // when
         final BatchResponse response = testContext.subjectToTest.execute(request, testContext.uriInfo);
@@ -66,27 +68,27 @@ public class AdjustTransactionCommandStrategyTest {
         assertEquals(request.getRequestId(), response.getRequestId());
         assertEquals(request.getHeaders(), response.getHeaders());
         assertEquals(responseBody, response.getBody());
-        verify(testContext.loanTransactionsApiResource).adjustLoanTransaction(eq(loanId), eq(transactionId), eq(request.getBody()),
-                eq(null));
+        verify(testContext.loanTransactionsApiResource).adjustLoanTransaction(eq(loanExternalId), eq(transactionExternalId),
+                eq(request.getBody()), isNull());
     }
 
     /**
-     * Test {@link AdjustTransactionCommandStrategy#execute} happy path scenario.
+     * Test {@link AdjustTransactionByExternalIdCommandStrategy#execute} happy path scenario.
      */
     @Test
     public void testExecuteWithCommandSuccessScenario() {
         // given
         final TestContext testContext = new TestContext();
 
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final Long transactionId = Long.valueOf(RandomStringUtils.randomNumeric(4));
-        final BatchRequest request = getBatchRequest(loanId, transactionId, "chargeback");
+        final String loanExternalId = UUID.randomUUID().toString();
+        final String transactionExternalId = UUID.randomUUID().toString();
+        final BatchRequest request = getBatchRequest(loanExternalId, transactionExternalId, "chargeback");
         final String responseBody = "{\"officeId\":1,\"clientId\":107,\"loanId\":71,\"resourceId\":193,\"changes\""
                 + ":{\"transactionDate\":\"03 October 2022\",\"transactionAmount\":\"500\",\"locale\":\"en\",\"dateFormat\":"
                 + "\"dd MMMM yyyy\",\"paymentTypeId\":\"\"}}";
 
-        given(testContext.loanTransactionsApiResource.adjustLoanTransaction(eq(loanId), eq(transactionId), eq(request.getBody()),
-                eq("chargeback"))).willReturn(responseBody);
+        given(testContext.loanTransactionsApiResource.adjustLoanTransaction(eq(loanExternalId), eq(transactionExternalId),
+                eq(request.getBody()), eq("chargeback"))).willReturn(responseBody);
 
         // when
         final BatchResponse response = testContext.subjectToTest.execute(request, testContext.uriInfo);
@@ -96,25 +98,25 @@ public class AdjustTransactionCommandStrategyTest {
         assertEquals(request.getRequestId(), response.getRequestId());
         assertEquals(request.getHeaders(), response.getHeaders());
         assertEquals(responseBody, response.getBody());
-        verify(testContext.loanTransactionsApiResource).adjustLoanTransaction(eq(loanId), eq(transactionId), eq(request.getBody()),
-                eq("chargeback"));
+        verify(testContext.loanTransactionsApiResource).adjustLoanTransaction(eq(loanExternalId), eq(transactionExternalId),
+                eq(request.getBody()), eq("chargeback"));
     }
 
     /**
      * Creates and returns a request with the given loan id and transaction id.
      *
-     * @param loanId
+     * @param loanExternalId
      *            the loan id
-     * @param transactionId
+     * @param transactionExternalId
      *            the transaction id
      * @param transactionCommand
      *            the optional transaction command
      * @return BatchRequest
      */
-    private BatchRequest getBatchRequest(final Long loanId, final Long transactionId, final String transactionCommand) {
+    private BatchRequest getBatchRequest(final String loanExternalId, final String transactionExternalId, final String transactionCommand) {
 
         final BatchRequest br = new BatchRequest();
-        String relativeUrl = String.format("loans/%s/transactions/%s", loanId, transactionId);
+        String relativeUrl = String.format("loans/external-id/%s/transactions/external-id/%s", loanExternalId, transactionExternalId);
 
         br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
         br.setRelativeUrl(relativeUrl);
@@ -148,14 +150,14 @@ public class AdjustTransactionCommandStrategyTest {
         /**
          * The class under test.
          */
-        private final AdjustTransactionCommandStrategy subjectToTest;
+        private final AdjustTransactionByExternalIdCommandStrategy subjectToTest;
 
         /**
          * Constructor.
          */
         TestContext() {
             MockitoAnnotations.openMocks(this);
-            subjectToTest = new AdjustTransactionCommandStrategy(loanTransactionsApiResource);
+            subjectToTest = new AdjustTransactionByExternalIdCommandStrategy(loanTransactionsApiResource);
         }
     }
 }

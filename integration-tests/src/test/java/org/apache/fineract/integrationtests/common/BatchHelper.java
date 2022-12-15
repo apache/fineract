@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.ws.rs.HttpMethod;
 import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy;
@@ -302,6 +303,25 @@ public final class BatchHelper {
      * @return {@link BatchRequest}
      */
     public static BatchRequest applyLoanRequestWithClientId(final Long requestId, final Integer clientId, final Integer productId) {
+        return applyLoanRequestWithClientIdAndExternalId(requestId, clientId, productId, UUID.randomUUID().toString());
+    }
+
+    /**
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.ApplyLoanCommandStrategy} request with
+     * given clientId, external id and product id.
+     *
+     * @param requestId
+     *            the request id
+     * @param clientId
+     *            the client id
+     * @param productId
+     *            the product id
+     * @param externalId
+     *            the external id
+     * @return {@link BatchRequest}
+     */
+    public static BatchRequest applyLoanRequestWithClientIdAndExternalId(final Long requestId, final Integer clientId,
+            final Integer productId, final String externalId) {
 
         final BatchRequest br = new BatchRequest();
 
@@ -315,7 +335,7 @@ public final class BatchHelper {
                 + "\"repaymentEvery\": 1, \"repaymentFrequencyType\": 2, \"interestRatePerPeriod\": 10,"
                 + "\"amortizationType\": 1, \"interestType\": 0, \"interestCalculationPeriodType\": 1,"
                 + "\"transactionProcessingStrategyCode\": \"mifos-standard-strategy\", \"expectedDisbursementDate\": \"10 Jun 2013\","
-                + "\"submittedOnDate\": \"10 Jun 2013\"}", clientId, productId);
+                + "\"submittedOnDate\": \"10 Jun 2013\", \"externalId\": \"%s\"}", clientId, productId, externalId);
 
         br.setBody(body);
 
@@ -349,7 +369,7 @@ public final class BatchHelper {
 
     /**
      * Creates and returns a {@link org.apache.fineract.batch.command.internal.CreateChargeCommandStrategy} Request with
-     * given requestId and reference
+     * given requestId and reference based on loan id
      *
      * @param requestId
      *            the batch request id.
@@ -359,11 +379,46 @@ public final class BatchHelper {
      *            the charge id used for getting charge type.
      * @return BatchRequest
      */
-    public static BatchRequest createChargeRequest(final Long requestId, final Long reference, final Integer chargeId) {
+    public static BatchRequest createChargeByLoanIdRequest(final Long requestId, final Long reference, final Integer chargeId) {
+        return createChargeRequest(requestId, reference, "loans/$.loanId/charges", chargeId);
+    }
+
+    /**
+     * Creates and returns a
+     * {@link org.apache.fineract.batch.command.internal.CreateChargeByLoanExternalIdCommandStrategy} Request with given
+     * requestId and reference based on loan external id
+     *
+     * @param requestId
+     *            the batch request id.
+     * @param reference
+     *            the reference id.
+     * @param chargeId
+     *            the charge id used for getting charge type.
+     * @return BatchRequest
+     */
+    public static BatchRequest createChargeByLoanExternalIdRequest(final Long requestId, final Long reference, final Integer chargeId) {
+        return createChargeRequest(requestId, reference, "loans/external-id/$.externalId/charges", chargeId);
+    }
+
+    /**
+     * Creates and returns a Batch Request with given requestId and reference
+     *
+     * @param requestId
+     *            the batch request id.
+     * @param reference
+     *            the reference id.
+     * @param relativeUrl
+     *            the relative url reference.
+     * @param chargeId
+     *            the charge id used for getting charge type.
+     * @return BatchRequest
+     */
+    private static BatchRequest createChargeRequest(final Long requestId, final Long reference, final String relativeUrl,
+            final Integer chargeId) {
 
         final BatchRequest br = new BatchRequest();
         br.setRequestId(requestId);
-        br.setRelativeUrl("loans/$.loanId/charges");
+        br.setRelativeUrl(relativeUrl);
         br.setMethod("POST");
         br.setReference(reference);
 
@@ -379,22 +434,128 @@ public final class BatchHelper {
     }
 
     /**
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.AdjustChargeCommandStrategy} Request with
+     * given requestId and reference
+     *
+     * @param requestId
+     *            the batch request id.
+     * @param reference
+     *            the reference id.
+     * @return BatchRequest
+     */
+    public static BatchRequest adjustChargeRequest(final Long requestId, final Long reference) {
+
+        final BatchRequest br = new BatchRequest();
+        br.setRequestId(requestId);
+        br.setRelativeUrl("loans/$.loanId/charges/$.resourceId?command=adjustment");
+        br.setMethod("POST");
+        br.setReference(reference);
+        br.setBody("{\"amount\":7.00,\"locale\":\"en\"}");
+
+        return br;
+    }
+
+    /**
+     * Creates and returns a
+     * {@link org.apache.fineract.batch.command.internal.AdjustChargeByChargeExternalIdCommandStrategy} Request with
+     * given requestId and reference
+     *
+     * @param requestId
+     *            the batch request id.
+     * @param reference
+     *            the reference id.
+     * @param loanExternalId
+     *            the loan external id.
+     * @param chargeExternalId
+     *            the charge external id
+     * @return BatchRequest
+     */
+    public static BatchRequest adjustChargeByExternalIdRequest(final Long requestId, final Long reference, final String loanExternalId,
+            final String chargeExternalId) {
+
+        final BatchRequest br = new BatchRequest();
+        br.setRequestId(requestId);
+        br.setRelativeUrl(
+                String.format("loans/external-id/%s/charges/external-id/%s?command=adjustment", loanExternalId, chargeExternalId));
+        br.setMethod("POST");
+        br.setReference(reference);
+        br.setBody("{\"amount\":7.00,\"locale\":\"en\"}");
+
+        return br;
+    }
+
+    /**
      * Creates and returns a {@link org.apache.fineract.batch.command.internal.CollectChargesCommandStrategy} Request
      * with given requestId and reference.
      *
      * @param requestId
+     *            the request id
      * @param reference
+     *            the reference id
      * @return BatchRequest
      */
-    public static BatchRequest collectChargesRequest(final Long requestId, final Long reference) {
+    public static BatchRequest collectChargesByLoanIdRequest(final Long requestId, final Long reference) {
+        return collectChargesRequest(requestId, reference, "loans/$.loanId/charges");
+    }
+
+    /**
+     * Creates and returns a
+     * {@link org.apache.fineract.batch.command.internal.CollectChargesByLoanExternalIdCommandStrategy} Request with
+     * given requestId and reference.
+     *
+     * @param requestId
+     *            the request id
+     * @param reference
+     *            the reference id
+     * @return BatchRequest
+     */
+    public static BatchRequest collectChargesByLoanExternalIdRequest(final Long requestId, final Long reference) {
+        return collectChargesRequest(requestId, reference, "loans/external-id/$.externalId/charges");
+    }
+
+    /**
+     * Creates and returns a Batch Request with given requestId and reference.
+     *
+     * @param requestId
+     *            the request id
+     * @param reference
+     *            the reference id
+     * @param relativeUrl
+     *            the relative url
+     * @return BatchRequest
+     */
+    private static BatchRequest collectChargesRequest(final Long requestId, final Long reference, final String relativeUrl) {
 
         final BatchRequest br = new BatchRequest();
 
         br.setRequestId(requestId);
-        br.setRelativeUrl("loans/$.loanId/charges");
+        br.setRelativeUrl(relativeUrl);
         br.setReference(reference);
         br.setMethod("GET");
         br.setBody("{ }");
+
+        return br;
+    }
+
+    /**
+     * Creates and returns a Batch request with given requestId and reference.
+     *
+     * @param requestId
+     *            the request id
+     * @param reference
+     *            the reference
+     * @param relativeUrl
+     *            the relative url
+     * @return the {@link BatchRequest}
+     */
+    private static BatchRequest getChargeById(final Long requestId, final Long reference, final String relativeUrl) {
+
+        final BatchRequest br = new BatchRequest();
+        br.setRequestId(requestId);
+        br.setRelativeUrl(relativeUrl);
+        br.setMethod(HttpMethod.GET);
+        br.setReference(reference);
+        br.setBody("{}");
 
         return br;
     }
@@ -409,18 +570,25 @@ public final class BatchHelper {
      *            the reference
      * @return the {@link BatchRequest}
      */
-    public static BatchRequest getChargeByIdCommandStrategy(final Long requestId, final Long reference) {
+    public static BatchRequest getChargeByLoanIdChargeId(final Long requestId, final Long reference) {
+        return getChargeById(requestId, reference, "loans/$.loanId/charges/$.resourceId");
+    }
 
-        final BatchRequest br = new BatchRequest();
-        String relativeUrl = "loans/$.loanId/charges/$.resourceId";
-
-        br.setRequestId(requestId);
-        br.setRelativeUrl(relativeUrl);
-        br.setMethod(HttpMethod.GET);
-        br.setReference(reference);
-        br.setBody("{}");
-
-        return br;
+    /**
+     * Creates and returns a
+     * {@link org.apache.fineract.batch.command.internal.GetChargeByChargeExternalIdCommandStrategy} request with given
+     * requestId and reference.
+     *
+     * @param requestId
+     *            the request id
+     * @param reference
+     *            the reference
+     * @return the {@link BatchRequest}
+     */
+    public static BatchRequest getChargeByLoanExternalIdChargeExternalId(final Long requestId, final Long reference,
+            final String loanExternalId, final String chargeExternalId) {
+        return getChargeById(requestId, reference,
+                String.format("loans/external-id/%s/charges/external-id/%s", loanExternalId, chargeExternalId));
     }
 
     /**
@@ -529,6 +697,41 @@ public final class BatchHelper {
     }
 
     /**
+     * Creates and returns a
+     * {@link org.apache.fineract.batch.command.internal.LoanStateTransistionsByExternalIdCommandStrategy} Request with
+     * given requestId and reference.
+     *
+     *
+     * @param requestId
+     *            the request ID
+     * @param reference
+     *            the reference ID
+     * @param date
+     *            the actual disbursement date
+     * @param command
+     *            the action to transistion
+     * @return BatchRequest the batch request
+     */
+    public static BatchRequest transistionLoanStateByExternalId(final Long requestId, final Long reference, final LocalDate date,
+            final String command) {
+        final BatchRequest br = new BatchRequest();
+
+        br.setRequestId(requestId);
+        br.setRelativeUrl("loans/external-id/$.resourceExternalId?command=" + command);
+        br.setReference(reference);
+        br.setMethod("POST");
+        String dateString = date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+        if ("disburse".equals(command)) {
+            br.setBody("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", \"actualDisbursementDate\": \"" + dateString + "\"}");
+        } else if ("approve".equals(command)) {
+            br.setBody("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", \"approvedOnDate\": \"" + dateString + "\","
+                    + "\"note\": \"Loan approval note\"}");
+        }
+
+        return br;
+    }
+
+    /**
      * Creates and returns a {@link CreateTransactionLoanCommandStrategy} Request with given requestId.
      *
      * @param requestId
@@ -563,6 +766,37 @@ public final class BatchHelper {
         br.setRequestId(requestId);
         br.setReference(reference);
         br.setRelativeUrl(String.format("loans/$.loanId/transactions?command=%s", transactionCommand));
+        br.setMethod("POST");
+        String dateString = date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+        br.setBody(String.format(
+                "{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", " + "\"transactionDate\": \"%s\",  \"transactionAmount\": %s}",
+                dateString, amount));
+
+        return br;
+    }
+
+    /**
+     * Creates and returns a {@link CreateTransactionLoanCommandStrategy} Request with given requestId.
+     *
+     * @param requestId
+     *            the request ID
+     * @param reference
+     *            the reference ID
+     * @param transactionCommand
+     *            the transaction command to process
+     * @param amount
+     *            the amount
+     * @param date
+     *            the transaction date
+     * @return BatchRequest the batch request
+     */
+    public static BatchRequest createTransactionRequestByLoanExternalId(final Long requestId, final Long reference,
+            final String transactionCommand, final String amount, final LocalDate date) {
+        final BatchRequest br = new BatchRequest();
+
+        br.setRequestId(requestId);
+        br.setReference(reference);
+        br.setRelativeUrl(String.format("loans/external-id/$.externalId/transactions?command=%s", transactionCommand));
         br.setMethod("POST");
         String dateString = date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
         br.setBody(String.format(
@@ -725,12 +959,50 @@ public final class BatchHelper {
      *            the request id
      * @param reference
      *            the reference
+     * @param subResourceId
+     *            whether the subResourceId is used
      * @return the {@link BatchRequest}
      */
-    public static BatchRequest getTransactionByIdRequest(final Long requestId, final Long reference) {
+    public static BatchRequest getTransactionByIdRequest(final Long requestId, final Long reference, final Boolean subResourceId) {
 
         final BatchRequest br = new BatchRequest();
-        String relativeUrl = "loans/$.loanId/transactions/$.resourceId";
+        String relativeUrl;
+        if (subResourceId) {
+            relativeUrl = "loans/$.loanId/transactions/$.subResourceId";
+        } else {
+            relativeUrl = "loans/$.loanId/transactions/$.resourceId";
+        }
+
+        br.setRequestId(requestId);
+        br.setRelativeUrl(relativeUrl);
+        br.setMethod(HttpMethod.GET);
+        br.setReference(reference);
+        br.setBody("{}");
+
+        return br;
+    }
+
+    /**
+     * Creates and returns a
+     * {@link org.apache.fineract.batch.command.internal.GetTransactionByExternalIdCommandStrategy} request with given
+     * requestId and reference.
+     *
+     * @param requestId
+     *            the request id
+     * @param reference
+     *            the reference
+     * @return the {@link BatchRequest}
+     */
+    public static BatchRequest getTransactionByExternalIdRequest(final Long requestId, final Long reference, final String loanExternalId,
+            final Boolean subResourceExternalId) {
+
+        final BatchRequest br = new BatchRequest();
+        String relativeUrl;
+        if (subResourceExternalId) {
+            relativeUrl = String.format("loans/external-id/%s/transactions/external-id/$.subResourceExternalId", loanExternalId);
+        } else {
+            relativeUrl = String.format("loans/external-id/%s/transactions/external-id/$.resourceExternalId", loanExternalId);
+        }
 
         br.setRequestId(requestId);
         br.setRelativeUrl(relativeUrl);
@@ -771,6 +1043,35 @@ public final class BatchHelper {
     }
 
     /**
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.GetLoanByExternalIdCommandStrategy}
+     * request with given requestId and reference.
+     *
+     * @param requestId
+     *            the request id
+     * @param reference
+     *            the reference
+     * @param queryParameter
+     *            the query parameters
+     * @return the {@link BatchRequest}
+     */
+    public static BatchRequest getLoanByExternalIdRequest(final Long requestId, final Long reference, final String queryParameter) {
+
+        final BatchRequest br = new BatchRequest();
+        String relativeUrl = "loans/external-id/$.resourceExternalId";
+        if (queryParameter != null) {
+            relativeUrl = relativeUrl + "?" + queryParameter;
+        }
+
+        br.setRequestId(requestId);
+        br.setRelativeUrl(relativeUrl);
+        br.setMethod(HttpMethod.GET);
+        br.setReference(reference);
+        br.setBody("{}");
+
+        return br;
+    }
+
+    /**
      * Creates and returns a {@link org.apache.fineract.batch.command.internal.GetLoanByIdCommandStrategy} request with
      * given loan id and query param.
      *
@@ -781,13 +1082,33 @@ public final class BatchHelper {
      * @return the {@link BatchRequest}
      */
     public static BatchRequest getLoanByIdRequest(final Long loanId, final String queryParameter) {
+        return getLoanByIdRequest(loanId, 4567L, null, queryParameter);
+    }
+
+    /**
+     * Creates and returns a {@link org.apache.fineract.batch.command.internal.GetLoanByIdCommandStrategy} request with
+     * given loan id and query param.
+     *
+     * @param loanId
+     *            the loan id
+     * @param requestId
+     *            the request id
+     * @param referenceId
+     *            the reference id
+     * @param queryParameter
+     *            the query parameters
+     * @return the {@link BatchRequest}
+     */
+    public static BatchRequest getLoanByIdRequest(final Long loanId, final Long requestId, final Long referenceId,
+            final String queryParameter) {
         final BatchRequest br = new BatchRequest();
         String relativeUrl = String.format("loans/%s", loanId);
         if (queryParameter != null) {
             relativeUrl = relativeUrl + "?" + queryParameter;
         }
 
-        br.setRequestId(4567L);
+        br.setRequestId(requestId);
+        br.setReference(referenceId);
         br.setRelativeUrl(relativeUrl);
         br.setMethod(HttpMethod.GET);
         br.setBody("{}");
@@ -913,6 +1234,39 @@ public final class BatchHelper {
     }
 
     /**
+     * Creates and returns a batch request to create an adjust transaction request using external id.
+     *
+     * @param requestId
+     *            the request ID
+     * @param reference
+     *            the reference
+     * @param loanExternalId
+     *            the loan external id
+     * @param transactionExternalId
+     *            the transaction external id
+     * @param amount
+     *            the amount
+     * @param date
+     *            the date
+     * @return the {@link BatchRequest}
+     */
+    public static BatchRequest createAdjustTransactionByExternalIdRequest(final Long requestId, final Long reference,
+            final String loanExternalId, final String transactionExternalId, final String amount, final LocalDate date) {
+        final BatchRequest br = new BatchRequest();
+
+        br.setRequestId(requestId);
+        br.setReference(reference);
+        br.setRelativeUrl(String.format("loans/external-id/%s/transactions/external-id/%s", loanExternalId, transactionExternalId));
+        br.setMethod("POST");
+        String dateString = date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+        br.setBody(String.format(
+                "{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", " + "\"transactionDate\": \"%s\",  \"transactionAmount\": %s}",
+                dateString, amount));
+
+        return br;
+    }
+
+    /**
      * Creates and returns a batch request to create a chargeback transaction request.
      *
      * @param requestId
@@ -935,6 +1289,50 @@ public final class BatchHelper {
 
         return br;
 
+    }
+
+    /**
+     * Creates and returns a batch request to update a Loan account as fraud.
+     *
+     * @param requestId
+     *            the request ID
+     * @param reference
+     *            the reference
+     * @return the {@link BatchRequest}
+     */
+    public static BatchRequest createLoanRequestMarkAsFraud(final Long requestId, final Long reference) {
+
+        final BatchRequest br = new BatchRequest();
+
+        br.setRequestId(requestId);
+        br.setRelativeUrl("loans/$.loanId?command=markAsFraud");
+        br.setMethod("PUT");
+        br.setReference(reference);
+        br.setBody("{\"fraud\": \"true\"}");
+
+        return br;
+    }
+
+    /**
+     * Creates and returns a batch request to update a Loan account as fraud by loan external id.
+     *
+     * @param requestId
+     *            the request ID
+     * @param reference
+     *            the reference
+     * @return the {@link BatchRequest}
+     */
+    public static BatchRequest modifyLoanByExternalIdRequest(final Long requestId, final Long reference) {
+
+        final BatchRequest br = new BatchRequest();
+
+        br.setRequestId(requestId);
+        br.setRelativeUrl("loans/external-id/$.resourceExternalId?command=markAsFraud");
+        br.setMethod("PUT");
+        br.setReference(reference);
+        br.setBody("{\"fraud\": \"true\"}");
+
+        return br;
     }
 
     /**

@@ -629,4 +629,10 @@ public class GlobalConfigurationHelper {
         assertEquals(updatedConfiguration.getEnabled(), enabled);
     }
 
+    public static Integer updateIsAutomaticExternalIdGenerationEnabled(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final boolean enabled) {
+        long configId = 50;
+        return updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, configId, enabled);
+    }
+
 }

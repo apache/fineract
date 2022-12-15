@@ -26,6 +26,7 @@ import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.infrastructure.dataqueries.api.DatatablesApiResource;
+import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 /**
@@ -61,7 +62,7 @@ public class CreateDatatableEntryCommandStrategy implements CommandStrategy {
         // 'DatatablesApiResource' to create a datatable entry on an existing loan
         responseBody = datatablesApiResource.createDatatableEntry(datatableName, loanId, request.getBody());
 
-        response.setStatusCode(200);
+        response.setStatusCode(HttpStatus.SC_OK);
         // Sets the body of the response after datatable entry is successfully
         // created
         response.setBody(responseBody);

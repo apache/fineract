@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.UUID;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -35,22 +36,22 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Test class for {@link CreateTransactionLoanCommandStrategy}.
+ * Test class for {@link CreateTransactionByLoanExternalIdCommandStrategy}.
  */
-public class CreateTransactionLoanCommandStrategyTest {
+public class CreateTransactionByLoanExternalIdCommandStrategyTest {
 
     /**
-     * Test {@link CreateTransactionLoanCommandStrategy#execute} happy path scenario.
+     * Test {@link CreateTransactionByLoanExternalIdCommandStrategy#execute} happy path scenario.
      */
     @Test
     public void testExecuteSuccessScenario() {
         final TestContext testContext = new TestContext();
-        final Long loanId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final String loanExternalId = UUID.randomUUID().toString();
         final String command = "myCommand";
-        final BatchRequest batchRequest = getBatchRequest(loanId, command);
+        final BatchRequest batchRequest = getBatchRequest(loanExternalId, command);
         final String responseBody = "myResponseBody";
 
-        when(testContext.loanTransactionsApiResource.executeLoanTransaction(loanId, command, batchRequest.getBody()))
+        when(testContext.loanTransactionsApiResource.executeLoanTransaction(loanExternalId, command, batchRequest.getBody()))
                 .thenReturn(responseBody);
 
         BatchResponse batchResponse = testContext.subjectToTest.execute(batchRequest, testContext.uriInfo);
@@ -60,22 +61,22 @@ public class CreateTransactionLoanCommandStrategyTest {
         assertEquals(batchRequest.getRequestId(), batchResponse.getRequestId());
         assertEquals(batchRequest.getHeaders(), batchResponse.getHeaders());
 
-        verify(testContext.loanTransactionsApiResource).executeLoanTransaction(loanId, command, batchRequest.getBody());
+        verify(testContext.loanTransactionsApiResource).executeLoanTransaction(loanExternalId, command, batchRequest.getBody());
     }
 
     /**
      * Creates and returns a request with the given loan id and command value.
      *
-     * @param loanId
-     *            the loan id
+     * @param loanExternalId
+     *            the loan external id
      * @param command
      *            the transaction id
      * @return BatchRequest
      */
-    private BatchRequest getBatchRequest(final Long loanId, final String command) {
+    private BatchRequest getBatchRequest(final String loanExternalId, final String command) {
 
         final BatchRequest br = new BatchRequest();
-        String relativeUrl = "loans/" + loanId + "/transactions?command=" + command;
+        String relativeUrl = "loans/external-id/" + loanExternalId + "/transactions?command=" + command;
 
         br.setRequestId(Long.valueOf(RandomStringUtils.randomNumeric(5)));
         br.setRelativeUrl(relativeUrl);
@@ -104,16 +105,16 @@ public class CreateTransactionLoanCommandStrategyTest {
         private LoanTransactionsApiResource loanTransactionsApiResource;
 
         /**
-         * The {@link CreateTransactionLoanCommandStrategy} under test.
+         * The {@link CreateTransactionByLoanExternalIdCommandStrategy} under test.
          */
-        private final CreateTransactionLoanCommandStrategy subjectToTest;
+        private final CreateTransactionByLoanExternalIdCommandStrategy subjectToTest;
 
         /**
          * Constructor.
          */
         TestContext() {
             MockitoAnnotations.openMocks(this);
-            subjectToTest = new CreateTransactionLoanCommandStrategy(loanTransactionsApiResource);
+            subjectToTest = new CreateTransactionByLoanExternalIdCommandStrategy(loanTransactionsApiResource);
         }
     }
 }

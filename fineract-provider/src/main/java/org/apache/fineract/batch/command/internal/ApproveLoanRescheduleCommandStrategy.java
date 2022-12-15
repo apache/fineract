@@ -26,6 +26,7 @@ import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.api.RescheduleLoansApiResource;
+import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -35,7 +36,7 @@ public class ApproveLoanRescheduleCommandStrategy implements CommandStrategy {
     private final RescheduleLoansApiResource rescheduleLoansApiResource;
 
     @Override
-    public BatchResponse execute(BatchRequest request, UriInfo uriInfo) {
+    public BatchResponse execute(BatchRequest request, final UriInfo uriInfo) {
         final BatchResponse response = new BatchResponse();
         final String responseBody;
 
@@ -43,14 +44,14 @@ public class ApproveLoanRescheduleCommandStrategy implements CommandStrategy {
         response.setHeaders(request.getHeaders());
 
         final List<String> pathParameters = Splitter.on('/').splitToList(request.getRelativeUrl());
-        Long scheduleId = Long.parseLong(pathParameters.get(1).substring(0, pathParameters.get(1).indexOf("?")));
+        final Long scheduleId = Long.parseLong(pathParameters.get(1).substring(0, pathParameters.get(1).indexOf("?")));
 
         // Calls 'approve' function from 'Loans reschedule Request' to
         // approve a
         // loan
         responseBody = rescheduleLoansApiResource.updateLoanRescheduleRequest(scheduleId, "approve", request.getBody());
 
-        response.setStatusCode(200);
+        response.setStatusCode(HttpStatus.SC_OK);
         // Sets the body of the response after the successful approval of a
         // Loans reschedule Request
         response.setBody(responseBody);
