@@ -222,7 +222,7 @@ dependencyManagement {
 
         dependency "io.github.resilience4j:resilience4j-spring-boot2:1.7.1"
 
-        dependency ('org.mariadb.jdbc:mariadb-java-client:3.1.0') {
+        dependency ('org.mariadb.jdbc:mariadb-java-client:3.0.9') {
             exclude 'org.slf4j:jcl-over-slf4j'
             exclude 'org.slf4j:slf4j-api'
         }
