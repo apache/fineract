@@ -27,28 +27,40 @@ import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.command.CommandStrategyUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
-import org.apache.fineract.portfolio.loanaccount.api.LoanTransactionsApiResource;
+import org.apache.fineract.portfolio.loanaccount.api.LoansApiResource;
 import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 /**
- * Implements {@link CommandStrategy} to adjust a transaction. It passes the contents of the body from the BatchRequest
- * to {@link LoanTransactionsApiResource} and gets back the response. This class will also catch any errors raised by
- * {@link LoanTransactionsApiResource} and map those errors to appropriate status codes in BatchResponse.
+ * Implements {@link org.apache.fineract.batch.command.CommandStrategy} to handle any updates to the loan application.
+ * It passes the contents of the body from the BatchRequest to
+ * {@link org.apache.fineract.portfolio.loanaccount.api.LoansApiResource} and gets back the response. This class will
+ * also catch any errors raised by {@link org.apache.fineract.portfolio.loanaccount.api.LoansApiResource} and map those
+ * errors to appropriate status codes in BatchResponse.
  *
- * @see CommandStrategy
- * @see BatchRequest
- * @see BatchResponse
+ * @see org.apache.fineract.batch.command.CommandStrategy
+ * @see org.apache.fineract.batch.domain.BatchRequest
+ * @see org.apache.fineract.batch.domain.BatchResponse
  */
 @Component
 @RequiredArgsConstructor
-public class AdjustTransactionCommandStrategy implements CommandStrategy {
+public class ModifyLoanApplicationCommandStrategy implements CommandStrategy {
 
     /**
-     * Loan transactions api resource {@link LoanTransactionsApiResource}.
+     * {@link LoansApiResource} object
      */
-    private final LoanTransactionsApiResource loanTransactionsApiResource;
+    private final LoansApiResource loansApiResource;
 
+    /**
+     * Returns {@link org.apache.fineract.batch.domain.BatchResponse} object by taking in and executing
+     * {@link org.apache.fineract.batch.domain.BatchRequest} object.
+     *
+     * @param request
+     *            the {@link org.apache.fineract.batch.domain.BatchRequest} object
+     * @param uriInfo
+     *            the {@link UriInfo} object
+     * @return response the {@link org.apache.fineract.batch.domain.BatchResponse} object
+     */
     @Override
     public BatchResponse execute(final BatchRequest request, final UriInfo uriInfo) {
         final BatchResponse response = new BatchResponse();
@@ -59,29 +71,27 @@ public class AdjustTransactionCommandStrategy implements CommandStrategy {
 
         final String relativeUrl = request.getRelativeUrl();
 
-        // Get the loan and transaction ids for use in loanTransactionsApiResource
+        // Get the loan id for use in loansApiResource
         final List<String> pathParameters = Splitter.on('/').splitToList(relativeUrl);
-        final Long loanId = Long.parseLong(pathParameters.get(1));
 
-        final String transactionIdPathParameter = pathParameters.get(3);
-        Long transactionId;
-        if (transactionIdPathParameter.contains("?")) {
-            transactionId = Long.parseLong(pathParameters.get(3).substring(0, pathParameters.get(3).indexOf("?")));
+        final String loanIdPathParameter = pathParameters.get(1);
+        Long loanId;
+        if (loanIdPathParameter.contains("?")) {
+            loanId = Long.parseLong(loanIdPathParameter.substring(0, loanIdPathParameter.indexOf("?")));
         } else {
-            transactionId = Long.parseLong(pathParameters.get(3));
+            loanId = Long.parseLong(loanIdPathParameter);
         }
 
         final Map<String, String> queryParameters = CommandStrategyUtils.getQueryParameters(relativeUrl);
         final String command = queryParameters.get("command");
 
-        // Calls 'adjustLoanTransaction' function from 'loanTransactionsApiResource'
-        responseBody = loanTransactionsApiResource.adjustLoanTransaction(loanId, transactionId, request.getBody(), command);
+        responseBody = loansApiResource.modifyLoanApplication(loanId, command, request.getBody());
 
         response.setStatusCode(HttpStatus.SC_OK);
 
-        // Sets the body of the response after retrieving the transaction
+        // Sets the body of the response modifying the loan application
         response.setBody(responseBody);
-
         return response;
     }
+
 }

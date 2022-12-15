@@ -47,10 +47,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class GetTransactionByIdCommandStrategy implements CommandStrategy {
 
+    /**
+     * Loan transactions api resource {@link LoanTransactionsApiResource}.
+     */
     private final LoanTransactionsApiResource loanTransactionsApiResource;
 
     @Override
-    public BatchResponse execute(final BatchRequest request, UriInfo uriInfo) {
+    public BatchResponse execute(final BatchRequest request, final UriInfo uriInfo) {
         final MutableUriInfo parameterizedUriInfo = new MutableUriInfo(uriInfo);
 
         final BatchResponse response = new BatchResponse();
@@ -63,7 +66,7 @@ public class GetTransactionByIdCommandStrategy implements CommandStrategy {
 
         // Get the loan and transaction ids for use in loanTransactionsApiResource
         final List<String> pathParameters = Splitter.on('/').splitToList(relativeUrl);
-        Long loanId = Long.parseLong(pathParameters.get(1));
+        final Long loanId = Long.parseLong(pathParameters.get(1));
         Long transactionId;
         if (relativeUrl.indexOf('?') > 0) {
             transactionId = Long.parseLong(StringUtils.substringBeforeLast(pathParameters.get(3), "?"));

@@ -107,6 +107,8 @@ final class LoanChargesApiResourceSwagger {
         public LocalDate submittedOnDate;
         @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
         public String externalId;
+        @Schema(example = "26 March 2013")
+        public LocalDate dueDate;
     }
 
     @Schema(description = "GetLoansLoanIdChargesTemplateResponse")

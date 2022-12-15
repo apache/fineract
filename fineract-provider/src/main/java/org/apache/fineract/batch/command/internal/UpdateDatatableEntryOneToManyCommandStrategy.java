@@ -26,6 +26,7 @@ import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.infrastructure.dataqueries.api.DatatablesApiResource;
+import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 /**
@@ -62,7 +63,7 @@ public class UpdateDatatableEntryOneToManyCommandStrategy implements CommandStra
         // 'DatatablesApiResource' to update a datatable entry on an existing entity in a one-many relationship
         responseBody = datatablesApiResource.updateDatatableEntryOneToMany(datatableName, entityId, datatableEntryId, request.getBody());
 
-        response.setStatusCode(200);
+        response.setStatusCode(HttpStatus.SC_OK);
         // Sets the body of the response after datatable entry is successfully
         // updated
         response.setBody(responseBody);

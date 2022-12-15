@@ -28,15 +28,14 @@ import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.command.CommandStrategyUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
-import org.apache.fineract.infrastructure.core.api.MutableUriInfo;
-import org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource;
+import org.apache.fineract.portfolio.loanaccount.api.LoansApiResource;
 import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 /**
- * Implements {@link CommandStrategy} to retrieve a charge by id. It passes the contents of the body from the
- * BatchRequest to {@link LoanChargesApiResource} and gets back the response. This class will also catch any errors
- * raised by {@link LoanChargesApiResource} and map those errors to appropriate status codes in BatchResponse.
+ * Implements {@link CommandStrategy} to handle any updates to the loan application. It passes the contents of the body
+ * from the BatchRequest to {@link LoansApiResource} and gets back the response. This class will also catch any errors
+ * raised by {@link LoansApiResource} and map those errors to appropriate status codes in BatchResponse.
  *
  * @see CommandStrategy
  * @see BatchRequest
@@ -44,47 +43,54 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class GetChargeByIdCommandStrategy implements CommandStrategy {
+public class ModifyLoanApplicationByExternalIdCommandStrategy implements CommandStrategy {
 
     /**
-     * Loan charges api resource {@link LoanChargesApiResource}.
+     * {@link LoansApiResource} object
      */
-    private final LoanChargesApiResource loanChargesApiResource;
+    private final LoansApiResource loansApiResource;
 
+    /**
+     * Returns {@link BatchResponse} object by taking in and executing {@link BatchRequest} object.
+     *
+     * @param request
+     *            the {@link BatchRequest} object
+     * @param uriInfo
+     *            the {@link UriInfo} object
+     * @return response the {@link BatchResponse} object
+     */
     @Override
     public BatchResponse execute(final BatchRequest request, final UriInfo uriInfo) {
-        final MutableUriInfo parameterizedUriInfo = new MutableUriInfo(uriInfo);
-
         final BatchResponse response = new BatchResponse();
         final String responseBody;
 
         response.setRequestId(request.getRequestId());
         response.setHeaders(request.getHeaders());
 
+        // Expected pattern - loans\/external-id\/[\w\d_-]+\?command=adjust
         final String relativeUrl = request.getRelativeUrl();
 
-        // Get the loan and charge ids for use in loanChargesApiResource
+        // Get the loan id for use in loansApiResource
         final List<String> pathParameters = Splitter.on('/').splitToList(relativeUrl);
-        final Long loanId = Long.parseLong(pathParameters.get(1));
-        Long chargeId;
-        if (relativeUrl.indexOf('?') > 0) {
-            chargeId = Long.parseLong(StringUtils.substringBeforeLast(pathParameters.get(3), "?"));
+
+        final String loanIdPathParameter = pathParameters.get(2);
+        String loanExternalId;
+        if (loanIdPathParameter.contains("?")) {
+            loanExternalId = StringUtils.substringBefore(loanIdPathParameter, "?");
         } else {
-            chargeId = Long.parseLong(pathParameters.get(3));
+            loanExternalId = loanIdPathParameter;
         }
 
-        Map<String, String> queryParameters;
-        if (relativeUrl.indexOf('?') > 0) {
-            queryParameters = CommandStrategyUtils.getQueryParameters(relativeUrl);
+        final Map<String, String> queryParameters = CommandStrategyUtils.getQueryParameters(relativeUrl);
+        final String command = queryParameters.get("command");
 
-            // Add the query parameters sent in the relative URL to UriInfo
-            CommandStrategyUtils.addQueryParametersToUriInfo(parameterizedUriInfo, queryParameters);
-        }
+        responseBody = loansApiResource.modifyLoanApplication(loanExternalId, command, request.getBody());
 
-        responseBody = loanChargesApiResource.retrieveLoanCharge(loanId, chargeId, parameterizedUriInfo);
         response.setStatusCode(HttpStatus.SC_OK);
-        response.setBody(responseBody);
 
+        // Sets the body of the response modifying the loan application
+        response.setBody(responseBody);
         return response;
     }
+
 }

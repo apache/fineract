@@ -29,10 +29,13 @@ import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.infrastructure.dataqueries.api.DatatablesApiResource;
 import org.apache.http.HttpStatus;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+/**
+ * Test class for {@link CreateDatatableEntryCommandStrategy}.
+ */
 public class CreateDatatableEntryCommandStrategyTest {
 
     /**
@@ -55,10 +58,10 @@ public class CreateDatatableEntryCommandStrategyTest {
         final BatchResponse response = testContext.subjectToTest.execute(request, testContext.uriInfo);
 
         // then
-        assertEquals(response.getStatusCode(), HttpStatus.SC_OK);
-        assertEquals(response.getRequestId(), request.getRequestId());
-        assertEquals(response.getHeaders(), request.getHeaders());
-        assertEquals(response.getBody(), responseBody);
+        assertEquals(HttpStatus.SC_OK, response.getStatusCode());
+        assertEquals(request.getRequestId(), response.getRequestId());
+        assertEquals(request.getHeaders(), response.getHeaders());
+        assertEquals(responseBody, response.getBody());
     }
 
     /**
@@ -88,13 +91,26 @@ public class CreateDatatableEntryCommandStrategyTest {
      */
     private static class TestContext {
 
+        /**
+         * The Mock UriInfo
+         */
         @Mock
         private UriInfo uriInfo;
 
+        /**
+         * The Mock {@link DatatablesApiResource}
+         */
         @Mock
         private DatatablesApiResource datatablesApiResource;
 
+        /**
+         * The class under test.
+         */
         private final CreateDatatableEntryCommandStrategy subjectToTest;
+
+        /**
+         * Constructor.
+         */
 
         TestContext() {
             MockitoAnnotations.openMocks(this);

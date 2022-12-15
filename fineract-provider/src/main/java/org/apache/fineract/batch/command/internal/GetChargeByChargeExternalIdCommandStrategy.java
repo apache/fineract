@@ -34,7 +34,7 @@ import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 /**
- * Implements {@link CommandStrategy} to retrieve a charge by id. It passes the contents of the body from the
+ * Implements {@link CommandStrategy} to retrieve a charge by external id. It passes the contents of the body from the
  * BatchRequest to {@link LoanChargesApiResource} and gets back the response. This class will also catch any errors
  * raised by {@link LoanChargesApiResource} and map those errors to appropriate status codes in BatchResponse.
  *
@@ -44,7 +44,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class GetChargeByIdCommandStrategy implements CommandStrategy {
+public class GetChargeByChargeExternalIdCommandStrategy implements CommandStrategy {
 
     /**
      * Loan charges api resource {@link LoanChargesApiResource}.
@@ -63,14 +63,15 @@ public class GetChargeByIdCommandStrategy implements CommandStrategy {
 
         final String relativeUrl = request.getRelativeUrl();
 
-        // Get the loan and charge ids for use in loanChargesApiResource
+        // Expected pattern - loans\/external-id\/[\w\d_-]+\/charges\/external-id\/[\w\d_-]+
+        // Get the loan and charge external ids for use in loanChargesApiResource
         final List<String> pathParameters = Splitter.on('/').splitToList(relativeUrl);
-        final Long loanId = Long.parseLong(pathParameters.get(1));
-        Long chargeId;
+        final String loanExternalId = pathParameters.get(2);
+        String chargeExternalId;
         if (relativeUrl.indexOf('?') > 0) {
-            chargeId = Long.parseLong(StringUtils.substringBeforeLast(pathParameters.get(3), "?"));
+            chargeExternalId = StringUtils.substringBeforeLast(pathParameters.get(5), "?");
         } else {
-            chargeId = Long.parseLong(pathParameters.get(3));
+            chargeExternalId = pathParameters.get(5);
         }
 
         Map<String, String> queryParameters;
@@ -81,7 +82,7 @@ public class GetChargeByIdCommandStrategy implements CommandStrategy {
             CommandStrategyUtils.addQueryParametersToUriInfo(parameterizedUriInfo, queryParameters);
         }
 
-        responseBody = loanChargesApiResource.retrieveLoanCharge(loanId, chargeId, parameterizedUriInfo);
+        responseBody = loanChargesApiResource.retrieveLoanCharge(loanExternalId, chargeExternalId, parameterizedUriInfo);
         response.setStatusCode(HttpStatus.SC_OK);
         response.setBody(responseBody);
 
