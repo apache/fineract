@@ -220,7 +220,7 @@ dependencyManagement {
 
         dependency "org.apache.avro:avro:1.11.1"
 
-        dependency "io.github.resilience4j:resilience4j-spring-boot2:1.7.1"
+        dependency "io.github.resilience4j:resilience4j-spring-boot2:2.0.2"
 
         dependency ('org.mariadb.jdbc:mariadb-java-client:3.0.9') {
             exclude 'org.slf4j:jcl-over-slf4j'
