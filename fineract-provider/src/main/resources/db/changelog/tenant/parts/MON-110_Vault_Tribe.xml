@@ -139,4 +139,18 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="drop.fk.FK_m_savings_account_transaction_parent_savings_account_transaction_id" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <foreignKeyConstraintExists foreignKeyName="FK_m_savings_account_transaction_parent_savings_account_transaction_id"/>
+        </preConditions>
+        <dropForeignKeyConstraint baseTableName="m_payment_detail" constraintName="FK_m_savings_account_transaction_parent_savings_account_transaction_id"/>
+        <addForeignKeyConstraint baseTableName="m_payment_detail"
+                                 baseColumnNames="parent_savings_account_transaction_id"
+                                 constraintName="FK_m_savings_account_transaction_parent_sa_tx_id"
+                                 referencedTableName="m_savings_account_transaction"
+                                 referencedColumnNames="id"
+                                 onDelete="RESTRICT"
+                                 onUpdate="RESTRICT"/>
+    </changeSet>
+
 </databaseChangeLog>
