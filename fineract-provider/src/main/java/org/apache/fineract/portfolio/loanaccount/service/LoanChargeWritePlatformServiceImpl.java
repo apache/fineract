@@ -262,6 +262,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         this.loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanAddChargeBusinessEvent(loanCharge));
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()) //
                 .withEntityId(loanCharge.getId()) //
                 .withEntityExternalId(loanCharge.getExternalId()) //
@@ -366,7 +367,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         undoWaivedCharge(changes, loan, loanTransaction, loanChargePaidBy);
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanWaiveChargeUndoBusinessEvent(loanCharge));
-
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
         changes.put("principalPortion", loanTransaction.getPrincipalPortion());
         changes.put("interestPortion", loanTransaction.getInterestPortion());
         changes.put("feeChargesPortion", loanTransaction.getFeeChargesPortion());
@@ -500,7 +501,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         this.loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanWaiveChargeBusinessEvent(loanCharge));
-
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(loanChargeId) //
@@ -627,6 +628,7 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         AccountTransferDetails transferDetails = this.accountTransferDetailRepository.findById(transferTransactionId)
                 .orElseThrow(() -> new AccountTransferNotFoundException(transferTransactionId));
         LoanTransaction loanTransaction = transferDetails.getAccountTransferTransactions().get(0).getToLoanTransaction();
+        businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(loanChargeId) //
@@ -756,7 +758,6 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                 this.loanAccountDomainService.recalculateAccruals(loan);
             }
             this.loanAccountDomainService.setLoanDelinquencyTag(loan, DateUtils.getBusinessLocalDate());
-            businessEventNotifierService.notifyPostBusinessEvent(new LoanApplyOverdueChargeBusinessEvent(loan));
         }
     }
 
@@ -1021,14 +1022,12 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
 
         LoanRepaymentScheduleInstallment installment = null;
         LocalDate lastChargeAppliedDate = dueDate;
+        LocalDate recalculateFrom = DateUtils.getBusinessLocalDate();
         if (!scheduleDates.isEmpty()) {
             installment = loan.fetchRepaymentScheduleInstallment(periodNumber);
             lastChargeAppliedDate = installment.getDueDate();
-        }
-        LocalDate recalculateFrom = DateUtils.getBusinessLocalDate();
-
-        if (loan != null) {
             businessEventNotifierService.notifyPreBusinessEvent(new LoanApplyOverdueChargeBusinessEvent(loan));
+
             for (Map.Entry<Integer, LocalDate> entry : scheduleDates.entrySet()) {
 
                 final LoanCharge loanCharge = loanChargeAssembler.createNewFromJson(loan, chargeDefinition, command, entry.getValue());
@@ -1049,6 +1048,8 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
                     lastChargeAppliedDate = entry.getValue();
                 }
             }
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanApplyOverdueChargeBusinessEvent(loan));
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanBalanceChangedBusinessEvent(loan));
         }
 
         return new LoanOverdueDTO(loan, runInterestRecalculation, recalculateFrom, lastChargeAppliedDate);
