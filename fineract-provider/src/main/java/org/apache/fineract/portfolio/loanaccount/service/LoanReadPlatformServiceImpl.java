@@ -231,6 +231,20 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     @Override
+    public LoanAccountData fetchRepaymentScheduleData(LoanAccountData accountData) {
+        final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData = accountData.getTimeline().repaymentScheduleRelatedData(
+                accountData.getCurrency(), accountData.getPrincipal(), accountData.getApprovedPrincipal(),
+                accountData.getInArrearsTolerance(), accountData.getFeeChargesAtDisbursementCharged());
+
+        final Collection<DisbursementData> disbursementData = retrieveLoanDisbursementDetails(accountData.getId());
+        final LoanScheduleData repaymentSchedule = retrieveRepaymentSchedule(accountData.getId(), repaymentScheduleRelatedData,
+                disbursementData, accountData.isInterestRecalculationEnabled(),
+                accountData.getSummary() != null ? accountData.getSummary().getFeeChargesPaid() : BigDecimal.ZERO);
+        accountData.setRepaymentSchedule(repaymentSchedule);
+        return accountData;
+    }
+
+    @Override
     public LoanScheduleData retrieveRepaymentSchedule(final Long loanId,
             final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData, Collection<DisbursementData> disbursementData,
             boolean isInterestRecalculationEnabled, BigDecimal totalPaidFeeCharges) {
