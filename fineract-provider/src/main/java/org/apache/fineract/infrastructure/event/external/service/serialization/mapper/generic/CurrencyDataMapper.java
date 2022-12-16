@@ -16,18 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan;
+package org.apache.fineract.infrastructure.event.external.service.serialization.mapper.generic;
 
-import org.apache.fineract.avro.loan.v1.LoanChargeDataRangeViewV1;
-import org.apache.fineract.avro.loan.v1.LoanChargeDataV1;
+import org.apache.fineract.avro.generic.v1.CurrencyDataV1;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroMapperConfig;
-import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.mapstruct.Mapper;
 
 @Mapper(config = AvroMapperConfig.class)
-public interface LoanChargeDataMapper {
+public interface CurrencyDataMapper {
 
-    LoanChargeDataV1 map(LoanChargeData source);
+    CurrencyDataV1 map(CurrencyData source);
 
-    LoanChargeDataRangeViewV1 mapRangeView(LoanChargeData source);
 }
