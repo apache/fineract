@@ -748,32 +748,48 @@ public class SchedulerJobsTestResults {
         Assertions.assertEquals(39.39f, (Float) repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"),
                 "Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job");
 
-        GlobalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec, "10", "1");
-        LocalDate dateToFastForward = LocalDate.of(2020, 5, 2);
-        schedulerJobHelper.fastForwardTime(lastBusinessDateBeforeFastForward, dateToFastForward, jobName, responseSpec);
-        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.COB_DATE, dateToFastForward);
-        this.schedulerJobHelper.executeAndAwaitJob(jobName);
-        repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
-        Assertions.assertEquals(0, (Integer) repaymentScheduleDataAfter.get(2).get("penaltyChargesDue"),
-                "Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job");
-
-        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.COB_DATE, LocalDate.of(2020, 5, 3));
-        this.schedulerJobHelper.executeAndAwaitJob(jobName);
-        repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
-        Assertions.assertEquals(39.39f, (Float) repaymentScheduleDataAfter.get(2).get("penaltyChargesDue"),
-                "Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job");
-
         List<Map> transactions = this.loanTransactionHelper.getLoanTransactions(this.requestSpec, this.responseSpec, loanID);
         Assertions.assertEquals(39.39f, (Float) transactions.get(2).get("amount"));
         Assertions.assertEquals(2020, ((List) transactions.get(2).get("date")).get(0));
         Assertions.assertEquals(4, ((List) transactions.get(2).get("date")).get(1));
         Assertions.assertEquals(2, ((List) transactions.get(2).get("date")).get(2));
 
-        transactions = this.loanTransactionHelper.getLoanTransactions(this.requestSpec, this.responseSpec, loanID);
-        Assertions.assertEquals(39.39f, (Float) transactions.get(3).get("amount"));
-        Assertions.assertEquals(2020, ((List) transactions.get(3).get("date")).get(0));
-        Assertions.assertEquals(5, ((List) transactions.get(3).get("date")).get(1));
-        Assertions.assertEquals(2, ((List) transactions.get(3).get("date")).get(2));
+        // Test penalty where there is 1 day grace period
+        final Integer loanID2 = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null, "10 January 2020");
+
+        Assertions.assertNotNull(loanID2);
+
+        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID2);
+        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+
+        loanStatusHashMap = this.loanTransactionHelper.approveLoan("01 April 2020", loanID2);
+        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+
+        String loanDetails2 = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID2);
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("02 April 2020", loanID2,
+                JsonPath.from(loanDetails2).get("netDisbursalAmount").toString());
+        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+
+        GlobalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec, "10", "1");
+        LocalDate dateToFastForward = LocalDate.of(2020, 5, 2);
+
+        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.COB_DATE, dateToFastForward);
+        this.schedulerJobHelper.executeAndAwaitJob(jobName);
+        repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID2);
+        Assertions.assertEquals(0, (Integer) repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"),
+                "Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job");
+
+        BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.COB_DATE, LocalDate.of(2020, 5, 3));
+        this.schedulerJobHelper.executeAndAwaitJob(jobName);
+        repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID2);
+        Assertions.assertEquals(39.39f, (Float) repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"),
+                "Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job");
+
+        transactions = this.loanTransactionHelper.getLoanTransactions(this.requestSpec, this.responseSpec, loanID2);
+        Assertions.assertEquals(39.39f, (Float) transactions.get(2).get("amount"));
+        Assertions.assertEquals(2020, ((List) transactions.get(2).get("date")).get(0));
+        Assertions.assertEquals(5, ((List) transactions.get(2).get("date")).get(1));
+        Assertions.assertEquals(2, ((List) transactions.get(2).get("date")).get(2));
 
         GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
         GlobalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec, "10", "2");
