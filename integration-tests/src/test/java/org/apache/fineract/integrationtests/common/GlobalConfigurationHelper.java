@@ -67,29 +67,45 @@ public class GlobalConfigurationHelper {
     public static void resetAllDefaultGlobalConfigurations(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
 
+        ArrayList<HashMap> actualGlobalConfigurations = getAllGlobalConfigurations(requestSpec, responseSpec);
         final ArrayList<HashMap> defaults = getAllDefaultGlobalConfigurations();
-        for (HashMap configDefault : defaults) {
+        int changedNo = 0;
+        for (int i = 0; i < actualGlobalConfigurations.size(); i++) {
 
-            /**
-             * Cannot update trapDoor global configurations because
-             * {@link org.apache.fineract.infrastructure.configuration.exception.GlobalConfigurationPropertyCannotBeModfied}
-             * will be thrown.
-             */
-            if ((Boolean) configDefault.get("trapDoor")) {
-                continue;
+            HashMap defaultGlobalConfiguration = defaults.get(i);
+            HashMap actualGlobalConfiguration = actualGlobalConfigurations.get(i);
+
+            if (!isMatching(defaultGlobalConfiguration, actualGlobalConfiguration)) {
+
+                /**
+                 * Cannot update trapDoor global configurations because
+                 * {@link org.apache.fineract.infrastructure.configuration.exception.GlobalConfigurationPropertyCannotBeModfied}
+                 * will be thrown.
+                 */
+                if ((Boolean) defaultGlobalConfiguration.get("trapDoor")) {
+                    continue;
+                }
+
+                // Currently only values and enabled flags are modified by the
+                // integration test suite.
+                // If any other column is modified by the integration test suite in
+                // the future, it needs to be reset here.
+                final Integer configDefaultId = (Integer) defaultGlobalConfiguration.get("id");
+                final Integer configDefaultValue = (Integer) defaultGlobalConfiguration.get("value");
+
+                updateValueForGlobalConfiguration(requestSpec, responseSpec, configDefaultId.toString(), configDefaultValue.toString());
+                updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, configDefaultId.toString(),
+                        (Boolean) defaultGlobalConfiguration.get("enabled"));
+                changedNo++;
             }
-
-            // Currently only values and enabled flags are modified by the
-            // integration test suite.
-            // If any other column is modified by the integration test suite in
-            // the future, it needs to be reset here.
-            final Integer configDefaultId = (Integer) configDefault.get("id");
-            final Integer configDefaultValue = (Integer) configDefault.get("value");
-
-            updateValueForGlobalConfiguration(requestSpec, responseSpec, configDefaultId.toString(), configDefaultValue.toString());
-            updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, configDefaultId.toString(),
-                    (Boolean) configDefault.get("enabled"));
         }
+        log.info("--------------------------------- UPDATED GLOBAL CONFIG ENTRY SIZE: {} ---------------------------------------------",
+                changedNo);
+    }
+
+    private static boolean isMatching(HashMap o1, HashMap o2) {
+        return o1.get("id").equals(o2.get("id")) && o1.get("name").equals(o2.get("name")) && o1.get("value").equals(o2.get("value"))
+                && o1.get("enabled").equals(o2.get("enabled")) && o1.get("trapDoor").equals(o2.get("trapDoor"));
     }
 
     public static void verifyAllDefaultGlobalConfigurations(final RequestSpecification requestSpec,
