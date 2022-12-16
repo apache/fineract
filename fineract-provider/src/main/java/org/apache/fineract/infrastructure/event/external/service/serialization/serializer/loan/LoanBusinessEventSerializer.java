@@ -46,6 +46,7 @@ public class LoanBusinessEventSerializer extends AbstractBusinessEventSerializer
     protected <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
         LoanBusinessEvent event = (LoanBusinessEvent) rawEvent;
         LoanAccountData data = service.retrieveOne(event.get().getId());
+        data = service.fetchRepaymentScheduleData(data);
         return mapper.map(data);
     }
 
