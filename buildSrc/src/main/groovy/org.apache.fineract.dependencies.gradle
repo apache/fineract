@@ -27,7 +27,7 @@ dependencyManagement {
         mavenBom 'org.jetbrains.kotlin:kotlin-bom:1.7.22'
         mavenBom 'org.junit:junit-bom:5.9.1'
         mavenBom 'com.fasterxml.jackson:jackson-bom:2.14.1'
-        mavenBom 'io.cucumber:cucumber-bom:7.10.0'
+        mavenBom 'io.cucumber:cucumber-bom:7.10.1'
         mavenBom 'io.netty:netty-bom:4.1.86.Final'
         mavenBom 'org.mockito:mockito-bom:4.10.0'
     }
@@ -61,7 +61,7 @@ dependencyManagement {
             exclude 'com.sun.mail:javax.mail'
         }
         dependency 'org.quartz-scheduler:quartz:2.3.2'
-        dependency 'com.amazonaws:aws-java-sdk-s3:1.12.365'
+        dependency 'com.amazonaws:aws-java-sdk-s3:1.12.367'
         dependency 'org.ehcache:ehcache:3.10.8'
         dependency 'com.github.spullara.mustache.java:compiler:0.9.10'
         dependency 'com.jayway.jsonpath:json-path:2.7.0'
@@ -158,11 +158,11 @@ dependencyManagement {
         dependency 'com.vdurmont:semver4j:3.1.0'
         dependency 'org.beryx:text-io:3.4.1'
 
-        dependency 'org.springdoc:springdoc-openapi-ui:1.6.13'
-        dependency 'org.springdoc:springdoc-openapi-webmvc-core:1.6.13'
-        dependency 'org.springdoc:springdoc-openapi-common:1.6.13'
-        dependency 'org.springdoc:springdoc-openapi-security:1.6.13'
-        dependency 'org.springdoc:springdoc-openapi-javadoc:1.6.13'
+        dependency 'org.springdoc:springdoc-openapi-ui:1.6.14'
+        dependency 'org.springdoc:springdoc-openapi-webmvc-core:1.6.14'
+        dependency 'org.springdoc:springdoc-openapi-common:1.6.14'
+        dependency 'org.springdoc:springdoc-openapi-security:1.6.14'
+        dependency 'org.springdoc:springdoc-openapi-javadoc:1.6.14'
 
         dependency 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.8.0'
 
