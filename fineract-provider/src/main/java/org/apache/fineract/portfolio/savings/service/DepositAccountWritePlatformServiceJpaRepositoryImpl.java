@@ -592,8 +592,8 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                             .getTransactionsByAccountIdAndType(account.getId(), SavingsAccountTransactionType.WITHDRAWAL.getValue());
 
                     if (trans.size() >= getNumberOfFreeWithdrawal(account)) {
-                        this.createWithdrawLimitExceedCharge(account, product);
-                        this.applyInterestForfeitedCharges(account, getAppUserIfPresent(), transactionDate);
+                        this.createWithdrawLimitExceedCharge(account, product, transactionDate);
+                        this.applyInterestForfeitedCharges(account, getAppUserIfPresent(), transactionDate, paymentDetail);
                     }
                 }
             }
@@ -748,6 +748,31 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             throwValidationForActiveStatus(SavingsApiConstants.undoTransactionAction);
         }
         account.undoTransaction(transactionId);
+
+        // undoing transaction is withdrawal then undo withdrawal fee
+        // transaction if any
+        if (savingsAccountTransaction.isWithdrawal()) {
+            SavingsAccountTransaction nextSavingsAccountTransaction = this.savingsAccountTransactionRepository
+                    .findOneByIdAndSavingsAccountId(transactionId + 1, savingsId);
+            if(nextSavingsAccountTransaction == null) {
+                nextSavingsAccountTransaction = this.savingsAccountTransactionRepository
+                        .findOneByIdAndSavingsAccountId(transactionId - 1, savingsId);
+            }
+            if (nextSavingsAccountTransaction != null && nextSavingsAccountTransaction.isWithdrawalFeeAndNotReversed()) {
+                Long tranId = nextSavingsAccountTransaction.getId();
+                account.undoTransaction(tranId);
+            }
+            if(savingsAccountTransaction.getPaymentDetail() != null){
+                PaymentDetail detail = savingsAccountTransaction.getPaymentDetail();
+                if(detail.getActualTransactionType().equals(SavingsAccountTransactionType.PAY_CHARGE.getCode())){
+                    final SavingsAccountTransaction interestForfeitedTran = this.savingsAccountTransactionRepository
+                            .findOneByIdAndSavingsAccountId(detail.getParentSavingsAccountTransactionId().longValue(), savingsId);
+                    if (interestForfeitedTran != null && interestForfeitedTran.isNotReversed()) {
+                        account.undoTransaction(detail.getParentSavingsAccountTransactionId().longValue());
+                    }
+                }
+            }
+        }
         boolean isInterestTransfer = false;
         LocalDate postInterestOnDate = null;
         checkClientOrGroupActive(account);
@@ -2248,7 +2273,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         return withholdTransactions;
     }
 
-    private void createWithdrawLimitExceedCharge(SavingsAccount account, SavingsProduct product) {
+    private void createWithdrawLimitExceedCharge(SavingsAccount account, SavingsProduct product, final LocalDate transactionDate) {
 
         if (account.depositAccountType().isRecurringDeposit() && account.allowWithdrawal()) {
             final DepositProductRecurringDetail prodRecurringDetail = ((RecurringDepositProduct) product).depositRecurringDetail();
@@ -2259,16 +2284,20 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                         .collect(Collectors.toList());
                 Charge charge = this.chargeRepository.findChargeByChargeTimeType(ChargeTimeType.INTEREST_FORFEITED);
                 LocalDate date = account.getActivationLocalDate();
-                BigDecimal amount = account.findAccrualInterestPostingTransactionFromTo(date);
+                BigDecimal amount = account.findAccrualInterestPostingTransactionFromTo(date, transactionDate);
                 for (SavingsAccountCharge chargeDef : interestForfeitedCharges) {
-                    date = chargeDef.getDueLocalDate();
-                    amount = account.findAccrualInterestPostingTransactionFromTo(date);
+                    if(chargeDef.isPaid()) {
+                        date = chargeDef.getDueLocalDate();
+                    }else{
+                        account.inactivateCharge(chargeDef, transactionDate);
+                    }
+                    amount = account.findAccrualInterestPostingTransactionFromTo(date, transactionDate);
                 }
                 if (amount.compareTo(BigDecimal.ZERO) > 0) {
                     if (charge != null && charge.isActive() && charge.isAllowedSavingsChargeTime()) {
                         SavingsAccountChargeReq savingsAccountChargeReq = new SavingsAccountChargeReq();
                         savingsAccountChargeReq.setAmount(amount);
-                        savingsAccountChargeReq.setDueDate(DateUtils.getLocalDateOfTenant());
+                        savingsAccountChargeReq.setDueDate(transactionDate);
                         SavingsAccountCharge savingsAccountCharge = SavingsAccountCharge.createNew(account, charge,
                                 savingsAccountChargeReq);
                         account.addCharge(DateUtils.getDefaultFormatter(), savingsAccountCharge, charge);
@@ -2281,17 +2310,21 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         }
     }
 
-    private void applyInterestForfeitedCharges(SavingsAccount account, AppUser user, LocalDate closedDate) {
+    private void applyInterestForfeitedCharges(SavingsAccount account, AppUser user, LocalDate closedDate, PaymentDetail paymentDetail) {
         List<SavingsAccountCharge> interestForfeitedCharges = account.getCharges().stream()
                 .filter(c -> Arrays.asList(ChargeTimeType.INTEREST_FORFEITED.getValue()).contains(c.getCharge().getChargeTimeType()))
                 .collect(Collectors.toList());
 
         for (SavingsAccountCharge charge : interestForfeitedCharges) {
-            BigDecimal amount = charge.amount();
-            charge.setAmountOutstanding(amount);
             if (!charge.isPaid()) {
+                BigDecimal amount = charge.amount();
+                charge.setAmountOutstanding(amount);
                 this.savingsAccountWritePlatformService.payCharge(charge, closedDate, amount, DateUtils.getDefaultFormatter(), user);
                 charge.setAmountOutstanding(BigDecimal.ZERO);
+                if(paymentDetail != null) {
+                    paymentDetail.setActualTransactionType(SavingsAccountTransactionType.PAY_CHARGE.getCode());
+                    paymentDetail.setParentSavingsAccountTransactionId(account.getTransactions().get(account.getTransactions().size() - 1).getId().intValue());
+                }
             }
         }
     }

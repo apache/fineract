@@ -150,4 +150,12 @@ public final class PaymentDetail extends AbstractPersistableCustom {
     public void setTransactionDate(LocalDate transactionDate) {
         this.transactionDate = transactionDate;
     }
+
+    public String getActualTransactionType() {
+        return actualTransactionType;
+    }
+
+    public Integer getParentSavingsAccountTransactionId() {
+        return parentSavingsAccountTransactionId;
+    }
 }
