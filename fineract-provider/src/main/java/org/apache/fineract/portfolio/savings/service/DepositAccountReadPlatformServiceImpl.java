@@ -851,11 +851,11 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final Boolean allowPartialLiquidation = rs.getBoolean("allowPartialLiquidation");
             final Integer totalLiquidationAllowed = rs.getInt("totalLiquidationAllowed");
 
-            FixedDepositAccountData fixedDepositAccountData =  FixedDepositAccountData.instance(depositAccountData, preClosurePenalApplicable, preClosurePenalInterest,
-                    preClosurePenalInterestOnType, minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
-                    inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount, maturityAmount, maturityDate, depositPeriod,
-                    depositPeriodFrequencyType, onAccountClosureType, transferInterestToSavings, transferToSavingsId,
-                    allowPartialLiquidation, totalLiquidationAllowed);
+            FixedDepositAccountData fixedDepositAccountData = FixedDepositAccountData.instance(depositAccountData,
+                    preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnType, minDepositTerm, maxDepositTerm,
+                    minDepositTermType, maxDepositTermType, inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, depositAmount,
+                    maturityAmount, maturityDate, depositPeriod, depositPeriodFrequencyType, onAccountClosureType,
+                    transferInterestToSavings, transferToSavingsId, allowPartialLiquidation, totalLiquidationAllowed);
             fixedDepositAccountData.setAccruedInterestCarriedForward(interestCarriedForward);
             return fixedDepositAccountData;
 
