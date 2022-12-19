@@ -22,7 +22,7 @@ apply plugin: 'io.spring.dependency-management'
 // https://github.com/spring-gradle-plugins/dependency-management-plugin
 dependencyManagement {
     imports {
-        mavenBom 'org.springframework:spring-framework-bom:5.3.24'
+        mavenBom 'org.springframework:spring-framework-bom:6.0.3'
         mavenBom 'org.springframework.boot:spring-boot-dependencies:2.7.6'
         mavenBom 'org.jetbrains.kotlin:kotlin-bom:1.7.22'
         mavenBom 'org.junit:junit-bom:5.9.1'
