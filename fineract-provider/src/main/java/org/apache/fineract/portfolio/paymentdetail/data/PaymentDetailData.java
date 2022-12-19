@@ -42,6 +42,8 @@ public class PaymentDetailData implements Serializable {
     @SuppressWarnings("unused")
     private final String bankNumber;
 
+    private Long parentSavingsTranId;
+
     public PaymentDetailData(final Long id, final PaymentTypeData paymentType, final String accountNumber, final String checkNumber,
             final String routingCode, final String receiptNumber, final String bankNumber) {
         this.id = id;
@@ -75,5 +77,9 @@ public class PaymentDetailData implements Serializable {
 
     public PaymentTypeData getPaymentType() {
         return this.paymentType;
+    }
+
+    public void setParentSavingsTranId(Long parentSavingsTranId) {
+        this.parentSavingsTranId = parentSavingsTranId;
     }
 }

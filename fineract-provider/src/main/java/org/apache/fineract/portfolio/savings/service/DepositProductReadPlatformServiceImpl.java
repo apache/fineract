@@ -301,7 +301,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             sqlBuilder.append("dptp.deposit_amount as depositAmount, ");
             sqlBuilder.append("dptp.max_deposit_amount as maxDepositAmount, ");
             sqlBuilder.append("dprd.is_mandatory as isMandatoryDeposit, ");
-            sqlBuilder.append("dprd.allow_withdrawal as allowWithdrawal, ");
+            sqlBuilder.append("dprd.allow_withdrawal as allowWithdrawal, dprd.allow_free_withdrawal as allowFreeWithdrawal, ");
             sqlBuilder.append("dprd.adjust_advance_towards_future_payments as adjustAdvanceTowardsFuturePayments, ");
             sqlBuilder.append("dptp.min_deposit_term as minDepositTerm, ");
             sqlBuilder.append("dptp.max_deposit_term as maxDepositTerm, ");
@@ -330,6 +330,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
 
             final boolean isMandatoryDeposit = rs.getBoolean("isMandatoryDeposit");
             final boolean allowWithdrawal = rs.getBoolean("allowWithdrawal");
+            final boolean allowFreeWithdrawal = rs.getBoolean("allowFreeWithdrawal");
             final boolean adjustAdvanceTowardsFuturePayments = rs.getBoolean("adjustAdvanceTowardsFuturePayments");
             final boolean preClosurePenalApplicable = rs.getBoolean("preClosurePenalApplicable");
             final BigDecimal preClosurePenalInterest = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "preClosurePenalInterest");
@@ -355,7 +356,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             return RecurringDepositProductData.instance(depositProductData, preClosurePenalApplicable, preClosurePenalInterest,
                     preClosurePenalInterestOnType, minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
                     inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, isMandatoryDeposit, allowWithdrawal,
-                    adjustAdvanceTowardsFuturePayments, minDepositAmount, depositAmount, maxDepositAmount);
+                    adjustAdvanceTowardsFuturePayments, minDepositAmount, depositAmount, maxDepositAmount, allowFreeWithdrawal);
         }
     }
 

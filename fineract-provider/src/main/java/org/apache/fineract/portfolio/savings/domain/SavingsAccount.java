@@ -5052,12 +5052,12 @@ public class SavingsAccount extends AbstractPersistableCustom {
         return vaultTargetDate;
     }
 
-    public BigDecimal findAccrualInterestPostingTransactionFromTo(final LocalDate postingDate) {
+    public BigDecimal findAccrualInterestPostingTransactionFromTo(final LocalDate startDate, final LocalDate transactionDate) {
         BigDecimal amount = BigDecimal.ZERO;
         List<SavingsAccountTransaction> trans = getTransactions();
         for (final SavingsAccountTransaction transaction : trans) {
             if ((transaction.isAccrualInterestPostingAndNotReversed() || transaction.isOverdraftAccrualInterestAndNotReversed())
-                    && transaction.isAfter(postingDate)) {
+                    && transaction.isAfter(startDate) && (transaction.isBefore(transactionDate) || transaction.getDateOf().isEqual(transactionDate))) {
                 amount = amount.add(transaction.getAmount());
             }
         }

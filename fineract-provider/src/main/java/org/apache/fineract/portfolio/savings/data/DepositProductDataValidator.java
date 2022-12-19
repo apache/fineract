@@ -746,6 +746,11 @@ public class DepositProductDataValidator {
             baseDataValidator.reset().parameter(allowWithdrawalParamName).value(allowWithdrawal).ignoreIfNull().validateForBooleanValue();
         }
 
+        if (this.fromApiJsonHelper.parameterExists(allowFreeWithdrawalParamName, element)) {
+            final Boolean allowFreeWithdrawal = this.fromApiJsonHelper.extractBooleanNamed(allowFreeWithdrawalParamName, element);
+            baseDataValidator.reset().parameter(allowFreeWithdrawalParamName).value(allowFreeWithdrawal).ignoreIfNull().validateForBooleanValue();
+        }
+
         if (this.fromApiJsonHelper.parameterExists(adjustAdvanceTowardsFuturePaymentsParamName, element)) {
             final Boolean adjustAdvanceTowardsFuturePayments = this.fromApiJsonHelper
                     .extractBooleanNamed(adjustAdvanceTowardsFuturePaymentsParamName, element);

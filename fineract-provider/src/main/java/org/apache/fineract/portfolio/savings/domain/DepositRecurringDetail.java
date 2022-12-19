@@ -81,6 +81,12 @@ public class DepositRecurringDetail {
             this.allowWithdrawal = newValue;
         }
 
+        if (command.isChangeInBooleanParameterNamed(allowFreeWithdrawalParamName, this.allowFreeWithdrawal)) {
+            final boolean newValue = command.booleanObjectValueOfParameterNamed(allowFreeWithdrawalParamName);
+            actualChanges.put(allowFreeWithdrawalParamName, newValue);
+            this.allowFreeWithdrawal = newValue;
+        }
+
         if (command.isChangeInBooleanParameterNamed(adjustAdvanceTowardsFuturePaymentsParamName, this.adjustAdvanceTowardsFuturePayments)) {
             final boolean newValue = command.booleanObjectValueOfParameterNamed(adjustAdvanceTowardsFuturePaymentsParamName);
             actualChanges.put(adjustAdvanceTowardsFuturePaymentsParamName, newValue);
