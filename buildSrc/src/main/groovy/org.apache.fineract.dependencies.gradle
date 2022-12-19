@@ -39,7 +39,7 @@ dependencyManagement {
 
         dependency 'org.slf4j:slf4j-api:1.7.36'
         dependency 'org.slf4j:slf4j-simple:1.7.36'
-        dependency 'org.slf4j:jcl-over-slf4j:1.7.36'
+        dependency 'org.slf4j:jcl-over-slf4j:2.0.6'
         dependency 'org.slf4j:jul-to-slf4j:1.7.36'
         dependency 'org.slf4j:log4j-over-slf4j:1.7.36'
         dependency 'ch.qos.logback:logback-core:1.2.11'
