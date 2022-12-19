@@ -37,7 +37,7 @@ dependencyManagement {
         // We do not use :+ to get the latest available version available on Maven Central, as that could suddenly break things.
         // We use the Renovate Bot to automatically propose Pull Requests (PRs) when upgrades for all of these versions are available.
 
-        dependency 'org.slf4j:slf4j-api:1.7.36'
+        dependency 'org.slf4j:slf4j-api:2.0.6'
         dependency 'org.slf4j:slf4j-simple:1.7.36'
         dependency 'org.slf4j:jcl-over-slf4j:1.7.36'
         dependency 'org.slf4j:jul-to-slf4j:1.7.36'
