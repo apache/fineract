@@ -28,11 +28,14 @@ import org.apache.fineract.avro.loan.v1.RepaymentDueDataV1;
 import org.apache.fineract.avro.loan.v1.RepaymentPastDueDataV1;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.repayment.LoanRepaymentBusinessEvent;
+import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanRepaymentPastDueDataMapper;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroDateTimeMapper;
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventSerializer;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentPastDueData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.service.LoanCalculateRepaymentPastDueService;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -40,6 +43,8 @@ import org.springframework.stereotype.Component;
 public class LoanRepaymentBusinessEventSerializer extends AbstractBusinessEventSerializer {
 
     private final AvroDateTimeMapper dataTimeMapper;
+    private final LoanRepaymentPastDueDataMapper pastDueDataMapper;
+    private final LoanCalculateRepaymentPastDueService pastDueService;
 
     @Override
     protected <T> ByteBufferSerializable toAvroDTO(BusinessEvent<T> rawEvent) {
@@ -55,6 +60,18 @@ public class LoanRepaymentBusinessEventSerializer extends AbstractBusinessEventS
         CurrencyDataV1 currency = CurrencyDataV1.newBuilder().setCode(loanCurrency.getCode())
                 .setDecimalPlaces(loanCurrency.getDigitsAfterDecimal()).setInMultiplesOf(loanCurrency.getCurrencyInMultiplesOf()).build();
 
+        RepaymentDueDataV1 repaymentDue = getRepaymentDueData(repaymentInstallment, loanCurrency);
+
+        LoanRepaymentPastDueData pastDueData = pastDueService.retrieveLoanRepaymentPastDueAmountTillDate(loan);
+
+        RepaymentPastDueDataV1 pastDue = pastDueDataMapper.map(pastDueData);
+
+        LoanRepaymentDueDataV1 loanRepaymentDueDataV1 = LoanRepaymentDueDataV1.newBuilder().setLoanId(id).setLoanAccountNo(accountNo)
+                .setLoanExternalId(externalId).setCurrency(currency).setInstallment(repaymentDue).setPastDueAmount(pastDue).build();
+        return loanRepaymentDueDataV1;
+    }
+
+    private RepaymentDueDataV1 getRepaymentDueData(LoanRepaymentScheduleInstallment repaymentInstallment, MonetaryCurrency loanCurrency) {
         Integer installmentNumber = repaymentInstallment.getInstallmentNumber();
         String dueDate = dataTimeMapper.mapLocalDate(repaymentInstallment.getDueDate());
         BigDecimal principalAmountDue = repaymentInstallment.getPrincipalOutstanding(loanCurrency).getAmount();
@@ -65,13 +82,7 @@ public class LoanRepaymentBusinessEventSerializer extends AbstractBusinessEventS
 
         RepaymentDueDataV1 repaymentDue = new RepaymentDueDataV1(installmentNumber, dueDate, principalAmountDue, interestAmountDue,
                 feeChargeAmountDue, penaltyChargeAmountDue, totalAmountDue);
-
-        RepaymentPastDueDataV1 pastDue = new RepaymentPastDueDataV1(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
-                BigDecimal.ZERO);
-
-        LoanRepaymentDueDataV1 loanRepaymentDueDataV1 = LoanRepaymentDueDataV1.newBuilder().setLoanId(id).setLoanAccountNo(accountNo)
-                .setLoanExternalId(externalId).setCurrency(currency).setInstallment(repaymentDue).setPastDueAmount(pastDue).build();
-        return loanRepaymentDueDataV1;
+        return repaymentDue;
     }
 
     @Override
