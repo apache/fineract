@@ -44,13 +44,16 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.domain.loan.repayment.LoanRepaymentDueBusinessEvent;
+import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanRepaymentPastDueDataMapper;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroDateTimeMapper;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummary;
+import org.apache.fineract.portfolio.loanaccount.service.LoanCalculateRepaymentPastDueService;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -68,17 +71,32 @@ public class LoanRepaymentBusinessEventSerializerTest {
     @Mock
     private AvroDateTimeMapper mapper;
 
+    @Mock
+    private LoanRepaymentPastDueDataMapper pastDueDataMapper;
+
+    @Mock
+    private LoanCalculateRepaymentPastDueService pastDueService;
+
+    private MockedStatic<MoneyHelper> moneyHelper = Mockito.mockStatic(MoneyHelper.class);
+
     @BeforeEach
     public void setUp() {
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
         ThreadLocalContextUtil
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.now(ZoneId.systemDefault()))));
+        moneyHelper.when(() -> MoneyHelper.getRoundingMode()).thenReturn(RoundingMode.UP);
+    }
+
+    @AfterEach
+    public void reset() {
+        moneyHelper.close();
     }
 
     @Test
     public void testLoanRepaymentEventPayloadSerialization() throws IOException {
         // given
-        LoanRepaymentBusinessEventSerializer serializer = new LoanRepaymentBusinessEventSerializer(mapper);
+        LoanRepaymentBusinessEventSerializer serializer = new LoanRepaymentBusinessEventSerializer(mapper, pastDueDataMapper,
+                pastDueService);
 
         LocalDate loanInstallmentRepaymentDueDate = DateUtils.getBusinessLocalDate().plusDays(1);
 
@@ -86,12 +104,14 @@ public class LoanRepaymentBusinessEventSerializerTest {
         LoanProduct loanProduct = Mockito.mock(LoanProduct.class);
         LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
         MonetaryCurrency loanCurrency = Mockito.mock(MonetaryCurrency.class);
-        MockedStatic<MoneyHelper> moneyHelper = Mockito.mockStatic(MoneyHelper.class);
 
         LoanRepaymentScheduleInstallment repaymentInstallment = new LoanRepaymentScheduleInstallment(loanForProcessing, 1,
                 LocalDate.now(ZoneId.systemDefault()), loanInstallmentRepaymentDueDate, BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0),
                 BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), false, new HashSet<>(), BigDecimal.valueOf(0.0));
         LoanRepaymentDueBusinessEvent event = new LoanRepaymentDueBusinessEvent(repaymentInstallment);
+
+        RepaymentPastDueDataV1 pastDueAmount = new RepaymentPastDueDataV1(BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0),
+                BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0));
 
         when(loanForProcessing.getId()).thenReturn(1L);
         when(loanForProcessing.getAccountNumber()).thenReturn("0001");
@@ -103,7 +123,8 @@ public class LoanRepaymentBusinessEventSerializerTest {
         when(loanCurrency.getCurrencyInMultiplesOf()).thenReturn(1);
         when(loanCurrency.getDigitsAfterDecimal()).thenReturn(1);
         when(mapper.mapLocalDate(any())).thenReturn(loanInstallmentRepaymentDueDate.format(DateTimeFormatter.ISO_DATE));
-        moneyHelper.when(() -> MoneyHelper.getRoundingMode()).thenReturn(RoundingMode.UP);
+        when(pastDueDataMapper.map(any())).thenReturn(pastDueAmount);
+        when(pastDueService.retrieveLoanRepaymentPastDueAmountTillDate(loanForProcessing)).thenReturn(null);
 
         // when
         LoanRepaymentDueDataV1 data = (LoanRepaymentDueDataV1) serializer.toAvroDTO(event);
@@ -119,13 +140,14 @@ public class LoanRepaymentBusinessEventSerializerTest {
                 pastDue);
 
         assertEquals(data, expectedSerializedData);
-        moneyHelper.close();
+
     }
 
     @Test
     public void testLoanRepaymentEventLoanIdMandatoryFieldValidation() {
         // given
-        LoanRepaymentBusinessEventSerializer serializer = new LoanRepaymentBusinessEventSerializer(mapper);
+        LoanRepaymentBusinessEventSerializer serializer = new LoanRepaymentBusinessEventSerializer(mapper, pastDueDataMapper,
+                pastDueService);
 
         LocalDate loanInstallmentRepaymentDueDate = DateUtils.getBusinessLocalDate().plusDays(1);
 
@@ -133,12 +155,14 @@ public class LoanRepaymentBusinessEventSerializerTest {
         LoanProduct loanProduct = Mockito.mock(LoanProduct.class);
         LoanSummary loanSummary = Mockito.mock(LoanSummary.class);
         MonetaryCurrency loanCurrency = Mockito.mock(MonetaryCurrency.class);
-        MockedStatic<MoneyHelper> moneyHelper = Mockito.mockStatic(MoneyHelper.class);
 
         LoanRepaymentScheduleInstallment repaymentInstallment = new LoanRepaymentScheduleInstallment(loanForProcessing, 1,
                 LocalDate.now(ZoneId.systemDefault()), loanInstallmentRepaymentDueDate, BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0),
                 BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), false, new HashSet<>(), BigDecimal.valueOf(0.0));
         LoanRepaymentDueBusinessEvent event = new LoanRepaymentDueBusinessEvent(repaymentInstallment);
+
+        RepaymentPastDueDataV1 pastDueAmount = new RepaymentPastDueDataV1(BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0),
+                BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0), BigDecimal.valueOf(0.0));
 
         // set mandatory loanID field as null
         when(loanForProcessing.getId()).thenReturn(null);
@@ -151,11 +175,12 @@ public class LoanRepaymentBusinessEventSerializerTest {
         when(loanCurrency.getCurrencyInMultiplesOf()).thenReturn(1);
         when(loanCurrency.getDigitsAfterDecimal()).thenReturn(1);
         when(mapper.mapLocalDate(any())).thenReturn(loanInstallmentRepaymentDueDate.format(DateTimeFormatter.ISO_DATE));
-        moneyHelper.when(() -> MoneyHelper.getRoundingMode()).thenReturn(RoundingMode.UP);
+        when(pastDueDataMapper.map(any())).thenReturn(pastDueAmount);
+        when(pastDueService.retrieveLoanRepaymentPastDueAmountTillDate(loanForProcessing)).thenReturn(null);
 
         // when
         AvroRuntimeException exceptionThrown = assertThrows(AvroRuntimeException.class, () -> serializer.toAvroDTO(event));
         assertTrue(exceptionThrown.getMessage().contains("does not accept null values"));
-        moneyHelper.close();
     }
+
 }
