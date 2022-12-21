@@ -59,6 +59,10 @@
     "allowedVersions": "<=1.7.36"
   },
   {
+    "matchPackageNames": ["org.springframework:spring-framework-bom"],
+    "allowedVersions": "<6.0.0"
+  },
+  {
     "matchPackageNames": ["gradle"],
     "allowedVersions": "<=7.5.1"
   },
