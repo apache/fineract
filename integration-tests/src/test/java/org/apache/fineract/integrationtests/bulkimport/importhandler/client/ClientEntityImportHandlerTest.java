@@ -97,7 +97,7 @@ public class ClientEntityImportHandlerTest {
         CodeHelper.retrieveOrCreateCodeValue(25, requestSpec, responseSpec);
 
         ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
-        Workbook workbook = clientHelper.getClientEntityWorkbook(GlobalEntityType.CLIENTS_ENTTTY, "dd MMMM yyyy");
+        Workbook workbook = clientHelper.getClientEntityWorkbook(GlobalEntityType.CLIENTS_ENTITY, "dd MMMM yyyy");
 
         // insert dummy data into client entity sheet
         Sheet clientEntitySheet = workbook.getSheet(TemplatePopulateImportConstants.CLIENT_ENTITY_SHEET_NAME);

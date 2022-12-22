@@ -22,6 +22,7 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -65,5 +66,10 @@ public class DatabaseIndependentQueryService implements DatabaseQueryService {
     @Override
     public SqlRowSet getTableColumns(DataSource dataSource, String tableName) {
         return choose(dataSource).getTableColumns(dataSource, tableName);
+    }
+
+    @Override
+    public List<IndexDetail> getTableIndexes(DataSource dataSource, String tableName) {
+        return choose(dataSource).getTableIndexes(dataSource, tableName);
     }
 }

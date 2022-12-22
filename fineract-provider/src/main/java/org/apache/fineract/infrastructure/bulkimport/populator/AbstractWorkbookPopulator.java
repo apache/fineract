@@ -129,8 +129,8 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
                         writeDate(activationDateCol, row, outputFormat.format(client.getActivationDate()), dateCellStyle, dateFormat);
                     }
                     if (containsClientExtId) {
-                        if (client.getExternalId() != null) {
-                            writeString(nameCol + 1, row, client.getExternalId());
+                        if (!client.getExternalId().isEmpty()) {
+                            writeString(nameCol + 1, row, client.getExternalId().getValue());
                         }
                     }
 

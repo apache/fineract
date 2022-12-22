@@ -1175,6 +1175,10 @@ final class LoanProductsApiResourceSwagger {
 
             public GetLoanCharge charge;
             public GetLoanAccountingMappings.GetLoanIncomeFromFeeAccount incomeAccount;
+            @Schema(example = "10")
+            public Long chargeId;
+            @Schema(example = "39")
+            public Long incomeAccountId;
         }
 
         @Schema(example = "11")

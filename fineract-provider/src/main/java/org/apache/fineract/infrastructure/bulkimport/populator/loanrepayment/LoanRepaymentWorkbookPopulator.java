@@ -46,12 +46,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddressList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LoanRepaymentWorkbookPopulator.class);
     private final OfficeSheetPopulator officeSheetPopulator;
     private final ClientSheetPopulator clientSheetPopulator;
     private final ExtrasSheetPopulator extrasSheetPopulator;
@@ -83,8 +80,8 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
         clientIdToClientExternalId = new HashMap<>();
         List<ClientData> allclients = clientSheetPopulator.getClients();
         for (ClientData client : allclients) {
-            if (client.getExternalId() != null) {
-                clientIdToClientExternalId.put(client.getId(), client.getExternalId());
+            if (!client.getExternalId().isEmpty()) {
+                clientIdToClientExternalId.put(client.getId(), client.getExternalId().getValue());
             }
         }
     }

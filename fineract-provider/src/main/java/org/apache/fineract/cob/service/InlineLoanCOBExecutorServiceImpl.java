@@ -21,6 +21,8 @@ package org.apache.fineract.cob.service;
 import static org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRES_NEW;
 
 import com.google.gson.Gson;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,11 +35,14 @@ import org.apache.fineract.cob.domain.LoanAccountLock;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.exceptions.LoanAccountLockCannotBeOverruledException;
+import org.apache.fineract.cob.loan.LoanCOBConstant;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformInternalServerException;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameter;
 import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameterRepository;
 import org.apache.fineract.infrastructure.jobs.exception.JobNotFoundException;
@@ -55,7 +60,6 @@ import org.springframework.batch.core.configuration.JobLocator;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.NoSuchJobException;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
@@ -66,7 +70,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<Long>, InitializingBean {
+public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<Long> {
 
     private static final String JOB_EXECUTION_FAILED_MESSAGE = "Job execution failed for job with name: ";
 
@@ -80,12 +84,7 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
     private final CustomJobParameterRepository customJobParameterRepository;
     private final PlatformSecurityContext context;
 
-    private Gson gson;
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        this.gson = gsonFactory.createSimpleGson();
-    }
+    private final Gson gson = GoogleGsonSerializerHelper.createSimpleGson();
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
@@ -105,7 +104,9 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
             throw new JobNotFoundException(jobName, e);
         }
         JobParameters jobParameters = new JobParametersBuilder(jobExplorer).getNextJobParameters(inlineLoanCOBJob)
-                .addJobParameters(new JobParameters(getJobParametersMap(loanIds))).toJobParameters();
+                .addJobParameters(new JobParameters(
+                        getJobParametersMap(loanIds, ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE))))
+                .toJobParameters();
         JobExecution jobExecution;
         try {
             jobExecution = jobLauncher.run(inlineLoanCOBJob, jobParameters);
@@ -144,14 +145,18 @@ public class InlineLoanCOBExecutorServiceImpl implements InlineExecutorService<L
         return loanAccountLocks;
     }
 
-    private Map<String, JobParameter> getJobParametersMap(List<Long> loanIds) {
+    private Map<String, JobParameter> getJobParametersMap(List<Long> loanIds, LocalDate businessDate) {
         // TODO: refactor for a more generic solution
         String parameterJson = gson.toJson(loanIds);
-        CustomJobParameter customJobParameter = new CustomJobParameter();
-        customJobParameter.setParameterJson(parameterJson);
-        Long customJobParameterId = customJobParameterRepository.saveAndFlush(customJobParameter).getId();
+        CustomJobParameter loanIdsJobParameter = new CustomJobParameter();
+        loanIdsJobParameter.setParameterJson(parameterJson);
+        Long loanIdsJobParameterId = customJobParameterRepository.saveAndFlush(loanIdsJobParameter).getId();
+        CustomJobParameter businessDateJobParameter = new CustomJobParameter();
+        businessDateJobParameter.setParameterJson(gson.toJson(businessDate.format(DateTimeFormatter.ISO_DATE)));
+        Long businessDateJobParameterId = customJobParameterRepository.saveAndFlush(businessDateJobParameter).getId();
         Map<String, JobParameter> jobParameterMap = new HashMap<>();
-        jobParameterMap.put(SpringBatchJobConstants.CUSTOM_JOB_PARAMETER_ID_KEY, new JobParameter(customJobParameterId));
+        jobParameterMap.put(SpringBatchJobConstants.CUSTOM_JOB_PARAMETER_ID_KEY, new JobParameter(loanIdsJobParameterId));
+        jobParameterMap.put(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME, new JobParameter(businessDateJobParameterId));
         return jobParameterMap;
     }
 

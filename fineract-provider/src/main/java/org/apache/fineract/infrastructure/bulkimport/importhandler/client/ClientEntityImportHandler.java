@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import lombok.AllArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -34,7 +35,9 @@ import org.apache.fineract.infrastructure.bulkimport.data.Count;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.portfolio.address.data.AddressData;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.data.ClientNonPersonData;
@@ -45,20 +48,16 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@AllArgsConstructor
 public class ClientEntityImportHandler implements ImportHandler {
 
     public static final String SEPARATOR = "-";
     private static final Logger LOG = LoggerFactory.getLogger(ClientEntityImportHandler.class);
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-
-    @Autowired
-    public ClientEntityImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    }
+    private final ExternalIdFactory externalIdFactory;
 
     @Override
     public Count process(final Workbook workbook, final String locale, final String dateFormat) {
@@ -141,7 +140,7 @@ public class ClientEntityImportHandler implements ImportHandler {
         ClientNonPersonData clientNonPersonData = ClientNonPersonData.importInstance(incorporationNo, incorporationTill, remarks,
                 mainBusinessId, constitutionId, locale, dateFormat);
 
-        String externalId = ImportHandlerUtils.readAsString(ClientEntityConstants.EXTERNAL_ID_COL, row);
+        ExternalId externalId = externalIdFactory.create(ImportHandlerUtils.readAsString(ClientEntityConstants.EXTERNAL_ID_COL, row));
 
         Boolean active = ImportHandlerUtils.readAsBoolean(ClientEntityConstants.ACTIVE_COL, row);
 

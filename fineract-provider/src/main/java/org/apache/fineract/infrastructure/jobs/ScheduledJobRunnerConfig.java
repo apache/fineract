@@ -41,7 +41,8 @@ public class ScheduledJobRunnerConfig {
     @Bean
     public PlatformTransactionManager transactionManager(ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
         ExtendedJpaTransactionManager transactionManager = new ExtendedJpaTransactionManager();
-        transactionManagerCustomizers.ifAvailable((customizers) -> customizers.customize(transactionManager));
+        transactionManager.setValidateExistingTransaction(true);
+        transactionManagerCustomizers.ifAvailable(customizers -> customizers.customize(transactionManager));
         return transactionManager;
     }
 

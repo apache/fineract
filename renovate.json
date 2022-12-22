@@ -55,6 +55,22 @@
     "allowedVersions": "<=1.2.11"
   },
   {
+    "matchPackageNames": ["org.slf4j:slf4j-api", "org.slf4j:slf4j-simple", "org.slf4j:jcl-over-slf4j", "org.slf4j:jul-to-slf4j", "org.slf4j:log4j-over-slf4j"],
+    "allowedVersions": "<=1.7.36"
+  },
+  {
+    "matchPackageNames": ["org.springframework:spring-framework-bom"],
+    "allowedVersions": "<6.0.0"
+  },
+  {
+    "matchPackageNames": ["gradle"],
+    "allowedVersions": "<=7.5.1"
+  },
+  {
+    "matchPackageNames": ["org.mariadb.jdbc:mariadb-java-client"],
+    "allowedVersions": "<=3.0.9"
+  },
+  {
     "depTypeList": ["dependencies"],
     "updateTypes": ["patch", "minor"],
     "groupName": "non-major"

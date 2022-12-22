@@ -384,9 +384,10 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         try {
 
             final GLJournalEntryMapper rm = new GLJournalEntryMapper(associationParametersData);
+            // Programmatic query, disable sonar issue
             final String sql = "select " + rm.schema() + " where journalEntry.id = ?";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, glJournalEntryId);
+            return this.jdbcTemplate.queryForObject(sql, rm, glJournalEntryId); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new JournalEntriesNotFoundException(glJournalEntryId, e);
         }

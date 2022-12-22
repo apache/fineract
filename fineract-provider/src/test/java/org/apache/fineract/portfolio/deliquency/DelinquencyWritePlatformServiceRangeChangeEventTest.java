@@ -21,11 +21,11 @@ package org.apache.fineract.portfolio.deliquency;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyIterable;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
@@ -46,13 +46,14 @@ import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRange;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRangeRepository;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyTagHistoryRepository;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyWritePlatformServiceImpl;
+import org.apache.fineract.portfolio.delinquency.service.LoanDelinquencyDomainService;
 import org.apache.fineract.portfolio.delinquency.validator.DelinquencyBucketParseAndValidator;
 import org.apache.fineract.portfolio.delinquency.validator.DelinquencyRangeParseAndValidator;
+import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -84,6 +85,8 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
     private LoanProductRepository loanProductRepository;
     @Mock
     private BusinessEventNotifierService businessEventNotifierService;
+    @Mock
+    private LoanDelinquencyDomainService loanDelinquencyDomainService;
     @InjectMocks
     private DelinquencyWritePlatformServiceImpl underTest;
 
@@ -101,7 +104,6 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
         // given
         Loan loanForProcessing = Mockito.mock(Loan.class);
         LoanProduct loanProduct = Mockito.mock(LoanProduct.class);
-        LoanProductRelatedDetail loanProductRelatedDetail = Mockito.mock(LoanProductRelatedDetail.class);
         DelinquencyRange range1 = DelinquencyRange.instance("Range1", 1, 2);
         range1.setId(1L);
         DelinquencyRange range2 = DelinquencyRange.instance("Range30", 3, 30);
@@ -113,14 +115,13 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
         LocalDate overDueSinceDate = DateUtils.getBusinessLocalDate().minusDays(2);
         LoanScheduleDelinquencyData loanScheduleDelinquencyData = new LoanScheduleDelinquencyData(1L, overDueSinceDate, 1L,
                 loanForProcessing);
+        CollectionData collectionData = new CollectionData(BigDecimal.ZERO, 2L, null, 2L, overDueSinceDate, BigDecimal.ZERO, null, null);
 
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
         when(loanProduct.getDelinquencyBucket()).thenReturn(delinquencyBucket);
-        when(loanProduct.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
-        when(loanProductRelatedDetail.getGraceOnArrearsAgeing()).thenReturn(1);
         when(loanForProcessing.hasDelinquencyBucket()).thenReturn(true);
         when(loanDelinquencyTagRepository.findByLoanAndLiftedOnDate(any(), any())).thenReturn(Optional.empty());
-        when(repositoryRange.getReferenceById(anyLong())).thenReturn(range1);
+        when(loanDelinquencyDomainService.getOverdueCollectionData(loanForProcessing)).thenReturn(collectionData);
 
         // when
         underTest.applyDelinquencyTagToLoan(loanScheduleDelinquencyData);
@@ -137,7 +138,6 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
         // given
         Loan loanForProcessing = Mockito.mock(Loan.class);
         LoanProduct loanProduct = Mockito.mock(LoanProduct.class);
-        LoanProductRelatedDetail loanProductRelatedDetail = Mockito.mock(LoanProductRelatedDetail.class);
 
         DelinquencyRange range1 = DelinquencyRange.instance("Range1", 1, 2);
         range1.setId(1L);
@@ -154,10 +154,9 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
 
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
         when(loanProduct.getDelinquencyBucket()).thenReturn(delinquencyBucket);
-        when(loanProduct.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
-        when(loanProductRelatedDetail.getGraceOnArrearsAgeing()).thenReturn(1);
         when(loanForProcessing.hasDelinquencyBucket()).thenReturn(true);
         when(loanDelinquencyTagRepository.findByLoanAndLiftedOnDate(any(), any())).thenReturn(Optional.empty());
+        when(loanDelinquencyDomainService.getOverdueCollectionData(loanForProcessing)).thenReturn(CollectionData.template());
 
         // when
         underTest.applyDelinquencyTagToLoan(loanScheduleDelinquencyData);
@@ -165,7 +164,6 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
         // then
         verify(loanDelinquencyTagRepository, times(0)).saveAllAndFlush(anyIterable());
         verify(businessEventNotifierService, times(0)).notifyPostBusinessEvent(any());
-
     }
 
     @Test

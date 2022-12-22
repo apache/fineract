@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.exception;
 
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 import org.springframework.dao.EmptyResultDataAccessException;
 
@@ -27,15 +29,27 @@ import org.springframework.dao.EmptyResultDataAccessException;
 public class LoanTransactionNotFoundException extends AbstractPlatformResourceNotFoundException {
 
     public LoanTransactionNotFoundException(final Long id) {
-        super("error.msg.loan.id.invalid", "Transaction with identifier " + id + " does not exist", id);
+        super("error.msg.loan.transaction.id.invalid", "Transaction with identifier " + id + " does not exist", id);
     }
 
     public LoanTransactionNotFoundException(final Long id, final Long loanId) {
-        super("error.msg.loan.id.invalid", "Transaction with identifier " + id + " does not exist for loan with identifier " + loanId + ".",
-                id, loanId);
+        super("error.msg.loan.transaction.id.invalid",
+                "Transaction with identifier " + id + " does not exist for loan with identifier " + loanId + ".", id, loanId);
     }
 
     public LoanTransactionNotFoundException(Long id, EmptyResultDataAccessException e) {
-        super("error.msg.loan.id.invalid", "Transaction with identifier " + id + " does not exist", id, e);
+        super("error.msg.loan.transaction.id.invalid", "Transaction with identifier " + id + " does not exist", id, e);
+    }
+
+    public LoanTransactionNotFoundException(ExternalId transactionExternalId) {
+        super("error.msg.loan.transaction.external.id.invalid", "Transaction with external identifier "
+                + ObjectUtils.defaultIfNull(transactionExternalId, ExternalId.empty()).getValue() + " does not exist",
+                transactionExternalId);
+    }
+
+    public LoanTransactionNotFoundException(ExternalId transactionExternalId, EmptyResultDataAccessException e) {
+        super("error.msg.loan.transaction.external.id.invalid", "Transaction with external identifier "
+                + ObjectUtils.defaultIfNull(transactionExternalId, ExternalId.empty()).getValue() + " does not exist",
+                transactionExternalId, e);
     }
 }

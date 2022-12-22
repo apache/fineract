@@ -207,7 +207,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                 }
 
                 this.entityDatatableChecksWritePlatformService.runTheCheck(newGroup.getId(), EntityTables.GROUP.getName(),
-                        StatusEnum.CREATE.getCode().longValue(), EntityTables.GROUP.getForeignKeyColumnNameOnDatatable());
+                        StatusEnum.CREATE.getCode(), EntityTables.GROUP.getForeignKeyColumnNameOnDatatable(), null);
             }
 
             return new CommandProcessingResultBuilder() //
@@ -323,8 +323,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         if (!isGroupClientCountValid) {
             throw new GroupMemberCountNotInPermissibleRangeException(group.getId(), minClients, maxClients);
         }
-        entityDatatableChecksWritePlatformService.runTheCheck(group.getId(), EntityTables.GROUP.getName(),
-                StatusEnum.ACTIVATE.getCode().longValue(), EntityTables.GROUP.getForeignKeyColumnNameOnDatatable());
+        entityDatatableChecksWritePlatformService.runTheCheck(group.getId(), EntityTables.GROUP.getName(), StatusEnum.ACTIVATE.getCode(),
+                EntityTables.GROUP.getForeignKeyColumnNameOnDatatable(), null);
     }
 
     public void validateGroupRulesBeforeClientAssociation(final Group group) {
@@ -595,8 +595,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         validateLoansAndSavingsForGroupOrCenterClose(group, closureDate);
 
-        entityDatatableChecksWritePlatformService.runTheCheck(groupId, EntityTables.GROUP.getName(), StatusEnum.CLOSE.getCode().longValue(),
-                EntityTables.GROUP.getForeignKeyColumnNameOnDatatable());
+        entityDatatableChecksWritePlatformService.runTheCheck(groupId, EntityTables.GROUP.getName(), StatusEnum.CLOSE.getCode(),
+                EntityTables.GROUP.getForeignKeyColumnNameOnDatatable(), null);
 
         group.close(currentUser, closureReason, closureDate);
 
@@ -670,8 +670,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         validateLoansAndSavingsForGroupOrCenterClose(center, closureDate);
 
-        entityDatatableChecksWritePlatformService.runTheCheck(centerId, EntityTables.GROUP.getName(),
-                StatusEnum.ACTIVATE.getCode().longValue(), EntityTables.GROUP.getForeignKeyColumnNameOnDatatable());
+        entityDatatableChecksWritePlatformService.runTheCheck(centerId, EntityTables.GROUP.getName(), StatusEnum.ACTIVATE.getCode(),
+                EntityTables.GROUP.getForeignKeyColumnNameOnDatatable(), null);
 
         center.close(currentUser, closureReason, closureDate);
 

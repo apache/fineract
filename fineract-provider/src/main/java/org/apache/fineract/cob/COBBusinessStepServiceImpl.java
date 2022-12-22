@@ -51,20 +51,27 @@ public class COBBusinessStepServiceImpl implements COBBusinessStepService {
         if (executionMap == null || executionMap.isEmpty()) {
             throw new BusinessStepException("Execution map is empty! COB Business step execution skipped!");
         }
-        businessEventNotifierService.startExternalEventRecording();
-        for (String businessStep : executionMap.values()) {
-            try {
-                ThreadLocalContextUtil.setActionContext(ActionContext.COB);
-                COBBusinessStep<S> businessStepBean = (COBBusinessStep<S>) applicationContext.getBean(businessStep);
-                item = businessStepBean.execute(item);
-            } catch (Exception e) {
-                throw new BusinessStepException("Error happened during business step execution", e);
-            } finally {
-                // Fallback to COB action context after each business step
-                ThreadLocalContextUtil.setActionContext(ActionContext.COB);
+        // Extra safety net to avoid event leaking
+        try {
+            businessEventNotifierService.startExternalEventRecording();
+
+            for (String businessStep : executionMap.values()) {
+                try {
+                    ThreadLocalContextUtil.setActionContext(ActionContext.COB);
+                    COBBusinessStep<S> businessStepBean = (COBBusinessStep<S>) applicationContext.getBean(businessStep);
+                    item = businessStepBean.execute(item);
+                } catch (Exception e) {
+                    throw new BusinessStepException("Error happened during business step execution", e);
+                } finally {
+                    // Fallback to COB action context after each business step
+                    ThreadLocalContextUtil.setActionContext(ActionContext.COB);
+                }
             }
+            businessEventNotifierService.stopExternalEventRecording();
+        } catch (Exception e) {
+            businessEventNotifierService.resetEventRecording();
+            throw e;
         }
-        businessEventNotifierService.stopExternalEventRecording();
         return item;
     }
 

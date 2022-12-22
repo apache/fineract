@@ -74,19 +74,21 @@ public class DatatableCommandFromApiJsonDeserializer {
     public static final String DROPDOWN = "dropdown";
     private static final String DATATABLE_NAME_REGEX_PATTERN = "^[a-zA-Z][a-zA-Z0-9\\-_\\s]{0,48}[a-zA-Z0-9]$";
     private static final String DATATABLE_COLUMN_NAME_REGEX_PATTERN = "^[a-zA-Z][a-zA-Z0-9\\-_\\s]{0,}[a-zA-Z0-9]$";
+    private static final String INDEXED = "indexed";
+    private static final String UNIQUE = "unique";
     /**
      * The parameters supported for this command.
      */
     private static final Set<String> SUPPORTED_PARAMETERS_FOR_CREATE = new HashSet<>(
             Arrays.asList(DATATABLE_NAME, ENTITY_SUB_TYPE, APPTABLE_NAME, MULTI_ROW, COLUMNS));
     private static final Set<String> SUPPORTED_PARAMETERS_FOR_CREATE_COLUMNS = new HashSet<>(
-            Arrays.asList(NAME, TYPE, LENGTH, MANDATORY, CODE));
+            Arrays.asList(NAME, TYPE, LENGTH, MANDATORY, CODE, UNIQUE, INDEXED));
     private static final Set<String> SUPPORTED_PARAMETERS_FOR_UPDATE = new HashSet<>(
             Arrays.asList(APPTABLE_NAME, ENTITY_SUB_TYPE, CHANGE_COLUMNS, ADD_COLUMNS, DROP_COLUMNS));
     private static final Set<String> SUPPORTED_PARAMETERS_FOR_ADD_COLUMNS = new HashSet<>(
-            Arrays.asList(NAME, TYPE, LENGTH, MANDATORY, AFTER, CODE));
+            Arrays.asList(NAME, TYPE, LENGTH, MANDATORY, AFTER, CODE, UNIQUE, INDEXED));
     private static final Set<String> SUPPORTED_PARAMETERS_FOR_CHANGE_COLUMNS = new HashSet<>(
-            Arrays.asList(NAME, NEW_NAME, LENGTH, MANDATORY, AFTER, CODE, NEW_CODE));
+            Arrays.asList(NAME, NEW_NAME, LENGTH, MANDATORY, AFTER, CODE, NEW_CODE, UNIQUE, INDEXED));
     private static final Set<String> SUPPORTED_PARAMETERS_FOR_DROP_COLUMNS = new HashSet<>(List.of(NAME));
     private static final Object[] SUPPORTED_COLUMN_TYPES = { STRING, NUMBER, BOOLEAN, DECIMAL, DATE, DATETIME, TEXT, DROPDOWN };
     private static final Object[] SUPPORTED_APPTABLE_NAMES = { M_LOAN, M_SAVINGS_ACCOUNT, M_CLIENT, M_GROUP, M_CENTER, M_OFFICE,
@@ -180,7 +182,11 @@ public class DatatableCommandFromApiJsonDeserializer {
                 validateType(baseDataValidator, column);
 
                 final Boolean mandatory = this.fromApiJsonHelper.extractBooleanNamed(MANDATORY, column);
+                final Boolean unique = this.fromApiJsonHelper.extractBooleanNamed(UNIQUE, column);
+                final Boolean indexed = this.fromApiJsonHelper.extractBooleanNamed(INDEXED, column);
                 baseDataValidator.reset().parameter(MANDATORY).value(mandatory).ignoreIfNull().notBlank().isOneOfTheseValues(true, false);
+                baseDataValidator.reset().parameter(UNIQUE).value(unique).ignoreIfNull().notBlank().isOneOfTheseValues(true, false);
+                baseDataValidator.reset().parameter(INDEXED).value(indexed).ignoreIfNull().notBlank().isOneOfTheseValues(true, false);
             }
         }
 
@@ -262,6 +268,12 @@ public class DatatableCommandFromApiJsonDeserializer {
 
                 final Boolean after = this.fromApiJsonHelper.extractBooleanNamed(AFTER, column);
                 baseDataValidator.reset().parameter(AFTER).value(after).ignoreIfNull().notBlank().isOneOfTheseValues(true, false);
+
+                final Boolean unique = this.fromApiJsonHelper.extractBooleanNamed(UNIQUE, column);
+                baseDataValidator.reset().parameter(UNIQUE).value(unique).ignoreIfNull().notBlank().isOneOfTheseValues(true, false);
+
+                final Boolean indexed = this.fromApiJsonHelper.extractBooleanNamed(INDEXED, column);
+                baseDataValidator.reset().parameter(INDEXED).value(indexed).ignoreIfNull().notBlank().isOneOfTheseValues(true, false);
             }
         }
 
@@ -283,6 +295,12 @@ public class DatatableCommandFromApiJsonDeserializer {
 
                 final Boolean after = this.fromApiJsonHelper.extractBooleanNamed(AFTER, column);
                 baseDataValidator.reset().parameter(AFTER).value(after).ignoreIfNull().notBlank().isOneOfTheseValues(true, false);
+
+                final Boolean unique = this.fromApiJsonHelper.extractBooleanNamed(UNIQUE, column);
+                baseDataValidator.reset().parameter(UNIQUE).value(unique).ignoreIfNull().notBlank().isOneOfTheseValues(true, false);
+
+                final Boolean indexed = this.fromApiJsonHelper.extractBooleanNamed(INDEXED, column);
+                baseDataValidator.reset().parameter(INDEXED).value(indexed).ignoreIfNull().notBlank().isOneOfTheseValues(true, false);
             }
         }
 

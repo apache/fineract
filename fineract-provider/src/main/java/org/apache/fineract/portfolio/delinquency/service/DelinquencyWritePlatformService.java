@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.delinquency.service;
 
-import java.time.LocalDate;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleDelinquencyData;
@@ -47,7 +46,5 @@ public interface DelinquencyWritePlatformService {
     LoanScheduleDelinquencyData calculateDelinquencyData(LoanScheduleDelinquencyData loanScheduleDelinquencyData);
 
     void applyDelinquencyTagToLoan(LoanScheduleDelinquencyData loanDelinquencyData);
-
-    LocalDate getOverdueSinceDate(Loan loan, LocalDate businessDate, Integer graceOnArrearAgeing);
 
 }

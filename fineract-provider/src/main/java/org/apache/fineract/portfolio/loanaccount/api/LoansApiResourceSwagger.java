@@ -32,6 +32,19 @@ final class LoansApiResourceSwagger {
 
     private LoansApiResourceSwagger() {}
 
+    @Schema(description = "GetLoansApprovalTemplateResponse")
+    public static final class GetLoansApprovalTemplateResponse {
+
+        private GetLoansApprovalTemplateResponse() {}
+
+        @Schema(example = "[2012, 4, 3]")
+        public LocalDate approvalDate;
+        @Schema(example = "200.000000")
+        public Double approvalAmount;
+        @Schema(example = "200.000000")
+        public Double netDisbursalAmount;
+    }
+
     @Schema(description = "GetLoansTemplateResponse")
     public static final class GetLoansTemplateResponse {
 
@@ -561,6 +574,32 @@ final class LoansApiResourceSwagger {
             public Boolean inArrears;
             @Schema(example = "false")
             public Boolean isNPA;
+            @Schema(example = "0.000000")
+            public Double totalMerchantRefund;
+            @Schema(example = "0.000000")
+            public Double totalMerchantRefundReversed;
+            @Schema(example = "0.000000")
+            public Double totalPayoutRefund;
+            @Schema(example = "0.000000")
+            public Double totalPayoutRefundReversed;
+            @Schema(example = "0.000000")
+            public Double totalGoodwillCredit;
+            @Schema(example = "0.000000")
+            public Double totalGoodwillCreditReversed;
+            @Schema(example = "0.000000")
+            public Double totalChargeAdjustment;
+            @Schema(example = "0.000000")
+            public Double totalChargeAdjustmentReversed;
+            @Schema(example = "0.000000")
+            public Double totalChargeback;
+            @Schema(example = "0.000000")
+            public Double totalCreditBalanceRefund;
+            @Schema(example = "0.000000")
+            public Double totalCreditBalanceRefundReversed;
+            @Schema(example = "0.000000")
+            public Double totalRepaymentTransaction;
+            @Schema(example = "0.000000")
+            public Double totalRepaymentTransactionReversed;
             public Set<GetLoansLoanIdOverdueCharges> overdueCharges;
         }
 
@@ -909,6 +948,8 @@ final class LoansApiResourceSwagger {
 
         @Schema(example = "1")
         public Long id;
+        @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+        public String externalId;
         @Schema(example = "000000001")
         public Long accountNo;
         public GetLoansLoanIdStatus status;
@@ -916,6 +957,8 @@ final class LoansApiResourceSwagger {
         public boolean disallowExpectedDisbursements;
         @Schema(example = "1")
         public Integer clientId;
+        @Schema(example = "5e77989e-aa11-11bc-b109-0242ac120004")
+        public String clientExternalId;
         @Schema(example = "Kampala first Client")
         public String clientName;
         @Schema(example = "2")
@@ -940,6 +983,8 @@ final class LoansApiResourceSwagger {
         public BigDecimal principal;
         @Schema(example = "1000.000000")
         public Double approvedPrincipal;
+        @Schema(example = "1001.000000")
+        public Double proposedPrincipal;
         @Schema(example = "200.000000")
         public Double netDisbursalAmount;
         @Schema(example = "12")
@@ -955,6 +1000,8 @@ final class LoansApiResourceSwagger {
         public GetLoansLoanIdInterestRateFrequencyType interestRateFrequencyType;
         @Schema(example = "24")
         public Integer annualInterestRate;
+        @Schema(example = "false")
+        public Boolean isFloatingInterestRate;
         public GetLoansLoanIdAmortizationType amortizationType;
         @Schema(example = "5.5")
         public BigDecimal fixedPrincipalPercentagePerInstallment;
@@ -976,6 +1023,11 @@ final class LoansApiResourceSwagger {
         public GetDelinquencyRangesResponse delinquencyRange;
         @Schema(example = "false")
         public Boolean fraud;
+        @Schema(example = "250.000000")
+        public Double totalOverpaid;
+        public LocalDate lastClosedBusinessDate;
+        @Schema(example = "[2013, 11, 1]")
+        public LocalDate overpaidOnDate;
     }
 
     @Schema(description = "GetLoansResponse")
@@ -1011,8 +1063,8 @@ final class LoansApiResourceSwagger {
         public String locale;
         @Schema(example = "1")
         public Integer productId;
-        @Schema(example = "100,000.00")
-        public String principal;
+        @Schema(example = "1000.00")
+        public BigDecimal principal;
         @Schema(example = "12")
         public Integer loanTermFrequency;
         @Schema(example = "2")
@@ -1049,6 +1101,8 @@ final class LoansApiResourceSwagger {
         public List<PostLoansDisbursementData> disbursementData;
         @Schema(description = "Maximum allowed outstanding balance")
         public BigDecimal maxOutstandingLoanBalance;
+        @Schema(example = "[2011, 10, 20]")
+        public LocalDate repaymentsStartingFromDate;
     }
 
     @Schema(description = "PostLoansResponse")
@@ -1115,9 +1169,11 @@ final class LoansApiResourceSwagger {
         @Schema(example = "1")
         public Integer clientId;
         @Schema(example = "1")
-        public Integer loanId;
+        public Long loanId;
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
+        @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+        public String resourceExternalId;
     }
 
     @Schema(description = "PutLoansLoanIdRequest")
@@ -1266,9 +1322,11 @@ final class LoansApiResourceSwagger {
         @Schema(example = "1")
         public Integer clientId;
         @Schema(example = "1")
-        public Integer loanId;
+        public Long loanId;
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
+        @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+        public String resourceExternalId;
         public PutLoansLoanIdChanges changes;
     }
 
@@ -1282,9 +1340,11 @@ final class LoansApiResourceSwagger {
         @Schema(example = "1")
         public Integer clientId;
         @Schema(example = "1")
-        public Integer loanId;
+        public Long loanId;
         @Schema(example = "1")
-        public Integer resourceId;
+        public Long resourceId;
+        @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+        public String resourceExternalId;
     }
 
     @Schema(description = "PostLoansLoanIdRequest")
@@ -1306,6 +1366,9 @@ final class LoansApiResourceSwagger {
         public Integer toLoanOfficerId;
         @Schema(example = "02 September 2014")
         public String assignmentDate;
+
+        @Schema(example = "02 September 2014")
+        public String unassignedDate;
         @Schema(example = "en")
         public String locale;
         @Schema(example = "dd MMMM yyyy")
@@ -1315,7 +1378,7 @@ final class LoansApiResourceSwagger {
         @Schema(example = "3e7791ce-aa10-11ec-b909-0242ac120002")
         public String externalId;
         @Schema(example = "5000.33")
-        public String transactionAmount;
+        public BigDecimal transactionAmount;
         @Schema(example = "Description of disbursement details.")
         public String note;
         @Schema(example = "28 June 2022")
@@ -1325,9 +1388,13 @@ final class LoansApiResourceSwagger {
         @Schema(example = "28 June 2022")
         public String approvedOnDate;
         @Schema(example = "1000")
-        public String approvedLoanAmount;
+        public BigDecimal approvedLoanAmount;
         @Schema(example = "28 June 2022")
         public String expectedDisbursementDate;
+        @Schema(example = "28 June 2022")
+        public String rejectedOnDate;
+        @Schema(example = "28 June 2022")
+        public String withdrawnOnDate;
         @Schema(description = "List of PostLoansLoanIdDisbursementData")
         public List<PostLoansLoanIdDisbursementData> disbursementData;
     }
@@ -1389,6 +1456,8 @@ final class LoansApiResourceSwagger {
         public Integer loanId;
         @Schema(example = "3")
         public Integer resourceId;
+        @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+        public String resourceExternalId;
         @Schema(description = "PostLoansLoanIdChanges")
         public PostLoansLoanIdChanges changes;
     }

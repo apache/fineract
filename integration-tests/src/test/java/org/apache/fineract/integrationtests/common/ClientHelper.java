@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -36,12 +37,18 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.DeleteClientsClientIdResponse;
 import org.apache.fineract.client.models.GetClientClientIdAddressesResponse;
+import org.apache.fineract.client.models.GetClientTransferProposalDateResponse;
+import org.apache.fineract.client.models.GetClientsClientIdAccountsResponse;
 import org.apache.fineract.client.models.GetClientsClientIdResponse;
+import org.apache.fineract.client.models.GetObligeeData;
 import org.apache.fineract.client.models.PostClientClientIdAddressesRequest;
 import org.apache.fineract.client.models.PostClientClientIdAddressesResponse;
+import org.apache.fineract.client.models.PostClientsClientIdResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
+import org.apache.fineract.client.models.PutClientsClientIdResponse;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
@@ -53,19 +60,25 @@ import org.apache.poi.ss.usermodel.Workbook;
 @RequiredArgsConstructor
 public class ClientHelper extends IntegrationTest {
 
-    private static final String CREATE_CLIENT_URL = "/fineract-provider/api/v1/clients?" + Utils.TENANT_IDENTIFIER;
     private static final String CLIENT_URL = "/fineract-provider/api/v1/clients";
-    private static final String CLOSE_CLIENT_COMMAND = "close";
-    private static final String REACTIVATE_CLIENT_COMMAND = "reactivate";
-    private static final String REJECT_CLIENT_COMMAND = "reject";
-    private static final String ACTIVATE_CLIENT_COMMAND = "activate";
-    private static final String WITHDRAW_CLIENT_COMMAND = "withdraw";
-    private static final String UNDOREJECT_CLIENT_COMMAND = "undoRejection";
-    private static final String UNDOWITHDRAWN_CLIENT_COMMAND = "undoWithdrawal";
-    private static final Integer LEGALFORM_ID_PERSON = 1;
+    private static final String CREATE_CLIENT_URL = CLIENT_URL + "?" + Utils.TENANT_IDENTIFIER;
+    private static final String CLIENT_EXTERNALID_URL = CLIENT_URL + "/external-id";
+
+    public static final String CLOSE_CLIENT_COMMAND = "close";
+    public static final String REACTIVATE_CLIENT_COMMAND = "reactivate";
+    public static final String REJECT_CLIENT_COMMAND = "reject";
+    public static final String ACTIVATE_CLIENT_COMMAND = "activate";
+    public static final String WITHDRAW_CLIENT_COMMAND = "withdraw";
+    public static final String UNDOREJECT_CLIENT_COMMAND = "undoRejection";
+    public static final String UNDOWITHDRAWN_CLIENT_COMMAND = "undoWithdrawal";
+    public static final String DEFAULT_OFFICE_ID = "1";
+    public static final Integer LEGALFORM_ID_PERSON = 1;
+    public static final Integer LEGALFORM_ID_ENTITY = 2;
     public static final String CREATED_DATE = Utils.getLocalDateOfTenant().minusDays(5).format(Utils.dateFormatter);
     public static final String CREATED_DATE_PLUS_ONE = Utils.getLocalDateOfTenant().minusDays(4).format(Utils.dateFormatter);
     public static final String CREATED_DATE_PLUS_TWO = Utils.getLocalDateOfTenant().minusDays(3).format(Utils.dateFormatter);
+
+    public static final String DEFAULT_DATE = "04 March 2011";
 
     private static final Gson GSON = new JSON().getGson();
 
@@ -83,8 +96,55 @@ public class ClientHelper extends IntegrationTest {
         return ok(fineract().clients.create6(request));
     }
 
+    public static PostClientsResponse addClientAsPerson(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String jsonPayload) {
+        final String response = Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, jsonPayload);
+        log.info("{}", response);
+        return GSON.fromJson(response, PostClientsResponse.class);
+    }
+
+    public static PutClientsClientIdResponse updateClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String externalId, final String jsonPayload) {
+        final String url = CLIENT_EXTERNALID_URL + "/" + externalId + "?" + Utils.TENANT_IDENTIFIER;
+        final String response = Utils.performServerPut(requestSpec, responseSpec, url, jsonPayload);
+        log.info("{}", response);
+        return GSON.fromJson(response, PutClientsClientIdResponse.class);
+    }
+
+    public static DeleteClientsClientIdResponse deleteClient(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String externalId) {
+        final String url = CLIENT_EXTERNALID_URL + "/" + externalId + "?" + Utils.TENANT_IDENTIFIER;
+        final String response = Utils.performServerDelete(requestSpec, responseSpec, url, Utils.emptyJson(), null);
+        log.info("{}", response);
+        return GSON.fromJson(response, DeleteClientsClientIdResponse.class);
+    }
+
+    public static GetClientsClientIdAccountsResponse getClientAccounts(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String externalId) {
+        final String url = CLIENT_EXTERNALID_URL + "/" + externalId + "/accounts?" + Utils.TENANT_IDENTIFIER;
+        final String response = Utils.performServerGet(requestSpec, responseSpec, url);
+        log.info("{}", response);
+        return GSON.fromJson(response, GetClientsClientIdAccountsResponse.class);
+    }
+
+    public static GetClientTransferProposalDateResponse getProposedTransferDate(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String externalId) {
+        final String url = CLIENT_EXTERNALID_URL + "/" + externalId + "/transferproposaldate?" + Utils.TENANT_IDENTIFIER;
+        final String response = Utils.performServerGet(requestSpec, responseSpec, url);
+        log.info("{}", response);
+        return GSON.fromJson(response, GetClientTransferProposalDateResponse.class);
+    }
+
+    public static List<GetObligeeData> getObligeeData(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String externalId) {
+        final String url = CLIENT_EXTERNALID_URL + "/" + externalId + "/obligeedetails?" + Utils.TENANT_IDENTIFIER;
+        final String response = Utils.performServerGet(requestSpec, responseSpec, url);
+        log.info("{}", response);
+        return GSON.fromJson(response, new TypeToken<List<GetObligeeData>>() {}.getType());
+    }
+
     public static Integer createClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        return createClient(requestSpec, responseSpec, "04 March 2011");
+        return createClient(requestSpec, responseSpec, DEFAULT_DATE);
     }
 
     public static Integer createClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -97,6 +157,14 @@ public class ClientHelper extends IntegrationTest {
         log.info("---------------------------------CREATING A CLIENT---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestClientAsJSON(activationDate, officeId),
                 "clientId");
+    }
+
+    public static PostClientsResponse createClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String activationDate, final String officeId, final String externalId) {
+        log.info("---------------------------------CREATING A CLIENT---------------------------------------------");
+        final String response = Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL,
+                getTestClientAsJSON(activationDate, officeId));
+        return GSON.fromJson(response, PostClientsResponse.class);
     }
 
     public static PostClientClientIdAddressesResponse createClientAddress(final RequestSpecification requestSpec,
@@ -139,7 +207,7 @@ public class ClientHelper extends IntegrationTest {
     }
 
     public static Integer createClientAsPerson(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        return createClientAsPerson(requestSpec, responseSpec, "04 March 2011");
+        return createClientAsPerson(requestSpec, responseSpec, DEFAULT_DATE);
     }
 
     public static Integer createClientAsPerson(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -152,12 +220,21 @@ public class ClientHelper extends IntegrationTest {
 
         log.info(
                 "---------------------------------CREATING A CLIENT NON PERSON(ORGANISATION)---------------------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestPersonClientAsJSON(activationDate, officeId),
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestClientAsJSON(activationDate, officeId),
                 "clientId");
     }
 
+    public static PostClientsResponse createClientAsPersonWithDatatable(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String activationDate, final String officeId,
+            final HashMap<String, Object> datatables) {
+        log.info("---------------------------------CREATING A CLIENT PERSON WITH DATATABLE---------------------------------------------");
+        final String response = Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL,
+                getTestPersonClientAsJSON(activationDate, officeId, datatables), null);
+        return GSON.fromJson(response, PostClientsResponse.class);
+    }
+
     public static Integer createClientAsEntity(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        return createClientAsEntity(requestSpec, responseSpec, "04 March 2011");
+        return createClientAsEntity(requestSpec, responseSpec, DEFAULT_DATE);
     }
 
     public static Integer createClientAsEntity(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -180,7 +257,7 @@ public class ClientHelper extends IntegrationTest {
 
     public static Integer createClientForAccountPreference(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer clientType, String jsonAttributeToGetBack) {
-        final String activationDate = "04 March 2011";
+        final String activationDate = DEFAULT_DATE;
         final String officeId = "1";
         log.info(
                 "---------------------------------CREATING A CLIENT BASED ON ACCOUNT PREFERENCE---------------------------------------------");
@@ -202,15 +279,36 @@ public class ClientHelper extends IntegrationTest {
         return (Integer) getClient(requestSpec, responseSpec, clientId, "staffId");
     }
 
-    public static String getTestClientAsJSON(final String dateOfJoining, final String officeId) {
-        final HashMap<String, Object> map = new HashMap<>();
+    public static HashMap<String, Object> setInitialClientValues(final String officeId, final Integer legalFormId) {
+        return setInitialClientValues(officeId, legalFormId, randomIDGenerator("ID_", 7));
+    }
+
+    public static HashMap<String, Object> setInitialClientValues(final String officeId, final Integer legalFormId,
+            final String externalId) {
+        HashMap<String, Object> map = new HashMap<>();
         map.put("officeId", officeId);
-        map.put("legalFormId", LEGALFORM_ID_PERSON);
+        map.put("legalFormId", legalFormId);
         map.put("firstname", Utils.randomNameGenerator("Client_FirstName_", 5));
         map.put("lastname", Utils.randomNameGenerator("Client_LastName_", 4));
-        map.put("externalId", randomIDGenerator("ID_", 7));
+        if (externalId != null) {
+            map.put("externalId", externalId);
+        }
         map.put("dateFormat", Utils.DATE_FORMAT);
         map.put("locale", "en");
+        return map;
+    }
+
+    public static String getBasicClientAsJSON(final String officeId, final Integer legalFormId, final String externalId) {
+        HashMap<String, Object> map = setInitialClientValues(officeId, legalFormId, externalId);
+        map.put("active", "true");
+        map.put("activationDate", DEFAULT_DATE);
+        final String basicClientAsJson = GSON.toJson(map);
+        log.info("Client JSON :  {}", basicClientAsJson);
+        return basicClientAsJson;
+    }
+
+    public static String getTestClientAsJSON(final String dateOfJoining, final String officeId) {
+        HashMap<String, Object> map = setInitialClientValues(officeId, LEGALFORM_ID_PERSON);
         map.put("active", "true");
         map.put("activationDate", dateOfJoining);
         final String testClientAsJson = GSON.toJson(map);
@@ -219,14 +317,7 @@ public class ClientHelper extends IntegrationTest {
     }
 
     public static String getTestClientAsJSONPending(final String submittedOnDate, final String officeId) {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("officeId", officeId);
-        map.put("legalFormId", LEGALFORM_ID_PERSON);
-        map.put("firstname", Utils.randomNameGenerator("Client_FirstName_", 5));
-        map.put("lastname", Utils.randomNameGenerator("Client_LastName_", 4));
-        map.put("externalId", randomIDGenerator("ID_", 7));
-        map.put("dateFormat", Utils.DATE_FORMAT);
-        map.put("locale", "en");
+        HashMap<String, Object> map = setInitialClientValues(officeId, LEGALFORM_ID_PERSON);
         map.put("active", "false");
         map.put("submittedOnDate", submittedOnDate);
         log.info("map :  {}", map);
@@ -234,14 +325,7 @@ public class ClientHelper extends IntegrationTest {
     }
 
     public static String getTestPendingClientWithDatatableAsJson(final String registeredTableName) {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("officeId", "1");
-        map.put("legalFormId", LEGALFORM_ID_PERSON);
-        map.put("firstname", Utils.randomNameGenerator("Client_FirstName_", 5));
-        map.put("lastname", Utils.randomNameGenerator("Client_LastName_", 4));
-        map.put("externalId", randomIDGenerator("ID_", 7));
-        map.put("dateFormat", Utils.DATE_FORMAT);
-        map.put("locale", "en");
+        HashMap<String, Object> map = setInitialClientValues("1", LEGALFORM_ID_PERSON);
         map.put("active", "false");
         map.put("submittedOnDate", "04 March 2014");
         String requestJson = getTestDatatableAsJson(map, registeredTableName);
@@ -281,6 +365,25 @@ public class ClientHelper extends IntegrationTest {
         return GSON.toJson(map);
     }
 
+    public static String getTestPersonClientAsJSON(final String dateOfJoining, final String officeId,
+            final HashMap<String, Object> datatables) {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("officeId", officeId);
+        map.put("fullname", Utils.randomNameGenerator("Client_FullName_", 5));
+        map.put("externalId", randomIDGenerator("ID_", 7));
+        map.put("dateFormat", Utils.DATE_FORMAT);
+        map.put("locale", "en");
+        map.put("active", "true");
+        map.put("activationDate", dateOfJoining);
+        map.put("legalFormId", 1);
+        if (datatables != null) {
+            map.put("datatables", Arrays.asList(datatables));
+        }
+
+        log.info("map :  {}", map);
+        return GSON.toJson(map);
+    }
+
     public static String getTestEntityClientAsJSON(final String dateOfJoining, final String officeId,
             final Integer soleProprietorCodeValueId) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -291,7 +394,7 @@ public class ClientHelper extends IntegrationTest {
         map.put("locale", "en");
         map.put("active", "true");
         map.put("activationDate", dateOfJoining);
-        map.put("legalFormId", 2);
+        map.put("legalFormId", LEGALFORM_ID_ENTITY);
 
         final HashMap<String, Object> clientNonPersonMap = new HashMap<>();
         clientNonPersonMap.put("constitutionId", soleProprietorCodeValueId);
@@ -302,14 +405,7 @@ public class ClientHelper extends IntegrationTest {
     }
 
     public static String getTestClientWithClientTypeAsJSON(final String dateOfJoining, final String officeId, final String clientType) {
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("officeId", officeId);
-        map.put("legalFormId", LEGALFORM_ID_PERSON);
-        map.put("firstname", Utils.randomNameGenerator("Client_FirstName_", 5));
-        map.put("lastname", Utils.randomNameGenerator("Client_LastName_", 4));
-        map.put("externalId", randomIDGenerator("ID_", 7));
-        map.put("dateFormat", Utils.DATE_FORMAT);
-        map.put("locale", "en");
+        HashMap<String, Object> map = setInitialClientValues("1", LEGALFORM_ID_PERSON);
         map.put("active", "true");
         map.put("activationDate", dateOfJoining);
         map.put("clientTypeId", clientType);
@@ -336,6 +432,13 @@ public class ClientHelper extends IntegrationTest {
             final int clientId) {
         String clientResponseStr = (String) getClient(requestSpec, responseSpec, Integer.toString(clientId), null);
         return GSON.fromJson(clientResponseStr, GetClientsClientIdResponse.class);
+    }
+
+    public static GetClientsClientIdResponse getClientByExternalId(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String externalId) {
+        final String url = CLIENT_EXTERNALID_URL + "/" + externalId + "?" + Utils.TENANT_IDENTIFIER;
+        final String response = Utils.performServerGet(requestSpec, responseSpec, url);
+        return GSON.fromJson(response, GetClientsClientIdResponse.class);
     }
 
     public static List<GetClientClientIdAddressesResponse> getClientAddresses(final RequestSpecification requestSpec,
@@ -371,7 +474,7 @@ public class ClientHelper extends IntegrationTest {
         return Utils.randomStringGenerator(prefix, lenOfRandomSuffix, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     }
 
-    private String getCloseClientAsJSON() {
+    public String getCloseClientAsJSON() {
         final HashMap<String, String> map = new HashMap<>();
 
         /* Retrieve Code id for the Code "ClientClosureReason" */
@@ -389,20 +492,18 @@ public class ClientHelper extends IntegrationTest {
         map.put("closureDate", CREATED_DATE_PLUS_ONE);
 
         String clientJson = GSON.toJson(map);
-        log.info(clientJson);
+        log.info("{}", clientJson);
         return clientJson;
-
     }
 
-    private String getReactivateClientAsJSON() {
+    public String getReactivateClientAsJSON() {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", CommonConstants.LOCALE);
         map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("reactivationDate", CREATED_DATE_PLUS_ONE);
         String clientJson = GSON.toJson(map);
-        log.info(clientJson);
+        log.info("{}", clientJson);
         return clientJson;
-
     }
 
     private String getUndoRejectClientAsJSON(final String date) {
@@ -411,7 +512,7 @@ public class ClientHelper extends IntegrationTest {
         map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("reopenedDate", date);
         String clientJson = GSON.toJson(map);
-        log.info(clientJson);
+        log.info("{}", clientJson);
         return clientJson;
 
     }
@@ -422,12 +523,12 @@ public class ClientHelper extends IntegrationTest {
         map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("reopenedDate", date);
         String clientJson = GSON.toJson(map);
-        log.info(clientJson);
+        log.info("{}", clientJson);
         return clientJson;
 
     }
 
-    private String getRejectClientAsJSON() {
+    public String getRejectClientAsJSON() {
         final HashMap<String, String> map = new HashMap<>();
         /* Retrieve Code id for the Code "ClientRejectReason" */
         String codeName = "ClientRejectReason";
@@ -444,18 +545,18 @@ public class ClientHelper extends IntegrationTest {
         map.put("rejectionDate", CREATED_DATE_PLUS_ONE);
         map.put("rejectionReasonId", rejectionReasonId.toString());
         String clientJson = GSON.toJson(map);
-        log.info(clientJson);
+        log.info("{}", clientJson);
         return clientJson;
 
     }
 
-    private static String getActivateClientAsJSON(String date) {
+    public static String getActivateClientAsJSON(String date) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", CommonConstants.LOCALE);
         map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("activationDate", date);
         String clientJson = GSON.toJson(map);
-        log.info(clientJson);
+        log.info("{}", clientJson);
         return clientJson;
     }
 
@@ -478,7 +579,6 @@ public class ClientHelper extends IntegrationTest {
         String clientJson = GSON.toJson(map);
         log.info(clientJson);
         return clientJson;
-
     }
 
     public static String getSpecifiedDueDateChargesClientAsJSON(final String chargeId, final String dueDate) {
@@ -593,6 +693,13 @@ public class ClientHelper extends IntegrationTest {
         return response;
     }
 
+    public static PostClientsClientIdResponse performClientActionUsingExternalId(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String externalId, final String command, final String jsonPayload) {
+        final String url = CLIENT_EXTERNALID_URL + "/" + externalId + "?" + Utils.TENANT_IDENTIFIER + "&command=" + command;
+        final String response = Utils.performServerPost(requestSpec, responseSpec, url, jsonPayload);
+        return GSON.fromJson(response, PostClientsClientIdResponse.class);
+    }
+
     public static Integer addChargesForClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer clientId, final String request) {
         log.info("--------------------------------- ADD CHARGES FOR Client --------------------------------");
@@ -665,7 +772,7 @@ public class ClientHelper extends IntegrationTest {
     public String importClientEntityTemplate(File file) {
         String locale = "en";
         String dateFormat = "dd MMMM yyyy";
-        String legalFormType = GlobalEntityType.CLIENTS_ENTTTY.toString();
+        String legalFormType = GlobalEntityType.CLIENTS_ENTITY.toString();
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA);
         return Utils.performServerTemplatePost(requestSpec, responseSpec, CLIENT_URL + "/uploadtemplate" + "?" + Utils.TENANT_IDENTIFIER,
                 legalFormType, file, locale, dateFormat);
@@ -682,6 +789,6 @@ public class ClientHelper extends IntegrationTest {
         return new PostClientsRequest().officeId(1).legalFormId(LEGALFORM_ID_PERSON)
                 .firstname(Utils.randomNameGenerator("Client_FirstName_", 5)).lastname(Utils.randomNameGenerator("Client_LastName_", 5))
                 .externalId(randomIDGenerator("ID_", 7)).dateFormat(Utils.DATE_FORMAT).locale("en").active(true)
-                .activationDate("04 March 2011");
+                .activationDate(DEFAULT_DATE);
     }
 }

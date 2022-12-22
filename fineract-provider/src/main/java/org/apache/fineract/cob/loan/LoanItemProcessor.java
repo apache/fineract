@@ -31,5 +31,6 @@ public class LoanItemProcessor extends AbstractLoanItemProcessor {
     @BeforeStep
     public void beforeStep(StepExecution stepExecution) {
         setExecutionContext(stepExecution.getExecutionContext());
+        setBusinessDate(stepExecution);
     }
 }

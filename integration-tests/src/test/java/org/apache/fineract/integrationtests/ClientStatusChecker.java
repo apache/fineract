@@ -21,6 +21,8 @@ package org.apache.fineract.integrationtests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.HashMap;
+import org.apache.fineract.client.models.GetClientsClientIdResponse;
+import org.apache.fineract.portfolio.client.domain.ClientStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +36,10 @@ public final class ClientStatusChecker {
 
     public static void verifyClientIsActive(final HashMap<String, Object> clientStatusHashMap) {
         assertEquals(300, (int) clientStatusHashMap.get("id"));
+    }
+
+    public static void verifyClientStatus(final ClientStatus status, final GetClientsClientIdResponse clientResponse) {
+        assertEquals(status.getValue(), clientResponse.getStatus().getId());
     }
 
     public static void verifyClientClosed(final HashMap<String, Object> clientStatusHashMap) {

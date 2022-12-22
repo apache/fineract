@@ -105,6 +105,10 @@ final class LoanChargesApiResourceSwagger {
         public Boolean penalty;
         @Schema(example = "27 March 2013")
         public LocalDate submittedOnDate;
+        @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+        public String externalId;
+        @Schema(example = "26 March 2013")
+        public LocalDate dueDate;
     }
 
     @Schema(description = "GetLoansLoanIdChargesTemplateResponse")
@@ -199,6 +203,8 @@ final class LoanChargesApiResourceSwagger {
         public Long loanId;
         @Schema(example = "31")
         public Long resourceId;
+        @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+        public String resourceExternalId;
     }
 
     @Schema(description = " PutLoansLoanIdChargesChargeIdRequest")
@@ -229,6 +235,8 @@ final class LoanChargesApiResourceSwagger {
         public Long loanId;
         @Schema(example = "6")
         public Long resourceId;
+        @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+        public String resourceExternalId;
         public PutLoansLoanIdChargesChargeIdRequest changes;
     }
 
@@ -270,6 +278,12 @@ final class LoanChargesApiResourceSwagger {
         public Long savingsId;
         @Schema(example = "12")
         public Long resourceId;
+        @Schema(example = "12")
+        public Long subResourceId;
+        @Schema(example = "786444UUUYYH7")
+        public String resourceExternalId;
+        @Schema(example = "786444UUUYYH7")
+        public String subResourceExternalId;
         public PostLoansLoanIdChargesChargeIdChanges changes;
 
         static final class PostLoansLoanIdChargesChargeIdChanges {
@@ -288,6 +302,21 @@ final class LoanChargesApiResourceSwagger {
             public Double amount;
             @Schema(example = "786444UUUYYH7")
             public String externalId;
+
+            @Schema(example = "100.00")
+            public Double principalPortion;
+            @Schema(example = "100.00")
+            public Double interestPortion;
+            @Schema(example = "100.00")
+            public Double feeChargesPortion;
+            @Schema(example = "100.00")
+            public Double penaltyChargesPortion;
+            @Schema(example = "100.00")
+            public Double outstandingLoanBalance;
+            @Schema(example = "19 September 2013")
+            public Double date;
+            @Schema(example = "1")
+            public Long id;
         }
     }
 
@@ -304,5 +333,7 @@ final class LoanChargesApiResourceSwagger {
         public Long loanId;
         @Schema(example = "2")
         public Long resourceId;
+        @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
+        public String resourceExternalId;
     }
 }

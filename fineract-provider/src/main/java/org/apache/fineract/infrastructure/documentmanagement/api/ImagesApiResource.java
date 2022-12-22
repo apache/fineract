@@ -36,6 +36,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.UploadRequest;
@@ -54,18 +56,15 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+@Slf4j
+@RequiredArgsConstructor
 @Component
 @Scope("singleton")
 @Path("{entity}/{entityId}/images")
 public class ImagesApiResource {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ImagesApiResource.class);
 
     private final PlatformSecurityContext context;
     private final ImageReadPlatformService imageReadPlatformService;
@@ -73,18 +72,6 @@ public class ImagesApiResource {
     private final DefaultToApiJsonSerializer<ClientData> toApiJsonSerializer;
     private final FileUploadValidator fileUploadValidator;
     private final ImageResizer imageResizer;
-
-    @Autowired
-    public ImagesApiResource(final PlatformSecurityContext context, final ImageReadPlatformService readPlatformService,
-            final ImageWritePlatformService imageWritePlatformService, final DefaultToApiJsonSerializer<ClientData> toApiJsonSerializer,
-            final FileUploadValidator fileUploadValidator, final ImageResizer imageResizer) {
-        this.context = context;
-        this.imageReadPlatformService = readPlatformService;
-        this.imageWritePlatformService = imageWritePlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.fileUploadValidator = fileUploadValidator;
-        this.imageResizer = imageResizer;
-    }
 
     /**
      * Upload images through multi-part form upload
@@ -172,7 +159,7 @@ public class ImagesApiResource {
                 final String clientImageAsBase64Text = imageDataURISuffix + Base64.getMimeEncoder().encodeToString(resizedImageBytes);
                 return Response.ok(clientImageAsBase64Text, MediaType.TEXT_PLAIN_TYPE).build();
             } else {
-                LOG.error("resizedImageBytes is null for entityName={}, entityId={}, maxWidth={}, maxHeight={}", entityName, entityId,
+                log.error("resizedImageBytes is null for entityName={}, entityId={}, maxWidth={}, maxHeight={}", entityName, entityId,
                         maxWidth, maxHeight);
                 return Response.serverError().build();
             }

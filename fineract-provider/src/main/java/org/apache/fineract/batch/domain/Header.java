@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.batch.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -32,6 +33,7 @@ import lombok.experimental.Accessors;
  * @see BatchResponse
  */
 @NoArgsConstructor
+@AllArgsConstructor
 @Data
 @Accessors(chain = true)
 public class Header {

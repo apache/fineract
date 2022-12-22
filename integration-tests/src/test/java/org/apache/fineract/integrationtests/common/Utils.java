@@ -53,6 +53,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.TimeZone;
+import java.util.function.Function;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.conn.HttpHostConnectException;
 import org.slf4j.Logger;
@@ -164,6 +165,11 @@ public final class Utils {
         return performServerGet(requestSpec, responseSpec, url, null);
     }
 
+    public static Response performServerGetRaw(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String getURL, Function<RequestSpecification, RequestSpecification> requestMapper) {
+        return requestMapper.apply(given().spec(requestSpec)).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn();
+    }
+
     public static <T> T performServerGet(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String getURL, final String jsonAttributeToGetBack) {
         final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
@@ -204,12 +210,18 @@ public final class Utils {
 
     public static <T> T performServerPost(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String postURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
+        LOG.info("JSON {}", jsonBodyToSend);
         final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError().when().post(postURL)
                 .andReturn().asString();
         if (jsonAttributeToGetBack == null) {
             return (T) json;
         }
         return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
+    }
+
+    public static Response performServerPutRaw(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String putURL, Function<RequestSpecification, RequestSpecification> bodyMapper) {
+        return bodyMapper.apply(given().spec(requestSpec)).expect().spec(responseSpec).log().ifError().when().put(putURL).andReturn();
     }
 
     public static String performServerPut(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,

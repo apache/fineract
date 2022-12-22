@@ -597,7 +597,7 @@ public class DelinquencyBucketsIntegrationTest {
 
         // Reverse the Previous Loan Repayment
         PostLoansLoanIdTransactionsResponse loansLoanIdReverseTransactions = loanTransactionHelper.reverseLoanTransaction(loanId,
-                loansLoanIdTransactions.getResourceId().intValue(), operationDate, responseSpec);
+                loansLoanIdTransactions.getResourceId(), operationDate, responseSpec);
         assertNotNull(loansLoanIdReverseTransactions);
         log.info("Loan repayment reverse transaction id {}", loansLoanIdReverseTransactions.getResourceId());
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
@@ -781,7 +781,9 @@ public class DelinquencyBucketsIntegrationTest {
         }
 
         // Move the Business date to get older the loan and to have an overdue loan
+        LocalDate lastLoanCOBBusinessDate = businessDate;
         businessDate = businessDate.plusDays(50);
+        schedulerJobHelper.fastForwardTime(lastLoanCOBBusinessDate, businessDate, jobName, responseSpec);
         log.info("Current date {}", businessDate);
         BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
         // Run Second time the Job
@@ -838,5 +840,4 @@ public class DelinquencyBucketsIntegrationTest {
         log.info("{}", chargeApplyJSON);
         return chargeApplyJSON;
     }
-
 }

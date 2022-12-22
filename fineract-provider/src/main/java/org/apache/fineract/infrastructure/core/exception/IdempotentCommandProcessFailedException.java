@@ -16,20 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.business.domain.loan;
+package org.apache.fineract.infrastructure.core.exception;
 
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.commands.domain.CommandSource;
+import org.apache.fineract.commands.domain.CommandWrapper;
 
-public class LoanRepaymentDueBusinessEvent extends LoanBusinessEvent {
+/**
+ * Exception thrown when command is sent with same action, entity and idempotency key
+ */
+public class IdempotentCommandProcessFailedException extends AbstractIdempotentCommandException {
 
-    private static final String TYPE = "LoanRepaymentDueBusinessEvent";
+    private final Integer statusCode;
 
-    public LoanRepaymentDueBusinessEvent(Loan value) {
-        super(value);
+    public IdempotentCommandProcessFailedException(CommandWrapper wrapper, CommandSource commandSource) {
+        super(wrapper.actionName(), wrapper.entityName(), wrapper.getIdempotencyKey(), commandSource.getResult());
+        this.statusCode = commandSource.getResultStatusCode();
     }
 
-    @Override
-    public String getType() {
-        return TYPE;
+    public Integer getStatusCode() {
+        return statusCode;
     }
 }

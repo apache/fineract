@@ -37,8 +37,6 @@ import org.springframework.stereotype.Component;
  * also catch any errors raised by {@link LoanTransactionsApiResource} and map those errors to appropriate status codes
  * in BatchResponse.
  *
- * @author Mohit Sinha
- *
  * @see CommandStrategy
  * @see BatchRequest
  * @see BatchResponse
@@ -47,6 +45,9 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CreateTransactionLoanCommandStrategy implements CommandStrategy {
 
+    /**
+     * Loan transactions api resource {@link LoanTransactionsApiResource}.
+     */
     private final LoanTransactionsApiResource loanTransactionsApiResource;
 
     @Override
@@ -59,10 +60,10 @@ public class CreateTransactionLoanCommandStrategy implements CommandStrategy {
         response.setHeaders(request.getHeaders());
 
         final List<String> pathParameters = Splitter.on('/').splitToList(request.getRelativeUrl());
-        Long loanId = Long.parseLong(pathParameters.get(1));
+        final Long loanId = Long.parseLong(pathParameters.get(1));
 
-        Pattern commandPattern = Pattern.compile("^?command=[a-zA-Z]+");
-        Matcher commandMatcher = commandPattern.matcher(pathParameters.get(2));
+        final Pattern commandPattern = Pattern.compile("^?command=[a-zA-Z]+");
+        final Matcher commandMatcher = commandPattern.matcher(pathParameters.get(2));
 
         if (!commandMatcher.find()) {
             // This would only occur if the CommandStrategyProvider is incorrectly configured.
@@ -72,12 +73,12 @@ public class CreateTransactionLoanCommandStrategy implements CommandStrategy {
                     "Resource with method " + request.getMethod() + " and relativeUrl " + request.getRelativeUrl() + " doesn't exist");
             return response;
         }
-        String commandQueryParam = commandMatcher.group(0);
-        String command = commandQueryParam.substring(commandQueryParam.indexOf("=") + 1);
+        final String commandQueryParam = commandMatcher.group(0);
+        final String command = commandQueryParam.substring(commandQueryParam.indexOf("=") + 1);
 
         responseBody = loanTransactionsApiResource.executeLoanTransaction(loanId, command, request.getBody());
 
-        response.setStatusCode(200);
+        response.setStatusCode(HttpStatus.SC_OK);
         // Sets the body of the response after Charge has been successfully
         // created
         response.setBody(responseBody);

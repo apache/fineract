@@ -20,6 +20,7 @@ package org.apache.fineract.cob.loan;
 
 import java.util.List;
 import org.apache.fineract.cob.COBBusinessStepService;
+import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.domain.LoanAccountLockRepository;
 import org.apache.fineract.cob.listener.COBExecutionListenerRunner;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
@@ -33,6 +34,7 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
 import org.springframework.batch.integration.config.annotation.EnableBatchIntegration;
 import org.springframework.batch.integration.partition.RemotePartitioningManagerStepBuilderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +74,8 @@ public class LoanCOBManagerConfiguration {
     private LoanAccountLockRepository accountLockRepository;
     @Autowired
     private BusinessEventNotifierService businessEventNotifierService;
+    @Autowired
+    private CustomJobParameterResolver customJobParameterResolver;
 
     @Bean
     @JobScope
@@ -81,13 +85,19 @@ public class LoanCOBManagerConfiguration {
 
     @Bean
     public Step loanCOBStep() {
-        return stepBuilderFactory.get("Loan COB partition - Step").partitioner(LoanCOBConstant.LOAN_COB_WORKER_STEP, partitioner(null))
-                .outputChannel(outboundRequests).build();
+        return stepBuilderFactory.get(LoanCOBConstant.LOAN_COB_PARTITIONER_STEP)
+                .partitioner(LoanCOBConstant.LOAN_COB_WORKER_STEP, partitioner(null)).outputChannel(outboundRequests).build();
     }
 
     @Bean
     public Step fetchAndLockStep() {
         return localStepBuilderFactory.get("Fetch and Lock loan accounts - Step").tasklet(fetchAndLockLoanTasklet()).build();
+    }
+
+    @Bean
+    public Step resolveCustomJobParametersStep() {
+        return localStepBuilderFactory.get("Resolve custom job parameters - Step").tasklet(resolveCustomJobParametersTasklet())
+                .listener(customJobParametersPromotionListener()).build();
     }
 
     @Bean
@@ -103,6 +113,12 @@ public class LoanCOBManagerConfiguration {
 
     @Bean
     @JobScope
+    public ResolveLoanCOBCustomJobParametersTasklet resolveCustomJobParametersTasklet() {
+        return new ResolveLoanCOBCustomJobParametersTasklet(customJobParameterResolver);
+    }
+
+    @Bean
+    @JobScope
     public StayedLockedLoansTasklet stayedLockedTasklet() {
         return new StayedLockedLoansTasklet(accountLockRepository, businessEventNotifierService);
     }
@@ -111,8 +127,16 @@ public class LoanCOBManagerConfiguration {
     public Job loanCOBJob() {
         return jobBuilderFactory.get(JobName.LOAN_COB.name()) //
                 .listener(new COBExecutionListenerRunner(applicationContext, JobName.LOAN_COB.name())) //
-                .start(fetchAndLockStep()).next(loanCOBStep()).next(stayedLockedStep()) //
+                .start(resolveCustomJobParametersStep()) //
+                .next(fetchAndLockStep()).next(loanCOBStep()).next(stayedLockedStep()) //
                 .incrementer(new RunIdIncrementer()) //
                 .build();
+    }
+
+    @Bean
+    public ExecutionContextPromotionListener customJobParametersPromotionListener() {
+        ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
+        listener.setKeys(new String[] { LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME });
+        return listener;
     }
 }

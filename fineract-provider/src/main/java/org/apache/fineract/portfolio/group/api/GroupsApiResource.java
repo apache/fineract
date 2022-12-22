@@ -49,6 +49,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -96,17 +97,15 @@ import org.apache.fineract.portfolio.savings.data.GSIMContainer;
 import org.apache.fineract.portfolio.savings.service.GSIMReadPlatformService;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 @Path("/groups")
 @Component
-@Scope("singleton")
 @Tag(name = "Groups", description = "Groups are used to provide a distinctive banking distribution channel used in microfinances throughout the world. The Group is an administrative unit. It can contain as few as 5 people or as many as 40 depending on how its used.\n"
         + "\n"
         + "Different styles of group lending - Joint-Liability Group, Grameen Model (Center-Group), Self-Help Groups, Village/Communal Banks)")
+@RequiredArgsConstructor
 public class GroupsApiResource {
 
     private final PlatformSecurityContext context;
@@ -132,50 +131,6 @@ public class GroupsApiResource {
     private final GLIMAccountInfoReadPlatformService glimAccountInfoReadPlatformService;
     private final GSIMReadPlatformService gsimReadPlatformService;
 
-    @Autowired
-    public GroupsApiResource(final PlatformSecurityContext context, final GroupReadPlatformService groupReadPlatformService,
-            final CenterReadPlatformService centerReadPlatformService, final ClientReadPlatformService clientReadPlatformService,
-            final ToApiJsonSerializer<Object> toApiJsonSerializer,
-            final ToApiJsonSerializer<GroupGeneralData> groupTopOfHierarchyApiJsonSerializer,
-            final ToApiJsonSerializer<AccountSummaryCollectionData> groupSummaryToApiJsonSerializer,
-            final ToApiJsonSerializer<GLIMContainer> glimContainerToApiJsonSerializer,
-            final ToApiJsonSerializer<GSIMContainer> gsimContainerToApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final CollectionSheetReadPlatformService collectionSheetReadPlatformService, final FromJsonHelper fromJsonHelper,
-            final GroupRolesReadPlatformService groupRolesReadPlatformService,
-            final AccountDetailsReadPlatformService accountDetailsReadPlatformService,
-            final CalendarReadPlatformService calendarReadPlatformService, final MeetingReadPlatformService meetingReadPlatformService,
-            final EntityDatatableChecksReadService entityDatatableChecksReadService,
-            final BulkImportWorkbookService bulkImportWorkbookService,
-            final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService,
-            final GLIMAccountInfoReadPlatformService glimAccountInfoReadPlatformService,
-            final GSIMReadPlatformService gsimReadPlatformService) {
-        this.context = context;
-        this.groupReadPlatformService = groupReadPlatformService;
-        this.centerReadPlatformService = centerReadPlatformService;
-        this.clientReadPlatformService = clientReadPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.groupGeneralApiJsonSerializer = groupTopOfHierarchyApiJsonSerializer;
-        this.groupSummaryToApiJsonSerializer = groupSummaryToApiJsonSerializer;
-        this.glimContainerToApiJsonSerializer = glimContainerToApiJsonSerializer;
-        this.gsimContainerToApiJsonSerializer = gsimContainerToApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.collectionSheetReadPlatformService = collectionSheetReadPlatformService;
-        this.fromJsonHelper = fromJsonHelper;
-        this.groupRolesReadPlatformService = groupRolesReadPlatformService;
-        this.accountDetailsReadPlatformService = accountDetailsReadPlatformService;
-        this.calendarReadPlatformService = calendarReadPlatformService;
-        this.meetingReadPlatformService = meetingReadPlatformService;
-        this.entityDatatableChecksReadService = entityDatatableChecksReadService;
-        this.bulkImportWorkbookPopulatorService = bulkImportWorkbookPopulatorService;
-        this.bulkImportWorkbookService = bulkImportWorkbookService;
-        this.glimAccountInfoReadPlatformService = glimAccountInfoReadPlatformService;
-        this.gsimReadPlatformService = gsimReadPlatformService;
-
-    }
-
     @GET
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -193,32 +148,31 @@ public class GroupsApiResource {
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @Parameter(description = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly) {
 
-        this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
+        context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
 
         if (is(commandParam, "close")) {
-            final GroupGeneralData groupClosureTemplate = this.groupReadPlatformService.retrieveGroupWithClosureReasons();
-            final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-            return this.groupGeneralApiJsonSerializer.serialize(settings, groupClosureTemplate,
+            final GroupGeneralData groupClosureTemplate = groupReadPlatformService.retrieveGroupWithClosureReasons();
+            final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+            return groupGeneralApiJsonSerializer.serialize(settings, groupClosureTemplate,
                     GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
         }
 
-        final List<DatatableData> datatableTemplates = this.entityDatatableChecksReadService
+        final List<DatatableData> datatableTemplates = entityDatatableChecksReadService
                 .retrieveTemplates(StatusEnum.CREATE.getCode().longValue(), EntityTables.GROUP.getName(), null);
         if (centerId != null) {
-            final GroupGeneralData centerGroupTemplate = this.centerReadPlatformService.retrieveCenterGroupTemplate(centerId);
+            final GroupGeneralData centerGroupTemplate = centerReadPlatformService.retrieveCenterGroupTemplate(centerId);
             centerGroupTemplate.setDatatables(datatableTemplates);
-            final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-            return this.groupGeneralApiJsonSerializer.serialize(settings, centerGroupTemplate,
+            final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+            return groupGeneralApiJsonSerializer.serialize(settings, centerGroupTemplate,
                     GroupingTypesApiConstants.CENTER_GROUP_RESPONSE_DATA_PARAMETERS);
         }
 
-        final GroupGeneralData groupTemplate = this.groupReadPlatformService.retrieveTemplate(officeId, isCenterGroup,
+        final GroupGeneralData groupTemplate = groupReadPlatformService.retrieveTemplate(officeId, isCenterGroup,
                 staffInSelectedOfficeOnly);
         groupTemplate.setDatatables(datatableTemplates);
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.groupGeneralApiJsonSerializer.serialize(settings, groupTemplate,
-                GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return groupGeneralApiJsonSerializer.serialize(settings, groupTemplate, GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -242,19 +196,19 @@ public class GroupsApiResource {
             @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder,
             @QueryParam("orphansOnly") @Parameter(description = "orphansOnly") final Boolean orphansOnly) {
 
-        this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
+        context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
         final PaginationParameters parameters = PaginationParameters.instance(paged, offset, limit, orderBy, sortOrder);
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         final SearchParameters searchParameters = SearchParameters.forGroups(officeId, staffId, externalId, name, hierarchy, offset, limit,
                 orderBy, sortOrder, orphansOnly);
         if (parameters.isPaged()) {
-            final Page<GroupGeneralData> groups = this.groupReadPlatformService.retrievePagedAll(searchParameters, parameters);
-            return this.toApiJsonSerializer.serialize(settings, groups, GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
+            final Page<GroupGeneralData> groups = groupReadPlatformService.retrievePagedAll(searchParameters, parameters);
+            return toApiJsonSerializer.serialize(settings, groups, GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
         }
 
-        final Collection<GroupGeneralData> groups = this.groupReadPlatformService.retrieveAll(searchParameters, parameters);
-        return this.toApiJsonSerializer.serialize(settings, groups, GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
+        final Collection<GroupGeneralData> groups = groupReadPlatformService.retrieveAll(searchParameters, parameters);
+        return toApiJsonSerializer.serialize(settings, groups, GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -269,11 +223,11 @@ public class GroupsApiResource {
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @Parameter(description = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
             @QueryParam("roleId") @Parameter(description = "roleId") final Long roleId) {
 
-        this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
+        context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
 
-        GroupGeneralData group = this.groupReadPlatformService.retrieveOne(groupId);
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        GroupGeneralData group = groupReadPlatformService.retrieveOne(groupId);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         // associations
         Collection<ClientData> membersOfGroup = null;
@@ -289,26 +243,26 @@ public class GroupsApiResource {
                         Arrays.asList("clientMembers", "activeClientMembers", "groupRoles", "calendars", "collectionMeetingCalendar"));
             }
             if (associationParameters.contains("clientMembers")) {
-                membersOfGroup = this.clientReadPlatformService.retrieveClientMembersOfGroup(groupId);
+                membersOfGroup = clientReadPlatformService.retrieveClientMembersOfGroup(groupId);
                 if (CollectionUtils.isEmpty(membersOfGroup)) {
                     membersOfGroup = null;
                 }
             }
             if (associationParameters.contains("activeClientMembers")) {
-                activeClientMembers = this.clientReadPlatformService.retrieveActiveClientMembersOfGroup(groupId);
+                activeClientMembers = clientReadPlatformService.retrieveActiveClientMembersOfGroup(groupId);
                 if (CollectionUtils.isEmpty(activeClientMembers)) {
                     activeClientMembers = null;
                 }
             }
             if (associationParameters.contains("groupRoles")) {
-                groupRoles = this.groupRolesReadPlatformService.retrieveGroupRoles(groupId);
+                groupRoles = groupRolesReadPlatformService.retrieveGroupRoles(groupId);
                 if (CollectionUtils.isEmpty(groupRoles)) {
                     groupRoles = null;
                 }
             }
             if (associationParameters.contains("parentCalendars")) {
                 final List<Integer> calendarTypeOptions = CalendarUtils.createIntegerListFromQueryParameter("all");
-                calendars = this.calendarReadPlatformService.retrieveParentCalendarsByEntity(groupId, CalendarEntityType.GROUPS.getValue(),
+                calendars = calendarReadPlatformService.retrieveParentCalendarsByEntity(groupId, CalendarEntityType.GROUPS.getValue(),
                         calendarTypeOptions);
                 if (CollectionUtils.isEmpty(calendars)) {
                     calendars = null;
@@ -316,22 +270,22 @@ public class GroupsApiResource {
             }
             if (associationParameters.contains("collectionMeetingCalendar")) {
                 if (group.isChildGroup()) {
-                    collectionMeetingCalendar = this.calendarReadPlatformService.retrieveCollctionCalendarByEntity(group.getParentId(),
+                    collectionMeetingCalendar = calendarReadPlatformService.retrieveCollctionCalendarByEntity(group.getParentId(),
                             CalendarEntityType.CENTERS.getValue());
                 } else {
-                    collectionMeetingCalendar = this.calendarReadPlatformService.retrieveCollctionCalendarByEntity(groupId,
+                    collectionMeetingCalendar = calendarReadPlatformService.retrieveCollctionCalendarByEntity(groupId,
                             CalendarEntityType.GROUPS.getValue());
                 }
                 if (collectionMeetingCalendar != null) {
                     final boolean withHistory = true;
                     final LocalDate tillDate = null;
-                    final Collection<LocalDate> recurringDates = this.calendarReadPlatformService
+                    final Collection<LocalDate> recurringDates = calendarReadPlatformService
                             .generateRecurringDates(collectionMeetingCalendar, withHistory, tillDate);
-                    final Collection<LocalDate> nextTenRecurringDates = this.calendarReadPlatformService
+                    final Collection<LocalDate> nextTenRecurringDates = calendarReadPlatformService
                             .generateNextTenRecurringDates(collectionMeetingCalendar);
-                    final MeetingData lastMeeting = this.meetingReadPlatformService
+                    final MeetingData lastMeeting = meetingReadPlatformService
                             .retrieveLastMeeting(collectionMeetingCalendar.getCalendarInstanceId());
-                    final LocalDate recentEligibleMeetingDate = this.calendarReadPlatformService
+                    final LocalDate recentEligibleMeetingDate = calendarReadPlatformService
                             .generateNextEligibleMeetingDateForCollection(collectionMeetingCalendar, lastMeeting);
                     collectionMeetingCalendar = CalendarData.withRecurringDates(collectionMeetingCalendar, recurringDates,
                             nextTenRecurringDates, recentEligibleMeetingDate);
@@ -343,7 +297,7 @@ public class GroupsApiResource {
         }
 
         if (roleId != null) {
-            selectedRole = this.groupRolesReadPlatformService.retrieveGroupRole(groupId, roleId);
+            selectedRole = groupRolesReadPlatformService.retrieveGroupRole(groupId, roleId);
             if (selectedRole != null) {
                 group = GroupGeneralData.updateSelectedRole(group, selectedRole);
             }
@@ -351,12 +305,12 @@ public class GroupsApiResource {
 
         final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
         if (template) {
-            final GroupGeneralData templateGroup = this.groupReadPlatformService.retrieveTemplate(group.officeId(), false,
+            final GroupGeneralData templateGroup = groupReadPlatformService.retrieveTemplate(group.getOfficeId(), false,
                     staffInSelectedOfficeOnly);
             group = GroupGeneralData.withTemplate(templateGroup, group);
         }
 
-        return this.groupGeneralApiJsonSerializer.serialize(settings, group, GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
+        return groupGeneralApiJsonSerializer.serialize(settings, group, GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
@@ -374,8 +328,8 @@ public class GroupsApiResource {
                 .createGroup() //
                 .withJson(apiRequestBodyAsJson) //
                 .build(); //
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
+        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return toApiJsonSerializer.serialize(result);
     }
 
     @POST
@@ -393,8 +347,8 @@ public class GroupsApiResource {
                 .unassignGroupStaff(groupId) //
                 .withJson(apiRequestBodyAsJson) //
                 .build(); //
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
+        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return toApiJsonSerializer.serialize(result);
 
     }
 
@@ -413,8 +367,8 @@ public class GroupsApiResource {
                 .updateGroup(groupId) //
                 .withJson(apiRequestBodyAsJson) //
                 .build(); //
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
+        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return toApiJsonSerializer.serialize(result);
     }
 
     @DELETE
@@ -429,8 +383,8 @@ public class GroupsApiResource {
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .deleteGroup(groupId) //
                 .build(); //
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
+        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return toApiJsonSerializer.serialize(result);
     }
 
     @POST
@@ -480,55 +434,54 @@ public class GroupsApiResource {
         CommandProcessingResult result = null;
         if (is(commandParam, "activate")) {
             final CommandWrapper commandRequest = builder.activateGroup(groupId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return toApiJsonSerializer.serialize(result);
         } else if (is(commandParam, "associateClients")) {
             final CommandWrapper commandRequest = builder.associateClientsToGroup(groupId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return toApiJsonSerializer.serialize(result);
         } else if (is(commandParam, "disassociateClients")) {
             final CommandWrapper commandRequest = builder.disassociateClientsFromGroup(groupId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return toApiJsonSerializer.serialize(result);
         } else if (is(commandParam, "generateCollectionSheet")) {
-            final JsonElement parsedQuery = this.fromJsonHelper.parse(apiRequestBodyAsJson);
-            final JsonQuery query = JsonQuery.from(apiRequestBodyAsJson, parsedQuery, this.fromJsonHelper);
-            final JLGCollectionSheetData collectionSheet = this.collectionSheetReadPlatformService.generateGroupCollectionSheet(groupId,
-                    query);
-            final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-            return this.toApiJsonSerializer.serialize(settings, collectionSheet, GroupingTypesApiConstants.COLLECTIONSHEET_DATA_PARAMETERS);
+            final JsonElement parsedQuery = fromJsonHelper.parse(apiRequestBodyAsJson);
+            final JsonQuery query = JsonQuery.from(apiRequestBodyAsJson, parsedQuery, fromJsonHelper);
+            final JLGCollectionSheetData collectionSheet = collectionSheetReadPlatformService.generateGroupCollectionSheet(groupId, query);
+            final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+            return toApiJsonSerializer.serialize(settings, collectionSheet, GroupingTypesApiConstants.COLLECTIONSHEET_DATA_PARAMETERS);
         } else if (is(commandParam, "saveCollectionSheet")) {
             final CommandWrapper commandRequest = builder.saveGroupCollectionSheet(groupId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return toApiJsonSerializer.serialize(result);
         } else if (is(commandParam, "unassignStaff")) {
             final CommandWrapper commandRequest = builder.unassignGroupStaff(groupId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return toApiJsonSerializer.serialize(result);
         } else if (is(commandParam, "assignStaff")) {
             final CommandWrapper commandRequest = builder.assignGroupStaff(groupId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return toApiJsonSerializer.serialize(result);
         } else if (is(commandParam, "assignRole")) {
             final CommandWrapper commandRequest = builder.assignRole(groupId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return toApiJsonSerializer.serialize(result);
         } else if (is(commandParam, "unassignRole")) {
             final CommandWrapper commandRequest = builder.unassignRole(groupId, roleId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return toApiJsonSerializer.serialize(result);
         } else if (is(commandParam, "updateRole")) {
             final CommandWrapper commandRequest = builder.updateRole(groupId, roleId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return toApiJsonSerializer.serialize(result);
         } else if (is(commandParam, "transferClients")) {
             final CommandWrapper commandRequest = builder.transferClientsBetweenGroups(groupId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return toApiJsonSerializer.serialize(result);
         } else if (is(commandParam, "close")) {
             final CommandWrapper commandRequest = builder.closeGroup(groupId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return this.toApiJsonSerializer.serialize(result);
+            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return toApiJsonSerializer.serialize(result);
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate", "generateCollectionSheet",
                     "saveCollectionSheet", "unassignStaff", "assignRole", "unassignRole", "updateassignRole" });
@@ -552,15 +505,15 @@ public class GroupsApiResource {
     public String retrieveAccounts(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId,
             @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission("GROUP");
+        context.authenticatedUser().validateHasReadPermission("GROUP");
 
-        final AccountSummaryCollectionData groupAccount = this.accountDetailsReadPlatformService.retrieveGroupAccountDetails(groupId);
+        final AccountSummaryCollectionData groupAccount = accountDetailsReadPlatformService.retrieveGroupAccountDetails(groupId);
 
         final Set<String> GROUP_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(Arrays.asList("loanAccounts",
                 "groupLoanIndividualMonitoringAccounts", "savingsAccounts", "memberLoanAccounts", "memberSavingsAccounts"));
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.groupSummaryToApiJsonSerializer.serialize(settings, groupAccount, GROUP_ACCOUNTS_DATA_PARAMETERS);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return groupSummaryToApiJsonSerializer.serialize(settings, groupAccount, GROUP_ACCOUNTS_DATA_PARAMETERS);
     }
 
     @GET
@@ -579,9 +532,9 @@ public class GroupsApiResource {
     public String postGroupTemplate(@FormDataParam("file") InputStream uploadedInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("locale") final String locale,
             @FormDataParam("dateFormat") final String dateFormat) {
-        final Long importDocumentId = this.bulkImportWorkbookService.importWorkbook(GlobalEntityType.GROUPS.toString(), uploadedInputStream,
+        final Long importDocumentId = bulkImportWorkbookService.importWorkbook(GlobalEntityType.GROUPS.toString(), uploadedInputStream,
                 fileDetail, locale, dateFormat);
-        return this.toApiJsonSerializer.serialize(importDocumentId);
+        return toApiJsonSerializer.serialize(importDocumentId);
     }
 
     @GET
@@ -590,7 +543,7 @@ public class GroupsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveglimAccounts(@PathParam("groupId") final Long groupId,
             @QueryParam("parentLoanAccountNo") final String parentLoanAccountNo, @Context final UriInfo uriInfo) {
-        this.context.authenticatedUser().validateHasReadPermission("GROUP");
+        context.authenticatedUser().validateHasReadPermission("GROUP");
         List<GLIMContainer> glimContainer = Collections.emptyList();
         if (parentLoanAccountNo == null) {
             glimContainer = (List<GLIMContainer>) glimAccountInfoReadPlatformService.findGlimAccount(groupId);
@@ -602,8 +555,8 @@ public class GroupsApiResource {
         final Set<String> GLIM_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(
                 Arrays.asList("groupId", "accountNumber", "childGLIMAccounts", "memberLoanAccounts", "parentPrincipalAmount"));
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.glimContainerToApiJsonSerializer.serialize(settings, glimContainer, GLIM_ACCOUNTS_DATA_PARAMETERS);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return glimContainerToApiJsonSerializer.serialize(settings, glimContainer, GLIM_ACCOUNTS_DATA_PARAMETERS);
 
     }
 
@@ -615,23 +568,22 @@ public class GroupsApiResource {
             @QueryParam("parentGSIMAccountNo") final String parentGSIMAccountNo, @QueryParam("parentGSIMId") final Long parentGSIMId,
             @Context final UriInfo uriInfo) {
         List<GSIMContainer> gsimContainer;
-        this.context.authenticatedUser().validateHasReadPermission("GROUP");
+        context.authenticatedUser().validateHasReadPermission("GROUP");
 
         if (parentGSIMAccountNo == null && parentGSIMId != null) {
-            gsimContainer = this.gsimReadPlatformService.findGsimAccountContainerbyGsimAccountId(parentGSIMId);
+            gsimContainer = gsimReadPlatformService.findGsimAccountContainerbyGsimAccountId(parentGSIMId);
         } else if (parentGSIMAccountNo != null && parentGSIMId == null) {
-            gsimContainer = (List<GSIMContainer>) this.gsimReadPlatformService
-                    .findGsimAccountContainerbyGsimAccountNumber(parentGSIMAccountNo);
+            gsimContainer = (List<GSIMContainer>) gsimReadPlatformService.findGsimAccountContainerbyGsimAccountNumber(parentGSIMAccountNo);
         } else {
-            gsimContainer = (List<GSIMContainer>) this.gsimReadPlatformService.findGSIMAccountContainerByGroupId(groupId);
+            gsimContainer = (List<GSIMContainer>) gsimReadPlatformService.findGSIMAccountContainerByGroupId(groupId);
 
         }
 
         final Set<String> GSIM_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(
                 Arrays.asList("gsimId", "groupId", "accountNumber", "childGSIMAccounts", "parentBalance", "savingsStatus"));
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.gsimContainerToApiJsonSerializer.serialize(settings, gsimContainer, GSIM_ACCOUNTS_DATA_PARAMETERS);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return gsimContainerToApiJsonSerializer.serialize(settings, gsimContainer, GSIM_ACCOUNTS_DATA_PARAMETERS);
 
     }
 

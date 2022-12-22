@@ -434,6 +434,32 @@ final class SelfLoansApiResourceSwagger {
             public Boolean inArrears;
             @Schema(example = "false")
             public Boolean isNPA;
+            @Schema(example = "0.000000")
+            public Double totalMerchantRefund;
+            @Schema(example = "0.000000")
+            public Double totalMerchantRefundReversed;
+            @Schema(example = "0.000000")
+            public Double totalPayoutRefund;
+            @Schema(example = "0.000000")
+            public Double totalPayoutRefundReversed;
+            @Schema(example = "0.000000")
+            public Double totalGoodwillCredit;
+            @Schema(example = "0.000000")
+            public Double totalGoodwillCreditReversed;
+            @Schema(example = "0.000000")
+            public Double totalChargeAdjustment;
+            @Schema(example = "0.000000")
+            public Double totalChargeAdjustmentReversed;
+            @Schema(example = "0.000000")
+            public Double totalChargeback;
+            @Schema(example = "0.000000")
+            public Double totalCreditBalanceRefund;
+            @Schema(example = "0.000000")
+            public Double totalCreditBalanceRefundReversed;
+            @Schema(example = "0.000000")
+            public Double totalRepaymentTransaction;
+            @Schema(example = "0.000000")
+            public Double totalRepaymentTransactionReversed;
             public Set<GetLoansLoanIdOverdueCharges> overdueCharges;
         }
 

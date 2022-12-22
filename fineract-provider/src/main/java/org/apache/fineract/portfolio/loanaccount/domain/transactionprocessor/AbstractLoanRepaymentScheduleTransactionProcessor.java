@@ -38,6 +38,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalcualtio
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelation;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionToRepaymentScheduleMapping;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.CreocoreLoanRepaymentScheduleTransactionProcessor;
@@ -107,7 +109,10 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                 LocalDate startDate = disbursementDate;
                 for (final LoanRepaymentScheduleInstallment installment : installments) {
                     for (final LoanCharge loanCharge : transferCharges) {
-                        if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(startDate, installment.getDueDate())) {
+                        if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(startDate, installment.getDueDate())
+                                // Special case for Loan Charges (Due Date) added the same disbursement date
+                                || (startDate.equals(disbursementDate) && loanCharge.getDueDate() != null
+                                        && loanCharge.getDueDate().equals(disbursementDate))) {
                             Money amountForProcess = loanCharge.getAmount(currency);
                             if (amountForProcess.isGreaterThan(loanTransaction.getAmount(currency))) {
                                 amountForProcess = loanTransaction.getAmount(currency);
@@ -183,9 +188,12 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                         loanTransaction.updateLoanTransactionToRepaymentScheduleMappings(
                                 newLoanTransaction.getLoanTransactionToRepaymentScheduleMappings());
                     } else {
-                        loanTransaction.reverse(loanTransaction.getExternalId());
+                        loanTransaction.reverse();
                         loanTransaction.updateExternalId(null);
                         newLoanTransaction.copyLoanTransactionRelations(loanTransaction.getLoanTransactionRelations());
+                        // Adding Replayed relation from newly created transaction to reversed transaction
+                        newLoanTransaction.getLoanTransactionRelations().add(LoanTransactionRelation.linkToTransaction(newLoanTransaction,
+                                loanTransaction, LoanTransactionRelationTypeEnum.REPLAYED));
                         changedTransactionDetail.getNewTransactionMappings().put(loanTransaction.getId(), newLoanTransaction);
                     }
                 }

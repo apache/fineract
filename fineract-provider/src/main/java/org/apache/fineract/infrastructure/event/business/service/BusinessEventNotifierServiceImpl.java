@@ -155,4 +155,10 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
             recordedEvents.remove();
         }
     }
+
+    @Override
+    public void resetEventRecording() {
+        eventRecordingEnabled.set(false);
+        recordedEvents.remove();
+    }
 }

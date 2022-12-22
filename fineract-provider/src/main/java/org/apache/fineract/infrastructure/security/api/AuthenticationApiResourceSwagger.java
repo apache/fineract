@@ -26,7 +26,7 @@ import org.apache.fineract.useradministration.data.RoleData;
 /**
  * Created by sanyam on 13/8/17.
  */
-final class AuthenticationApiResourceSwagger {
+public final class AuthenticationApiResourceSwagger {
 
     private AuthenticationApiResourceSwagger() {
 

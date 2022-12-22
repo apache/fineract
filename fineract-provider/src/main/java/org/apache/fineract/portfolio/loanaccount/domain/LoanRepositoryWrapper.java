@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
@@ -62,8 +63,7 @@ public class LoanRepositoryWrapper {
     public Collection<Loan> findActiveLoansByLoanIdAndGroupId(Long clientId, Long groupId) {
         final Collection<Integer> loanStatuses = new ArrayList<>(Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),
                 LoanStatus.APPROVED.getValue(), LoanStatus.ACTIVE.getValue(), LoanStatus.OVERPAID.getValue()));
-        final Collection<Loan> loans = this.repository.findByClientIdAndGroupIdAndLoanStatus(clientId, groupId, loanStatuses);
-        return loans;
+        return this.repository.findByClientIdAndGroupIdAndLoanStatus(clientId, groupId, loanStatuses);
     }
 
     public Loan saveAndFlush(final Loan loan) {
@@ -114,8 +114,7 @@ public class LoanRepositoryWrapper {
 
     public List<LoanRepaymentScheduleInstallment> getLoanRepaymentScheduleInstallments(final Long loanId) {
         final Loan loan = this.repository.findById(loanId).orElseThrow(() -> new LoanNotFoundException(loanId));
-        final List<LoanRepaymentScheduleInstallment> loanRepaymentScheduleInstallments = loan.getRepaymentScheduleInstallments();
-        return loanRepaymentScheduleInstallments;
+        return loan.getRepaymentScheduleInstallments();
     }
 
     public Integer getNumberOfRepayments(final Long loanId) {
@@ -240,7 +239,7 @@ public class LoanRepositoryWrapper {
         return this.repository.findNonClosedLoanByAccountNumber(accountNumber);
     }
 
-    public boolean existLoanByExternalId(final String externalId) {
+    public boolean existLoanByExternalId(final ExternalId externalId) {
         return this.repository.existsByExternalId(externalId);
     }
 
@@ -252,5 +251,9 @@ public class LoanRepositoryWrapper {
             loan.initializeTransactions();
         }
         return loan;
+    }
+
+    public Long findIdByExternalId(ExternalId externalId) {
+        return this.repository.findIdByExternalId(externalId);
     }
 }

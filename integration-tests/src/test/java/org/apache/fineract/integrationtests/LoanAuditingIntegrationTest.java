@@ -75,7 +75,7 @@ public class LoanAuditingIntegrationTest {
     public void checkAuditDates() throws InterruptedException {
         final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
         String username = Utils.randomNameGenerator("user", 8);
-        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, 1, staffId, username, "password",
+        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, 1, staffId, username, "P4ssw0rd",
                 "resourceId");
 
         LOG.info("-------------------------Creating Client---------------------------");
@@ -129,7 +129,7 @@ public class LoanAuditingIntegrationTest {
 
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization",
-                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(username, "password"));
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(username, "P4ssw0rd"));
 
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
         loanStatusHashMap = this.loanTransactionHelper.approveLoan("11 July 2022", loanID);

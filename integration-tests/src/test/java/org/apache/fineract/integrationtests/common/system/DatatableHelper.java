@@ -30,11 +30,21 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import org.apache.fineract.client.models.GetDataTablesResponse;
+import org.apache.fineract.client.models.PostDataTablesRequest;
+import org.apache.fineract.client.models.PostDataTablesResponse;
+import org.apache.fineract.client.models.PutDataTablesAppTableIdDatatableIdResponse;
+import org.apache.fineract.client.models.PutDataTablesRequest;
+import org.apache.fineract.client.models.PutDataTablesResponse;
+import org.apache.fineract.client.util.JSON;
+import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DatatableHelper {
+public class DatatableHelper extends IntegrationTest {
+
+    private static final Gson GSON = new JSON().getGson();
 
     private static final Logger LOG = LoggerFactory.getLogger(DatatableHelper.class);
     private final RequestSpecification requestSpec;
@@ -73,6 +83,13 @@ public class DatatableHelper {
             final boolean genericResultSet, final String json) {
         return Utils.performServerPut(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + apptableId + "/"
                 + entryId + "?genericResultSet=" + genericResultSet + "&" + Utils.TENANT_IDENTIFIER, json, "");
+    }
+
+    public PutDataTablesAppTableIdDatatableIdResponse updateDatatableEntry(final String datatableName, final Integer apptableId,
+            final Integer entryId, final String json) {
+        final String response = Utils.performServerPut(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/"
+                + apptableId + "/" + entryId + "?genericResultSet=false&" + Utils.TENANT_IDENTIFIER, json, null);
+        return GSON.fromJson(response, PutDataTablesAppTableIdDatatableIdResponse.class);
     }
 
     public Integer createDatatableEntry(final String apptableName, final String datatableName, final Integer apptableId,
@@ -201,6 +218,39 @@ public class DatatableHelper {
 
         datatableColumnsList.add(datatableColumnMap);
         return datatableColumnsList;
+    }
+
+    public static List<HashMap<String, Object>> addDatatableColumnsWithUniqueAndIndex(List<HashMap<String, Object>> datatableColumnsList,
+            String columnName, String columnType, boolean isMandatory, Integer length, String codeName, boolean isUnique,
+            boolean isIndexed) {
+
+        final HashMap<String, Object> datatableColumnMap = new HashMap<>();
+
+        datatableColumnMap.put("name", columnName);
+        datatableColumnMap.put("type", columnType);
+        datatableColumnMap.put("mandatory", isMandatory);
+        if (length != null) {
+            datatableColumnMap.put("length", length);
+        }
+        if (codeName != null) {
+            datatableColumnMap.put("code", codeName);
+        }
+        datatableColumnMap.put("unique", isUnique);
+        datatableColumnMap.put("indexed", isIndexed);
+        datatableColumnsList.add(datatableColumnMap);
+        return datatableColumnsList;
+    }
+
+    public PostDataTablesResponse createDatatable(PostDataTablesRequest request) {
+        return ok(fineract().dataTables.createDatatable(request));
+    }
+
+    public GetDataTablesResponse getDataTableDetails(final String dataTableName) {
+        return ok(fineract().dataTables.getDatatable(dataTableName));
+    }
+
+    public PutDataTablesResponse updateDatatable(String dataTableName, PutDataTablesRequest request) {
+        return ok(fineract().dataTables.updateDatatable(dataTableName, request));
     }
 
 }

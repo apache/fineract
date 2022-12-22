@@ -389,7 +389,7 @@ public final class SavingsAccountData implements Serializable {
         if (this.clientData != null) {
             officeId = this.clientData.getOfficeId();
         } else if (this.groupId != null) {
-            officeId = this.groupGeneralData.officeId();
+            officeId = this.groupGeneralData.getOfficeId();
         }
         return officeId;
     }

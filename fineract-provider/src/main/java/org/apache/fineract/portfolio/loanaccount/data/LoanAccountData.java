@@ -33,6 +33,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -65,7 +66,7 @@ public class LoanAccountData {
     // identity
     private Long id;
     private String accountNo;
-    private String externalId;
+    private ExternalId externalId = ExternalId.empty();
 
     // status
     private LoanStatusEnumData status;
@@ -75,7 +76,7 @@ public class LoanAccountData {
     private Long clientId;
     private String clientAccountNo;
     private String clientName;
-    private String clientExternalId;
+    private ExternalId clientExternalId;
     private Long clientOfficeId;
     private GroupGeneralData group;
     private Long loanProductId;
@@ -247,9 +248,11 @@ public class LoanAccountData {
     private String linkAccountId;
     private Long groupId;
     private LocalDate expectedDisbursementDate;
+    private LocalDate overpaidOnDate;
 
     private CollectionData delinquent;
     private DelinquencyRangeData delinquencyRange;
+    private LocalDate lastClosedBusinessDate;
 
     public static LoanAccountData importInstanceIndividual(EnumOptionData loanTypeEnumOption, Long clientId, Long productId,
             Long loanOfficerId, LocalDate submittedOnDate, Long fundId, BigDecimal principal, Integer numberOfRepayments,
@@ -258,7 +261,7 @@ public class LoanAccountData {
             EnumOptionData amortizationEnumOption, EnumOptionData interestMethodEnum, EnumOptionData interestCalculationPeriodTypeEnum,
             BigDecimal inArrearsTolerance, String transactionProcessingStrategyCode, Integer graceOnPrincipalPayment,
             Integer graceOnInterestPayment, Integer graceOnInterestCharged, LocalDate interestChargedFromDate,
-            LocalDate repaymentsStartingFromDate, Integer rowIndex, String externalId, Long groupId, Collection<LoanChargeData> charges,
+            LocalDate repaymentsStartingFromDate, Integer rowIndex, ExternalId externalId, Long groupId, Collection<LoanChargeData> charges,
             String linkAccountId, String locale, String dateFormat, List<LoanCollateralManagementData> loanCollateralManagementData) {
 
         return new LoanAccountData().setLoanType(loanTypeEnumOption).setClientId(clientId).setProductId(productId)
@@ -283,7 +286,7 @@ public class LoanAccountData {
             EnumOptionData interestMethodEnum, EnumOptionData interestCalculationPeriodEnum, BigDecimal arrearsTolerance,
             String transactionProcessingStrategyCode, Integer graceOnPrincipalPayment, Integer graceOnInterestPayment,
             Integer graceOnInterestCharged, LocalDate interestChargedFromDate, LocalDate repaymentsStartingFromDate, Integer rowIndex,
-            String externalId, String linkAccountId, String locale, String dateFormat) {
+            ExternalId externalId, String linkAccountId, String locale, String dateFormat) {
 
         return new LoanAccountData().setLoanType(loanTypeEnumOption).setGroupId(groupIdforGroupLoan).setProductId(productId)
                 .setLoanOfficerId(loanOfficerId).setSubmittedOnDate(submittedOnDate).setFundId(fundId).setPrincipal(principal)
@@ -312,7 +315,7 @@ public class LoanAccountData {
      * Used to produce a {@link LoanAccountData} with only client information defaulted.
      */
     public static LoanAccountData clientDefaults(final Long clientId, final String clientAccountNo, final String clientName,
-            final Long clientOfficeId, final String clientExternalId, final LocalDate expectedDisbursementDate) {
+            final Long clientOfficeId, final ExternalId clientExternalId, final LocalDate expectedDisbursementDate) {
 
         return new LoanAccountData().setTimeline(LoanApplicationTimelineData.templateDefault(expectedDisbursementDate))
                 .setIsVariableInstallmentsAllowed(false).setDelinquent(CollectionData.template()).setClientId(clientId)
@@ -378,7 +381,7 @@ public class LoanAccountData {
                 .setIsEqualAmortization(acc.isEqualAmortization).setRates(acc.rates).setIsRatesEnabled(acc.isRatesEnabled)
                 .setFixedPrincipalPercentagePerInstallment(acc.fixedPrincipalPercentagePerInstallment).setDelinquent(acc.delinquent)
                 .setDelinquencyRange(acc.delinquencyRange).setDisallowExpectedDisbursements(acc.disallowExpectedDisbursements)
-                .setFraud(acc.fraud);
+                .setFraud(acc.fraud).setOverpaidOnDate(acc.overpaidOnDate);
     }
 
     /**
@@ -449,7 +452,7 @@ public class LoanAccountData {
                 .setIsEqualAmortization(acc.isEqualAmortization).setRates(acc.rates).setIsRatesEnabled(acc.isRatesEnabled)
                 .setFixedPrincipalPercentagePerInstallment(acc.fixedPrincipalPercentagePerInstallment).setDelinquent(acc.delinquent)
                 .setDelinquencyRange(acc.delinquencyRange).setDisallowExpectedDisbursements(acc.disallowExpectedDisbursements)
-                .setFraud(acc.fraud);
+                .setFraud(acc.fraud).setOverpaidOnDate(acc.overpaidOnDate);
     }
 
     public static LoanAccountData loanProductWithTemplateDefaults(final LoanProductData product,
@@ -616,29 +619,31 @@ public class LoanAccountData {
                 .setClosureLoanId(acc.closureLoanId).setClosureLoanAccountNo(acc.closureLoanAccountNo).setTopupAmount(acc.topupAmount)
                 .setIsEqualAmortization(product.isEqualAmortization()).setRates(acc.rates).setIsRatesEnabled(acc.isRatesEnabled)
                 .setFixedPrincipalPercentagePerInstallment(product.getFixedPrincipalPercentagePerInstallment()).setDelinquent(delinquent)
-                .setDisallowExpectedDisbursements(product.getDisallowExpectedDisbursements()).setFraud(acc.fraud);
+                .setDisallowExpectedDisbursements(product.getDisallowExpectedDisbursements()).setFraud(acc.fraud)
+                .setOverpaidOnDate(acc.overpaidOnDate);
     }
 
     /*
      * Used to send back loan account data with the basic details coming from query.
      */
     public static LoanAccountData basicLoanDetails(final Long id, final String accountNo, final LoanStatusEnumData status,
-            final String externalId, final Long clientId, final String clientAccountNo, final String clientName, final Long clientOfficeId,
-            final String clientExternalId, final GroupGeneralData group, final EnumOptionData loanType, final Long loanProductId,
-            final String loanProductName, final String loanProductDescription, final boolean isLoanProductLinkedToFloatingRate,
-            final Long fundId, final String fundName, final Long loanPurposeId, final String loanPurposeName, final Long loanOfficerId,
-            final String loanOfficerName, final CurrencyData currencyData, final BigDecimal proposedPrincipal, final BigDecimal principal,
-            final BigDecimal approvedPrincipal, final BigDecimal netDisbursalAmount, final BigDecimal totalOverpaid,
-            final BigDecimal inArrearsTolerance, final Integer termFrequency, final EnumOptionData termPeriodFrequencyType,
-            final Integer numberOfRepayments, final Integer repaymentEvery, final EnumOptionData repaymentFrequencyType,
-            EnumOptionData repaymentFrequencyNthDayType, EnumOptionData repaymentFrequencyDayOfWeekType, final String transactionStrategy,
-            final String transactionStrategyName, final EnumOptionData amortizationType, final BigDecimal interestRatePerPeriod,
-            final EnumOptionData interestRateFrequencyType, final BigDecimal annualInterestRate, final EnumOptionData interestType,
-            final boolean isFloatingInterestRate, final BigDecimal interestRateDifferential,
-            final EnumOptionData interestCalculationPeriodType, Boolean allowPartialPeriodInterestCalcualtion,
-            final LocalDate expectedFirstRepaymentOnDate, final Integer graceOnPrincipalPayment,
-            final Integer recurringMoratoriumOnPrincipalPeriods, final Integer graceOnInterestPayment, final Integer graceOnInterestCharged,
-            final LocalDate interestChargedFromDate, final LoanApplicationTimelineData timeline, final LoanSummaryData loanSummary,
+            final ExternalId externalId, final Long clientId, final String clientAccountNo, final String clientName,
+            final Long clientOfficeId, final ExternalId clientExternalId, final GroupGeneralData group, final EnumOptionData loanType,
+            final Long loanProductId, final String loanProductName, final String loanProductDescription,
+            final boolean isLoanProductLinkedToFloatingRate, final Long fundId, final String fundName, final Long loanPurposeId,
+            final String loanPurposeName, final Long loanOfficerId, final String loanOfficerName, final CurrencyData currencyData,
+            final BigDecimal proposedPrincipal, final BigDecimal principal, final BigDecimal approvedPrincipal,
+            final BigDecimal netDisbursalAmount, final BigDecimal totalOverpaid, final BigDecimal inArrearsTolerance,
+            final Integer termFrequency, final EnumOptionData termPeriodFrequencyType, final Integer numberOfRepayments,
+            final Integer repaymentEvery, final EnumOptionData repaymentFrequencyType, EnumOptionData repaymentFrequencyNthDayType,
+            EnumOptionData repaymentFrequencyDayOfWeekType, final String transactionStrategy, final String transactionStrategyName,
+            final EnumOptionData amortizationType, final BigDecimal interestRatePerPeriod, final EnumOptionData interestRateFrequencyType,
+            final BigDecimal annualInterestRate, final EnumOptionData interestType, final boolean isFloatingInterestRate,
+            final BigDecimal interestRateDifferential, final EnumOptionData interestCalculationPeriodType,
+            Boolean allowPartialPeriodInterestCalcualtion, final LocalDate expectedFirstRepaymentOnDate,
+            final Integer graceOnPrincipalPayment, final Integer recurringMoratoriumOnPrincipalPeriods,
+            final Integer graceOnInterestPayment, final Integer graceOnInterestCharged, final LocalDate interestChargedFromDate,
+            final LoanApplicationTimelineData timeline, final LoanSummaryData loanSummary,
             final BigDecimal feeChargesDueAtDisbursementCharged, final Boolean syncDisbursementWithMeeting, final Integer loanCounter,
             final Integer loanProductCounter, final Boolean multiDisburseLoan, Boolean canDefineInstallmentAmount,
             final BigDecimal fixedEmiAmont, final BigDecimal outstandingLoanBalance, final Boolean inArrears,
@@ -648,7 +653,8 @@ public class LoanAccountData {
             final Boolean isVariableInstallmentsAllowed, Integer minimumGap, Integer maximumGap, final EnumOptionData subStatus,
             final boolean canUseForTopup, final boolean isTopup, final Long closureLoanId, final String closureLoanAccountNo,
             final BigDecimal topupAmount, final boolean isEqualAmortization, final BigDecimal fixedPrincipalPercentagePerInstallment,
-            final DelinquencyRangeData delinquencyRange, final boolean disallowExpectedDisbursements, final boolean fraud) {
+            final DelinquencyRangeData delinquencyRange, final boolean disallowExpectedDisbursements, final boolean fraud,
+            LocalDate lastClosedBusinessDate, LocalDate overpaidOnDate) {
 
         final CollectionData delinquent = CollectionData.template();
 
@@ -687,7 +693,8 @@ public class LoanAccountData {
                 .setSubStatus(subStatus).setCanUseForTopup(canUseForTopup).setTopup(isTopup).setClosureLoanId(closureLoanId)
                 .setClosureLoanAccountNo(closureLoanAccountNo).setTopupAmount(topupAmount).setIsEqualAmortization(isEqualAmortization)
                 .setFixedPrincipalPercentagePerInstallment(fixedPrincipalPercentagePerInstallment).setDelinquent(delinquent)
-                .setDelinquencyRange(delinquencyRange).setDisallowExpectedDisbursements(disallowExpectedDisbursements).setFraud(fraud);
+                .setDelinquencyRange(delinquencyRange).setDisallowExpectedDisbursements(disallowExpectedDisbursements).setFraud(fraud)
+                .setLastClosedBusinessDate(lastClosedBusinessDate).setOverpaidOnDate(overpaidOnDate);
     }
 
     /*
@@ -771,7 +778,7 @@ public class LoanAccountData {
                 .setIsEqualAmortization(acc.isEqualAmortization)
                 .setFixedPrincipalPercentagePerInstallment(acc.fixedPrincipalPercentagePerInstallment)
                 .setDelinquencyRange(acc.delinquencyRange).setDisallowExpectedDisbursements(acc.disallowExpectedDisbursements)
-                .setFraud(acc.fraud);
+                .setFraud(acc.fraud).setLastClosedBusinessDate(acc.getLastClosedBusinessDate()).setOverpaidOnDate(acc.overpaidOnDate);
     }
 
     public static LoanAccountData associationsAndTemplate(final LoanAccountData acc, final Collection<LoanProductData> productOptions,
@@ -846,7 +853,7 @@ public class LoanAccountData {
                 .setIsEqualAmortization(acc.isEqualAmortization).setRates(acc.rates).setIsRatesEnabled(acc.isRatesEnabled)
                 .setFixedPrincipalPercentagePerInstallment(acc.fixedPrincipalPercentagePerInstallment).setDelinquent(acc.delinquent)
                 .setDelinquencyRange(acc.delinquencyRange).setDisallowExpectedDisbursements(acc.disallowExpectedDisbursements)
-                .setFraud(acc.fraud);
+                .setFraud(acc.fraud).setOverpaidOnDate(acc.overpaidOnDate);
     }
 
     public static LoanAccountData associateMemberVariations(final LoanAccountData acc, final Map<Long, Integer> memberLoanCycle) {
@@ -943,7 +950,7 @@ public class LoanAccountData {
                 .setIsEqualAmortization(acc.isEqualAmortization).setRates(acc.rates).setIsRatesEnabled(acc.isRatesEnabled)
                 .setFixedPrincipalPercentagePerInstallment(acc.fixedPrincipalPercentagePerInstallment).setDelinquent(acc.delinquent)
                 .setDelinquencyRange(acc.delinquencyRange).setDisallowExpectedDisbursements(acc.disallowExpectedDisbursements)
-                .setFraud(acc.fraud);
+                .setFraud(acc.fraud).setOverpaidOnDate(acc.overpaidOnDate);
     }
 
     public static LoanAccountData withInterestRecalculationCalendarData(final LoanAccountData acc, final CalendarData calendarData,
@@ -1008,7 +1015,7 @@ public class LoanAccountData {
                 .setIsEqualAmortization(acc.isEqualAmortization).setRates(acc.rates).setIsRatesEnabled(acc.isRatesEnabled)
                 .setFixedPrincipalPercentagePerInstallment(acc.fixedPrincipalPercentagePerInstallment).setDelinquent(acc.delinquent)
                 .setDelinquencyRange(acc.delinquencyRange).setDisallowExpectedDisbursements(acc.disallowExpectedDisbursements)
-                .setFraud(acc.fraud);
+                .setFraud(acc.fraud).setOverpaidOnDate(acc.overpaidOnDate);
     }
 
     public static LoanAccountData withLoanCalendarData(final LoanAccountData acc, final CalendarData calendarData) {
@@ -1066,7 +1073,7 @@ public class LoanAccountData {
                 .setIsEqualAmortization(acc.isEqualAmortization).setRates(acc.rates).setIsRatesEnabled(acc.isRatesEnabled)
                 .setFixedPrincipalPercentagePerInstallment(acc.fixedPrincipalPercentagePerInstallment).setDelinquent(acc.delinquent)
                 .setDelinquencyRange(acc.delinquencyRange).setDisallowExpectedDisbursements(acc.disallowExpectedDisbursements)
-                .setFraud(acc.fraud);
+                .setFraud(acc.fraud).setOverpaidOnDate(acc.overpaidOnDate);
     }
 
     public static LoanAccountData withOriginalSchedule(final LoanAccountData acc, final LoanScheduleData originalSchedule) {
@@ -1127,7 +1134,7 @@ public class LoanAccountData {
                 .setIsEqualAmortization(acc.isEqualAmortization).setRates(acc.rates).setIsRatesEnabled(acc.isRatesEnabled)
                 .setFixedPrincipalPercentagePerInstallment(acc.fixedPrincipalPercentagePerInstallment).setDelinquent(acc.delinquent)
                 .setDelinquencyRange(acc.delinquencyRange).setDisallowExpectedDisbursements(acc.disallowExpectedDisbursements)
-                .setFraud(acc.fraud);
+                .setFraud(acc.fraud).setOverpaidOnDate(acc.overpaidOnDate);
     }
 
     public static final Comparator<LoanAccountData> ClientNameComparator = (loan1, loan2) -> {

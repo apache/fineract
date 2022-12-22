@@ -16,20 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.business.domain.loan;
+package org.apache.fineract.infrastructure.jobs.service.jobparameterprovider;
 
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-
-public class LoanRepaymentOverdueBusinessEvent extends LoanBusinessEvent {
-
-    private static final String TYPE = "LoanRepaymentOverdueBusinessEvent";
-
-    public LoanRepaymentOverdueBusinessEvent(Loan value) {
-        super(value);
-    }
+public abstract class AbstractJobParameterProvider implements JobParameterProvider {
 
     @Override
-    public String getType() {
-        return TYPE;
+    public boolean canProvideParametersForJob(String jobName) {
+        return jobName.equals(getJobName());
     }
+
+    protected abstract String getJobName();
 }

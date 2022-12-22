@@ -61,12 +61,15 @@ import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.configuration.service.TemporaryConfigurationServiceContainer;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.security.service.RandomPasswordGenerator;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.service.HolidayUtil;
@@ -192,7 +195,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     private String accountNumber;
 
     @Column(name = "external_id")
-    private String externalId;
+    private ExternalId externalId;
 
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = true)
@@ -312,6 +315,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "total_overpaid_derived", scale = 6, precision = 19)
     private BigDecimal totalOverpaid;
 
+    @Column(name = "overpaidon_date")
+    private LocalDate overpaidOnDate;
+
     @Column(name = "loan_counter")
     private Integer loanCounter;
 
@@ -429,6 +435,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     @Column(name = "fixed_principal_percentage_per_installment", scale = 2, precision = 5, nullable = true)
     private BigDecimal fixedPrincipalPercentagePerInstallment;
+
+    @Column(name = "last_closed_business_date")
+    private LocalDate lastClosedBusinessDate;
 
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
@@ -719,9 +728,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 transactionDate = currentDate;
             }
         }
-
+        ExternalId externalId = ExternalId.empty();
+        if (TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled()) {
+            externalId = ExternalId.generate();
+        }
         final LoanTransaction applyLoanChargeTransaction = LoanTransaction.accrueLoanCharge(this, getOffice(), chargeAmount,
-                transactionDate, feeCharges, penaltyCharges);
+                transactionDate, feeCharges, penaltyCharges, externalId);
 
         Integer installmentNumber = null;
         final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(applyLoanChargeTransaction, loanCharge,
@@ -1014,7 +1026,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public LoanTransaction waiveLoanCharge(final LoanCharge loanCharge, final LoanLifecycleStateMachine loanLifecycleStateMachine,
             final Map<String, Object> changes, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
-            final Integer loanInstallmentNumber, final ScheduleGeneratorDTO scheduleGeneratorDTO, final Money accruedCharge) {
+            final Integer loanInstallmentNumber, final ScheduleGeneratorDTO scheduleGeneratorDTO, final Money accruedCharge,
+            final ExternalId externalId) {
 
         validateLoanIsNotClosed(loanCharge);
 
@@ -1066,7 +1079,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
         final LoanTransaction waiveLoanChargeTransaction = LoanTransaction.waiveLoanCharge(this, getOffice(), amountWaived, transactionDate,
-                feeChargesWaived, penaltyChargesWaived, unrecognizedIncome);
+                feeChargesWaived, penaltyChargesWaived, unrecognizedIncome, externalId);
         final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(waiveLoanChargeTransaction, loanCharge,
                 waiveLoanChargeTransaction.getAmount(getCurrency()).getAmount(), loanInstallmentNumber);
         waiveLoanChargeTransaction.getLoanChargesPaid().add(loanChargePaidBy);
@@ -1332,12 +1345,18 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     private void updateAccrualsForNonPeriodicAccruals(final Collection<LoanTransaction> accruals) {
 
         final Money interestApplied = Money.of(getCurrency(), this.summary.getTotalInterestCharged());
+        ExternalId externalId = ExternalId.empty();
+        boolean isExternalIdAutoGenerationEnabled = TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled();
+
         for (LoanTransaction loanTransaction : accruals) {
             if (loanTransaction.getInterestPortion(getCurrency()).isGreaterThanZero()) {
                 if (loanTransaction.getInterestPortion(getCurrency()).isNotEqualTo(interestApplied)) {
                     loanTransaction.reverse();
+                    if (isExternalIdAutoGenerationEnabled) {
+                        externalId = ExternalId.generate();
+                    }
                     final LoanTransaction interestAppliedTransaction = LoanTransaction.accrueInterest(getOffice(), this, interestApplied,
-                            getDisbursementDate());
+                            getDisbursementDate(), externalId);
                     addLoanTransaction(interestAppliedTransaction);
                 }
             } else {
@@ -1422,10 +1441,14 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             this.createStandingInstructionAtDisbursement = valueAsInput;
         }
 
-        if (command.isChangeInStringParameterNamed(EXTERNAL_ID, this.externalId)) {
+        if (command.isChangeInStringParameterNamed(EXTERNAL_ID, this.externalId.getValue())) {
             final String newValue = command.stringValueOfParameterNamed(EXTERNAL_ID);
-            actualChanges.put(EXTERNAL_ID, newValue);
-            this.externalId = StringUtils.defaultIfEmpty(newValue, null);
+            ExternalId externalId = ExternalIdFactory.produce(newValue);
+            if (externalId.isEmpty() && TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled()) {
+                externalId = ExternalId.generate();
+            }
+            actualChanges.put(EXTERNAL_ID, externalId);
+            this.externalId = externalId;
         }
 
         // add clientId, groupId and loanType changes to actual changes
@@ -1938,9 +1961,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             this.disbursementDetails.add(disbursementDetails);
             for (LoanTrancheCharge trancheCharge : trancheCharges) {
                 Charge chargeDefinition = trancheCharge.getCharge();
-                final LoanCharge loanCharge = LoanCharge.createNewWithoutLoan(chargeDefinition, principal, null, null, null,
-                        expectedDisbursementDate, null, null);
-                loanCharge.update(this);
+                ExternalId externalId = ExternalId.empty();
+                if (TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled()) {
+                    externalId = ExternalId.generate();
+                }
+                final LoanCharge loanCharge = new LoanCharge(this, chargeDefinition, principal, null, null, null, expectedDisbursementDate,
+                        null, null, BigDecimal.ZERO, externalId);
                 LoanTrancheDisbursementCharge loanTrancheDisbursementCharge = new LoanTrancheDisbursementCharge(loanCharge,
                         disbursementDetails);
                 loanCharge.updateLoanTrancheDisbursementCharge(loanTrancheDisbursementCharge);
@@ -2034,7 +2060,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     }
 
     public void loanApplicationSubmittal(final LoanScheduleModel loanSchedule, final LoanApplicationTerms loanApplicationTerms,
-            final LoanLifecycleStateMachine lifecycleStateMachine, final LocalDate submittedOn, final String externalId,
+            final LoanLifecycleStateMachine lifecycleStateMachine, final LocalDate submittedOn, final ExternalId externalId,
             final boolean allowTransactionsOnHoliday, final List<Holiday> holidays, final WorkingDays workingDays,
             final boolean allowTransactionsOnNonWorkingDay) {
 
@@ -2457,8 +2483,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
         if (((isMultiDisburmentLoan() && getDisbursedLoanDisbursementDetails().size() == 1) || !isMultiDisburmentLoan())
                 && isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()) {
+            ExternalId externalId = ExternalId.empty();
+            if (TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled()) {
+                externalId = ExternalId.generate();
+            }
             final LoanTransaction interestAppliedTransaction = LoanTransaction.accrueInterest(getOffice(), this, interestApplied,
-                    actualDisbursementDate);
+                    actualDisbursementDate, externalId);
             addLoanTransaction(interestAppliedTransaction);
         }
 
@@ -3388,6 +3418,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             handleLoanRepaymentInFull(transactionDate, loanLifecycleStateMachine);
             statusChanged = true;
         }
+        if (this.totalOverpaid == null || BigDecimal.ZERO.compareTo(this.totalOverpaid) == 0) {
+            this.overpaidOnDate = null;
+        }
         return statusChanged;
     }
 
@@ -3407,6 +3440,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             this.closedOnDate = transactionDate;
             this.actualMaturityDate = transactionDate;
         } else if (LoanStatus.fromInt(this.loanStatus).isOverpaid()) {
+            if (this.totalOverpaid == null || BigDecimal.ZERO.compareTo(this.totalOverpaid) == 0) {
+                this.overpaidOnDate = null;
+            }
             loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, this);
         }
         processIncomeAccrualTransactionOnLoanClosure();
@@ -3415,6 +3451,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     private void processIncomeAccrualTransactionOnLoanClosure() {
         if (this.loanInterestRecalculationDetails != null && this.loanInterestRecalculationDetails.isCompoundingToBePostedAsTransaction()
                 && this.getStatus().isClosedObligationsMet()) {
+
+            ExternalId externalId = ExternalId.empty();
+            boolean isExternalIdAutoGenerationEnabled = TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled();
+
             LocalDate closedDate = this.getClosedOnDate();
             reverseTransactionsOnOrAfter(retrieveListOfIncomePostingTransactions(), closedDate);
             reverseTransactionsOnOrAfter(retrieveListOfAccrualTransactions(), closedDate);
@@ -3428,8 +3468,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             BigDecimal penaltyToPost = cumulativeIncomeFromInstallments.get(PENALTY)
                     .subtract(cumulativeIncomeFromIncomePosting.get(PENALTY));
             BigDecimal amountToPost = interestToPost.add(feeToPost).add(penaltyToPost);
+            if (isExternalIdAutoGenerationEnabled) {
+                externalId = ExternalId.generate();
+            }
             LoanTransaction finalIncomeTransaction = LoanTransaction.incomePosting(this, this.getOffice(), closedDate, amountToPost,
-                    interestToPost, feeToPost, penaltyToPost);
+                    interestToPost, feeToPost, penaltyToPost, externalId);
             addLoanTransaction(finalIncomeTransaction);
             if (isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
                 List<LoanTransaction> updatedAccrualTransactions = retrieveListOfAccrualTransactions();
@@ -3439,8 +3482,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 }
                 HashMap<String, Object> feeDetails = new HashMap<>();
                 determineFeeDetails(lastAccruedDate, closedDate, feeDetails);
+                if (isExternalIdAutoGenerationEnabled) {
+                    externalId = ExternalId.generate();
+                }
                 LoanTransaction finalAccrual = LoanTransaction.accrueTransaction(this, this.getOffice(), closedDate, amountToPost,
-                        interestToPost, feeToPost, penaltyToPost);
+                        interestToPost, feeToPost, penaltyToPost, externalId);
                 updateLoanChargesPaidBy(finalAccrual, feeDetails, null);
                 addLoanTransaction(finalAccrual);
             }
@@ -3480,7 +3526,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     private void handleLoanOverpayment(final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
         loanLifecycleStateMachine.transition(LoanEvent.LOAN_OVERPAYMENT, this);
-
+        this.overpaidOnDate = DateUtils.getBusinessLocalDate();
         this.closedOnDate = null;
         this.actualMaturityDate = null;
     }
@@ -3596,13 +3642,13 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         }
 
         return LoanTransaction.waiver(getOffice(), this, possibleInterestToWaive, transactionDate, possibleInterestToWaive,
-                possibleInterestToWaive.zero());
+                possibleInterestToWaive.zero(), ExternalId.empty());
     }
 
     public ChangedTransactionDetail adjustExistingTransaction(final LoanTransaction newTransactionDetail,
             final LoanLifecycleStateMachine loanLifecycleStateMachine, final LoanTransaction transactionForAdjustment,
             final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
-            final ScheduleGeneratorDTO scheduleGeneratorDTO, final String reversalExternalId) {
+            final ScheduleGeneratorDTO scheduleGeneratorDTO, final ExternalId reversalExternalId) {
 
         HolidayDetailDTO holidayDetailDTO = scheduleGeneratorDTO.getHolidayDetailDTO();
         validateActivityNotBeforeLastTransactionDate(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, transactionForAdjustment.getTransactionDate());
@@ -3752,11 +3798,18 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             final LocalDate writtenOffOnLocalDate = command.localDateValueOfParameterNamed(TRANSACTION_DATE);
             final String txnExternalId = command.stringValueOfParameterNamedAllowingNull(EXTERNAL_ID);
 
+            ExternalId externalId = ExternalIdFactory.produce(txnExternalId);
+
+            if (externalId.isEmpty() && TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled()) {
+                externalId = ExternalId.generate();
+            }
+
             this.closedOnDate = writtenOffOnLocalDate;
             this.writtenOffOnDate = writtenOffOnLocalDate;
             this.closedBy = currentUser;
             changes.put(CLOSED_ON_DATE, command.stringValueOfParameterNamed(TRANSACTION_DATE));
             changes.put(WRITTEN_OFF_ON_DATE, command.stringValueOfParameterNamed(TRANSACTION_DATE));
+            changes.put("externalId", externalId);
 
             if (writtenOffOnLocalDate.isBefore(getDisbursementDate())) {
                 final String errorMessage = "The date on which a loan is written off cannot be before the loan disbursement date: "
@@ -3772,7 +3825,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 throw new InvalidLoanStateTransitionException("writeoff", "cannot.be.a.future.date", errorMessage, writtenOffOnLocalDate);
             }
 
-            loanTransaction = LoanTransaction.writeoff(this, getOffice(), writtenOffOnLocalDate, txnExternalId);
+            loanTransaction = LoanTransaction.writeoff(this, getOffice(), writtenOffOnLocalDate, externalId);
             LocalDate lastTransactionDate = getLastUserTransactionDate();
             if (lastTransactionDate.isAfter(writtenOffOnLocalDate)) {
                 final String errorMessage = "The date of the writeoff transaction must occur on or before previous transactions.";
@@ -3839,6 +3892,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         final LocalDate closureDate = command.localDateValueOfParameterNamed(TRANSACTION_DATE);
         final String txnExternalId = command.stringValueOfParameterNamedAllowingNull(EXTERNAL_ID);
 
+        ExternalId externalId = ExternalIdFactory.produce(txnExternalId);
+        if (externalId.isEmpty() && TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled()) {
+            externalId = ExternalId.generate();
+        }
+
         this.closedOnDate = closureDate;
         changes.put(CLOSED_ON_DATE, command.stringValueOfParameterNamed(TRANSACTION_DATE));
 
@@ -3870,7 +3928,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                     changes.put(PARAM_STATUS, LoanEnumerations.status(this.loanStatus));
                 }
                 this.closedOnDate = closureDate;
-                loanTransaction = LoanTransaction.writeoff(this, getOffice(), closureDate, txnExternalId);
+                changes.put("externalId", externalId);
+                loanTransaction = LoanTransaction.writeoff(this, getOffice(), closureDate, externalId);
                 final boolean isLastTransaction = isChronologicallyLatestTransaction(loanTransaction, getLoanTransactions());
                 if (!isLastTransaction) {
                     final String errorMessage = "The closing date of the loan must be on or after latest transaction date.";
@@ -5235,6 +5294,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return this.totalOverpaid;
     }
 
+    public LocalDate getOverpaidOnDate() {
+        return this.overpaidOnDate;
+    }
+
     public void updateIsInterestRecalculationEnabled() {
         this.loanRepaymentScheduleDetail.updateIsInterestRecalculationEnabled(isInterestRecalculationEnabledForProduct());
     }
@@ -5419,27 +5482,36 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             interest = compoundingDetail.getAmount().subtract(fee).subtract(penalties);
         }
 
+        ExternalId externalId = ExternalId.empty();
+        if (TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled()) {
+            externalId = ExternalId.generate();
+        }
+
         if (existingIncomeTransaction == null) {
             LoanTransaction transaction = LoanTransaction.incomePosting(this, this.getOffice(), compoundingDetail.getEffectiveDate(),
-                    compoundingDetail.getAmount(), interest, fee, penalties);
+                    compoundingDetail.getAmount(), interest, fee, penalties, externalId);
             addLoanTransaction(transaction);
         } else if (existingIncomeTransaction.getAmount(getCurrency()).getAmount().compareTo(compoundingDetail.getAmount()) != 0) {
             existingIncomeTransaction.reverse();
             LoanTransaction transaction = LoanTransaction.incomePosting(this, this.getOffice(), compoundingDetail.getEffectiveDate(),
-                    compoundingDetail.getAmount(), interest, fee, penalties);
+                    compoundingDetail.getAmount(), interest, fee, penalties, externalId);
             addLoanTransaction(transaction);
+        }
+
+        if (TemporaryConfigurationServiceContainer.isExternalIdAutoGenerationEnabled()) {
+            externalId = ExternalId.generate();
         }
 
         if (isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
             if (existingAccrualTransaction == null) {
                 LoanTransaction accrual = LoanTransaction.accrueTransaction(this, this.getOffice(), compoundingDetail.getEffectiveDate(),
-                        compoundingDetail.getAmount(), interest, fee, penalties);
+                        compoundingDetail.getAmount(), interest, fee, penalties, externalId);
                 updateLoanChargesPaidBy(accrual, feeDetails, null);
                 addLoanTransaction(accrual);
             } else if (existingAccrualTransaction.getAmount(getCurrency()).getAmount().compareTo(compoundingDetail.getAmount()) != 0) {
                 existingAccrualTransaction.reverse();
                 LoanTransaction accrual = LoanTransaction.accrueTransaction(this, this.getOffice(), compoundingDetail.getEffectiveDate(),
-                        compoundingDetail.getAmount(), interest, fee, penalties);
+                        compoundingDetail.getAmount(), interest, fee, penalties, externalId);
                 updateLoanChargesPaidBy(accrual, feeDetails, null);
                 addLoanTransaction(accrual);
             }
@@ -5966,7 +6038,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return this.accountNumber;
     }
 
-    public String getExternalId() {
+    public ExternalId getExternalId() {
         return this.externalId;
     }
 
@@ -6032,6 +6104,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         updateLoanSummaryDerivedFields();
 
         if (this.totalOverpaid == null || BigDecimal.ZERO.compareTo(this.totalOverpaid) == 0) {
+            this.overpaidOnDate = null;
             defaultLoanLifecycleStateMachine.transition(LoanEvent.LOAN_CREDIT_BALANCE_REFUND, this);
         }
 
@@ -6869,4 +6942,11 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return ageOfOverdueDays;
     }
 
+    public LocalDate getLastClosedBusinessDate() {
+        return this.lastClosedBusinessDate;
+    }
+
+    public void setLastClosedBusinessDate(LocalDate lastClosedBusinessDate) {
+        this.lastClosedBusinessDate = lastClosedBusinessDate;
+    }
 }
