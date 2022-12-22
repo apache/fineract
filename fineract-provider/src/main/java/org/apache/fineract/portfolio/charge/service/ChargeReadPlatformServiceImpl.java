@@ -94,13 +94,13 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     public Collection<ChargeData> retrieveAllCharges() {
         final ChargeMapper rm = new ChargeMapper();
 
-        String sql = "select " + rm.chargeSchema() + " where c.is_deleted=false ";
+        String sql = "select " + rm.chargeSchema() + " where c.is_deleted=false and c.charge_time_enum <> ? ";
 
         sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
 
         sql += " order by c.name ";
 
-        return this.jdbcTemplate.query(sql, rm); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, new Object[] {ChargeTimeType.INTEREST_FORFEITED.getValue()}); // NOSONAR
     }
 
     @Override
