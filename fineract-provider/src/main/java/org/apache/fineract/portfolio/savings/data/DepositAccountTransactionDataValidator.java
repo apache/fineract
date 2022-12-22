@@ -124,7 +124,7 @@ public class DepositAccountTransactionDataValidator {
 
         // Validate all string payment detail fields for max length
         final Integer paymentTypeId = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(paymentTypeIdParamName, element);
-        baseDataValidator.reset().parameter(paymentTypeIdParamName).value(paymentTypeId).ignoreIfNull().integerGreaterThanZero();
+        baseDataValidator.reset().parameter(paymentTypeIdParamName).value(paymentTypeId).notNull().integerGreaterThanZero();
         final Set<String> paymentDetailParameters = new HashSet<>(Arrays.asList(transactionAccountNumberParamName, checkNumberParamName,
                 routingCodeParamName, receiptNumberParamName, bankNumberParamName));
         for (final String paymentDetailParameterName : paymentDetailParameters) {
