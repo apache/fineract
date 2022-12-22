@@ -576,6 +576,7 @@ public class FixedDepositAccount extends SavingsAccount {
                 }
             }
         }
+        recalucateDailyBalanceDetails = this.postInterestCarriedForward(interestPostingUpToDate, recalucateDailyBalanceDetails);
         recalucateDailyBalanceDetails = applyWithholdTaxForDepositAccounts(interestPostingUpToDate, recalucateDailyBalanceDetails,
                 backdatedTxnsAllowedTill);
         if (recalucateDailyBalanceDetails) {
@@ -601,7 +602,7 @@ public class FixedDepositAccount extends SavingsAccount {
         // post remaining interest
         final Money remainigInterestToBePosted = interestOnMaturity.minus(interestPostedToDate);
         final boolean backdatedTxnsAllowedTill = false;
-        if (!remainigInterestToBePosted.isZero()) {
+        if (!remainigInterestToBePosted.isZero() && postInterest) {
             final boolean postInterestAsOn = false;
             final SavingsAccountTransaction newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(),
                     accountCloseDate, remainigInterestToBePosted, postInterestAsOn);

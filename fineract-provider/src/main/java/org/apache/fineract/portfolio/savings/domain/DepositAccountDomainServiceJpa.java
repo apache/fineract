@@ -520,7 +520,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
 
         // post interest
         account.postPreMaturityInterest(closedDate, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
-                financialYearBeginningMonth, false);
+                financialYearBeginningMonth, true);
 
         final Integer closureTypeValue = command.integerValueOfParameterNamed(DepositsApiConstants.onAccountClosureIdParamName);
         DepositAccountOnClosureType closureType = DepositAccountOnClosureType.fromInt(closureTypeValue);
@@ -552,7 +552,8 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         }
 
         account.prematureClosure(user, command, tenantsTodayDate, changes);
-
+        // Force interest earned to equal interest posted when FD is prematurely closed
+        account.getSummary().setTotalInterestEarned(account.getSummary().getTotalInterestPosted());
         this.savingsAccountRepository.save(account);
 
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
@@ -720,6 +721,13 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                     fixedDepositPreclosureReq.getLocale(), fmt, null, null, null, null, null,
                     AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, toSavingsAccount, account, false,
                     isExceptionForBalanceCheck);
+            if (account.getProduct().isUSDProduct()) {
+                if (this.readWriteNonCoreDataService.retrieveDatatable("Fx_rate") != null) {
+                    accountTransferDTO.setFdToSavings(true);
+                } else {
+                    throw new Fx_RateTableShouldBeExistException();
+                }
+            }
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             updateAlreadyPostedTransactions(existingTransactionIds, account);
             account.withdrawalFeeApplicableForTransfer = applyWithdrawalFeeForTransfer;
