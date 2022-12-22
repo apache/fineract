@@ -1376,7 +1376,7 @@ public class LoanProduct extends AbstractPersistableCustom {
                         BigDecimal.valueOf(this.loanProductMinMaxConstraints.getMaxNumberOfRepayments()));
             }
         }
-        if (cycleNumber > 0) {
+        if (cycleNumber != null && cycleNumber > 0) {
             Integer principalCycleUsed = 0;
             Integer interestCycleUsed = 0;
             Integer repaymentCycleUsed = 0;

@@ -1054,7 +1054,7 @@ public final class LoanAccountData {
 
         BigDecimal interestRatePerPeriod = null;
         Integer numberOfRepayments = null;
-        if (product.useBorrowerCycle() && loanCycleNumber > 0) {
+        if (product.useBorrowerCycle() && loanCycleNumber != null && loanCycleNumber > 0) {
             Collection<LoanProductBorrowerCycleVariationData> principalVariationsForBorrowerCycle = product
                     .getPrincipalVariationsForBorrowerCycle();
             Collection<LoanProductBorrowerCycleVariationData> interestForVariationsForBorrowerCycle = product
