@@ -550,6 +550,9 @@ public class DepositProductAssembler {
         if (allowWithdrawal == null) {
             allowWithdrawal = false;
         }
+        if (allowFreeWithdrawal == null) {
+            allowFreeWithdrawal = false;
+        }
         if (adjustAdvanceTowardsFuturePayments == null) {
             adjustAdvanceTowardsFuturePayments = false;
         }

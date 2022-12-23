@@ -195,12 +195,12 @@ public final class ProductToGLAccountMappingFromApiJsonDeserializer {
                     .extractLongNamed(SavingProductAccountingParams.PENALTIES_RECEIVABLE.getValue(), element);
             baseDataValidator.reset().parameter(SavingProductAccountingParams.PENALTIES_RECEIVABLE.getValue())
                     .value(receivablePenaltyAccountId).notNull().integerGreaterThanZero();
-
-            final Long receivableInterestAccountId = this.fromApiJsonHelper
-                    .extractLongNamed(SavingProductAccountingParams.INTEREST_RECEIVABLE.getValue(), element);
-            baseDataValidator.reset().parameter(SavingProductAccountingParams.INTEREST_RECEIVABLE.getValue())
-                    .value(receivableInterestAccountId).notNull().integerGreaterThanZero();
-
+            if (accountType.equals(DepositAccountType.RECURRING_DEPOSIT) || accountType.equals(DepositAccountType.SAVINGS_DEPOSIT)) {
+                final Long receivableInterestAccountId = this.fromApiJsonHelper
+                        .extractLongNamed(SavingProductAccountingParams.INTEREST_RECEIVABLE.getValue(), element);
+                baseDataValidator.reset().parameter(SavingProductAccountingParams.INTEREST_RECEIVABLE.getValue())
+                        .value(receivableInterestAccountId).notNull().integerGreaterThanZero();
+            }
             final Long receivableFeeAccountId = this.fromApiJsonHelper
                     .extractLongNamed(SavingProductAccountingParams.FEES_RECEIVABLE.getValue(), element);
             baseDataValidator.reset().parameter(SavingProductAccountingParams.FEES_RECEIVABLE.getValue()).value(receivableFeeAccountId)
