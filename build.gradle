@@ -56,7 +56,7 @@ buildscript {
 }
 
 plugins {
-    id "org.barfuin.gradle.taskinfo" version "1.4.0"
+    id "org.barfuin.gradle.taskinfo" version "2.1.0"
     id 'com.adarshr.test-logger' version '3.2.0'
     id 'com.diffplug.spotless' version '6.12.0' apply false
     id 'org.nosphere.apache.rat' version '0.8.0' apply false
