@@ -2,7 +2,7 @@
 *.jar
 *.war
 *.ear
-*.avsc
+**/avro/*.avsc
 .classpath
 .project
 .settings
