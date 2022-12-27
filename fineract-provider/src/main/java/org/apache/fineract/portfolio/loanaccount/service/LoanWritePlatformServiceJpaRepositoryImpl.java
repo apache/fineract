@@ -1226,9 +1226,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     transactionId);
         }
 
-        final List<Long> existingTransactionIds = new ArrayList<>();
-        final List<Long> existingReversedTransactionIds = new ArrayList<>();
-
         checkClientOrGroupActive(loan);
 
         if (loanTransaction.isReversed()) {
@@ -1243,6 +1240,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                             + " chargeback not allowed as loan transaction is not repayment, is " + loanTransaction.getTypeOf().getCode(),
                     transactionId);
         }
+
+        final List<Long> existingTransactionIds = loan.findExistingTransactionIds();
+        final List<Long> existingReversedTransactionIds = loan.findExistingReversedTransactionIds();
 
         businessEventNotifierService.notifyPreBusinessEvent(new LoanChargebackTransactionBusinessEvent(loanTransaction));
 
