@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.event.external.service.serialization.serializer.loan;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -60,7 +62,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanInstallmentCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -119,24 +120,21 @@ public class LoanAccountDelinquencyRangeEventSerializerTest {
         LoanAccountDelinquencyRangeDataV1 data = (LoanAccountDelinquencyRangeDataV1) serializer.toAvroDTO(event);
 
         // then
-        Assertions.assertEquals(1L, data.getLoanId());
-        Assertions.assertEquals("0001", data.getLoanAccountNo());
-        Assertions.assertEquals("externalId", data.getLoanExternalId());
-        Assertions.assertEquals(1L, data.getDelinquencyRange().getId());
-        Assertions.assertEquals("classification", data.getDelinquencyRange().getClassification());
-        Assertions.assertEquals(1, data.getDelinquencyRange().getMinimumAgeDays());
-        Assertions.assertEquals(10, data.getDelinquencyRange().getMaximumAgeDays());
-        Assertions.assertEquals(2, data.getCharges().size());
-        Assertions.assertTrue(io.vavr.collection.List.ofAll(data.getCharges())
-                .find(a -> a.getAmount().compareTo(new BigDecimal("100.5")) == 0).isDefined());
-        Assertions.assertTrue(io.vavr.collection.List.ofAll(data.getCharges())
-                .find(a -> a.getAmount().compareTo(new BigDecimal("200.3")) == 0).isDefined());
-
-        Assertions.assertEquals(0, data.getAmount().getTotalAmount().compareTo(new BigDecimal("185.0")));
-        Assertions.assertEquals(0, data.getAmount().getPrincipalAmount().compareTo(new BigDecimal("100.0")));
-        Assertions.assertEquals(0, data.getAmount().getInterestAmount().compareTo(new BigDecimal("30.0")));
-        Assertions.assertEquals(0, data.getAmount().getFeeAmount().compareTo(new BigDecimal("5.0")));
-        Assertions.assertEquals(0, data.getAmount().getPenaltyAmount().compareTo(new BigDecimal("50.0")));
+        assertEquals(1L, data.getLoanId());
+        assertEquals("0001", data.getLoanAccountNo());
+        assertEquals("externalId", data.getLoanExternalId());
+        assertEquals(1L, data.getDelinquencyRange().getId());
+        assertEquals("classification", data.getDelinquencyRange().getClassification());
+        assertEquals(1, data.getDelinquencyRange().getMinimumAgeDays());
+        assertEquals(10, data.getDelinquencyRange().getMaximumAgeDays());
+        assertEquals(2, data.getCharges().size());
+        assertTrue(data.getCharges().stream().anyMatch(a -> a.getAmount().compareTo(new BigDecimal("100.5")) == 0));
+        assertTrue(data.getCharges().stream().anyMatch(a -> a.getAmount().compareTo(new BigDecimal("200.3")) == 0));
+        assertEquals(0, data.getAmount().getTotalAmount().compareTo(new BigDecimal("185.0")));
+        assertEquals(0, data.getAmount().getPrincipalAmount().compareTo(new BigDecimal("100.0")));
+        assertEquals(0, data.getAmount().getInterestAmount().compareTo(new BigDecimal("30.0")));
+        assertEquals(0, data.getAmount().getFeeAmount().compareTo(new BigDecimal("5.0")));
+        assertEquals(0, data.getAmount().getPenaltyAmount().compareTo(new BigDecimal("50.0")));
 
         // assertEquals(data, expectedSerializedData);
         moneyHelper.close();

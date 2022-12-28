@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.core.filters;
 
-import io.vavr.collection.List;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -115,11 +114,13 @@ public class IdempotencyStoreFilter extends OncePerRequestFilter implements Batc
     }
 
     private Optional<String> extractIdempotentKeyFromBatchRequest(BatchRequest request) {
-        return Optional.ofNullable(request.getHeaders()) //
-                .map(List::ofAll) //
-                .flatMap(headers -> headers.find(header -> header.getName().equals(fineractProperties.getIdempotencyKeyHeaderName()))
-                        .toJavaOptional()) //
-                .map(Header::getValue); //
+        if (request.getHeaders() == null) {
+            return Optional.empty();
+        }
+        return request.getHeaders() //
+                .stream().filter(header -> header.getName().equals(fineractProperties.getIdempotencyKeyHeaderName())) //
+                .map(Header::getValue) //
+                .findAny(); //
 
     }
 

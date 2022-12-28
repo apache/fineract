@@ -32,7 +32,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.JsonParser;
-import io.vavr.CheckedFunction1;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -135,7 +134,7 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImplTest {
         return mapper.writeValueAsString(jsonResponse);
     }
 
-    public void mockOkHttpCall(CheckedFunction1<Request, Response> responseGenerator) throws IOException {
+    public void mockOkHttpCall(CheckedFunction<Request, Response> responseGenerator) throws IOException {
         ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
         Call callMock = mock(Call.class);
         when(okHttpClient.newCall(requestCaptor.capture())).thenReturn(callMock);
@@ -592,4 +591,8 @@ public class ThitsaWorksCreditBureauIntegrationWritePlatformServiceImplTest {
         assertNull(result.getClosedAccounts());
     }
 
+    private interface CheckedFunction<T, R> {
+
+        R apply(T t) throws Exception;
+    }
 }
