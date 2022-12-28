@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.jobs.filter;
 
 import com.google.common.base.Splitter;
-import io.vavr.control.Either;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -34,6 +33,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.UriInfo;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.batch.domain.BatchRequest;
@@ -74,6 +74,13 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
     private static final Integer GLIM_STRING_INDEX_IN_URL = 2;
     private static final String JOB_NAME = "INLINE_LOAN_COB";
 
+    @RequiredArgsConstructor
+    @Getter
+    private static class LoanIdsHardLockedException extends RuntimeException {
+
+        private final Long loanIdFromRequest;
+    }
+
     private static class Reject {
 
         private final String message;
@@ -109,35 +116,37 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
         if (!isOnApiList(request.getPathInfo(), request.getMethod())) {
             proceed(filterChain, request, response);
         } else {
-            Either<Reject, Boolean> bypassUser = isBypassUser();
-            if (bypassUser.isRight() && Boolean.TRUE.equals(bypassUser.get())) {
-                proceed(filterChain, request, response);
-            } else if (bypassUser.isLeft()) {
-                bypassUser.getLeft().toServletResponse(response);
-            } else {
-                Either<Reject, List<Long>> result = loanIdCalculation(request.getPathInfo());
-                if (result.isLeft()) {
-                    result.getLeft().toServletResponse(response);
-                } else {
-                    if (isLoanSoftLocked(result.get())) {
-                        executeInlineCob(result.get());
-                    }
+            try {
+                boolean bypassUser = isBypassUser();
+                if (bypassUser) {
                     proceed(filterChain, request, response);
+                } else {
+                    try {
+                        List<Long> result = calculateRelevantLoanIds(request.getPathInfo());
+                        if (isLoanSoftLocked(result)) {
+                            executeInlineCob(result);
+                        }
+                        proceed(filterChain, request, response);
+                    } catch (LoanIdsHardLockedException e) {
+                        Reject.reject(e.getLoanIdFromRequest(), HttpStatus.SC_CONFLICT).toServletResponse(response);
+                    }
                 }
+            } catch (UnAuthenticatedUserException e) {
+                Reject.reject(null, HttpStatus.SC_UNAUTHORIZED).toServletResponse(response);
             }
         }
     }
 
-    private Either<Reject, List<Long>> loanIdCalculation(String pathInfo) {
+    private List<Long> calculateRelevantLoanIds(String pathInfo) {
         Iterable<String> split = Splitter.on('/').split(pathInfo);
         Supplier<Stream<String>> streamSupplier = () -> StreamSupport.stream(split.spliterator(), false);
         boolean isGlim = isGlim(streamSupplier);
         Long loanIdFromRequest = getLoanId(isGlim, streamSupplier);
         List<Long> loanIds = isGlim ? getGlimChildLoanIds(loanIdFromRequest) : Collections.singletonList(loanIdFromRequest);
         if (isLoanHardLocked(loanIds)) {
-            return Either.left(Reject.reject(loanIdFromRequest, HttpStatus.SC_CONFLICT));
+            throw new LoanIdsHardLockedException(loanIdFromRequest);
         } else {
-            return Either.right(loanIds);
+            return loanIds;
         }
     }
 
@@ -145,12 +154,8 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
         inlineLoanCOBExecutorService.execute(loanIds, JOB_NAME);
     }
 
-    private Either<Reject, Boolean> isBypassUser() {
-        try {
-            return Either.right(context.authenticatedUser().isBypassUser());
-        } catch (UnAuthenticatedUserException e) {
-            return Either.left(Reject.reject(null, HttpStatus.SC_UNAUTHORIZED));
-        }
+    private boolean isBypassUser() {
+        return context.authenticatedUser().isBypassUser();
     }
 
     private List<Long> getGlimChildLoanIds(Long loanIdFromRequest) {
@@ -205,25 +210,24 @@ public class LoanCOBApiFilter extends OncePerRequestFilter implements BatchFilte
         if (!isOnApiList("/" + batchRequest.getRelativeUrl(), batchRequest.getMethod())) {
             return chain.serviceCall(batchRequest, uriInfo);
         } else {
-            Either<Reject, Boolean> bypassUser = isBypassUser();
-            if (bypassUser.isRight() && Boolean.TRUE.equals(bypassUser.get())) {
-                return chain.serviceCall(batchRequest, uriInfo);
-            } else if (bypassUser.isLeft()) {
-                return bypassUser.getLeft().toBatchResponse(batchRequest);
-            } else {
-                Either<Reject, List<Long>> result = loanIdCalculation("/" + batchRequest.getRelativeUrl());
-                if (result.isLeft()) {
-                    return result.getLeft().toBatchResponse(batchRequest);
-                } else {
-                    if (!isLoanSoftLocked(result.get())) {
-                        executeInlineCob(result.get());
-                    }
+            try {
+                boolean bypassUser = isBypassUser();
+                if (bypassUser) {
                     return chain.serviceCall(batchRequest, uriInfo);
-
+                } else {
+                    try {
+                        List<Long> result = calculateRelevantLoanIds("/" + batchRequest.getRelativeUrl());
+                        if (!isLoanSoftLocked(result)) {
+                            executeInlineCob(result);
+                        }
+                        return chain.serviceCall(batchRequest, uriInfo);
+                    } catch (LoanIdsHardLockedException e) {
+                        return Reject.reject(e.getLoanIdFromRequest(), HttpStatus.SC_CONFLICT).toBatchResponse(batchRequest);
+                    }
                 }
+            } catch (UnAuthenticatedUserException e) {
+                return Reject.reject(null, HttpStatus.SC_UNAUTHORIZED).toBatchResponse(batchRequest);
             }
         }
-
     }
-
 }

@@ -220,8 +220,9 @@ public class BatchRequestsIntegrationTest {
 
         // Verify that each loan has been applied successfully
         for (BatchResponse res : response) {
-            Assertions.assertFalse(io.vavr.collection.List.ofAll(res.getHeaders())
-                    .find(header -> header.getName().equals(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER)).isDefined(),
+            Assertions.assertFalse(
+                    res.getHeaders().stream()
+                            .anyMatch(header -> header.getName().equals(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER)),
                     "First can not be cached!");
             Assertions.assertEquals(200L, (long) res.getStatusCode(), "Verify Status Code 200");
         }
@@ -232,9 +233,9 @@ public class BatchRequestsIntegrationTest {
         // Verify that each loan has been applied successfully
         for (BatchResponse res : secondResponse) {
             Assertions.assertEquals("true",
-                    io.vavr.collection.List.ofAll(res.getHeaders())
-                            .find(header -> header.getName().equals(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER))
-                            .map(Header::getValue).get(),
+                    res.getHeaders().stream()
+                            .filter(header -> header.getName().equals(AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER))
+                            .map(Header::getValue).findAny().get(),
                     "Not cached by idempotency key!");
             Assertions.assertEquals(200L, (long) res.getStatusCode(), "Verify Status Code 200");
         }
