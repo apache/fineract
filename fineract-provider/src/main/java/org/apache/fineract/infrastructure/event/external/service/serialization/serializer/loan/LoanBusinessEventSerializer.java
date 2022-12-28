@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.event.external.service.serialization.serializer.loan;
 
+import java.util.Collection;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.generic.GenericContainer;
 import org.apache.fineract.avro.generator.ByteBufferSerializable;
@@ -27,6 +28,8 @@ import org.apache.fineract.infrastructure.event.business.domain.loan.LoanBusines
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.loan.LoanAccountDataMapper;
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.AbstractBusinessEventSerializer;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanSummaryData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.springframework.stereotype.Component;
 
@@ -47,6 +50,10 @@ public class LoanBusinessEventSerializer extends AbstractBusinessEventSerializer
         LoanBusinessEvent event = (LoanBusinessEvent) rawEvent;
         LoanAccountData data = service.retrieveOne(event.get().getId());
         data = service.fetchRepaymentScheduleData(data);
+        if (data.getSummary() != null) {
+            final Collection<LoanTransactionData> currentLoanTransactions = service.retrieveLoanTransactions(event.get().getId());
+            data.setSummary(LoanSummaryData.withTransactionAmountsSummary(data.getSummary(), currentLoanTransactions));
+        }
         return mapper.map(data);
     }
 
