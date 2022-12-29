@@ -130,6 +130,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
 
             if (chargeVarying) {
                 final List<ChargeSlab> slab = ChargeSlab.assembleFrom(command, charge);
+                this.fromApiJsonDeserializer.validateChartSlabs(slab);
                 chargeSlabRepository.saveAll(slab);
             }
             // check if the office specific products are enabled. If yes, then
@@ -220,6 +221,10 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
                     taxGroup = this.taxGroupRepository.findOneWithNotFoundDetection(newValue);
                 }
                 chargeForUpdate.setTaxGroup(taxGroup);
+            }
+
+            if (changes.containsKey("chargeSlabs")) {
+                this.fromApiJsonDeserializer.validateChartSlabs(chargeForUpdate.setOfChargeSlabs());
             }
 
             if (!changes.isEmpty()) {

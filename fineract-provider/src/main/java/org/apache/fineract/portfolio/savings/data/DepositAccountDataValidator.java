@@ -757,8 +757,11 @@ public class DepositAccountDataValidator {
                     final Long chargeId = this.fromApiJsonHelper.extractLongNamed(chargeIdParamName, savingsChargeElement);
                     baseDataValidator.reset().parameter(chargeIdParamName).value(chargeId).longGreaterThanZero();
 
-                    final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed(amountParamName, savingsChargeElement, locale);
-                    baseDataValidator.reset().parameter(amountParamName).value(amount).notNull().positiveAmount();
+                    if (this.fromApiJsonHelper.parameterExists(amountParamName, savingsChargeElement)) {
+                        final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed(amountParamName, savingsChargeElement,
+                                locale);
+                        baseDataValidator.reset().parameter(amountParamName).value(amount).notNull().positiveAmount();
+                    }
 
                     if (this.fromApiJsonHelper.parameterExists(feeOnMonthDayParamName, savingsChargeElement)) {
                         final MonthDay monthDay = this.fromApiJsonHelper.extractMonthDayNamed(feeOnMonthDayParamName, savingsChargeElement,

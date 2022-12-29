@@ -26,6 +26,7 @@ import java.time.MonthDay;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -42,7 +43,9 @@ import org.apache.fineract.portfolio.charge.api.ChargesApiConstants;
 import org.apache.fineract.portfolio.charge.domain.ChargeAppliesTo;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
+import org.apache.fineract.portfolio.charge.domain.ChargeSlab;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
+import org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -499,4 +502,37 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
     }
+
+    public void validateChartSlabs(Collection<ChargeSlab> chartSlabs) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charge");
+
+        List<ChargeSlab> chartSlabsList = new ArrayList<>(chartSlabs);
+
+        chartSlabsList.sort(Comparator.comparing(ChargeSlab::getFromPeriod));
+
+        for (int i = 0; i < chartSlabsList.size(); i++) {
+            ChargeSlab iSlabs = chartSlabsList.get(i);
+            if (!iSlabs.isValidChart()) {
+                baseDataValidator.parameter(InterestRateChartSlabApiConstants.fromPeriodParamName).failWithCode("cannot.be.blank");
+            }
+
+            if (i + 1 < chartSlabsList.size()) {
+                ChargeSlab nextSlabs = chartSlabsList.get(i + 1);
+                if (iSlabs.isValidChart() && nextSlabs.isValidChart()) {
+                    if (iSlabs.isRateChartOverlapping(nextSlabs)) {
+                        baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.overlapping", iSlabs.getFromPeriod(),
+                                iSlabs.getFromPeriod(), nextSlabs.getFromPeriod(), nextSlabs.getToPeriod());
+                    } else if (iSlabs.isRateChartHasGap(nextSlabs)) {
+                        baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.has.gap", iSlabs.getFromPeriod(),
+                                iSlabs.getToPeriod(), nextSlabs.getFromPeriod(), nextSlabs.getToPeriod());
+                    }
+                }
+            } else if (iSlabs.isNotProperPriodEnd()) {
+                baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.end.incorrect", iSlabs.getToPeriod());
+            }
+        }
+        this.throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
 }

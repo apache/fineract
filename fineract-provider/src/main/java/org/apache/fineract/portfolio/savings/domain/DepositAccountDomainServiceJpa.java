@@ -855,7 +855,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             }
             charge.setAmountOutstanding(charge.amount());
             charge.setChargePaid();
-            if (!charge.isPaid()) {
+            if (!charge.isPaid() && !charge.isWaived()) {
                 this.savingsAccountWritePlatformService.payCharge(charge, closedDate, charge.amount(), DateUtils.getDefaultFormatter(),
                         user);
             }
